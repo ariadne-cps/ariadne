@@ -684,6 +684,7 @@ class SmtDpllSearch {
         _learned_clause_is_theory.push_back(theory_clause);
         _learned_clause_active.push_back(true);
         _learned_clause_activity.push_back(1u);
+        _learned_clause_generation.push_back(_statistics.learned_clauses);
         ++_statistics.learned_clauses;
         if(theory_clause) {
             ++_statistics.theory_learned_clauses;
@@ -763,8 +764,16 @@ class SmtDpllSearch {
         std::vector<SizeType> candidates;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
             SizeType clause_index=this->_original_clause_count()+i;
+            SizeType const current_generation=_statistics.learned_clauses;
+            SizeType const clause_generation=_learned_clause_generation[i];
+            Bool const recent=(current_generation<=clause_generation+2u);
+            Bool const short_clause=(_learned_clauses[i].size()<=2u);
+            Bool const useful=(_learned_clause_activity[i]>1u);
             if(not _learned_clause_active[i]
                || _learned_clause_is_theory[i]
+               || recent
+               || short_clause
+               || useful
                || (protected_clause.has_value() && clause_index==*protected_clause)
                || this->_learned_clause_locked(clause_index)) {
                 continue;
@@ -1084,7 +1093,6 @@ class SmtDpllSearch {
 
         this->_backtrack_to_level(parent_level);
         ++_statistics.boolean_backtracks;
-        this->_maybe_prune_learned_clauses();
 
         this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
@@ -1105,7 +1113,6 @@ class SmtDpllSearch {
 
         this->_backtrack_to_level(parent_level);
         ++_statistics.boolean_backtracks;
-        this->_maybe_prune_learned_clauses();
         return SearchOutcome::exhausted();
     }
 
@@ -1382,6 +1389,7 @@ class SmtDpllSearch {
     std::vector<Bool> _learned_clause_is_theory;
     std::vector<Bool> _learned_clause_active;
     std::vector<SizeType> _learned_clause_activity;
+    std::vector<SizeType> _learned_clause_generation;
     std::optional<SizeType> _last_boolean_conflict_clause;
     std::optional<SizeType> _last_theory_conflict_clause;
     SmtSearchStatistics _statistics;

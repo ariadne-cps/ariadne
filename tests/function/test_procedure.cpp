@@ -34,6 +34,7 @@
 
 #include "function/procedure.hpp"
 #include "numeric/numeric.hpp"
+#include "geometry/interval.hpp"
 
 namespace Ariadne {
 
@@ -223,9 +224,9 @@ Void TestProcedure::test_backward_contractor_soundness()
 
     // Each interval contains a non-principal zero of the corresponding
     // periodic function. Backward propagation must not discard that branch.
-    check_periodic_witness(Sin(),ExactIntervalType(3.14_decimal,3.15_decimal));
-    check_periodic_witness(Cos(),ExactIntervalType(4.71_decimal,4.72_decimal));
-    check_periodic_witness(Tan(),ExactIntervalType(3.14_decimal,3.15_decimal));
+    check_periodic_witness(Sin(),ExactIntervalType(3.125_x,3.25_x));
+    check_periodic_witness(Cos(),ExactIntervalType(4.5_x,5.0_x));
+    check_periodic_witness(Tan(),ExactIntervalType(3.125_x,3.25_x));
 
     {
         ValidatedProcedure p(1);
@@ -352,9 +353,9 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_unary(Sin(), S(0), S(0), S(0));
     check_unary(Cos(), S(0), S(1), S(0));
     check_unary(Tan(), S(0), S(0), S(0));
-    check_unary(Sin(), E(3.14_decimal,3.15_decimal), S(0), E(3.14_decimal,3.15_decimal));
-    check_unary(Cos(), E(4.71_decimal,4.72_decimal), S(0), E(4.71_decimal,4.72_decimal));
-    check_unary(Tan(), E(3.14_decimal,3.15_decimal), S(0), E(3.14_decimal,3.15_decimal));
+    check_unary(Sin(), E(3.125_x,3.25_x), S(0), E(3.125_x,3.25_x));
+    check_unary(Cos(), E(4.5_x,5.0_x), S(0), E(4.5_x,5.0_x));
+    check_unary(Tan(), E(3.125_x,3.25_x), S(0), E(3.125_x,3.25_x));
 
     // Inverse trigonometric functions on their natural domains.
     check_unary(Asin(), S(0), S(0), S(0));
@@ -396,9 +397,9 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_unary(Sqrt(), E(0,9), E(1,2), S(4));
     check_unary(Exp(), E(-1,2), E(0.5_x,2.0_x), S(0));
     check_unary(Log(), E(0.5_x,3.0_x), E(-0.5_x,1.0_x), S(1));
-    check_unary(Sin(), E(3,4), E(-0.5_x,0.5_x), E(3.14_decimal,3.15_decimal));
-    check_unary(Cos(), E(4,5), E(-0.5_x,0.5_x), E(4.71_decimal,4.72_decimal));
-    check_unary(Tan(), E(3,4), E(-0.5_x,0.5_x), E(3.14_decimal,3.15_decimal));
+    check_unary(Sin(), E(3,4), E(-0.5_x,0.5_x), E(3.125_x,3.25_x));
+    check_unary(Cos(), E(4,5), E(-0.5_x,0.5_x), E(4.5_x,5.0_x));
+    check_unary(Tan(), E(3,4), E(-0.5_x,0.5_x), E(3.125_x,3.25_x));
     check_unary(Asin(), E(-1,1), E(-0.5_x,0.5_x), S(0));
     check_unary(Acos(), E(-1,1), E(0,2), S(1));
     check_unary(Atan(), E(-2,2), E(-1,1), S(0));

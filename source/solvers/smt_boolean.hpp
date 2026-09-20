@@ -31,6 +31,7 @@
 
 #include <vector>
 
+#include "numeric/numeric.hpp"
 #include "symbolic/expression.hpp"
 
 namespace Ariadne {
@@ -54,6 +55,16 @@ class SmtBooleanEncoding {
 
   private:
     friend class SmtBooleanEncoder;
+
+    Void _add_clause(Clause clause) { _clauses.push_back(std::move(clause)); }
+    Int _new_variable() {
+        ++_variable_count;
+        return static_cast<Int>(_variable_count);
+    }
+    Void _add_atom(ContinuousPredicate const& atom, SizeType variable) {
+        _atoms.push_back(atom);
+        _atom_variables.push_back(variable);
+    }
 
     std::vector<Clause> _clauses;
     std::vector<ContinuousPredicate> _atoms;

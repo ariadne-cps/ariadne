@@ -58,6 +58,18 @@ class SequentialSmtWorkQueue {
     std::vector<UpperBoxType> _boxes;
 };
 
+Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
+{
+    ARIADNE_ASSERT(first.dimension()==second.dimension());
+    for(SizeType i=0; i!=first.dimension(); ++i) {
+        if(first[i].lower_bound().raw()!=second[i].lower_bound().raw()
+           || first[i].upper_bound().raw()!=second[i].upper_bound().raw()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
@@ -133,12 +145,21 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
                                 List<ValidatedConstraint> const& constraints) const
 {
     ConstraintSolver contractor;
-    for(SizeType i=0; i!=constraints.size(); ++i) {
-        if(contractor.hull_reduce(domain,constraints[i].function(),this->_epsilon_bounds(constraints[i]))) {
+    while(true) {
+        UpperBoxType previous=domain;
+        for(SizeType i=0; i!=constraints.size(); ++i) {
+            if(contractor.hull_reduce(
+                    domain,constraints[i].function(),this->_epsilon_bounds(constraints[i]))) {
+                return true;
+            }
+        }
+        if(definitely(domain.is_empty())) {
             return true;
         }
+        if(same_box(domain,previous)) {
+            return false;
+        }
     }
-    return definitely(domain.is_empty());
 }
 
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
@@ -213,18 +234,27 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 {
     ConstraintSolver contractor;
     FloatDP epsilon(_configuration.epsilon(),dp);
-    for(auto const& literal:literals) {
-        if(contractor.hull_reduce(domain,literal.function,this->_epsilon_bounds(literal.relation))) {
-            return true;
-        }
-        if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-            UpperIntervalType image=apply(literal.function,domain);
-            if(definitely(image.upper_bound()<=-epsilon)) {
+    while(true) {
+        UpperBoxType previous=domain;
+        for(auto const& literal:literals) {
+            if(contractor.hull_reduce(
+                    domain,literal.function,this->_epsilon_bounds(literal.relation))) {
                 return true;
             }
+            if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
+                UpperIntervalType image=apply(literal.function,domain);
+                if(definitely(image.upper_bound()<=-epsilon)) {
+                    return true;
+                }
+            }
+        }
+        if(definitely(domain.is_empty())) {
+            return true;
+        }
+        if(same_box(domain,previous)) {
+            return false;
         }
     }
-    return definitely(domain.is_empty());
 }
 
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,

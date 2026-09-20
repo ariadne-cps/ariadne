@@ -499,6 +499,9 @@ class TestSmtSolver {
             expect_status("abs SAT",ExactIntervalType(-1,-1),abs(ex)==1,SmtResultStatus::EPSILON_SAT);
             expect_status("abs UNSAT",ExactIntervalType(-1,-1),abs(ex)==0,SmtResultStatus::UNSAT);
 
+            expect_status("nul SAT",ExactIntervalType(2,2),nul(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("nul UNSAT",ExactIntervalType(2,2),nul(ex)==1,SmtResultStatus::UNSAT);
+
             expect_status("pos SAT",ExactIntervalType(2,2),pos(ex)==2,SmtResultStatus::EPSILON_SAT);
             expect_status("pos UNSAT",ExactIntervalType(2,2),pos(ex)==3,SmtResultStatus::UNSAT);
 

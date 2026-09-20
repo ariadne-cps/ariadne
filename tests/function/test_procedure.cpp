@@ -86,6 +86,7 @@ class TestProcedure
     Void test_leq_backpropagate_soundness();
     Void test_inverse_trigonometric_empty_backpropagation();
     Void test_abs_backpropagation();
+    Void test_nul_hlf_backpropagation();
     Void test_derivative();
 };
 
@@ -105,6 +106,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
     ARIADNE_TEST_CALL(test_inverse_trigonometric_empty_backpropagation());
     ARIADNE_TEST_CALL(test_abs_backpropagation());
+    ARIADNE_TEST_CALL(test_nul_hlf_backpropagation());
     ARIADNE_TEST_CALL(test_derivative());
 }
 
@@ -693,6 +695,37 @@ Void TestProcedure::test_abs_backpropagation()
         UpperIntervalType argument=ExactIntervalType(-2,2);
         UpperIntervalType result=ExactIntervalType(-2,-1);
         backpropagate(result,Abs(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+}
+
+
+Void TestProcedure::test_nul_hlf_backpropagation()
+{
+    {
+        UpperIntervalType argument=ExactIntervalType(-4,4);
+        UpperIntervalType result=ExactIntervalType(1,1);
+        backpropagate(result,Hlf(),argument);
+        UpperIntervalType expected=ExactIntervalType(2,2);
+        ARIADNE_TEST_EQUAL(argument.lower_bound().raw(),expected.lower_bound().raw());
+        ARIADNE_TEST_EQUAL(argument.upper_bound().raw(),expected.upper_bound().raw());
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-4,4);
+        UpperIntervalType result=ExactIntervalType::empty_interval();
+        backpropagate(result,Hlf(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-4,4);
+        UpperIntervalType result=ExactIntervalType(-1,1);
+        backpropagate(result,Nul(),argument);
+        ARIADNE_TEST_ASSERT(not definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-4,4);
+        UpperIntervalType result=ExactIntervalType(1,2);
+        backpropagate(result,Nul(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
 }

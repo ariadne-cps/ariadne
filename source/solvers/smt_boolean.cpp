@@ -30,8 +30,6 @@
 
 namespace Ariadne {
 
-namespace {
-
 class TseitinBuilder {
   public:
     SmtBooleanEncoding build(ContinuousPredicate const& predicate) {
@@ -101,8 +99,6 @@ class TseitinBuilder {
     SmtBooleanEncoding _encoding;
     std::map<const Void*,Int> _atom_variables;
 };
-
-} // namespace
 
 SmtBooleanEncoding SmtBooleanEncoder::encode(ContinuousPredicate const& predicate) const
 {

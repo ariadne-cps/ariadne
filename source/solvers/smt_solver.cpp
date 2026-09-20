@@ -652,16 +652,16 @@ class SmtDpllSearch {
             return std::nullopt;
         }
 
-        if(not this->_check_partial_theory_consistency()) {
-            _assignment=std::move(saved_assignment);
-            return std::nullopt;
-        }
-
         SizeType variable=this->_next_unassigned_variable();
         if(variable==0u) {
             std::optional<UpperBoxType> witness=this->_check_theory_assignment();
             _assignment=std::move(saved_assignment);
             return witness;
+        }
+
+        if(not this->_check_partial_theory_consistency()) {
+            _assignment=std::move(saved_assignment);
+            return std::nullopt;
         }
 
         ++_statistics.boolean_decisions;

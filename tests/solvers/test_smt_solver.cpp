@@ -336,44 +336,44 @@ class TestSmtSolver {
         {
             std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
         }
 
         {
             std::cout << "[smt-theory-solve] EQ outside epsilon: x=0 weakened on x=0.25" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(0.25_x,0.25_x)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_unsat());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0.25_x,0.25_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 
         {
             std::cout << "[smt-theory-solve] GEQ at epsilon boundary: x>=0 weakened on x=-0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>=0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
         }
 
         {
             std::cout << "[smt-theory-solve] GT rejects epsilon boundary: x>0 weakened on x=-0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_unsat());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 
         {
             std::cout << "[smt-theory-solve] GT accepts strict interior: x>0 weakened on x=-0.0625" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
         }
 
         {
             std::cout << "[smt-theory-solve] transcendental GT: sin(x)>0 on [3,4]" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(sin(ex)>0)});
-            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(3,4)}),literals);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(result.has_witness());
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(3,4)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
 
         {

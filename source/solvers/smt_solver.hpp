@@ -30,6 +30,7 @@
 #define ARIADNE_SMT_SOLVER_HPP
 
 #include <optional>
+#include <mutex>
 
 #include "geometry/box.hpp"
 #include "numeric/numeric.hpp"
@@ -111,6 +112,11 @@ class SmtSolver {
     //! \brief Solve a bounded conjunction of validated real constraints.
     SmtResult solve(ExactBoxType const& domain,
                     List<ValidatedConstraint> const& constraints) const;
+
+    //! \brief Solve using BetterThreads dynamic workload processing.
+    //! \details The actual concurrency is controlled by BetterThreads::ThreadManager.
+    SmtResult solve_parallel(ExactBoxType const& domain,
+                             List<ValidatedConstraint> const& constraints) const;
 
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 

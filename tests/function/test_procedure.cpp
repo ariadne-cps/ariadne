@@ -28,13 +28,25 @@
 #include <string>
 #include <iomanip>
 #include <stdexcept>
+#include <type_traits>
 
 #include "config.hpp"
 
 #include "function/procedure.hpp"
-#include "function/procedure.tpl.hpp"
-
 #include "numeric/numeric.hpp"
+
+namespace Ariadne {
+
+// Test-side overload used only to instantiate the generic backward contractor
+// on validated numeric bounds. The production Procedure contractor uses the
+// analogous UpperIntervalType overload defined in procedure.cpp.
+inline Void restrict(FloatDPBounds& r, FloatDPBounds const& x) {
+    r=refinement(r,x);
+}
+
+} // namespace Ariadne
+
+#include "function/procedure.tpl.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/evaluate.hpp"
@@ -63,6 +75,7 @@ class TestProcedure
     Void test_evaluate();
     Void test_propagate();
     Void test_backward_contractor_soundness();
+    Void test_leq_backpropagate_soundness();
     Void test_derivative();
 };
 
@@ -77,6 +90,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
     ARIADNE_TEST_CALL(test_backward_contractor_soundness());
+    ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
     ARIADNE_TEST_CALL(test_derivative());
 }
 
@@ -276,6 +290,26 @@ Void TestProcedure::test_backward_contractor_soundness()
         simple_hull_reduce(x,p,ExactIntervalType(2,2));
         ARIADNE_TEST_ASSERT(x[0].is_empty());
     }
+}
+
+
+Void TestProcedure::test_leq_backpropagate_soundness()
+{
+    // Leq is currently not representable by ProcedureInstruction, so this
+    // overload is not on the simple_hull_reduce execution path.
+    ARIADNE_TEST_CONCEPT((not std::is_constructible_v<BinaryElementaryOperator,Leq>));
+    ARIADNE_TEST_CONCEPT((not std::is_constructible_v<ProcedureInstruction,Leq,SizeType,SizeType>));
+
+    // Independently exercise the overload itself. The valid witness
+    // a1=0, a2=1 satisfies a1<=a2 and must not be removed by propagation.
+    FloatDPBounds r(0,dp);
+    FloatDPBounds a1(0,0,dp);
+    FloatDPBounds a2(1,1,dp);
+
+    backpropagate(r,Leq(),a1,a2);
+
+    ARIADNE_TEST_ASSERT(not inconsistent(a1,FloatDPBounds(0,dp)));
+    ARIADNE_TEST_ASSERT(not inconsistent(a2,FloatDPBounds(1,dp)));
 }
 
 

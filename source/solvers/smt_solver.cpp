@@ -165,9 +165,14 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    List<ValidatedConstraint> const& constraints) const
 {
+    UpperBoxType point(domain.dimension(),[&](SizeType i) {
+        auto m=domain[i].midpoint();
+        return UpperIntervalType(m,m);
+    });
+
     for(SizeType i=0; i!=constraints.size(); ++i) {
         auto const& constraint=constraints[i];
-        UpperIntervalType image=apply(constraint.function(),domain);
+        UpperIntervalType image=apply(constraint.function(),point);
         if(not definitely(subset(image,this->_epsilon_bounds(constraint)))) {
             return false;
         }
@@ -184,7 +189,11 @@ SmtSolver::_process_box(UpperBoxType domain,
     }
 
     if(this->_epsilon_satisfied(domain,constraints)) {
-        return {BoxProcessingStatus::EPSILON_SAT,domain,std::nullopt};
+        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+        return {BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();
@@ -251,9 +260,14 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    CompiledTheoryLiterals const& literals) const
 {
+    UpperBoxType point(domain.dimension(),[&](SizeType i) {
+        auto m=domain[i].midpoint();
+        return UpperIntervalType(m,m);
+    });
+
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
-        UpperIntervalType image=apply(literal.function,domain);
+        UpperIntervalType image=apply(literal.function,point);
         switch(literal.relation) {
             case SmtTheoryPrimitiveRelation::EQ_ZERO:
             case SmtTheoryPrimitiveRelation::GEQ_ZERO:
@@ -282,7 +296,11 @@ SmtSolver::_process_box(UpperBoxType domain,
     }
 
     if(this->_epsilon_satisfied(domain,literals)) {
-        return {BoxProcessingStatus::EPSILON_SAT,domain,std::nullopt};
+        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+        return {BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();

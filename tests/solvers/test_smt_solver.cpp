@@ -661,10 +661,10 @@ class TestSmtSolver {
             std::cout << "[smt-dpll] prune aged low-activity learned clauses" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
                 0.125_x,std::numeric_limits<SizeType>::max(),1u));
-            ContinuousPredicate a=(ex>=-0.75);
-            ContinuousPredicate b=(ex>=-0.25);
-            ContinuousPredicate c=(ex>=0.25);
-            ContinuousPredicate d=(ex>=0.75);
+            ContinuousPredicate a=(ex>=-0.75_x);
+            ContinuousPredicate b=(ex>=-0.25_x);
+            ContinuousPredicate c=(ex>=0.25_x);
+            ContinuousPredicate d=(ex>=0.75_x);
             ContinuousPredicate formula=
                 ( a|| b|| c|| d)&&
                 ( a|| b|| c||(!d))&&

@@ -535,6 +535,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_split+=source.boxes_split;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
+    target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;
     target.boolean_conflicts+=source.boolean_conflicts;
     target.boolean_backtracks+=source.boolean_backtracks;
     target.max_decision_level=std::max(target.max_decision_level,source.max_decision_level);
@@ -554,7 +555,7 @@ class SmtDpllSearch {
           _domain(domain),
           _encoding(encoding),
           _parallel(parallel),
-          _assignment(encoding.variable_count()+1u,-1)
+          _assignment(encoding.variable_count()+1u)
     {
         _trail.reserve(encoding.variable_count());
         _decision_level_markers.reserve(encoding.variable_count()+1u);
@@ -571,24 +572,33 @@ class SmtDpllSearch {
     }
 
   private:
+    struct AssignmentInfo {
+        int8_t value = -1;
+        SizeType decision_level = 0u;
+        std::optional<SizeType> reason_clause;
+    };
+
     Bool _literal_true(Int literal) const
     {
         SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
-        int8_t value=_assignment[variable];
+        int8_t value=_assignment[variable].value;
         ARIADNE_ASSERT(value>=0);
         return literal>0 ? value==1 : value==0;
     }
 
-    Bool _assign_literal(Int literal)
+    Bool _assign_literal(Int literal, std::optional<SizeType> reason_clause = std::nullopt)
     {
         SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
         int8_t value=literal>0 ? 1 : 0;
-        if(_assignment[variable]<0) {
-            _assignment[variable]=value;
+        AssignmentInfo& assignment=_assignment[variable];
+        if(assignment.value<0) {
+            assignment.value=value;
+            assignment.decision_level=this->_decision_level();
+            assignment.reason_clause=reason_clause;
             _trail.push_back(variable);
             return true;
         }
-        return _assignment[variable]==value;
+        return assignment.value==value;
     }
 
     Bool _unit_propagate()
@@ -596,14 +606,15 @@ class SmtDpllSearch {
         Bool changed=true;
         while(changed) {
             changed=false;
-            for(auto const& clause:_encoding.clauses()) {
+            for(SizeType clause_index=0u; clause_index<_encoding.clauses().size(); ++clause_index) {
+                auto const& clause=_encoding.clauses()[clause_index];
                 Bool satisfied=false;
                 SizeType unassigned_count=0u;
                 Int unit_literal=0;
 
                 for(Int literal:clause) {
                     SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
-                    int8_t value=_assignment[variable];
+                    int8_t value=_assignment[variable].value;
                     if(value<0) {
                         ++unassigned_count;
                         unit_literal=literal;
@@ -624,10 +635,13 @@ class SmtDpllSearch {
 
                 if(unassigned_count==1u) {
                     SizeType variable=static_cast<SizeType>(unit_literal>0 ? unit_literal : -unit_literal);
-                    if(_assignment[variable]<0) {
-                        Bool assigned=this->_assign_literal(unit_literal);
+                    if(_assignment[variable].value<0) {
+                        Bool assigned=this->_assign_literal(unit_literal,clause_index);
                         ARIADNE_ASSERT(assigned);
+                        ARIADNE_ASSERT(_assignment[variable].reason_clause.has_value());
+                        ARIADNE_ASSERT(*_assignment[variable].reason_clause==clause_index);
                         ++_statistics.boolean_propagations;
+                        ++_statistics.boolean_reasoned_propagations;
                         changed=true;
                     } else if(not this->_literal_true(unit_literal)) {
                         ++_statistics.boolean_conflicts;
@@ -642,7 +656,7 @@ class SmtDpllSearch {
     SizeType _next_unassigned_variable() const
     {
         for(SizeType variable=1u; variable<=_encoding.variable_count(); ++variable) {
-            if(_assignment[variable]<0) {
+            if(_assignment[variable].value<0) {
                 return variable;
             }
         }
@@ -668,7 +682,7 @@ class SmtDpllSearch {
         while(_trail.size()>marker) {
             SizeType variable=_trail.back();
             _trail.pop_back();
-            _assignment[variable]=-1;
+            _assignment[variable]=AssignmentInfo();
         }
         _decision_level_markers.resize(level+1u);
     }
@@ -693,6 +707,8 @@ class SmtDpllSearch {
 
         this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(-static_cast<Int>(variable)));
+        ARIADNE_ASSERT(_assignment[variable].decision_level==this->_decision_level());
+        ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
         if(auto witness=this->_search_boolean(); witness.has_value()) {
             return witness;
         }
@@ -702,6 +718,8 @@ class SmtDpllSearch {
 
         this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
+        ARIADNE_ASSERT(_assignment[variable].decision_level==this->_decision_level());
+        ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
         if(auto witness=this->_search_boolean(); witness.has_value()) {
             return witness;
         }
@@ -718,12 +736,12 @@ class SmtDpllSearch {
 
         for(SizeType i=0; i!=_encoding.atom_count(); ++i) {
             SizeType variable=_encoding.atom_variable(i);
-            if(_assignment[variable]<0) {
+            if(_assignment[variable].value<0) {
                 continue;
             }
 
             SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(i));
-            if(_assignment[variable]==0) {
+            if(_assignment[variable].value==0) {
                 literal=literal.negated();
             }
             alternatives.push_back(normalize_smt_theory_literal(literal));
@@ -783,10 +801,10 @@ class SmtDpllSearch {
 
         for(SizeType i=0; i!=_encoding.atom_count(); ++i) {
             SizeType variable=_encoding.atom_variable(i);
-            ARIADNE_ASSERT(_assignment[variable]>=0);
+            ARIADNE_ASSERT(_assignment[variable].value>=0);
 
             SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(i));
-            if(_assignment[variable]==0) {
+            if(_assignment[variable].value==0) {
                 literal=literal.negated();
             }
             alternatives.push_back(normalize_smt_theory_literal(literal));
@@ -833,7 +851,7 @@ class SmtDpllSearch {
     ExactBoxType const& _domain;
     SmtBooleanEncoding const& _encoding;
     Bool _parallel;
-    std::vector<int8_t> _assignment;
+    std::vector<AssignmentInfo> _assignment;
     std::vector<SizeType> _trail;
     std::vector<SizeType> _decision_level_markers;
     SmtSearchStatistics _statistics;

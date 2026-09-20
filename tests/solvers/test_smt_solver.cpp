@@ -410,11 +410,15 @@ class TestSmtSolver {
             std::cout << "[smt-dpll-stats] decisions="
                       << solve_result.statistics().boolean_decisions
                       << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " reasoned=" << solve_result.statistics().boolean_reasoned_propagations
                       << " conflicts=" << solve_result.statistics().boolean_conflicts
                       << " theory_checks=" << solve_result.statistics().theory_checks
                       << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_propagations>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().boolean_reasoned_propagations,
+                solve_result.statistics().boolean_propagations);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
         }
 
@@ -477,11 +481,15 @@ class TestSmtSolver {
             std::cout << "[smt-dpll-stats] trail decisions="
                       << solve_result.statistics().boolean_decisions
                       << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " reasoned=" << solve_result.statistics().boolean_reasoned_propagations
                       << " backtracks=" << solve_result.statistics().boolean_backtracks
                       << " max_level=" << solve_result.statistics().max_decision_level
                       << " theory_checks=" << solve_result.statistics().theory_checks
                       << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_decisions>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().boolean_reasoned_propagations,
+                solve_result.statistics().boolean_propagations);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_backtracks>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().max_decision_level>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);

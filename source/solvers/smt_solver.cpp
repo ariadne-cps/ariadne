@@ -537,7 +537,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_conflicts+=source.boolean_conflicts;
     target.boolean_backtracks+=source.boolean_backtracks;
-    target.max_decision_level=max(target.max_decision_level,source.max_decision_level);
+    target.max_decision_level=std::max(target.max_decision_level,source.max_decision_level);
     target.theory_checks+=source.theory_checks;
     target.theory_conflicts+=source.theory_conflicts;
 }
@@ -657,7 +657,7 @@ class SmtDpllSearch {
     Void _push_decision_level()
     {
         _decision_level_markers.push_back(_trail.size());
-        _statistics.max_decision_level=max(
+        _statistics.max_decision_level=std::max(
             _statistics.max_decision_level,this->_decision_level());
     }
 

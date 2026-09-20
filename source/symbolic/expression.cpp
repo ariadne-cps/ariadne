@@ -54,6 +54,8 @@ template class Expression<Kleenean>;
 template class Expression<String>;
 template class Expression<Integer>;
 template class Expression<Real>;
+template const Expression<Real>& Expression<Kleenean>::cmp1<Real>(Real*) const;
+template const Expression<Real>& Expression<Kleenean>::cmp2<Real>(Real*) const;
 
 template Bool before<Real>(Expression<Real> const& e1, Expression<Real> const& e2);
 template SizeType count_nodes<Real>(const Expression<Real>& e);

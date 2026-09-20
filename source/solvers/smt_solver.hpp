@@ -33,6 +33,7 @@
 
 #include "geometry/box.hpp"
 #include "numeric/numeric.hpp"
+#include "function/constraint.hpp"
 
 namespace Ariadne {
 
@@ -86,6 +87,26 @@ class SmtResult {
 };
 
 OutputStream& operator<<(OutputStream& os, SmtResultStatus status);
+
+//! \ingroup Solvers
+//! \brief Sequential reference epsilon-SMT solver for bounded conjunctions.
+class SmtSolver {
+  public:
+    explicit SmtSolver(SmtSolverConfiguration configuration)
+        : _configuration(configuration) { }
+
+    //! \brief Solve a bounded conjunction of validated real constraints.
+    SmtResult solve(ExactBoxType const& domain,
+                    List<ValidatedConstraint> const& constraints) const;
+
+    SmtSolverConfiguration const& configuration() const { return _configuration; }
+
+  private:
+    Bool _epsilon_satisfied(UpperBoxType const& domain,
+                            List<ValidatedConstraint> const& constraints) const;
+
+    SmtSolverConfiguration _configuration;
+};
 
 } // namespace Ariadne
 

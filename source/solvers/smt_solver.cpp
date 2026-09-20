@@ -156,6 +156,12 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
         if(definitely(domain.is_empty())) {
             return true;
         }
+        for(SizeType i=0; i!=constraints.size(); ++i) {
+            UpperIntervalType image=apply(constraints[i].function(),domain);
+            if(definitely(disjoint(image,this->_epsilon_bounds(constraints[i])))) {
+                return true;
+            }
+        }
         if(same_box(domain,previous)) {
             return false;
         }
@@ -250,6 +256,24 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
         }
         if(definitely(domain.is_empty())) {
             return true;
+        }
+        for(auto const& literal:literals) {
+            UpperIntervalType image=apply(literal.function,domain);
+            switch(literal.relation) {
+                case SmtTheoryPrimitiveRelation::EQ_ZERO:
+                case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+                    if(definitely(disjoint(image,this->_epsilon_bounds(literal.relation)))) {
+                        return true;
+                    }
+                    break;
+                case SmtTheoryPrimitiveRelation::GT_ZERO:
+                    if(definitely(image.upper_bound()<=-epsilon)) {
+                        return true;
+                    }
+                    break;
+                default:
+                    ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+            }
         }
         if(same_box(domain,previous)) {
             return false;

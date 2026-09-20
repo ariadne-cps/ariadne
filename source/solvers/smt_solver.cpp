@@ -533,6 +533,10 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_processed+=source.boxes_processed;
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
+    target.boolean_decisions+=source.boolean_decisions;
+    target.boolean_propagations+=source.boolean_propagations;
+    target.boolean_conflicts+=source.boolean_conflicts;
+    target.theory_checks+=source.theory_checks;
 }
 
 class SmtDpllSearch {
@@ -553,7 +557,7 @@ class SmtDpllSearch {
 
     SmtResult solve()
     {
-        std::optional<UpperBoxType> witness=this->_search_boolean(1u);
+        std::optional<UpperBoxType> witness=this->_search_boolean();
         if(witness.has_value()) {
             return SmtResult::epsilon_sat(*witness,_statistics);
         }
@@ -569,56 +573,123 @@ class SmtDpllSearch {
         return literal>0 ? value==1 : value==0;
     }
 
-    Bool _has_clause_conflict() const
+    Bool _assign_literal(Int literal)
     {
-        for(auto const& clause:_encoding.clauses()) {
-            Bool satisfied=false;
-            Bool undecided=false;
-            for(Int literal:clause) {
-                SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
-                int8_t value=_assignment[variable];
-                if(value<0) {
-                    undecided=true;
-                } else if(this->_literal_true(literal)) {
-                    satisfied=true;
-                    break;
-                }
-            }
-            if(not satisfied and not undecided) {
-                return true;
-            }
+        SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+        int8_t value=literal>0 ? 1 : 0;
+        if(_assignment[variable]<0) {
+            _assignment[variable]=value;
+            return true;
         }
-        return false;
+        return _assignment[variable]==value;
     }
 
-    std::optional<UpperBoxType> _search_boolean(SizeType variable)
+    Bool _unit_propagate(std::vector<SizeType>& propagated)
     {
-        if(this->_has_clause_conflict()) {
+        Bool changed=true;
+        while(changed) {
+            changed=false;
+            for(auto const& clause:_encoding.clauses()) {
+                Bool satisfied=false;
+                SizeType unassigned_count=0u;
+                Int unit_literal=0;
+
+                for(Int literal:clause) {
+                    SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+                    int8_t value=_assignment[variable];
+                    if(value<0) {
+                        ++unassigned_count;
+                        unit_literal=literal;
+                    } else if(this->_literal_true(literal)) {
+                        satisfied=true;
+                        break;
+                    }
+                }
+
+                if(satisfied) {
+                    continue;
+                }
+
+                if(unassigned_count==0u) {
+                    ++_statistics.boolean_conflicts;
+                    return false;
+                }
+
+                if(unassigned_count==1u) {
+                    SizeType variable=static_cast<SizeType>(unit_literal>0 ? unit_literal : -unit_literal);
+                    if(_assignment[variable]<0) {
+                        Bool assigned=this->_assign_literal(unit_literal);
+                        ARIADNE_ASSERT(assigned);
+                        propagated.push_back(variable);
+                        ++_statistics.boolean_propagations;
+                        changed=true;
+                    } else if(not this->_literal_true(unit_literal)) {
+                        ++_statistics.boolean_conflicts;
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    SizeType _next_unassigned_variable() const
+    {
+        for(SizeType variable=1u; variable<=_encoding.variable_count(); ++variable) {
+            if(_assignment[variable]<0) {
+                return variable;
+            }
+        }
+        return 0u;
+    }
+
+    Void _undo(std::vector<SizeType> const& variables)
+    {
+        for(SizeType variable:variables) {
+            _assignment[variable]=-1;
+        }
+    }
+
+    std::optional<UpperBoxType> _search_boolean()
+    {
+        std::vector<SizeType> propagated;
+        if(not this->_unit_propagate(propagated)) {
+            this->_undo(propagated);
             return std::nullopt;
         }
 
-        if(variable>_encoding.variable_count()) {
-            return this->_check_theory_assignment();
+        SizeType variable=this->_next_unassigned_variable();
+        if(variable==0u) {
+            std::optional<UpperBoxType> witness=this->_check_theory_assignment();
+            this->_undo(propagated);
+            return witness;
         }
 
+        ++_statistics.boolean_decisions;
+
         _assignment[variable]=0;
-        if(auto witness=this->_search_boolean(variable+1u); witness.has_value()) {
+        if(auto witness=this->_search_boolean(); witness.has_value()) {
             _assignment[variable]=-1;
+            this->_undo(propagated);
             return witness;
         }
 
         _assignment[variable]=1;
-        if(auto witness=this->_search_boolean(variable+1u); witness.has_value()) {
+        if(auto witness=this->_search_boolean(); witness.has_value()) {
             _assignment[variable]=-1;
+            this->_undo(propagated);
             return witness;
         }
 
         _assignment[variable]=-1;
+        this->_undo(propagated);
         return std::nullopt;
     }
 
     std::optional<UpperBoxType> _check_theory_assignment()
     {
+        ++_statistics.theory_checks;
+
         std::vector<SmtTheoryAlternatives> alternatives;
         alternatives.reserve(_encoding.atom_count());
 
@@ -677,7 +748,6 @@ class SmtDpllSearch {
     std::vector<int8_t> _assignment;
     SmtSearchStatistics _statistics;
 };
-
 } // namespace
 
 SmtResult SmtSolver::solve(RealSpace const& space,

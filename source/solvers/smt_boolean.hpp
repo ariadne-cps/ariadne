@@ -36,6 +36,8 @@
 
 namespace Ariadne {
 
+class TseitinBuilder;
+
 //! \ingroup Solvers
 //! \brief A CNF encoding of a continuous predicate.
 //!
@@ -55,6 +57,7 @@ class SmtBooleanEncoding {
 
   private:
     friend class SmtBooleanEncoder;
+    friend class TseitinBuilder;
 
     Void _add_clause(Clause clause) { _clauses.push_back(std::move(clause)); }
     Int _new_variable() {

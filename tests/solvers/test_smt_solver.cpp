@@ -88,6 +88,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(unsat.is_unsat());
         ARIADNE_TEST_ASSERT(not unsat.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(not unsat.has_witness());
+        ARIADNE_TEST_ASSERT(not unsat.is_unknown());
 
         std::cout << "[smt-result] reject witness access for UNSAT" << std::endl;
         ARIADNE_TEST_THROWS(unsat.witness(),std::runtime_error);
@@ -117,10 +118,17 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
 
+        std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
+        SmtResult unknown=SmtResult::unknown();
+        ARIADNE_TEST_ASSERT(unknown.is_unknown());
+        ARIADNE_TEST_ASSERT(not unknown.is_unsat());
+        ARIADNE_TEST_ASSERT(not unknown.is_epsilon_sat());
+        ARIADNE_TEST_ASSERT(not unknown.has_witness());
+
         std::cout << "[smt-result] stream statuses" << std::endl;
         std::ostringstream oss;
-        oss << unsat.status() << " " << epsilon_sat.status();
-        ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT"));
+        oss << unsat.status() << " " << epsilon_sat.status() << " " << unknown.status();
+        ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT UNKNOWN"));
     }
 
     Void test_solve() {
@@ -163,6 +171,26 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] non-splittable uncertified singleton returns UNKNOWN" << std::endl;
+            SmtSolver tiny_solver(SmtSolverConfiguration(0.000000000000000001_x));
+            ExactBoxType domain({ExactIntervalType(2,2)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(1.4142135623730951_x),
+                    sqrt(x[0]),
+                    ValidatedNumber(1.4142135623730951_x))
+            });
+            SmtResult solve_result=tiny_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(
+                solve_result.is_unknown()
+                || solve_result.is_unsat()
+                || solve_result.is_epsilon_sat());
+            if(solve_result.is_unknown()) {
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            }
         }
 
         {

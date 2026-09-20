@@ -103,6 +103,11 @@ SmtResult SmtResult::epsilon_sat(UpperBoxType const& witness,
     return SmtResult(SmtResultStatus::EPSILON_SAT,witness,statistics);
 }
 
+SmtResult SmtResult::unknown(SmtSearchStatistics statistics)
+{
+    return SmtResult(SmtResultStatus::UNKNOWN,statistics);
+}
+
 UpperBoxType const& SmtResult::witness() const
 {
     ARIADNE_PRECONDITION(this->has_witness());
@@ -114,6 +119,7 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
     switch(status) {
         case SmtResultStatus::UNSAT: return os << "UNSAT";
         case SmtResultStatus::EPSILON_SAT: return os << "EPSILON_SAT";
+        case SmtResultStatus::UNKNOWN: return os << "UNKNOWN";
         default: ARIADNE_FAIL_MSG("Unknown SmtResultStatus");
     }
 }
@@ -214,8 +220,9 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
-    ARIADNE_ASSERT_MSG(not (first_same and second_same),
-                       "SMT search reached a non-splittable uncertified box: "<<domain);
+    if(first_same and second_same) {
+        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt};
+    }
 
     return {BoxProcessingStatus::SPLIT,std::nullopt,children};
 }
@@ -339,8 +346,9 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
-    ARIADNE_ASSERT_MSG(not (first_same and second_same),
-                       "SMT theory search reached a non-splittable uncertified box: "<<domain);
+    if(first_same and second_same) {
+        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt};
+    }
 
     return {BoxProcessingStatus::SPLIT,std::nullopt,children};
 }
@@ -356,11 +364,15 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     SmtSearchStatistics statistics;
 
     if(domain.is_empty()) {
-        return SmtResult::unsat(statistics);
+        if(unknown_seen) {
+        return SmtResult::unknown(statistics);
+    }
+    return SmtResult::unsat(statistics);
     }
 
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
+    Bool unknown_seen=false;
 
     while(not pending.empty()) {
         UpperBoxType current=pending.pop();
@@ -383,6 +395,11 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
                 pending.push(std::move(processing.children->first));
                 break;
 
+            case BoxProcessingStatus::UNKNOWN:
+                ++statistics.boxes_unknown;
+                unknown_seen=true;
+                break;
+
             default:
                 ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
         }
@@ -401,12 +418,16 @@ SmtResult SmtSolver::solve(RealSpace const& space,
 
     SmtSearchStatistics statistics;
     if(domain.is_empty()) {
-        return SmtResult::unsat(statistics);
+        if(unknown_seen) {
+        return SmtResult::unknown(statistics);
+    }
+    return SmtResult::unsat(statistics);
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
+    Bool unknown_seen=false;
 
     while(not pending.empty()) {
         UpperBoxType current=pending.pop();
@@ -426,6 +447,10 @@ SmtResult SmtSolver::solve(RealSpace const& space,
                 pending.push(std::move(processing.children->second));
                 pending.push(std::move(processing.children->first));
                 break;
+            case BoxProcessingStatus::UNKNOWN:
+                ++statistics.boxes_unknown;
+                unknown_seen=true;
+                break;
             default:
                 ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
         }
@@ -442,6 +467,7 @@ struct ParallelSmtSearchState {
     SmtSearchStatistics statistics;
     std::optional<UpperBoxType> witness;
     std::atomic<bool> found{false};
+    std::atomic<bool> unknown{false};
 };
 
 using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
@@ -458,7 +484,10 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
 
     auto state=std::make_shared<ParallelSmtSearchState>();
     if(domain.is_empty()) {
-        return SmtResult::unsat(state->statistics);
+        if(state->unknown.load()) {
+        return SmtResult::unknown(state->statistics);
+    }
+    return SmtResult::unsat(state->statistics);
     }
 
     ParallelSmtWorkload workload(
@@ -501,6 +530,14 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                     }
                     return;
 
+                case BoxProcessingStatus::UNKNOWN:
+                    state->unknown.store(true);
+                    {
+                        std::lock_guard<std::mutex> lock(state->mutex);
+                        ++state->statistics.boxes_unknown;
+                    }
+                    return;
+
                 default:
                     ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
             }
@@ -513,6 +550,9 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
     if(state->found.load()) {
         ARIADNE_ASSERT(state->witness.has_value());
         return SmtResult::epsilon_sat(*state->witness,state->statistics);
+    }
+    if(state->unknown.load()) {
+        return SmtResult::unknown(state->statistics);
     }
     return SmtResult::unsat(state->statistics);
 }
@@ -567,6 +607,14 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                         access.append(processing.children->second);
                     }
                     return;
+                case BoxProcessingStatus::UNKNOWN:
+                    state->unknown.store(true);
+                    {
+                        std::lock_guard<std::mutex> lock(state->mutex);
+                        ++state->statistics.boxes_unknown;
+                    }
+                    return;
+
                 default:
                     ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
             }
@@ -591,6 +639,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_processed+=source.boxes_processed;
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
+    target.boxes_unknown+=source.boxes_unknown;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;
@@ -653,6 +702,9 @@ class SmtDpllSearch {
         SearchOutcome outcome=this->_search_boolean();
         if(outcome.witness.has_value()) {
             return SmtResult::epsilon_sat(*outcome.witness,_statistics);
+        }
+        if(_theory_unknown_seen) {
+            return SmtResult::unknown(_statistics);
         }
         return SmtResult::unsat(_statistics);
     }
@@ -1355,6 +1407,10 @@ class SmtDpllSearch {
                 ? _solver.solve_parallel(_space,_domain,literals)
                 : _solver.solve(_space,_domain,literals);
             add_statistics(_statistics,result.statistics());
+            if(result.is_unknown()) {
+                _theory_unknown_seen=true;
+                return true;
+            }
             return result.is_epsilon_sat();
         }
 
@@ -1412,6 +1468,9 @@ class SmtDpllSearch {
             if(result.is_epsilon_sat()) {
                 return result.witness();
             }
+            if(result.is_unknown()) {
+                _theory_unknown_seen=true;
+            }
             return std::nullopt;
         }
 
@@ -1446,6 +1505,7 @@ class SmtDpllSearch {
     std::vector<SizeType> _learned_clause_generation;
     std::optional<SizeType> _last_boolean_conflict_clause;
     std::optional<SizeType> _last_theory_conflict_clause;
+    Bool _theory_unknown_seen=false;
     SmtSearchStatistics _statistics;
 };
 } // namespace

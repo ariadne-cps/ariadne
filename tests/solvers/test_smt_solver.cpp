@@ -59,6 +59,13 @@ class TestSmtSolver {
         std::cout << "[smt-config] positive epsilon=0.125" << std::endl;
         SmtSolverConfiguration configuration(0.125_x);
         ARIADNE_TEST_EQUAL(configuration.epsilon(),0.125_x);
+        ARIADNE_TEST_EQUAL(
+            configuration.theory_minimization_budget(),
+            std::numeric_limits<SizeType>::max());
+
+        std::cout << "[smt-config] bounded theory minimization budget=1" << std::endl;
+        SmtSolverConfiguration bounded_configuration(0.125_x,1u);
+        ARIADNE_TEST_EQUAL(bounded_configuration.theory_minimization_budget(),1u);
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -516,6 +523,38 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_nogood_minimized_literals,2u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_nogood_literals_removed,2u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_minimization_checks>=4u);
+        }
+
+        {
+            std::cout << "[smt-dpll] bound theory nogood minimization work" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(0.125_x,1u));
+            ContinuousPredicate conflict=(ex>=1)&&(ex<=0);
+            ContinuousPredicate irrelevant_lower=(ex>=-100);
+            ContinuousPredicate irrelevant_upper=(ex<=100);
+            ContinuousPredicate free_branch=(ex>=-2)||(ex<=2);
+            ContinuousPredicate formula=
+                conflict&&irrelevant_lower&&irrelevant_upper&&free_branch;
+            SmtResult solve_result=bounded_solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] budget=1 minimization_checks="
+                      << solve_result.statistics().theory_minimization_checks
+                      << " raw=" << solve_result.statistics().theory_nogood_raw_literals
+                      << " minimized="
+                      << solve_result.statistics().theory_nogood_minimized_literals
+                      << " removed="
+                      << solve_result.statistics().theory_nogood_literals_removed
+                      << " budget_exhaustions="
+                      << solve_result.statistics().theory_minimization_budget_exhaustions
+                      << std::endl;
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_minimization_checks,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().theory_minimization_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_nogood_raw_literals,4u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().theory_nogood_minimized_literals>=2u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().theory_nogood_minimized_literals<=4u);
         }
 
         {

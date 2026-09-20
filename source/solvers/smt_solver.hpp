@@ -31,6 +31,7 @@
 
 #include <optional>
 #include <mutex>
+#include <limits>
 
 #include "geometry/box.hpp"
 #include "numeric/numeric.hpp"
@@ -52,13 +53,19 @@ enum class SmtResultStatus {
 //! \brief Configuration shared by bounded real epsilon-SMT solvers.
 class SmtSolverConfiguration {
   public:
-    explicit SmtSolverConfiguration(ExactDouble epsilon);
+    explicit SmtSolverConfiguration(
+        ExactDouble epsilon,
+        SizeType theory_minimization_budget=std::numeric_limits<SizeType>::max());
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
 
+    //! \brief Maximum theory checks used to minimize one learned theory nogood.
+    SizeType theory_minimization_budget() const { return _theory_minimization_budget; }
+
   private:
     ExactDouble _epsilon;
+    SizeType _theory_minimization_budget;
 };
 
 //! \ingroup Solvers
@@ -90,6 +97,7 @@ struct SmtSearchStatistics {
     SizeType theory_nogood_raw_literals = 0u;
     SizeType theory_nogood_minimized_literals = 0u;
     SizeType theory_nogood_literals_removed = 0u;
+    SizeType theory_minimization_budget_exhaustions = 0u;
 };
 
 //! \ingroup Solvers

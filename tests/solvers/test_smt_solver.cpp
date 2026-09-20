@@ -453,12 +453,44 @@ class TestSmtSolver {
                       << " theory_conflicts=" << solve_result.statistics().theory_conflicts
                       << " theory_learned=" << solve_result.statistics().theory_learned_clauses
                       << " theory_learned_literals="
-                      << solve_result.statistics().theory_learned_clause_literals << std::endl;
+                      << solve_result.statistics().theory_learned_clause_literals
+                      << " minimization_checks="
+                      << solve_result.statistics().theory_minimization_checks
+                      << " raw_nogood_literals="
+                      << solve_result.statistics().theory_nogood_raw_literals
+                      << " minimized_nogood_literals="
+                      << solve_result.statistics().theory_nogood_minimized_literals << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_learned_clause_literals>=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] minimize theory conflict nogood" << std::endl;
+            ContinuousPredicate conflict=(ex>=1)&&(ex<=0);
+            ContinuousPredicate irrelevant=(ex>=-100);
+            ContinuousPredicate formula=conflict&&irrelevant;
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] minimization_checks="
+                      << solve_result.statistics().theory_minimization_checks
+                      << " raw=" << solve_result.statistics().theory_nogood_raw_literals
+                      << " minimized="
+                      << solve_result.statistics().theory_nogood_minimized_literals
+                      << " removed="
+                      << solve_result.statistics().theory_nogood_literals_removed << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_minimization_checks>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().theory_nogood_raw_literals
+                > solve_result.statistics().theory_nogood_minimized_literals);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_nogood_literals_removed>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().theory_nogood_raw_literals
+                    - solve_result.statistics().theory_nogood_minimized_literals,
+                solve_result.statistics().theory_nogood_literals_removed);
         }
 
         {

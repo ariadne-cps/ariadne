@@ -86,6 +86,10 @@ struct SmtSearchStatistics {
     SizeType theory_learned_clauses = 0u;
     SizeType theory_learned_clause_literals = 0u;
     SizeType theory_learned_clause_propagations = 0u;
+    SizeType theory_minimization_checks = 0u;
+    SizeType theory_nogood_raw_literals = 0u;
+    SizeType theory_nogood_minimized_literals = 0u;
+    SizeType theory_nogood_literals_removed = 0u;
 };
 
 //! \ingroup Solvers

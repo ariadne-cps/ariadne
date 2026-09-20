@@ -67,6 +67,10 @@ struct SmtSearchStatistics {
     SizeType boxes_processed = 0u;
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
+    SizeType boolean_decisions = 0u;
+    SizeType boolean_propagations = 0u;
+    SizeType boolean_conflicts = 0u;
+    SizeType theory_checks = 0u;
 };
 
 //! \ingroup Solvers

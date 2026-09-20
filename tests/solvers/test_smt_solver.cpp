@@ -402,6 +402,38 @@ class TestSmtSolver {
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
 
         {
+            std::cout << "[smt-dpll] unit propagation on single atom" << std::endl;
+            ContinuousPredicate formula=(ex>=0);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            std::cout << "[smt-dpll-stats] decisions="
+                      << solve_result.statistics().boolean_decisions
+                      << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " conflicts=" << solve_result.statistics().boolean_conflicts
+                      << " theory_checks=" << solve_result.statistics().theory_checks << std::endl;
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_propagations>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] Boolean contradiction pruned before theory" << std::endl;
+            ContinuousPredicate atom=(ex>=0);
+            ContinuousPredicate formula=atom&&(!atom);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] contradiction decisions="
+                      << solve_result.statistics().boolean_decisions
+                      << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " conflicts=" << solve_result.statistics().boolean_conflicts
+                      << " theory_checks=" << solve_result.statistics().theory_checks << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] conjunction UNSAT: x>=1 and x<=0 on [0,1]" << std::endl;
             ContinuousPredicate formula=(ex>=1)&&(ex<=0);
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0,1)}),formula);

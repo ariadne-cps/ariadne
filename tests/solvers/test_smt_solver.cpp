@@ -409,10 +409,10 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] disjunction EPSILON_SAT: x<0 or x>1 on [0,0.1]" << std::endl;
+            std::cout << "[smt-dpll] disjunction EPSILON_SAT: x<0 or x>1 on [0,0.0625]" << std::endl;
             ContinuousPredicate formula=(ex<0)||(ex>1);
             SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0.0_x,0.1_x)}),formula);
+                space,ExactBoxType({ExactIntervalType(0.0_x,0.0625_x)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }

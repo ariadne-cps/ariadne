@@ -536,6 +536,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_conflicts+=source.boolean_conflicts;
+    target.boolean_backtracks+=source.boolean_backtracks;
+    target.max_decision_level=max(target.max_decision_level,source.max_decision_level);
     target.theory_checks+=source.theory_checks;
     target.theory_conflicts+=source.theory_conflicts;
 }
@@ -555,6 +557,8 @@ class SmtDpllSearch {
           _assignment(encoding.variable_count()+1u,-1)
     {
         _trail.reserve(encoding.variable_count());
+        _decision_level_markers.reserve(encoding.variable_count()+1u);
+        _decision_level_markers.push_back(0u);
     }
 
     SmtResult solve()
@@ -645,52 +649,65 @@ class SmtDpllSearch {
         return 0u;
     }
 
-    Void _backtrack(SizeType marker)
+    SizeType _decision_level() const
     {
+        return _decision_level_markers.size()-1u;
+    }
+
+    Void _push_decision_level()
+    {
+        _decision_level_markers.push_back(_trail.size());
+        _statistics.max_decision_level=max(
+            _statistics.max_decision_level,this->_decision_level());
+    }
+
+    Void _backtrack_to_level(SizeType level)
+    {
+        ARIADNE_ASSERT(level<this->_decision_level_markers.size());
+        SizeType marker=_decision_level_markers[level];
         while(_trail.size()>marker) {
             SizeType variable=_trail.back();
             _trail.pop_back();
             _assignment[variable]=-1;
         }
+        _decision_level_markers.resize(level+1u);
     }
 
     std::optional<UpperBoxType> _search_boolean()
     {
-        SizeType marker=_trail.size();
-
         if(not this->_unit_propagate()) {
-            this->_backtrack(marker);
             return std::nullopt;
         }
 
         SizeType variable=this->_next_unassigned_variable();
         if(variable==0u) {
-            std::optional<UpperBoxType> witness=this->_check_theory_assignment();
-            this->_backtrack(marker);
-            return witness;
+            return this->_check_theory_assignment();
         }
 
         if(not this->_check_partial_theory_consistency()) {
-            this->_backtrack(marker);
             return std::nullopt;
         }
 
         ++_statistics.boolean_decisions;
+        SizeType parent_level=this->_decision_level();
 
+        this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(-static_cast<Int>(variable)));
         if(auto witness=this->_search_boolean(); witness.has_value()) {
-            this->_backtrack(marker);
             return witness;
         }
-        this->_backtrack(marker);
 
+        this->_backtrack_to_level(parent_level);
+        ++_statistics.boolean_backtracks;
+
+        this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
         if(auto witness=this->_search_boolean(); witness.has_value()) {
-            this->_backtrack(marker);
             return witness;
         }
 
-        this->_backtrack(marker);
+        this->_backtrack_to_level(parent_level);
+        ++_statistics.boolean_backtracks;
         return std::nullopt;
     }
 
@@ -818,6 +835,7 @@ class SmtDpllSearch {
     Bool _parallel;
     std::vector<int8_t> _assignment;
     std::vector<SizeType> _trail;
+    std::vector<SizeType> _decision_level_markers;
     SmtSearchStatistics _statistics;
 };
 } // namespace

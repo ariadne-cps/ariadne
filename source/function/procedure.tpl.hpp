@@ -305,9 +305,18 @@ template<class X> Void backpropagate(X const& r, Log, X& a) { restrict(a,exp(r))
 template<class X> Void backpropagate(X const& r, Sin, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Cos, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Tan, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
-template<class X> Void backpropagate(X const& r, Asin, X& a) { restrict(a,sin(r)); }
-template<class X> Void backpropagate(X const& r, Acos, X& a) { restrict(a,cos(r)); }
-template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)); }
+template<class X> Void backpropagate(X const& r, Asin, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,sin(r));
+}
+template<class X> Void backpropagate(X const& r, Acos, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,cos(r));
+}
+template<class X> Void backpropagate(X const& r, Atan, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,tan(r));
+}
 
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }

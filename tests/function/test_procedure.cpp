@@ -84,6 +84,7 @@ class TestProcedure
     Void test_backward_contractor_witness_preservation();
     Void test_backward_contractor_generated_witnesses();
     Void test_leq_backpropagate_soundness();
+    Void test_inverse_trigonometric_empty_backpropagation();
     Void test_derivative();
 };
 
@@ -101,6 +102,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_backward_contractor_witness_preservation());
     ARIADNE_TEST_CALL(test_backward_contractor_generated_witnesses());
     ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
+    ARIADNE_TEST_CALL(test_inverse_trigonometric_empty_backpropagation());
     ARIADNE_TEST_CALL(test_derivative());
 }
 
@@ -643,6 +645,28 @@ Void TestProcedure::test_leq_backpropagate_soundness()
 
     ARIADNE_TEST_ASSERT(not inconsistent(a1,FloatDPBounds(0,dp)));
     ARIADNE_TEST_ASSERT(not inconsistent(a2,FloatDPBounds(1,dp)));
+}
+
+
+Void TestProcedure::test_inverse_trigonometric_empty_backpropagation()
+{
+    UpperIntervalType empty=ExactIntervalType::empty_interval();
+
+    {
+        UpperIntervalType argument=ExactIntervalType(0,0);
+        backpropagate(empty,Asin(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(0,0);
+        backpropagate(empty,Acos(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(0,0);
+        backpropagate(empty,Atan(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
 }
 
 

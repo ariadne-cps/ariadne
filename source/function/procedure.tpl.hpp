@@ -315,7 +315,7 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }
 template<class X> Void backpropagate(X const& r, Leq, X& a1, X& a2) {
-    restrict(a1,X(-inf,a2.upper())); restrict(a1,X(a2.lower(),+inf)); }
+    restrict(a1,X(-inf,a2.upper())); restrict(a2,X(a1.lower(),+inf)); }
 
 template<class X> Void backpropagate(X const& r, UnaryElementaryOperator eop, X& a) {
     return eop.accept([&r,&a](auto op){backpropagate(r,op,a);}); }

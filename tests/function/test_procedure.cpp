@@ -218,9 +218,9 @@ Void TestProcedure::test_backward_contractor_soundness()
 
     // Each interval contains a non-principal zero of the corresponding
     // periodic function. Backward propagation must not discard that branch.
-    check_periodic_witness(Sin(),ExactIntervalType(3.14_x,3.15_x));
-    check_periodic_witness(Cos(),ExactIntervalType(4.71_x,4.72_x));
-    check_periodic_witness(Tan(),ExactIntervalType(3.14_x,3.15_x));
+    check_periodic_witness(Sin(),ExactIntervalType(3.14_decimal,3.15_decimal));
+    check_periodic_witness(Cos(),ExactIntervalType(4.71_decimal,4.72_decimal));
+    check_periodic_witness(Tan(),ExactIntervalType(3.14_decimal,3.15_decimal));
 
     {
         ValidatedProcedure p(1);
@@ -339,9 +339,9 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_unary(Sin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
     check_unary(Cos(), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
     check_unary(Tan(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_unary(Sin(), FloatDPBounds(3.14_x,3.15_x,dp), FloatDPBounds(0,dp));
-    check_unary(Cos(), FloatDPBounds(4.71_x,4.72_x,dp), FloatDPBounds(0,dp));
-    check_unary(Tan(), FloatDPBounds(3.14_x,3.15_x,dp), FloatDPBounds(0,dp));
+    check_unary(Sin(), FloatDPBounds(3.14_decimal,3.15_decimal,dp), FloatDPBounds(0,dp));
+    check_unary(Cos(), FloatDPBounds(4.71_decimal,4.72_decimal,dp), FloatDPBounds(0,dp));
+    check_unary(Tan(), FloatDPBounds(3.14_decimal,3.15_decimal,dp), FloatDPBounds(0,dp));
 
     // The inverse trigonometric functions are single-valued on their domains.
     check_unary(Asin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
@@ -404,9 +404,9 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_unary_interval(Sqrt(), FloatDPBounds(0,9,dp), FloatDPBounds(1,2,dp), FloatDPBounds(4,dp));
     check_unary_interval(Exp(),  FloatDPBounds(-1,2,dp), FloatDPBounds(0.5_x,2.0_x,dp), FloatDPBounds(0,dp));
     check_unary_interval(Log(),  FloatDPBounds(0.5_x,3.0_x,dp), FloatDPBounds(-0.5_x,1.0_x,dp), FloatDPBounds(1,dp));
-    check_unary_interval(Sin(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_x,3.15_x,dp));
-    check_unary_interval(Cos(),  FloatDPBounds(4,5,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(4.71_x,4.72_x,dp));
-    check_unary_interval(Tan(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_x,3.15_x,dp));
+    check_unary_interval(Sin(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_decimal,3.15_decimal,dp));
+    check_unary_interval(Cos(),  FloatDPBounds(4,5,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(4.71_decimal,4.72_decimal,dp));
+    check_unary_interval(Tan(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_decimal,3.15_decimal,dp));
     check_unary_interval(Asin(), FloatDPBounds(-1,1,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(0,dp));
     check_unary_interval(Acos(), FloatDPBounds(-1,1,dp), FloatDPBounds(0,2,dp), FloatDPBounds(1,dp));
     check_unary_interval(Atan(), FloatDPBounds(-2,2,dp), FloatDPBounds(-1,1,dp), FloatDPBounds(0,dp));

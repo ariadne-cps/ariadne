@@ -49,6 +49,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_configuration());
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_solve());
+        ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_parallel_solve());
     }
 
@@ -316,6 +317,80 @@ class TestSmtSolver {
             ExactBoxType domain({ExactIntervalType(-infty,+infty)});
             List<ValidatedConstraint> constraints;
             ARIADNE_TEST_THROWS(solver.solve(domain,constraints),std::runtime_error);
+        }
+    }
+
+    Void test_theory_solve() {
+        RealVariable x("x");
+        RealExpression ex=x;
+        RealSpace space({x});
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+        auto primitive = [&](ContinuousPredicate const& predicate) {
+            auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            return alternatives[0][0];
+        };
+
+        {
+            std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] EQ outside epsilon: x=0 weakened on x=0.25" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(0.25_x,0.25_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] GEQ at epsilon boundary: x>=0 weakened on x=-0.125" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>=0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] GT rejects epsilon boundary: x>0 weakened on x=-0.125" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] GT accepts strict interior: x>0 weakened on x=-0.0625" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] transcendental GT: sin(x)>0 on [3,4]" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(sin(ex)>0)});
+            SmtResult result=solver.solve(space,ExactBoxType({ExactIntervalType(3,4)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] parallel/sequential agreement for strict primitive" << std::endl;
+            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            ConcurrencyGuard concurrency_guard(thread_manager);
+            SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u ? 2u : thread_manager.maximum_concurrency();
+            if(parallel_concurrency>0u) {
+                List<SmtTheoryPrimitiveLiteral> literals({primitive(sin(ex)>0)});
+                ExactBoxType domain({ExactIntervalType(3,4)});
+                thread_manager.set_concurrency(0);
+                SmtResult sequential=solver.solve(space,domain,literals);
+                thread_manager.set_concurrency(parallel_concurrency);
+                SmtResult parallel=solver.solve_parallel(space,domain,literals);
+                ARIADNE_TEST_EQUAL(sequential.status(),parallel.status());
+                ARIADNE_TEST_ASSERT(sequential.has_witness()==parallel.has_witness());
+            }
         }
     }
 

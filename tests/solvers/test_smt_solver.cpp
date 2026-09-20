@@ -418,10 +418,10 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] disjunction UNSAT: x<0 or x>1 on [0.4,0.6]" << std::endl;
+            std::cout << "[smt-dpll] disjunction UNSAT: x<0 or x>1 on [0.375,0.625]" << std::endl;
             ContinuousPredicate formula=(ex<0)||(ex>1);
             SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0.4_x,0.6_x)}),formula);
+                space,ExactBoxType({ExactIntervalType(0.375_x,0.625_x)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 

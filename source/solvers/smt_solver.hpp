@@ -102,6 +102,9 @@ class SmtSolver {
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 
   private:
+    ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
+    Bool _epsilon_reduce(UpperBoxType& domain,
+                         List<ValidatedConstraint> const& constraints) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
 

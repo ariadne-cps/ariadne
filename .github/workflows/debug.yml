@@ -53,9 +53,9 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install ninja mpfr cairo gnuplot pkg-config
-        python3 -m pip install --upgrade pip
-        pip3 install --upgrade pip
-        pip3 install pytest
+        python3 -m venv "$GITHUB_WORKSPACE/.venv"
+        "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'

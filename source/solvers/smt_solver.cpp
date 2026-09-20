@@ -584,7 +584,7 @@ class SmtDpllSearch {
         return _assignment[variable]==value;
     }
 
-    Bool _unit_propagate(std::vector<SizeType>& propagated)
+    Bool _unit_propagate()
     {
         Bool changed=true;
         while(changed) {
@@ -620,7 +620,6 @@ class SmtDpllSearch {
                     if(_assignment[variable]<0) {
                         Bool assigned=this->_assign_literal(unit_literal);
                         ARIADNE_ASSERT(assigned);
-                        propagated.push_back(variable);
                         ++_statistics.boolean_propagations;
                         changed=true;
                     } else if(not this->_literal_true(unit_literal)) {
@@ -643,25 +642,19 @@ class SmtDpllSearch {
         return 0u;
     }
 
-    Void _undo(std::vector<SizeType> const& variables)
-    {
-        for(SizeType variable:variables) {
-            _assignment[variable]=-1;
-        }
-    }
-
     std::optional<UpperBoxType> _search_boolean()
     {
-        std::vector<SizeType> propagated;
-        if(not this->_unit_propagate(propagated)) {
-            this->_undo(propagated);
+        std::vector<int8_t> saved_assignment=_assignment;
+
+        if(not this->_unit_propagate()) {
+            _assignment=std::move(saved_assignment);
             return std::nullopt;
         }
 
         SizeType variable=this->_next_unassigned_variable();
         if(variable==0u) {
             std::optional<UpperBoxType> witness=this->_check_theory_assignment();
-            this->_undo(propagated);
+            _assignment=std::move(saved_assignment);
             return witness;
         }
 
@@ -669,20 +662,18 @@ class SmtDpllSearch {
 
         _assignment[variable]=0;
         if(auto witness=this->_search_boolean(); witness.has_value()) {
-            _assignment[variable]=-1;
-            this->_undo(propagated);
+            _assignment=std::move(saved_assignment);
             return witness;
         }
 
+        _assignment=saved_assignment;
         _assignment[variable]=1;
         if(auto witness=this->_search_boolean(); witness.has_value()) {
-            _assignment[variable]=-1;
-            this->_undo(propagated);
+            _assignment=std::move(saved_assignment);
             return witness;
         }
 
-        _assignment[variable]=-1;
-        this->_undo(propagated);
+        _assignment=std::move(saved_assignment);
         return std::nullopt;
     }
 

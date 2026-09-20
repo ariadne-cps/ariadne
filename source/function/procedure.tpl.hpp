@@ -288,15 +288,15 @@ template<class X> Void backpropagate(X const& r, Rec, X& a) { restrict(a,rec(r))
 template<class X> Void backpropagate(X const& r, Sqr, X& a) {
     if(definitely(r.is_empty())) { restrict(a,r); return; }
     auto s=sqrt(abs(r));
-    restrict(a,hull(s,neg(s)));
+    restrict(a,hull(s,-s));
 }
 template<class X> Void backpropagate(X const& r, Pow, X& a, Int n) {
     if(definitely(r.is_empty())) { restrict(a,r); return; }
     if(n<=0) { return; }
-    // Integer powers have symmetric inverse branches for even exponents, and
-    // sign-dependent branches for odd exponents. Their interval hull is sound.
-    auto s=root(abs(r),n);
-    restrict(a,hull(s,neg(s)));
+    // Compute the magnitude of an n-th root using the elementary operations
+    // supported by interval arithmetic, then retain both sign branches.
+    auto s=exp(log(abs(r))/n);
+    restrict(a,hull(s,-s));
 }
 template<class X> Void backpropagate(X const& r, Sqrt, X& a) { restrict(a,sqr(r)); }
 template<class X> Void backpropagate(X const& r, Exp, X& a) { restrict(a,log(r)); }

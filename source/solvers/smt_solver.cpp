@@ -561,6 +561,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.theory_nogood_literals_removed+=source.theory_nogood_literals_removed;
     target.theory_minimization_budget_exhaustions+=
         source.theory_minimization_budget_exhaustions;
+    target.first_minimization_candidate_trail_rank=
+        source.first_minimization_candidate_trail_rank;
 }
 
 class SmtDpllSearch {
@@ -1068,12 +1070,28 @@ class SmtDpllSearch {
 
     std::vector<Int> _minimize_theory_nogood(std::vector<Int> clause)
     {
-        std::stable_sort(clause.begin(),clause.end(),[this](Int lhs, Int rhs) {
+        std::vector<SizeType> trail_rank(_assignment.size(),0u);
+        for(SizeType rank=0u; rank<_trail.size(); ++rank) {
+            trail_rank[_trail[rank]]=rank+1u;
+        }
+
+        std::stable_sort(clause.begin(),clause.end(),[this,&trail_rank](Int lhs, Int rhs) {
             SizeType lhs_variable=static_cast<SizeType>(lhs>0 ? lhs : -lhs);
             SizeType rhs_variable=static_cast<SizeType>(rhs>0 ? rhs : -rhs);
-            return _assignment[lhs_variable].decision_level
-                > _assignment[rhs_variable].decision_level;
+            SizeType lhs_level=_assignment[lhs_variable].decision_level;
+            SizeType rhs_level=_assignment[rhs_variable].decision_level;
+            if(lhs_level!=rhs_level) {
+                return lhs_level>rhs_level;
+            }
+            return trail_rank[lhs_variable]>trail_rank[rhs_variable];
         });
+
+        if(not clause.empty()) {
+            SizeType first_variable=static_cast<SizeType>(
+                clause.front()>0 ? clause.front() : -clause.front());
+            _statistics.first_minimization_candidate_trail_rank=
+                trail_rank[first_variable];
+        }
 
         SizeType const budget=_solver.configuration().theory_minimization_budget();
         SizeType checks=0u;

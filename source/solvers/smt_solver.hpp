@@ -71,6 +71,7 @@ struct SmtSearchStatistics {
     SizeType boolean_propagations = 0u;
     SizeType boolean_conflicts = 0u;
     SizeType theory_checks = 0u;
+    SizeType theory_conflicts = 0u;
 };
 
 //! \ingroup Solvers

@@ -498,6 +498,29 @@ class TestSmtSolver {
 
             expect_status("abs SAT",ExactIntervalType(-1,-1),abs(ex)==1,SmtResultStatus::EPSILON_SAT);
             expect_status("abs UNSAT",ExactIntervalType(-1,-1),abs(ex)==0,SmtResultStatus::UNSAT);
+
+            expect_status("pos SAT",ExactIntervalType(2,2),pos(ex)==2,SmtResultStatus::EPSILON_SAT);
+            expect_status("pos UNSAT",ExactIntervalType(2,2),pos(ex)==3,SmtResultStatus::UNSAT);
+
+            expect_status("hlf SAT",ExactIntervalType(2,2),hlf(ex)==1,SmtResultStatus::EPSILON_SAT);
+            expect_status("hlf UNSAT",ExactIntervalType(2,2),hlf(ex)==2,SmtResultStatus::UNSAT);
+
+            expect_status("add SAT",ExactIntervalType(2,2),add(ex,RealExpression(3))==5,SmtResultStatus::EPSILON_SAT);
+            expect_status("add UNSAT",ExactIntervalType(2,2),add(ex,RealExpression(3))==6,SmtResultStatus::UNSAT);
+
+            expect_status("sub SAT",ExactIntervalType(2,2),sub(ex,RealExpression(3))==-1,SmtResultStatus::EPSILON_SAT);
+            expect_status("sub UNSAT",ExactIntervalType(2,2),sub(ex,RealExpression(3))==0,SmtResultStatus::UNSAT);
+
+            expect_status("mul SAT",ExactIntervalType(2,2),mul(ex,RealExpression(3))==6,SmtResultStatus::EPSILON_SAT);
+            expect_status("mul UNSAT",ExactIntervalType(2,2),mul(ex,RealExpression(3))==7,SmtResultStatus::UNSAT);
+
+            expect_status("div SAT",ExactIntervalType(6,6),div(ex,RealExpression(3))==2,SmtResultStatus::EPSILON_SAT);
+            expect_status("div UNSAT",ExactIntervalType(6,6),div(ex,RealExpression(3))==3,SmtResultStatus::UNSAT);
+
+            expect_status("operator add SAT",ExactIntervalType(2,2),(ex+RealExpression(3))==5,SmtResultStatus::EPSILON_SAT);
+            expect_status("operator sub SAT",ExactIntervalType(2,2),(ex-RealExpression(3))==-1,SmtResultStatus::EPSILON_SAT);
+            expect_status("operator mul SAT",ExactIntervalType(2,2),(ex*RealExpression(3))==6,SmtResultStatus::EPSILON_SAT);
+            expect_status("operator div SAT",ExactIntervalType(6,6),(ex/RealExpression(3))==2,SmtResultStatus::EPSILON_SAT);
         }
 
         {

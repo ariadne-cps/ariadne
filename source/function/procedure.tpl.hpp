@@ -321,7 +321,7 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) {
 template<class X> Void backpropagate(X const& r, Abs, X& a) {
     if(definitely(r.is_empty())) { restrict(a,r); return; }
     if(definitely(r.upper_bound()<0)) { restrict(a,X::empty_interval()); return; }
-    auto upper=max(r.upper_bound(),decltype(r.upper_bound())(0));
+    auto upper=r.upper_bound();
     restrict(a,X(-upper,+upper));
 }
 

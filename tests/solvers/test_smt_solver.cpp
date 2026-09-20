@@ -210,6 +210,25 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] contractor fixpoint closes chained UNSAT at root" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({
+                ExactIntervalType(0,1),
+                ExactIntervalType(0,1)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),xy[0]-xy[1],ValidatedNumber(0)),
+                ValidatedConstraint(ValidatedNumber(0),xy[1],ValidatedNumber(0)),
+                ValidatedConstraint(ValidatedNumber(1),xy[0],ValidatedNumber(1))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+        }
+
+        {
             std::cout << "[smt-solve] inequality EPSILON_SAT: x in [0,1], x<=0.25" << std::endl;
             ExactBoxType domain({ExactIntervalType(0,1)});
             List<ValidatedConstraint> constraints({
@@ -382,6 +401,32 @@ class TestSmtSolver {
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] contractor fixpoint closes chained UNSAT at root" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            auto xy_primitive = [&](ContinuousPredicate const& predicate) {
+                auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+                ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+                ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+                return alternatives[0][0];
+            };
+            List<SmtTheoryPrimitiveLiteral> literals({
+                xy_primitive(ex-ey==0),
+                xy_primitive(ey==0),
+                xy_primitive(ex==1)
+            });
+            SmtResult solve_result=solver.solve(
+                xy_space,
+                ExactBoxType({ExactIntervalType(0,1),ExactIntervalType(0,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
         }
 
         {

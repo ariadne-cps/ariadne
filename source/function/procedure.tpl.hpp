@@ -282,8 +282,19 @@ template<class X, class Y> Void backpropagate(X const& r, Min, X& a1, Y const&) 
     restrict(a1,X(r.lower_bound(),+inf));
 }
 
+template<class X> Void backpropagate(X const& r, Nul, X& a) {
+    if(definitely(r.is_empty())
+       || definitely(r.upper_bound()<0)
+       || definitely(r.lower_bound()>0)) {
+        restrict(a,X::empty_interval());
+    }
+}
 template<class X> Void backpropagate(X const& r, Pos, X& a) { restrict(a,r); }
 template<class X> Void backpropagate(X const& r, Neg, X& a) { restrict(a,neg(r)); }
+template<class X> Void backpropagate(X const& r, Hlf, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,r+r);
+}
 template<class X> Void backpropagate(X const& r, Rec, X& a) { restrict(a,rec(r)); }
 template<class X> Void backpropagate(X const& r, Sqr, X& a) {
     // sqrt(UpperIntervalType) is defined as the hull of the inverse image

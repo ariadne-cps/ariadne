@@ -46,7 +46,8 @@ namespace Ariadne {
 //! \brief Logical status returned by a bounded real epsilon-SMT solver.
 enum class SmtResultStatus {
     UNSAT,
-    EPSILON_SAT
+    EPSILON_SAT,
+    UNKNOWN
 };
 
 //! \ingroup Solvers
@@ -79,6 +80,7 @@ struct SmtSearchStatistics {
     SizeType boxes_processed = 0u;
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
+    SizeType boxes_unknown = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -121,9 +123,13 @@ class SmtResult {
     static SmtResult epsilon_sat(UpperBoxType const& witness,
                                  SmtSearchStatistics statistics = {});
 
+    //! \brief Construct an inconclusive result.
+    static SmtResult unknown(SmtSearchStatistics statistics = {});
+
     SmtResultStatus status() const { return _status; }
     Bool is_unsat() const { return _status==SmtResultStatus::UNSAT; }
     Bool is_epsilon_sat() const { return _status==SmtResultStatus::EPSILON_SAT; }
+    Bool is_unknown() const { return _status==SmtResultStatus::UNKNOWN; }
 
     //! \brief True iff the result contains a witness box.
     Bool has_witness() const { return _witness.has_value(); }
@@ -188,7 +194,8 @@ class SmtSolver {
     enum class BoxProcessingStatus {
         PRUNED,
         EPSILON_SAT,
-        SPLIT
+        SPLIT,
+        UNKNOWN
     };
 
     struct BoxProcessingResult {

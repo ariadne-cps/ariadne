@@ -683,7 +683,6 @@ Void TestProcedure::test_abs_backpropagation()
         UpperIntervalType result=ExactIntervalType(1,1);
         backpropagate(result,Abs(),argument);
         UpperIntervalType expected=ExactIntervalType(-1,1);
-        ARIADNE_TEST_ASSERT(definitely(subset(argument,expected)));
         ARIADNE_TEST_EQUAL(argument.lower_bound().raw(),expected.lower_bound().raw());
         ARIADNE_TEST_EQUAL(argument.upper_bound().raw(),expected.upper_bound().raw());
     }

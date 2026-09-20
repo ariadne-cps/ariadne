@@ -438,6 +438,68 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-theory-solve] cover supported RealExpression operations" << std::endl;
+
+            auto expect_status = [&](String const& label,
+                                     ExactIntervalType const& interval,
+                                     ContinuousPredicate const& predicate,
+                                     SmtResultStatus expected) {
+                std::cout << "[smt-real-op] " << label << std::endl;
+                List<SmtTheoryPrimitiveLiteral> literals({primitive(predicate)});
+                SmtResult solve_result=solver.solve(space,ExactBoxType({interval}),literals);
+                ARIADNE_TEST_EQUAL(solve_result.status(),expected);
+            };
+
+            expect_status("neg SAT",ExactIntervalType(1,1),neg(ex)==-1,SmtResultStatus::EPSILON_SAT);
+            expect_status("neg UNSAT",ExactIntervalType(1,1),neg(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("sqr SAT",ExactIntervalType(2,2),sqr(ex)==4,SmtResultStatus::EPSILON_SAT);
+            expect_status("sqr UNSAT",ExactIntervalType(2,2),sqr(ex)==5,SmtResultStatus::UNSAT);
+
+            expect_status("pow SAT",ExactIntervalType(2,2),pow(ex,3)==8,SmtResultStatus::EPSILON_SAT);
+            expect_status("pow UNSAT",ExactIntervalType(2,2),pow(ex,3)==9,SmtResultStatus::UNSAT);
+
+            expect_status("rec SAT",ExactIntervalType(2,2),rec(ex)==0.5_x,SmtResultStatus::EPSILON_SAT);
+            expect_status("rec UNSAT",ExactIntervalType(2,2),rec(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("sqrt SAT",ExactIntervalType(4,4),sqrt(ex)==2,SmtResultStatus::EPSILON_SAT);
+            expect_status("sqrt UNSAT",ExactIntervalType(4,4),sqrt(ex)==3,SmtResultStatus::UNSAT);
+
+            expect_status("exp SAT",ExactIntervalType(0,0),exp(ex)==1,SmtResultStatus::EPSILON_SAT);
+            expect_status("exp UNSAT",ExactIntervalType(0,0),exp(ex)==2,SmtResultStatus::UNSAT);
+
+            expect_status("log SAT",ExactIntervalType(1,1),log(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("log UNSAT",ExactIntervalType(1,1),log(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("sin SAT",ExactIntervalType(0,0),sin(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("sin UNSAT",ExactIntervalType(0,0),sin(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("cos SAT",ExactIntervalType(0,0),cos(ex)==1,SmtResultStatus::EPSILON_SAT);
+            expect_status("cos UNSAT",ExactIntervalType(0,0),cos(ex)==0,SmtResultStatus::UNSAT);
+
+            expect_status("tan SAT",ExactIntervalType(0,0),tan(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("tan UNSAT",ExactIntervalType(0,0),tan(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("asin SAT",ExactIntervalType(0,0),asin(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("asin UNSAT",ExactIntervalType(0,0),asin(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("acos SAT",ExactIntervalType(1,1),acos(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("acos UNSAT",ExactIntervalType(1,1),acos(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("atan SAT",ExactIntervalType(0,0),atan(ex)==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("atan UNSAT",ExactIntervalType(0,0),atan(ex)==1,SmtResultStatus::UNSAT);
+
+            expect_status("max SAT",ExactIntervalType(-1,-1),max(ex,RealExpression(0))==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("max UNSAT",ExactIntervalType(-1,-1),max(ex,RealExpression(0))==1,SmtResultStatus::UNSAT);
+
+            expect_status("min SAT",ExactIntervalType(1,1),min(ex,RealExpression(0))==0,SmtResultStatus::EPSILON_SAT);
+            expect_status("min UNSAT",ExactIntervalType(1,1),min(ex,RealExpression(0))==1,SmtResultStatus::UNSAT);
+
+            expect_status("abs SAT",ExactIntervalType(-1,-1),abs(ex)==1,SmtResultStatus::EPSILON_SAT);
+            expect_status("abs UNSAT",ExactIntervalType(-1,-1),abs(ex)==0,SmtResultStatus::UNSAT);
+        }
+
+        {
             std::cout << "[smt-theory-solve] parallel/sequential agreement for strict primitive" << std::endl;
             auto& thread_manager=BetterThreads::ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);

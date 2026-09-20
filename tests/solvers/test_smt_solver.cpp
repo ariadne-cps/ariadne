@@ -58,7 +58,11 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not epsilon_sat.is_unsat());
         ARIADNE_TEST_ASSERT(epsilon_sat.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(epsilon_sat.has_witness());
-        ARIADNE_TEST_EQUAL(epsilon_sat.witness(),witness);
+        ARIADNE_TEST_EQUAL(epsilon_sat.witness().dimension(),witness.dimension());
+        for(SizeType i=0; i!=witness.dimension(); ++i) {
+            ARIADNE_TEST_ASSERT(definitely(subset(epsilon_sat.witness()[i],witness[i])));
+            ARIADNE_TEST_ASSERT(definitely(subset(witness[i],epsilon_sat.witness()[i])));
+        }
 
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status();

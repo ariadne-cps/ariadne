@@ -68,8 +68,8 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
     switch(status) {
         case SmtResultStatus::UNSAT: return os << "UNSAT";
         case SmtResultStatus::EPSILON_SAT: return os << "EPSILON_SAT";
+        default: ARIADNE_FAIL_MSG("Unknown SmtResultStatus");
     }
-    ARIADNE_FAIL_MSG("Unknown SmtResultStatus");
 }
 
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,

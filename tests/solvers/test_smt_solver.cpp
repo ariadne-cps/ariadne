@@ -467,19 +467,46 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());
             std::cout << "[smt-dpll-stats] analyzed="
                       << solve_result.statistics().boolean_conflicts_analyzed
+                      << " learned_clauses=" << solve_result.statistics().learned_clauses
                       << " learned_literals_total=" << solve_result.statistics().learned_clause_literals
                       << " last_learned_literals=" << solve_result.statistics().last_learned_clause_literals
                       << " last_current_level_literals="
                       << solve_result.statistics().last_learned_current_level_literals
+                      << " learned_propagations="
+                      << solve_result.statistics().learned_clause_propagations
                       << " backjump_level=" << solve_result.statistics().last_backjump_level
+                      << " nonchronological_backjumps="
+                      << solve_result.statistics().nonchronological_backjumps
                       << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts_analyzed>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().last_learned_clause_literals>=1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().last_learned_current_level_literals,1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_propagations>=1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().last_backjump_level
                 < solve_result.statistics().max_decision_level);
+        }
+
+        {
+            std::cout << "[smt-dpll] learned clause propagation after backjump" << std::endl;
+            ContinuousPredicate a=(ex>=-2);
+            ContinuousPredicate b=(ex>=-1);
+            ContinuousPredicate c=(ex>=0);
+            ContinuousPredicate formula=
+                (a||b)&&(a||(!b))&&((!a)||c)&&((!a)||(!c));
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] learned="
+                      << solve_result.statistics().learned_clauses
+                      << " learned_propagations="
+                      << solve_result.statistics().learned_clause_propagations
+                      << " backtracks=" << solve_result.statistics().boolean_backtracks
+                      << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_propagations>=1u);
         }
 
         {

@@ -78,6 +78,9 @@ struct SmtSearchStatistics {
     SizeType last_learned_clause_literals = 0u;
     SizeType last_learned_current_level_literals = 0u;
     SizeType last_backjump_level = 0u;
+    SizeType learned_clauses = 0u;
+    SizeType learned_clause_propagations = 0u;
+    SizeType nonchronological_backjumps = 0u;
     SizeType theory_checks = 0u;
     SizeType theory_conflicts = 0u;
 };

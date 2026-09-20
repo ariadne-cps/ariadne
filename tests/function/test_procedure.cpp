@@ -62,6 +62,7 @@ class TestProcedure
     Void test_construct_from_expansion();
     Void test_evaluate();
     Void test_propagate();
+    Void test_backward_contractor_soundness();
     Void test_derivative();
 };
 
@@ -75,6 +76,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
+    ARIADNE_TEST_CALL(test_backward_contractor_soundness());
     ARIADNE_TEST_CALL(test_derivative());
 }
 
@@ -186,6 +188,96 @@ Void TestProcedure::test_propagate()
     simple_hull_reduce(xx,pp,cc);
     ARIADNE_TEST_PRINT(xx);
 }
+
+Void TestProcedure::test_backward_contractor_soundness()
+{
+    auto check_periodic_witness = [](auto op, ExactIntervalType domain) {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(op,0u);
+        UpperBoxType x=ExactBoxType({domain});
+        simple_hull_reduce(x,p,ExactIntervalType(0,0));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+    };
+
+    // Each interval contains a non-principal zero of the corresponding
+    // periodic function. Backward propagation must not discard that branch.
+    check_periodic_witness(Sin(),ExactIntervalType(3.14_x,3.15_x));
+    check_periodic_witness(Cos(),ExactIntervalType(4.71_x,4.72_x));
+    check_periodic_witness(Tan(),ExactIntervalType(3.14_x,3.15_x));
+
+    {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Sqr(),0u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(-1,-1)});
+        simple_hull_reduce(x,p,ExactIntervalType(1,1));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+    }
+
+    {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Pow(),0u,2);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(-1,-1)});
+        simple_hull_reduce(x,p,ExactIntervalType(1,1));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+    }
+
+    {
+        ValidatedProcedure p(2);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Var(),1u);
+        p.new_instruction(Max(),0u,1u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(0,0),ExactIntervalType(1,1)});
+        simple_hull_reduce(x,p,ExactIntervalType(1,1));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!x[1].is_empty());
+    }
+
+    {
+        ValidatedProcedure p(2);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Var(),1u);
+        p.new_instruction(Min(),0u,1u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(1,1),ExactIntervalType(0,0)});
+        simple_hull_reduce(x,p,ExactIntervalType(0,0));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!x[1].is_empty());
+    }
+
+    {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_constant(1.0_x);
+        p.new_instruction_scalar(Max(),0u,0u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(0,0)});
+        simple_hull_reduce(x,p,ExactIntervalType(1,1));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+    }
+
+    {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_constant(0.0_x);
+        p.new_instruction_scalar(Min(),0u,0u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(1,1)});
+        simple_hull_reduce(x,p,ExactIntervalType(0,0));
+        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+    }
+
+    // Conservative periodic backward propagation must still propagate an
+    // empty forward image so that an impossible codomain empties the domain.
+    {
+        ValidatedProcedure p(1);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Sin(),0u);
+        UpperBoxType x=ExactBoxType({ExactIntervalType(0,0)});
+        simple_hull_reduce(x,p,ExactIntervalType(2,2));
+        ARIADNE_TEST_ASSERT(x[0].is_empty());
+    }
+}
+
 
 Void TestProcedure::test_derivative()
 {

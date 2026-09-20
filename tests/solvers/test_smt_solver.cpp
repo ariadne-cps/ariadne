@@ -718,6 +718,23 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] zero theory box budget propagates UNKNOWN without conflict" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ContinuousPredicate formula=(ex>=0);
+            SmtResult solve_result=bounded_solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] Boolean contradiction pruned before theory" << std::endl;
             ContinuousPredicate atom=(ex>=0);
             ContinuousPredicate formula=atom&&(!atom);

@@ -601,6 +601,25 @@ class TestSmtSolver {
             expect_edge_status("rec singleton zero undefined",ExactIntervalType(0,0),rec(ex)==0,SmtResultStatus::UNSAT);
 
             expect_edge_status("tan regular branch",ExactIntervalType(0,0),tan(ex)==0,SmtResultStatus::EPSILON_SAT);
+
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            auto xy_primitive = [&](ContinuousPredicate const& predicate) {
+                auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+                ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+                ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+                return alternatives[0][0];
+            };
+            {
+                std::cout << "[smt-real-domain] division singleton zero denominator" << std::endl;
+                List<SmtTheoryPrimitiveLiteral> literals({xy_primitive(ex/ey==1)});
+                SmtResult solve_result=solver.solve(
+                    xy_space,
+                    ExactBoxType({ExactIntervalType(1,1),ExactIntervalType(0,0)}),
+                    literals);
+                ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            }
         }
 
         {

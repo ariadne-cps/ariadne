@@ -61,9 +61,10 @@ class SequentialSmtWorkQueue {
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
-    ExactDouble epsilon, SizeType theory_minimization_budget)
+    ExactDouble epsilon, SizeType theory_minimization_budget, SizeType learned_clause_limit)
     : _epsilon(epsilon),
-      _theory_minimization_budget(theory_minimization_budget)
+      _theory_minimization_budget(theory_minimization_budget),
+      _learned_clause_limit(learned_clause_limit)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -566,6 +567,12 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
         target.first_minimization_candidate_trail_rank=
             source.first_minimization_candidate_trail_rank;
     }
+    target.learned_clause_activity_bumps+=source.learned_clause_activity_bumps;
+    target.learned_clause_pruning_runs+=source.learned_clause_pruning_runs;
+    target.learned_clauses_pruned+=source.learned_clauses_pruned;
+    target.peak_active_non_theory_learned_clauses=std::max(
+        target.peak_active_non_theory_learned_clauses,
+        source.peak_active_non_theory_learned_clauses);
 }
 
 class SmtDpllSearch {
@@ -675,10 +682,16 @@ class SmtDpllSearch {
     {
         _learned_clauses.emplace_back(clause.begin(),clause.end());
         _learned_clause_is_theory.push_back(theory_clause);
+        _learned_clause_active.push_back(true);
+        _learned_clause_activity.push_back(1u);
         ++_statistics.learned_clauses;
         if(theory_clause) {
             ++_statistics.theory_learned_clauses;
             _statistics.theory_learned_clause_literals+=clause.size();
+        } else {
+            _statistics.peak_active_non_theory_learned_clauses=std::max(
+                _statistics.peak_active_non_theory_learned_clauses,
+                this->_active_non_theory_learned_clause_count());
         }
         return this->_original_clause_count()+_learned_clauses.size()-1u;
     }
@@ -691,6 +704,94 @@ class SmtDpllSearch {
         return _learned_clause_is_theory[index-this->_original_clause_count()];
     }
 
+    Bool _is_active_clause(SizeType index) const
+    {
+        if(not this->_is_learned_clause(index)) {
+            return true;
+        }
+        return _learned_clause_active[index-this->_original_clause_count()];
+    }
+
+    SizeType _active_non_theory_learned_clause_count() const
+    {
+        SizeType count=0u;
+        for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
+            if(_learned_clause_active[i] && not _learned_clause_is_theory[i]) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    Bool _learned_clause_locked(SizeType index) const
+    {
+        if(not this->_is_learned_clause(index)) {
+            return true;
+        }
+        for(AssignmentInfo const& assignment:_assignment) {
+            if(assignment.value>=0
+               && assignment.reason_clause.has_value()
+               && *assignment.reason_clause==index) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Void _bump_learned_clause_activity(SizeType index)
+    {
+        if(not this->_is_learned_clause(index)) {
+            return;
+        }
+        SizeType learned_index=index-this->_original_clause_count();
+        if(not _learned_clause_active[learned_index]) {
+            return;
+        }
+        ++_learned_clause_activity[learned_index];
+        ++_statistics.learned_clause_activity_bumps;
+    }
+
+    Void _maybe_prune_learned_clauses(std::optional<SizeType> protected_clause=std::nullopt)
+    {
+        SizeType const limit=_solver.configuration().learned_clause_limit();
+        SizeType active=this->_active_non_theory_learned_clause_count();
+        if(active<=limit) {
+            return;
+        }
+
+        ++_statistics.learned_clause_pruning_runs;
+        std::vector<SizeType> candidates;
+        for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
+            SizeType clause_index=this->_original_clause_count()+i;
+            if(not _learned_clause_active[i]
+               || _learned_clause_is_theory[i]
+               || (protected_clause.has_value() && clause_index==*protected_clause)
+               || this->_learned_clause_locked(clause_index)) {
+                continue;
+            }
+            candidates.push_back(clause_index);
+        }
+
+        std::stable_sort(candidates.begin(),candidates.end(),[this](SizeType lhs, SizeType rhs) {
+            SizeType li=lhs-this->_original_clause_count();
+            SizeType ri=rhs-this->_original_clause_count();
+            if(_learned_clause_activity[li]!=_learned_clause_activity[ri]) {
+                return _learned_clause_activity[li]<_learned_clause_activity[ri];
+            }
+            return _learned_clauses[li].size()>_learned_clauses[ri].size();
+        });
+
+        for(SizeType clause_index:candidates) {
+            if(active<=limit) {
+                break;
+            }
+            SizeType learned_index=clause_index-this->_original_clause_count();
+            _learned_clause_active[learned_index]=false;
+            --active;
+            ++_statistics.learned_clauses_pruned;
+        }
+    }
+
     Bool _unit_propagate()
     {
         _last_boolean_conflict_clause.reset();
@@ -698,6 +799,9 @@ class SmtDpllSearch {
         while(changed) {
             changed=false;
             for(SizeType clause_index=0u; clause_index<this->_clause_count(); ++clause_index) {
+                if(not this->_is_active_clause(clause_index)) {
+                    continue;
+                }
                 auto const& clause=this->_clause(clause_index);
                 Bool satisfied=false;
                 SizeType unassigned_count=0u;
@@ -721,6 +825,7 @@ class SmtDpllSearch {
 
                 if(unassigned_count==0u) {
                     ++_statistics.boolean_conflicts;
+                    this->_bump_learned_clause_activity(clause_index);
                     _last_boolean_conflict_clause=clause_index;
                     return false;
                 }
@@ -735,6 +840,7 @@ class SmtDpllSearch {
                         ++_statistics.boolean_propagations;
                         ++_statistics.boolean_reasoned_propagations;
                         if(this->_is_learned_clause(clause_index)) {
+                            this->_bump_learned_clause_activity(clause_index);
                             ++_statistics.learned_clause_propagations;
                             if(this->_is_theory_learned_clause(clause_index)) {
                                 ++_statistics.theory_learned_clause_propagations;
@@ -743,6 +849,7 @@ class SmtDpllSearch {
                         changed=true;
                     } else if(not this->_literal_true(unit_literal)) {
                         ++_statistics.boolean_conflicts;
+                        this->_bump_learned_clause_activity(clause_index);
                         _last_boolean_conflict_clause=clause_index;
                         return false;
                     }
@@ -801,9 +908,10 @@ class SmtDpllSearch {
         return result;
     }
 
-    ConflictAnalysis _analyze_boolean_conflict(SizeType conflict_clause_index) const
+    ConflictAnalysis _analyze_boolean_conflict(SizeType conflict_clause_index)
     {
         ARIADNE_ASSERT(conflict_clause_index<this->_clause_count());
+        this->_bump_learned_clause_activity(conflict_clause_index);
         ConflictAnalysis analysis;
         auto const& conflict_clause=this->_clause(conflict_clause_index);
         analysis.learned_clause.assign(conflict_clause.begin(),conflict_clause.end());
@@ -824,6 +932,7 @@ class SmtDpllSearch {
             ARIADNE_ASSERT(pivot.has_value());
             SizeType reason_index=*_assignment[*pivot].reason_clause;
             ARIADNE_ASSERT(reason_index<this->_clause_count());
+            this->_bump_learned_clause_activity(reason_index);
             analysis.learned_clause=this->_resolve_on_variable(
                 analysis.learned_clause,this->_clause(reason_index),*pivot);
         }
@@ -898,7 +1007,7 @@ class SmtDpllSearch {
                 this->_current_level_literal_count(analysis.learned_clause);
             _statistics.last_backjump_level=analysis.backjump_level;
 
-            this->_add_learned_clause(analysis.learned_clause);
+            SizeType learned_index=this->_add_learned_clause(analysis.learned_clause);
             _last_boolean_conflict_clause.reset();
 
             ARIADNE_ASSERT(analysis.backjump_level<conflict_level);
@@ -907,6 +1016,7 @@ class SmtDpllSearch {
             }
             this->_backtrack_to_level(analysis.backjump_level);
             ++_statistics.boolean_backtracks;
+            this->_maybe_prune_learned_clauses(learned_index);
             return SearchOutcome::backjump(analysis.backjump_level);
         }
 
@@ -939,7 +1049,7 @@ class SmtDpllSearch {
                 this->_current_level_literal_count(analysis.learned_clause);
             _statistics.last_backjump_level=analysis.backjump_level;
 
-            this->_add_learned_clause(analysis.learned_clause);
+            SizeType learned_index=this->_add_learned_clause(analysis.learned_clause);
             _last_theory_conflict_clause.reset();
 
             ARIADNE_ASSERT(analysis.backjump_level<conflict_level);
@@ -948,6 +1058,7 @@ class SmtDpllSearch {
             }
             this->_backtrack_to_level(analysis.backjump_level);
             ++_statistics.boolean_backtracks;
+            this->_maybe_prune_learned_clauses(learned_index);
             return SearchOutcome::backjump(analysis.backjump_level);
         }
 
@@ -973,6 +1084,7 @@ class SmtDpllSearch {
 
         this->_backtrack_to_level(parent_level);
         ++_statistics.boolean_backtracks;
+        this->_maybe_prune_learned_clauses();
 
         this->_push_decision_level();
         ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
@@ -993,6 +1105,7 @@ class SmtDpllSearch {
 
         this->_backtrack_to_level(parent_level);
         ++_statistics.boolean_backtracks;
+        this->_maybe_prune_learned_clauses();
         return SearchOutcome::exhausted();
     }
 
@@ -1267,6 +1380,8 @@ class SmtDpllSearch {
     std::vector<SizeType> _decision_level_markers;
     std::vector<SmtBooleanEncoding::Clause> _learned_clauses;
     std::vector<Bool> _learned_clause_is_theory;
+    std::vector<Bool> _learned_clause_active;
+    std::vector<SizeType> _learned_clause_activity;
     std::optional<SizeType> _last_boolean_conflict_clause;
     std::optional<SizeType> _last_theory_conflict_clause;
     SmtSearchStatistics _statistics;

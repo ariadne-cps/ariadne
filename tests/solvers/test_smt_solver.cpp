@@ -66,6 +66,14 @@ class TestSmtSolver {
         std::cout << "[smt-config] bounded theory minimization budget=1" << std::endl;
         SmtSolverConfiguration bounded_configuration(0.125_x,1u);
         ARIADNE_TEST_EQUAL(bounded_configuration.theory_minimization_budget(),1u);
+        ARIADNE_TEST_EQUAL(
+            bounded_configuration.learned_clause_limit(),
+            std::numeric_limits<SizeType>::max());
+
+        std::cout << "[smt-config] learned clause limit=1" << std::endl;
+        SmtSolverConfiguration pruning_configuration(
+            0.125_x,std::numeric_limits<SizeType>::max(),1u);
+        ARIADNE_TEST_EQUAL(pruning_configuration.learned_clause_limit(),1u);
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -612,6 +620,43 @@ class TestSmtSolver {
                       << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_propagations>=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] prune inactive low-activity learned clauses" << std::endl;
+            SmtSolver pruning_solver(SmtSolverConfiguration(
+                0.125_x,std::numeric_limits<SizeType>::max(),1u));
+            ContinuousPredicate a=(ex>=0);
+            ContinuousPredicate b=(ex<=0);
+            ContinuousPredicate c=(ex==0);
+            ContinuousPredicate formula=
+                ( a|| b|| c)&&
+                ( a|| b||(!c))&&
+                ( a||(!b)|| c)&&
+                ( a||(!b)||(!c))&&
+                ((!a)|| b|| c)&&
+                ((!a)|| b||(!c))&&
+                ((!a)||(!b)|| c)&&
+                ((!a)||(!b)||(!c));
+            SmtResult solve_result=pruning_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-1,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] learned="
+                      << solve_result.statistics().learned_clauses
+                      << " activity_bumps="
+                      << solve_result.statistics().learned_clause_activity_bumps
+                      << " pruning_runs="
+                      << solve_result.statistics().learned_clause_pruning_runs
+                      << " pruned=" << solve_result.statistics().learned_clauses_pruned
+                      << " peak_active="
+                      << solve_result.statistics().peak_active_non_theory_learned_clauses
+                      << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=2u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_activity_bumps>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().peak_active_non_theory_learned_clauses>=2u);
         }
 
         {

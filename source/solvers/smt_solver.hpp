@@ -55,7 +55,8 @@ class SmtSolverConfiguration {
   public:
     explicit SmtSolverConfiguration(
         ExactDouble epsilon,
-        SizeType theory_minimization_budget=std::numeric_limits<SizeType>::max());
+        SizeType theory_minimization_budget=std::numeric_limits<SizeType>::max(),
+        SizeType learned_clause_limit=std::numeric_limits<SizeType>::max());
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -63,9 +64,13 @@ class SmtSolverConfiguration {
     //! \brief Maximum theory checks used to minimize one learned theory nogood.
     SizeType theory_minimization_budget() const { return _theory_minimization_budget; }
 
+    //! \brief Maximum number of active non-theory learned clauses.
+    SizeType learned_clause_limit() const { return _learned_clause_limit; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
+    SizeType _learned_clause_limit;
 };
 
 //! \ingroup Solvers
@@ -99,6 +104,10 @@ struct SmtSearchStatistics {
     SizeType theory_nogood_literals_removed = 0u;
     SizeType theory_minimization_budget_exhaustions = 0u;
     SizeType first_minimization_candidate_trail_rank = 0u;
+    SizeType learned_clause_activity_bumps = 0u;
+    SizeType learned_clause_pruning_runs = 0u;
+    SizeType learned_clauses_pruned = 0u;
+    SizeType peak_active_non_theory_learned_clauses = 0u;
 };
 
 //! \ingroup Solvers

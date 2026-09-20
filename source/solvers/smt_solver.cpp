@@ -794,10 +794,16 @@ class SmtDpllSearch {
         std::vector<SizeType> candidates;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
             SizeType clause_index=this->_original_clause_count()+i;
+            SizeType const current_generation=_statistics.learned_clauses;
+            SizeType const clause_generation=_learned_clause_generation[i];
+            Bool const recent=(current_generation<=clause_generation+2u);
             Bool const short_clause=(_learned_clauses[i].size()<=2u);
+            Bool const useful=(_learned_clause_activity[i]>1u);
             if(not _learned_clause_active[i]
                || _learned_clause_is_theory[i]
+               || recent
                || short_clause
+               || useful
                || (protected_clause.has_value() && clause_index==*protected_clause)
                || this->_learned_clause_locked(clause_index)) {
                 continue;
@@ -808,27 +814,8 @@ class SmtDpllSearch {
         std::stable_sort(candidates.begin(),candidates.end(),[this](SizeType lhs, SizeType rhs) {
             SizeType li=lhs-this->_original_clause_count();
             SizeType ri=rhs-this->_original_clause_count();
-
-            SizeType const current_generation=_statistics.learned_clauses;
-            Bool const lhs_recent=(
-                current_generation<=_learned_clause_generation[li]+2u);
-            Bool const rhs_recent=(
-                current_generation<=_learned_clause_generation[ri]+2u);
-            if(lhs_recent!=rhs_recent) {
-                return not lhs_recent;
-            }
-
-            Bool const lhs_useful=(_learned_clause_activity[li]>1u);
-            Bool const rhs_useful=(_learned_clause_activity[ri]>1u);
-            if(lhs_useful!=rhs_useful) {
-                return not lhs_useful;
-            }
-
             if(_learned_clause_activity[li]!=_learned_clause_activity[ri]) {
                 return _learned_clause_activity[li]<_learned_clause_activity[ri];
-            }
-            if(_learned_clause_generation[li]!=_learned_clause_generation[ri]) {
-                return _learned_clause_generation[li]<_learned_clause_generation[ri];
             }
             return _learned_clauses[li].size()>_learned_clauses[ri].size();
         });

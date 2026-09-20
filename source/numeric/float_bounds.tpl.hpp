@@ -122,6 +122,22 @@ template<class F> auto Operations<Bounds<F>>::_tan(Bounds<F> const& x) -> Bounds
     Bounds<F> y=x-n*pi_bnds;
     assert(y.lower_raw()>=-hlf(pi_val));
     assert(y.upper_raw()<=+hlf(pi_val));
+
+    F positive_pole_lower=hlf(pi_bnds.lower_raw());
+    F positive_pole_upper=hlf(pi_bnds.upper_raw());
+    F negative_pole_lower=-positive_pole_upper;
+    F negative_pole_upper=-positive_pole_lower;
+    Bool may_cross_positive_pole=(
+        y.lower_raw()<=positive_pole_upper
+        && y.upper_raw()>=positive_pole_lower);
+    Bool may_cross_negative_pole=(
+        y.lower_raw()<=negative_pole_upper
+        && y.upper_raw()>=negative_pole_lower);
+    if(may_cross_positive_pole || may_cross_negative_pole) {
+        F inf_=F::inf(prec);
+        return Bounds<F>(-inf_,+inf_);
+    }
+
     return Bounds<F>(tan(down,y._l),tan(up,y._u));
 }
 

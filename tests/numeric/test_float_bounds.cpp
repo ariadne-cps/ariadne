@@ -591,6 +591,14 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         ARIADNE_TEST_COMPARE(asin_crossing_high.lower_raw(),<=,RawFloatType(0,pr));
     }
 
+    // Tangent intervals that may contain a pole must return the whole-real hull.
+    {
+        FloatBoundsType around_half_pi(1.5707_x,1.5709_x,pr);
+        FloatBoundsType tan_around_half_pi=tan(around_half_pi);
+        ARIADNE_TEST_EQUAL(tan_around_half_pi.lower_raw(),-inf_);
+        ARIADNE_TEST_EQUAL(tan_around_half_pi.upper_raw(),+inf_);
+    }
+
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
     ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);

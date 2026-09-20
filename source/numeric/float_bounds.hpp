@@ -216,9 +216,16 @@ template<class F> class Bounds
         else if(x._u<0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); } //!< <p/>
         else { return Bounds<F>(nul(x._l),max(mul(up,x._l,x._l),mul(up,x._u,x._u))); } } //!< <p/>
     friend Bounds<F> rec(Bounds<F> const& x) {
-        if(x._l>0 || x._u<0) {  return Bounds<F>(rec(down,x._u),rec(up,x._l)); } //!< <p/>
-    //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x); //!< <p/>
-        else { F inf_=F::inf(x.precision()); return Bounds<F>(-inf_,+inf_); } } //!< <p/>
+        if(x._l>0 || x._u<0) { return Bounds<F>(rec(down,x._u),rec(up,x._l)); } //!< <p/>
+        if(x._l==0 && x._u==0) {
+            F one(1,x.precision());
+            return Bounds<F>(one,-one);
+        }
+        // The reciprocal image of an interval crossing zero is disconnected;
+        // its interval hull is the whole real line.
+        F inf_=F::inf(x.precision());
+        return Bounds<F>(-inf_,+inf_);
+    } //!< <p/>
 
     friend Bounds<F> add(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(add(down,x1._l,x2._l),add(up,x1._u,x2._u)); } //!< <p/>

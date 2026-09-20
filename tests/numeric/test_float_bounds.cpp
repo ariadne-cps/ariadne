@@ -598,6 +598,18 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
 
     ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-0.0_x,+1.0_x,pr)).upper_raw(),+inf_);
     ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0_x,+0.0_x,pr)).lower_raw(),-inf_);
+
+    // Reciprocal is undefined on the singleton zero, but intervals crossing
+    // zero retain the whole-real hull of their two defined branches.
+    {
+        FloatBoundsType zero(0,pr);
+        FloatBoundsType crossing(-1,1,pr);
+        FloatBoundsType rec_zero=rec(zero);
+        FloatBoundsType rec_crossing=rec(crossing);
+        ARIADNE_TEST_ASSERT(rec_zero.lower_raw()>rec_zero.upper_raw());
+        ARIADNE_TEST_EQUAL(rec_crossing.lower_raw(),-inf_);
+        ARIADNE_TEST_EQUAL(rec_crossing.upper_raw(),+inf_);
+    }
 }
 
 

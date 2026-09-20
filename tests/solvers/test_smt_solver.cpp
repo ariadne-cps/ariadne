@@ -267,6 +267,24 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] forced splitting UNSAT: sin(x)=0 and cos(x)=0 on [0,7]" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,7)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0)),
+                ValidatedConstraint(ValidatedNumber(0),cos(x[0]),ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-stats] forced splitting processed="
+                      << solve_result.statistics().boxes_processed
+                      << " pruned=" << solve_result.statistics().boxes_pruned
+                      << " split=" << solve_result.statistics().boxes_split << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_split>0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>0u);
+        }
+
+        {
             std::cout << "[smt-solve] empty constraint list: bounded nonempty domain is EPSILON_SAT" << std::endl;
             ExactBoxType domain({ExactIntervalType(-1,1)});
             List<ValidatedConstraint> constraints;
@@ -344,6 +362,24 @@ class TestSmtSolver {
             }
 
             {
+                std::cout << "[smt-parallel] concurrent forced splitting UNSAT: sin(x)=0 and cos(x)=0 on [0,7]" << std::endl;
+                ExactBoxType domain({ExactIntervalType(0,7)});
+                List<ValidatedConstraint> constraints({
+                    ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0)),
+                    ValidatedConstraint(ValidatedNumber(0),cos(x[0]),ValidatedNumber(0))
+                });
+                SmtResult solve_result=solver.solve_parallel(domain,constraints);
+                ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+                std::cout << "[smt-parallel] forced splitting processed="
+                          << solve_result.statistics().boxes_processed
+                          << " pruned=" << solve_result.statistics().boxes_pruned
+                          << " split=" << solve_result.statistics().boxes_split << std::endl;
+                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_split>0u);
+                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>1u);
+                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>0u);
+            }
+
+            {
                 std::cout << "[smt-parallel] concurrent UNSAT: sin(x)=2 on [3,4]" << std::endl;
                 ExactBoxType domain({ExactIntervalType(3,4)});
                 List<ValidatedConstraint> constraints({
@@ -403,6 +439,14 @@ class TestSmtSolver {
             ExactBoxType({ExactIntervalType(3,4)}),
             List<ValidatedConstraint>({
                 ValidatedConstraint(ValidatedNumber(2),sin(x[0]),ValidatedNumber(2))
+            }));
+
+        compare_status(
+            "forced splitting transcendental unsat",
+            ExactBoxType({ExactIntervalType(0,7)}),
+            List<ValidatedConstraint>({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0)),
+                ValidatedConstraint(ValidatedNumber(0),cos(x[0]),ValidatedNumber(0))
             }));
     }
 };

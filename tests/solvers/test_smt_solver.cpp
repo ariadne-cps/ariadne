@@ -718,7 +718,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] zero theory box budget propagates UNKNOWN without conflict" << std::endl;
+            std::cout << "[smt-dpll] zero global box budget stops before theory" << std::endl;
             SmtSolver bounded_solver(SmtSolverConfiguration(
                 0.125_x,
                 std::numeric_limits<SizeType>::max(),
@@ -728,10 +728,26 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,1)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+        }
+
+        {
+            std::cout << "[smt-dpll] one-box global budget permits one theory check" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u));
+            ContinuousPredicate formula=(ex>=0);
+            SmtResult solve_result=bounded_solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(
+                solve_result.is_epsilon_sat() || solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=1u);
         }
 
         {

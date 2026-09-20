@@ -42,8 +42,8 @@ class TestSmtSolver {
         SmtSolverConfiguration configuration(0.125_x);
         ARIADNE_TEST_EQUAL(configuration.epsilon(),0.125_x);
 
-        ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),PreconditionViolation);
-        ARIADNE_TEST_THROWS(SmtSolverConfiguration(-0.125_x),PreconditionViolation);
+        ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
+        ARIADNE_TEST_THROWS(SmtSolverConfiguration(-0.125_x),std::runtime_error);
     }
 
     Void test_result() {
@@ -51,7 +51,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(unsat.is_unsat());
         ARIADNE_TEST_ASSERT(not unsat.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(not unsat.has_witness());
-        ARIADNE_TEST_THROWS(unsat.witness(),PreconditionViolation);
+        ARIADNE_TEST_THROWS(unsat.witness(),std::runtime_error);
 
         UpperBoxType witness=ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(2,3)});
         SmtResult epsilon_sat=SmtResult::epsilon_sat(witness);

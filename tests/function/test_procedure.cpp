@@ -216,11 +216,16 @@ Void TestProcedure::test_propagate()
 Void TestProcedure::test_backward_contractor_soundness()
 {
     auto check_periodic_witness = [](auto op, ExactIntervalType domain) {
+        std::cout << "[contractor-soundness] periodic op=" << op
+                  << " domain=" << domain
+                  << " codomain={0:0}" << std::endl;
         ValidatedProcedure p(1);
         p.new_instruction(Var(),0u);
         p.new_instruction(op,0u);
         UpperBoxType x=ExactBoxType({domain});
         simple_hull_reduce(x,p,ExactIntervalType(0,0));
+        std::cout << "[contractor-soundness] periodic op=" << op
+                  << " contracted=" << x[0] << std::endl;
         ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     };
 
@@ -231,6 +236,7 @@ Void TestProcedure::test_backward_contractor_soundness()
     check_periodic_witness(Tan(),ExactIntervalType(3.125_x,3.25_x));
 
     {
+        std::cout << "[contractor-soundness] unary op=sqr domain={-1:-1} codomain={1:1}" << std::endl;
         ValidatedProcedure p(1);
         p.new_instruction(Var(),0u);
         p.new_instruction(Sqr(),0u);
@@ -240,6 +246,7 @@ Void TestProcedure::test_backward_contractor_soundness()
     }
 
     {
+        std::cout << "[contractor-soundness] power exponent=2 domain={-1:-1} codomain={1:1}" << std::endl;
         ValidatedProcedure p(1);
         p.new_instruction(Var(),0u);
         p.new_instruction(Pow(),0u,2);
@@ -249,6 +256,7 @@ Void TestProcedure::test_backward_contractor_soundness()
     }
 
     {
+        std::cout << "[contractor-soundness] binary op=max lhs={0:0} rhs={1:1} codomain={1:1}" << std::endl;
         ValidatedProcedure p(2);
         p.new_instruction(Var(),0u);
         p.new_instruction(Var(),1u);
@@ -260,6 +268,7 @@ Void TestProcedure::test_backward_contractor_soundness()
     }
 
     {
+        std::cout << "[contractor-soundness] binary op=min lhs={1:1} rhs={0:0} codomain={0:0}" << std::endl;
         ValidatedProcedure p(2);
         p.new_instruction(Var(),0u);
         p.new_instruction(Var(),1u);
@@ -315,7 +324,13 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
 
     auto check_unary = [&](auto op, ExactIntervalType domain, ExactIntervalType output, ExactIntervalType witness) {
         UpperIntervalType contracted=U(domain);
+        std::cout << "[contractor-witness] unary op=" << op
+                  << " domain=" << domain
+                  << " output=" << output
+                  << " witness=" << witness << std::endl;
         backpropagate(U(output),op,contracted);
+        std::cout << "[contractor-witness] unary op=" << op
+                  << " contracted=" << contracted << std::endl;
         ARIADNE_TEST_ASSERT(preserves(contracted,witness));
     };
 
@@ -325,7 +340,16 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
                             ExactIntervalType lhs_witness, ExactIntervalType rhs_witness) {
         UpperIntervalType lhs=U(lhs_domain);
         UpperIntervalType rhs=U(rhs_domain);
+        std::cout << "[contractor-witness] binary op=" << op
+                  << " lhs_domain=" << lhs_domain
+                  << " rhs_domain=" << rhs_domain
+                  << " output=" << output
+                  << " lhs_witness=" << lhs_witness
+                  << " rhs_witness=" << rhs_witness << std::endl;
         backpropagate(U(output),op,lhs,rhs);
+        std::cout << "[contractor-witness] binary op=" << op
+                  << " lhs_contracted=" << lhs
+                  << " rhs_contracted=" << rhs << std::endl;
         ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
         ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
     };
@@ -333,7 +357,13 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     auto check_power = [&](ExactIntervalType domain, Int exponent,
                            ExactIntervalType output, ExactIntervalType witness) {
         UpperIntervalType contracted=U(domain);
+        std::cout << "[contractor-witness] power exponent=" << exponent
+                  << " domain=" << domain
+                  << " output=" << output
+                  << " witness=" << witness << std::endl;
         backpropagate(U(output),Pow(),contracted,exponent);
+        std::cout << "[contractor-witness] power exponent=" << exponent
+                  << " contracted=" << contracted << std::endl;
         ARIADNE_TEST_ASSERT(preserves(contracted,witness));
     };
 

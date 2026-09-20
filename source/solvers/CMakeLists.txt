@@ -2,6 +2,7 @@ set(LIBRARY_NAME ariadne-solvers)
 
 add_library(${LIBRARY_NAME} OBJECT
     solver.cpp
+    smt_solver.cpp
     integrator.cpp
     inclusion_integrator.cpp
     bounder.cpp

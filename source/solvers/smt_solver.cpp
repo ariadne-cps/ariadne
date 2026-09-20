@@ -25,11 +25,33 @@
 #include "solvers/smt_solver.hpp"
 
 #include <vector>
+#include <utility>
 
 #include "solvers/constraint_solver.hpp"
 #include "utility/exceptions.hpp"
 
 namespace Ariadne {
+
+namespace {
+
+class SequentialSmtWorkQueue {
+  public:
+    Void push(UpperBoxType box) { _boxes.push_back(std::move(box)); }
+
+    UpperBoxType pop() {
+        ARIADNE_PRECONDITION(not _boxes.empty());
+        UpperBoxType box=std::move(_boxes.back());
+        _boxes.pop_back();
+        return box;
+    }
+
+    Bool empty() const { return _boxes.empty(); }
+
+  private:
+    std::vector<UpperBoxType> _boxes;
+};
+
+} // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(ExactDouble epsilon)
     : _epsilon(epsilon)
@@ -37,24 +59,26 @@ SmtSolverConfiguration::SmtSolverConfiguration(ExactDouble epsilon)
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
 
-SmtResult::SmtResult(SmtResultStatus status)
-    : _status(status), _witness()
+SmtResult::SmtResult(SmtResultStatus status, SmtSearchStatistics statistics)
+    : _status(status), _witness(), _statistics(statistics)
 {
 }
 
-SmtResult::SmtResult(SmtResultStatus status, UpperBoxType const& witness)
-    : _status(status), _witness(witness)
+SmtResult::SmtResult(SmtResultStatus status, UpperBoxType const& witness,
+                     SmtSearchStatistics statistics)
+    : _status(status), _witness(witness), _statistics(statistics)
 {
 }
 
-SmtResult SmtResult::unsat()
+SmtResult SmtResult::unsat(SmtSearchStatistics statistics)
 {
-    return SmtResult(SmtResultStatus::UNSAT);
+    return SmtResult(SmtResultStatus::UNSAT,statistics);
 }
 
-SmtResult SmtResult::epsilon_sat(UpperBoxType const& witness)
+SmtResult SmtResult::epsilon_sat(UpperBoxType const& witness,
+                                 SmtSearchStatistics statistics)
 {
-    return SmtResult(SmtResultStatus::EPSILON_SAT,witness);
+    return SmtResult(SmtResultStatus::EPSILON_SAT,witness,statistics);
 }
 
 UpperBoxType const& SmtResult::witness() const
@@ -111,6 +135,40 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+SmtSolver::BoxProcessingResult
+SmtSolver::_process_box(UpperBoxType domain,
+                        List<ValidatedConstraint> const& constraints) const
+{
+    if(this->_epsilon_reduce(domain,constraints)) {
+        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt};
+    }
+
+    if(this->_epsilon_satisfied(domain,constraints)) {
+        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+        return {BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt};
+    }
+
+    Pair<UpperBoxType,UpperBoxType> children=domain.split();
+
+    Bool first_same=true;
+    Bool second_same=true;
+    for(SizeType i=0; i!=domain.dimension(); ++i) {
+        first_same = first_same
+            and children.first[i].lower_bound().raw()==domain[i].lower_bound().raw()
+            and children.first[i].upper_bound().raw()==domain[i].upper_bound().raw();
+        second_same = second_same
+            and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
+            and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
+    }
+    ARIADNE_ASSERT_MSG(not (first_same and second_same),
+                       "SMT search reached a non-splittable uncertified box: "<<domain);
+
+    return {BoxProcessingStatus::SPLIT,std::nullopt,children};
+}
+
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
                            List<ValidatedConstraint> const& constraints) const
 {
@@ -119,49 +177,42 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
     }
 
+    SmtSearchStatistics statistics;
+
     if(domain.is_empty()) {
-        return SmtResult::unsat();
+        return SmtResult::unsat(statistics);
     }
 
-    std::vector<UpperBoxType> pending;
-    pending.emplace_back(domain);
+    SequentialSmtWorkQueue pending;
+    pending.push(UpperBoxType(domain));
 
     while(not pending.empty()) {
-        UpperBoxType current=std::move(pending.back());
-        pending.pop_back();
+        UpperBoxType current=pending.pop();
+        ++statistics.boxes_processed;
 
-        if(this->_epsilon_reduce(current,constraints)) {
-            continue;
+        BoxProcessingResult processing=this->_process_box(std::move(current),constraints);
+        switch(processing.status) {
+            case BoxProcessingStatus::PRUNED:
+                ++statistics.boxes_pruned;
+                break;
+
+            case BoxProcessingStatus::EPSILON_SAT:
+                ARIADNE_ASSERT(processing.witness.has_value());
+                return SmtResult::epsilon_sat(*processing.witness,statistics);
+
+            case BoxProcessingStatus::SPLIT:
+                ARIADNE_ASSERT(processing.children.has_value());
+                ++statistics.boxes_split;
+                pending.push(std::move(processing.children->second));
+                pending.push(std::move(processing.children->first));
+                break;
+
+            default:
+                ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
         }
-
-        if(this->_epsilon_satisfied(current,constraints)) {
-            UpperBoxType witness(current.dimension(),[&](SizeType i) {
-                auto m=current[i].midpoint();
-                return UpperIntervalType(m,m);
-            });
-            return SmtResult::epsilon_sat(witness);
-        }
-
-        Pair<UpperBoxType,UpperBoxType> children=current.split();
-
-        Bool first_same=true;
-        Bool second_same=true;
-        for(SizeType i=0; i!=current.dimension(); ++i) {
-            first_same = first_same
-                and children.first[i].lower_bound().raw()==current[i].lower_bound().raw()
-                and children.first[i].upper_bound().raw()==current[i].upper_bound().raw();
-            second_same = second_same
-                and children.second[i].lower_bound().raw()==current[i].lower_bound().raw()
-                and children.second[i].upper_bound().raw()==current[i].upper_bound().raw();
-        }
-        ARIADNE_ASSERT_MSG(not (first_same and second_same),
-                           "SMT search reached a non-splittable uncertified box: "<<current);
-
-        pending.push_back(std::move(children.second));
-        pending.push_back(std::move(children.first));
     }
 
-    return SmtResult::unsat();
+    return SmtResult::unsat(statistics);
 }
 
 } // namespace Ariadne

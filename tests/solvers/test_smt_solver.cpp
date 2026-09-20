@@ -78,6 +78,14 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(epsilon_sat.witness()[i].upper_bound().raw(),witness[i].upper_bound().raw());
         }
 
+        std::cout << "[smt-result] default search statistics are zero" << std::endl;
+        ARIADNE_TEST_EQUAL(unsat.statistics().boxes_processed,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().boxes_pruned,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().boxes_split,0u);
+        ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_processed,0u);
+        ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
+        ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
+
         std::cout << "[smt-result] stream statuses" << std::endl;
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status();
@@ -96,6 +104,12 @@ class TestSmtSolver {
             });
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-stats] linear UNSAT processed="
+                      << solve_result.statistics().boxes_processed
+                      << " pruned=" << solve_result.statistics().boxes_pruned
+                      << " split=" << solve_result.statistics().boxes_split << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>=1u);
         }
 
         {
@@ -231,6 +245,11 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            std::cout << "[smt-stats] multiple branches processed="
+                      << solve_result.statistics().boxes_processed
+                      << " pruned=" << solve_result.statistics().boxes_pruned
+                      << " split=" << solve_result.statistics().boxes_split << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>=1u);
         }
 
         {

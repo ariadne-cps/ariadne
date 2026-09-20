@@ -537,6 +537,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_conflicts+=source.boolean_conflicts;
     target.theory_checks+=source.theory_checks;
+    target.theory_conflicts+=source.theory_conflicts;
 }
 
 class SmtDpllSearch {
@@ -651,6 +652,11 @@ class SmtDpllSearch {
             return std::nullopt;
         }
 
+        if(not this->_check_partial_theory_consistency()) {
+            _assignment=std::move(saved_assignment);
+            return std::nullopt;
+        }
+
         SizeType variable=this->_next_unassigned_variable();
         if(variable==0u) {
             std::optional<UpperBoxType> witness=this->_check_theory_assignment();
@@ -675,6 +681,69 @@ class SmtDpllSearch {
 
         _assignment=std::move(saved_assignment);
         return std::nullopt;
+    }
+
+    Bool _check_partial_theory_consistency()
+    {
+        std::vector<SmtTheoryAlternatives> alternatives;
+        alternatives.reserve(_encoding.atom_count());
+
+        for(SizeType i=0; i!=_encoding.atom_count(); ++i) {
+            SizeType variable=_encoding.atom_variable(i);
+            if(_assignment[variable]<0) {
+                continue;
+            }
+
+            SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(i));
+            if(_assignment[variable]==0) {
+                literal=literal.negated();
+            }
+            alternatives.push_back(normalize_smt_theory_literal(literal));
+        }
+
+        if(alternatives.empty()) {
+            return true;
+        }
+
+        ++_statistics.theory_checks;
+        List<SmtTheoryPrimitiveLiteral> literals;
+        Bool consistent=this->_theory_alternatives_consistent(alternatives,0u,literals);
+        if(not consistent) {
+            ++_statistics.theory_conflicts;
+        }
+        return consistent;
+    }
+
+    Bool _theory_alternatives_consistent(
+        std::vector<SmtTheoryAlternatives> const& alternatives,
+        SizeType atom,
+        List<SmtTheoryPrimitiveLiteral>& literals)
+    {
+        if(atom==alternatives.size()) {
+            SmtResult result=_parallel
+                ? _solver.solve_parallel(_space,_domain,literals)
+                : _solver.solve(_space,_domain,literals);
+            add_statistics(_statistics,result.statistics());
+            return result.is_epsilon_sat();
+        }
+
+        for(auto const& alternative:alternatives[atom]) {
+            SizeType old_size=literals.size();
+            for(auto const& primitive:alternative) {
+                literals.append(primitive);
+            }
+
+            Bool consistent=this->_theory_alternatives_consistent(
+                alternatives,atom+1u,literals);
+            literals.erase(
+                literals.begin()+static_cast<std::ptrdiff_t>(old_size),
+                literals.end());
+
+            if(consistent) {
+                return true;
+            }
+        }
+        return false;
     }
 
     std::optional<UpperBoxType> _check_theory_assignment()

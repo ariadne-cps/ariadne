@@ -411,7 +411,8 @@ class TestSmtSolver {
                       << solve_result.statistics().boolean_decisions
                       << " propagations=" << solve_result.statistics().boolean_propagations
                       << " conflicts=" << solve_result.statistics().boolean_conflicts
-                      << " theory_checks=" << solve_result.statistics().theory_checks << std::endl;
+                      << " theory_checks=" << solve_result.statistics().theory_checks
+                      << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_propagations>=1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
@@ -431,6 +432,24 @@ class TestSmtSolver {
                       << " theory_checks=" << solve_result.statistics().theory_checks << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
+        }
+
+        {
+            std::cout << "[smt-dpll] partial theory conflict before free Boolean branch" << std::endl;
+            ContinuousPredicate forced_conflict=(ex>=1)&&(ex<=0);
+            ContinuousPredicate free_branch=(ex>=-1)||(ex<=2);
+            ContinuousPredicate formula=forced_conflict&&free_branch;
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] partial conflict decisions="
+                      << solve_result.statistics().boolean_decisions
+                      << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " theory_checks=" << solve_result.statistics().theory_checks
+                      << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);
         }
 
         {

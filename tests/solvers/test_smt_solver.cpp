@@ -471,7 +471,8 @@ class TestSmtSolver {
             std::cout << "[smt-dpll] minimize theory conflict nogood" << std::endl;
             ContinuousPredicate conflict=(ex>=1)&&(ex<=0);
             ContinuousPredicate irrelevant=(ex>=-100);
-            ContinuousPredicate formula=conflict&&irrelevant;
+            ContinuousPredicate free_branch=(ex>=-2)||(ex<=2);
+            ContinuousPredicate formula=conflict&&irrelevant&&free_branch;
             SmtResult solve_result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,1)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());

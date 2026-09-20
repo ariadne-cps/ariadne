@@ -374,6 +374,67 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_power(FloatDPBounds( 2,dp), -1, FloatDPBounds(0.5_x,dp));
     check_power(FloatDPBounds(-2,dp), -2, FloatDPBounds(0.25_x,dp));
 
+    // Non-degenerate intervals exercise lower/upper-bound propagation, where
+    // singleton tests alone cannot expose endpoint-direction errors.
+    auto check_unary_interval = [&](auto op, FloatDPBounds domain, FloatDPBounds output, FloatDPBounds witness) {
+        backpropagate(output,op,domain);
+        ARIADNE_TEST_ASSERT(preserves(domain,witness));
+    };
+
+    auto check_binary_interval = [&](auto op,
+                                     FloatDPBounds lhs, FloatDPBounds rhs,
+                                     FloatDPBounds output,
+                                     FloatDPBounds lhs_witness, FloatDPBounds rhs_witness) {
+        backpropagate(output,op,lhs,rhs);
+        ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
+        ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
+    };
+
+    auto check_power_interval = [&](FloatDPBounds domain, Int exponent,
+                                    FloatDPBounds output, FloatDPBounds witness) {
+        backpropagate(output,Pow(),domain,exponent);
+        ARIADNE_TEST_ASSERT(preserves(domain,witness));
+    };
+
+    check_unary_interval(Pos(),  FloatDPBounds(1,3,dp), FloatDPBounds(1,3,dp), FloatDPBounds(2,dp));
+    check_unary_interval(Neg(),  FloatDPBounds(1,3,dp), FloatDPBounds(-3,-1,dp), FloatDPBounds(2,dp));
+    check_unary_interval(Rec(),  FloatDPBounds(1,4,dp), FloatDPBounds(0.25_x,1.0_x,dp), FloatDPBounds(2,dp));
+    check_unary_interval(Sqr(),  FloatDPBounds(-3,3,dp), FloatDPBounds(1,4,dp), FloatDPBounds(-2,dp));
+    check_unary_interval(Sqr(),  FloatDPBounds(-3,3,dp), FloatDPBounds(1,4,dp), FloatDPBounds(2,dp));
+    check_unary_interval(Sqrt(), FloatDPBounds(0,9,dp), FloatDPBounds(1,2,dp), FloatDPBounds(4,dp));
+    check_unary_interval(Exp(),  FloatDPBounds(-1,2,dp), FloatDPBounds(0.5_x,2.0_x,dp), FloatDPBounds(0,dp));
+    check_unary_interval(Log(),  FloatDPBounds(0.5_x,3.0_x,dp), FloatDPBounds(-0.5_x,1.0_x,dp), FloatDPBounds(1,dp));
+    check_unary_interval(Sin(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_x,3.15_x,dp));
+    check_unary_interval(Cos(),  FloatDPBounds(4,5,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(4.71_x,4.72_x,dp));
+    check_unary_interval(Tan(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_x,3.15_x,dp));
+    check_unary_interval(Asin(), FloatDPBounds(-1,1,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(0,dp));
+    check_unary_interval(Acos(), FloatDPBounds(-1,1,dp), FloatDPBounds(0,2,dp), FloatDPBounds(1,dp));
+    check_unary_interval(Atan(), FloatDPBounds(-2,2,dp), FloatDPBounds(-1,1,dp), FloatDPBounds(0,dp));
+
+    check_binary_interval(Add(),
+                          FloatDPBounds(0,4,dp), FloatDPBounds(1,5,dp), FloatDPBounds(4,6,dp),
+                          FloatDPBounds(2,dp), FloatDPBounds(3,dp));
+    check_binary_interval(Sub(),
+                          FloatDPBounds(0,4,dp), FloatDPBounds(1,5,dp), FloatDPBounds(-2,0,dp),
+                          FloatDPBounds(2,dp), FloatDPBounds(3,dp));
+    check_binary_interval(Mul(),
+                          FloatDPBounds(-3,-1,dp), FloatDPBounds(2,4,dp), FloatDPBounds(-8,-4,dp),
+                          FloatDPBounds(-2,dp), FloatDPBounds(3,dp));
+    check_binary_interval(Div(),
+                          FloatDPBounds(4,8,dp), FloatDPBounds(2,4,dp), FloatDPBounds(1,3,dp),
+                          FloatDPBounds(6,dp), FloatDPBounds(3,dp));
+    check_binary_interval(Max(),
+                          FloatDPBounds(-2,2,dp), FloatDPBounds(0,4,dp), FloatDPBounds(1,3,dp),
+                          FloatDPBounds(1,dp), FloatDPBounds(2,dp));
+    check_binary_interval(Min(),
+                          FloatDPBounds(-2,2,dp), FloatDPBounds(0,4,dp), FloatDPBounds(-1,1,dp),
+                          FloatDPBounds(0,dp), FloatDPBounds(2,dp));
+
+    check_power_interval(FloatDPBounds(-3,3,dp), 2, FloatDPBounds(1,4,dp), FloatDPBounds(-2,dp));
+    check_power_interval(FloatDPBounds(-3,3,dp), 2, FloatDPBounds(1,4,dp), FloatDPBounds(2,dp));
+    check_power_interval(FloatDPBounds(-3,3,dp), 3, FloatDPBounds(-9,-1,dp), FloatDPBounds(-2,dp));
+    check_power_interval(FloatDPBounds(1,4,dp), -1, FloatDPBounds(0.25_x,1.0_x,dp), FloatDPBounds(2,dp));
+
     // Scalar-left overloads are distinct implementations and need their own
     // witness-preservation checks.
     {

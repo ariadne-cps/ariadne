@@ -37,9 +37,14 @@
 
 namespace Ariadne {
 
-// Test-side overload used only to instantiate the generic backward contractor
-// on validated numeric bounds. The production Procedure contractor uses the
-// analogous UpperIntervalType overload defined in procedure.cpp.
+// Test-side overloads used to instantiate the generic backward contractors.
+// The UpperIntervalType overload mirrors the production implementation in
+// procedure.cpp; the FloatDPBounds overload is used only by the isolated Leq
+// test, since Leq is not a ProcedureInstruction operator.
+inline Void restrict(UpperIntervalType& r, UpperIntervalType const& x) {
+    r.set_lower_bound(max(r.lower_bound(),x.lower_bound()));
+    r.set_upper_bound(min(r.upper_bound(),x.upper_bound()));
+}
 inline Void restrict(FloatDPBounds& r, FloatDPBounds const& x) {
     r=refinement(r,x);
 }
@@ -297,211 +302,184 @@ Void TestProcedure::test_backward_contractor_soundness()
 
 Void TestProcedure::test_backward_contractor_witness_preservation()
 {
-    auto preserves = [](FloatDPBounds const& contracted, FloatDPBounds const& witness) {
-        return not inconsistent(contracted,witness);
+    auto U = [](ExactIntervalType const& x) { return UpperIntervalType(x); };
+    auto E = [](auto l, auto u) { return ExactIntervalType(l,u); };
+    auto S = [](auto x) { return ExactIntervalType(x,x); };
+
+    auto preserves = [](UpperIntervalType const& contracted, ExactIntervalType const& witness) {
+        return intersect(contracted,witness);
     };
 
-    auto check_unary = [&](auto op, FloatDPBounds input, FloatDPBounds output) {
-        FloatDPBounds witness=input;
-        backpropagate(output,op,input);
-        ARIADNE_TEST_ASSERT(preserves(input,witness));
+    auto check_unary = [&](auto op, ExactIntervalType domain, ExactIntervalType output, ExactIntervalType witness) {
+        UpperIntervalType contracted=U(domain);
+        backpropagate(U(output),op,contracted);
+        ARIADNE_TEST_ASSERT(preserves(contracted,witness));
     };
 
-    auto check_binary = [&](auto op, FloatDPBounds lhs, FloatDPBounds rhs, FloatDPBounds output) {
-        FloatDPBounds lhs_witness=lhs;
-        FloatDPBounds rhs_witness=rhs;
-        backpropagate(output,op,lhs,rhs);
+    auto check_binary = [&](auto op,
+                            ExactIntervalType lhs_domain, ExactIntervalType rhs_domain,
+                            ExactIntervalType output,
+                            ExactIntervalType lhs_witness, ExactIntervalType rhs_witness) {
+        UpperIntervalType lhs=U(lhs_domain);
+        UpperIntervalType rhs=U(rhs_domain);
+        backpropagate(U(output),op,lhs,rhs);
         ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
         ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
     };
 
-    auto check_power = [&](FloatDPBounds input, Int exponent, FloatDPBounds output) {
-        FloatDPBounds witness=input;
-        backpropagate(output,Pow(),input,exponent);
-        ARIADNE_TEST_ASSERT(preserves(input,witness));
+    auto check_power = [&](ExactIntervalType domain, Int exponent,
+                           ExactIntervalType output, ExactIntervalType witness) {
+        UpperIntervalType contracted=U(domain);
+        backpropagate(U(output),Pow(),contracted,exponent);
+        ARIADNE_TEST_ASSERT(preserves(contracted,witness));
     };
 
     // Unary inverse contractors.
-    check_unary(Pos(), FloatDPBounds(2,dp), FloatDPBounds(2,dp));
-    check_unary(Neg(), FloatDPBounds(2,dp), FloatDPBounds(-2,dp));
-    check_unary(Rec(), FloatDPBounds(2,dp), FloatDPBounds(0.5_x,dp));
+    check_unary(Pos(), S(2), S(2), S(2));
+    check_unary(Neg(), S(2), S(-2), S(2));
+    check_unary(Rec(), S(2), S(0.5_x), S(2));
 
-    check_unary(Sqr(), FloatDPBounds(-2,dp), FloatDPBounds(4,dp));
-    check_unary(Sqr(), FloatDPBounds( 2,dp), FloatDPBounds(4,dp));
-    check_unary(Sqr(), FloatDPBounds( 0,dp), FloatDPBounds(0,dp));
+    check_unary(Sqr(), S(-2), S(4), S(-2));
+    check_unary(Sqr(), S( 2), S(4), S(2));
+    check_unary(Sqr(), S( 0), S(0), S(0));
 
-    check_unary(Sqrt(), FloatDPBounds(4,dp), FloatDPBounds(2,dp));
-    check_unary(Sqrt(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_unary(Exp(), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
-    check_unary(Log(), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
+    check_unary(Sqrt(), S(4), S(2), S(4));
+    check_unary(Sqrt(), S(0), S(0), S(0));
+    check_unary(Exp(), S(0), S(1), S(0));
+    check_unary(Log(), S(1), S(0), S(1));
 
     // Principal and non-principal periodic witnesses.
-    check_unary(Sin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_unary(Cos(), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
-    check_unary(Tan(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_unary(Sin(), FloatDPBounds(3.14_decimal,3.15_decimal,dp), FloatDPBounds(0,dp));
-    check_unary(Cos(), FloatDPBounds(4.71_decimal,4.72_decimal,dp), FloatDPBounds(0,dp));
-    check_unary(Tan(), FloatDPBounds(3.14_decimal,3.15_decimal,dp), FloatDPBounds(0,dp));
+    check_unary(Sin(), S(0), S(0), S(0));
+    check_unary(Cos(), S(0), S(1), S(0));
+    check_unary(Tan(), S(0), S(0), S(0));
+    check_unary(Sin(), E(3.14_decimal,3.15_decimal), S(0), E(3.14_decimal,3.15_decimal));
+    check_unary(Cos(), E(4.71_decimal,4.72_decimal), S(0), E(4.71_decimal,4.72_decimal));
+    check_unary(Tan(), E(3.14_decimal,3.15_decimal), S(0), E(3.14_decimal,3.15_decimal));
 
-    // The inverse trigonometric functions are single-valued on their domains.
-    check_unary(Asin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_unary(Acos(), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
-    check_unary(Atan(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    // Inverse trigonometric functions on their natural domains.
+    check_unary(Asin(), S(0), S(0), S(0));
+    check_unary(Acos(), S(1), S(0), S(1));
+    check_unary(Atan(), S(0), S(0), S(0));
 
     // Binary contractors, including signs and zero products.
-    check_binary(Add(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(5,dp));
-    check_binary(Sub(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(-1,dp));
-    check_binary(Mul(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(6,dp));
-    check_binary(Mul(), FloatDPBounds(-2,dp), FloatDPBounds(3,dp), FloatDPBounds(-6,dp));
-    check_binary(Mul(), FloatDPBounds(0,dp), FloatDPBounds(3,dp), FloatDPBounds(0,dp));
-    check_binary(Div(), FloatDPBounds(6,dp), FloatDPBounds(3,dp), FloatDPBounds(2,dp));
-    check_binary(Div(), FloatDPBounds(-6,dp), FloatDPBounds(3,dp), FloatDPBounds(-2,dp));
+    check_binary(Add(), S(2), S(3), S(5), S(2), S(3));
+    check_binary(Sub(), S(2), S(3), S(-1), S(2), S(3));
+    check_binary(Mul(), S(2), S(3), S(6), S(2), S(3));
+    check_binary(Mul(), S(-2), S(3), S(-6), S(-2), S(3));
+    check_binary(Mul(), S(0), S(3), S(0), S(0), S(3));
+    check_binary(Div(), S(6), S(3), S(2), S(6), S(3));
+    check_binary(Div(), S(-6), S(3), S(-2), S(-6), S(3));
 
-    check_binary(Max(), FloatDPBounds(0,dp), FloatDPBounds(1,dp), FloatDPBounds(1,dp));
-    check_binary(Max(), FloatDPBounds(1,dp), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
-    check_binary(Max(), FloatDPBounds(1,dp), FloatDPBounds(1,dp), FloatDPBounds(1,dp));
-    check_binary(Min(), FloatDPBounds(0,dp), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
-    check_binary(Min(), FloatDPBounds(1,dp), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
-    check_binary(Min(), FloatDPBounds(0,dp), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_binary(Max(), S(0), S(1), S(1), S(0), S(1));
+    check_binary(Max(), S(1), S(0), S(1), S(1), S(0));
+    check_binary(Max(), S(1), S(1), S(1), S(1), S(1));
+    check_binary(Min(), S(0), S(1), S(0), S(0), S(1));
+    check_binary(Min(), S(1), S(0), S(0), S(1), S(0));
+    check_binary(Min(), S(0), S(0), S(0), S(0), S(0));
 
     // Integer powers: both branches for even powers, signed odd powers,
     // zero exponent, and negative exponents.
-    check_power(FloatDPBounds(-2,dp),  2, FloatDPBounds(4,dp));
-    check_power(FloatDPBounds( 2,dp),  2, FloatDPBounds(4,dp));
-    check_power(FloatDPBounds(-2,dp),  3, FloatDPBounds(-8,dp));
-    check_power(FloatDPBounds( 2,dp),  3, FloatDPBounds(8,dp));
-    check_power(FloatDPBounds( 2,dp),  0, FloatDPBounds(1,dp));
-    check_power(FloatDPBounds( 2,dp), -1, FloatDPBounds(0.5_x,dp));
-    check_power(FloatDPBounds(-2,dp), -2, FloatDPBounds(0.25_x,dp));
+    check_power(S(-2),  2, S(4), S(-2));
+    check_power(S( 2),  2, S(4), S(2));
+    check_power(S(-2),  3, S(-8), S(-2));
+    check_power(S( 2),  3, S(8), S(2));
+    check_power(S( 2),  0, S(1), S(2));
+    check_power(S( 2), -1, S(0.5_x), S(2));
+    check_power(S(-2), -2, S(0.25_x), S(-2));
 
-    // Non-degenerate intervals exercise lower/upper-bound propagation, where
-    // singleton tests alone cannot expose endpoint-direction errors.
-    auto check_unary_interval = [&](auto op, FloatDPBounds domain, FloatDPBounds output, FloatDPBounds witness) {
-        backpropagate(output,op,domain);
-        ARIADNE_TEST_ASSERT(preserves(domain,witness));
-    };
+    // Non-degenerate domains exercise endpoint propagation.
+    check_unary(Pos(), E(1,3), E(1,3), S(2));
+    check_unary(Neg(), E(1,3), E(-3,-1), S(2));
+    check_unary(Rec(), E(1,4), E(0.25_x,1.0_x), S(2));
+    check_unary(Sqr(), E(-3,3), E(1,4), S(-2));
+    check_unary(Sqr(), E(-3,3), E(1,4), S(2));
+    check_unary(Sqrt(), E(0,9), E(1,2), S(4));
+    check_unary(Exp(), E(-1,2), E(0.5_x,2.0_x), S(0));
+    check_unary(Log(), E(0.5_x,3.0_x), E(-0.5_x,1.0_x), S(1));
+    check_unary(Sin(), E(3,4), E(-0.5_x,0.5_x), E(3.14_decimal,3.15_decimal));
+    check_unary(Cos(), E(4,5), E(-0.5_x,0.5_x), E(4.71_decimal,4.72_decimal));
+    check_unary(Tan(), E(3,4), E(-0.5_x,0.5_x), E(3.14_decimal,3.15_decimal));
+    check_unary(Asin(), E(-1,1), E(-0.5_x,0.5_x), S(0));
+    check_unary(Acos(), E(-1,1), E(0,2), S(1));
+    check_unary(Atan(), E(-2,2), E(-1,1), S(0));
 
-    auto check_binary_interval = [&](auto op,
-                                     FloatDPBounds lhs, FloatDPBounds rhs,
-                                     FloatDPBounds output,
-                                     FloatDPBounds lhs_witness, FloatDPBounds rhs_witness) {
-        backpropagate(output,op,lhs,rhs);
-        ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
-        ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
-    };
+    check_binary(Add(), E(0,4), E(1,5), E(4,6), S(2), S(3));
+    check_binary(Sub(), E(0,4), E(1,5), E(-2,0), S(2), S(3));
+    check_binary(Mul(), E(-3,-1), E(2,4), E(-8,-4), S(-2), S(3));
+    check_binary(Div(), E(4,8), E(2,4), E(1,3), S(6), S(3));
+    check_binary(Max(), E(-2,2), E(0,4), E(1,3), S(1), S(2));
+    check_binary(Min(), E(-2,2), E(0,4), E(-1,1), S(0), S(2));
 
-    auto check_power_interval = [&](FloatDPBounds domain, Int exponent,
-                                    FloatDPBounds output, FloatDPBounds witness) {
-        backpropagate(output,Pow(),domain,exponent);
-        ARIADNE_TEST_ASSERT(preserves(domain,witness));
-    };
+    check_power(E(-3,3), 2, E(1,4), S(-2));
+    check_power(E(-3,3), 2, E(1,4), S(2));
+    check_power(E(-3,3), 3, E(-9,-1), S(-2));
+    check_power(E(1,4), -1, E(0.25_x,1.0_x), S(2));
 
-    check_unary_interval(Pos(),  FloatDPBounds(1,3,dp), FloatDPBounds(1,3,dp), FloatDPBounds(2,dp));
-    check_unary_interval(Neg(),  FloatDPBounds(1,3,dp), FloatDPBounds(-3,-1,dp), FloatDPBounds(2,dp));
-    check_unary_interval(Rec(),  FloatDPBounds(1,4,dp), FloatDPBounds(0.25_x,1.0_x,dp), FloatDPBounds(2,dp));
-    check_unary_interval(Sqr(),  FloatDPBounds(-3,3,dp), FloatDPBounds(1,4,dp), FloatDPBounds(-2,dp));
-    check_unary_interval(Sqr(),  FloatDPBounds(-3,3,dp), FloatDPBounds(1,4,dp), FloatDPBounds(2,dp));
-    check_unary_interval(Sqrt(), FloatDPBounds(0,9,dp), FloatDPBounds(1,2,dp), FloatDPBounds(4,dp));
-    check_unary_interval(Exp(),  FloatDPBounds(-1,2,dp), FloatDPBounds(0.5_x,2.0_x,dp), FloatDPBounds(0,dp));
-    check_unary_interval(Log(),  FloatDPBounds(0.5_x,3.0_x,dp), FloatDPBounds(-0.5_x,1.0_x,dp), FloatDPBounds(1,dp));
-    check_unary_interval(Sin(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_decimal,3.15_decimal,dp));
-    check_unary_interval(Cos(),  FloatDPBounds(4,5,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(4.71_decimal,4.72_decimal,dp));
-    check_unary_interval(Tan(),  FloatDPBounds(3,4,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(3.14_decimal,3.15_decimal,dp));
-    check_unary_interval(Asin(), FloatDPBounds(-1,1,dp), FloatDPBounds(-0.5_x,0.5_x,dp), FloatDPBounds(0,dp));
-    check_unary_interval(Acos(), FloatDPBounds(-1,1,dp), FloatDPBounds(0,2,dp), FloatDPBounds(1,dp));
-    check_unary_interval(Atan(), FloatDPBounds(-2,2,dp), FloatDPBounds(-1,1,dp), FloatDPBounds(0,dp));
-
-    check_binary_interval(Add(),
-                          FloatDPBounds(0,4,dp), FloatDPBounds(1,5,dp), FloatDPBounds(4,6,dp),
-                          FloatDPBounds(2,dp), FloatDPBounds(3,dp));
-    check_binary_interval(Sub(),
-                          FloatDPBounds(0,4,dp), FloatDPBounds(1,5,dp), FloatDPBounds(-2,0,dp),
-                          FloatDPBounds(2,dp), FloatDPBounds(3,dp));
-    check_binary_interval(Mul(),
-                          FloatDPBounds(-3,-1,dp), FloatDPBounds(2,4,dp), FloatDPBounds(-8,-4,dp),
-                          FloatDPBounds(-2,dp), FloatDPBounds(3,dp));
-    check_binary_interval(Div(),
-                          FloatDPBounds(4,8,dp), FloatDPBounds(2,4,dp), FloatDPBounds(1,3,dp),
-                          FloatDPBounds(6,dp), FloatDPBounds(3,dp));
-    check_binary_interval(Max(),
-                          FloatDPBounds(-2,2,dp), FloatDPBounds(0,4,dp), FloatDPBounds(1,3,dp),
-                          FloatDPBounds(1,dp), FloatDPBounds(2,dp));
-    check_binary_interval(Min(),
-                          FloatDPBounds(-2,2,dp), FloatDPBounds(0,4,dp), FloatDPBounds(-1,1,dp),
-                          FloatDPBounds(0,dp), FloatDPBounds(2,dp));
-
-    check_power_interval(FloatDPBounds(-3,3,dp), 2, FloatDPBounds(1,4,dp), FloatDPBounds(-2,dp));
-    check_power_interval(FloatDPBounds(-3,3,dp), 2, FloatDPBounds(1,4,dp), FloatDPBounds(2,dp));
-    check_power_interval(FloatDPBounds(-3,3,dp), 3, FloatDPBounds(-9,-1,dp), FloatDPBounds(-2,dp));
-    check_power_interval(FloatDPBounds(1,4,dp), -1, FloatDPBounds(0.25_x,1.0_x,dp), FloatDPBounds(2,dp));
-
-    // Scalar-left overloads are distinct implementations and need their own
-    // witness-preservation checks.
+    // Scalar-left overloads are distinct implementations.
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(5,dp),Add(),ValidatedNumber(2),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(5)),Add(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(-1,dp),Sub(),ValidatedNumber(2),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(-1)),Sub(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(6,dp),Mul(),ValidatedNumber(2),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(6)),Mul(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(2,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(3,dp),Div(),ValidatedNumber(6),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(2));
+        backpropagate(U(S(3)),Div(),ValidatedNumber(6),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(2)));
     }
     {
-        FloatDPBounds a(0,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(1,dp),Max(),ValidatedNumber(1),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(0));
+        backpropagate(U(S(1)),Max(),ValidatedNumber(1),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(0)));
     }
     {
-        FloatDPBounds a(1,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(0,dp),Min(),ValidatedNumber(0),a);
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(1));
+        backpropagate(U(S(0)),Min(),ValidatedNumber(0),a);
+        ARIADNE_TEST_ASSERT(preserves(a,S(1)));
     }
 
     // Scalar-right overloads are not used by ScalarProcedureInstruction today,
-    // but test them because they are part of the generic backpropagation API.
+    // but remain part of the generic backpropagation API.
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(5,dp),Add(),a,ValidatedNumber(2));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(5)),Add(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(1,dp),Sub(),a,ValidatedNumber(2));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(1)),Sub(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(6,dp),Mul(),a,ValidatedNumber(2));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(3));
+        backpropagate(U(S(6)),Mul(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,S(3)));
     }
     {
-        FloatDPBounds a(6,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(3,dp),Div(),a,ValidatedNumber(2));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(6));
+        backpropagate(U(S(3)),Div(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,S(6)));
     }
     {
-        FloatDPBounds a(0,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(1,dp),Max(),a,ValidatedNumber(1));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(0));
+        backpropagate(U(S(1)),Max(),a,ValidatedNumber(1));
+        ARIADNE_TEST_ASSERT(preserves(a,S(0)));
     }
     {
-        FloatDPBounds a(1,dp); FloatDPBounds witness=a;
-        backpropagate(FloatDPBounds(0,dp),Min(),a,ValidatedNumber(0));
-        ARIADNE_TEST_ASSERT(preserves(a,witness));
+        UpperIntervalType a=U(S(1));
+        backpropagate(U(S(0)),Min(),a,ValidatedNumber(0));
+        ARIADNE_TEST_ASSERT(preserves(a,S(1)));
     }
 }
-
 
 Void TestProcedure::test_leq_backpropagate_soundness()
 {

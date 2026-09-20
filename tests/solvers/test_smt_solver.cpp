@@ -94,8 +94,8 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(2),x[0],ValidatedNumber(2))
             });
-            SmtResult result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_unsat());
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 
         {
@@ -104,9 +104,9 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(1),2*x[0],ValidatedNumber(1))
             });
-            SmtResult result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(result.has_witness());
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
 
         {
@@ -115,9 +115,9 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
             });
-            SmtResult result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(result.has_witness());
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
 
         {
@@ -126,8 +126,8 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(2),sin(x[0]),ValidatedNumber(2))
             });
-            SmtResult result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_unsat());
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 
         {
@@ -136,9 +136,9 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(1),sqr(x[0]),ValidatedNumber(1))
             });
-            SmtResult result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(result.has_witness());
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
     }
 };

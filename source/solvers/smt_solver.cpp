@@ -661,10 +661,10 @@ class SmtDpllSearch {
 
             if(auto witness=this->_search_theory_alternatives(
                     alternatives,atom+1u,literals); witness.has_value()) {
-                literals.resize(old_size);
+                literals.erase(literals.begin()+static_cast<std::ptrdiff_t>(old_size),literals.end());
                 return witness;
             }
-            literals.resize(old_size);
+            literals.erase(literals.begin()+static_cast<std::ptrdiff_t>(old_size),literals.end());
         }
         return std::nullopt;
     }

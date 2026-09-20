@@ -552,6 +552,10 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.theory_learned_clauses+=source.theory_learned_clauses;
     target.theory_learned_clause_literals+=source.theory_learned_clause_literals;
     target.theory_learned_clause_propagations+=source.theory_learned_clause_propagations;
+    target.theory_minimization_checks+=source.theory_minimization_checks;
+    target.theory_nogood_raw_literals+=source.theory_nogood_raw_literals;
+    target.theory_nogood_minimized_literals+=source.theory_nogood_minimized_literals;
+    target.theory_nogood_literals_removed+=source.theory_nogood_literals_removed;
 }
 
 class SmtDpllSearch {
@@ -1014,10 +1018,76 @@ class SmtDpllSearch {
         return clause;
     }
 
+    std::vector<SmtTheoryAlternatives> _theory_alternatives_for_nogood(
+        std::vector<Int> const& clause) const
+    {
+        std::vector<SmtTheoryAlternatives> alternatives;
+        alternatives.reserve(clause.size());
+
+        for(Int nogood_literal:clause) {
+            SizeType variable=static_cast<SizeType>(
+                nogood_literal>0 ? nogood_literal : -nogood_literal);
+
+            std::optional<SizeType> atom_index;
+            for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
+                if(_encoding.atom_variable(i)==variable) {
+                    atom_index=i;
+                    break;
+                }
+            }
+            ARIADNE_ASSERT(atom_index.has_value());
+
+            SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(*atom_index));
+            Bool assignment_value=nogood_literal<0;
+            if(not assignment_value) {
+                literal=literal.negated();
+            }
+            alternatives.push_back(normalize_smt_theory_literal(literal));
+        }
+
+        return alternatives;
+    }
+
+    Bool _nogood_theory_consistent(std::vector<Int> const& clause)
+    {
+        if(clause.empty()) {
+            return true;
+        }
+
+        ++_statistics.theory_minimization_checks;
+        std::vector<SmtTheoryAlternatives> alternatives=
+            this->_theory_alternatives_for_nogood(clause);
+        List<SmtTheoryPrimitiveLiteral> literals;
+        return this->_theory_alternatives_consistent(alternatives,0u,literals);
+    }
+
+    std::vector<Int> _minimize_theory_nogood(std::vector<Int> clause)
+    {
+        SizeType i=0u;
+        while(i<clause.size()) {
+            std::vector<Int> candidate=clause;
+            candidate.erase(candidate.begin()+static_cast<std::ptrdiff_t>(i));
+            if(not candidate.empty() && not this->_nogood_theory_consistent(candidate)) {
+                clause=std::move(candidate);
+            } else {
+                ++i;
+            }
+        }
+        return clause;
+    }
+
     SizeType _learn_current_theory_nogood()
     {
         std::vector<Int> clause=this->_current_theory_nogood();
         ARIADNE_ASSERT(not clause.empty());
+
+        SizeType raw_size=clause.size();
+        _statistics.theory_nogood_raw_literals+=raw_size;
+        clause=this->_minimize_theory_nogood(std::move(clause));
+        ARIADNE_ASSERT(not clause.empty());
+        _statistics.theory_nogood_minimized_literals+=clause.size();
+        _statistics.theory_nogood_literals_removed+=raw_size-clause.size();
+
         return this->_add_learned_clause(clause,true);
     }
 

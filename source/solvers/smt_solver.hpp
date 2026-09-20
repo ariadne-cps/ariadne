@@ -83,6 +83,9 @@ struct SmtSearchStatistics {
     SizeType nonchronological_backjumps = 0u;
     SizeType theory_checks = 0u;
     SizeType theory_conflicts = 0u;
+    SizeType theory_learned_clauses = 0u;
+    SizeType theory_learned_clause_literals = 0u;
+    SizeType theory_learned_clause_propagations = 0u;
 };
 
 //! \ingroup Solvers

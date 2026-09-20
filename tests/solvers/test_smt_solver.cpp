@@ -573,6 +573,36 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-theory-solve] cover RealExpression domain edge cases" << std::endl;
+
+            auto expect_edge_status = [&](String const& label,
+                                          ExactIntervalType const& interval,
+                                          ContinuousPredicate const& predicate,
+                                          SmtResultStatus expected) {
+                std::cout << "[smt-real-domain] " << label << std::endl;
+                List<SmtTheoryPrimitiveLiteral> literals({primitive(predicate)});
+                SmtResult solve_result=solver.solve(space,ExactBoxType({interval}),literals);
+                ARIADNE_TEST_EQUAL(solve_result.status(),expected);
+            };
+
+            expect_edge_status("sqrt negative domain",ExactIntervalType(-1,-1),sqrt(ex)==0,SmtResultStatus::UNSAT);
+            expect_edge_status("sqrt zero boundary",ExactIntervalType(0,0),sqrt(ex)==0,SmtResultStatus::EPSILON_SAT);
+
+            expect_edge_status("log negative domain",ExactIntervalType(-1,-1),log(ex)==0,SmtResultStatus::UNSAT);
+            expect_edge_status("log zero domain",ExactIntervalType(0,0),log(ex)==0,SmtResultStatus::UNSAT);
+
+            expect_edge_status("asin below domain",ExactIntervalType(-2,-2),asin(ex)==0,SmtResultStatus::UNSAT);
+            expect_edge_status("asin above domain",ExactIntervalType(2,2),asin(ex)==0,SmtResultStatus::UNSAT);
+            expect_edge_status("acos below domain",ExactIntervalType(-2,-2),acos(ex)==0,SmtResultStatus::UNSAT);
+            expect_edge_status("acos above domain",ExactIntervalType(2,2),acos(ex)==0,SmtResultStatus::UNSAT);
+
+            expect_edge_status("rec positive near zero",ExactIntervalType(0.5_x,0.5_x),rec(ex)==2,SmtResultStatus::EPSILON_SAT);
+            expect_edge_status("rec negative",ExactIntervalType(-1,-1),rec(ex)==-1,SmtResultStatus::EPSILON_SAT);
+
+            expect_edge_status("tan regular branch",ExactIntervalType(0,0),tan(ex)==0,SmtResultStatus::EPSILON_SAT);
+        }
+
+        {
             std::cout << "[smt-theory-solve] parallel/sequential agreement for strict primitive" << std::endl;
             auto& thread_manager=BetterThreads::ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);

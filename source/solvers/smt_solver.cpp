@@ -39,7 +39,24 @@ namespace Ariadne {
 
 namespace {
 
+class SequentialSmtWorkQueue {
+  public:
+    Void push(UpperBoxType box) { _boxes.push_back(std::move(box)); }
 
+    UpperBoxType pop() {
+        ARIADNE_PRECONDITION(not _boxes.empty());
+        UpperBoxType box=std::move(_boxes.back());
+        _boxes.pop_back();
+        return box;
+    }
+
+    Bool empty() const { return _boxes.empty(); }
+
+  private:
+    std::vector<UpperBoxType> _boxes;
+};
+
+} // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(ExactDouble epsilon)
     : _epsilon(epsilon)
@@ -231,6 +248,7 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
     }
 
     ParallelSmtWorkload workload(
+        [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
         [this,&constraints,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
             if(state->found.load()) {
                 return;

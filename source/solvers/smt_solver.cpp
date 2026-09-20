@@ -418,10 +418,7 @@ SmtResult SmtSolver::solve(RealSpace const& space,
 
     SmtSearchStatistics statistics;
     if(domain.is_empty()) {
-        if(unknown_seen) {
-        return SmtResult::unknown(statistics);
-    }
-    return SmtResult::unsat(statistics);
+        return SmtResult::unsat(statistics);
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);

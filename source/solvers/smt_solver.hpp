@@ -36,6 +36,7 @@
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
 #include "solvers/smt_theory.hpp"
+#include "solvers/smt_boolean.hpp"
 #include "symbolic/space.hpp"
 
 namespace Ariadne {
@@ -129,6 +130,16 @@ class SmtSolver {
     SmtResult solve_parallel(RealSpace const& space,
                              ExactBoxType const& domain,
                              List<SmtTheoryPrimitiveLiteral> const& literals) const;
+
+    //! \brief Solve a bounded Boolean combination of real predicates.
+    SmtResult solve(RealSpace const& space,
+                    ExactBoxType const& domain,
+                    ContinuousPredicate const& predicate) const;
+
+    //! \brief Solve a bounded Boolean combination using parallel theory search.
+    SmtResult solve_parallel(RealSpace const& space,
+                             ExactBoxType const& domain,
+                             ContinuousPredicate const& predicate) const;
 
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 

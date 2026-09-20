@@ -75,6 +75,7 @@ class TestProcedure
     Void test_evaluate();
     Void test_propagate();
     Void test_backward_contractor_soundness();
+    Void test_backward_contractor_witness_preservation();
     Void test_leq_backpropagate_soundness();
     Void test_derivative();
 };
@@ -90,6 +91,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
     ARIADNE_TEST_CALL(test_backward_contractor_soundness());
+    ARIADNE_TEST_CALL(test_backward_contractor_witness_preservation());
     ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
     ARIADNE_TEST_CALL(test_derivative());
 }
@@ -289,6 +291,153 @@ Void TestProcedure::test_backward_contractor_soundness()
         UpperBoxType x=ExactBoxType({ExactIntervalType(0,0)});
         simple_hull_reduce(x,p,ExactIntervalType(2,2));
         ARIADNE_TEST_ASSERT(x[0].is_empty());
+    }
+}
+
+
+Void TestProcedure::test_backward_contractor_witness_preservation()
+{
+    auto preserves = [](FloatDPBounds const& contracted, FloatDPBounds const& witness) {
+        return not inconsistent(contracted,witness);
+    };
+
+    auto check_unary = [&](auto op, FloatDPBounds input, FloatDPBounds output) {
+        FloatDPBounds witness=input;
+        backpropagate(output,op,input);
+        ARIADNE_TEST_ASSERT(preserves(input,witness));
+    };
+
+    auto check_binary = [&](auto op, FloatDPBounds lhs, FloatDPBounds rhs, FloatDPBounds output) {
+        FloatDPBounds lhs_witness=lhs;
+        FloatDPBounds rhs_witness=rhs;
+        backpropagate(output,op,lhs,rhs);
+        ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
+        ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
+    };
+
+    auto check_power = [&](FloatDPBounds input, Int exponent, FloatDPBounds output) {
+        FloatDPBounds witness=input;
+        backpropagate(output,Pow(),input,exponent);
+        ARIADNE_TEST_ASSERT(preserves(input,witness));
+    };
+
+    // Unary inverse contractors.
+    check_unary(Pos(), FloatDPBounds(2,dp), FloatDPBounds(2,dp));
+    check_unary(Neg(), FloatDPBounds(2,dp), FloatDPBounds(-2,dp));
+    check_unary(Rec(), FloatDPBounds(2,dp), FloatDPBounds(0.5_x,dp));
+
+    check_unary(Sqr(), FloatDPBounds(-2,dp), FloatDPBounds(4,dp));
+    check_unary(Sqr(), FloatDPBounds( 2,dp), FloatDPBounds(4,dp));
+    check_unary(Sqr(), FloatDPBounds( 0,dp), FloatDPBounds(0,dp));
+
+    check_unary(Sqrt(), FloatDPBounds(4,dp), FloatDPBounds(2,dp));
+    check_unary(Sqrt(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_unary(Exp(), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
+    check_unary(Log(), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
+
+    // Principal and non-principal periodic witnesses.
+    check_unary(Sin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_unary(Cos(), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
+    check_unary(Tan(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_unary(Sin(), FloatDPBounds(3.14_x,3.15_x,dp), FloatDPBounds(0,dp));
+    check_unary(Cos(), FloatDPBounds(4.71_x,4.72_x,dp), FloatDPBounds(0,dp));
+    check_unary(Tan(), FloatDPBounds(3.14_x,3.15_x,dp), FloatDPBounds(0,dp));
+
+    // The inverse trigonometric functions are single-valued on their domains.
+    check_unary(Asin(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_unary(Acos(), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
+    check_unary(Atan(), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+
+    // Binary contractors, including signs and zero products.
+    check_binary(Add(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(5,dp));
+    check_binary(Sub(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(-1,dp));
+    check_binary(Mul(), FloatDPBounds(2,dp), FloatDPBounds(3,dp), FloatDPBounds(6,dp));
+    check_binary(Mul(), FloatDPBounds(-2,dp), FloatDPBounds(3,dp), FloatDPBounds(-6,dp));
+    check_binary(Mul(), FloatDPBounds(0,dp), FloatDPBounds(3,dp), FloatDPBounds(0,dp));
+    check_binary(Div(), FloatDPBounds(6,dp), FloatDPBounds(3,dp), FloatDPBounds(2,dp));
+    check_binary(Div(), FloatDPBounds(-6,dp), FloatDPBounds(3,dp), FloatDPBounds(-2,dp));
+
+    check_binary(Max(), FloatDPBounds(0,dp), FloatDPBounds(1,dp), FloatDPBounds(1,dp));
+    check_binary(Max(), FloatDPBounds(1,dp), FloatDPBounds(0,dp), FloatDPBounds(1,dp));
+    check_binary(Max(), FloatDPBounds(1,dp), FloatDPBounds(1,dp), FloatDPBounds(1,dp));
+    check_binary(Min(), FloatDPBounds(0,dp), FloatDPBounds(1,dp), FloatDPBounds(0,dp));
+    check_binary(Min(), FloatDPBounds(1,dp), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+    check_binary(Min(), FloatDPBounds(0,dp), FloatDPBounds(0,dp), FloatDPBounds(0,dp));
+
+    // Integer powers: both branches for even powers, signed odd powers,
+    // zero exponent, and negative exponents.
+    check_power(FloatDPBounds(-2,dp),  2, FloatDPBounds(4,dp));
+    check_power(FloatDPBounds( 2,dp),  2, FloatDPBounds(4,dp));
+    check_power(FloatDPBounds(-2,dp),  3, FloatDPBounds(-8,dp));
+    check_power(FloatDPBounds( 2,dp),  3, FloatDPBounds(8,dp));
+    check_power(FloatDPBounds( 2,dp),  0, FloatDPBounds(1,dp));
+    check_power(FloatDPBounds( 2,dp), -1, FloatDPBounds(0.5_x,dp));
+    check_power(FloatDPBounds(-2,dp), -2, FloatDPBounds(0.25_x,dp));
+
+    // Scalar-left overloads are distinct implementations and need their own
+    // witness-preservation checks.
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(5,dp),Add(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(-1,dp),Sub(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(6,dp),Mul(),ValidatedNumber(2),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(2,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(3,dp),Div(),ValidatedNumber(6),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(0,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(1,dp),Max(),ValidatedNumber(1),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(1,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(0,dp),Min(),ValidatedNumber(0),a);
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+
+    // Scalar-right overloads are not used by ScalarProcedureInstruction today,
+    // but test them because they are part of the generic backpropagation API.
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(5,dp),Add(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(1,dp),Sub(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(3,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(6,dp),Mul(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(6,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(3,dp),Div(),a,ValidatedNumber(2));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(0,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(1,dp),Max(),a,ValidatedNumber(1));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
+    }
+    {
+        FloatDPBounds a(1,dp); FloatDPBounds witness=a;
+        backpropagate(FloatDPBounds(0,dp),Min(),a,ValidatedNumber(0));
+        ARIADNE_TEST_ASSERT(preserves(a,witness));
     }
 }
 

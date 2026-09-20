@@ -245,35 +245,69 @@ template<class X> Void backpropagate(X const& r, Add, X& a1, X& a2) { restrict(a
 template<class X> Void backpropagate(X const& r, Sub, X& a1, X& a2) { restrict(a1,a2+r); restrict(a2,a1-r); }
 template<class X> Void backpropagate(X const& r, Mul, X& a1, X& a2) { restrict(a1,r/a2); restrict(a2,r/a1); }
 template<class X> Void backpropagate(X const& r, Div, X& a1, X& a2) { restrict(a1,a2*r); restrict(a2,a1/r); }
-template<class X> Void backpropagate(X const& r, Max, X& a1, X& a2) { restrict(a1,max(r,a2)); restrict(a2,max(r,a1)); }
-template<class X> Void backpropagate(X const& r, Min, X& a1, X& a2) { restrict(a1,min(r,a2)); restrict(a2,min(r,a1)); }
+template<class X> Void backpropagate(X const& r, Max, X& a1, X& a2) {
+    if(definitely(r.is_empty())) { restrict(a1,r); restrict(a2,r); return; }
+    // max(a1,a2) in r implies that neither argument can exceed r.
+    restrict(a1,X(-inf,r.upper_bound())); restrict(a2,X(-inf,r.upper_bound()));
+}
+template<class X> Void backpropagate(X const& r, Min, X& a1, X& a2) {
+    if(definitely(r.is_empty())) { restrict(a1,r); restrict(a2,r); return; }
+    // min(a1,a2) in r implies that neither argument can be below r.
+    restrict(a1,X(r.lower_bound(),+inf)); restrict(a2,X(r.lower_bound(),+inf));
+}
 
 template<class X, class Y> Void backpropagate(X const& r, Add, Y const& c1, X& a2) { restrict(a2,r-c1); }
 template<class X, class Y> Void backpropagate(X const& r, Sub, Y const& c1, X& a2) { restrict(a2,c1-r); }
 template<class X, class Y> Void backpropagate(X const& r, Mul, Y const& c1, X& a2) { restrict(a2,r/c1); }
 template<class X, class Y> Void backpropagate(X const& r, Div, Y const& c1, X& a2) { restrict(a2,c1/r); }
-template<class X, class Y> Void backpropagate(X const& r, Max, Y const& c1, X& a2) { restrict(a2,max(r,c1)); }
-template<class X, class Y> Void backpropagate(X const& r, Min, Y const& c1, X& a2) { restrict(a2,min(r,c1)); }
+template<class X, class Y> Void backpropagate(X const& r, Max, Y const&, X& a2) {
+    if(definitely(r.is_empty())) { restrict(a2,r); return; }
+    restrict(a2,X(-inf,r.upper_bound()));
+}
+template<class X, class Y> Void backpropagate(X const& r, Min, Y const&, X& a2) {
+    if(definitely(r.is_empty())) { restrict(a2,r); return; }
+    restrict(a2,X(r.lower_bound(),+inf));
+}
 
 template<class X, class Y> Void backpropagate(X const& r, Add, X& a1, Y const& c2) { restrict(a1,r-c2); }
 template<class X, class Y> Void backpropagate(X const& r, Sub, X& a1, Y const& c2) { restrict(a1,c2+r); }
 template<class X, class Y> Void backpropagate(X const& r, Mul, X& a1, Y const& c2) { restrict(a1,r/c2); }
 template<class X, class Y> Void backpropagate(X const& r, Div, X& a1, Y const& c2) { restrict(a1,c2*r); }
-template<class X, class Y> Void backpropagate(X const& r, Max, X& a1, Y const& c2) { restrict(a1,max(r,c2)); }
-template<class X, class Y> Void backpropagate(X const& r, Min, X& a1, Y const& c2) { restrict(a1,min(r,c2)); }
+template<class X, class Y> Void backpropagate(X const& r, Max, X& a1, Y const&) {
+    if(definitely(r.is_empty())) { restrict(a1,r); return; }
+    restrict(a1,X(-inf,r.upper_bound()));
+}
+template<class X, class Y> Void backpropagate(X const& r, Min, X& a1, Y const&) {
+    if(definitely(r.is_empty())) { restrict(a1,r); return; }
+    restrict(a1,X(r.lower_bound(),+inf));
+}
 
 template<class X> Void backpropagate(X const& r, Pos, X& a) { restrict(a,r); }
 template<class X> Void backpropagate(X const& r, Neg, X& a) { restrict(a,neg(r)); }
 template<class X> Void backpropagate(X const& r, Rec, X& a) { restrict(a,rec(r)); }
-template<class X> Void backpropagate(X const& r, Sqr, X& a) { restrict(a,sqrt(r)); }
-template<class X> Void backpropagate(X const& r, Pow, X& a, Int n) { restrict(a,exp(log(r)/n)); }
+template<class X> Void backpropagate(X const& r, Sqr, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    auto s=sqrt(abs(r));
+    restrict(a,hull(s,neg(s)));
+}
+template<class X> Void backpropagate(X const& r, Pow, X& a, Int n) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    if(n<=0) { return; }
+    // Integer powers have symmetric inverse branches for even exponents, and
+    // sign-dependent branches for odd exponents. Their interval hull is sound.
+    auto s=root(abs(r),n);
+    restrict(a,hull(s,neg(s)));
+}
 template<class X> Void backpropagate(X const& r, Sqrt, X& a) { restrict(a,sqr(r)); }
 template<class X> Void backpropagate(X const& r, Exp, X& a) { restrict(a,log(r)); }
 template<class X> Void backpropagate(X const& r, Log, X& a) { restrict(a,exp(r)); }
-    // FIXME: restricting asin/acos of interval should not be dependent on any branch of asin/acos
-template<class X> Void backpropagate(X const& r, Sin, X& a) { restrict(a,asin(r)); }
-template<class X> Void backpropagate(X const& r, Cos, X& a) { restrict(a,acos(r)); }
-template<class X> Void backpropagate(X const& r, Tan, X& a) { restrict(a,atan(r)); }
+// Periodic inverse images are generally disconnected. A single interval cannot
+// represent them without a hull, so defer periodic backward pruning until a
+// multi-branch contractor is available. Empty forward images are still
+// propagated to preserve inconsistency detection.
+template<class X> Void backpropagate(X const& r, Sin, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
+template<class X> Void backpropagate(X const& r, Cos, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
+template<class X> Void backpropagate(X const& r, Tan, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Asin, X& a) { restrict(a,sin(r)); }
 template<class X> Void backpropagate(X const& r, Acos, X& a) { restrict(a,cos(r)); }
 template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)); }

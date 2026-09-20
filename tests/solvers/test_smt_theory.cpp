@@ -43,13 +43,15 @@ class TestSmtTheory {
 
     Void test_relations() {
         RealVariable x("x"), y("y");
+        RealExpression ex=x;
+        RealExpression ey=y;
 
-        check_relation(x==y,SmtTheoryRelation::EQ,"x==y");
-        check_relation(x!=y,SmtTheoryRelation::NEQ,"x!=y");
-        check_relation(x<=y,SmtTheoryRelation::LEQ,"x<=y");
-        check_relation(x>=y,SmtTheoryRelation::GEQ,"x>=y");
-        check_relation(x<y,SmtTheoryRelation::LT,"x<y");
-        check_relation(x>y,SmtTheoryRelation::GT,"x>y");
+        check_relation(ex==ey,SmtTheoryRelation::EQ,"x==y");
+        check_relation(ex!=ey,SmtTheoryRelation::NEQ,"x!=y");
+        check_relation(ex<=ey,SmtTheoryRelation::LEQ,"x<=y");
+        check_relation(ex>=ey,SmtTheoryRelation::GEQ,"x>=y");
+        check_relation(ex<ey,SmtTheoryRelation::LT,"x<y");
+        check_relation(ex>ey,SmtTheoryRelation::GT,"x>y");
     }
 
     Void check_negation(ContinuousPredicate const& predicate,
@@ -62,18 +64,22 @@ class TestSmtTheory {
 
     Void test_negations() {
         RealVariable x("x"), y("y");
+        RealExpression ex=x;
+        RealExpression ey=y;
 
-        check_negation(x==y,SmtTheoryRelation::NEQ,"!(x==y) -> x!=y");
-        check_negation(x!=y,SmtTheoryRelation::EQ,"!(x!=y) -> x==y");
-        check_negation(x<=y,SmtTheoryRelation::GT,"!(x<=y) -> x>y");
-        check_negation(x>=y,SmtTheoryRelation::LT,"!(x>=y) -> x<y");
-        check_negation(x<y,SmtTheoryRelation::GEQ,"!(x<y) -> x>=y");
-        check_negation(x>y,SmtTheoryRelation::LEQ,"!(x>y) -> x<=y");
+        check_negation(ex==ey,SmtTheoryRelation::NEQ,"!(x==y) -> x!=y");
+        check_negation(ex!=ey,SmtTheoryRelation::EQ,"!(x!=y) -> x==y");
+        check_negation(ex<=ey,SmtTheoryRelation::GT,"!(x<=y) -> x>y");
+        check_negation(ex>=ey,SmtTheoryRelation::LT,"!(x>=y) -> x<y");
+        check_negation(ex<ey,SmtTheoryRelation::GEQ,"!(x<y) -> x>=y");
+        check_negation(ex>ey,SmtTheoryRelation::LEQ,"!(x>y) -> x<=y");
     }
 
     Void test_reject_non_atom() {
         RealVariable x("x"), y("y");
-        ContinuousPredicate formula=(x<=0)&&(y>=1);
+        RealExpression ex=x;
+        RealExpression ey=y;
+        ContinuousPredicate formula=(ex<=0)&&(ey>=1);
 
         std::cout << "[smt-theory] reject non-atomic conjunction" << std::endl;
         ARIADNE_TEST_THROWS(make_smt_theory_literal(formula),std::runtime_error);

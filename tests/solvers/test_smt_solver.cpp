@@ -262,6 +262,23 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] certify a nondegenerate epsilon-satisfying witness box" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-0.0625_x,0.0625_x)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),x[0],ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(
+                solve_result.witness()[0].lower_bound().raw(),
+                UpperBoxType(domain)[0].lower_bound().raw());
+            ARIADNE_TEST_EQUAL(
+                solve_result.witness()[0].upper_bound().raw(),
+                UpperBoxType(domain)[0].upper_bound().raw());
+        }
+
+        {
             std::cout << "[smt-solve] two-dimensional EPSILON_SAT: x+y=1, x-y=0" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             ExactBoxType domain({ExactIntervalType(0,1),ExactIntervalType(0,1)});
@@ -373,6 +390,21 @@ class TestSmtSolver {
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] certify a nondegenerate epsilon-satisfying witness box" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-0.0625_x,0.0625_x)});
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
+            SmtResult solve_result=solver.solve(space,domain,literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(
+                solve_result.witness()[0].lower_bound().raw(),
+                UpperBoxType(domain)[0].lower_bound().raw());
+            ARIADNE_TEST_EQUAL(
+                solve_result.witness()[0].upper_bound().raw(),
+                UpperBoxType(domain)[0].upper_bound().raw());
         }
 
         {

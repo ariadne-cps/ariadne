@@ -36,14 +36,13 @@ class TseitinBuilder {
   public:
     SmtBooleanEncoding build(ContinuousPredicate const& predicate) {
         Int root=this->_encode(predicate);
-        _encoding._clauses.push_back({root});
+        _encoding._add_clause({root});
         return _encoding;
     }
 
   private:
     Int _new_variable() {
-        ++_encoding._variable_count;
-        return static_cast<Int>(_encoding._variable_count);
+        return _encoding._new_variable();
     }
 
     Int _encode_atom(ContinuousPredicate const& predicate) {
@@ -55,8 +54,7 @@ class TseitinBuilder {
 
         Int variable=this->_new_variable();
         _atom_variables.emplace(key,variable);
-        _encoding._atoms.push_back(predicate);
-        _encoding._atom_variables.push_back(static_cast<SizeType>(variable));
+        _encoding._add_atom(predicate,static_cast<SizeType>(variable));
         return variable;
     }
 
@@ -78,9 +76,9 @@ class TseitinBuilder {
                 Int rhs=this->_encode(predicate.arg2());
                 Int variable=this->_new_variable();
 
-                _encoding._clauses.push_back({-variable,lhs});
-                _encoding._clauses.push_back({-variable,rhs});
-                _encoding._clauses.push_back({variable,-lhs,-rhs});
+                _encoding._add_clause({-variable,lhs});
+                _encoding._add_clause({-variable,rhs});
+                _encoding._add_clause({variable,-lhs,-rhs});
                 return variable;
             }
 
@@ -89,9 +87,9 @@ class TseitinBuilder {
                 Int rhs=this->_encode(predicate.arg2());
                 Int variable=this->_new_variable();
 
-                _encoding._clauses.push_back({variable,-lhs});
-                _encoding._clauses.push_back({variable,-rhs});
-                _encoding._clauses.push_back({-variable,lhs,rhs});
+                _encoding._add_clause({variable,-lhs});
+                _encoding._add_clause({variable,-rhs});
+                _encoding._add_clause({-variable,lhs,rhs});
                 return variable;
             }
 

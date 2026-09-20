@@ -22,6 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "numeric/numeric.hpp"
 #include "solvers/smt_boolean.hpp"
 #include "symbolic/variable.hpp"
 

@@ -539,6 +539,9 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boolean_conflicts+=source.boolean_conflicts;
     target.boolean_backtracks+=source.boolean_backtracks;
     target.max_decision_level=std::max(target.max_decision_level,source.max_decision_level);
+    target.boolean_conflicts_analyzed+=source.boolean_conflicts_analyzed;
+    target.learned_clause_literals+=source.learned_clause_literals;
+    target.last_backjump_level=source.last_backjump_level;
     target.theory_checks+=source.theory_checks;
     target.theory_conflicts+=source.theory_conflicts;
 }
@@ -578,6 +581,11 @@ class SmtDpllSearch {
         std::optional<SizeType> reason_clause;
     };
 
+    struct ConflictAnalysis {
+        std::vector<Int> learned_clause;
+        SizeType backjump_level = 0u;
+    };
+
     Bool _literal_true(Int literal) const
     {
         SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
@@ -603,6 +611,7 @@ class SmtDpllSearch {
 
     Bool _unit_propagate()
     {
+        _last_boolean_conflict_clause.reset();
         Bool changed=true;
         while(changed) {
             changed=false;
@@ -630,6 +639,7 @@ class SmtDpllSearch {
 
                 if(unassigned_count==0u) {
                     ++_statistics.boolean_conflicts;
+                    _last_boolean_conflict_clause=clause_index;
                     return false;
                 }
 
@@ -645,12 +655,103 @@ class SmtDpllSearch {
                         changed=true;
                     } else if(not this->_literal_true(unit_literal)) {
                         ++_statistics.boolean_conflicts;
+                        _last_boolean_conflict_clause=clause_index;
                         return false;
                     }
                 }
             }
         }
         return true;
+    }
+
+    Bool _clause_contains_variable(std::vector<Int> const& clause, SizeType variable) const
+    {
+        for(Int literal:clause) {
+            SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            if(literal_variable==variable) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    SizeType _current_level_literal_count(std::vector<Int> const& clause) const
+    {
+        SizeType count=0u;
+        for(Int literal:clause) {
+            SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            if(_assignment[variable].decision_level==this->_decision_level()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    std::vector<Int> _resolve_on_variable(
+        std::vector<Int> const& lhs,
+        SmtBooleanEncoding::Clause const& rhs,
+        SizeType variable) const
+    {
+        std::vector<Int> result;
+        result.reserve(lhs.size()+rhs.size());
+
+        auto append_unique=[&](Int literal) {
+            SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            if(literal_variable==variable) {
+                return;
+            }
+            for(Int existing:result) {
+                if(existing==literal) {
+                    return;
+                }
+            }
+            result.push_back(literal);
+        };
+
+        for(Int literal:lhs) { append_unique(literal); }
+        for(Int literal:rhs) { append_unique(literal); }
+        return result;
+    }
+
+    ConflictAnalysis _analyze_boolean_conflict(SizeType conflict_clause_index) const
+    {
+        ARIADNE_ASSERT(conflict_clause_index<_encoding.clauses().size());
+        ConflictAnalysis analysis;
+        analysis.learned_clause.assign(
+            _encoding.clauses()[conflict_clause_index].begin(),
+            _encoding.clauses()[conflict_clause_index].end());
+
+        while(this->_current_level_literal_count(analysis.learned_clause)>1u) {
+            std::optional<SizeType> pivot;
+            for(auto iter=_trail.rbegin(); iter!=_trail.rend(); ++iter) {
+                SizeType variable=*iter;
+                AssignmentInfo const& assignment=_assignment[variable];
+                if(assignment.decision_level==this->_decision_level()
+                   && assignment.reason_clause.has_value()
+                   && this->_clause_contains_variable(analysis.learned_clause,variable)) {
+                    pivot=variable;
+                    break;
+                }
+            }
+
+            ARIADNE_ASSERT(pivot.has_value());
+            SizeType reason_index=*_assignment[*pivot].reason_clause;
+            ARIADNE_ASSERT(reason_index<_encoding.clauses().size());
+            analysis.learned_clause=this->_resolve_on_variable(
+                analysis.learned_clause,_encoding.clauses()[reason_index],*pivot);
+        }
+
+        SizeType current_level=this->_decision_level();
+        SizeType backjump_level=0u;
+        for(Int literal:analysis.learned_clause) {
+            SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            SizeType level=_assignment[variable].decision_level;
+            if(level!=current_level) {
+                backjump_level=std::max(backjump_level,level);
+            }
+        }
+        analysis.backjump_level=backjump_level;
+        return analysis;
     }
 
     SizeType _next_unassigned_variable() const
@@ -690,6 +791,14 @@ class SmtDpllSearch {
     std::optional<UpperBoxType> _search_boolean()
     {
         if(not this->_unit_propagate()) {
+            if(_last_boolean_conflict_clause.has_value() && this->_decision_level()>0u) {
+                ConflictAnalysis analysis=this->_analyze_boolean_conflict(
+                    *_last_boolean_conflict_clause);
+                ++_statistics.boolean_conflicts_analyzed;
+                _statistics.learned_clause_literals+=analysis.learned_clause.size();
+                _statistics.last_backjump_level=analysis.backjump_level;
+            }
+            _last_boolean_conflict_clause.reset();
             return std::nullopt;
         }
 
@@ -854,6 +963,7 @@ class SmtDpllSearch {
     std::vector<AssignmentInfo> _assignment;
     std::vector<SizeType> _trail;
     std::vector<SizeType> _decision_level_markers;
+    std::optional<SizeType> _last_boolean_conflict_clause;
     SmtSearchStatistics _statistics;
 };
 } // namespace

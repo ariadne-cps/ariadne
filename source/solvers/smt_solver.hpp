@@ -73,6 +73,9 @@ struct SmtSearchStatistics {
     SizeType boolean_conflicts = 0u;
     SizeType boolean_backtracks = 0u;
     SizeType max_decision_level = 0u;
+    SizeType boolean_conflicts_analyzed = 0u;
+    SizeType learned_clause_literals = 0u;
+    SizeType last_backjump_level = 0u;
     SizeType theory_checks = 0u;
     SizeType theory_conflicts = 0u;
 };

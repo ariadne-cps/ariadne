@@ -306,9 +306,18 @@ template<class X> Void backpropagate(X const& r, Pow, X& a, Int) {
     // Integer powers can have disconnected and sign-dependent inverse images.
     // Defer pruning until a sound multi-branch contractor is available.
 }
-template<class X> Void backpropagate(X const& r, Sqrt, X& a) { restrict(a,sqr(r)); }
-template<class X> Void backpropagate(X const& r, Exp, X& a) { restrict(a,log(r)); }
-template<class X> Void backpropagate(X const& r, Log, X& a) { restrict(a,exp(r)); }
+template<class X> Void backpropagate(X const& r, Sqrt, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,sqr(r));
+}
+template<class X> Void backpropagate(X const& r, Exp, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,log(r));
+}
+template<class X> Void backpropagate(X const& r, Log, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    restrict(a,exp(r));
+}
 // Periodic inverse images are generally disconnected. A single interval cannot
 // represent them without a hull, so defer periodic backward pruning until a
 // multi-branch contractor is available. Empty forward images are still

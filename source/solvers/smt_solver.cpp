@@ -1423,15 +1423,28 @@ class SmtDpllSearch {
         return consistent;
     }
 
+    SmtResult _solve_theory_literals(List<SmtTheoryPrimitiveLiteral> const& literals)
+    {
+        SizeType const limit=_solver.configuration().box_processing_limit();
+        SizeType const processed=_statistics.boxes_processed;
+        SizeType const remaining=processed>=limit ? 0u : limit-processed;
+        SmtSolver theory_solver(SmtSolverConfiguration(
+            _solver.configuration().epsilon(),
+            _solver.configuration().theory_minimization_budget(),
+            _solver.configuration().learned_clause_limit(),
+            remaining));
+        return _parallel
+            ? theory_solver.solve_parallel(_space,_domain,literals)
+            : theory_solver.solve(_space,_domain,literals);
+    }
+
     Bool _theory_alternatives_consistent(
         std::vector<SmtTheoryAlternatives> const& alternatives,
         SizeType atom,
         List<SmtTheoryPrimitiveLiteral>& literals)
     {
         if(atom==alternatives.size()) {
-            SmtResult result=_parallel
-                ? _solver.solve_parallel(_space,_domain,literals)
-                : _solver.solve(_space,_domain,literals);
+            SmtResult result=this->_solve_theory_literals(literals);
             add_statistics(_statistics,result.statistics());
             if(result.is_unknown()) {
                 _theory_unknown_seen=true;
@@ -1487,9 +1500,7 @@ class SmtDpllSearch {
         List<SmtTheoryPrimitiveLiteral>& literals)
     {
         if(atom==alternatives.size()) {
-            SmtResult result=_parallel
-                ? _solver.solve_parallel(_space,_domain,literals)
-                : _solver.solve(_space,_domain,literals);
+            SmtResult result=this->_solve_theory_literals(literals);
             add_statistics(_statistics,result.statistics());
             if(result.is_epsilon_sat()) {
                 return result.witness();

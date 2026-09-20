@@ -1037,6 +1037,22 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] global box budget spans multiple theory checks" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u));
+            ContinuousPredicate formula=(ex<0)||(ex>1);
+            SmtResult solve_result=bounded_solver.solve(
+                space,ExactBoxType({ExactIntervalType(0.5_x,0.5_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=2u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,1u);
+        }
+
+        {
             std::cout << "[smt-dpll] trail backtracking across Boolean branches" << std::endl;
             ContinuousPredicate formula=(ex<0)||(ex>1);
             SmtResult solve_result=solver.solve(

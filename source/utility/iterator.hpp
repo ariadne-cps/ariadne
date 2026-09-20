@@ -82,6 +82,7 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,RandomAccessT
     I& operator++() { IteratorCoreAccess::advance(static_cast<I&>(*this),1); return static_cast<I&>(*this); }
     I& operator--() { IteratorCoreAccess::advance(static_cast<I&>(*this),-1); return static_cast<I&>(*this); }
     Ref operator*() const { return IteratorCoreAccess::dereference(static_cast<const I&>(*this)); }
+    Ref operator[](std::ptrdiff_t n) const { I result(static_cast<const I&>(*this)); IteratorCoreAccess::advance(result,n); return IteratorCoreAccess::dereference(result); }
     Ptr operator->() const { return &IteratorCoreAccess::dereference(static_cast<const I&>(*this)); }
 };
 

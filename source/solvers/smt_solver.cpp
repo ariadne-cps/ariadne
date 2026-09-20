@@ -30,6 +30,7 @@
 #include <memory>
 #include <mutex>
 #include <cstdint>
+#include <algorithm>
 
 #include "betterthreads/workload.hpp"
 
@@ -59,8 +60,10 @@ class SequentialSmtWorkQueue {
 
 } // namespace
 
-SmtSolverConfiguration::SmtSolverConfiguration(ExactDouble epsilon)
-    : _epsilon(epsilon)
+SmtSolverConfiguration::SmtSolverConfiguration(
+    ExactDouble epsilon, SizeType theory_minimization_budget)
+    : _epsilon(epsilon),
+      _theory_minimization_budget(theory_minimization_budget)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -556,6 +559,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.theory_nogood_raw_literals+=source.theory_nogood_raw_literals;
     target.theory_nogood_minimized_literals+=source.theory_nogood_minimized_literals;
     target.theory_nogood_literals_removed+=source.theory_nogood_literals_removed;
+    target.theory_minimization_budget_exhaustions+=
+        source.theory_minimization_budget_exhaustions;
 }
 
 class SmtDpllSearch {
@@ -1063,11 +1068,31 @@ class SmtDpllSearch {
 
     std::vector<Int> _minimize_theory_nogood(std::vector<Int> clause)
     {
+        std::stable_sort(clause.begin(),clause.end(),[this](Int lhs, Int rhs) {
+            SizeType lhs_variable=static_cast<SizeType>(lhs>0 ? lhs : -lhs);
+            SizeType rhs_variable=static_cast<SizeType>(rhs>0 ? rhs : -rhs);
+            return _assignment[lhs_variable].decision_level
+                > _assignment[rhs_variable].decision_level;
+        });
+
+        SizeType const budget=_solver.configuration().theory_minimization_budget();
+        SizeType checks=0u;
         SizeType i=0u;
         while(i<clause.size()) {
+            if(checks>=budget) {
+                ++_statistics.theory_minimization_budget_exhaustions;
+                break;
+            }
+
             std::vector<Int> candidate=clause;
             candidate.erase(candidate.begin()+static_cast<std::ptrdiff_t>(i));
-            if(not candidate.empty() && not this->_nogood_theory_consistent(candidate)) {
+            if(candidate.empty()) {
+                ++i;
+                continue;
+            }
+
+            ++checks;
+            if(not this->_nogood_theory_consistent(candidate)) {
                 clause=std::move(candidate);
             } else {
                 ++i;

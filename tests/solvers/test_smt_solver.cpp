@@ -467,11 +467,16 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());
             std::cout << "[smt-dpll-stats] analyzed="
                       << solve_result.statistics().boolean_conflicts_analyzed
-                      << " learned_literals=" << solve_result.statistics().learned_clause_literals
+                      << " learned_literals_total=" << solve_result.statistics().learned_clause_literals
+                      << " last_learned_literals=" << solve_result.statistics().last_learned_clause_literals
+                      << " last_current_level_literals="
+                      << solve_result.statistics().last_learned_current_level_literals
                       << " backjump_level=" << solve_result.statistics().last_backjump_level
                       << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts_analyzed>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_literals>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().last_learned_clause_literals>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().last_learned_current_level_literals,1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().last_backjump_level
                 < solve_result.statistics().max_decision_level);

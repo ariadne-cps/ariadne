@@ -541,6 +541,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.max_decision_level=std::max(target.max_decision_level,source.max_decision_level);
     target.boolean_conflicts_analyzed+=source.boolean_conflicts_analyzed;
     target.learned_clause_literals+=source.learned_clause_literals;
+    target.last_learned_clause_literals=source.last_learned_clause_literals;
+    target.last_learned_current_level_literals=source.last_learned_current_level_literals;
     target.last_backjump_level=source.last_backjump_level;
     target.theory_checks+=source.theory_checks;
     target.theory_conflicts+=source.theory_conflicts;
@@ -751,6 +753,7 @@ class SmtDpllSearch {
             }
         }
         analysis.backjump_level=backjump_level;
+        ARIADNE_ASSERT(this->_current_level_literal_count(analysis.learned_clause)==1u);
         return analysis;
     }
 
@@ -796,6 +799,9 @@ class SmtDpllSearch {
                     *_last_boolean_conflict_clause);
                 ++_statistics.boolean_conflicts_analyzed;
                 _statistics.learned_clause_literals+=analysis.learned_clause.size();
+                _statistics.last_learned_clause_literals=analysis.learned_clause.size();
+                _statistics.last_learned_current_level_literals=
+                    this->_current_level_literal_count(analysis.learned_clause);
                 _statistics.last_backjump_level=analysis.backjump_level;
             }
             _last_boolean_conflict_clause.reset();

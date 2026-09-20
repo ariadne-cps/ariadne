@@ -85,6 +85,7 @@ class TestProcedure
     Void test_backward_contractor_generated_witnesses();
     Void test_leq_backpropagate_soundness();
     Void test_inverse_trigonometric_empty_backpropagation();
+    Void test_abs_backpropagation();
     Void test_derivative();
 };
 
@@ -103,6 +104,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_backward_contractor_generated_witnesses());
     ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
     ARIADNE_TEST_CALL(test_inverse_trigonometric_empty_backpropagation());
+    ARIADNE_TEST_CALL(test_abs_backpropagation());
     ARIADNE_TEST_CALL(test_derivative());
 }
 
@@ -665,6 +667,31 @@ Void TestProcedure::test_inverse_trigonometric_empty_backpropagation()
     {
         UpperIntervalType argument=ExactIntervalType(0,0);
         backpropagate(empty,Atan(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+}
+
+
+Void TestProcedure::test_abs_backpropagation()
+{
+    {
+        UpperIntervalType argument=ExactIntervalType(-2,2);
+        UpperIntervalType result=ExactIntervalType(1,1);
+        backpropagate(result,Abs(),argument);
+        ARIADNE_TEST_ASSERT(definitely(subset(argument,ExactIntervalType(-1,1))));
+        ARIADNE_TEST_ASSERT(definitely(argument.contains(ExactDouble(-1))));
+        ARIADNE_TEST_ASSERT(definitely(argument.contains(ExactDouble(1))));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-2,2);
+        UpperIntervalType result=ExactIntervalType::empty_interval();
+        backpropagate(result,Abs(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-2,2);
+        UpperIntervalType result=ExactIntervalType(-2,-1);
+        backpropagate(result,Abs(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
 }

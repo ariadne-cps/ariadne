@@ -318,6 +318,13 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) {
     restrict(a,tan(r));
 }
 
+template<class X> Void backpropagate(X const& r, Abs, X& a) {
+    if(definitely(r.is_empty())) { restrict(a,r); return; }
+    if(definitely(r.upper_bound()<0)) { restrict(a,X::empty_interval()); return; }
+    auto upper=max(r.upper_bound(),decltype(r.upper_bound())(0));
+    restrict(a,X(-upper,+upper));
+}
+
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }
 template<class X> Void backpropagate(X const& r, Leq, X& a1, X& a2) {

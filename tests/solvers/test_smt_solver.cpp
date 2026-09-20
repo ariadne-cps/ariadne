@@ -469,6 +469,21 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] trail backtracking across Boolean branches" << std::endl;
+            ContinuousPredicate formula=(ex<0)||(ex>1);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0.5_x,0.5_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] trail decisions="
+                      << solve_result.statistics().boolean_decisions
+                      << " propagations=" << solve_result.statistics().boolean_propagations
+                      << " theory_checks=" << solve_result.statistics().theory_checks
+                      << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_decisions>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);
+        }
+
+        {
             std::cout << "[smt-dpll] disjunction UNSAT: x<0 or x>1 on [0.375,0.625]" << std::endl;
             ContinuousPredicate formula=(ex<0)||(ex>1);
             SmtResult solve_result=solver.solve(

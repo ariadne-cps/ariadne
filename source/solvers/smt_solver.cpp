@@ -554,6 +554,7 @@ class SmtDpllSearch {
           _parallel(parallel),
           _assignment(encoding.variable_count()+1u,-1)
     {
+        _trail.reserve(encoding.variable_count());
     }
 
     SmtResult solve()
@@ -580,6 +581,7 @@ class SmtDpllSearch {
         int8_t value=literal>0 ? 1 : 0;
         if(_assignment[variable]<0) {
             _assignment[variable]=value;
+            _trail.push_back(variable);
             return true;
         }
         return _assignment[variable]==value;
@@ -643,43 +645,52 @@ class SmtDpllSearch {
         return 0u;
     }
 
+    Void _backtrack(SizeType marker)
+    {
+        while(_trail.size()>marker) {
+            SizeType variable=_trail.back();
+            _trail.pop_back();
+            _assignment[variable]=-1;
+        }
+    }
+
     std::optional<UpperBoxType> _search_boolean()
     {
-        std::vector<int8_t> saved_assignment=_assignment;
+        SizeType marker=_trail.size();
 
         if(not this->_unit_propagate()) {
-            _assignment=std::move(saved_assignment);
+            this->_backtrack(marker);
             return std::nullopt;
         }
 
         SizeType variable=this->_next_unassigned_variable();
         if(variable==0u) {
             std::optional<UpperBoxType> witness=this->_check_theory_assignment();
-            _assignment=std::move(saved_assignment);
+            this->_backtrack(marker);
             return witness;
         }
 
         if(not this->_check_partial_theory_consistency()) {
-            _assignment=std::move(saved_assignment);
+            this->_backtrack(marker);
             return std::nullopt;
         }
 
         ++_statistics.boolean_decisions;
 
-        _assignment[variable]=0;
+        ARIADNE_ASSERT(this->_assign_literal(-static_cast<Int>(variable)));
         if(auto witness=this->_search_boolean(); witness.has_value()) {
-            _assignment=std::move(saved_assignment);
+            this->_backtrack(marker);
+            return witness;
+        }
+        this->_backtrack(marker);
+
+        ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
+        if(auto witness=this->_search_boolean(); witness.has_value()) {
+            this->_backtrack(marker);
             return witness;
         }
 
-        _assignment=saved_assignment;
-        _assignment[variable]=1;
-        if(auto witness=this->_search_boolean(); witness.has_value()) {
-            _assignment=std::move(saved_assignment);
-            return witness;
-        }
-
-        _assignment=std::move(saved_assignment);
+        this->_backtrack(marker);
         return std::nullopt;
     }
 
@@ -806,6 +817,7 @@ class SmtDpllSearch {
     SmtBooleanEncoding const& _encoding;
     Bool _parallel;
     std::vector<int8_t> _assignment;
+    std::vector<SizeType> _trail;
     SmtSearchStatistics _statistics;
 };
 } // namespace

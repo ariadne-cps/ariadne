@@ -455,6 +455,7 @@ class TestSmtSolver {
 
             expect_status("sqr SAT",ExactIntervalType(2,2),sqr(ex)==4,SmtResultStatus::EPSILON_SAT);
             expect_status("sqr UNSAT",ExactIntervalType(2,2),sqr(ex)==5,SmtResultStatus::UNSAT);
+            expect_status("sqr epsilon-overlap SAT",ExactIntervalType(2,2),sqr(ex)==4.0625_x,SmtResultStatus::EPSILON_SAT);
 
             expect_status("pow SAT",ExactIntervalType(2,2),pow(ex,3)==8,SmtResultStatus::EPSILON_SAT);
             expect_status("pow UNSAT",ExactIntervalType(2,2),pow(ex,3)==9,SmtResultStatus::UNSAT);

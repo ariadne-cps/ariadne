@@ -132,6 +132,8 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().boxes_processed,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().boxes_split,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().box_budget_exhaustions,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().non_splittable_uncertified_boxes,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_processed,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
@@ -213,6 +215,8 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
 
@@ -582,6 +586,8 @@ class TestSmtSolver {
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
 
@@ -1052,6 +1058,8 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         {
@@ -1486,6 +1494,8 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve_parallel(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         {
@@ -1506,6 +1516,8 @@ class TestSmtSolver {
                 space,ExactBoxType({ExactIntervalType(0,1)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);

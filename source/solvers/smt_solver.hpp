@@ -92,6 +92,8 @@ struct SmtSearchStatistics {
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
     SizeType boxes_unknown = 0u;
+    SizeType box_budget_exhaustions = 0u;
+    SizeType non_splittable_uncertified_boxes = 0u;
     SizeType hull_reduction_rounds = 0u;
     SizeType hull_effective_reductions = 0u;
     SizeType shaving_reduction_rounds = 0u;

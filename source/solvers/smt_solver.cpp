@@ -733,6 +733,7 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
 
     while(not pending.empty()) {
         if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
+            ++statistics.box_budget_exhaustions;
             unknown_seen=true;
             break;
         }
@@ -774,6 +775,7 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
 
             case BoxProcessingStatus::UNKNOWN:
                 ++statistics.boxes_unknown;
+                ++statistics.non_splittable_uncertified_boxes;
                 unknown_seen=true;
                 break;
 
@@ -808,6 +810,7 @@ SmtResult SmtSolver::solve(RealSpace const& space,
 
     while(not pending.empty()) {
         if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
+            ++statistics.box_budget_exhaustions;
             unknown_seen=true;
             break;
         }
@@ -846,6 +849,7 @@ SmtResult SmtSolver::solve(RealSpace const& space,
                 break;
             case BoxProcessingStatus::UNKNOWN:
                 ++statistics.boxes_unknown;
+                ++statistics.non_splittable_uncertified_boxes;
                 unknown_seen=true;
                 break;
             default:
@@ -898,6 +902,7 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
+                    ++state->statistics.box_budget_exhaustions;
                     state->unknown.store(true);
                     state->limit_reached.store(true);
                     return;
@@ -958,6 +963,7 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                     {
                         std::lock_guard<std::mutex> lock(state->mutex);
                         ++state->statistics.boxes_unknown;
+                        ++state->statistics.non_splittable_uncertified_boxes;
                     }
                     return;
 
@@ -1003,6 +1009,7 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
+                    ++state->statistics.box_budget_exhaustions;
                     state->unknown.store(true);
                     state->limit_reached.store(true);
                     return;
@@ -1060,6 +1067,7 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                     {
                         std::lock_guard<std::mutex> lock(state->mutex);
                         ++state->statistics.boxes_unknown;
+                        ++state->statistics.non_splittable_uncertified_boxes;
                     }
                     return;
 
@@ -1091,6 +1099,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
     target.boxes_unknown+=source.boxes_unknown;
+    target.box_budget_exhaustions+=source.box_budget_exhaustions;
+    target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
@@ -1563,6 +1573,7 @@ class SmtDpllSearch {
     {
         SizeType const box_limit=_solver.configuration().box_processing_limit();
         if(_statistics.boxes_processed>=box_limit) {
+            ++_statistics.box_budget_exhaustions;
             _theory_unknown_seen=true;
             return SearchOutcome::exhausted();
         }

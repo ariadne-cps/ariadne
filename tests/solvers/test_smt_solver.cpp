@@ -134,6 +134,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().boxes_split,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().box_budget_exhaustions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().non_splittable_uncertified_boxes,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().non_splittable_epsilon_overlap_boxes,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_processed,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
@@ -239,6 +240,7 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 
@@ -638,6 +640,7 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 

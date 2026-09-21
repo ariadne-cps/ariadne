@@ -358,6 +358,24 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+Bool SmtSolver::_epsilon_overlaps(
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints) const
+{
+    UpperBoxType point(domain.dimension(),[&](SizeType i) {
+        auto m=domain[i].midpoint();
+        return UpperIntervalType(m,m);
+    });
+    for(SizeType i=0u; i!=constraints.size(); ++i) {
+        UpperIntervalType image=apply(constraints[i].function(),point);
+        UpperIntervalType bounds(this->_epsilon_bounds(constraints[i]));
+        if(definitely(disjoint(image,bounds))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::optional<UpperBoxType>
 SmtSolver::_epsilon_witness(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const
@@ -452,6 +470,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_search_attempted;
+        result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,constraints);
         return result;
     }
 
@@ -605,6 +624,37 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+Bool SmtSolver::_epsilon_overlaps(
+    UpperBoxType const& domain,
+    CompiledTheoryLiterals const& literals) const
+{
+    UpperBoxType point(domain.dimension(),[&](SizeType i) {
+        auto m=domain[i].midpoint();
+        return UpperIntervalType(m,m);
+    });
+    FloatDP epsilon(_configuration.epsilon(),dp);
+    for(auto const& literal:literals) {
+        UpperIntervalType image=apply(literal.function,point);
+        switch(literal.relation) {
+            case SmtTheoryPrimitiveRelation::EQ_ZERO:
+            case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+                if(definitely(disjoint(
+                        image,UpperIntervalType(this->_epsilon_bounds(literal.relation))))) {
+                    return false;
+                }
+                break;
+            case SmtTheoryPrimitiveRelation::GT_ZERO:
+                if(definitely(image.upper_bound()<=-epsilon)) {
+                    return false;
+                }
+                break;
+            default:
+                ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+        }
+    }
+    return true;
+}
+
 std::optional<UpperBoxType>
 SmtSolver::_epsilon_witness(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const
@@ -699,6 +749,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_search_attempted;
+        result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,literals);
         return result;
     }
 
@@ -776,6 +827,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
             case BoxProcessingStatus::UNKNOWN:
                 ++statistics.boxes_unknown;
                 ++statistics.non_splittable_uncertified_boxes;
+                if(processing.non_splittable_epsilon_overlap) {
+                    ++statistics.non_splittable_epsilon_overlap_boxes;
+                }
                 unknown_seen=true;
                 break;
 
@@ -850,6 +904,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
             case BoxProcessingStatus::UNKNOWN:
                 ++statistics.boxes_unknown;
                 ++statistics.non_splittable_uncertified_boxes;
+                if(processing.non_splittable_epsilon_overlap) {
+                    ++statistics.non_splittable_epsilon_overlap_boxes;
+                }
                 unknown_seen=true;
                 break;
             default:
@@ -964,6 +1021,12 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                         std::lock_guard<std::mutex> lock(state->mutex);
                         ++state->statistics.boxes_unknown;
                         ++state->statistics.non_splittable_uncertified_boxes;
+                        if(processing.non_splittable_epsilon_overlap) {
+                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
+                        }
+                        if(processing.non_splittable_epsilon_overlap) {
+                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
+                        }
                     }
                     return;
 
@@ -1101,6 +1164,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_unknown+=source.boxes_unknown;
     target.box_budget_exhaustions+=source.box_budget_exhaustions;
     target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
+    target.non_splittable_epsilon_overlap_boxes+=source.non_splittable_epsilon_overlap_boxes;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;

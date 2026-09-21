@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_enclosure
+    test_enclosure_precision
     test_iterated_map
     test_iterated_map_evolver
     test_vector_field

@@ -84,8 +84,11 @@ Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl) {
     FloatDPBounds dub(ivl.upper_bound(),dp);
     FloatDPApproximation dla(ivl.lower_bound(),dp);
     FloatDPApproximation dua(ivl.upper_bound(),dp);
-    FloatDP dl(FloatDP(Float32(dla.raw(),near)));
-    FloatDP du(FloatDP(Float32(dua.raw(),near)));
+    // Keep the full FloatDP precision of the approximated endpoints.  Reducing
+    // them to Float32 here creates an avoidable, step-size-independent error
+    // which is later transferred to the enclosure remainder.
+    FloatDP dl(dla.raw());
+    FloatDP du(dua.raw());
     FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
     return make_pair(make_interval(dl,du),e);
 }

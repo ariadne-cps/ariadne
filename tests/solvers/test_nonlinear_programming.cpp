@@ -313,6 +313,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
         ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        ARIADNE_TEST_ASSERT(not definitely(not candidate_result.first));
         if(definitely(candidate_result.first)) {
             ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
                 D,g,C,cast_exact(candidate_result.second)));

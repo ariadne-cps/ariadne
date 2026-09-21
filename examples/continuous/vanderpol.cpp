@@ -71,13 +71,28 @@ void ariadne_main()
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
 
-    // Temporary diagnostic: exercise one integrator step directly, before the
-    // evolver machinery, so that the internal Picard/refinement diagnostics
-    // are unambiguously attributable to GradedTaylorPicardIntegrator.
+    // Temporary diagnostic: compare the two Picard integrators on exactly
+    // the same initial box and requested step before running the full evolver.
     auto diagnostic_initial_box = cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
-    std::cerr << "[vanderpol] direct graded Taylor-Picard probe" << std::endl;
-    auto diagnostic_flow = integrator.flow_step(dynamics.function(),diagnostic_initial_box,suggest(StepSizeType(0.02_dy)));
-    std::cerr << "[vanderpol] direct probe returned with error=" << diagnostic_flow.error() << std::endl;
+    StepSizeType diagnostic_step=0.02_dy;
+    TaylorPicardIntegrator diagnostic_taylor_picard(max_err);
+    GradedTaylorPicardIntegrator diagnostic_graded_picard(max_err,order=5);
+
+    Stopwatch<Microseconds> diagnostic_sw;
+    std::cerr << "[vanderpol] TaylorPicard direct probe" << std::endl;
+    auto diagnostic_taylor_flow = diagnostic_taylor_picard.flow_step(
+        dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
+    diagnostic_sw.click();
+    std::cerr << "[vanderpol] TaylorPicard time_us=" << diagnostic_sw.elapsed().count()
+              << " error=" << diagnostic_taylor_flow.error() << std::endl;
+
+    diagnostic_sw.restart();
+    std::cerr << "[vanderpol] GradedTaylorPicard direct probe" << std::endl;
+    auto diagnostic_graded_flow = diagnostic_graded_picard.flow_step(
+        dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
+    diagnostic_sw.click();
+    std::cerr << "[vanderpol] GradedTaylorPicard time_us=" << diagnostic_sw.elapsed().count()
+              << " error=" << diagnostic_graded_flow.error() << std::endl;
 
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);

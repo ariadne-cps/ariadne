@@ -429,24 +429,27 @@ class TestSmtSolver {
             std::cout << "[smt-solve] split ignores wider inactive coordinate" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             SmtSolver bounded_solver(SmtSolverConfiguration(
-                0.125_x,
+                0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                2u));
+                1u));
             ExactBoxType domain({
-                ExactIntervalType(0,1),
-                ExactIntervalType(-100,100)
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-10000,10000)
             });
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(
-                    ValidatedNumber(0),
-                    sin(xy[0]),
-                    ValidatedNumber(0))
+                    ValidatedNumber(0.3_x),
+                    sin(10*xy[0]),
+                    ValidatedNumber(0.3_x))
             });
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(
-                solve_result.is_epsilon_sat() || solve_result.is_unknown());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
         }
 
         {
@@ -472,10 +475,6 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
         }
 
         {
@@ -853,23 +852,27 @@ class TestSmtSolver {
         {
             std::cout << "[smt-theory-solve] split ignores wider inactive coordinate" << std::endl;
             RealVariable y("y");
-            RealExpression ey=y;
             RealSpace xy_space({x,y});
             SmtSolver bounded_solver(SmtSolverConfiguration(
-                0.125_x,
+                0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                2u));
+                1u));
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sin(ex)==0));
+                make_smt_theory_literal(sin(10*ex)==0.3_x));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
             SmtResult solve_result=bounded_solver.solve(
                 xy_space,
-                ExactBoxType({ExactIntervalType(0,1),ExactIntervalType(-100,100)}),
+                ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(-10000,10000)}),
                 literals);
-            ARIADNE_TEST_ASSERT(
-                solve_result.is_epsilon_sat() || solve_result.is_unknown());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
         }
 
         {

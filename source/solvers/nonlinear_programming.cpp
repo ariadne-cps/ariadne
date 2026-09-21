@@ -880,7 +880,12 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
 
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        this->step(f,D,g,R,v);
+        try {
+            this->step(f,D,g,R,v);
+        } catch(const NearBoundaryOfFeasibleDomainException&) {
+            CONCLOG_PRINTLN("Near boundary of feasible domain; returning indeterminate candidate");
+            return {indeterminate,x};
+        }
         if(this->validate_feasibility(D,g,C,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Feasible");

@@ -78,7 +78,7 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
 
     SizeType geometric=0u;
     for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
-        if(definitely(widths[variable]>widths[geometric])) {
+        if(widths[variable].raw()>widths[geometric].raw()) {
             geometric=variable;
         }
     }

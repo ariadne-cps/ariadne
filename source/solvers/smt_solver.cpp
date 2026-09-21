@@ -225,6 +225,10 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             return true;
         }
 
+        if(not same_box(domain,previous)) {
+            ++statistics.hull_effective;
+        }
+
         if(same_box(domain,previous)) {
             UpperBoxType before_shaving=domain;
             ++statistics.shaving_rounds;
@@ -241,6 +245,9 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             }
             if(definitely(domain.is_empty())) {
                 return true;
+            }
+            if(not same_box(domain,before_shaving)) {
+                ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
                 for(SizeType i=0; i!=constraints.size(); ++i) {
@@ -365,6 +372,10 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             return true;
         }
 
+        if(not same_box(domain,previous)) {
+            ++statistics.hull_effective;
+        }
+
         if(same_box(domain,previous)) {
             UpperBoxType before_shaving=domain;
             ++statistics.shaving_rounds;
@@ -381,6 +392,9 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             }
             if(definitely(domain.is_empty())) {
                 return true;
+            }
+            if(not same_box(domain,before_shaving)) {
+                ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
                 for(auto const& literal:literals) {
@@ -530,7 +544,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
 
         BoxProcessingResult processing=this->_process_box(std::move(current),constraints);
         statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+        statistics.hull_effective_reductions+=processing.reductions.hull_effective;
         statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
+        statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -591,7 +607,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
 
         BoxProcessingResult processing=this->_process_box(std::move(current),compiled);
         statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+        statistics.hull_effective_reductions+=processing.reductions.hull_effective;
         statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
+        statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -670,7 +688,9 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+                state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
                 state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
+                state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -761,7 +781,9 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+                state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
                 state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
+                state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -822,7 +844,9 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_split+=source.boxes_split;
     target.boxes_unknown+=source.boxes_unknown;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
+    target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
+    target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;

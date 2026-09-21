@@ -88,7 +88,9 @@ struct SmtSearchStatistics {
     SizeType boxes_split = 0u;
     SizeType boxes_unknown = 0u;
     SizeType hull_reduction_rounds = 0u;
+    SizeType hull_effective_reductions = 0u;
     SizeType shaving_reduction_rounds = 0u;
+    SizeType shaving_effective_reductions = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -208,7 +210,9 @@ class SmtSolver {
 
     struct ReductionStatistics {
         SizeType hull_rounds = 0u;
+        SizeType hull_effective = 0u;
         SizeType shaving_rounds = 0u;
+        SizeType shaving_effective = 0u;
     };
 
     struct BoxProcessingResult {

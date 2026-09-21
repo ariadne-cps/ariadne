@@ -232,11 +232,13 @@ class SmtSolver {
     };
     using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;
 
+    ExactIntervalType _original_bounds(ValidatedConstraint const& constraint) const;
+    ExactIntervalType _original_bounds(SmtTheoryPrimitiveRelation relation) const;
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;
-    Bool _epsilon_reduce(UpperBoxType& domain,
-                         List<ValidatedConstraint> const& constraints,
-                         ReductionStatistics& statistics) const;
+    Bool _original_reduce(UpperBoxType& domain,
+                          List<ValidatedConstraint> const& constraints,
+                          ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
     std::optional<UpperBoxType> _epsilon_witness(
@@ -251,9 +253,9 @@ class SmtSolver {
     CompiledTheoryLiterals _compile_theory_literals(
         RealSpace const& space,
         List<SmtTheoryPrimitiveLiteral> const& literals) const;
-    Bool _epsilon_reduce(UpperBoxType& domain,
-                         CompiledTheoryLiterals const& literals,
-                         ReductionStatistics& statistics) const;
+    Bool _original_reduce(UpperBoxType& domain,
+                          CompiledTheoryLiterals const& literals,
+                          ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
     std::optional<UpperBoxType> _epsilon_witness(

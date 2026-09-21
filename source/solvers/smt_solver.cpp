@@ -225,6 +225,24 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
     }
 }
 
+ExactIntervalType SmtSolver::_original_bounds(ValidatedConstraint const& constraint) const
+{
+    return constraint.bounds();
+}
+
+ExactIntervalType SmtSolver::_original_bounds(SmtTheoryPrimitiveRelation relation) const
+{
+    switch(relation) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO:
+            return ExactIntervalType(0,0);
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+        case SmtTheoryPrimitiveRelation::GT_ZERO:
+            return ExactIntervalType(0,+infty);
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    }
+}
+
 ExactIntervalType SmtSolver::_epsilon_bounds(ValidatedConstraint const& constraint) const
 {
     FloatDP epsilon(_configuration.epsilon(),dp);
@@ -248,9 +266,9 @@ ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation
     }
 }
 
-Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
-                                List<ValidatedConstraint> const& constraints,
-                                ReductionStatistics& statistics) const
+Bool SmtSolver::_original_reduce(UpperBoxType& domain,
+                                 List<ValidatedConstraint> const& constraints,
+                                 ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
     while(true) {
@@ -258,7 +276,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
         ++statistics.hull_rounds;
         for(SizeType i=0; i!=constraints.size(); ++i) {
             if(contractor.hull_reduce(
-                    domain,constraints[i].function(),this->_epsilon_bounds(constraints[i]))) {
+                    domain,constraints[i].function(),this->_original_bounds(constraints[i]))) {
                 return true;
             }
         }
@@ -278,7 +296,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
                     if(contractor.box_reduce(
                             domain,
                             constraints[i].function(),
-                            this->_epsilon_bounds(constraints[i]),
+                            this->_original_bounds(constraints[i]),
                             variable)) {
                         return true;
                     }
@@ -293,7 +311,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             if(same_box(domain,before_shaving)) {
                 for(SizeType i=0; i!=constraints.size(); ++i) {
                     UpperIntervalType image=apply(constraints[i].function(),domain);
-                    if(definitely(disjoint(image,this->_epsilon_bounds(constraints[i])))) {
+                    if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
                         return true;
                     }
                 }
@@ -304,7 +322,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 
         for(SizeType i=0; i!=constraints.size(); ++i) {
             UpperIntervalType image=apply(constraints[i].function(),domain);
-            if(definitely(disjoint(image,this->_epsilon_bounds(constraints[i])))) {
+            if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
                 return true;
             }
         }
@@ -359,7 +377,7 @@ SmtSolver::_process_box(UpperBoxType domain,
                         List<ValidatedConstraint> const& constraints) const
 {
     ReductionStatistics reductions;
-    if(this->_epsilon_reduce(domain,constraints,reductions)) {
+    if(this->_original_reduce(domain,constraints,reductions)) {
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
@@ -408,23 +426,22 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
     return result;
 }
 
-Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
-                                CompiledTheoryLiterals const& literals,
-                                ReductionStatistics& statistics) const
+Bool SmtSolver::_original_reduce(UpperBoxType& domain,
+                                 CompiledTheoryLiterals const& literals,
+                                 ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    FloatDP epsilon(_configuration.epsilon(),dp);
     while(true) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
         for(auto const& literal:literals) {
             if(contractor.hull_reduce(
-                    domain,literal.function,this->_epsilon_bounds(literal.relation))) {
+                    domain,literal.function,this->_original_bounds(literal.relation))) {
                 return true;
             }
             if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
                 UpperIntervalType image=apply(literal.function,domain);
-                if(definitely(image.upper_bound()<=-epsilon)) {
+                if(definitely(image.upper_bound()<=0)) {
                     return true;
                 }
             }
@@ -445,7 +462,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
                     if(contractor.box_reduce(
                             domain,
                             literal.function,
-                            this->_epsilon_bounds(literal.relation),
+                            this->_original_bounds(literal.relation),
                             variable)) {
                         return true;
                     }
@@ -464,12 +481,12 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
                         case SmtTheoryPrimitiveRelation::EQ_ZERO:
                         case SmtTheoryPrimitiveRelation::GEQ_ZERO:
                             if(definitely(disjoint(
-                                    image,this->_epsilon_bounds(literal.relation)))) {
+                                    image,this->_original_bounds(literal.relation)))) {
                                 return true;
                             }
                             break;
                         case SmtTheoryPrimitiveRelation::GT_ZERO:
-                            if(definitely(image.upper_bound()<=-epsilon)) {
+                            if(definitely(image.upper_bound()<=0)) {
                                 return true;
                             }
                             break;
@@ -487,12 +504,12 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
             switch(literal.relation) {
                 case SmtTheoryPrimitiveRelation::EQ_ZERO:
                 case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                    if(definitely(disjoint(image,this->_epsilon_bounds(literal.relation)))) {
+                    if(definitely(disjoint(image,this->_original_bounds(literal.relation)))) {
                         return true;
                     }
                     break;
                 case SmtTheoryPrimitiveRelation::GT_ZERO:
-                    if(definitely(image.upper_bound()<=-epsilon)) {
+                    if(definitely(image.upper_bound()<=0)) {
                         return true;
                     }
                     break;
@@ -563,7 +580,7 @@ SmtSolver::_process_box(UpperBoxType domain,
                         CompiledTheoryLiterals const& literals) const
 {
     ReductionStatistics reductions;
-    if(this->_epsilon_reduce(domain,literals,reductions)) {
+    if(this->_original_reduce(domain,literals,reductions)) {
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 

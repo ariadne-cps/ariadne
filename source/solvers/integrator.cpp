@@ -786,16 +786,24 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     while(phi.error().raw()>max_err && (so<max_so || to<max_to) ) {
 
-        old_error = phi.error();
+        // Compare the current error with the error obtained at the previous
+        // order.  The old code overwrote old_error immediately before this
+        // comparison, making the spatial-order branch unconditionally true
+        // for every positive error.
+        bool const insufficient_temporal_improvement =
+            (phi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR,dp)).raw() > old_error.raw();
 
-        if( (so<max_so) && ((phi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR,dp)).raw() > old_error.raw()) ) {
-            // try increasing spacial degree
+        if(so<max_so && (to>=max_to || insufficient_temporal_improvement)) {
+            // Try increasing spatial degree and restart the temporal order.
             ++so;
             to=init_to;
-        } else {
+        } else if(to<max_to) {
             ++to;
+        } else {
+            break;
         }
 
+        old_error = phi.error();
         phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
         CONCLOG_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" err="<<phi.error());

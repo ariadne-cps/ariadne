@@ -872,6 +872,13 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
     FloatDPApproximationVector& x=cast_approximate(v.x);
     FloatDPApproximationVector& y=cast_approximate(v.y);
 
+    auto safe_candidate=[&D](FloatDPApproximationVector const& candidate) {
+        if(contains(D,cast_exact(candidate))) {
+            return candidate;
+        }
+        return midpoint(D);
+    };
+
     ApproximateScalarMultivariateFunction f(EuclideanDomain(D.dimension()));
     ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
     this->setup_feasibility(D,g,R,v);
@@ -884,7 +891,7 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
             this->step(f,D,g,R,v);
         } catch(const NearBoundaryOfFeasibleDomainException&) {
             CONCLOG_PRINTLN("Near boundary of feasible domain; returning indeterminate candidate");
-            return {indeterminate,x};
+            return {indeterminate,safe_candidate(x)};
         }
         if(this->validate_feasibility(D,g,C,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
@@ -894,7 +901,7 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
         if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Infeasible");
-            return {false,x};
+            return {false,safe_candidate(x)};
         }
         if(v.mu.raw()<MU_MIN) {
             break;
@@ -902,7 +909,7 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
     }
     CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
     CONCLOG_PRINTLN("Indeterminate");
-    return {indeterminate,x};
+    return {indeterminate,safe_candidate(x)};
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::

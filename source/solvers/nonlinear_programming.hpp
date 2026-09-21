@@ -187,7 +187,8 @@ class NonlinearInfeasibleInteriorPointOptimiser
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
     //! \brief Runs the nonlinear feasibility iteration and returns both its validated status and final numerical candidate.
-    //! \details The candidate is heuristic data only. A caller must validate it independently before using it as a certificate.
+    //! \details The candidate is heuristic data only. It is guaranteed to lie in \f$D\f$,
+    //! but a caller must validate it independently before using it as a certificate.
     Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_candidate(
         ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 

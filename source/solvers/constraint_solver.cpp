@@ -154,11 +154,20 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(decide(t>=TERR)) {
             CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
-            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
-            else { CONCLOG_PRINTLN("f(y)="<<fn(cast_exact(y))); return make_pair(indeterminate,cast_exact(point)); }
+            if(definitely(this->check_feasibility(
+                    domain,function,codomain,cast_exact(point)))) {
+                return make_pair(true,cast_exact(point));
+            }
+            CONCLOG_PRINTLN("Candidate not yet certified; continuing. f(y)="
+                            <<fn(cast_exact(y)));
         }
     }
     CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+
+    if(definitely(this->check_feasibility(
+            domain,function,codomain,cast_exact(point)))) {
+        return make_pair(true,cast_exact(point));
+    }
 
     if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this

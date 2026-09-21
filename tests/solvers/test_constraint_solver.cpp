@@ -198,7 +198,29 @@ class TestConstraintSolver
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             ValidatedVectorMultivariateFunction function({xy[0]+xy[1]});
             ExactBoxType domain({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-            ExactBoxType codomain({{0.9_x,1.1_x}});
+            ExactBoxType codomain({{0.19_x,0.21_x}});
+            ARIADNE_TEST_ASSERT(not definitely(contractor.check_feasibility(
+                domain,function,codomain,domain.midpoint())));
+            auto feasibility_result=contractor.feasible(domain,function,codomain);
+            ARIADNE_TEST_ASSERT(possibly(feasibility_result.first));
+            if(definitely(feasibility_result.first)) {
+                ARIADNE_TEST_EQUAL(feasibility_result.second.dimension(),domain.dimension());
+                ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
+                    domain,function,codomain,feasibility_result.second)));
+            }
+        {
+            auto coordinates=ValidatedScalarMultivariateFunction::coordinates(7);
+            ValidatedScalarMultivariateFunction sum=coordinates[0];
+            for(SizeType i=1u; i!=7u; ++i) {
+                sum=sum+coordinates[i];
+            }
+            ValidatedVectorMultivariateFunction function({sum});
+            ExactBoxType domain({
+                {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+                {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+                {0.0_x,1.0_x}
+            });
+            ExactBoxType codomain({{1.175_x,1.425_x}});
             auto feasibility_result=contractor.feasible(domain,function,codomain);
             ARIADNE_TEST_ASSERT(possibly(feasibility_result.first));
             if(definitely(feasibility_result.first)) {

@@ -93,9 +93,11 @@ Pair<SizeType,Bool> sensitivity_split_coordinate(
             if(not definitely(derivative_image.lower_bound()==0)
                || not definitely(derivative_image.upper_bound()==0)) {
                 active=true;
-                sensitivity=max(
-                    sensitivity,
-                    domain[variable].width()*mag(derivative_image));
+                PositiveFloatDPUpperBound candidate=
+                    domain[variable].width()*mag(derivative_image);
+                if(definitely(candidate>sensitivity)) {
+                    sensitivity=candidate;
+                }
             }
         }
         if(active && (not selected_score.has_value()

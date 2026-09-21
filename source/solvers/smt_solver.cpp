@@ -208,11 +208,13 @@ ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation
 }
 
 Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
-                                List<ValidatedConstraint> const& constraints) const
+                                List<ValidatedConstraint> const& constraints,
+                                ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
     while(true) {
         UpperBoxType previous=domain;
+        ++statistics.hull_rounds;
         for(SizeType i=0; i!=constraints.size(); ++i) {
             if(contractor.hull_reduce(
                     domain,constraints[i].function(),this->_epsilon_bounds(constraints[i]))) {
@@ -225,6 +227,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 
         if(same_box(domain,previous)) {
             UpperBoxType before_shaving=domain;
+            ++statistics.shaving_rounds;
             for(SizeType i=0; i!=constraints.size(); ++i) {
                 for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
                     if(contractor.box_reduce(
@@ -295,11 +298,11 @@ SmtSolver::_process_box(UpperBoxType domain,
                         List<ValidatedConstraint> const& constraints) const
 {
     if(this->_epsilon_reduce(domain,constraints)) {
-        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt};
+        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
     if(auto witness=this->_epsilon_witness(domain,constraints); witness.has_value()) {
-        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt};
+        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();
@@ -315,10 +318,10 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
     if(first_same and second_same) {
-        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt};
+        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children};
+    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions};
 }
 
 SmtSolver::CompiledTheoryLiterals
@@ -337,12 +340,14 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
 }
 
 Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
-                                CompiledTheoryLiterals const& literals) const
+                                CompiledTheoryLiterals const& literals,
+                                ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
     FloatDP epsilon(_configuration.epsilon(),dp);
     while(true) {
         UpperBoxType previous=domain;
+        ++statistics.hull_rounds;
         for(auto const& literal:literals) {
             if(contractor.hull_reduce(
                     domain,literal.function,this->_epsilon_bounds(literal.relation))) {
@@ -361,6 +366,7 @@ Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
 
         if(same_box(domain,previous)) {
             UpperBoxType before_shaving=domain;
+            ++statistics.shaving_rounds;
             for(auto const& literal:literals) {
                 for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
                     if(contractor.box_reduce(
@@ -468,11 +474,11 @@ SmtSolver::_process_box(UpperBoxType domain,
                         CompiledTheoryLiterals const& literals) const
 {
     if(this->_epsilon_reduce(domain,literals)) {
-        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt};
+        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
     if(auto witness=this->_epsilon_witness(domain,literals); witness.has_value()) {
-        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt};
+        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();
@@ -488,10 +494,10 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
     if(first_same and second_same) {
-        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt};
+        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children};
+    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions};
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -521,6 +527,8 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         ++statistics.boxes_processed;
 
         BoxProcessingResult processing=this->_process_box(std::move(current),constraints);
+        statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+        statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -580,6 +588,8 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         ++statistics.boxes_processed;
 
         BoxProcessingResult processing=this->_process_box(std::move(current),compiled);
+        statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+        statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -657,6 +667,8 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
             BoxProcessingResult processing=this->_process_box(box,constraints);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
+                state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+                state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -746,6 +758,8 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
             BoxProcessingResult processing=this->_process_box(box,compiled);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
+                state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+                state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -805,6 +819,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
     target.boxes_unknown+=source.boxes_unknown;
+    target.hull_reduction_rounds+=source.hull_reduction_rounds;
+    target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;

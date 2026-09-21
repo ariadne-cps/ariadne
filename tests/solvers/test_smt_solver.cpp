@@ -125,6 +125,8 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_processed,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().hull_reduction_rounds,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().shaving_reduction_rounds,0u);
 
         std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
         SmtResult unknown=SmtResult::unknown();
@@ -384,6 +386,8 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().hull_reduction_rounds>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().shaving_reduction_rounds>=1u);
         }
 
         {
@@ -537,6 +541,8 @@ class TestSmtSolver {
                 space,ExactBoxType({ExactIntervalType(-2,2)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().hull_reduction_rounds>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().shaving_reduction_rounds>=1u);
         }
 
         {

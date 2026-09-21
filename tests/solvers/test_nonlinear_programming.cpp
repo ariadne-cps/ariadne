@@ -210,6 +210,10 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         ARIADNE_TEST_CALL(test_candidate_equality());
         ARIADNE_TEST_CALL(test_candidate_infeasible());
         ARIADNE_TEST_CALL(test_candidate_seven_dimensional());
+        ARIADNE_TEST_CALL(test_candidate_narrow_codomain());
+        ARIADNE_TEST_CALL(test_candidate_anisotropic_domain());
+        ARIADNE_TEST_CALL(test_candidate_multiple_constraints());
+        ARIADNE_TEST_CALL(test_candidate_nonlinear_seven_dimensional());
     }
 
     Void test_candidate_linear() {
@@ -285,6 +289,75 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
                 D,g,C,cast_exact(candidate_result.second)));
         }
     }
+    Void test_candidate_narrow_codomain() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.199999_x,0.200001_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_anisotropic_domain() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({1000*x[0]+x[1]});
+        ExactBoxType D({{0.0_x,0.001_x},{0.0_x,1000.0_x}});
+        ExactBoxType C({{0.49_x,0.51_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_multiple_constraints() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(3);
+        ValidatedVectorMultivariateFunction g({
+            x[0]+x[1]+x[2],
+            x[0]-x[1]
+        });
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{1.19_x,1.21_x},{-0.01_x,0.01_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_nonlinear_seven_dimensional() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(7);
+        ValidatedScalarMultivariateFunction expression=
+            sqr(x[0])+x[1]+x[2]+x[3]+x[4]+x[5]+x[6];
+        ValidatedVectorMultivariateFunction g({expression});
+        ExactBoxType D({
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x}
+        });
+        ExactBoxType C({{1.29_x,1.31_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
 };
 
 Int main(Int argc, const char* argv[]) {

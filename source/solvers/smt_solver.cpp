@@ -388,8 +388,9 @@ Bool SmtSolver::_epsilon_satisfied_high_precision(
     for(SizeType i=0u; i!=constraints.size(); ++i) {
         FloatMPBounds image=constraints[i].function()(point);
         ExactIntervalType exact_bounds=this->_epsilon_bounds(constraints[i]);
-        FloatMPBounds bounds(
-            exact_bounds.lower_bound(),exact_bounds.upper_bound(),precision);
+        FloatDPBounds dp_bounds(
+            exact_bounds.lower_bound(),exact_bounds.upper_bound());
+        FloatMPBounds bounds(dp_bounds,precision);
         if(not definitely(refines(image,bounds))) {
             return false;
         }
@@ -704,8 +705,9 @@ Bool SmtSolver::_epsilon_satisfied_high_precision(
             case SmtTheoryPrimitiveRelation::EQ_ZERO:
             case SmtTheoryPrimitiveRelation::GEQ_ZERO: {
                 ExactIntervalType exact_bounds=this->_epsilon_bounds(literal.relation);
-                FloatMPBounds bounds(
-                    exact_bounds.lower_bound(),exact_bounds.upper_bound(),precision);
+                FloatDPBounds dp_bounds(
+                    exact_bounds.lower_bound(),exact_bounds.upper_bound());
+                FloatMPBounds bounds(dp_bounds,precision);
                 if(not definitely(refines(image,bounds))) {
                     return false;
                 }

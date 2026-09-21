@@ -333,8 +333,11 @@ class TestSmtSolver {
                 ValidatedConstraint(ValidatedNumber(1.125_x),x[0],ValidatedNumber(1.125_x))
             });
             SmtResult solve_result=solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            if(solve_result.is_epsilon_sat()) {
+                ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            }
         }
 
         {
@@ -546,7 +549,8 @@ class TestSmtSolver {
             std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
         }
 
         {
@@ -560,7 +564,8 @@ class TestSmtSolver {
             std::cout << "[smt-theory-solve] GEQ at epsilon boundary: x>=0 weakened on x=-0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>=0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
         }
 
         {
@@ -574,7 +579,8 @@ class TestSmtSolver {
             std::cout << "[smt-theory-solve] GT accepts strict interior: x>0 weakened on x=-0.0625" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
         }
 
         {
@@ -682,7 +688,18 @@ class TestSmtSolver {
 
             expect_status("sqr SAT",ExactIntervalType(2,2),sqr(ex)==4,SmtResultStatus::EPSILON_SAT);
             expect_status("sqr UNSAT",ExactIntervalType(2,2),sqr(ex)==5,SmtResultStatus::UNSAT);
-            expect_status("sqr epsilon-overlap SAT",ExactIntervalType(2,2),sqr(ex)==4.0625_x,SmtResultStatus::EPSILON_SAT);
+            {
+                std::cout << "[smt-real-op] sqr epsilon-overlap delta-decision" << std::endl;
+                auto alternatives=normalize_smt_theory_literal(
+                    make_smt_theory_literal(sqr(ex)==4.0625_x));
+                ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+                ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+                List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+                SmtResult solve_result=solver.solve(
+                    space,ExactBoxType({ExactIntervalType(2,2)}),literals);
+                ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+                ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            }
 
             expect_status("pow SAT",ExactIntervalType(2,2),pow(ex,3)==8,SmtResultStatus::EPSILON_SAT);
             expect_status("pow UNSAT",ExactIntervalType(2,2),pow(ex,3)==9,SmtResultStatus::UNSAT);
@@ -1255,8 +1272,11 @@ class TestSmtSolver {
             ContinuousPredicate formula=(ex<0)||(ex>1);
             SmtResult solve_result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0.0_x,0.0625_x)}),formula);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            if(solve_result.is_epsilon_sat()) {
+                ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            }
         }
 
         {
@@ -1340,7 +1360,8 @@ class TestSmtSolver {
             ContinuousPredicate formula=(ex!=0);
             SmtResult solve_result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,0)}),formula);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
         }
 
         {

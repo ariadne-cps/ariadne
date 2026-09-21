@@ -871,7 +871,7 @@ feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactB
     FloatDPApproximationVector& x=cast_approximate(v.x);
     FloatDPApproximationVector& y=cast_approximate(v.y);
 
-    auto safe_candidate=[&D](FloatDPApproximationVector const& candidate) {
+    auto safe_candidate=[&D](FloatDPApproximationVector const& candidate) -> FloatDPApproximationVector {
         if(contains(D,cast_exact(candidate))) {
             return candidate;
         }

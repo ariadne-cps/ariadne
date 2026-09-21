@@ -226,8 +226,8 @@ class SmtSolver {
         ReductionStatistics reductions;
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
-        Bool feasibility_witness_search = false;
-        Bool feasibility_witness_success = false;
+        Bool candidate_witness_search = false;
+        Bool candidate_witness_success = false;
     };
 
     struct CompiledTheoryLiteral {

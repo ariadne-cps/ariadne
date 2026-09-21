@@ -93,8 +93,8 @@ struct SmtSearchStatistics {
     SizeType shaving_effective_reductions = 0u;
     SizeType sensitivity_guided_splits = 0u;
     SizeType sensitivity_overrides_geometric_splits = 0u;
-    SizeType feasibility_witness_searches = 0u;
-    SizeType feasibility_witness_successes = 0u;
+    SizeType candidate_witness_searches = 0u;
+    SizeType candidate_witness_successes = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -248,7 +248,7 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints) const;
-    std::optional<UpperBoxType> _epsilon_feasible_witness(
+    std::optional<UpperBoxType> _epsilon_candidate_witness(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
@@ -268,7 +268,7 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;
-    std::optional<UpperBoxType> _epsilon_feasible_witness(
+    std::optional<UpperBoxType> _epsilon_candidate_witness(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;
     BoxProcessingResult _process_box(UpperBoxType domain,

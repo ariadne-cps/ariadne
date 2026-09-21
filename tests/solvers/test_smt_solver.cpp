@@ -131,8 +131,8 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_overrides_geometric_splits,0u);
-        ARIADNE_TEST_EQUAL(unsat.statistics().feasibility_witness_searches,0u);
-        ARIADNE_TEST_EQUAL(unsat.statistics().feasibility_witness_successes,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_searches,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_successes,0u);
 
         std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
         SmtResult unknown=SmtResult::unknown();
@@ -483,7 +483,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-solve] conservative feasibility fallback on 7D epsilon-SAT" << std::endl;
+            std::cout << "[smt-solve] interior-point candidate search on 7D epsilon-SAT" << std::endl;
             auto coordinates=ValidatedScalarMultivariateFunction::coordinates(7);
             ValidatedScalarMultivariateFunction sum=coordinates[0];
             for(SizeType i=1u; i!=7u; ++i) {
@@ -501,10 +501,9 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().feasibility_witness_searches>=1u);
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().feasibility_witness_successes
-                <= solve_result.statistics().feasibility_witness_searches);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,1u);
         }
 
         {
@@ -945,7 +944,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-theory-solve] conservative feasibility fallback on 7D epsilon-SAT" << std::endl;
+            std::cout << "[smt-theory-solve] interior-point candidate search on 7D epsilon-SAT" << std::endl;
             RealVariable x0("x0"); RealVariable x1("x1"); RealVariable x2("x2");
             RealVariable x3("x3"); RealVariable x4("x4"); RealVariable x5("x5");
             RealVariable x6("x6");
@@ -970,10 +969,9 @@ class TestSmtSolver {
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().feasibility_witness_searches>=1u);
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().feasibility_witness_successes
-                <= solve_result.statistics().feasibility_witness_searches);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,1u);
         }
 
         {

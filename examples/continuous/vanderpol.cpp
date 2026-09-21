@@ -70,6 +70,15 @@ void ariadne_main()
 
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
+
+    // Temporary diagnostic: exercise one integrator step directly, before the
+    // evolver machinery, so that the internal Picard/refinement diagnostics
+    // are unambiguously attributable to GradedTaylorPicardIntegrator.
+    auto diagnostic_initial_box = cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
+    std::cerr << "[vanderpol] direct graded Taylor-Picard probe" << std::endl;
+    auto diagnostic_flow = integrator.flow_step(dynamics.function(),diagnostic_initial_box,suggest(StepSizeType(0.02_dy)));
+    std::cerr << "[vanderpol] direct probe returned with error=" << diagnostic_flow.error() << std::endl;
+
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();

@@ -83,7 +83,7 @@ void ariadne_main()
     auto diagnostic_taylor_flow = diagnostic_taylor_picard.flow_step(
         dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
     diagnostic_sw.click();
-    std::cerr << "[vanderpol] TaylorPicard time_us=" << diagnostic_sw.elapsed().count()
+    std::cerr << "[vanderpol] TaylorPicard time_us=" << diagnostic_sw.duration().count()
               << " error=" << diagnostic_taylor_flow.error() << std::endl;
 
     diagnostic_sw.restart();
@@ -91,7 +91,7 @@ void ariadne_main()
     auto diagnostic_graded_flow = diagnostic_graded_picard.flow_step(
         dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
     diagnostic_sw.click();
-    std::cerr << "[vanderpol] GradedTaylorPicard time_us=" << diagnostic_sw.elapsed().count()
+    std::cerr << "[vanderpol] GradedTaylorPicard time_us=" << diagnostic_sw.duration().count()
               << " error=" << diagnostic_graded_flow.error() << std::endl;
 
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;

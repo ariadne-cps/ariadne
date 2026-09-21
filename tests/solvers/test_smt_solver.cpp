@@ -221,6 +221,28 @@ class TestSmtSolver {
 
 
         {
+            std::cout << "[smt-solve] classify non-splittable uncertified singleton" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ExactBoxType domain({ExactIntervalType(1,1)});
+            ValidatedScalarMultivariateFunction residual=sin(x[0])-sin(x[0]);
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+        }
+
+        {
             std::cout << "[smt-solve] transcendental UNSAT: x in [3,4], sin(x)=2" << std::endl;
             ExactBoxType domain({ExactIntervalType(3,4)});
             List<ValidatedConstraint> constraints({
@@ -590,6 +612,34 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
+
+        {
+            std::cout << "[smt-theory-solve] classify non-splittable uncertified singleton" << std::endl;
+            RealVariable singleton_x("singleton_x");
+            RealExpression singleton_ex=singleton_x;
+            RealSpace singleton_space({singleton_x});
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(
+                    sin(singleton_ex)-sin(singleton_ex)==0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                singleton_space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+        }
 
         {
             std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;

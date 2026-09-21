@@ -634,9 +634,6 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         if(processing.sensitivity_overrode_geometric_split) {
             ++statistics.sensitivity_overrides_geometric_splits;
         }
-        if(processing.sensitivity_overrode_geometric_split) {
-            ++statistics.sensitivity_overrides_geometric_splits;
-        }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -702,6 +699,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
         if(processing.sensitivity_guided_split) {
             ++statistics.sensitivity_guided_splits;
+        }
+        if(processing.sensitivity_overrode_geometric_split) {
+            ++statistics.sensitivity_overrides_geometric_splits;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -789,12 +789,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 }
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
-                }
-                if(processing.sensitivity_overrode_geometric_split) {
-                    ++state->statistics.sensitivity_overrides_geometric_splits;
-                }
-                if(processing.sensitivity_guided_split) {
-                    ++state->statistics.sensitivity_guided_splits;
                 }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
@@ -889,6 +883,12 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                 state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
                 state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
                 state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
+                if(processing.sensitivity_guided_split) {
+                    ++state->statistics.sensitivity_guided_splits;
+                }
+                if(processing.sensitivity_overrode_geometric_split) {
+                    ++state->statistics.sensitivity_overrides_geometric_splits;
+                }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {

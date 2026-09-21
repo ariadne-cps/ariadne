@@ -24,6 +24,7 @@
 
 #include "utility/stopwatch.hpp"
 #include "function/taylor_function.hpp"
+#include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "ariadne_main.hpp"
 
@@ -104,7 +105,7 @@ void ariadne_main()
         EnclosureConfiguration(integrator.function_factory()));
     diagnostic_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
 
-    TimeStepType diagnostic_time=0_dy;
+    TimeStepType diagnostic_time(0u);
     for(Nat diagnostic_step_index=0; diagnostic_step_index!=20; ++diagnostic_step_index) {
         auto const& sf=diagnostic_enclosure.state_function();
         auto const& sf_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(sf.reference());

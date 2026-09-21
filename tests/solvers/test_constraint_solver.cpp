@@ -199,12 +199,12 @@ class TestConstraintSolver
             ValidatedVectorMultivariateFunction function({xy[0]+xy[1]});
             ExactBoxType domain({{0.0_x,1.0_x},{0.0_x,1.0_x}});
             ExactBoxType codomain({{0.9_x,1.1_x}});
-            auto result=contractor.feasible(domain,function,codomain);
-            ARIADNE_TEST_ASSERT(possibly(result.first));
-            if(definitely(result.first)) {
-                ARIADNE_TEST_EQUAL(result.second.dimension(),domain.dimension());
+            auto feasibility_result=contractor.feasible(domain,function,codomain);
+            ARIADNE_TEST_ASSERT(possibly(feasibility_result.first));
+            if(definitely(feasibility_result.first)) {
+                ARIADNE_TEST_EQUAL(feasibility_result.second.dimension(),domain.dimension());
                 ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
-                    domain,function,codomain,result.second)));
+                    domain,function,codomain,feasibility_result.second)));
             }
         }
     }

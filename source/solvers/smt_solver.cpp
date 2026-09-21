@@ -72,8 +72,10 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
 
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 {
+    constexpr SizeType max_corner_candidates=64u;
+
     std::vector<UpperBoxType> candidates;
-    candidates.reserve(3u+2u*domain.dimension());
+    candidates.reserve(3u+2u*domain.dimension()+max_corner_candidates);
 
     auto midpoint_point=[&]() {
         return UpperBoxType(domain.dimension(),[&](SizeType i) {
@@ -105,6 +107,24 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
         candidates.push_back(std::move(low_axis));
         candidates.push_back(std::move(high_axis));
     }
+
+    if(domain.dimension()<std::numeric_limits<std::uint64_t>::digits) {
+        std::uint64_t corner_count=std::uint64_t(1) << domain.dimension();
+        if(corner_count<=max_corner_candidates) {
+            for(std::uint64_t mask=0u; mask<corner_count; ++mask) {
+                UpperBoxType corner=midpoint;
+                for(SizeType i=0u; i!=domain.dimension(); ++i) {
+                    Bool use_upper=(mask & (std::uint64_t(1) << i))!=0u;
+                    auto endpoint=use_upper
+                        ? domain[i].upper_bound().raw()
+                        : domain[i].lower_bound().raw();
+                    corner[i]=UpperIntervalType(endpoint,endpoint);
+                }
+                candidates.push_back(std::move(corner));
+            }
+        }
+    }
+
     return candidates;
 }
 

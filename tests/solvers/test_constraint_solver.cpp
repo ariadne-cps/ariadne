@@ -54,6 +54,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_box_reduce());
         ARIADNE_TEST_CALL(test_pruning_well_definedness());
         ARIADNE_TEST_CALL(test_composite_pruning_witness_preservation());
+        ARIADNE_TEST_CALL(test_partial_domain_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_monotone_reduce());
         ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
@@ -269,6 +270,65 @@ class TestConstraintSolver
             (x[0]-x[0])+x[1],
             ExactIntervalType(0.5_x,0.5_x),
             ExactBoxType({{-1.5_x,-1.5_x},{0.5_x,0.5_x}}));
+    }
+
+    Void test_partial_domain_pruning_witness_preservation() {
+        ConstraintSolver contractor;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+
+        auto check = [&](String const& label,
+                         UpperBoxType const& domain,
+                         ValidatedScalarMultivariateFunction const& function,
+                         ExactIntervalType const& codomain,
+                         UpperBoxType const& witness) {
+            std::cout << "[constraint-prune-domain] " << label << std::endl;
+            UpperBoxType reduced=domain;
+            contractor.hull_reduce(reduced,function,codomain);
+            ARIADNE_TEST_ASSERT(refines(reduced,domain));
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(witness,reduced)));
+        };
+
+        check(
+            "reciprocal domain straddles zero",
+            ExactBoxType({{-2.0_x,2.0_x},{0.0_x,0.0_x}}),
+            rec(x[0])+x[1],
+            ExactIntervalType(1.0_x,1.0_x),
+            ExactBoxType({{1.0_x,1.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "division denominator straddles zero",
+            ExactBoxType({{1.0_x,2.0_x},{-2.0_x,2.0_x}}),
+            x[0]/x[1],
+            ExactIntervalType(1.0_x,1.0_x),
+            ExactBoxType({{1.0_x,1.0_x},{1.0_x,1.0_x}}));
+
+        check(
+            "sqrt argument crosses negative side",
+            ExactBoxType({{-1.0_x,4.0_x},{0.0_x,0.0_x}}),
+            sqrt(x[0])+x[1],
+            ExactIntervalType(1.0_x,1.0_x),
+            ExactBoxType({{1.0_x,1.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "log argument crosses zero",
+            ExactBoxType({{-1.0_x,3.0_x},{0.0_x,0.0_x}}),
+            log(x[0])+x[1],
+            ExactIntervalType(0.0_x,0.0_x),
+            ExactBoxType({{1.0_x,1.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "asin argument crosses both boundaries",
+            ExactBoxType({{-2.0_x,2.0_x},{0.0_x,0.0_x}}),
+            asin(x[0])+x[1],
+            ExactIntervalType(0.0_x,0.0_x),
+            ExactBoxType({{0.0_x,0.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "acos argument crosses both boundaries",
+            ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}}),
+            acos(x[0])+x[1],
+            ExactIntervalType(0.0_x,0.0_x),
+            ExactBoxType({{1.0_x,1.0_x},{-1.5707963267948966_x,-1.5707963267948966_x}}));
     }
 
     Void test_monotone_reduce() {

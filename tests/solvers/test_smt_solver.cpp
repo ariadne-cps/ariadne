@@ -1538,6 +1538,93 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] audit relation and negation delta-boundaries" << std::endl;
+
+            auto require_epsilon_sat = [&](String const& label,
+                                           ContinuousPredicate const& formula,
+                                           ExactDouble value) {
+                std::cout << "[smt-relation] " << label << " value=" << value << std::endl;
+                SmtResult result=solver.solve(
+                    space,ExactBoxType({ExactIntervalType(value,value)}),formula);
+                ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+                ARIADNE_TEST_ASSERT(result.has_witness());
+            };
+
+            auto require_unsat = [&](String const& label,
+                                     ContinuousPredicate const& formula,
+                                     ExactDouble value) {
+                std::cout << "[smt-relation] " << label << " value=" << value << std::endl;
+                SmtResult result=solver.solve(
+                    space,ExactBoxType({ExactIntervalType(value,value)}),formula);
+                ARIADNE_TEST_ASSERT(result.is_unsat());
+            };
+
+            auto require_delta_overlap = [&](String const& label,
+                                             ContinuousPredicate const& formula,
+                                             ExactDouble value) {
+                std::cout << "[smt-relation] " << label << " value=" << value << std::endl;
+                SmtResult result=solver.solve(
+                    space,ExactBoxType({ExactIntervalType(value,value)}),formula);
+                ARIADNE_TEST_ASSERT(result.is_unsat() || result.is_epsilon_sat());
+                ARIADNE_TEST_ASSERT(not result.is_unknown());
+            };
+
+            // Equality: exact models must be delta-sat; outside the epsilon band must be UNSAT.
+            require_epsilon_sat("x=0 original true",ex==0,0.0_x);
+            require_delta_overlap("x=0 positive epsilon boundary",ex==0,0.125_x);
+            require_delta_overlap("x=0 negative epsilon boundary",ex==0,-0.125_x);
+            require_unsat("x=0 outside epsilon",ex==0,0.25_x);
+
+            // Non-strict inequalities use closed epsilon boundaries.
+            require_epsilon_sat("x>=0 original true",ex>=0,0.25_x);
+            require_delta_overlap("x>=0 epsilon boundary",ex>=0,-0.125_x);
+            require_unsat("x>=0 outside epsilon",ex>=0,-0.25_x);
+
+            require_epsilon_sat("x<=0 original true",ex<=0,-0.25_x);
+            require_delta_overlap("x<=0 epsilon boundary",ex<=0,0.125_x);
+            require_unsat("x<=0 outside epsilon",ex<=0,0.25_x);
+
+            // Strict inequalities retain strictness after weakening.
+            require_epsilon_sat("x>0 original true",ex>0,0.25_x);
+            require_delta_overlap("x>0 weakened interior",ex>0,-0.0625_x);
+            require_unsat("x>0 epsilon boundary excluded",ex>0,-0.125_x);
+
+            require_epsilon_sat("x<0 original true",ex<0,-0.25_x);
+            require_delta_overlap("x<0 weakened interior",ex<0,0.0625_x);
+            require_unsat("x<0 epsilon boundary excluded",ex<0,0.125_x);
+
+            // Disequality normalizes to x>0 OR -x>0. Its delta weakening is
+            // therefore satisfied at equality as well.
+            require_epsilon_sat("x!=0 original true positive",ex!=0,0.25_x);
+            require_epsilon_sat("x!=0 original true negative",ex!=0,-0.25_x);
+            require_delta_overlap("x!=0 equality delta-overlap",ex!=0,0.0_x);
+
+            // Audit Boolean negation against the corresponding complementary relation.
+            require_epsilon_sat("!(x<=0) original true",!(ex<=0),0.25_x);
+            require_delta_overlap("!(x<=0) weakened interior",!(ex<=0),-0.0625_x);
+            require_unsat("!(x<=0) strict epsilon boundary",!(ex<=0),-0.125_x);
+
+            require_epsilon_sat("!(x>=0) original true",!(ex>=0),-0.25_x);
+            require_delta_overlap("!(x>=0) weakened interior",!(ex>=0),0.0625_x);
+            require_unsat("!(x>=0) strict epsilon boundary",!(ex>=0),0.125_x);
+
+            require_epsilon_sat("!(x<0) original true",!(ex<0),0.25_x);
+            require_delta_overlap("!(x<0) closed epsilon boundary",!(ex<0),-0.125_x);
+            require_unsat("!(x<0) outside epsilon",!(ex<0),-0.25_x);
+
+            require_epsilon_sat("!(x>0) original true",!(ex>0),-0.25_x);
+            require_delta_overlap("!(x>0) closed epsilon boundary",!(ex>0),0.125_x);
+            require_unsat("!(x>0) outside epsilon",!(ex>0),0.25_x);
+
+            require_epsilon_sat("!(x!=0) equality",!(ex!=0),0.0_x);
+            require_delta_overlap("!(x!=0) epsilon boundary",!(ex!=0),0.125_x);
+            require_unsat("!(x!=0) outside epsilon",!(ex!=0),0.25_x);
+
+            require_delta_overlap("!(x==0) equality delta-overlap",!(ex==0),0.0_x);
+            require_epsilon_sat("!(x==0) original true",!(ex==0),0.25_x);
+        }
+
+        {
             std::cout << "[smt-dpll] mixed transcendental Boolean formula" << std::endl;
             ContinuousPredicate formula=((sin(ex)==0)||(cos(ex)==0))&&(ex>=3);
             SmtResult solve_result=solver.solve(

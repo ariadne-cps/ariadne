@@ -547,7 +547,7 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
-Pair<Pair<UpperBoxType,UpperBoxType>,Bool>
+Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       CompiledTheoryLiterals const& literals) const
 {

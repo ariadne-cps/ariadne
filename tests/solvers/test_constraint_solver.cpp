@@ -52,6 +52,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_empty_box_reduce());
         ARIADNE_TEST_CALL(test_hull_reduce());
         ARIADNE_TEST_CALL(test_box_reduce());
+        ARIADNE_TEST_CALL(test_pruning_well_definedness());
         ARIADNE_TEST_CALL(test_monotone_reduce());
         ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
@@ -147,6 +148,75 @@ class TestConstraintSolver
         ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,1.25_x}}));
     }
 
+
+    Void test_pruning_well_definedness() {
+        ConstraintSolver contractor;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+
+        {
+            std::cout << "[constraint-prune] hull reduction is reductive and preserves a known solution" << std::endl;
+            UpperBoxType before=ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}});
+            UpperBoxType after=before;
+            ValidatedScalarMultivariateFunction function=x[0]+x[1];
+            ExactIntervalType codomain(1.0_x,1.0_x);
+            UpperBoxType solution=ExactBoxType({
+                {0.25_x,0.25_x},{0.75_x,0.75_x}
+            });
+
+            contractor.hull_reduce(after,function,codomain);
+            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
+            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+        }
+
+        {
+            std::cout << "[constraint-prune] nonlinear hull reduction preserves a known solution" << std::endl;
+            UpperBoxType before=ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}});
+            UpperBoxType after=before;
+            ValidatedScalarMultivariateFunction function=sqr(x[0])+x[1];
+            ExactIntervalType codomain(1.0_x,1.0_x);
+            UpperBoxType solution=ExactBoxType({
+                {0.0_x,0.0_x},{1.0_x,1.0_x}
+            });
+
+            contractor.hull_reduce(after,function,codomain);
+            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
+            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+        }
+
+        {
+            std::cout << "[constraint-prune] box shaving is reductive and preserves a known solution" << std::endl;
+            UpperBoxType before=ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}});
+            UpperBoxType after=before;
+            ValidatedScalarMultivariateFunction function=sqr(x[0])+x[1];
+            ExactIntervalType codomain(1.0_x,1.0_x);
+            UpperBoxType solution=ExactBoxType({
+                {0.0_x,0.0_x},{1.0_x,1.0_x}
+            });
+
+            contractor.box_reduce(after,function,codomain,0u);
+            contractor.box_reduce(after,function,codomain,1u);
+            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
+            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+        }
+
+        {
+            std::cout << "[constraint-prune] definitely infeasible hull reduction closes the box" << std::endl;
+            auto y=ValidatedScalarMultivariateFunction::coordinates(1);
+            UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
+            contractor.hull_reduce(
+                domain,y[0],ExactIntervalType(2.0_x,3.0_x));
+            ARIADNE_TEST_ASSERT(definitely(domain.is_empty()));
+        }
+
+        {
+            std::cout << "[constraint-prune] definitely infeasible box shaving closes the box" << std::endl;
+            auto y=ValidatedScalarMultivariateFunction::coordinates(1);
+            UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
+            contractor.box_reduce(
+                domain,y[0],ExactIntervalType(2.0_x,3.0_x),0u);
+            ARIADNE_TEST_ASSERT(definitely(domain.is_empty()));
+        }
+    }
 
     Void test_monotone_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);

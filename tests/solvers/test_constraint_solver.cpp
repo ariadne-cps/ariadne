@@ -208,6 +208,8 @@ class TestConstraintSolver
                 ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
                     domain,function,codomain,feasibility_result.second)));
             }
+        }
+
         {
             auto coordinates=ValidatedScalarMultivariateFunction::coordinates(7);
             ValidatedScalarMultivariateFunction sum=coordinates[0];

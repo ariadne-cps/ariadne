@@ -375,6 +375,20 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+
+    auto log_model_size = [](const char* phase, DegreeType iteration, FlowStepModelType const& model) {
+        auto const& taylor_model = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(model.reference());
+        SizeType total_nnz=0;
+        CONCLOG_PRINT_AT(0,"[GradedTaylorPicard] "<<phase<<" "<<iteration<<" nnz=[");
+        for(SizeType i=0; i!=taylor_model.size(); ++i) {
+            SizeType const nnz=taylor_model[i].number_of_nonzeros();
+            total_nnz+=nnz;
+            if(i!=0) { CONCLOG_PRINT_AT(0,","); }
+            CONCLOG_PRINT_AT(0,nnz);
+        }
+        CONCLOG_PRINTLN_AT(0,"] total="<<total_nnz<<" error="<<taylor_model.error());
+    };
+
     FlowStepModelType fphi=compose(f,join(phi0,ta));
     for (DegreeType k=0; k!=this->_order; ++k) {
         try {
@@ -385,11 +399,13 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         }
         phi=antiderivative(fphi,nx)+phi0;
         CONCLOG_PRINTLN_AT(2,"phi="<<phi);
+        log_model_size("picard",k+1,phi);
     }
     auto errors = phi.errors();
     CONCLOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
     fphi=compose(f,join(std::move(phi),ta));
     phi=antiderivative(fphi,nx)+phi0;
+    log_model_size("validation",1,phi);
     auto new_errors = phi.errors();
     for (SizeType i=0; i<errors.size(); ++i) {
         if (not refines(new_errors[i],errors[i])) {
@@ -398,9 +414,12 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     }
     errors = new_errors;
     CONCLOG_PRINTLN_AT(2,"validated errors=" << errors);
+    DegreeType refinement_iteration=0;
     while (true) {
+        ++refinement_iteration;
         fphi=compose(f,join(std::move(phi),ta));
         phi=antiderivative(fphi,nx)+phi0;
+        log_model_size("refinement",refinement_iteration,phi);
         new_errors = phi.errors();
         Bool has_improved = false;
         for (SizeType i=0; i<errors.size(); ++i) {

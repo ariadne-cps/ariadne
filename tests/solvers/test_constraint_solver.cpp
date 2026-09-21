@@ -165,8 +165,8 @@ class TestConstraintSolver
             });
 
             contractor.hull_reduce(after,function,codomain);
-            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
-            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+            ARIADNE_TEST_ASSERT(refines(after,before));
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(solution,after)));
         }
 
         {
@@ -180,8 +180,8 @@ class TestConstraintSolver
             });
 
             contractor.hull_reduce(after,function,codomain);
-            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
-            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+            ARIADNE_TEST_ASSERT(refines(after,before));
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(solution,after)));
         }
 
         {
@@ -196,8 +196,8 @@ class TestConstraintSolver
 
             contractor.box_reduce(after,function,codomain,0u);
             contractor.box_reduce(after,function,codomain,1u);
-            ARIADNE_TEST_ASSERT(definitely(subset(after,before)));
-            ARIADNE_TEST_ASSERT(definitely(subset(solution,after)));
+            ARIADNE_TEST_ASSERT(refines(after,before));
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(solution,after)));
         }
 
         {
@@ -231,8 +231,8 @@ class TestConstraintSolver
             std::cout << "[constraint-prune-composite] " << label << std::endl;
             UpperBoxType reduced=domain;
             contractor.hull_reduce(reduced,function,codomain);
-            ARIADNE_TEST_ASSERT(definitely(subset(reduced,domain)));
-            ARIADNE_TEST_ASSERT(definitely(subset(witness,reduced)));
+            ARIADNE_TEST_ASSERT(refines(reduced,domain));
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(witness,reduced)));
         };
 
         check(

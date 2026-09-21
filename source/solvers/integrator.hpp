@@ -291,6 +291,8 @@ class GradedTaylorPicardIntegrator
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
+    using IntegratorBase::flow_step;
+
 private:
     FlowStepModelType
     _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,

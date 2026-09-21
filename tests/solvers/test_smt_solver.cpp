@@ -129,6 +129,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().hull_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_reduction_rounds,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
 
         std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
         SmtResult unknown=SmtResult::unknown();
@@ -445,6 +446,28 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(
                 solve_result.is_epsilon_sat() || solve_result.is_unknown());
             ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
+        }
+
+        {
+            std::cout << "[smt-solve] sensitivity-guided split overrides widest coordinate" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-10,10)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(3),
+                    20*xy[0]+xy[1],
+                    ValidatedNumber(3)),
+                ValidatedConstraint(
+                    ValidatedNumber(-3),
+                    20*xy[0]+xy[1],
+                    ValidatedNumber(-3))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().sensitivity_guided_splits>=1u);
         }
 
         {
@@ -839,6 +862,24 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(
                 solve_result.is_epsilon_sat() || solve_result.is_unknown());
             ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] sensitivity-guided split overrides widest coordinate" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            auto a=normalize_smt_theory_literal(
+                make_smt_theory_literal(20*ex+ey==3));
+            auto b=normalize_smt_theory_literal(
+                make_smt_theory_literal(20*ex+ey==-3));
+            List<SmtTheoryPrimitiveLiteral> literals({a[0][0],b[0][0]});
+            SmtResult solve_result=solver.solve(
+                xy_space,
+                ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(-10,10)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().sensitivity_guided_splits>=1u);
         }
 
         {

@@ -70,39 +70,43 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
     return true;
 }
 
-SizeType widest_active_coordinate(
+Pair<SizeType,Bool> sensitivity_split_coordinate(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions)
 {
-    std::optional<SizeType> selected;
     auto widths=domain.widths();
+
+    SizeType geometric=0u;
+    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
+        if(definitely(widths[variable]>widths[geometric])) {
+            geometric=variable;
+        }
+    }
+
+    std::optional<SizeType> selected;
+    std::optional<PositiveFloatDPUpperBound> selected_score;
     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+        PositiveFloatDPUpperBound sensitivity(0u,dp);
         Bool active=false;
         for(auto const& function:functions) {
             UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
             if(not definitely(derivative_image.lower_bound()==0)
                || not definitely(derivative_image.upper_bound()==0)) {
                 active=true;
-                break;
+                sensitivity=max(
+                    sensitivity,
+                    domain[variable].width()*mag(derivative_image));
             }
         }
-        if(active) {
-            if(not selected.has_value()
-               || definitely(widths[variable]>widths[*selected])) {
-                selected=variable;
-            }
+        if(active && (not selected_score.has_value()
+                      || definitely(sensitivity>*selected_score))) {
+            selected=variable;
+            selected_score=sensitivity;
         }
     }
-    if(selected.has_value()) {
-        return *selected;
-    }
-    SizeType widest=0u;
-    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
-        if(definitely(widths[variable]>widths[widest])) {
-            widest=variable;
-        }
-    }
-    return widest;
+
+    SizeType coordinate=selected.has_value() ? *selected : geometric;
+    return {coordinate,coordinate!=geometric};
 }
 
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
@@ -335,7 +339,7 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
-Pair<UpperBoxType,UpperBoxType>
+Pair<Pair<UpperBoxType,UpperBoxType>,Bool>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       List<ValidatedConstraint> const& constraints) const
 {
@@ -344,7 +348,8 @@ SmtSolver::_split_box(UpperBoxType const& domain,
     for(SizeType i=0u; i!=constraints.size(); ++i) {
         functions.push_back(constraints[i].function());
     }
-    return domain.split(widest_active_coordinate(domain,functions));
+    auto selection=sensitivity_split_coordinate(domain,functions);
+    return {domain.split(selection.first),selection.second};
 }
 
 SmtSolver::BoxProcessingResult
@@ -360,7 +365,8 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    Pair<UpperBoxType,UpperBoxType> children=this->_split_box(domain,constraints);
+    auto split_result=this->_split_box(domain,constraints);
+    Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
     Bool first_same=true;
     Bool second_same=true;
@@ -376,7 +382,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions};
+    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions,split_result.second};
 }
 
 SmtSolver::CompiledTheoryLiterals
@@ -531,7 +537,7 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
-Pair<UpperBoxType,UpperBoxType>
+Pair<Pair<UpperBoxType,UpperBoxType>,Bool>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       CompiledTheoryLiterals const& literals) const
 {
@@ -540,7 +546,8 @@ SmtSolver::_split_box(UpperBoxType const& domain,
     for(auto const& literal:literals) {
         functions.push_back(literal.function);
     }
-    return domain.split(widest_active_coordinate(domain,functions));
+    auto selection=sensitivity_split_coordinate(domain,functions);
+    return {domain.split(selection.first),selection.second};
 }
 
 SmtSolver::BoxProcessingResult
@@ -556,7 +563,8 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    Pair<UpperBoxType,UpperBoxType> children=this->_split_box(domain,literals);
+    auto split_result=this->_split_box(domain,literals);
+    Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
     Bool first_same=true;
     Bool second_same=true;
@@ -572,7 +580,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions};
+    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions,split_result.second};
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -606,6 +614,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         statistics.hull_effective_reductions+=processing.reductions.hull_effective;
         statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
         statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
+        if(processing.sensitivity_guided_split) {
+            ++statistics.sensitivity_guided_splits;
+        }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -669,6 +680,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         statistics.hull_effective_reductions+=processing.reductions.hull_effective;
         statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
         statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
+        if(processing.sensitivity_guided_split) {
+            ++statistics.sensitivity_guided_splits;
+        }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -750,6 +764,12 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
                 state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
                 state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
+                if(processing.sensitivity_guided_split) {
+                    ++state->statistics.sensitivity_guided_splits;
+                }
+                if(processing.sensitivity_guided_split) {
+                    ++state->statistics.sensitivity_guided_splits;
+                }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -906,6 +926,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
+    target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;

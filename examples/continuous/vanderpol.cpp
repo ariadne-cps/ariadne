@@ -39,7 +39,7 @@ void ariadne_main()
 
     StepMaximumError max_err=1e-6;
 
-    TaylorPicardIntegrator integrator(max_err);
+    GradedTaylorPicardIntegrator integrator(max_err,order=5);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);

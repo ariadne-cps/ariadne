@@ -749,12 +749,6 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         if(processing.feasibility_witness_success) {
             ++statistics.feasibility_witness_successes;
         }
-        if(processing.feasibility_witness_search) {
-            ++statistics.feasibility_witness_searches;
-        }
-        if(processing.feasibility_witness_success) {
-            ++statistics.feasibility_witness_successes;
-        }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
                 ++statistics.boxes_pruned;
@@ -823,6 +817,12 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         }
         if(processing.sensitivity_overrode_geometric_split) {
             ++statistics.sensitivity_overrides_geometric_splits;
+        }
+        if(processing.feasibility_witness_search) {
+            ++statistics.feasibility_witness_searches;
+        }
+        if(processing.feasibility_witness_success) {
+            ++statistics.feasibility_witness_successes;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -910,12 +910,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 }
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
-                }
-                if(processing.feasibility_witness_search) {
-                    ++state->statistics.feasibility_witness_searches;
-                }
-                if(processing.feasibility_witness_success) {
-                    ++state->statistics.feasibility_witness_successes;
                 }
                 if(processing.feasibility_witness_search) {
                     ++state->statistics.feasibility_witness_searches;
@@ -1021,6 +1015,12 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                 }
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
+                }
+                if(processing.feasibility_witness_search) {
+                    ++state->statistics.feasibility_witness_searches;
+                }
+                if(processing.feasibility_witness_success) {
+                    ++state->statistics.feasibility_witness_successes;
                 }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;

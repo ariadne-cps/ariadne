@@ -102,7 +102,6 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     -> Pair<ValidatedKleenean,ExactPointType>
 {
     CONCLOG_SCOPE_CREATE;
-    static const ExactDouble XSIGMA=0.125_x;
     static const ExactDouble TERR=-1.0_x*pow(two,-10);
     static const ExactDouble _inf ( Ariadne::inf.get_d() );
 
@@ -200,14 +199,18 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         CONCLOG_PRINTLN("Splitting domain");
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
-        FloatDPApproximation xsigma(XSIGMA,dp);
-        Vector<FloatDPApproximation> nx = (1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
-        Vector<FloatDPApproximation> ny = midpoint(sd.first);
-        ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
-        nx = FloatDPApproximation(1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
-        ny = midpoint(sd.second);
-        result = result || this->feasible(sd.second, fn, c).first;
-        return make_pair(result,ExactPointType());
+
+        auto first=this->feasible(sd.first,fn,c);
+        if(definitely(first.first)) {
+            return first;
+        }
+
+        auto second=this->feasible(sd.second,fn,c);
+        if(definitely(second.first)) {
+            return second;
+        }
+
+        return make_pair(first.first || second.first,ExactPointType());
     }
 
     return make_pair(indeterminate,ExactPointType());

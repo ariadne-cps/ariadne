@@ -182,11 +182,13 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 
 SmtSolverConfiguration::SmtSolverConfiguration(
     ExactDouble epsilon, SizeType theory_minimization_budget,
-    SizeType learned_clause_limit, SizeType box_processing_limit)
+    SizeType learned_clause_limit, SizeType box_processing_limit,
+    Bool candidate_search_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
-      _box_processing_limit(box_processing_limit)
+      _box_processing_limit(box_processing_limit),
+      _candidate_search_enabled(candidate_search_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -421,12 +423,16 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    if(auto witness=this->_epsilon_candidate_witness(domain,constraints); witness.has_value()) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
-        result.candidate_witness_search=true;
-        result.candidate_witness_success=true;
-        return result;
+    Bool candidate_search_attempted=false;
+    if(_configuration.candidate_search_enabled()) {
+        candidate_search_attempted=true;
+        if(auto witness=this->_epsilon_candidate_witness(domain,constraints); witness.has_value()) {
+            BoxProcessingResult result{
+                BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
+            result.candidate_witness_search=true;
+            result.candidate_witness_success=true;
+            return result;
+        }
     }
 
     auto split_result=this->_split_box(domain,constraints);
@@ -445,7 +451,7 @@ SmtSolver::_process_box(UpperBoxType domain,
     if(first_same and second_same) {
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=true;
+        result.candidate_witness_search=candidate_search_attempted;
         return result;
     }
 
@@ -456,7 +462,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         reductions,
         split_result.second.first,
         split_result.second.second};
-    result.candidate_witness_search=true;
+    result.candidate_witness_search=candidate_search_attempted;
     return result;
 }
 
@@ -664,12 +670,16 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    if(auto witness=this->_epsilon_candidate_witness(domain,literals); witness.has_value()) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
-        result.candidate_witness_search=true;
-        result.candidate_witness_success=true;
-        return result;
+    Bool candidate_search_attempted=false;
+    if(_configuration.candidate_search_enabled()) {
+        candidate_search_attempted=true;
+        if(auto witness=this->_epsilon_candidate_witness(domain,literals); witness.has_value()) {
+            BoxProcessingResult result{
+                BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
+            result.candidate_witness_search=true;
+            result.candidate_witness_success=true;
+            return result;
+        }
     }
 
     auto split_result=this->_split_box(domain,literals);
@@ -688,7 +698,7 @@ SmtSolver::_process_box(UpperBoxType domain,
     if(first_same and second_same) {
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=true;
+        result.candidate_witness_search=candidate_search_attempted;
         return result;
     }
 
@@ -699,7 +709,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         reductions,
         split_result.second.first,
         split_result.second.second};
-    result.candidate_witness_search=true;
+    result.candidate_witness_search=candidate_search_attempted;
     return result;
 }
 

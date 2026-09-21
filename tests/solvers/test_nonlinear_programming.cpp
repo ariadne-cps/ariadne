@@ -199,11 +199,100 @@ class TestOptimiser
 
 };
 
+class TestNonlinearInfeasibleInteriorPointOptimiser
+{
+  private:
+    NonlinearInfeasibleInteriorPointOptimiser optimiser;
+  public:
+    Void test() {
+        ARIADNE_TEST_CALL(test_candidate_linear());
+        ARIADNE_TEST_CALL(test_candidate_nonlinear());
+        ARIADNE_TEST_CALL(test_candidate_equality());
+        ARIADNE_TEST_CALL(test_candidate_infeasible());
+        ARIADNE_TEST_CALL(test_candidate_seven_dimensional());
+    }
+
+    Void test_candidate_linear() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.19_x,0.21_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(candidate_result.first));
+        ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+            D,g,C,cast_exact(candidate_result.second)));
+    }
+
+    Void test_candidate_nonlinear() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({sqr(x[0])+x[1]});
+        ExactBoxType D({{0.0_x,2.0_x},{0.0_x,2.0_x}});
+        ExactBoxType C({{0.49_x,0.51_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_equality() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({2*x[0]-x[1]+x[0]*x[1]/8});
+        ExactBoxType D({{0.0_x,2.0_x},{0.0_x,2.0_x}});
+        ExactBoxType C({{0.0_x,0.0_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(candidate_result.first));
+        ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+            D,g,C,cast_exact(candidate_result.second)));
+    }
+
+    Void test_candidate_infeasible() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{3.0_x,4.0_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(not candidate_result.first));
+    }
+
+    Void test_candidate_seven_dimensional() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(7);
+        ValidatedScalarMultivariateFunction sum=x[0];
+        for(SizeType i=1u; i!=7u; ++i) {
+            sum=sum+x[i];
+        }
+        ValidatedVectorMultivariateFunction g({sum});
+        ExactBoxType D({
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x}
+        });
+        ExactBoxType C({{1.175_x,1.425_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+};
+
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
+    TestNonlinearInfeasibleInteriorPointOptimiser().test();
     return ARIADNE_TEST_FAILURES;
     NonlinearInteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();

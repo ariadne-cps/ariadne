@@ -373,6 +373,20 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] shaving contractor handles repeated nonlinear occurrence" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-2,2)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0.75_x),
+                    sqr(x[0])+x[0],
+                    ValidatedNumber(0.75_x))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
             std::cout << "[smt-solve] forced splitting UNSAT: sin(x)=0 and cos(x)=0 on [0,7]" << std::endl;
             ExactBoxType domain({ExactIntervalType(0,7)});
             List<ValidatedConstraint> constraints({
@@ -514,6 +528,15 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] shaving contractor handles repeated nonlinear occurrence" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(sqr(ex)+ex==0.75_x)});
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-2,2)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
 
         {

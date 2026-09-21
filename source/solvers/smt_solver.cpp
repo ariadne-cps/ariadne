@@ -376,28 +376,6 @@ Bool SmtSolver::_epsilon_overlaps(
     return true;
 }
 
-Bool SmtSolver::_epsilon_satisfied_high_precision(
-    UpperBoxType const& domain,
-    List<ValidatedConstraint> const& constraints) const
-{
-    MultiplePrecision precision(128_bits);
-    FloatMPBoundsVector point(domain.dimension(),[&](SizeType i) {
-        return FloatMPBounds(cast_singleton(domain[i]),precision);
-    });
-
-    for(SizeType i=0u; i!=constraints.size(); ++i) {
-        FloatMPBounds image=constraints[i].function()(point);
-        ExactIntervalType exact_bounds=this->_epsilon_bounds(constraints[i]);
-        FloatDPBounds dp_bounds(
-            exact_bounds.lower_bound(),exact_bounds.upper_bound());
-        FloatMPBounds bounds(dp_bounds,precision);
-        if(not definitely(refines(image,bounds))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 std::optional<UpperBoxType>
 SmtSolver::_epsilon_witness(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const
@@ -504,18 +482,6 @@ SmtSolver::_process_box(UpperBoxType domain,
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_search_attempted;
         result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,constraints);
-        if(result.non_splittable_epsilon_overlap) {
-            result.high_precision_terminal_retry=true;
-            if(this->_epsilon_satisfied_high_precision(domain,constraints)) {
-                UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-                    auto m=domain[i].midpoint();
-                    return UpperIntervalType(m,m);
-                });
-                result.status=BoxProcessingStatus::EPSILON_SAT;
-                result.witness=witness;
-                result.high_precision_terminal_success=true;
-            }
-        }
         return result;
     }
 
@@ -700,42 +666,6 @@ Bool SmtSolver::_epsilon_overlaps(
     return true;
 }
 
-Bool SmtSolver::_epsilon_satisfied_high_precision(
-    UpperBoxType const& domain,
-    CompiledTheoryLiterals const& literals) const
-{
-    MultiplePrecision precision(128_bits);
-    FloatMPBoundsVector point(domain.dimension(),[&](SizeType i) {
-        return FloatMPBounds(cast_singleton(domain[i]),precision);
-    });
-    FloatMP epsilon(_configuration.epsilon(),precision);
-
-    for(auto const& literal:literals) {
-        FloatMPBounds image=literal.function(point);
-        switch(literal.relation) {
-            case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            case SmtTheoryPrimitiveRelation::GEQ_ZERO: {
-                ExactIntervalType exact_bounds=this->_epsilon_bounds(literal.relation);
-                FloatDPBounds dp_bounds(
-                    exact_bounds.lower_bound(),exact_bounds.upper_bound());
-                FloatMPBounds bounds(dp_bounds,precision);
-                if(not definitely(refines(image,bounds))) {
-                    return false;
-                }
-                break;
-            }
-            case SmtTheoryPrimitiveRelation::GT_ZERO:
-                if(not definitely(image.lower()>-epsilon)) {
-                    return false;
-                }
-                break;
-            default:
-                ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
-        }
-    }
-    return true;
-}
-
 std::optional<UpperBoxType>
 SmtSolver::_epsilon_witness(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const
@@ -842,18 +772,6 @@ SmtSolver::_process_box(UpperBoxType domain,
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_search_attempted;
         result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,literals);
-        if(result.non_splittable_epsilon_overlap) {
-            result.high_precision_terminal_retry=true;
-            if(this->_epsilon_satisfied_high_precision(domain,literals)) {
-                UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-                    auto m=domain[i].midpoint();
-                    return UpperIntervalType(m,m);
-                });
-                result.status=BoxProcessingStatus::EPSILON_SAT;
-                result.witness=witness;
-                result.high_precision_terminal_success=true;
-            }
-        }
         return result;
     }
 
@@ -914,12 +832,6 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         }
         if(processing.candidate_witness_success) {
             ++statistics.candidate_witness_successes;
-        }
-        if(processing.high_precision_terminal_retry) {
-            ++statistics.high_precision_terminal_retries;
-        }
-        if(processing.high_precision_terminal_success) {
-            ++statistics.high_precision_terminal_successes;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -1003,12 +915,6 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         }
         if(processing.candidate_witness_success) {
             ++statistics.candidate_witness_successes;
-        }
-        if(processing.high_precision_terminal_retry) {
-            ++statistics.high_precision_terminal_retries;
-        }
-        if(processing.high_precision_terminal_success) {
-            ++statistics.high_precision_terminal_successes;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -1110,12 +1016,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 }
                 if(processing.candidate_witness_success) {
                     ++state->statistics.candidate_witness_successes;
-                }
-                if(processing.high_precision_terminal_retry) {
-                    ++state->statistics.high_precision_terminal_retries;
-                }
-                if(processing.high_precision_terminal_success) {
-                    ++state->statistics.high_precision_terminal_successes;
                 }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
@@ -1233,12 +1133,6 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                 if(processing.candidate_witness_success) {
                     ++state->statistics.candidate_witness_successes;
                 }
-                if(processing.high_precision_terminal_retry) {
-                    ++state->statistics.high_precision_terminal_retries;
-                }
-                if(processing.high_precision_terminal_success) {
-                    ++state->statistics.high_precision_terminal_successes;
-                }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -1305,8 +1199,6 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.box_budget_exhaustions+=source.box_budget_exhaustions;
     target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
     target.non_splittable_epsilon_overlap_boxes+=source.non_splittable_epsilon_overlap_boxes;
-    target.high_precision_terminal_retries+=source.high_precision_terminal_retries;
-    target.high_precision_terminal_successes+=source.high_precision_terminal_successes;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;

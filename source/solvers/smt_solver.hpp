@@ -93,6 +93,8 @@ struct SmtSearchStatistics {
     SizeType shaving_effective_reductions = 0u;
     SizeType sensitivity_guided_splits = 0u;
     SizeType sensitivity_overrides_geometric_splits = 0u;
+    SizeType feasibility_witness_searches = 0u;
+    SizeType feasibility_witness_successes = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -224,6 +226,8 @@ class SmtSolver {
         ReductionStatistics reductions;
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
+        Bool feasibility_witness_search = false;
+        Bool feasibility_witness_success = false;
     };
 
     struct CompiledTheoryLiteral {
@@ -244,6 +248,9 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints) const;
+    std::optional<UpperBoxType> _epsilon_feasible_witness(
+        UpperBoxType const& domain,
+        List<ValidatedConstraint> const& constraints) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      List<ValidatedConstraint> const& constraints) const;
     Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
@@ -259,6 +266,9 @@ class SmtSolver {
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
     std::optional<UpperBoxType> _epsilon_witness(
+        UpperBoxType const& domain,
+        CompiledTheoryLiterals const& literals) const;
+    std::optional<UpperBoxType> _epsilon_feasible_witness(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;
     BoxProcessingResult _process_box(UpperBoxType domain,

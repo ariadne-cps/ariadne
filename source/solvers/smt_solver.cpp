@@ -111,6 +111,14 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     return {coordinate,{guided,overrode}};
 }
 
+UpperBoxType singleton_box(
+    ConstraintSolverInterface::ExactPointType const& point)
+{
+    return UpperBoxType(point.dimension(),[&](SizeType i) {
+        return UpperIntervalType(ExactIntervalType(point[i],point[i]));
+    });
+}
+
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 {
     constexpr SizeType max_corner_candidates=64u;
@@ -359,6 +367,35 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
+std::optional<UpperBoxType>
+SmtSolver::_epsilon_feasible_witness(
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints) const
+{
+    if(constraints.empty()) {
+        return std::nullopt;
+    }
+
+    ValidatedVectorMultivariateFunction function(
+        constraints.size(),constraints[0].function().domain());
+    ExactBoxType codomain(constraints.size());
+    for(SizeType i=0u; i!=constraints.size(); ++i) {
+        function[i]=constraints[i].function();
+        codomain[i]=this->_epsilon_bounds(constraints[i]);
+    }
+
+    ConstraintSolver feasibility_solver;
+    auto result=feasibility_solver.feasible(
+        cast_exact_box(domain),function,codomain);
+    if(definitely(result.first)) {
+        UpperBoxType witness=singleton_box(result.second);
+        if(this->_epsilon_satisfied(witness,constraints)) {
+            return witness;
+        }
+    }
+    return std::nullopt;
+}
+
 Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       List<ValidatedConstraint> const& constraints) const
@@ -385,6 +422,14 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
+    if(auto witness=this->_epsilon_feasible_witness(domain,constraints); witness.has_value()) {
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
+        result.feasibility_witness_search=true;
+        result.feasibility_witness_success=true;
+        return result;
+    }
+
     auto split_result=this->_split_box(domain,constraints);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
@@ -399,16 +444,21 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
     if(first_same and second_same) {
-        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
+        BoxProcessingResult result{
+            BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
+        result.feasibility_witness_search=true;
+        return result;
     }
 
-    return {
+    BoxProcessingResult result{
         BoxProcessingStatus::SPLIT,
         std::nullopt,
         children,
         reductions,
         split_result.second.first,
         split_result.second.second};
+    result.feasibility_witness_search=true;
+    return result;
 }
 
 SmtSolver::CompiledTheoryLiterals
@@ -562,6 +612,35 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
+std::optional<UpperBoxType>
+SmtSolver::_epsilon_feasible_witness(
+    UpperBoxType const& domain,
+    CompiledTheoryLiterals const& literals) const
+{
+    if(literals.empty()) {
+        return std::nullopt;
+    }
+
+    ValidatedVectorMultivariateFunction function(
+        literals.size(),literals[0].function.domain());
+    ExactBoxType codomain(literals.size());
+    for(SizeType i=0u; i!=literals.size(); ++i) {
+        function[i]=literals[i].function;
+        codomain[i]=this->_epsilon_bounds(literals[i].relation);
+    }
+
+    ConstraintSolver feasibility_solver;
+    auto result=feasibility_solver.feasible(
+        cast_exact_box(domain),function,codomain);
+    if(definitely(result.first)) {
+        UpperBoxType witness=singleton_box(result.second);
+        if(this->_epsilon_satisfied(witness,literals)) {
+            return witness;
+        }
+    }
+    return std::nullopt;
+}
+
 Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       CompiledTheoryLiterals const& literals) const
@@ -588,6 +667,14 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
+    if(auto witness=this->_epsilon_feasible_witness(domain,literals); witness.has_value()) {
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
+        result.feasibility_witness_search=true;
+        result.feasibility_witness_success=true;
+        return result;
+    }
+
     auto split_result=this->_split_box(domain,literals);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
@@ -602,16 +689,21 @@ SmtSolver::_process_box(UpperBoxType domain,
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
     if(first_same and second_same) {
-        return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
+        BoxProcessingResult result{
+            BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
+        result.feasibility_witness_search=true;
+        return result;
     }
 
-    return {
+    BoxProcessingResult result{
         BoxProcessingStatus::SPLIT,
         std::nullopt,
         children,
         reductions,
         split_result.second.first,
         split_result.second.second};
+    result.feasibility_witness_search=true;
+    return result;
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -650,6 +742,18 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         }
         if(processing.sensitivity_overrode_geometric_split) {
             ++statistics.sensitivity_overrides_geometric_splits;
+        }
+        if(processing.feasibility_witness_search) {
+            ++statistics.feasibility_witness_searches;
+        }
+        if(processing.feasibility_witness_success) {
+            ++statistics.feasibility_witness_successes;
+        }
+        if(processing.feasibility_witness_search) {
+            ++statistics.feasibility_witness_searches;
+        }
+        if(processing.feasibility_witness_success) {
+            ++statistics.feasibility_witness_successes;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -806,6 +910,18 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 }
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
+                }
+                if(processing.feasibility_witness_search) {
+                    ++state->statistics.feasibility_witness_searches;
+                }
+                if(processing.feasibility_witness_success) {
+                    ++state->statistics.feasibility_witness_successes;
+                }
+                if(processing.feasibility_witness_search) {
+                    ++state->statistics.feasibility_witness_searches;
+                }
+                if(processing.feasibility_witness_success) {
+                    ++state->statistics.feasibility_witness_successes;
                 }
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
@@ -971,6 +1087,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
     target.sensitivity_overrides_geometric_splits+=source.sensitivity_overrides_geometric_splits;
+    target.feasibility_witness_searches+=source.feasibility_witness_searches;
+    target.feasibility_witness_successes+=source.feasibility_witness_successes;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;

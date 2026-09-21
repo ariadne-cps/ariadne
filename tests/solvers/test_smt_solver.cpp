@@ -131,6 +131,8 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_overrides_geometric_splits,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().feasibility_witness_searches,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().feasibility_witness_successes,0u);
 
         std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
         SmtResult unknown=SmtResult::unknown();
@@ -478,6 +480,30 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] certified feasibility witness avoids 7D split" << std::endl;
+            auto coordinates=ValidatedScalarMultivariateFunction::coordinates(7);
+            ValidatedScalarMultivariateFunction sum=coordinates[0];
+            for(SizeType i=1u; i!=7u; ++i) {
+                sum=sum+coordinates[i];
+            }
+            ExactBoxType domain({
+                ExactIntervalType(0,1),ExactIntervalType(0,1),
+                ExactIntervalType(0,1),ExactIntervalType(0,1),
+                ExactIntervalType(0,1),ExactIntervalType(0,1),
+                ExactIntervalType(0,1)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(1.3_x),sum,ValidatedNumber(1.3_x))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().feasibility_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().feasibility_witness_successes,1u);
         }
 
         {
@@ -915,6 +941,37 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] certified feasibility witness avoids 7D split" << std::endl;
+            RealVariable x0("x0"); RealVariable x1("x1"); RealVariable x2("x2");
+            RealVariable x3("x3"); RealVariable x4("x4"); RealVariable x5("x5");
+            RealVariable x6("x6");
+            RealSpace seven_space({x0,x1,x2,x3,x4,x5,x6});
+            RealExpression sum=
+                RealExpression(x0)+RealExpression(x1)+RealExpression(x2)
+                +RealExpression(x3)+RealExpression(x4)+RealExpression(x5)
+                +RealExpression(x6);
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(sum==1.3_x));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=solver.solve(
+                seven_space,
+                ExactBoxType({
+                    ExactIntervalType(0,1),ExactIntervalType(0,1),
+                    ExactIntervalType(0,1),ExactIntervalType(0,1),
+                    ExactIntervalType(0,1),ExactIntervalType(0,1),
+                    ExactIntervalType(0,1)
+                }),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().feasibility_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().feasibility_witness_successes,1u);
         }
 
         {

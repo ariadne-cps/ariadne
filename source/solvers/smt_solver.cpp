@@ -1076,6 +1076,9 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
         ARIADNE_ASSERT(state->witness.has_value());
         return SmtResult::epsilon_sat(*state->witness,state->statistics);
     }
+    if(state->unknown.load()) {
+        return SmtResult::unknown(state->statistics);
+    }
     return SmtResult::unsat(state->statistics);
 }
 

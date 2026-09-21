@@ -1488,6 +1488,26 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
         }
 
+        {
+            std::cout << "[smt-parallel] theory zero box budget returns UNKNOWN" << std::endl;
+            RealVariable x("x");
+            RealSpace space({x});
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(RealExpression(x)==0.5_x));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=bounded_solver.solve_parallel(
+                space,ExactBoxType({ExactIntervalType(0,1)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+        }
+
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
         auto& thread_manager=BetterThreads::ThreadManager::instance();

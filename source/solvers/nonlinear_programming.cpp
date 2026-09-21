@@ -855,6 +855,13 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
 ValidatedKleenean NonlinearInfeasibleInteriorPointOptimiser::
 feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
+    return this->feasible_candidate(D,g,C).first;
+}
+
+Pair<ValidatedKleenean,FloatDPApproximationVector>
+NonlinearInfeasibleInteriorPointOptimiser::
+feasible_candidate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
     CONCLOG_SCOPE_CREATE
     CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
 
@@ -871,19 +878,18 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
 
     static const ExactDouble MU_MIN = 1e-12_pr;
 
-    // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         this->step(f,D,g,R,v);
         if(this->validate_feasibility(D,g,C,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Feasible");
-            return true;
+            return {true,x};
         }
         if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Infeasible");
-            return false;
+            return {false,x};
         }
         if(v.mu.raw()<MU_MIN) {
             break;
@@ -891,7 +897,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     }
     CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
     CONCLOG_PRINTLN("Indeterminate");
-    return indeterminate;
+    return {indeterminate,x};
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::

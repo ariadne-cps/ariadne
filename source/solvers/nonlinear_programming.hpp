@@ -186,6 +186,11 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
+    //! \brief Runs the nonlinear feasibility iteration and returns both its validated status and final numerical candidate.
+    //! \details The candidate is heuristic data only. A caller must validate it independently before using it as a certificate.
+    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_candidate(
+        ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
     Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, const PrimalDualData& wxy0) const;

@@ -94,6 +94,7 @@ struct SmtSearchStatistics {
     SizeType boxes_unknown = 0u;
     SizeType box_budget_exhaustions = 0u;
     SizeType non_splittable_uncertified_boxes = 0u;
+    SizeType non_splittable_epsilon_overlap_boxes = 0u;
     SizeType hull_reduction_rounds = 0u;
     SizeType hull_effective_reductions = 0u;
     SizeType shaving_reduction_rounds = 0u;
@@ -235,6 +236,7 @@ class SmtSolver {
         Bool sensitivity_overrode_geometric_split = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
+        Bool non_splittable_epsilon_overlap = false;
     };
 
     struct CompiledTheoryLiteral {
@@ -272,6 +274,11 @@ class SmtSolver {
                           ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
+
+    Bool _epsilon_overlaps(UpperBoxType const& domain,
+                           List<ValidatedConstraint> const& constraints) const;
+    Bool _epsilon_overlaps(UpperBoxType const& domain,
+                           CompiledTheoryLiterals const& literals) const;
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;

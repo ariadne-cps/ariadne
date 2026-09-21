@@ -297,7 +297,8 @@ SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         List<ValidatedConstraint> const& constraints) const
 {
-    if(this->_epsilon_reduce(domain,constraints)) {
+    ReductionStatistics reductions;
+    if(this->_epsilon_reduce(domain,constraints,reductions)) {
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
@@ -473,7 +474,8 @@ SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         CompiledTheoryLiterals const& literals) const
 {
-    if(this->_epsilon_reduce(domain,literals)) {
+    ReductionStatistics reductions;
+    if(this->_epsilon_reduce(domain,literals,reductions)) {
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 

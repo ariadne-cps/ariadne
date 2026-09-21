@@ -235,6 +235,28 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] mixed-corner witness avoids split for x*y=-1" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(-1),
+                    xy[0]*xy[1],
+                    ValidatedNumber(-1))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.witness()[0].lower_bound().raw()
+                != solve_result.witness()[1].lower_bound().raw());
+        }
+
+        {
             std::cout << "[smt-solve] conjunction EPSILON_SAT: x in [0,1], x>=0.25 and x<=0.75" << std::endl;
             ExactBoxType domain({ExactIntervalType(0,1)});
             List<ValidatedConstraint> constraints({
@@ -507,6 +529,25 @@ class TestSmtSolver {
             List<SmtTheoryPrimitiveLiteral> literals({primitive(sqr(ex)==4)});
             SmtResult solve_result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(-2,2)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] mixed-corner witness avoids split for x*y=-1" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(ex*ey==-1));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=solver.solve(
+                xy_space,
+                ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(-1,1)}),
+                literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);

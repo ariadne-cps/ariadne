@@ -70,6 +70,7 @@ void ariadne_main()
 
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
+    std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");

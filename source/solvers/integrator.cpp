@@ -346,6 +346,7 @@ GradedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
 FlowStepModelType
 GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
+    std::cerr << "[GradedTaylorPicard] ENTER _flow_step" << std::endl;
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("f="<<f);
     CONCLOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
@@ -388,7 +389,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
             msg << nnz;
         }
         msg << "] total=" << total_nnz << " error=" << taylor_model.error();
-        std::clog << msg.str() << std::endl;
+        std::cerr << msg.str() << std::endl;
     };
 
     FlowStepModelType fphi=compose(f,join(phi0,ta));

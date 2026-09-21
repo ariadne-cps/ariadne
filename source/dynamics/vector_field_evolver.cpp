@@ -90,8 +90,11 @@ auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType con
 }
 
 auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
+    std::cerr << "[VectorFieldEvolver] constructing initial enclosure" << std::endl;
     auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    std::cerr << "[VectorFieldEvolver] initial enclosure constructed" << std::endl;
     enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
+    std::cerr << "[VectorFieldEvolver] entering enclosure orbit" << std::endl;
     return orbit(enclosure,time,semantics);
 }
 
@@ -201,7 +204,9 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     // Compute flow model
     IntegratorInterface const* integrator=this->_integrator.operator->();
+    std::cerr << "[VectorFieldEvolver] calling integrator flow_step at t=" << current_time << std::endl;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,suggest(maximum_step_size));
+    std::cerr << "[VectorFieldEvolver] integrator flow_step returned" << std::endl;
     StepSizeType step_size = static_cast<StepSizeType>(flow_model.domain()[flow_model.argument_size()-1u].upper_bound());
     CONCLOG_PRINTLN("step_size = "<<step_size)
     CONCLOG_PRINTLN_AT(1,"flow_model = "<<flow_model)

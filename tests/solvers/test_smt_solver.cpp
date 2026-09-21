@@ -135,8 +135,6 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().box_budget_exhaustions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().non_splittable_uncertified_boxes,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().non_splittable_epsilon_overlap_boxes,0u);
-        ARIADNE_TEST_EQUAL(unsat.statistics().high_precision_terminal_retries,0u);
-        ARIADNE_TEST_EQUAL(unsat.statistics().high_precision_terminal_successes,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_processed,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_pruned,0u);
         ARIADNE_TEST_EQUAL(epsilon_sat.statistics().boxes_split,0u);
@@ -239,15 +237,12 @@ class TestSmtSolver {
                 ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().high_precision_terminal_retries,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().high_precision_terminal_successes,1u);
         }
 
         {
@@ -657,15 +652,12 @@ class TestSmtSolver {
                 singleton_space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().high_precision_terminal_retries,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().high_precision_terminal_successes,1u);
         }
 
         {

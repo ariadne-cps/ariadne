@@ -178,13 +178,35 @@ class TestConstraintSolver
         ARIADNE_TEST_PRINT(constraints);
 
         ExactBoxType domain1({{1.9375_x,2.0_x}});
-        ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints).first));
+        auto feasible1=contractor.feasible(domain1,constraints);
+        ARIADNE_TEST_ASSERT(definitely(feasible1.first));
+        ARIADNE_TEST_EQUAL(feasible1.second.dimension(),domain1.dimension());
+        ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
+            domain1,
+            ValidatedVectorMultivariateFunction(
+                {constraints[0].function()}),
+            ExactBoxType({constraints[0].bounds()}),
+            feasible1.second)));
 
         ExactBoxType domain2({{2.015625_x,2.5_x}});
         ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints).first));
 
         ExactBoxType domain3({{2.0_x,2.015625_x}});
         ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints).first));
+
+        {
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ValidatedVectorMultivariateFunction function({xy[0]+xy[1]});
+            ExactBoxType domain({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+            ExactBoxType codomain({{0.9_x,1.1_x}});
+            auto result=contractor.feasible(domain,function,codomain);
+            ARIADNE_TEST_ASSERT(possibly(result.first));
+            if(definitely(result.first)) {
+                ARIADNE_TEST_EQUAL(result.second.dimension(),domain.dimension());
+                ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
+                    domain,function,codomain,result.second)));
+            }
+        }
     }
 };
 

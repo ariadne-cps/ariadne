@@ -95,13 +95,11 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
                 active=true;
                 PositiveFloatDPUpperBound candidate=
                     domain[variable].width()*mag(derivative_image);
-                if(definitely(candidate>sensitivity)) {
-                    sensitivity=candidate;
-                }
+                sensitivity+=candidate;
             }
         }
         if(active && (not selected_score.has_value()
-                      || definitely(sensitivity>*selected_score))) {
+                      || sensitivity.raw()>selected_score->raw())) {
             selected=variable;
             selected_score=sensitivity;
         }

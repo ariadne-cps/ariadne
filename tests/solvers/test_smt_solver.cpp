@@ -459,12 +459,12 @@ class TestSmtSolver {
                 1u));
             ExactBoxType domain({
                 ExactIntervalType(-1,1),
-                ExactIntervalType(-100,100)
+                ExactIntervalType(-10000,10000)
             });
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(
                     ValidatedNumber(0.3_x),
-                    sin(10*xy[0])+0.001_x*xy[1],
+                    sin(10*xy[0])+0.000001_x*xy[1],
                     ValidatedNumber(0.3_x))
             });
             SmtResult solve_result=split_solver.solve(domain,constraints);
@@ -472,12 +472,10 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().sensitivity_overrides_geometric_splits
-                <= solve_result.statistics().sensitivity_guided_splits);
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().sensitivity_overrides_geometric_splits
-                <= solve_result.statistics().sensitivity_guided_splits);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
         }
 
         {
@@ -885,13 +883,13 @@ class TestSmtSolver {
                 std::numeric_limits<SizeType>::max(),
                 1u));
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sin(10*ex)+0.001_x*ey==0.3_x));
+                make_smt_theory_literal(sin(10*ex)+0.000001_x*ey==0.3_x));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
             SmtResult solve_result=split_solver.solve(
                 xy_space,
-                ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(-100,100)}),
+                ExactBoxType({ExactIntervalType(-1,1),ExactIntervalType(-10000,10000)}),
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);

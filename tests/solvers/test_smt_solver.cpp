@@ -146,6 +146,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_overrides_geometric_splits,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().epsilon_box_certifications,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_searches,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_successes,0u);
 
@@ -369,6 +370,21 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] whole-box epsilon certification" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,0.0625_x)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),x[0],ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().epsilon_box_certifications,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 
         {
@@ -688,6 +704,27 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(-0.0625_x,-0.0625_x)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat() || solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] whole-box epsilon certification" << std::endl;
+            RealVariable box_x("box_x");
+            RealSpace box_space({box_x});
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(RealExpression(box_x)==0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=solver.solve(
+                box_space,
+                ExactBoxType({ExactIntervalType(0,0.0625_x)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().epsilon_box_certifications,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 
         {

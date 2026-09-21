@@ -103,6 +103,7 @@ struct SmtSearchStatistics {
     SizeType shaving_effective_reductions = 0u;
     SizeType sensitivity_guided_splits = 0u;
     SizeType sensitivity_overrides_geometric_splits = 0u;
+    SizeType epsilon_box_certifications = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     SizeType boolean_decisions = 0u;
@@ -236,6 +237,7 @@ class SmtSolver {
         ReductionStatistics reductions;
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
+        Bool epsilon_box_certification = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
         Bool non_splittable_epsilon_overlap = false;

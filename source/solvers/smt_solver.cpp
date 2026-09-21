@@ -459,6 +459,17 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
+    if(this->_epsilon_satisfied(domain,constraints)) {
+        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt,reductions};
+        result.epsilon_box_certification=true;
+        return result;
+    }
+
     if(auto witness=this->_epsilon_witness(domain,constraints); witness.has_value()) {
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
@@ -786,6 +797,17 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
+    if(this->_epsilon_satisfied(domain,literals)) {
+        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt,reductions};
+        result.epsilon_box_certification=true;
+        return result;
+    }
+
     if(auto witness=this->_epsilon_witness(domain,literals); witness.has_value()) {
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
@@ -884,6 +906,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         if(processing.sensitivity_overrode_geometric_split) {
             ++statistics.sensitivity_overrides_geometric_splits;
         }
+        if(processing.epsilon_box_certification) {
+            ++statistics.epsilon_box_certifications;
+        }
         if(processing.candidate_witness_search) {
             ++statistics.candidate_witness_searches;
         }
@@ -969,6 +994,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         }
         if(processing.sensitivity_overrode_geometric_split) {
             ++statistics.sensitivity_overrides_geometric_splits;
+        }
+        if(processing.epsilon_box_certification) {
+            ++statistics.epsilon_box_certifications;
         }
         if(processing.candidate_witness_search) {
             ++statistics.candidate_witness_searches;
@@ -1073,6 +1101,9 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 }
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
+                }
+                if(processing.epsilon_box_certification) {
+                    ++state->statistics.epsilon_box_certifications;
                 }
                 if(processing.candidate_witness_search) {
                     ++state->statistics.candidate_witness_searches;
@@ -1193,6 +1224,9 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                 if(processing.sensitivity_overrode_geometric_split) {
                     ++state->statistics.sensitivity_overrides_geometric_splits;
                 }
+                if(processing.epsilon_box_certification) {
+                    ++state->statistics.epsilon_box_certifications;
+                }
                 if(processing.candidate_witness_search) {
                     ++state->statistics.candidate_witness_searches;
                 }
@@ -1279,6 +1313,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
     target.sensitivity_overrides_geometric_splits+=source.sensitivity_overrides_geometric_splits;
+    target.epsilon_box_certifications+=source.epsilon_box_certifications;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;
     target.boolean_decisions+=source.boolean_decisions;

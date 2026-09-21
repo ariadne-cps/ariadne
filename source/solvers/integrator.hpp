@@ -64,6 +64,8 @@ typedef SharedPointer<const ValidatedFunctionPatchFactoryInterface> ValidatedFun
 typedef SharedPointer<const ValidatedFunctionPatchFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
+FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
+
 struct StepMaximumError : Attribute<ApproximateDouble> {
     StepMaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }
     StepMaximumError(double x) : Attribute<ApproximateDouble>(x) { }

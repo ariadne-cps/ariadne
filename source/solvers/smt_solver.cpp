@@ -70,6 +70,44 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
     return true;
 }
 
+std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
+{
+    std::vector<UpperBoxType> candidates;
+    candidates.reserve(3u+2u*domain.dimension());
+
+    auto midpoint_point=[&]() {
+        return UpperBoxType(domain.dimension(),[&](SizeType i) {
+            auto m=domain[i].midpoint();
+            return UpperIntervalType(m,m);
+        });
+    };
+    UpperBoxType midpoint=midpoint_point();
+    candidates.push_back(midpoint);
+
+    UpperBoxType lower=midpoint;
+    UpperBoxType upper=midpoint;
+    for(SizeType i=0u; i!=domain.dimension(); ++i) {
+        auto l=domain[i].lower_bound().raw();
+        auto u=domain[i].upper_bound().raw();
+        lower[i]=UpperIntervalType(l,l);
+        upper[i]=UpperIntervalType(u,u);
+    }
+    candidates.push_back(lower);
+    candidates.push_back(upper);
+
+    for(SizeType i=0u; i!=domain.dimension(); ++i) {
+        UpperBoxType low_axis=midpoint;
+        UpperBoxType high_axis=midpoint;
+        auto l=domain[i].lower_bound().raw();
+        auto u=domain[i].upper_bound().raw();
+        low_axis[i]=UpperIntervalType(l,l);
+        high_axis[i]=UpperIntervalType(u,u);
+        candidates.push_back(std::move(low_axis));
+        candidates.push_back(std::move(high_axis));
+    }
+    return candidates;
+}
+
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
@@ -194,6 +232,18 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+std::optional<UpperBoxType>
+SmtSolver::_epsilon_witness(UpperBoxType const& domain,
+                            List<ValidatedConstraint> const& constraints) const
+{
+    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
+        if(this->_epsilon_satisfied(candidate,constraints)) {
+            return candidate;
+        }
+    }
+    return std::nullopt;
+}
+
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         List<ValidatedConstraint> const& constraints) const
@@ -202,12 +252,8 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt};
     }
 
-    if(this->_epsilon_satisfied(domain,constraints)) {
-        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-            auto m=domain[i].midpoint();
-            return UpperIntervalType(m,m);
-        });
-        return {BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt};
+    if(auto witness=this->_epsilon_witness(domain,constraints); witness.has_value()) {
+        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();
@@ -320,6 +366,18 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+std::optional<UpperBoxType>
+SmtSolver::_epsilon_witness(UpperBoxType const& domain,
+                            CompiledTheoryLiterals const& literals) const
+{
+    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
+        if(this->_epsilon_satisfied(candidate,literals)) {
+            return candidate;
+        }
+    }
+    return std::nullopt;
+}
+
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         CompiledTheoryLiterals const& literals) const
@@ -328,12 +386,8 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt};
     }
 
-    if(this->_epsilon_satisfied(domain,literals)) {
-        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-            auto m=domain[i].midpoint();
-            return UpperIntervalType(m,m);
-        });
-        return {BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt};
+    if(auto witness=this->_epsilon_witness(domain,literals); witness.has_value()) {
+        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt};
     }
 
     Pair<UpperBoxType,UpperBoxType> children=domain.split();

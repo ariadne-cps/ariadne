@@ -220,6 +220,21 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] endpoint witness avoids split for x^2=4 on [-2,2]" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-2,2)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(4),sqr(x[0]),ValidatedNumber(4))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.witness()[0].lower_bound().raw(),
+                UpperIntervalType(ExactIntervalType(-2,-2)).lower_bound().raw());
+        }
+
+        {
             std::cout << "[smt-solve] conjunction EPSILON_SAT: x in [0,1], x>=0.25 and x<=0.75" << std::endl;
             ExactBoxType domain({ExactIntervalType(0,1)});
             List<ValidatedConstraint> constraints({
@@ -485,6 +500,16 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(3,4)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] endpoint witness avoids split for x^2=4 on [-2,2]" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(sqr(ex)==4)});
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-2,2)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
         }
 
         {

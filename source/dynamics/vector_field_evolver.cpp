@@ -33,6 +33,7 @@
 #include "utility/container.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
+#include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"

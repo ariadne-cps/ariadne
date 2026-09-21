@@ -130,6 +130,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_reduction_rounds,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_overrides_geometric_splits,0u);
 
         std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
         SmtResult unknown=SmtResult::unknown();
@@ -449,7 +450,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-solve] sensitivity-guided split overrides widest coordinate" << std::endl;
+            std::cout << "[smt-solve] sensitivity-guided split is exercised" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             SmtSolver split_solver(SmtSolverConfiguration(
                 0.01_x,
@@ -471,6 +472,12 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().sensitivity_overrides_geometric_splits
+                <= solve_result.statistics().sensitivity_guided_splits);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().sensitivity_overrides_geometric_splits
+                <= solve_result.statistics().sensitivity_guided_splits);
         }
 
         {
@@ -868,7 +875,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-theory-solve] sensitivity-guided split overrides widest coordinate" << std::endl;
+            std::cout << "[smt-theory-solve] sensitivity-guided split is exercised" << std::endl;
             RealVariable y("y");
             RealExpression ey=y;
             RealSpace xy_space({x,y});

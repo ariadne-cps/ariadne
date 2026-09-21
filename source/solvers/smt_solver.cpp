@@ -70,7 +70,7 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
     return true;
 }
 
-Pair<SizeType,Bool> sensitivity_split_coordinate(
+Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions)
 {
@@ -107,8 +107,10 @@ Pair<SizeType,Bool> sensitivity_split_coordinate(
         }
     }
 
-    SizeType coordinate=selected.has_value() ? *selected : geometric;
-    return {coordinate,coordinate!=geometric};
+    Bool guided=selected.has_value();
+    SizeType coordinate=guided ? *selected : geometric;
+    Bool overrode=guided && coordinate!=geometric;
+    return {coordinate,{guided,overrode}};
 }
 
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
@@ -341,7 +343,7 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
-Pair<Pair<UpperBoxType,UpperBoxType>,Bool>
+Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
 SmtSolver::_split_box(UpperBoxType const& domain,
                       List<ValidatedConstraint> const& constraints) const
 {
@@ -384,7 +386,13 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions,split_result.second};
+    return {
+        BoxProcessingStatus::SPLIT,
+        std::nullopt,
+        children,
+        reductions,
+        split_result.second.first,
+        split_result.second.second};
 }
 
 SmtSolver::CompiledTheoryLiterals
@@ -582,7 +590,13 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
     }
 
-    return {BoxProcessingStatus::SPLIT,std::nullopt,children,reductions,split_result.second};
+    return {
+        BoxProcessingStatus::SPLIT,
+        std::nullopt,
+        children,
+        reductions,
+        split_result.second.first,
+        split_result.second.second};
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -618,6 +632,12 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
         if(processing.sensitivity_guided_split) {
             ++statistics.sensitivity_guided_splits;
+        }
+        if(processing.sensitivity_overrode_geometric_split) {
+            ++statistics.sensitivity_overrides_geometric_splits;
+        }
+        if(processing.sensitivity_overrode_geometric_split) {
+            ++statistics.sensitivity_overrides_geometric_splits;
         }
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
@@ -768,6 +788,12 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
                 if(processing.sensitivity_guided_split) {
                     ++state->statistics.sensitivity_guided_splits;
+                }
+                if(processing.sensitivity_overrode_geometric_split) {
+                    ++state->statistics.sensitivity_overrides_geometric_splits;
+                }
+                if(processing.sensitivity_overrode_geometric_split) {
+                    ++state->statistics.sensitivity_overrides_geometric_splits;
                 }
                 if(processing.sensitivity_guided_split) {
                     ++state->statistics.sensitivity_guided_splits;
@@ -929,6 +955,7 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
+    target.sensitivity_overrides_geometric_splits+=source.sensitivity_overrides_geometric_splits;
     target.boolean_decisions+=source.boolean_decisions;
     target.boolean_propagations+=source.boolean_propagations;
     target.boolean_reasoned_propagations+=source.boolean_reasoned_propagations;

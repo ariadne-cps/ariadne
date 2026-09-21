@@ -70,6 +70,38 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
     return true;
 }
 
+SizeType widest_active_coordinate(
+    UpperBoxType const& domain,
+    std::vector<ValidatedScalarMultivariateFunction> const& functions)
+{
+    std::optional<SizeType> selected;
+    auto widths=domain.widths();
+    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+        Bool active=false;
+        for(auto const& function:functions) {
+            UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
+            if(not definitely(derivative_image.lower_bound()==0)
+               || not definitely(derivative_image.upper_bound()==0)) {
+                active=true;
+                break;
+            }
+        }
+        if(active && (not selected.has_value() || widths[variable]>widths[*selected])) {
+            selected=variable;
+        }
+    }
+    if(selected.has_value()) {
+        return *selected;
+    }
+    SizeType widest=0u;
+    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
+        if(widths[variable]>widths[widest]) {
+            widest=variable;
+        }
+    }
+    return widest;
+}
+
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 {
     constexpr SizeType max_corner_candidates=64u;
@@ -300,6 +332,18 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
+Pair<UpperBoxType,UpperBoxType>
+SmtSolver::_split_box(UpperBoxType const& domain,
+                      List<ValidatedConstraint> const& constraints) const
+{
+    std::vector<ValidatedScalarMultivariateFunction> functions;
+    functions.reserve(constraints.size());
+    for(SizeType i=0u; i!=constraints.size(); ++i) {
+        functions.push_back(constraints[i].function());
+    }
+    return domain.split(widest_active_coordinate(domain,functions));
+}
+
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         List<ValidatedConstraint> const& constraints) const
@@ -313,7 +357,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    Pair<UpperBoxType,UpperBoxType> children=domain.split();
+    Pair<UpperBoxType,UpperBoxType> children=this->_split_box(domain,constraints);
 
     Bool first_same=true;
     Bool second_same=true;
@@ -484,6 +528,18 @@ SmtSolver::_epsilon_witness(UpperBoxType const& domain,
     return std::nullopt;
 }
 
+Pair<UpperBoxType,UpperBoxType>
+SmtSolver::_split_box(UpperBoxType const& domain,
+                      CompiledTheoryLiterals const& literals) const
+{
+    std::vector<ValidatedScalarMultivariateFunction> functions;
+    functions.reserve(literals.size());
+    for(auto const& literal:literals) {
+        functions.push_back(literal.function);
+    }
+    return domain.split(widest_active_coordinate(domain,functions));
+}
+
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(UpperBoxType domain,
                         CompiledTheoryLiterals const& literals) const
@@ -497,7 +553,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    Pair<UpperBoxType,UpperBoxType> children=domain.split();
+    Pair<UpperBoxType,UpperBoxType> children=this->_split_box(domain,literals);
 
     Bool first_same=true;
     Bool second_same=true;

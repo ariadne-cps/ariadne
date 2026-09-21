@@ -240,6 +240,9 @@ class SmtSolver {
         List<ValidatedConstraint> const& constraints) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      List<ValidatedConstraint> const& constraints) const;
+    Pair<UpperBoxType,UpperBoxType> _split_box(
+        UpperBoxType const& domain,
+        List<ValidatedConstraint> const& constraints) const;
 
     CompiledTheoryLiterals _compile_theory_literals(
         RealSpace const& space,
@@ -254,6 +257,9 @@ class SmtSolver {
         CompiledTheoryLiterals const& literals) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      CompiledTheoryLiterals const& literals) const;
+    Pair<UpperBoxType,UpperBoxType> _split_box(
+        UpperBoxType const& domain,
+        CompiledTheoryLiterals const& literals) const;
 
     SmtSolverConfiguration _configuration;
 };

@@ -424,6 +424,30 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] split ignores wider inactive coordinate" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                2u));
+            ExactBoxType domain({
+                ExactIntervalType(0,1),
+                ExactIntervalType(-100,100)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0),
+                    sin(xy[0]),
+                    ValidatedNumber(0))
+            });
+            SmtResult solve_result=bounded_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(
+                solve_result.is_epsilon_sat() || solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
+        }
+
+        {
             std::cout << "[smt-solve] empty constraint list: bounded nonempty domain is EPSILON_SAT" << std::endl;
             ExactBoxType domain({ExactIntervalType(-1,1)});
             List<ValidatedConstraint> constraints;
@@ -793,6 +817,28 @@ class TestSmtSolver {
                     literals);
                 ARIADNE_TEST_ASSERT(solve_result.is_unsat());
             }
+        }
+
+        {
+            std::cout << "[smt-theory-solve] split ignores wider inactive coordinate" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                2u));
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(sin(ex)==0));
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=bounded_solver.solve(
+                xy_space,
+                ExactBoxType({ExactIntervalType(0,1),ExactIntervalType(-100,100)}),
+                literals);
+            ARIADNE_TEST_ASSERT(
+                solve_result.is_epsilon_sat() || solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=2u);
         }
 
         {

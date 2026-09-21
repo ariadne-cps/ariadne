@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
+#include "utility/stopwatch.hpp"
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "helper/stlio.hpp"
@@ -202,11 +203,31 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
     CONCLOG_PRINTLN("current_set_bounds = "<<current_set_bounds)
 
-    // Compute flow model
+    // Temporary profiling of the complete evolver step.
+    auto state_nnz = [](ValidatedVectorMultivariateFunctionPatch const& function) {
+        auto const& model = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(function.reference());
+        SizeType nnz=0;
+        for(SizeType i=0; i!=model.size(); ++i) { nnz+=model[i].number_of_nonzeros(); }
+        return nnz;
+    };
+
+    SizeType const current_state_nnz=state_nnz(current_set.state_function());
+    std::cerr << "[EvolverProfile] begin t=" << current_time
+              << " params=" << current_set.number_of_parameters()
+              << " state_nnz=" << current_state_nnz
+              << " state_error=" << current_set.state_function().error() << std::endl;
+
     IntegratorInterface const* integrator=this->_integrator.operator->();
-    std::cerr << "[VectorFieldEvolver] calling integrator flow_step at t=" << current_time << std::endl;
+    Stopwatch<Microseconds> profile_sw;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,suggest(maximum_step_size));
-    std::cerr << "[VectorFieldEvolver] integrator flow_step returned" << std::endl;
+    profile_sw.click();
+    auto const& flow_taylor = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(flow_model.reference());
+    SizeType flow_nnz=0;
+    for(SizeType i=0; i!=flow_taylor.size(); ++i) { flow_nnz+=flow_taylor[i].number_of_nonzeros(); }
+    std::cerr << "[EvolverProfile] flow_us=" << profile_sw.duration().count()
+              << " flow_nnz=" << flow_nnz
+              << " flow_error=" << flow_model.error() << std::endl;
+
     StepSizeType step_size = static_cast<StepSizeType>(flow_model.domain()[flow_model.argument_size()-1u].upper_bound());
     CONCLOG_PRINTLN("step_size = "<<step_size)
     CONCLOG_PRINTLN_AT(1,"flow_model = "<<flow_model)
@@ -218,10 +239,22 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     CONCLOG_PRINTLN_AT(1,"next_time = "<<next_time)
     // Compute the flow tube (reachable set) model and the final set
     EnclosureType reach_set=current_set;
+    profile_sw.restart();
     reach_set.apply_full_reach_step(flow_model);
+    profile_sw.click();
+    std::cerr << "[EvolverProfile] reach_us=" << profile_sw.duration().count()
+              << " reach_nnz=" << state_nnz(reach_set.state_function())
+              << " reach_error=" << reach_set.state_function().error() << std::endl;
     CONCLOG_PRINTLN_AT(1,"reach_set = " << reach_set)
+
     EnclosureType next_set=current_set;
+    profile_sw.restart();
     next_set.apply_fixed_evolve_step(flow_model, step_size);
+    profile_sw.click();
+    std::cerr << "[EvolverProfile] evolve_us=" << profile_sw.duration().count()
+              << " next_params=" << next_set.number_of_parameters()
+              << " next_nnz=" << state_nnz(next_set.state_function())
+              << " next_error=" << next_set.state_function().error() << std::endl;
     CONCLOG_PRINTLN_AT(1,"next_set = " << next_set)
 
     result->adjoin_reach(reach_set);

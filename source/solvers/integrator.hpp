@@ -262,7 +262,11 @@ class GradedTaylorPicardIntegrator
 
     //! \brief The order of the method.
     DegreeType order() const { return this->_order; }
-    Void set_order(Nat m) { this->_order=m; this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m); }
+    Void set_order(Nat m) {
+        this->_order=m;
+        this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m);
+        this->set_function_factory(ValidatedFunctionPatchFactory(make_taylor_function_patch_factory(this->_sweeper)));
+    }
     //! \brief  Set the maximum error of a single step.
     ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
@@ -314,7 +318,10 @@ class TaylorSeriesIntegrator
     Void set_order(DegreeType n) { this->_order=n; }
     //! \brief  Set the sweep threshold of the Taylor model.
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) {
+        _sweeper = sweeper;
+        this->set_function_factory(ValidatedFunctionPatchFactory(make_taylor_function_patch_factory(_sweeper)));
+    }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
@@ -409,7 +416,10 @@ class GradedTaylorSeriesIntegrator
     Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model.
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) {
+        _sweeper = sweeper;
+        this->set_function_factory(ValidatedFunctionPatchFactory(make_taylor_function_patch_factory(_sweeper)));
+    }
     //! \brief  Set the sweep threshold of the Taylor model.
     ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }

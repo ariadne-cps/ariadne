@@ -82,6 +82,16 @@ class TestSmtSolver {
             std::numeric_limits<SizeType>::max(),
             0u);
         ARIADNE_TEST_EQUAL(bounded_search_configuration.box_processing_limit(),0u);
+        ARIADNE_TEST_ASSERT(bounded_search_configuration.candidate_search_enabled());
+
+        std::cout << "[smt-config] disable candidate witness search" << std::endl;
+        SmtSolverConfiguration no_candidate_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false);
+        ARIADNE_TEST_ASSERT(not no_candidate_configuration.candidate_search_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -437,7 +447,8 @@ class TestSmtSolver {
                 0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                1u));
+                1u,
+                false));
             ExactBoxType domain({
                 ExactIntervalType(-1,1),
                 ExactIntervalType(-10000,10000)
@@ -451,6 +462,7 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
             ARIADNE_TEST_EQUAL(
@@ -464,7 +476,8 @@ class TestSmtSolver {
                 0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                1u));
+                1u,
+                false));
             ExactBoxType domain({
                 ExactIntervalType(-1,1),
                 ExactIntervalType(-10000,10000)
@@ -478,6 +491,7 @@ class TestSmtSolver {
             SmtResult solve_result=split_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
         }
@@ -900,7 +914,8 @@ class TestSmtSolver {
                 0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                1u));
+                1u,
+                false));
             auto alternatives=normalize_smt_theory_literal(
                 make_smt_theory_literal(sin(10*ex)==0.3_x));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
@@ -912,6 +927,7 @@ class TestSmtSolver {
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
             ARIADNE_TEST_EQUAL(
@@ -927,7 +943,8 @@ class TestSmtSolver {
                 0.01_x,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
-                1u));
+                1u,
+                false));
             auto alternatives=normalize_smt_theory_literal(
                 make_smt_theory_literal(sin(10*ex)+0.000001_x*ey==0.3_x));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
@@ -939,6 +956,7 @@ class TestSmtSolver {
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
         }

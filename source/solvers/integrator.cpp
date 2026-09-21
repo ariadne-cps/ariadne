@@ -379,14 +379,16 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     auto log_model_size = [](const char* phase, DegreeType iteration, FlowStepModelType const& model) {
         auto const& taylor_model = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(model.reference());
         SizeType total_nnz=0;
-        CONCLOG_PRINT_AT(0,"[GradedTaylorPicard] "<<phase<<" "<<iteration<<" nnz=[");
+        std::stringstream msg;
+        msg << "[GradedTaylorPicard] " << phase << " " << iteration << " nnz=[";
         for(SizeType i=0; i!=taylor_model.size(); ++i) {
             SizeType const nnz=taylor_model[i].number_of_nonzeros();
             total_nnz+=nnz;
-            if(i!=0) { CONCLOG_PRINT_AT(0,","); }
-            CONCLOG_PRINT_AT(0,nnz);
+            if(i!=0) { msg << ","; }
+            msg << nnz;
         }
-        CONCLOG_PRINTLN_AT(0,"] total="<<total_nnz<<" error="<<taylor_model.error());
+        msg << "] total=" << total_nnz << " error=" << taylor_model.error();
+        CONCLOG_PRINTLN_AT(0,msg.str());
     };
 
     FlowStepModelType fphi=compose(f,join(phi0,ta));

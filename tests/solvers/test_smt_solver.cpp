@@ -403,9 +403,9 @@ class TestSmtSolver {
                       << solve_result.statistics().boxes_processed
                       << " pruned=" << solve_result.statistics().boxes_pruned
                       << " split=" << solve_result.statistics().boxes_split << std::endl;
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_split>0u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().hull_reduction_rounds>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().shaving_reduction_rounds>=1u);
         }
 
         {
@@ -1313,9 +1313,9 @@ class TestSmtSolver {
                           << solve_result.statistics().boxes_processed
                           << " pruned=" << solve_result.statistics().boxes_pruned
                           << " split=" << solve_result.statistics().boxes_split << std::endl;
-                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_split>0u);
-                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed>1u);
                 ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>0u);
+                ARIADNE_TEST_ASSERT(solve_result.statistics().hull_reduction_rounds>=1u);
+                ARIADNE_TEST_ASSERT(solve_result.statistics().shaving_reduction_rounds>=1u);
             }
 
             {

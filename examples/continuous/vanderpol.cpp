@@ -23,6 +23,8 @@
  */
 
 #include "utility/stopwatch.hpp"
+#include "function/taylor_function.hpp"
+#include "dynamics/enclosure.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
@@ -93,6 +95,49 @@ void ariadne_main()
     diagnostic_sw.click();
     std::cerr << "[vanderpol] GradedTaylorPicard time_us=" << diagnostic_sw.duration().count()
               << " error=" << diagnostic_graded_flow.error() << std::endl;
+
+    // Temporary synchronous propagation benchmark.  This deliberately avoids
+    // VectorFieldEvolver/DynamicWorkload and measures flow construction and
+    // enclosure propagation separately for a short prefix of the trajectory.
+    LabelledEnclosure diagnostic_enclosure(
+        initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+        EnclosureConfiguration(integrator.function_factory()));
+    diagnostic_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+
+    TimeStepType diagnostic_time=0_dy;
+    for(Nat diagnostic_step_index=0; diagnostic_step_index!=20; ++diagnostic_step_index) {
+        auto const& sf=diagnostic_enclosure.state_function();
+        auto const& sf_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(sf.reference());
+        SizeType state_nnz=0;
+        for(SizeType i=0; i!=sf_taylor.size(); ++i) { state_nnz+=sf_taylor[i].number_of_nonzeros(); }
+
+        auto box=cast_exact_box(diagnostic_enclosure.euclidean_set().bounding_box());
+        diagnostic_sw.restart();
+        auto flow=integrator.flow_step(dynamics.function(),box,suggest(diagnostic_step));
+        diagnostic_sw.click();
+        auto const& flow_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(flow.reference());
+        SizeType flow_nnz=0;
+        for(SizeType i=0; i!=flow_taylor.size(); ++i) { flow_nnz+=flow_taylor[i].number_of_nonzeros(); }
+        auto const flow_us=diagnostic_sw.duration().count();
+
+        StepSizeType actual_step=static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
+        diagnostic_sw.restart();
+        diagnostic_enclosure.apply_fixed_evolve_step(flow,actual_step);
+        diagnostic_sw.click();
+
+        std::cerr << "[SyncProfile] step=" << diagnostic_step_index
+                  << " t=" << diagnostic_time
+                  << " params=" << diagnostic_enclosure.number_of_parameters()
+                  << " state_nnz_before=" << state_nnz
+                  << " state_error_before=" << sf.error()
+                  << " flow_us=" << flow_us
+                  << " flow_nnz=" << flow_nnz
+                  << " flow_error=" << flow.error()
+                  << " evolve_us=" << diagnostic_sw.duration().count()
+                  << " next_error=" << diagnostic_enclosure.state_function().error()
+                  << std::endl;
+        diagnostic_time+=TimeStepType(actual_step);
+    }
 
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);

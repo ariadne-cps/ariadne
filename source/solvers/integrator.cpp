@@ -388,7 +388,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
             msg << nnz;
         }
         msg << "] total=" << total_nnz << " error=" << taylor_model.error();
-        CONCLOG_PRINTLN_AT(0,msg.str());
+        std::clog << msg.str() << std::endl;
     };
 
     FlowStepModelType fphi=compose(f,join(phi0,ta));

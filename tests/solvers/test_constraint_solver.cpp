@@ -53,6 +53,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_hull_reduce());
         ARIADNE_TEST_CALL(test_box_reduce());
         ARIADNE_TEST_CALL(test_pruning_well_definedness());
+        ARIADNE_TEST_CALL(test_composite_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_monotone_reduce());
         ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
@@ -216,6 +217,58 @@ class TestConstraintSolver
                 domain,y[0],ExactIntervalType(2.0_x,3.0_x),0u);
             ARIADNE_TEST_ASSERT(definitely(domain.is_empty()));
         }
+    }
+
+    Void test_composite_pruning_witness_preservation() {
+        ConstraintSolver contractor;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+
+        auto check = [&](String const& label,
+                         UpperBoxType const& domain,
+                         ValidatedScalarMultivariateFunction const& function,
+                         ExactIntervalType const& codomain,
+                         UpperBoxType const& witness) {
+            std::cout << "[constraint-prune-composite] " << label << std::endl;
+            UpperBoxType reduced=domain;
+            contractor.hull_reduce(reduced,function,codomain);
+            ARIADNE_TEST_ASSERT(definitely(subset(reduced,domain)));
+            ARIADNE_TEST_ASSERT(definitely(subset(witness,reduced)));
+        };
+
+        check(
+            "negative square branch survives",
+            ExactBoxType({{-2.0_x,2.0_x},{0.0_x,0.0_x}}),
+            sqr(x[0])+x[1],
+            ExactIntervalType(1.0_x,1.0_x),
+            ExactBoxType({{-1.0_x,-1.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "abs of repeated nonlinear expression survives",
+            ExactBoxType({{-2.0_x,2.0_x},{-1.0_x,1.0_x}}),
+            abs(sqr(x[0])-1)+sqr(x[1]),
+            ExactIntervalType(0.0_x,0.0_x),
+            ExactBoxType({{-1.0_x,-1.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "product and division composition survives",
+            ExactBoxType({{-2.0_x,2.0_x},{1.0_x,3.0_x}}),
+            (x[0]*x[1])/(x[0]+3),
+            ExactIntervalType(-1.0_x,-1.0_x),
+            ExactBoxType({{-1.0_x,-1.0_x},{2.0_x,2.0_x}}));
+
+        check(
+            "nested elementary composition survives",
+            ExactBoxType({{-1.0_x,1.0_x},{-1.0_x,1.0_x}}),
+            exp(sqr(x[0]))+abs(x[1]),
+            ExactIntervalType(1.0_x,1.0_x),
+            ExactBoxType({{0.0_x,0.0_x},{0.0_x,0.0_x}}));
+
+        check(
+            "repeated coordinate cancellation does not lose witness",
+            ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}}),
+            (x[0]-x[0])+x[1],
+            ExactIntervalType(0.5_x,0.5_x),
+            ExactBoxType({{-1.5_x,-1.5_x},{0.5_x,0.5_x}}));
     }
 
     Void test_monotone_reduce() {

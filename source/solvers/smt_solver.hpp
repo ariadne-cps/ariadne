@@ -87,6 +87,8 @@ struct SmtSearchStatistics {
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
     SizeType boxes_unknown = 0u;
+    SizeType hull_reduction_rounds = 0u;
+    SizeType shaving_reduction_rounds = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -204,10 +206,16 @@ class SmtSolver {
         UNKNOWN
     };
 
+    struct ReductionStatistics {
+        SizeType hull_rounds = 0u;
+        SizeType shaving_rounds = 0u;
+    };
+
     struct BoxProcessingResult {
         BoxProcessingStatus status;
         std::optional<UpperBoxType> witness;
         std::optional<Pair<UpperBoxType,UpperBoxType>> children;
+        ReductionStatistics reductions;
     };
 
     struct CompiledTheoryLiteral {
@@ -219,7 +227,8 @@ class SmtSolver {
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;
     Bool _epsilon_reduce(UpperBoxType& domain,
-                         List<ValidatedConstraint> const& constraints) const;
+                         List<ValidatedConstraint> const& constraints,
+                         ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
     std::optional<UpperBoxType> _epsilon_witness(
@@ -232,7 +241,8 @@ class SmtSolver {
         RealSpace const& space,
         List<SmtTheoryPrimitiveLiteral> const& literals) const;
     Bool _epsilon_reduce(UpperBoxType& domain,
-                         CompiledTheoryLiterals const& literals) const;
+                         CompiledTheoryLiterals const& literals,
+                         ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
     std::optional<UpperBoxType> _epsilon_witness(

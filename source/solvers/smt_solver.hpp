@@ -222,6 +222,9 @@ class SmtSolver {
                          List<ValidatedConstraint> const& constraints) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
+    std::optional<UpperBoxType> _epsilon_witness(
+        UpperBoxType const& domain,
+        List<ValidatedConstraint> const& constraints) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      List<ValidatedConstraint> const& constraints) const;
 
@@ -232,6 +235,9 @@ class SmtSolver {
                          CompiledTheoryLiterals const& literals) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
+    std::optional<UpperBoxType> _epsilon_witness(
+        UpperBoxType const& domain,
+        CompiledTheoryLiterals const& literals) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      CompiledTheoryLiterals const& literals) const;
 

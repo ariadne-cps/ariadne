@@ -86,8 +86,11 @@ SizeType widest_active_coordinate(
                 break;
             }
         }
-        if(active && (not selected.has_value() || widths[variable]>widths[*selected])) {
-            selected=variable;
+        if(active) {
+            if(not selected.has_value()
+               || definitely(widths[variable]>widths[*selected])) {
+                selected=variable;
+            }
         }
     }
     if(selected.has_value()) {
@@ -95,7 +98,7 @@ SizeType widest_active_coordinate(
     }
     SizeType widest=0u;
     for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
-        if(widths[variable]>widths[widest]) {
+        if(definitely(widths[variable]>widths[widest])) {
             widest=variable;
         }
     }

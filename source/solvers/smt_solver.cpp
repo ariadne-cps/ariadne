@@ -35,6 +35,7 @@
 #include "betterthreads/workload.hpp"
 
 #include "solvers/constraint_solver.hpp"
+#include "solvers/nonlinear_programming.hpp"
 #include "utility/exceptions.hpp"
 
 namespace Ariadne {

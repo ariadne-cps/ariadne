@@ -199,7 +199,7 @@ void ariadne_main()
                     for(SizeType i=0u; i!=taylor.size(); ++i) {
                         nnz+=taylor[i].number_of_nonzeros();
                     }
-                    double const error=flow.error().raw().get_d();
+                    double const error=cast_exact(flow.error().get(dp)).get_d();
                     if(measured_error!=nullptr) { *measured_error=error; }
                     std::cerr << " nnz=" << nnz
                               << " error=" << flow.error()

@@ -52,6 +52,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_search_outcome());
+        ARIADNE_TEST_CALL(test_cdcl_helpers());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
         ARIADNE_TEST_CALL(test_epsilon_predicates());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
@@ -314,6 +315,29 @@ class TestSmtSolver {
         SmtResult unsat=SmtSolverTestSupport::finalize_search_outcome(
             exhausted,false,statistics);
         ARIADNE_TEST_ASSERT(unsat.is_unsat());
+    }
+
+    Void test_cdcl_helpers() {
+        std::cout << "[smt-cdcl] deterministic clause resolution and nogood ordering" << std::endl;
+
+        std::vector<Int> resolved=SmtSolverTestSupport::resolve_clause_on_variable(
+            std::vector<Int>({1,2,3,3}),
+            std::vector<Int>({-1,3,4,4}),
+            1u);
+        ARIADNE_TEST_EQUAL(resolved.size(),3u);
+        ARIADNE_TEST_EQUAL(resolved[0],2);
+        ARIADNE_TEST_EQUAL(resolved[1],3);
+        ARIADNE_TEST_EQUAL(resolved[2],4);
+
+        std::vector<Int> clause({1,-2,3,-4});
+        std::vector<SizeType> decision_levels({0u,1u,2u,2u,1u});
+        std::vector<SizeType> trail_rank({0u,1u,2u,4u,3u});
+        SmtSolverTestSupport::order_theory_nogood(
+            clause,decision_levels,trail_rank);
+        ARIADNE_TEST_EQUAL(clause[0],3);
+        ARIADNE_TEST_EQUAL(clause[1],-2);
+        ARIADNE_TEST_EQUAL(clause[2],-4);
+        ARIADNE_TEST_EQUAL(clause[3],1);
     }
 
     Void test_invalid_internal_relations() {

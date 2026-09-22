@@ -119,6 +119,40 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(or_true.clauses()[0][0],1);
             ARIADNE_TEST_EQUAL(or_true.clauses()[1][0],1);
 
+            std::cout << "[smt-boolean] fold atom&&true" << std::endl;
+            SmtBooleanEncoding and_true_rhs=SmtBooleanEncoder().encode(
+                atom&&ContinuousPredicate(true));
+            ARIADNE_TEST_EQUAL(and_true_rhs.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(and_true_rhs.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(and_true_rhs.clauses().size(),1u);
+            ARIADNE_TEST_EQUAL(and_true_rhs.clauses()[0][0],1);
+
+            std::cout << "[smt-boolean] fold atom&&false" << std::endl;
+            SmtBooleanEncoding and_false_rhs=SmtBooleanEncoder().encode(
+                atom&&ContinuousPredicate(false));
+            ARIADNE_TEST_EQUAL(and_false_rhs.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(and_false_rhs.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(and_false_rhs.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(and_false_rhs.clauses()[0][0],-1);
+            ARIADNE_TEST_EQUAL(and_false_rhs.clauses()[1][0],1);
+
+            std::cout << "[smt-boolean] fold atom||true" << std::endl;
+            SmtBooleanEncoding or_true_rhs=SmtBooleanEncoder().encode(
+                atom||ContinuousPredicate(true));
+            ARIADNE_TEST_EQUAL(or_true_rhs.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(or_true_rhs.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(or_true_rhs.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(or_true_rhs.clauses()[0][0],1);
+            ARIADNE_TEST_EQUAL(or_true_rhs.clauses()[1][0],1);
+
+            std::cout << "[smt-boolean] fold atom||false" << std::endl;
+            SmtBooleanEncoding or_false_rhs=SmtBooleanEncoder().encode(
+                atom||ContinuousPredicate(false));
+            ARIADNE_TEST_EQUAL(or_false_rhs.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(or_false_rhs.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(or_false_rhs.clauses().size(),1u);
+            ARIADNE_TEST_EQUAL(or_false_rhs.clauses()[0][0],1);
+
             std::cout << "[smt-boolean] fold negated constant" << std::endl;
             SmtBooleanEncoding negated=SmtBooleanEncoder().encode(
                 !ContinuousPredicate(false));

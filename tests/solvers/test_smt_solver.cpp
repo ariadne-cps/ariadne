@@ -961,6 +961,29 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] non-splittable uncertified singleton returns UNKNOWN" << std::endl;
+            auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ValidatedScalarMultivariateFunction residual=
+                sqr(sin(sx[0]))+sqr(cos(sx[0]))-1;
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                ExactBoxType({ExactIntervalType(1,1)}),constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+        }
+
+        {
             std::cout << "[smt-solve] reject constraint dimension mismatch" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             ExactBoxType domain({ExactIntervalType(0,1)});
@@ -983,6 +1006,16 @@ class TestSmtSolver {
         RealExpression ex=x;
         RealSpace space({x});
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+        {
+            std::cout << "[smt-theory-solve] empty domain is UNSAT" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals;
+            SmtResult solve_result=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType::empty_interval()}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
 
         auto primitive = [&](ContinuousPredicate const& predicate) {
             auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
@@ -1200,6 +1233,16 @@ class TestSmtSolver {
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(3,4)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] strict GT rejects zero-only image" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(sqr(ex)>0)});
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
         }
 
         {
@@ -2251,6 +2294,24 @@ class TestSmtSolver {
     }
 
     Void test_parallel_solve() {
+        {
+            std::cout << "[smt-parallel] empty domains are UNSAT" << std::endl;
+            ExactBoxType empty_domain({ExactIntervalType::empty_interval()});
+            SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+            List<ValidatedConstraint> constraints;
+            SmtResult constraints_result=solver.solve_parallel(
+                empty_domain,constraints);
+            ARIADNE_TEST_ASSERT(constraints_result.is_unsat());
+
+            RealVariable x("empty_parallel_x");
+            RealSpace space({x});
+            List<SmtTheoryPrimitiveLiteral> literals;
+            SmtResult theory_result=solver.solve_parallel(
+                space,empty_domain,literals);
+            ARIADNE_TEST_ASSERT(theory_result.is_unsat());
+        }
+
         {
             std::cout << "[smt-parallel] empty conjunctions ignore zero box budget" << std::endl;
             SmtSolver zero_budget_solver(SmtSolverConfiguration(

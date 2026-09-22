@@ -128,25 +128,24 @@ class TseitinBuilder {
             return std::nullopt;
         }
         Kleenean const& value=predicate.val();
+        std::optional<Bool> result;
         if(definitely(value)) {
-            return true;
+            result=true;
+        } else if(definitely(!value)) {
+            result=false;
+        } else {
+            ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
         }
-        if(definitely(!value)) {
-            return false;
-        }
-        ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+        return result;
     }
 
     Int _encode_constant(ContinuousPredicate const& predicate) {
         Int variable=this->_new_variable();
         Kleenean const& value=predicate.val();
-        if(definitely(value)) {
-            _encoding._add_clause({variable});
-        } else if(definitely(!value)) {
-            _encoding._add_clause({-variable});
-        } else {
+        if(not definitely(value) && not definitely(!value)) {
             ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
         }
+        _encoding._add_clause({definitely(value) ? variable : -variable});
         return variable;
     }
 

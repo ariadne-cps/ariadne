@@ -254,6 +254,8 @@ Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input);
 
+Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);

@@ -42,50 +42,67 @@ void ariadne_main()
     simulator.configuration().set_step_size(0.02);
 
     StepMaximumError max_err=1e-6;
-
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-12);
-    PreconditionedGradedTaylorSeriesIntegrator integrator(
+
+    GradedTaylorSeriesIntegrator graded_integrator(
         max_err,sweeper,lipschitz_tolerance=0.5_x,
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
-    evolver.configuration().set_maximum_spacial_error(1e-6);
-    CONCLOG_PRINTLN(evolver.configuration());
+    PreconditionedGradedTaylorSeriesIntegrator preconditioned_integrator(
+        max_err,sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
 
     Real x0 = 1.40_dec;
     Real y0 = 2.30_dec;
     Real eps_x0 = 0.15_dec;
     Real eps_y0 = 0.05_dec;
-
-    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
-
-    CONCLOG_PRINTLN("Initial set: " << initial_set);
-
+    RealExpressionBoundedConstraintSet initial_set({
+        x0-eps_x0<=x<=x0+eps_x0,
+        y0-eps_y0<=y<=y0+eps_y0
+    });
     Real evolution_time = 7;
 
-    Stopwatch<Milliseconds> sw;
-    CONCLOG_PRINTLN("Computing simulation...");
-    auto simulation = simulator.orbit(initial_set,evolution_time);
-    sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+    auto configure_evolver = [](VectorFieldEvolver& evolver, Bool reconditioning) {
+        evolver.configuration().set_maximum_enclosure_radius(1.0);
+        evolver.configuration().set_maximum_step_size(0.02);
+        evolver.configuration().set_maximum_spacial_error(1e-6);
+        evolver.configuration().set_enable_reconditioning(reconditioning);
+    };
 
-    CONCLOG_PRINTLN("Plotting...");;
-    LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
-    fig.draw(simulation);
-    fig.write("vanderpol_simulation");
+    auto run_case =
+        [&](const char* name, IntegratorInterface const& integrator,
+            Bool reconditioning)
+    {
+        VectorFieldEvolver evolver(dynamics,integrator);
+        configure_evolver(evolver,reconditioning);
 
-    sw.restart();
-    CONCLOG_PRINTLN("Computing evolution... ");
+        Stopwatch<Milliseconds> sw;
+        sw.restart();
+        auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+        sw.click();
 
-    auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+        std::cerr << "[IntegratorComparison]"
+                  << " method=" << name
+                  << " reconditioning=" << reconditioning
+                  << " time_s=" << sw.elapsed_seconds()
+                  << " reach_sets=" << orbit.reach().size()
+                  << " intermediate_sets=" << orbit.intermediate().size()
+                  << " final_sets=" << orbit.final().size();
 
-    CONCLOG_PRINTLN("Plotting...");
-    fig.clear();
-    fig.draw(evolution);
-    fig.write("vanderpol_evolution");
+        if(!orbit.final().empty()) {
+            auto const& final_set=orbit.final()[0];
+            std::cerr << " final_params=" << final_set.number_of_parameters()
+                      << " final_radius=" << final_set.radius()
+                      << " final_error=" << final_set.state_function().error()
+                      << " final_box=" << final_set.euclidean_set().bounding_box();
+        }
+        std::cerr << std::endl;
+    };
+
+    run_case("GradedTaylorSeries",graded_integrator,true);
+    run_case("GradedTaylorSeriesNoReconditioning",graded_integrator,false);
+    run_case("PreconditionedGradedTaylorSeries",preconditioned_integrator,false);
+
 }

@@ -179,10 +179,31 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     bx = hull(UpperBoxType(dx),bx);
     StepSizeType hred=h;
     FlowStepModelType phi = this->flow_step(vf,dx,hred,bx);
+    Nat reduction_count=0u;
     while (not definitely(subset(phi.range(),cast_exact_box(bx)))) {
+        std::cerr << "[FixedStepBoundCheck]"
+                  << " reduction=" << reduction_count
+                  << " h=" << hred
+                  << " bx=" << bx
+                  << " flow_range=" << phi.range()
+                  << std::endl;
+        if(reduction_count>=32u) {
+            std::stringstream msg;
+            msg << "IntegratorBase::flow_step(vf,dx,h): flow range did not fit the "
+                << "fixed bounding box after " << reduction_count
+                << " step halvings; bx=" << bx << ", last_range=" << phi.range();
+            throw IncompleteFlowException(msg.str(),phi);
+        }
         hred=hlf(hred);
+        ++reduction_count;
         phi = this->flow_step(vf,dx,hred,bx);
     }
+    std::cerr << "[FixedStepBoundCheck]"
+              << " accepted=true reductions=" << reduction_count
+              << " h=" << hred
+              << " bx=" << bx
+              << " flow_range=" << phi.range()
+              << std::endl;
     if (hred==h) {
         return phi;
     } else {

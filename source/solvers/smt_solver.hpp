@@ -204,6 +204,16 @@ Void accumulate_statistics(
     SmtSearchStatistics& target,
     SmtSearchStatistics const& source);
 
+struct ParallelExecutionObservation {
+    SizeType observed_thread_count = 0u;
+    SizeType worker_thread_count = 0u;
+    Bool calling_thread_observed = false;
+};
+
+Void begin_parallel_execution_observation();
+ParallelExecutionObservation end_parallel_execution_observation();
+Void record_parallel_processing_thread();
+
 struct CandidateWitnessOutcome {
     Bool attempted = false;
     Bool certified = false;

@@ -96,7 +96,6 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(encoding.clauses().size(),1u);
             ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
         }
-    }
 
         {
             RealVariable x("x");
@@ -129,6 +128,7 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(negated.clauses()[0][0],1);
             ARIADNE_TEST_EQUAL(negated.clauses()[1][0],1);
         }
+    }
 
     Void test_sign_atom() {
         RealVariable x("x");

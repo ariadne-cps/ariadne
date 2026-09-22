@@ -1593,6 +1593,11 @@ class TestSmtSolver {
             require_delta_overlap("x<0 weakened interior",ex<0,0.0625_x);
             require_unsat("x<0 epsilon boundary excluded",ex<0,0.125_x);
 
+            // Sign predicates are strict positivity tests and use the same weakening as x>0.
+            require_epsilon_sat("sgn(x) original true",sgn(ex),0.25_x);
+            require_delta_overlap("sgn(x) weakened interior",sgn(ex),-0.0625_x);
+            require_unsat("sgn(x) epsilon boundary excluded",sgn(ex),-0.125_x);
+
             // Disequality normalizes to x>0 OR -x>0. Its delta weakening is
             // therefore satisfied at equality as well.
             require_epsilon_sat("x!=0 original true positive",ex!=0,0.25_x);
@@ -1615,6 +1620,10 @@ class TestSmtSolver {
             require_epsilon_sat("!(x>0) original true",!(ex>0),-0.25_x);
             require_delta_overlap("!(x>0) closed epsilon boundary",!(ex>0),0.125_x);
             require_unsat("!(x>0) outside epsilon",!(ex>0),0.25_x);
+
+            require_epsilon_sat("!sgn(x) original true",!sgn(ex),-0.25_x);
+            require_delta_overlap("!sgn(x) closed epsilon boundary",!sgn(ex),0.125_x);
+            require_unsat("!sgn(x) outside epsilon",!sgn(ex),0.25_x);
 
             require_epsilon_sat("!(x!=0) equality",!(ex!=0),0.0_x);
             require_delta_overlap("!(x!=0) epsilon boundary",!(ex!=0),0.125_x);

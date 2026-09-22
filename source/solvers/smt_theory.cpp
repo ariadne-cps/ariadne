@@ -35,6 +35,13 @@ SmtTheoryLiteral SmtTheoryLiteral::negated() const
 
 SmtTheoryLiteral make_smt_theory_literal(ContinuousPredicate const& predicate)
 {
+    if(predicate.code()==OperatorCode::SGN) {
+        return SmtTheoryLiteral(
+            indicator(predicate,Sign::POSITIVE),
+            SmtTheoryRelation::GT,
+            RealExpression(0));
+    }
+
     SmtTheoryRelation relation;
     switch(predicate.code()) {
         case OperatorCode::EQ: relation=SmtTheoryRelation::EQ; break;
@@ -44,7 +51,7 @@ SmtTheoryLiteral make_smt_theory_literal(ContinuousPredicate const& predicate)
         case OperatorCode::LT: relation=SmtTheoryRelation::LT; break;
         case OperatorCode::GT: relation=SmtTheoryRelation::GT; break;
         default:
-            ARIADNE_FAIL_MSG("Expected real comparison atom, got operator "<<predicate.code());
+            ARIADNE_FAIL_MSG("Expected real theory atom, got operator "<<predicate.code());
     }
 
     return SmtTheoryLiteral(predicate.cmp1<Real>(),relation,predicate.cmp2<Real>());

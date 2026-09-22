@@ -54,6 +54,7 @@ class TestSmtTheory {
         check_relation(ex>=ey,SmtTheoryRelation::GEQ,"x>=y");
         check_relation(ex<ey,SmtTheoryRelation::LT,"x<y");
         check_relation(ex>ey,SmtTheoryRelation::GT,"x>y");
+        check_relation(sgn(ex),SmtTheoryRelation::GT,"sgn(x) -> x>0");
     }
 
     Void check_negation(ContinuousPredicate const& predicate,
@@ -75,6 +76,7 @@ class TestSmtTheory {
         check_negation(ex>=ey,SmtTheoryRelation::LT,"!(x>=y) -> x<y");
         check_negation(ex<ey,SmtTheoryRelation::GEQ,"!(x<y) -> x>=y");
         check_negation(ex>ey,SmtTheoryRelation::LEQ,"!(x>y) -> x<=y");
+        check_negation(sgn(ex),SmtTheoryRelation::LEQ,"!sgn(x) -> x<=0");
     }
 
     Void test_normalization() {
@@ -99,6 +101,11 @@ class TestSmtTheory {
         check_single(ex>ey,SmtTheoryPrimitiveRelation::GT_ZERO,ex-ey,"x>y -> x-y>0");
         check_single(ex<=ey,SmtTheoryPrimitiveRelation::GEQ_ZERO,ey-ex,"x<=y -> y-x>=0");
         check_single(ex<ey,SmtTheoryPrimitiveRelation::GT_ZERO,ey-ex,"x<y -> y-x>0");
+        check_single(
+            sgn(ex),
+            SmtTheoryPrimitiveRelation::GT_ZERO,
+            ex-RealExpression(0),
+            "sgn(x) -> x>0");
 
         std::cout << "[smt-theory] normalize x!=y -> (x-y>0) or (y-x>0)" << std::endl;
         auto neq=normalize_smt_theory_literal(make_smt_theory_literal(ex!=ey));
@@ -132,6 +139,7 @@ class TestSmtTheory {
         check(ex==ey,SmtTheoryWeakRelation::ABS_LEQ_EPSILON,"x==y -> |x-y|<=epsilon");
         check(ex>=ey,SmtTheoryWeakRelation::GEQ_MINUS_EPSILON,"x>=y -> x-y>=-epsilon");
         check(ex>ey,SmtTheoryWeakRelation::GT_MINUS_EPSILON,"x>y -> x-y>-epsilon");
+        check(sgn(ex),SmtTheoryWeakRelation::GT_MINUS_EPSILON,"sgn(x) -> x>-epsilon");
 
         std::cout << "[smt-theory] weakening requires positive epsilon" << std::endl;
         auto primitive=normalize_smt_theory_literal(make_smt_theory_literal(ex==ey))[0][0];

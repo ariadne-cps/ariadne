@@ -1786,7 +1786,7 @@ class TestSmtSolver {
                           << " parallel=" << parallel_result.status() << std::endl;
 
                 ARIADNE_TEST_EQUAL(sequential_result.status(),parallel_result.status());
-                ARIADNE_TEST_ASSERT(sequential_solve_result.has_witness()==parallel_solve_result.has_witness());
+                ARIADNE_TEST_ASSERT(sequential_result.has_witness()==parallel_result.has_witness());
             }
         };
 

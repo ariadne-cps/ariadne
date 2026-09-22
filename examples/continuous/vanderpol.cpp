@@ -187,6 +187,10 @@ void ariadne_main()
             GradedTaylorPicardIntegrator first_step_integrator(
                 step_maximum_error=1e-3,order=5,
                 StepSweepThreshold(ApproximateDouble(cutoff_value)));
+            // Keep this diagnostic bounded and directly comparable with the
+            // Chen 1e-12 case, which stopped after two refinement iterations.
+            first_step_integrator.set_maximum_error_refinement_iterations(2u);
+            std::cerr << "[FirstStepCutoff] starting cutoff=" << cutoff_value << std::endl;
             auto const first_step_box=
                 cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
             Stopwatch<Microseconds> first_step_sw;

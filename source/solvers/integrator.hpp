@@ -257,6 +257,7 @@ class GradedTaylorPicardIntegrator
     ExactDouble _step_maximum_error;
     GradedThresholdSweeper<FloatDP> _sweeper;
     ExactDouble _error_refinement_minimum_improvement_percentage;
+    Nat _maximum_error_refinement_iterations;
     DegreeType _order;
     ApproximateDouble _sweep_threshold;
     Bool _diagnostics;
@@ -278,6 +279,9 @@ class GradedTaylorPicardIntegrator
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
     ExactDouble error_refinement_minimum_improvement_percentage() const { return this->_error_refinement_minimum_improvement_percentage; }
     Void set_error_refinement_minimum_improvement_percentage(ApproximateDouble e) { _error_refinement_minimum_improvement_percentage = cast_exact(e); }
+    //! \brief Limit error-refinement iterations; zero preserves the historical unlimited behaviour.
+    Void set_maximum_error_refinement_iterations(Nat n) { _maximum_error_refinement_iterations=n; }
+    Nat maximum_error_refinement_iterations() const { return _maximum_error_refinement_iterations; }
     Void set_diagnostics(Bool diagnostics) { _diagnostics=diagnostics; }
 
     virtual GradedTaylorPicardIntegrator* clone() const { return new GradedTaylorPicardIntegrator(*this); }

@@ -330,6 +330,7 @@ GradedTaylorPicardIntegrator::GradedTaylorPicardIntegrator(StepMaximumError err,
           _sweeper(GradedThresholdSweeper<FloatDP>(
               DoublePrecision(), order, FloatDP(cast_exact(threshold.value()),DoublePrecision()))),
           _error_refinement_minimum_improvement_percentage(cast_exact(0.02)),
+          _maximum_error_refinement_iterations(0u),
           _order(order), _sweep_threshold(threshold.value()), _diagnostics(false) { }
 
 FlowStepModelType
@@ -439,6 +440,11 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         phi=antiderivative(fphi,nx)+phi0;
         diagnostic_print("refinement_phi",diagnostic_refinement_iteration,phi);
         new_errors = phi.errors();
+        if(this->_maximum_error_refinement_iterations!=0u
+           && diagnostic_refinement_iteration>=this->_maximum_error_refinement_iterations) {
+            errors=new_errors;
+            break;
+        }
         Bool has_improved = false;
         for (SizeType i=0; i<errors.size(); ++i) {
             if (possibly(errors[i] > 0)) {

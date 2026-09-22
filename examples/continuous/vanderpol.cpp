@@ -135,11 +135,15 @@ void ariadne_main()
     // Compare the two existing series-based local-flow constructors before
     // choosing the implementation base for the preconditioned integrator.
     //
-    // This is deliberately a single-step benchmark: it measures the quality
-    // and cost of constructing the local flow itself, without reconditioning
-    // or long-horizon wrapping effects.  The TaylorSeries case uses one total
-    // degree.  The GradedTaylorSeries case uses separate spatial/temporal
-    // degree budgets, as intended by that implementation.
+    // Three cases are measured for each step:
+    //  (1) TaylorSeries with total order 5;
+    //  (2) GradedTaylorSeries with spatial=5 and temporal=5 fixed;
+    //  (3) adaptive GradedTaylorSeries, with its target error set to the error
+    //      actually obtained by TaylorSeries for that same step.
+    //
+    // Cases (1) and (2) compare the local series constructions at equal maximum
+    // degree.  Case (3) compares their cost/sparsity at approximately equal
+    // requested accuracy.
     {
         ExactBoxType const benchmark_box=cast_exact_box(
             initial_set.euclidean_set(dynamics.state_space()).bounding_box());
@@ -151,15 +155,20 @@ void ariadne_main()
         ThresholdSweeper<FloatDP> series_sweeper(DoublePrecision(),1e-12);
         TaylorSeriesIntegrator series_integrator(
             series_sweeper,lipschitz_tolerance=0.5_x,order=5);
-        GradedTaylorSeriesIntegrator graded_series_integrator(
+        GradedTaylorSeriesIntegrator graded_fixed_integrator(
             step_maximum_error=1e-3,series_sweeper,lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=1,minimum_temporal_order=5,
+            minimum_spacial_order=5,minimum_temporal_order=5,
             maximum_spacial_order=5,maximum_temporal_order=5);
 
         for(SizeType step_case=0u; step_case!=4u; ++step_case) {
             StepSizeType const step=benchmark_steps[step_case];
+            double taylor_error=0.0;
+            bool taylor_completed=false;
 
-            auto run_series_step = [&](const char* method, IntegratorInterface const& candidate) {
+            auto run_series_step =
+                [&](const char* method, IntegratorInterface const& candidate,
+                    double* measured_error, bool* completed_out)
+            {
                 Stopwatch<Microseconds> step_sw;
                 bool completed=true;
                 String failure;
@@ -173,6 +182,8 @@ void ariadne_main()
                     completed=false;
                     failure=e.what();
                 }
+
+                if(completed_out!=nullptr) { *completed_out=completed; }
 
                 std::cerr << "[SeriesStepBenchmark]"
                           << " method=" << method
@@ -188,6 +199,8 @@ void ariadne_main()
                     for(SizeType i=0u; i!=taylor.size(); ++i) {
                         nnz+=taylor[i].number_of_nonzeros();
                     }
+                    double const error=flow.error().raw().get_d();
+                    if(measured_error!=nullptr) { *measured_error=error; }
                     std::cerr << " nnz=" << nnz
                               << " error=" << flow.error()
                               << " component_errors=" << flow.errors()
@@ -198,8 +211,26 @@ void ariadne_main()
                 std::cerr << std::endl;
             };
 
-            run_series_step("TaylorSeries",series_integrator);
-            run_series_step("GradedTaylorSeries",graded_series_integrator);
+            run_series_step(
+                "TaylorSeriesOrder5",series_integrator,
+                &taylor_error,&taylor_completed);
+
+            run_series_step(
+                "GradedFixed5x5",graded_fixed_integrator,
+                nullptr,nullptr);
+
+            if(taylor_completed) {
+                GradedTaylorSeriesIntegrator graded_matched_integrator(
+                    step_maximum_error=1e-3,series_sweeper,lipschitz_tolerance=0.5_x,
+                    minimum_spacial_order=1,minimum_temporal_order=1,
+                    maximum_spacial_order=5,maximum_temporal_order=5);
+                graded_matched_integrator.set_step_maximum_error(
+                    ApproximateDouble(taylor_error));
+
+                run_series_step(
+                    "GradedMatchedAccuracy",graded_matched_integrator,
+                    nullptr,nullptr);
+            }
         }
     }
 

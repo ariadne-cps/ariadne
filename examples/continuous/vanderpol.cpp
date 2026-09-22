@@ -48,9 +48,6 @@ void ariadne_main()
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    // Temporary diagnostic: isolate the cost of graded propagation from
-    // enclosure reconditioning.
-    evolver.configuration().set_enable_reconditioning(false);
     CONCLOG_PRINTLN(evolver.configuration());
 
     Real x0 = 1.40_dec;

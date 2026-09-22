@@ -188,8 +188,18 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     // Test to see if set requires reconditioning
     if (this->_configuration->enable_reconditioning() && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
-        CONCLOG_PRINTLN("reconditioning from errors " << current_set.state_function().errors())
+        auto const errors_before=current_set.state_function().errors();
+        auto const params_before=current_set.number_of_parameters();
+        Stopwatch<Microseconds> recondition_sw;
         current_set.recondition();
+        recondition_sw.click();
+        std::cerr << "[ReconditionProfile] t=" << current_time
+                  << " time_us=" << recondition_sw.duration().count()
+                  << " params_before=" << params_before
+                  << " params_after=" << current_set.number_of_parameters()
+                  << " errors_before=" << errors_before
+                  << " errors_after=" << current_set.state_function().errors()
+                  << std::endl;
         workload.append({current_time,current_set});
         return;
     }

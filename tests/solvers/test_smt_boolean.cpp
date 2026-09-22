@@ -35,6 +35,7 @@ class TestSmtBoolean {
     Void test() {
         ARIADNE_TEST_CALL(test_atom());
         ARIADNE_TEST_CALL(test_constants());
+        ARIADNE_TEST_CALL(test_invalid_inputs());
         ARIADNE_TEST_CALL(test_sign_atom());
         ARIADNE_TEST_CALL(test_negation());
         ARIADNE_TEST_CALL(test_conjunction());
@@ -162,6 +163,30 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(negated.clauses()[0][0],1);
             ARIADNE_TEST_EQUAL(negated.clauses()[1][0],1);
         }
+    }
+
+    Void test_invalid_inputs() {
+        std::cout << "[smt-boolean] reject indeterminate constants" << std::endl;
+        ContinuousPredicate indeterminate_constant(Kleenean(indeterminate));
+        ARIADNE_TEST_THROWS(
+            SmtBooleanEncoder().encode(indeterminate_constant),
+            std::runtime_error);
+
+        RealVariable x("x");
+        ContinuousPredicate atom=(x<=0);
+        ARIADNE_TEST_THROWS(
+            SmtBooleanEncoder().encode(indeterminate_constant&&atom),
+            std::runtime_error);
+
+        std::cout << "[smt-boolean] reject invalid relation/operator enums" << std::endl;
+        ARIADNE_TEST_THROWS(
+            SmtBooleanTestSupport::canonical_relation(
+                static_cast<SmtTheoryRelation>(999)),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            SmtBooleanTestSupport::supported_operator(
+                static_cast<OperatorCode>(999)),
+            std::runtime_error);
     }
 
     Void test_sign_atom() {

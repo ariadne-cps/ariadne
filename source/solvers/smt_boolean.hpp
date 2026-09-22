@@ -36,6 +36,13 @@
 
 namespace Ariadne {
 
+namespace SmtBooleanTestSupport {
+
+SmtTheoryRelation canonical_relation(SmtTheoryRelation relation);
+Bool supported_operator(OperatorCode code);
+
+} // namespace SmtBooleanTestSupport
+
 class TseitinBuilder;
 
 //! \ingroup Solvers

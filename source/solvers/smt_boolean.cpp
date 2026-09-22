@@ -31,6 +31,45 @@
 
 namespace Ariadne {
 
+namespace SmtBooleanTestSupport {
+
+SmtTheoryRelation canonical_relation(SmtTheoryRelation relation)
+{
+    switch(relation) {
+        case SmtTheoryRelation::LEQ: return SmtTheoryRelation::GEQ;
+        case SmtTheoryRelation::LT: return SmtTheoryRelation::GT;
+        case SmtTheoryRelation::EQ:
+        case SmtTheoryRelation::NEQ:
+        case SmtTheoryRelation::GEQ:
+        case SmtTheoryRelation::GT:
+            return relation;
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+    }
+}
+
+Bool supported_operator(OperatorCode code)
+{
+    switch(code) {
+        case OperatorCode::CNST:
+        case OperatorCode::SGN:
+        case OperatorCode::EQ:
+        case OperatorCode::NEQ:
+        case OperatorCode::GEQ:
+        case OperatorCode::LEQ:
+        case OperatorCode::GT:
+        case OperatorCode::LT:
+        case OperatorCode::NOT:
+        case OperatorCode::AND:
+        case OperatorCode::OR:
+            return true;
+        default:
+            ARIADNE_FAIL_MSG("Unsupported operator in SMT Boolean encoding: "<<code);
+    }
+}
+
+} // namespace SmtBooleanTestSupport
+
 namespace {
 
 struct CanonicalTheoryAtom {
@@ -46,23 +85,17 @@ CanonicalTheoryAtom canonical_theory_atom(ContinuousPredicate const& predicate)
     RealExpression rhs=literal.rhs();
     SmtTheoryRelation relation=literal.relation();
 
-    switch(relation) {
-        case SmtTheoryRelation::LEQ:
-            return {rhs,SmtTheoryRelation::GEQ,lhs};
-        case SmtTheoryRelation::LT:
-            return {rhs,SmtTheoryRelation::GT,lhs};
-        case SmtTheoryRelation::EQ:
-        case SmtTheoryRelation::NEQ:
-            if(before(rhs,lhs)) {
-                std::swap(lhs,rhs);
-            }
-            return {lhs,relation,rhs};
-        case SmtTheoryRelation::GEQ:
-        case SmtTheoryRelation::GT:
-            return {lhs,relation,rhs};
-        default:
-            ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+    SmtTheoryRelation canonical=
+        SmtBooleanTestSupport::canonical_relation(relation);
+    if(relation==SmtTheoryRelation::LEQ || relation==SmtTheoryRelation::LT) {
+        return {rhs,canonical,lhs};
     }
+    if(relation==SmtTheoryRelation::EQ || relation==SmtTheoryRelation::NEQ) {
+        if(before(rhs,lhs)) {
+            std::swap(lhs,rhs);
+        }
+    }
+    return {lhs,canonical,rhs};
 }
 
 Bool equivalent_theory_atoms(ContinuousPredicate const& lhs,
@@ -140,6 +173,7 @@ class TseitinBuilder {
     }
 
     Int _encode(ContinuousPredicate const& predicate) {
+        SmtBooleanTestSupport::supported_operator(predicate.code());
         switch(predicate.code()) {
             case OperatorCode::CNST:
                 return this->_encode_constant(predicate);

@@ -963,9 +963,9 @@ SmtResult SmtSolver::solve_parallel(
 }
 
 
-namespace {
+namespace SmtSolverTestSupport {
 
-Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)
+Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)
 {
     target.boxes_processed+=source.boxes_processed;
     target.boxes_pruned+=source.boxes_pruned;
@@ -1023,9 +1023,6 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
         source.peak_active_non_theory_learned_clauses);
 }
 
-} // namespace
-
-namespace SmtSolverTestSupport {
 
 std::vector<SizeType> learned_clause_pruning_candidates(
     std::vector<LearnedClausePruningEntry> const& entries)
@@ -1804,7 +1801,7 @@ class SmtDpllSearch {
     {
         if(atom==alternatives.size()) {
             SmtResult result=this->_solve_theory_literals(literals);
-            add_statistics(_statistics,result.statistics());
+            SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             if(result.is_unknown()) {
                 _theory_unknown_seen=true;
                 return true;
@@ -1867,7 +1864,7 @@ class SmtDpllSearch {
     {
         if(atom==alternatives.size()) {
             SmtResult result=this->_solve_theory_literals(literals);
-            add_statistics(_statistics,result.statistics());
+            SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             if(result.is_epsilon_sat()) {
                 return result.witness();
             }

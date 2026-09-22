@@ -198,6 +198,10 @@ SizeType apply_learned_clause_pruning(
     SizeType active_count,
     SizeType limit);
 
+Void accumulate_statistics(
+    SmtSearchStatistics& target,
+    SmtSearchStatistics const& source);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers

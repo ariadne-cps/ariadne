@@ -51,6 +51,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
+        ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -268,6 +269,41 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(success.certified);
         ARIADNE_TEST_ASSERT(success.witness.has_value());
         ARIADNE_TEST_EQUAL(success.witness->dimension(),1u);
+    }
+
+    Void test_search_outcome() {
+        std::cout << "[smt-dpll] deterministic search outcome classification" << std::endl;
+        using Outcome=SmtSolverTestSupport::SearchOutcome;
+
+        Outcome exhausted=Outcome::exhausted();
+        ARIADNE_TEST_ASSERT(not exhausted.witness.has_value());
+        ARIADNE_TEST_ASSERT(not exhausted.backjump_level.has_value());
+
+        Outcome backjump=Outcome::backjump(3u);
+        ARIADNE_TEST_ASSERT(not backjump.witness.has_value());
+        ARIADNE_TEST_ASSERT(backjump.backjump_level.has_value());
+        ARIADNE_TEST_EQUAL(*backjump.backjump_level,3u);
+
+        UpperBoxType witness({
+            UpperIntervalType(ExactIntervalType(0,0))
+        });
+        Outcome found=Outcome::found(witness);
+        ARIADNE_TEST_ASSERT(found.witness.has_value());
+        ARIADNE_TEST_ASSERT(not found.backjump_level.has_value());
+
+        SmtSearchStatistics statistics;
+        SmtResult sat=SmtSolverTestSupport::finalize_search_outcome(
+            found,false,statistics);
+        ARIADNE_TEST_ASSERT(sat.is_epsilon_sat());
+        ARIADNE_TEST_ASSERT(sat.has_witness());
+
+        SmtResult unknown=SmtSolverTestSupport::finalize_search_outcome(
+            exhausted,true,statistics);
+        ARIADNE_TEST_ASSERT(unknown.is_unknown());
+
+        SmtResult unsat=SmtSolverTestSupport::finalize_search_outcome(
+            exhausted,false,statistics);
+        ARIADNE_TEST_ASSERT(unsat.is_unsat());
     }
 
     Void test_solve() {

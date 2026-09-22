@@ -176,10 +176,11 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     // [-h,+h] and only restricts the returned model to [0,h] at the end.
     // Hence its a-priori state bound must enclose both the forward and backward
     // displacement from dx.  A one-sided +h*f(dx) bound is invalid here.
-    UpperBoxType const radius = 1.5_dy * (dx-dx.centre());
-    UpperBoxType const displacement = (1.5_dy * h) * cast_singleton(image(dx,vf));
-    UpperBoxType bx = hull(UpperBoxType(dx + radius + displacement),
-                           UpperBoxType(dx + radius - displacement));
+    auto const radius = 1.5_dy * (dx-dx.centre());
+    auto const displacement = (1.5_dy * h) * cast_singleton(image(dx,vf));
+    UpperBoxType const forward_box = dx + radius + displacement;
+    UpperBoxType const backward_box = dx + radius + (-displacement);
+    UpperBoxType bx = hull(forward_box,backward_box);
     bx = hull(UpperBoxType(dx),bx);
     StepSizeType hred=h;
     FlowStepModelType phi = this->flow_step(vf,dx,hred,bx);

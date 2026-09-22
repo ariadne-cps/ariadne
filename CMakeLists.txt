@@ -65,6 +65,7 @@ if(COVERAGE)
     else()
         include(CodeCoverage)
         append_coverage_compiler_flags()
+        include(GCCCodeCoverage)
     endif()
 endif()
 
@@ -269,18 +270,9 @@ if(COVERAGE)
             EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
         )
     else()
-        setup_target_for_coverage_lcov(
+        setup_target_for_coverage_gcc(
             NAME coverage
-            NO_BASELINE
-            EXECUTABLE "${CMAKE_CTEST_COMMAND}"
-            EXECUTABLE_ARGS --output-on-failure
             DEPENDENCIES tests
-            BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-            EXCLUDE
-                "/usr/*"
-                "${PROJECT_SOURCE_DIR}/tests/*"
-                "${PROJECT_SOURCE_DIR}/python/*"
-                "${PROJECT_SOURCE_DIR}/submodules/*"
         )
     endif()
 endif()

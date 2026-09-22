@@ -381,6 +381,27 @@ class TestSmtSolver {
             2u,2u,active_flags));
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::should_bump_learned_clause(
             3u,2u,active_flags));
+
+        UpperBoxType witness({
+            UpperIntervalType(ExactIntervalType(0,0))
+        });
+        auto sat=SmtSolverTestSupport::interpret_theory_result(
+            SmtResult::epsilon_sat(witness));
+        ARIADNE_TEST_ASSERT(sat.consistent);
+        ARIADNE_TEST_ASSERT(not sat.unknown);
+        ARIADNE_TEST_ASSERT(sat.witness.has_value());
+
+        auto unknown=SmtSolverTestSupport::interpret_theory_result(
+            SmtResult::unknown());
+        ARIADNE_TEST_ASSERT(unknown.consistent);
+        ARIADNE_TEST_ASSERT(unknown.unknown);
+        ARIADNE_TEST_ASSERT(not unknown.witness.has_value());
+
+        auto unsat=SmtSolverTestSupport::interpret_theory_result(
+            SmtResult::unsat());
+        ARIADNE_TEST_ASSERT(not unsat.consistent);
+        ARIADNE_TEST_ASSERT(not unsat.unknown);
+        ARIADNE_TEST_ASSERT(not unsat.witness.has_value());
     }
 
     Void test_invalid_internal_relations() {

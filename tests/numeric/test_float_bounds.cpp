@@ -618,6 +618,15 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         ARIADNE_TEST_EQUAL(translated.upper_raw(),+inf_);
     }
 
+    // Tangent away from poles remains finite and encloses the endpoint values.
+    {
+        FloatBoundsType x(0.25_x,0.5_x,pr);
+        FloatBoundsType tx=tan(x);
+        ARIADNE_TEST_ASSERT(tx.lower_raw()<=tx.upper_raw());
+        ARIADNE_TEST_COMPARE(tx.lower_raw(),<=,tan(down,RawFloatType(0.25_x,pr)));
+        ARIADNE_TEST_COMPARE(tx.upper_raw(),>=,tan(up,RawFloatType(0.5_x,pr)));
+    }
+
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
     ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);

@@ -107,6 +107,29 @@ void ariadne_main()
 
     TimeStepType diagnostic_time(0u);
     for(Nat diagnostic_step_index=0; diagnostic_step_index!=20; ++diagnostic_step_index) {
+        Nat reconditioning_count=0u;
+        while(possibly(norm(diagnostic_enclosure.state_function().errors()) > 1e-6)) {
+            auto const params_before_recondition=diagnostic_enclosure.number_of_parameters();
+            auto const errors_before_recondition=diagnostic_enclosure.state_function().errors();
+            diagnostic_sw.restart();
+            diagnostic_enclosure.recondition();
+            diagnostic_sw.click();
+            ++reconditioning_count;
+            std::cerr << "[SyncRecondition] step=" << diagnostic_step_index
+                      << " t=" << diagnostic_time
+                      << " count=" << reconditioning_count
+                      << " time_us=" << diagnostic_sw.duration().count()
+                      << " params_before=" << params_before_recondition
+                      << " params_after=" << diagnostic_enclosure.number_of_parameters()
+                      << " errors_before=" << errors_before_recondition
+                      << " errors_after=" << diagnostic_enclosure.state_function().errors()
+                      << std::endl;
+            if(reconditioning_count>=20u) {
+                std::cerr << "[SyncRecondition] aborting after 20 consecutive reconditionings at same t" << std::endl;
+                break;
+            }
+        }
+
         auto const& sf=diagnostic_enclosure.state_function();
         auto const& sf_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(sf.reference());
         SizeType state_nnz=0;
@@ -138,6 +161,7 @@ void ariadne_main()
                   << " flow_error=" << flow.error()
                   << " evolve_us=" << diagnostic_sw.duration().count()
                   << " next_error=" << diagnostic_enclosure.state_function().error()
+                  << " reconditionings_before_step=" << reconditioning_count
                   << std::endl;
         diagnostic_time+=TimeStepType(actual_step);
     }

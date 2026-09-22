@@ -1563,6 +1563,51 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] learned clause pruning removes stale clauses" << std::endl;
+            SmtSolver pruning_solver(SmtSolverConfiguration(
+                0.125_x,std::numeric_limits<SizeType>::max(),0u));
+            RealVariable p0("p0"), p1("p1"), p2("p2"), p3("p3"), p4("p4");
+            RealSpace pruning_space({p0,p1,p2,p3,p4});
+            ExactBoxType pruning_domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1)});
+            std::vector<ContinuousPredicate> atoms({
+                RealExpression(p0)>=0,
+                RealExpression(p1)>=0,
+                RealExpression(p2)>=0,
+                RealExpression(p3)>=0,
+                RealExpression(p4)>=0});
+            ContinuousPredicate formula(true);
+            for(SizeType mask=0u; mask!=32u; ++mask) {
+                ContinuousPredicate clause(false);
+                for(SizeType i=0u; i!=atoms.size(); ++i) {
+                    clause=clause||(((mask>>i)&1u)!=0u ? atoms[i] : !atoms[i]);
+                }
+                formula=formula&&clause;
+            }
+            SmtResult solve_result=pruning_solver.solve(
+                pruning_space,pruning_domain,formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] pruning learned="
+                      << solve_result.statistics().learned_clauses
+                      << " pruning_runs="
+                      << solve_result.statistics().learned_clause_pruning_runs
+                      << " pruned="
+                      << solve_result.statistics().learned_clauses_pruned
+                      << " peak_active="
+                      << solve_result.statistics().peak_active_non_theory_learned_clauses
+                      << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=4u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().peak_active_non_theory_learned_clauses>=2u);
+        }
+
+        {
             std::cout << "[smt-dpll] semantically equivalent atoms share one Boolean variable" << std::endl;
             RealVariable y("y");
             RealExpression ey=y;

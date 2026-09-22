@@ -53,6 +53,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
+        ARIADNE_TEST_CALL(test_epsilon_predicates());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
@@ -325,6 +326,45 @@ class TestSmtSolver {
         ARIADNE_TEST_THROWS(
             SmtSolverTestSupport::epsilon_bounds(solver,invalid),
             std::runtime_error);
+    }
+
+    Void test_epsilon_predicates() {
+        std::cout << "[smt-epsilon] deterministic satisfaction and overlap failures" << std::endl;
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+        UpperBoxType point({
+            UpperIntervalType(ExactIntervalType(0,0))
+        });
+
+        List<ValidatedConstraint> outside({
+            ValidatedConstraint(
+                ValidatedNumber(1),
+                x[0],
+                ValidatedNumber(1))
+        });
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::epsilon_satisfied(
+                solver,point,outside));
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::epsilon_overlaps(
+                solver,point,outside));
+
+        List<ValidatedConstraint> inside({
+            ValidatedConstraint(
+                ValidatedNumber(0),
+                x[0],
+                ValidatedNumber(0))
+        });
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::epsilon_satisfied(
+                solver,point,inside));
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::epsilon_overlaps(
+                solver,point,inside));
+
+        auto empty_candidate=
+            SmtSolverTestSupport::empty_candidate_witness(solver,point);
+        ARIADNE_TEST_ASSERT(not empty_candidate.has_value());
     }
 
     Void test_box_processing_statistics() {

@@ -264,6 +264,20 @@ ExactIntervalType epsilon_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);
 
+Bool epsilon_satisfied(
+    SmtSolver const& solver,
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints);
+
+Bool epsilon_overlaps(
+    SmtSolver const& solver,
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints);
+
+std::optional<UpperBoxType> empty_candidate_witness(
+    SmtSolver const& solver,
+    UpperBoxType const& domain);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers
@@ -309,6 +323,12 @@ class SmtSolver {
         SmtSolver const&, SmtTheoryPrimitiveRelation);
     friend ExactIntervalType SmtSolverTestSupport::epsilon_bounds(
         SmtSolver const&, SmtTheoryPrimitiveRelation);
+    friend Bool SmtSolverTestSupport::epsilon_satisfied(
+        SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
+    friend Bool SmtSolverTestSupport::epsilon_overlaps(
+        SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
+    friend std::optional<UpperBoxType> SmtSolverTestSupport::empty_candidate_witness(
+        SmtSolver const&, UpperBoxType const&);
 
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 

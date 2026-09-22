@@ -632,7 +632,7 @@ class TestSmtSolver {
 
 
         {
-            std::cout << "[smt-theory-solve] classify non-splittable uncertified singleton" << std::endl;
+            std::cout << "[smt-theory-solve] simplify repeated expression before interval solving" << std::endl;
             RealVariable singleton_x("singleton_x");
             RealExpression singleton_ex=singleton_x;
             RealSpace singleton_space({singleton_x});
@@ -642,9 +642,10 @@ class TestSmtSolver {
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 false));
+            RealExpression residual=sin(singleton_ex)-sin(singleton_ex);
+            ARIADNE_TEST_ASSERT(identical(simplify(residual),RealExpression(0)));
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(
-                    sin(singleton_ex)-sin(singleton_ex)==0));
+                make_smt_theory_literal(residual==0));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
@@ -652,11 +653,11 @@ class TestSmtSolver {
                 singleton_space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 
@@ -1111,6 +1112,18 @@ class TestSmtSolver {
         RealExpression ex=x;
         RealSpace space({x});
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+        {
+            std::cout << "[smt-dpll] symbolic simplification removes dependency before theory solving" << std::endl;
+            RealExpression residual=sin(ex)-sin(ex);
+            SmtResult solve_result=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                residual==0);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+        }
 
         {
             std::cout << "[smt-dpll] Boolean theory solve preserves disabled candidate search" << std::endl;

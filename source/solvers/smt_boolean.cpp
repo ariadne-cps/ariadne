@@ -43,6 +43,19 @@ class TseitinBuilder {
         return _encoding._new_variable();
     }
 
+    Int _encode_constant(ContinuousPredicate const& predicate) {
+        Int variable=this->_new_variable();
+        Kleenean const& value=predicate.val();
+        if(definitely(value)) {
+            _encoding._add_clause({variable});
+        } else if(definitely(!value)) {
+            _encoding._add_clause({-variable});
+        } else {
+            ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+        }
+        return variable;
+    }
+
     Int _encode_atom(ContinuousPredicate const& predicate) {
         const Void* key=static_cast<const Void*>(predicate.node_raw_ptr());
         auto iter=_atom_variables.find(key);
@@ -58,6 +71,9 @@ class TseitinBuilder {
 
     Int _encode(ContinuousPredicate const& predicate) {
         switch(predicate.code()) {
+            case OperatorCode::CNST:
+                return this->_encode_constant(predicate);
+
             case OperatorCode::SGN:
             case OperatorCode::EQ:
             case OperatorCode::NEQ:

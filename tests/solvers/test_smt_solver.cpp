@@ -1434,6 +1434,32 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] Boolean constants" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-1,1)});
+
+            SmtResult true_result=solver.solve(space,domain,ContinuousPredicate(true));
+            ARIADNE_TEST_ASSERT(true_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(true_result.has_witness());
+
+            SmtResult false_result=solver.solve(space,domain,ContinuousPredicate(false));
+            ARIADNE_TEST_ASSERT(false_result.is_unsat());
+
+            ContinuousPredicate atom=(ex>=0);
+            SmtResult mixed_true=solver.solve(
+                space,domain,ContinuousPredicate(true)&&atom);
+            ARIADNE_TEST_ASSERT(mixed_true.is_epsilon_sat());
+
+            SmtResult mixed_false=solver.solve(
+                space,domain,ContinuousPredicate(false)&&atom);
+            ARIADNE_TEST_ASSERT(mixed_false.is_unsat());
+
+            SmtResult neutral_or=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-1,-0.5_x)}),
+                ContinuousPredicate(false)||atom);
+            ARIADNE_TEST_ASSERT(neutral_or.is_unsat());
+        }
+
+        {
             std::cout << "[smt-dpll] conjunction UNSAT: x>=1 and x<=0 on [0,1]" << std::endl;
             ContinuousPredicate formula=(ex>=1)&&(ex<=0);
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0,1)}),formula);

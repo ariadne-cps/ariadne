@@ -58,6 +58,16 @@ endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
 
+if(COVERAGE)
+    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+        include(LLVMCodeCoverage)
+        append_llvm_coverage_compiler_flags()
+    else()
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+    endif()
+endif()
+
 enable_testing()
 include(CTest)
 
@@ -250,9 +260,13 @@ target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-if(COVERAGE)
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
+if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+    setup_target_for_coverage_llvm(
+        NAME coverage
+        TARGET ariadne
+        DEPENDENCIES tests
+        EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
+    )
 endif()
 
 if(CAIRO_FOUND)

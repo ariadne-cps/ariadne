@@ -243,15 +243,11 @@ ExactIntervalType SmtSolver::_original_bounds(ValidatedConstraint const& constra
 
 ExactIntervalType SmtSolver::_original_bounds(SmtTheoryPrimitiveRelation relation) const
 {
-    switch(relation) {
-        case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            return ExactIntervalType(0,0);
-        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-        case SmtTheoryPrimitiveRelation::GT_ZERO:
-            return ExactIntervalType(0,+infty);
-        default:
-            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    SmtSolverTestSupport::validate_primitive_relation(relation);
+    if(relation==SmtTheoryPrimitiveRelation::EQ_ZERO) {
+        return ExactIntervalType(0,0);
     }
+    return ExactIntervalType(0,+infty);
 }
 
 ExactIntervalType SmtSolver::_epsilon_bounds(ValidatedConstraint const& constraint) const
@@ -265,16 +261,12 @@ ExactIntervalType SmtSolver::_epsilon_bounds(ValidatedConstraint const& constrai
 
 ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation) const
 {
+    SmtSolverTestSupport::validate_primitive_relation(relation);
     FloatDP epsilon(_configuration.epsilon(),dp);
-    switch(relation) {
-        case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            return ExactIntervalType(-epsilon,+epsilon);
-        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-        case SmtTheoryPrimitiveRelation::GT_ZERO:
-            return ExactIntervalType(-epsilon,+infty);
-        default:
-            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    if(relation==SmtTheoryPrimitiveRelation::EQ_ZERO) {
+        return ExactIntervalType(-epsilon,+epsilon);
     }
+    return ExactIntervalType(-epsilon,+infty);
 }
 ExactIntervalType
 SmtSolver::_epsilon_bounds(CompiledTheoryLiteral const& literal) const
@@ -452,21 +444,14 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
             if(same_box(domain,before_shaving)) {
                 for(auto const& literal:literals) {
                     UpperIntervalType image=apply(literal.function,domain);
-                    switch(literal.relation) {
-                        case SmtTheoryPrimitiveRelation::EQ_ZERO:
-                        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                            if(definitely(disjoint(
-                                    image,this->_original_bounds(literal.relation)))) {
-                                return true;
-                            }
-                            break;
-                        case SmtTheoryPrimitiveRelation::GT_ZERO:
-                            if(definitely(image.upper_bound()<=0)) {
-                                return true;
-                            }
-                            break;
-                        default:
-                            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+                    SmtSolverTestSupport::validate_primitive_relation(literal.relation);
+                    if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
+                        if(definitely(image.upper_bound()<=0)) {
+                            return true;
+                        }
+                    } else if(definitely(disjoint(
+                            image,this->_original_bounds(literal.relation)))) {
+                        return true;
                     }
                 }
                 return false;
@@ -476,20 +461,14 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
 
         for(auto const& literal:literals) {
             UpperIntervalType image=apply(literal.function,domain);
-            switch(literal.relation) {
-                case SmtTheoryPrimitiveRelation::EQ_ZERO:
-                case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                    if(definitely(disjoint(image,this->_original_bounds(literal.relation)))) {
-                        return true;
-                    }
-                    break;
-                case SmtTheoryPrimitiveRelation::GT_ZERO:
-                    if(definitely(image.upper_bound()<=0)) {
-                        return true;
-                    }
-                    break;
-                default:
-                    ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+            SmtSolverTestSupport::validate_primitive_relation(literal.relation);
+            if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
+                if(definitely(image.upper_bound()<=0)) {
+                    return true;
+                }
+            } else if(definitely(disjoint(
+                    image,this->_original_bounds(literal.relation)))) {
+                return true;
             }
         }
     }
@@ -506,20 +485,14 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
         UpperIntervalType image=apply(literal.function,point);
-        switch(literal.relation) {
-            case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                if(not definitely(subset(image,this->_epsilon_bounds(literal.relation)))) {
-                    return false;
-                }
-                break;
-            case SmtTheoryPrimitiveRelation::GT_ZERO:
-                if(not definitely(image.lower_bound()>-epsilon)) {
-                    return false;
-                }
-                break;
-            default:
-                ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+        SmtSolverTestSupport::validate_primitive_relation(literal.relation);
+        if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
+            if(not definitely(image.lower_bound()>-epsilon)) {
+                return false;
+            }
+        } else if(not definitely(
+                subset(image,this->_epsilon_bounds(literal.relation)))) {
+            return false;
         }
     }
     return true;
@@ -536,21 +509,14 @@ Bool SmtSolver::_epsilon_overlaps(
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
         UpperIntervalType image=apply(literal.function,point);
-        switch(literal.relation) {
-            case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                if(definitely(disjoint(
-                        image,UpperIntervalType(this->_epsilon_bounds(literal.relation))))) {
-                    return false;
-                }
-                break;
-            case SmtTheoryPrimitiveRelation::GT_ZERO:
-                if(definitely(image.upper_bound()<=-epsilon)) {
-                    return false;
-                }
-                break;
-            default:
-                ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+        SmtSolverTestSupport::validate_primitive_relation(literal.relation);
+        if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
+            if(definitely(image.upper_bound()<=-epsilon)) {
+                return false;
+            }
+        } else if(definitely(disjoint(
+                image,UpperIntervalType(this->_epsilon_bounds(literal.relation))))) {
+            return false;
         }
     }
     return true;
@@ -749,22 +715,16 @@ SmtSolver::_solve_sequential_conjunction(
             std::move(current),conjunction);
         this->_accumulate_box_processing_statistics(statistics,processing);
 
-        switch(processing.status) {
-            case BoxProcessingStatus::PRUNED:
-                break;
-            case BoxProcessingStatus::EPSILON_SAT:
-                ARIADNE_ASSERT(processing.witness.has_value());
-                return SmtResult::epsilon_sat(*processing.witness,statistics);
-            case BoxProcessingStatus::SPLIT:
-                ARIADNE_ASSERT(processing.children.has_value());
-                pending.push(std::move(processing.children->second));
-                pending.push(std::move(processing.children->first));
-                break;
-            case BoxProcessingStatus::UNKNOWN:
-                unknown_seen=true;
-                break;
-            default:
-                ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+        if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
+            ARIADNE_ASSERT(processing.witness.has_value());
+            return SmtResult::epsilon_sat(*processing.witness,statistics);
+        }
+        if(processing.status==BoxProcessingStatus::SPLIT) {
+            ARIADNE_ASSERT(processing.children.has_value());
+            pending.push(std::move(processing.children->second));
+            pending.push(std::move(processing.children->first));
+        } else if(processing.status==BoxProcessingStatus::UNKNOWN) {
+            unknown_seen=true;
         }
     }
 
@@ -862,31 +822,29 @@ SmtSolver::_solve_parallel_conjunction(
                     state->statistics,processing);
             }
 
-            switch(processing.status) {
-                case BoxProcessingStatus::PRUNED:
-                    return;
-                case BoxProcessingStatus::EPSILON_SAT: {
-                    ARIADNE_ASSERT(processing.witness.has_value());
-                    bool expected=false;
-                    if(state->found.compare_exchange_strong(expected,true)) {
-                        std::lock_guard<std::mutex> lock(state->mutex);
-                        state->witness=*processing.witness;
-                    }
-                    return;
-                }
-                case BoxProcessingStatus::SPLIT:
-                    ARIADNE_ASSERT(processing.children.has_value());
-                    if(not state->found.load()) {
-                        access.append(processing.children->first);
-                        access.append(processing.children->second);
-                    }
-                    return;
-                case BoxProcessingStatus::UNKNOWN:
-                    state->unknown.store(true);
-                    return;
-                default:
-                    ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+            if(processing.status==BoxProcessingStatus::PRUNED) {
+                return;
             }
+            if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
+                ARIADNE_ASSERT(processing.witness.has_value());
+                bool expected=false;
+                if(state->found.compare_exchange_strong(expected,true)) {
+                    std::lock_guard<std::mutex> lock(state->mutex);
+                    state->witness=*processing.witness;
+                }
+                return;
+            }
+            if(processing.status==BoxProcessingStatus::SPLIT) {
+                ARIADNE_ASSERT(processing.children.has_value());
+                if(not state->found.load()) {
+                    access.append(processing.children->first);
+                    access.append(processing.children->second);
+                }
+                return;
+            }
+            ARIADNE_ASSERT(processing.status==BoxProcessingStatus::UNKNOWN);
+            state->unknown.store(true);
+            return;
         });
 
     workload.append(UpperBoxType(domain));
@@ -1096,6 +1054,18 @@ SmtResult finalize_search_outcome(
         return SmtResult::unknown(statistics);
     }
     return SmtResult::unsat(statistics);
+}
+
+Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation)
+{
+    switch(relation) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO:
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+        case SmtTheoryPrimitiveRelation::GT_ZERO:
+            return;
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    }
 }
 
 ExactIntervalType original_bounds(

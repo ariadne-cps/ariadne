@@ -276,6 +276,12 @@ ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation
             ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
     }
 }
+ExactIntervalType
+SmtSolver::_epsilon_bounds(CompiledTheoryLiteral const& literal) const
+{
+    return this->_epsilon_bounds(literal.relation);
+}
+
 
 Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  List<ValidatedConstraint> const& constraints,

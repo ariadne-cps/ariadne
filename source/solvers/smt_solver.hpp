@@ -270,6 +270,7 @@ class SmtSolver {
     ExactIntervalType _original_bounds(SmtTheoryPrimitiveRelation relation) const;
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;
+    ExactIntervalType _epsilon_bounds(CompiledTheoryLiteral const& literal) const;
     Bool _original_reduce(UpperBoxType& domain,
                           List<ValidatedConstraint> const& constraints,
                           ReductionStatistics& statistics) const;

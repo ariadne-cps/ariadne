@@ -1163,6 +1163,25 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] zero theory box budget still permits Boolean UNSAT" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ContinuousPredicate atom=(ex>=0);
+            SmtResult solve_result=bounded_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                atom&&!atom);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
+        }
+
+        {
             std::cout << "[smt-dpll] zero global box budget stops before theory" << std::endl;
             SmtSolver bounded_solver(SmtSolverConfiguration(
                 0.125_x,

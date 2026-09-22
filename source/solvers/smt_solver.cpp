@@ -376,58 +376,6 @@ Bool SmtSolver::_epsilon_overlaps(
     return true;
 }
 
-std::optional<UpperBoxType>
-SmtSolver::_epsilon_witness(UpperBoxType const& domain,
-                            List<ValidatedConstraint> const& constraints) const
-{
-    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
-        if(this->_epsilon_satisfied(candidate,constraints)) {
-            return candidate;
-        }
-    }
-    return std::nullopt;
-}
-
-std::optional<UpperBoxType>
-SmtSolver::_epsilon_candidate_witness(
-    UpperBoxType const& domain,
-    List<ValidatedConstraint> const& constraints) const
-{
-    if(constraints.empty()) {
-        return std::nullopt;
-    }
-
-    ValidatedVectorMultivariateFunction function(
-        constraints.size(),constraints[0].function().domain());
-    ExactBoxType codomain(constraints.size());
-    for(SizeType i=0u; i!=constraints.size(); ++i) {
-        function[i]=constraints[i].function();
-        codomain[i]=this->_epsilon_bounds(constraints[i]);
-    }
-
-    NonlinearInfeasibleInteriorPointOptimiser candidate_solver;
-    auto result=candidate_solver.feasible_candidate(
-        cast_exact_box(domain),function,codomain);
-    UpperBoxType witness=singleton_box(cast_exact(result.second));
-    if(this->_epsilon_satisfied(witness,constraints)) {
-        return witness;
-    }
-    return std::nullopt;
-}
-
-Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
-SmtSolver::_split_box(UpperBoxType const& domain,
-                      List<ValidatedConstraint> const& constraints) const
-{
-    std::vector<ValidatedScalarMultivariateFunction> functions;
-    functions.reserve(constraints.size());
-    for(SizeType i=0u; i!=constraints.size(); ++i) {
-        functions.push_back(constraints[i].function());
-    }
-    auto selection=sensitivity_split_coordinate(domain,functions);
-    return {domain.split(selection.first),selection.second};
-}
-
 SmtSolver::CompiledTheoryLiterals
 SmtSolver::_compile_theory_literals(RealSpace const& space,
                                     List<SmtTheoryPrimitiveLiteral> const& literals) const
@@ -602,53 +550,70 @@ Bool SmtSolver::_epsilon_overlaps(
     return true;
 }
 
+ValidatedScalarMultivariateFunction const&
+SmtSolver::_function(ValidatedConstraint const& constraint) const
+{
+    return constraint.function();
+}
+
+ValidatedScalarMultivariateFunction const&
+SmtSolver::_function(CompiledTheoryLiteral const& literal) const
+{
+    return literal.function;
+}
+
+template<class Conjunction>
 std::optional<UpperBoxType>
-SmtSolver::_epsilon_witness(UpperBoxType const& domain,
-                            CompiledTheoryLiterals const& literals) const
+SmtSolver::_epsilon_witness(
+    UpperBoxType const& domain,
+    Conjunction const& conjunction) const
 {
     for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
-        if(this->_epsilon_satisfied(candidate,literals)) {
+        if(this->_epsilon_satisfied(candidate,conjunction)) {
             return candidate;
         }
     }
     return std::nullopt;
 }
 
+template<class Conjunction>
 std::optional<UpperBoxType>
 SmtSolver::_epsilon_candidate_witness(
     UpperBoxType const& domain,
-    CompiledTheoryLiterals const& literals) const
+    Conjunction const& conjunction) const
 {
-    if(literals.empty()) {
+    if(conjunction.empty()) {
         return std::nullopt;
     }
 
     ValidatedVectorMultivariateFunction function(
-        literals.size(),literals[0].function.domain());
-    ExactBoxType codomain(literals.size());
-    for(SizeType i=0u; i!=literals.size(); ++i) {
-        function[i]=literals[i].function;
-        codomain[i]=this->_epsilon_bounds(literals[i].relation);
+        conjunction.size(),this->_function(conjunction[0]).domain());
+    ExactBoxType codomain(conjunction.size());
+    for(SizeType i=0u; i!=conjunction.size(); ++i) {
+        function[i]=this->_function(conjunction[i]);
+        codomain[i]=this->_epsilon_bounds(conjunction[i]);
     }
 
     NonlinearInfeasibleInteriorPointOptimiser candidate_solver;
     auto result=candidate_solver.feasible_candidate(
         cast_exact_box(domain),function,codomain);
     UpperBoxType witness=singleton_box(cast_exact(result.second));
-    if(this->_epsilon_satisfied(witness,literals)) {
+    if(this->_epsilon_satisfied(witness,conjunction)) {
         return witness;
     }
     return std::nullopt;
 }
 
+template<class Conjunction>
 Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
-SmtSolver::_split_box(UpperBoxType const& domain,
-                      CompiledTheoryLiterals const& literals) const
+SmtSolver::_split_box(
+    UpperBoxType const& domain,
+    Conjunction const& conjunction) const
 {
     std::vector<ValidatedScalarMultivariateFunction> functions;
-    functions.reserve(literals.size());
-    for(auto const& literal:literals) {
-        functions.push_back(literal.function);
+    functions.reserve(conjunction.size());
+    for(auto const& item:conjunction) {
+        functions.push_back(this->_function(item));
     }
     auto selection=sensitivity_split_coordinate(domain,functions);
     return {domain.split(selection.first),selection.second};

@@ -275,15 +275,6 @@ class SmtSolver {
                           ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
-    std::optional<UpperBoxType> _epsilon_witness(
-        UpperBoxType const& domain,
-        List<ValidatedConstraint> const& constraints) const;
-    std::optional<UpperBoxType> _epsilon_candidate_witness(
-        UpperBoxType const& domain,
-        List<ValidatedConstraint> const& constraints) const;
-    Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
-        UpperBoxType const& domain,
-        List<ValidatedConstraint> const& constraints) const;
 
     CompiledTheoryLiterals _compile_theory_literals(
         RealSpace const& space,
@@ -299,15 +290,24 @@ class SmtSolver {
     Bool _epsilon_overlaps(UpperBoxType const& domain,
                            CompiledTheoryLiterals const& literals) const;
 
+    template<class Conjunction>
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
-        CompiledTheoryLiterals const& literals) const;
+        Conjunction const& conjunction) const;
+    template<class Conjunction>
     std::optional<UpperBoxType> _epsilon_candidate_witness(
         UpperBoxType const& domain,
-        CompiledTheoryLiterals const& literals) const;
+        Conjunction const& conjunction) const;
+    template<class Conjunction>
     Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
         UpperBoxType const& domain,
-        CompiledTheoryLiterals const& literals) const;
+        Conjunction const& conjunction) const;
+
+    ValidatedScalarMultivariateFunction const& _function(
+        ValidatedConstraint const& constraint) const;
+    ValidatedScalarMultivariateFunction const& _function(
+        CompiledTheoryLiteral const& literal) const;
+
 
     SmtSolverConfiguration _configuration;
 };

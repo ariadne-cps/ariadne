@@ -74,7 +74,7 @@ ValidatedVectorMultivariateFunctionPatch flowstar_normalise_mapping(
             state[i]-FloatDPBounds(c);
         FloatDP const r=cast_exact(mag(centred.range()));
 
-        physical_box[i]=ExactIntervalType(c-r,c+r);
+        physical_box[i]=ExactIntervalType(sub(down,c,r),add(up,c,r));
         if(r==FloatDP(0,dp)) {
             result[i]=factory.create_zero(domain);
         } else {

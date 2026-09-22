@@ -203,12 +203,14 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
         ++reduction_count;
         phi = this->flow_step(vf,dx,hred,bx);
     }
-    std::cerr << "[FixedStepBoundCheck]"
-              << " accepted=true reductions=" << reduction_count
-              << " h=" << hred
-              << " bx=" << bx
-              << " flow_range=" << phi.range()
-              << std::endl;
+    if(reduction_count!=0u) {
+        std::cerr << "[FixedStepBoundCheck]"
+                  << " accepted=true reductions=" << reduction_count
+                  << " h=" << hred
+                  << " bx=" << bx
+                  << " flow_range=" << phi.range()
+                  << std::endl;
+    }
     if (hred==h) {
         return phi;
     } else {

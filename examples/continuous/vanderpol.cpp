@@ -79,20 +79,25 @@ void ariadne_main()
     // step internally only to prove the flow bound, but then reports
     // IncompleteFlowException instead of silently accepting that smaller step.
     {
+        const StepSizeType chen_steps[] = {
+            StepSizeType(0.02_dy), StepSizeType(0.01_dy), StepSizeType(0.005_dy)
+        };
+        const Nat chen_num_steps_values[] = {350u,700u,1400u};
+        for(SizeType chen_case=0u; chen_case!=3u; ++chen_case) {
         GradedTaylorPicardIntegrator chen_integrator(
             step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
         // Keep the diagnostic bounded. Without this cap, loosening the step
         // acceptance threshold can expose an arbitrarily long remainder
         // refinement sequence before the first step returns.
         chen_integrator.set_maximum_error_refinement_iterations(2u);
-        chen_integrator.set_diagnostics(true);
+        chen_integrator.set_diagnostics(false);
         LabelledEnclosure chen_enclosure(
             initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
             EnclosureConfiguration(chen_integrator.function_factory()));
         chen_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
 
-        StepSizeType const chen_step=StepSizeType(0.02_dy);
-        Nat const chen_num_steps=350u;
+        StepSizeType const chen_step=chen_steps[chen_case];
+        Nat const chen_num_steps=chen_num_steps_values[chen_case];
         Nat chen_reconditionings=0u;
         SizeType chen_max_state_nnz=0u;
         SizeType chen_max_reach_nnz=0u;
@@ -129,10 +134,6 @@ void ariadne_main()
             if(state_nnz>chen_max_state_nnz) { chen_max_state_nnz=state_nnz; }
 
             auto box=cast_exact_box(chen_enclosure.euclidean_set().bounding_box());
-            std::cerr << "[ChenStepStart]"
-                      << " step=" << (step_index+1u)
-                      << " box=" << box
-                      << std::endl;
             try {
                 chen_sw.restart();
                 auto flow=chen_integrator.flow_step(dynamics.function(),box,chen_step);
@@ -179,19 +180,7 @@ void ariadne_main()
                     double const component_width=evolved_box[i].width().get_d();
                     if(component_width>evolved_width) { evolved_width=component_width; }
                 }
-                std::cerr << "[ChenStep]"
-                          << " step=" << (step_index+1u)
-                          << " time=" << ((step_index+1u)*0.02)
-                          << " reconditioned=" << did_recondition
-                          << " errors_before_recondition=" << errors_before_recondition
-                          << " errors_after_recondition=" << errors_after_recondition
-                          << " state_errors_before_flow=" << state_errors_before_flow
-                          << " flow_errors=" << flow_errors
-                          << " reach_errors=" << reach_errors
-                          << " evolved_errors=" << evolved_errors
-                          << " evolved_width=" << evolved_width
-                          << " evolved_box=" << evolved_box
-                          << std::endl;
+
             } catch(const std::exception& e) {
                 chen_completed=false;
                 chen_failed_step=step_index;
@@ -202,8 +191,10 @@ void ariadne_main()
 
         auto const chen_final_box=chen_enclosure.euclidean_set().bounding_box();
         double chen_final_width=0.0;
+        std::vector<double> chen_component_widths(chen_final_box.size());
         for(SizeType i=0; i!=chen_final_box.size(); ++i) {
             double const component_width=chen_final_box[i].width().get_d();
+            chen_component_widths[i]=component_width;
             if(component_width>chen_final_width) { chen_final_width=component_width; }
         }
 
@@ -221,11 +212,13 @@ void ariadne_main()
                   << " recondition_us=" << chen_recondition_us
                   << " final_error=" << chen_enclosure.state_function().error()
                   << " final_width=" << chen_final_width
+                  << " component_widths=[" << chen_component_widths[0] << "," << chen_component_widths[1] << "]"
                   << " final_box=" << chen_final_box;
         if(not chen_completed) {
             std::cerr << " failure=\"" << chen_failure << "\"";
         }
         std::cerr << std::endl;
+        }
     }
 
     // Compare graded Taylor-Picard cutoff values on the full trajectory using

@@ -790,6 +790,53 @@ SmtSolver::_process_box(UpperBoxType domain,
     return result;
 }
 
+Void
+SmtSolver::_accumulate_box_processing_statistics(
+    SmtSearchStatistics& statistics,
+    BoxProcessingResult const& processing) const
+{
+    statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
+    statistics.hull_effective_reductions+=processing.reductions.hull_effective;
+    statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
+    statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
+
+    if(processing.sensitivity_guided_split) {
+        ++statistics.sensitivity_guided_splits;
+    }
+    if(processing.sensitivity_overrode_geometric_split) {
+        ++statistics.sensitivity_overrides_geometric_splits;
+    }
+    if(processing.epsilon_box_certification) {
+        ++statistics.epsilon_box_certifications;
+    }
+    if(processing.candidate_witness_search) {
+        ++statistics.candidate_witness_searches;
+    }
+    if(processing.candidate_witness_success) {
+        ++statistics.candidate_witness_successes;
+    }
+
+    switch(processing.status) {
+        case BoxProcessingStatus::PRUNED:
+            ++statistics.boxes_pruned;
+            break;
+        case BoxProcessingStatus::SPLIT:
+            ++statistics.boxes_split;
+            break;
+        case BoxProcessingStatus::UNKNOWN:
+            ++statistics.boxes_unknown;
+            ++statistics.non_splittable_uncertified_boxes;
+            if(processing.non_splittable_epsilon_overlap) {
+                ++statistics.non_splittable_epsilon_overlap_boxes;
+            }
+            break;
+        case BoxProcessingStatus::EPSILON_SAT:
+            break;
+        default:
+            ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+    }
+}
+
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
                            List<ValidatedConstraint> const& constraints) const
 {
@@ -821,28 +868,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         ++statistics.boxes_processed;
 
         BoxProcessingResult processing=this->_process_box(std::move(current),constraints);
-        statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
-        statistics.hull_effective_reductions+=processing.reductions.hull_effective;
-        statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
-        statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
-        if(processing.sensitivity_guided_split) {
-            ++statistics.sensitivity_guided_splits;
-        }
-        if(processing.sensitivity_overrode_geometric_split) {
-            ++statistics.sensitivity_overrides_geometric_splits;
-        }
-        if(processing.epsilon_box_certification) {
-            ++statistics.epsilon_box_certifications;
-        }
-        if(processing.candidate_witness_search) {
-            ++statistics.candidate_witness_searches;
-        }
-        if(processing.candidate_witness_success) {
-            ++statistics.candidate_witness_successes;
-        }
+        this->_accumulate_box_processing_statistics(statistics,processing);
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
-                ++statistics.boxes_pruned;
                 break;
 
             case BoxProcessingStatus::EPSILON_SAT:
@@ -851,17 +879,11 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
 
             case BoxProcessingStatus::SPLIT:
                 ARIADNE_ASSERT(processing.children.has_value());
-                ++statistics.boxes_split;
                 pending.push(std::move(processing.children->second));
                 pending.push(std::move(processing.children->first));
                 break;
 
             case BoxProcessingStatus::UNKNOWN:
-                ++statistics.boxes_unknown;
-                ++statistics.non_splittable_uncertified_boxes;
-                if(processing.non_splittable_epsilon_overlap) {
-                    ++statistics.non_splittable_epsilon_overlap_boxes;
-                }
                 unknown_seen=true;
                 break;
 
@@ -910,44 +932,19 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         ++statistics.boxes_processed;
 
         BoxProcessingResult processing=this->_process_box(std::move(current),compiled);
-        statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
-        statistics.hull_effective_reductions+=processing.reductions.hull_effective;
-        statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
-        statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
-        if(processing.sensitivity_guided_split) {
-            ++statistics.sensitivity_guided_splits;
-        }
-        if(processing.sensitivity_overrode_geometric_split) {
-            ++statistics.sensitivity_overrides_geometric_splits;
-        }
-        if(processing.epsilon_box_certification) {
-            ++statistics.epsilon_box_certifications;
-        }
-        if(processing.candidate_witness_search) {
-            ++statistics.candidate_witness_searches;
-        }
-        if(processing.candidate_witness_success) {
-            ++statistics.candidate_witness_successes;
-        }
+        this->_accumulate_box_processing_statistics(statistics,processing);
         switch(processing.status) {
             case BoxProcessingStatus::PRUNED:
-                ++statistics.boxes_pruned;
                 break;
             case BoxProcessingStatus::EPSILON_SAT:
                 ARIADNE_ASSERT(processing.witness.has_value());
                 return SmtResult::epsilon_sat(*processing.witness,statistics);
             case BoxProcessingStatus::SPLIT:
                 ARIADNE_ASSERT(processing.children.has_value());
-                ++statistics.boxes_split;
                 pending.push(std::move(processing.children->second));
                 pending.push(std::move(processing.children->first));
                 break;
             case BoxProcessingStatus::UNKNOWN:
-                ++statistics.boxes_unknown;
-                ++statistics.non_splittable_uncertified_boxes;
-                if(processing.non_splittable_epsilon_overlap) {
-                    ++statistics.non_splittable_epsilon_overlap_boxes;
-                }
                 unknown_seen=true;
                 break;
             default:
@@ -1015,30 +1012,8 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
             BoxProcessingResult processing=this->_process_box(box,constraints);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
-                state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
-                state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
-                state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
-                state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
-                if(processing.sensitivity_guided_split) {
-                    ++state->statistics.sensitivity_guided_splits;
-                }
-                if(processing.sensitivity_overrode_geometric_split) {
-                    ++state->statistics.sensitivity_overrides_geometric_splits;
-                }
-                if(processing.epsilon_box_certification) {
-                    ++state->statistics.epsilon_box_certifications;
-                }
-                if(processing.candidate_witness_search) {
-                    ++state->statistics.candidate_witness_searches;
-                }
-                if(processing.candidate_witness_success) {
-                    ++state->statistics.candidate_witness_successes;
-                }
-                if(processing.status==BoxProcessingStatus::PRUNED) {
-                    ++state->statistics.boxes_pruned;
-                } else if(processing.status==BoxProcessingStatus::SPLIT) {
-                    ++state->statistics.boxes_split;
-                }
+                this->_accumulate_box_processing_statistics(
+                    state->statistics,processing);
             }
 
             switch(processing.status) {
@@ -1065,14 +1040,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
 
                 case BoxProcessingStatus::UNKNOWN:
                     state->unknown.store(true);
-                    {
-                        std::lock_guard<std::mutex> lock(state->mutex);
-                        ++state->statistics.boxes_unknown;
-                        ++state->statistics.non_splittable_uncertified_boxes;
-                        if(processing.non_splittable_epsilon_overlap) {
-                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
-                        }
-                    }
                     return;
 
                 default:
@@ -1136,30 +1103,8 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
             BoxProcessingResult processing=this->_process_box(box,compiled);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
-                state->statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
-                state->statistics.hull_effective_reductions+=processing.reductions.hull_effective;
-                state->statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
-                state->statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
-                if(processing.sensitivity_guided_split) {
-                    ++state->statistics.sensitivity_guided_splits;
-                }
-                if(processing.sensitivity_overrode_geometric_split) {
-                    ++state->statistics.sensitivity_overrides_geometric_splits;
-                }
-                if(processing.epsilon_box_certification) {
-                    ++state->statistics.epsilon_box_certifications;
-                }
-                if(processing.candidate_witness_search) {
-                    ++state->statistics.candidate_witness_searches;
-                }
-                if(processing.candidate_witness_success) {
-                    ++state->statistics.candidate_witness_successes;
-                }
-                if(processing.status==BoxProcessingStatus::PRUNED) {
-                    ++state->statistics.boxes_pruned;
-                } else if(processing.status==BoxProcessingStatus::SPLIT) {
-                    ++state->statistics.boxes_split;
-                }
+                this->_accumulate_box_processing_statistics(
+                    state->statistics,processing);
             }
 
             switch(processing.status) {
@@ -1183,14 +1128,6 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                     return;
                 case BoxProcessingStatus::UNKNOWN:
                     state->unknown.store(true);
-                    {
-                        std::lock_guard<std::mutex> lock(state->mutex);
-                        ++state->statistics.boxes_unknown;
-                        ++state->statistics.non_splittable_uncertified_boxes;
-                        if(processing.non_splittable_epsilon_overlap) {
-                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
-                        }
-                    }
                     return;
 
                 default:

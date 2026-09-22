@@ -115,7 +115,7 @@ void ariadne_main()
             for(SizeType i=0; i!=state_taylor.size(); ++i) {
                 state_nnz+=state_taylor[i].number_of_nonzeros();
             }
-            max_state_nnz=max(max_state_nnz,state_nnz);
+            if(state_nnz>max_state_nnz) { max_state_nnz=state_nnz; }
 
             auto box=cast_exact_box(sweep_enclosure.euclidean_set().bounding_box());
             sweep_sw.restart();
@@ -138,7 +138,7 @@ void ariadne_main()
             for(SizeType i=0; i!=reach_taylor.size(); ++i) {
                 reach_nnz+=reach_taylor[i].number_of_nonzeros();
             }
-            max_reach_nnz=max(max_reach_nnz,reach_nnz);
+            if(reach_nnz>max_reach_nnz) { max_reach_nnz=reach_nnz; }
 
             sweep_sw.restart();
             sweep_enclosure.apply_fixed_evolve_step(flow,actual_step);

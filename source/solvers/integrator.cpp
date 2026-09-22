@@ -406,9 +406,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     }
     errors = new_errors;
     CONCLOG_PRINTLN_AT(2,"validated errors=" << errors);
-    DegreeType refinement_iteration=0;
     while (true) {
-        ++refinement_iteration;
         fphi=compose(f,join(std::move(phi),ta));
         phi=antiderivative(fphi,nx)+phi0;
         new_errors = phi.errors();

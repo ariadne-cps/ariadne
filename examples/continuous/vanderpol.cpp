@@ -48,6 +48,9 @@ void ariadne_main()
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
+    // Temporary diagnostic: isolate the cost of graded propagation from
+    // enclosure reconditioning.
+    evolver.configuration().set_enable_reconditioning(false);
     CONCLOG_PRINTLN(evolver.configuration());
 
     Real x0 = 1.40_dec;
@@ -111,6 +114,8 @@ void ariadne_main()
         auto const& sf_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(sf.reference());
         SizeType state_nnz=0;
         for(SizeType i=0; i!=sf_taylor.size(); ++i) { state_nnz+=sf_taylor[i].number_of_nonzeros(); }
+        auto const state_error_before=sf.error();
+        SizeType const state_params_before=diagnostic_enclosure.number_of_parameters();
 
         auto box=cast_exact_box(diagnostic_enclosure.euclidean_set().bounding_box());
         diagnostic_sw.restart();
@@ -128,9 +133,9 @@ void ariadne_main()
 
         std::cerr << "[SyncProfile] step=" << diagnostic_step_index
                   << " t=" << diagnostic_time
-                  << " params=" << diagnostic_enclosure.number_of_parameters()
+                  << " params_before=" << state_params_before
                   << " state_nnz_before=" << state_nnz
-                  << " state_error_before=" << sf.error()
+                  << " state_error_before=" << state_error_before
                   << " flow_us=" << flow_us
                   << " flow_nnz=" << flow_nnz
                   << " flow_error=" << flow.error()

@@ -28,6 +28,11 @@ set(LIBRARY_EXCLUSIVE_WARN shadow)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
+if(APPLE)
+    # Build-tree executables must load the just-built Ariadne dylibs rather
+    # than an older installation from CMAKE_INSTALL_PREFIX (e.g. /usr/local).
+    set(CMAKE_BUILD_RPATH "${PROJECT_BINARY_DIR}")
+endif()
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -254,6 +259,17 @@ target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR)
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+if(APPLE)
+    # Keep the dylib identity relocatable.  In the build tree, CMake's
+    # BUILD_RPATH above resolves @rpath to PROJECT_BINARY_DIR; installed
+    # consumers can supply their own install/runtime rpath independently.
+    set_target_properties(ariadne ariadne-kernel ariadne-core PROPERTIES
+        MACOSX_RPATH ON
+        INSTALL_NAME_DIR "@rpath"
+        BUILD_WITH_INSTALL_NAME_DIR OFF
+    )
+endif()
 
 if(COVERAGE)
     if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")

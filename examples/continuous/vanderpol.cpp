@@ -118,7 +118,7 @@ void ariadne_main()
                 }
 
                 auto at_zero=partial_evaluate(
-                    flow,flow.argument_size()-1u,StepSizeType(0_dy));
+                    flow,flow.argument_size()-1u,StepSizeType(0_z));
                 auto identity=factory(at_zero).create_identity();
                 auto initial_defect=at_zero-identity;
                 auto at_end=partial_evaluate(

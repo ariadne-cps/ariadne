@@ -32,6 +32,7 @@ class TestSmtTheory {
         ARIADNE_TEST_CALL(test_normalization());
         ARIADNE_TEST_CALL(test_weakening());
         ARIADNE_TEST_CALL(test_streaming());
+        ARIADNE_TEST_CALL(test_invalid_relations());
         ARIADNE_TEST_CALL(test_reject_non_atom());
     }
 
@@ -182,6 +183,39 @@ class TestSmtTheory {
         ARIADNE_TEST_EQUAL(
             weak_stream.str(),
             String("abs<=epsilon >=-epsilon >-epsilon"));
+    }
+
+    Void test_invalid_relations() {
+        std::cout << "[smt-theory] reject invalid enum values" << std::endl;
+        RealVariable x("x");
+        RealExpression ex=x;
+
+        auto invalid_relation=static_cast<SmtTheoryRelation>(999);
+        SmtTheoryLiteral invalid_literal(ex,invalid_relation,RealExpression(0));
+        ARIADNE_TEST_THROWS(invalid_literal.negated(),std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            normalize_smt_theory_literal(invalid_literal),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            static_cast<Void>(
+                static_cast<OutputStream&>(std::cout) << invalid_relation),
+            std::runtime_error);
+
+        auto invalid_primitive=static_cast<SmtTheoryPrimitiveRelation>(999);
+        SmtTheoryPrimitiveLiteral invalid_primitive_literal(ex,invalid_primitive);
+        ARIADNE_TEST_THROWS(
+            weaken_smt_theory_literal(invalid_primitive_literal,0.125_x),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            static_cast<Void>(
+                static_cast<OutputStream&>(std::cout) << invalid_primitive),
+            std::runtime_error);
+
+        auto invalid_weak=static_cast<SmtTheoryWeakRelation>(999);
+        ARIADNE_TEST_THROWS(
+            static_cast<Void>(
+                static_cast<OutputStream&>(std::cout) << invalid_weak),
+            std::runtime_error);
     }
 
     Void test_reject_non_atom() {

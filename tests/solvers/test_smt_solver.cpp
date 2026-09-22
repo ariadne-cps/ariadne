@@ -163,6 +163,13 @@ class TestSmtSolver {
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status() << " " << unknown.status();
         ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT UNKNOWN"));
+
+        std::cout << "[smt-result] reject invalid status" << std::endl;
+        auto invalid_status=static_cast<SmtResultStatus>(999);
+        ARIADNE_TEST_THROWS(
+            static_cast<Void>(
+                static_cast<OutputStream&>(std::cout) << invalid_status),
+            std::runtime_error);
     }
 
     Void test_learned_clause_pruning_policy() {

@@ -74,116 +74,13 @@ void ariadne_main()
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
 
-    // Compare graded Taylor-Picard cutoff values on the full trajectory using
-    // synchronous enclosure propagation.  Each case is capped in measured work
-    // so that cutoff=0 cannot make the benchmark impractically long.
-    // Chen-aligned state domain and integration parameters are used here,
-    // but this sweep is intentionally adaptive and is therefore a performance
-    // diagnostic, not a direct reproduction of Chen's fixed-step experiment.
-    const double cutoff_values[] = {1e-14,1e-13,1e-12,1e-11,1e-10};
-    const long long cutoff_work_limit_us = 15000000;
-    for(double cutoff_value : cutoff_values) {
-        GradedTaylorPicardIntegrator sweep_integrator(
-            max_err,order=5,StepSweepThreshold(ApproximateDouble(cutoff_value)));
-        LabelledEnclosure sweep_enclosure(
-            initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
-            EnclosureConfiguration(sweep_integrator.function_factory()));
-        sweep_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
-
-        TimeStepType sweep_time(0u);
-        Nat sweep_steps=0u;
-        Nat sweep_reconditionings=0u;
-        SizeType max_state_nnz=0u;
-        SizeType max_reach_nnz=0u;
-        long long flow_us_total=0;
-        long long reach_us_total=0;
-        long long evolve_us_total=0;
-        long long recondition_us_total=0;
-        Stopwatch<Microseconds> sweep_sw;
-
-        while(possibly(sweep_time < TimeStepType(7u)) && sweep_steps<2000u
-              && flow_us_total+reach_us_total+evolve_us_total+recondition_us_total < cutoff_work_limit_us) {
-            if(possibly(sweep_enclosure.state_function().error() > 1e-6_pr)) {
-                sweep_sw.restart();
-                sweep_enclosure.recondition();
-                sweep_sw.click();
-                recondition_us_total+=sweep_sw.duration().count();
-                ++sweep_reconditionings;
-            }
-
-            auto const& state_taylor =
-                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
-                    sweep_enclosure.state_function().reference());
-            SizeType state_nnz=0u;
-            for(SizeType i=0; i!=state_taylor.size(); ++i) {
-                state_nnz+=state_taylor[i].number_of_nonzeros();
-            }
-            if(state_nnz>max_state_nnz) { max_state_nnz=state_nnz; }
-
-            auto box=cast_exact_box(sweep_enclosure.euclidean_set().bounding_box());
-            sweep_sw.restart();
-            auto flow=sweep_integrator.flow_step(dynamics.function(),box,suggest(StepSizeType(0.02_dy)));
-            sweep_sw.click();
-            flow_us_total+=sweep_sw.duration().count();
-
-            StepSizeType actual_step=
-                static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
-
-            LabelledEnclosure reach_enclosure=sweep_enclosure;
-            sweep_sw.restart();
-            reach_enclosure.apply_full_reach_step(flow);
-            sweep_sw.click();
-            reach_us_total+=sweep_sw.duration().count();
-            auto const& reach_taylor =
-                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
-                    reach_enclosure.state_function().reference());
-            SizeType reach_nnz=0u;
-            for(SizeType i=0; i!=reach_taylor.size(); ++i) {
-                reach_nnz+=reach_taylor[i].number_of_nonzeros();
-            }
-            if(reach_nnz>max_reach_nnz) { max_reach_nnz=reach_nnz; }
-
-            sweep_sw.restart();
-            sweep_enclosure.apply_fixed_evolve_step(flow,actual_step);
-            sweep_sw.click();
-            evolve_us_total+=sweep_sw.duration().count();
-
-            sweep_time+=TimeStepType(actual_step);
-            ++sweep_steps;
-        }
-
-        bool const completed=not possibly(sweep_time < TimeStepType(7u));
-        auto const final_box=sweep_enclosure.euclidean_set().bounding_box();
-        double final_width=0.0;
-        for(SizeType i=0; i!=final_box.size(); ++i) {
-            double const component_width=final_box[i].width().get_d();
-            if(component_width>final_width) { final_width=component_width; }
-        }
-        std::cerr << "[CutoffSweep]"
-                  << " cutoff=" << cutoff_value
-                  << " completed=" << completed
-                  << " t=" << sweep_time
-                  << " steps=" << sweep_steps
-                  << " reconditionings=" << sweep_reconditionings
-                  << " max_state_nnz=" << max_state_nnz
-                  << " max_reach_nnz=" << max_reach_nnz
-                  << " flow_us=" << flow_us_total
-                  << " reach_us=" << reach_us_total
-                  << " evolve_us=" << evolve_us_total
-                  << " recondition_us=" << recondition_us_total
-                  << " final_error=" << sweep_enclosure.state_function().error()
-                  << " final_width=" << final_width
-                  << " final_box=" << final_box
-                  << std::endl;
-    }
-
     // Chen-aligned fixed-step benchmark.  This deliberately calls the exact
     // StepSizeType overload rather than suggest(...): Ariadne may try a smaller
     // step internally only to prove the flow bound, but then reports
     // IncompleteFlowException instead of silently accepting that smaller step.
     {
         GradedTaylorPicardIntegrator chen_integrator(
-            max_err,order=5,step_sweep_threshold=1e-12);
+            step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
         chen_integrator.set_diagnostics(false);
         LabelledEnclosure chen_enclosure(
             initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
@@ -323,54 +220,112 @@ void ariadne_main()
         std::cerr << std::endl;
     }
 
-    // Isolate coefficient-cutoff effects on Chen's first fixed step.
-    // cutoff=0 is deliberately excluded here: it is a separate complexity
-    // stress case and can make a single composition prohibitively expensive.
-    // Use a deliberately loose step error so every case returns its converged
-    // model instead of throwing at the 1e-6 acceptance threshold.
-    {
-        const double first_step_cutoffs[] = {1e-14,1e-13,1e-12};
-        for(double cutoff_value : first_step_cutoffs) {
-            GradedTaylorPicardIntegrator first_step_integrator(
-                step_maximum_error=1e-3,order=5,
-                StepSweepThreshold(ApproximateDouble(cutoff_value)));
-            // Keep this diagnostic bounded and directly comparable with the
-            // Chen 1e-12 case, which stopped after two refinement iterations.
-            first_step_integrator.set_maximum_error_refinement_iterations(2u);
-            std::cerr << "[FirstStepCutoff] starting cutoff=" << cutoff_value << std::endl;
-            auto const first_step_box=
-                cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
-            Stopwatch<Microseconds> first_step_sw;
-            try {
-                auto first_step_flow=
-                    first_step_integrator.flow_step(
-                        dynamics.function(),first_step_box,StepSizeType(0.02_dy));
-                first_step_sw.click();
-                auto const& first_step_taylor =
-                    dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
-                        first_step_flow.reference());
-                SizeType first_step_nnz=0u;
-                for(SizeType i=0; i!=first_step_taylor.size(); ++i) {
-                    first_step_nnz+=first_step_taylor[i].number_of_nonzeros();
-                }
-                std::cerr << "[FirstStepCutoff]"
-                          << " cutoff=" << cutoff_value
-                          << " error=" << first_step_flow.error()
-                          << " errors=" << first_step_flow.errors()
-                          << " nnz=" << first_step_nnz
-                          << " time_us=" << first_step_sw.duration().count()
-                          << std::endl;
-            } catch(const std::exception& e) {
-                first_step_sw.click();
-                std::cerr << "[FirstStepCutoff]"
-                          << " cutoff=" << cutoff_value
-                          << " failed=true"
-                          << " time_us=" << first_step_sw.duration().count()
-                          << " failure=\"" << e.what() << "\""
-                          << std::endl;
+    // Compare graded Taylor-Picard cutoff values on the full trajectory using
+    // synchronous enclosure propagation.  Each case is capped in measured work
+    // so that cutoff=0 cannot make the benchmark impractically long.
+    // Chen-aligned state domain and integration parameters are used here,
+    // but this sweep is intentionally adaptive and is therefore a performance
+    // diagnostic, not a direct reproduction of Chen's fixed-step experiment.
+    const double cutoff_values[] = {1e-14,1e-13,1e-12,1e-11,1e-10};
+    const long long cutoff_work_limit_us = 15000000;
+    for(double cutoff_value : cutoff_values) {
+        GradedTaylorPicardIntegrator sweep_integrator(
+            max_err,order=5,StepSweepThreshold(ApproximateDouble(cutoff_value)));
+        LabelledEnclosure sweep_enclosure(
+            initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+            EnclosureConfiguration(sweep_integrator.function_factory()));
+        sweep_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+
+        TimeStepType sweep_time(0u);
+        Nat sweep_steps=0u;
+        Nat sweep_reconditionings=0u;
+        SizeType max_state_nnz=0u;
+        SizeType max_reach_nnz=0u;
+        long long flow_us_total=0;
+        long long reach_us_total=0;
+        long long evolve_us_total=0;
+        long long recondition_us_total=0;
+        Stopwatch<Microseconds> sweep_sw;
+
+        while(possibly(sweep_time < TimeStepType(7u)) && sweep_steps<2000u
+              && flow_us_total+reach_us_total+evolve_us_total+recondition_us_total < cutoff_work_limit_us) {
+            if(possibly(sweep_enclosure.state_function().error() > 1e-6_pr)) {
+                sweep_sw.restart();
+                sweep_enclosure.recondition();
+                sweep_sw.click();
+                recondition_us_total+=sweep_sw.duration().count();
+                ++sweep_reconditionings;
             }
+
+            auto const& state_taylor =
+                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                    sweep_enclosure.state_function().reference());
+            SizeType state_nnz=0u;
+            for(SizeType i=0; i!=state_taylor.size(); ++i) {
+                state_nnz+=state_taylor[i].number_of_nonzeros();
+            }
+            if(state_nnz>max_state_nnz) { max_state_nnz=state_nnz; }
+
+            auto box=cast_exact_box(sweep_enclosure.euclidean_set().bounding_box());
+            sweep_sw.restart();
+            auto flow=sweep_integrator.flow_step(dynamics.function(),box,suggest(StepSizeType(0.02_dy)));
+            sweep_sw.click();
+            flow_us_total+=sweep_sw.duration().count();
+
+            StepSizeType actual_step=
+                static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
+
+            LabelledEnclosure reach_enclosure=sweep_enclosure;
+            sweep_sw.restart();
+            reach_enclosure.apply_full_reach_step(flow);
+            sweep_sw.click();
+            reach_us_total+=sweep_sw.duration().count();
+            auto const& reach_taylor =
+                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                    reach_enclosure.state_function().reference());
+            SizeType reach_nnz=0u;
+            for(SizeType i=0; i!=reach_taylor.size(); ++i) {
+                reach_nnz+=reach_taylor[i].number_of_nonzeros();
+            }
+            if(reach_nnz>max_reach_nnz) { max_reach_nnz=reach_nnz; }
+
+            sweep_sw.restart();
+            sweep_enclosure.apply_fixed_evolve_step(flow,actual_step);
+            sweep_sw.click();
+            evolve_us_total+=sweep_sw.duration().count();
+
+            sweep_time+=TimeStepType(actual_step);
+            ++sweep_steps;
         }
+
+        bool const completed=not possibly(sweep_time < TimeStepType(7u));
+        auto const final_box=sweep_enclosure.euclidean_set().bounding_box();
+        double final_width=0.0;
+        for(SizeType i=0; i!=final_box.size(); ++i) {
+            double const component_width=final_box[i].width().get_d();
+            if(component_width>final_width) { final_width=component_width; }
+        }
+        std::cerr << "[CutoffSweep]"
+                  << " cutoff=" << cutoff_value
+                  << " completed=" << completed
+                  << " t=" << sweep_time
+                  << " steps=" << sweep_steps
+                  << " reconditionings=" << sweep_reconditionings
+                  << " max_state_nnz=" << max_state_nnz
+                  << " max_reach_nnz=" << max_reach_nnz
+                  << " flow_us=" << flow_us_total
+                  << " reach_us=" << reach_us_total
+                  << " evolve_us=" << evolve_us_total
+                  << " recondition_us=" << recondition_us_total
+                  << " final_error=" << sweep_enclosure.state_function().error()
+                  << " final_width=" << final_width
+                  << " final_box=" << final_box
+                  << std::endl;
     }
+
+    // The standalone first-step cutoff sweep is intentionally disabled here.
+    // Cutoffs below Chen's 1e-12 can make a single Taylor-model composition
+    // dominate the run without adding information to the fixed-step comparison.
 
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);

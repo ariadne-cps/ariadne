@@ -132,6 +132,77 @@ void ariadne_main()
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
 
+    // Compare the two existing series-based local-flow constructors before
+    // choosing the implementation base for the preconditioned integrator.
+    //
+    // This is deliberately a single-step benchmark: it measures the quality
+    // and cost of constructing the local flow itself, without reconditioning
+    // or long-horizon wrapping effects.  The TaylorSeries case uses one total
+    // degree.  The GradedTaylorSeries case uses separate spatial/temporal
+    // degree budgets, as intended by that implementation.
+    {
+        ExactBoxType const benchmark_box=cast_exact_box(
+            initial_set.euclidean_set(dynamics.state_space()).bounding_box());
+        const StepSizeType benchmark_steps[] = {
+            StepSizeType(0.02_dy), StepSizeType(0.01_dy),
+            StepSizeType(0.005_dy), StepSizeType(0.0025_dy)
+        };
+
+        ThresholdSweeper<FloatDP> series_sweeper(DoublePrecision(),1e-12);
+        TaylorSeriesIntegrator series_integrator(
+            series_sweeper,lipschitz_tolerance=0.5_x,order=5);
+        GradedTaylorSeriesIntegrator graded_series_integrator(
+            step_maximum_error=1e-3,series_sweeper,lipschitz_tolerance=0.5_x,
+            minimum_spacial_order=1,minimum_temporal_order=5,
+            maximum_spacial_order=5,maximum_temporal_order=5);
+
+        for(SizeType step_case=0u; step_case!=4u; ++step_case) {
+            StepSizeType const step=benchmark_steps[step_case];
+
+            auto run_series_step = [&](const char* method, IntegratorInterface const& candidate) {
+                Stopwatch<Microseconds> step_sw;
+                bool completed=true;
+                String failure;
+                FlowStepModelType flow;
+                try {
+                    step_sw.restart();
+                    flow=candidate.flow_step(dynamics.function(),benchmark_box,step);
+                    step_sw.click();
+                } catch(const std::exception& e) {
+                    step_sw.click();
+                    completed=false;
+                    failure=e.what();
+                }
+
+                std::cerr << "[SeriesStepBenchmark]"
+                          << " method=" << method
+                          << " requested_step=" << step
+                          << " completed=" << completed
+                          << " time_us=" << step_sw.duration().count();
+
+                if(completed) {
+                    auto const& taylor=
+                        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                            flow.reference());
+                    SizeType nnz=0u;
+                    for(SizeType i=0u; i!=taylor.size(); ++i) {
+                        nnz+=taylor[i].number_of_nonzeros();
+                    }
+                    std::cerr << " nnz=" << nnz
+                              << " error=" << flow.error()
+                              << " component_errors=" << flow.errors()
+                              << " range=" << flow.range();
+                } else {
+                    std::cerr << " failure=\"" << failure << "\"";
+                }
+                std::cerr << std::endl;
+            };
+
+            run_series_step("TaylorSeries",series_integrator);
+            run_series_step("GradedTaylorSeries",graded_series_integrator);
+        }
+    }
+
     // Reference Ariadne reconditioning at a fixed physical calendar.
     {
         const StepSizeType benchmark_steps[] = {

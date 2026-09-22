@@ -291,10 +291,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 return true;
             }
         }
-        if(definitely(domain.is_empty())) {
-            return true;
-        }
-
         if(not same_box(domain,previous)) {
             ++statistics.hull_effective;
         }
@@ -312,9 +308,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                         return true;
                     }
                 }
-            }
-            if(definitely(domain.is_empty())) {
-                return true;
             }
             if(not same_box(domain,before_shaving)) {
                 ++statistics.shaving_effective;
@@ -415,10 +408,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 }
             }
         }
-        if(definitely(domain.is_empty())) {
-            return true;
-        }
-
         if(not same_box(domain,previous)) {
             ++statistics.hull_effective;
         }
@@ -436,9 +425,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                         return true;
                     }
                 }
-            }
-            if(definitely(domain.is_empty())) {
-                return true;
             }
             if(not same_box(domain,before_shaving)) {
                 ++statistics.shaving_effective;
@@ -556,9 +542,7 @@ SmtSolver::_epsilon_candidate_witness(
     UpperBoxType const& domain,
     Conjunction const& conjunction) const
 {
-    if(conjunction.empty()) {
-        return std::nullopt;
-    }
+    ARIADNE_ASSERT(not conjunction.empty());
 
     ValidatedVectorMultivariateFunction function(
         conjunction.size(),this->_function(conjunction[0]).domain());

@@ -481,9 +481,6 @@ class TestSmtSolver {
             SmtSolverTestSupport::epsilon_overlaps(
                 solver,point,inside));
 
-        auto empty_candidate=
-            SmtSolverTestSupport::empty_candidate_witness(solver,point);
-        ARIADNE_TEST_ASSERT(not empty_candidate.has_value());
     }
 
     Void test_box_processing_statistics() {

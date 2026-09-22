@@ -1082,6 +1082,30 @@ ExactIntervalType epsilon_bounds(
     return solver._epsilon_bounds(relation);
 }
 
+Bool epsilon_satisfied(
+    SmtSolver const& solver,
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints)
+{
+    return solver._epsilon_satisfied(domain,constraints);
+}
+
+Bool epsilon_overlaps(
+    SmtSolver const& solver,
+    UpperBoxType const& domain,
+    List<ValidatedConstraint> const& constraints)
+{
+    return solver._epsilon_overlaps(domain,constraints);
+}
+
+std::optional<UpperBoxType> empty_candidate_witness(
+    SmtSolver const& solver,
+    UpperBoxType const& domain)
+{
+    List<ValidatedConstraint> constraints;
+    return solver._epsilon_candidate_witness(domain,constraints);
+}
+
 Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input)

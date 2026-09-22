@@ -647,6 +647,33 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-theory-solve] simplified zero primitive ignores zero box budget" << std::endl;
+            RealVariable zero_x("zero_x");
+            RealExpression zero_ex=zero_x;
+            RealSpace zero_space({zero_x});
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u,
+                false));
+            RealExpression residual=sin(zero_ex)-sin(zero_ex);
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(residual>0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=zero_budget_solver.solve(
+                zero_space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+        }
+
+        {
             std::cout << "[smt-theory-solve] zero box budget propagates UNKNOWN" << std::endl;
             SmtSolver bounded_solver(SmtSolverConfiguration(
                 0.125_x,
@@ -689,7 +716,7 @@ class TestSmtSolver {
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
@@ -1157,6 +1184,26 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+        }
+
+        {
+            std::cout << "[smt-dpll] simplified zero theory atom ignores zero box budget" << std::endl;
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u,
+                false));
+            RealExpression residual=sin(ex)-sin(ex);
+            SmtResult solve_result=zero_budget_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                residual>0);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
         }
 
         {
@@ -1943,6 +1990,33 @@ class TestSmtSolver {
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+        }
+
+        {
+            std::cout << "[smt-parallel] simplified zero primitive ignores zero box budget" << std::endl;
+            RealVariable x("zero_parallel_x");
+            RealExpression ex=x;
+            RealSpace space({x});
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u,
+                false));
+            RealExpression residual=sin(ex)-sin(ex);
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(residual>=0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=zero_budget_solver.solve_parallel(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
         }
 
         {

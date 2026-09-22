@@ -503,8 +503,12 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
     CompiledTheoryLiterals result;
     result.reserve(literals.size());
     for(SizeType i=0; i!=literals.size(); ++i) {
+        RealExpression expression=simplify(literals[i].expression());
+        if(is_constant(expression,Real(0))) {
+            continue;
+        }
         result.push_back({
-            ValidatedScalarMultivariateFunction(space,simplify(literals[i].expression())),
+            ValidatedScalarMultivariateFunction(space,expression),
             literals[i].relation()
         });
     }
@@ -889,6 +893,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
+    if(compiled.empty()) {
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
+    }
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
     Bool unknown_seen=false;
@@ -1104,6 +1111,10 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
+    if(compiled.empty()) {
+        return SmtResult::epsilon_sat(
+            singleton_box(domain.midpoint()),state->statistics);
+    }
     ParallelSmtWorkload workload(
         [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
         [this,&compiled,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {

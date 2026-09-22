@@ -1746,7 +1746,8 @@ class SmtDpllSearch {
             case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
                 break;
             case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
-                ARIADNE_UNREACHABLE;
+            default:
+                ARIADNE_FAIL_MSG("Invalid first child search action");
         }
 
         this->_backtrack_to_level(parent_level);
@@ -1767,7 +1768,8 @@ class SmtDpllSearch {
             case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
                 break;
             case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
-                ARIADNE_UNREACHABLE;
+            default:
+                ARIADNE_FAIL_MSG("Invalid second child search action");
         }
 
         this->_backtrack_to_level(parent_level);

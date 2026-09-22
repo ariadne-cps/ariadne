@@ -322,6 +322,28 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] candidate search failure on uncertifiable singleton" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver candidate_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                true));
+            ExactBoxType domain({ExactIntervalType(1,1)});
+            ValidatedScalarMultivariateFunction residual=sin(x[0])-sin(x[0]);
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
+            });
+            SmtResult solve_result=candidate_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
+        }
+
+        {
             std::cout << "[smt-solve] transcendental UNSAT: x in [3,4], sin(x)=2" << std::endl;
             ExactBoxType domain({ExactIntervalType(3,4)});
             List<ValidatedConstraint> constraints({

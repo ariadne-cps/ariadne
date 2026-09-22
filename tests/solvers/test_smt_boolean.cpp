@@ -34,6 +34,7 @@ class TestSmtBoolean {
   public:
     Void test() {
         ARIADNE_TEST_CALL(test_atom());
+        ARIADNE_TEST_CALL(test_constants());
         ARIADNE_TEST_CALL(test_sign_atom());
         ARIADNE_TEST_CALL(test_negation());
         ARIADNE_TEST_CALL(test_conjunction());
@@ -57,6 +58,41 @@ class TestSmtBoolean {
         ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
         ARIADNE_TEST_EQUAL(encoding.atom_variable(0),1u);
         ARIADNE_TEST_EQUAL(encoding.atom(0).code(),OperatorCode::LEQ);
+    }
+
+    Void test_constants() {
+        {
+            std::cout << "[smt-boolean] constant true" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(ContinuousPredicate(true));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[0].size(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[1][0],1);
+        }
+
+        {
+            std::cout << "[smt-boolean] constant false" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(ContinuousPredicate(false));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[0].size(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],-1);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[1][0],1);
+        }
+
+        {
+            RealVariable x("x");
+            ContinuousPredicate atom=(x<=0);
+            std::cout << "[smt-boolean] constants composed with atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(
+                (ContinuousPredicate(true)&&atom)||ContinuousPredicate(false));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_ASSERT(encoding.variable_count()>=4u);
+            ARIADNE_TEST_ASSERT(encoding.clauses().size()>=1u);
+        }
     }
 
     Void test_sign_atom() {

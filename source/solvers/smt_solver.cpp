@@ -1112,6 +1112,64 @@ Void order_theory_nogood(
         });
 }
 
+AssignmentDecision assignment_decision(
+    int8_t current_value,
+    int8_t requested_value)
+{
+    if(current_value<0) {
+        return {true,true};
+    }
+    return {current_value==requested_value,false};
+}
+
+Bool clause_is_learned(SizeType index, SizeType original_clause_count)
+{
+    return index>=original_clause_count;
+}
+
+Bool learned_clause_is_theory(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& theory_flags)
+{
+    if(not clause_is_learned(index,original_clause_count)) {
+        return false;
+    }
+    return theory_flags[index-original_clause_count];
+}
+
+Bool clause_is_active(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& active_flags)
+{
+    if(not clause_is_learned(index,original_clause_count)) {
+        return true;
+    }
+    return active_flags[index-original_clause_count];
+}
+
+Bool assignment_locks_clause(
+    int8_t assignment_value,
+    std::optional<SizeType> const& reason_clause,
+    SizeType clause_index)
+{
+    return assignment_value>=0
+        && reason_clause.has_value()
+        && *reason_clause==clause_index;
+}
+
+Bool should_bump_learned_clause(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& active_flags)
+{
+    if(not clause_is_learned(index,original_clause_count)) {
+        return false;
+    }
+    return active_flags[index-original_clause_count];
+}
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation)
@@ -1253,14 +1311,15 @@ class SmtDpllSearch {
         SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
         int8_t value=literal>0 ? 1 : 0;
         AssignmentInfo& assignment=_assignment[variable];
-        if(assignment.value<0) {
+        auto decision=SmtSolverTestSupport::assignment_decision(
+            assignment.value,value);
+        if(decision.newly_assigned) {
             assignment.value=value;
             assignment.decision_level=this->_decision_level();
             assignment.reason_clause=reason_clause;
             _trail.push_back(variable);
-            return true;
         }
-        return assignment.value==value;
+        return decision.accepted;
     }
 
     SizeType _original_clause_count() const
@@ -1283,7 +1342,8 @@ class SmtDpllSearch {
 
     Bool _is_learned_clause(SizeType index) const
     {
-        return index>=this->_original_clause_count();
+        return SmtSolverTestSupport::clause_is_learned(
+            index,this->_original_clause_count());
     }
 
     SizeType _add_learned_clause(std::vector<Int> const& clause, Bool theory_clause = false)
@@ -1307,18 +1367,14 @@ class SmtDpllSearch {
 
     Bool _is_theory_learned_clause(SizeType index) const
     {
-        if(not this->_is_learned_clause(index)) {
-            return false;
-        }
-        return _learned_clause_is_theory[index-this->_original_clause_count()];
+        return SmtSolverTestSupport::learned_clause_is_theory(
+            index,this->_original_clause_count(),_learned_clause_is_theory);
     }
 
     Bool _is_active_clause(SizeType index) const
     {
-        if(not this->_is_learned_clause(index)) {
-            return true;
-        }
-        return _learned_clause_active[index-this->_original_clause_count()];
+        return SmtSolverTestSupport::clause_is_active(
+            index,this->_original_clause_count(),_learned_clause_active);
     }
 
     SizeType _active_non_theory_learned_clause_count() const
@@ -1338,9 +1394,8 @@ class SmtDpllSearch {
             return true;
         }
         for(AssignmentInfo const& assignment:_assignment) {
-            if(assignment.value>=0
-               && assignment.reason_clause.has_value()
-               && *assignment.reason_clause==index) {
+            if(SmtSolverTestSupport::assignment_locks_clause(
+                    assignment.value,assignment.reason_clause,index)) {
                 return true;
             }
         }
@@ -1349,13 +1404,11 @@ class SmtDpllSearch {
 
     Void _bump_learned_clause_activity(SizeType index)
     {
-        if(not this->_is_learned_clause(index)) {
+        if(not SmtSolverTestSupport::should_bump_learned_clause(
+                index,this->_original_clause_count(),_learned_clause_active)) {
             return;
         }
         SizeType learned_index=index-this->_original_clause_count();
-        if(not _learned_clause_active[learned_index]) {
-            return;
-        }
         ++_learned_clause_activity[learned_index];
         ++_statistics.learned_clause_activity_bumps;
     }
@@ -1709,16 +1762,7 @@ class SmtDpllSearch {
                 literal=-literal;
             }
 
-            Bool duplicate=false;
-            for(Int existing:clause) {
-                if(existing==literal) {
-                    duplicate=true;
-                    break;
-                }
-            }
-            if(not duplicate) {
-                clause.push_back(literal);
-            }
+            clause.push_back(literal);
         }
 
         return clause;
@@ -1756,10 +1800,7 @@ class SmtDpllSearch {
 
     Bool _nogood_theory_consistent(std::vector<Int> const& clause)
     {
-        if(clause.empty()) {
-            return true;
-        }
-
+        ARIADNE_PRECONDITION(not clause.empty());
         ++_statistics.theory_minimization_checks;
         std::vector<SmtTheoryAlternatives> alternatives=
             this->_theory_alternatives_for_nogood(clause);

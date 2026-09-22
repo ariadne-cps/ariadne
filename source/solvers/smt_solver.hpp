@@ -266,6 +266,30 @@ Void order_theory_nogood(
     std::vector<SizeType> const& decision_levels,
     std::vector<SizeType> const& trail_rank);
 
+struct AssignmentDecision {
+    Bool accepted = false;
+    Bool newly_assigned = false;
+};
+
+AssignmentDecision assignment_decision(int8_t current_value, int8_t requested_value);
+Bool clause_is_learned(SizeType index, SizeType original_clause_count);
+Bool learned_clause_is_theory(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& theory_flags);
+Bool clause_is_active(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& active_flags);
+Bool assignment_locks_clause(
+    int8_t assignment_value,
+    std::optional<SizeType> const& reason_clause,
+    SizeType clause_index);
+Bool should_bump_learned_clause(
+    SizeType index,
+    SizeType original_clause_count,
+    std::vector<Bool> const& active_flags);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);

@@ -338,6 +338,49 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(clause[1],-2);
         ARIADNE_TEST_EQUAL(clause[2],-4);
         ARIADNE_TEST_EQUAL(clause[3],1);
+
+        auto unassigned=SmtSolverTestSupport::assignment_decision(-1,1);
+        ARIADNE_TEST_ASSERT(unassigned.accepted);
+        ARIADNE_TEST_ASSERT(unassigned.newly_assigned);
+        auto same=SmtSolverTestSupport::assignment_decision(1,1);
+        ARIADNE_TEST_ASSERT(same.accepted);
+        ARIADNE_TEST_ASSERT(not same.newly_assigned);
+        auto conflict=SmtSolverTestSupport::assignment_decision(0,1);
+        ARIADNE_TEST_ASSERT(not conflict.accepted);
+        ARIADNE_TEST_ASSERT(not conflict.newly_assigned);
+
+        std::vector<Bool> theory_flags({false,true});
+        std::vector<Bool> active_flags({true,false});
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::clause_is_learned(1u,2u));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_learned(2u,2u));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::learned_clause_is_theory(
+            1u,2u,theory_flags));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::learned_clause_is_theory(
+            2u,2u,theory_flags));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::learned_clause_is_theory(
+            3u,2u,theory_flags));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_active(
+            1u,2u,active_flags));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_active(
+            2u,2u,active_flags));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::clause_is_active(
+            3u,2u,active_flags));
+
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::assignment_locks_clause(
+            1,std::optional<SizeType>(7u),7u));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::assignment_locks_clause(
+            -1,std::optional<SizeType>(7u),7u));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::assignment_locks_clause(
+            1,std::nullopt,7u));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::assignment_locks_clause(
+            1,std::optional<SizeType>(6u),7u));
+
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::should_bump_learned_clause(
+            1u,2u,active_flags));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::should_bump_learned_clause(
+            2u,2u,active_flags));
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::should_bump_learned_clause(
+            3u,2u,active_flags));
     }
 
     Void test_invalid_internal_relations() {

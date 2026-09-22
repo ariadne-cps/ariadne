@@ -245,6 +245,16 @@ class SmtSolver {
         SmtSearchStatistics& statistics,
         BoxProcessingResult const& processing) const;
 
+    template<class Conjunction>
+    SmtResult _solve_sequential_conjunction(
+        ExactBoxType const& domain,
+        Conjunction const& conjunction) const;
+
+    template<class Conjunction>
+    SmtResult _solve_parallel_conjunction(
+        ExactBoxType const& domain,
+        Conjunction const& conjunction) const;
+
     struct CompiledTheoryLiteral {
         ValidatedScalarMultivariateFunction function;
         SmtTheoryPrimitiveRelation relation;

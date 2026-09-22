@@ -837,6 +837,54 @@ SmtSolver::_accumulate_box_processing_statistics(
     }
 }
 
+template<class Conjunction>
+SmtResult
+SmtSolver::_solve_sequential_conjunction(
+    ExactBoxType const& domain,
+    Conjunction const& conjunction) const
+{
+    SmtSearchStatistics statistics;
+    SequentialSmtWorkQueue pending;
+    pending.push(UpperBoxType(domain));
+    Bool unknown_seen=false;
+
+    while(not pending.empty()) {
+        if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
+            ++statistics.box_budget_exhaustions;
+            unknown_seen=true;
+            break;
+        }
+        UpperBoxType current=pending.pop();
+        ++statistics.boxes_processed;
+
+        BoxProcessingResult processing=this->_process_box(
+            std::move(current),conjunction);
+        this->_accumulate_box_processing_statistics(statistics,processing);
+
+        switch(processing.status) {
+            case BoxProcessingStatus::PRUNED:
+                break;
+            case BoxProcessingStatus::EPSILON_SAT:
+                ARIADNE_ASSERT(processing.witness.has_value());
+                return SmtResult::epsilon_sat(*processing.witness,statistics);
+            case BoxProcessingStatus::SPLIT:
+                ARIADNE_ASSERT(processing.children.has_value());
+                pending.push(std::move(processing.children->second));
+                pending.push(std::move(processing.children->first));
+                break;
+            case BoxProcessingStatus::UNKNOWN:
+                unknown_seen=true;
+                break;
+            default:
+                ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+        }
+    }
+
+    return unknown_seen
+        ? SmtResult::unknown(statistics)
+        : SmtResult::unsat(statistics);
+}
+
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
                            List<ValidatedConstraint> const& constraints) const
 {
@@ -845,59 +893,14 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
     }
 
-    SmtSearchStatistics statistics;
-
     if(domain.is_empty()) {
-        return SmtResult::unsat(statistics);
+        return SmtResult::unsat();
     }
     if(constraints.empty()) {
-        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-
-    SequentialSmtWorkQueue pending;
-    pending.push(UpperBoxType(domain));
-    Bool unknown_seen=false;
-
-    while(not pending.empty()) {
-        if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
-            ++statistics.box_budget_exhaustions;
-            unknown_seen=true;
-            break;
-        }
-        UpperBoxType current=pending.pop();
-        ++statistics.boxes_processed;
-
-        BoxProcessingResult processing=this->_process_box(std::move(current),constraints);
-        this->_accumulate_box_processing_statistics(statistics,processing);
-        switch(processing.status) {
-            case BoxProcessingStatus::PRUNED:
-                break;
-
-            case BoxProcessingStatus::EPSILON_SAT:
-                ARIADNE_ASSERT(processing.witness.has_value());
-                return SmtResult::epsilon_sat(*processing.witness,statistics);
-
-            case BoxProcessingStatus::SPLIT:
-                ARIADNE_ASSERT(processing.children.has_value());
-                pending.push(std::move(processing.children->second));
-                pending.push(std::move(processing.children->first));
-                break;
-
-            case BoxProcessingStatus::UNKNOWN:
-                unknown_seen=true;
-                break;
-
-            default:
-                ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
-        }
-    }
-
-    if(unknown_seen) {
-        return SmtResult::unknown(statistics);
-    }
-    return SmtResult::unsat(statistics);
+    return this->_solve_sequential_conjunction(domain,constraints);
 }
-
 
 SmtResult SmtSolver::solve(RealSpace const& space,
                            ExactBoxType const& domain,
@@ -906,56 +909,18 @@ SmtResult SmtSolver::solve(RealSpace const& space,
     ARIADNE_PRECONDITION(domain.is_bounded());
     ARIADNE_PRECONDITION(space.size()==domain.dimension());
 
-    SmtSearchStatistics statistics;
     if(domain.is_empty()) {
-        return SmtResult::unsat(statistics);
+        return SmtResult::unsat();
     }
     if(literals.empty()) {
-        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
     if(compiled.empty()) {
-        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    SequentialSmtWorkQueue pending;
-    pending.push(UpperBoxType(domain));
-    Bool unknown_seen=false;
-
-    while(not pending.empty()) {
-        if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
-            ++statistics.box_budget_exhaustions;
-            unknown_seen=true;
-            break;
-        }
-        UpperBoxType current=pending.pop();
-        ++statistics.boxes_processed;
-
-        BoxProcessingResult processing=this->_process_box(std::move(current),compiled);
-        this->_accumulate_box_processing_statistics(statistics,processing);
-        switch(processing.status) {
-            case BoxProcessingStatus::PRUNED:
-                break;
-            case BoxProcessingStatus::EPSILON_SAT:
-                ARIADNE_ASSERT(processing.witness.has_value());
-                return SmtResult::epsilon_sat(*processing.witness,statistics);
-            case BoxProcessingStatus::SPLIT:
-                ARIADNE_ASSERT(processing.children.has_value());
-                pending.push(std::move(processing.children->second));
-                pending.push(std::move(processing.children->first));
-                break;
-            case BoxProcessingStatus::UNKNOWN:
-                unknown_seen=true;
-                break;
-            default:
-                ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
-        }
-    }
-
-    if(unknown_seen) {
-        return SmtResult::unknown(statistics);
-    }
-    return SmtResult::unsat(statistics);
+    return this->_solve_sequential_conjunction(domain,compiled);
 }
 
 
@@ -974,33 +939,26 @@ using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
 
 } // namespace
 
-SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
-                                    List<ValidatedConstraint> const& constraints) const
+template<class Conjunction>
+SmtResult
+SmtSolver::_solve_parallel_conjunction(
+    ExactBoxType const& domain,
+    Conjunction const& conjunction) const
 {
-    ARIADNE_PRECONDITION(domain.is_bounded());
-    for(SizeType i=0; i!=constraints.size(); ++i) {
-        ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
-    }
-
     auto state=std::make_shared<ParallelSmtSearchState>();
-    if(domain.is_empty()) {
-        return SmtResult::unsat(state->statistics);
-    }
-    if(constraints.empty()) {
-        return SmtResult::epsilon_sat(
-            singleton_box(domain.midpoint()),state->statistics);
-    }
-
     ParallelSmtWorkload workload(
         [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
-        [this,&constraints,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
+        [this,&conjunction,state](
+                ParallelSmtWorkload::Access& access,
+                UpperBoxType const& box) {
             if(state->found.load() || state->limit_reached.load()) {
                 return;
             }
 
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
-                if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
+                if(state->statistics.boxes_processed>=
+                        _configuration.box_processing_limit()) {
                     ++state->statistics.box_budget_exhaustions;
                     state->unknown.store(true);
                     state->limit_reached.store(true);
@@ -1009,7 +967,7 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                 ++state->statistics.boxes_processed;
             }
 
-            BoxProcessingResult processing=this->_process_box(box,constraints);
+            BoxProcessingResult processing=this->_process_box(box,conjunction);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 this->_accumulate_box_processing_statistics(
@@ -1019,7 +977,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
             switch(processing.status) {
                 case BoxProcessingStatus::PRUNED:
                     return;
-
                 case BoxProcessingStatus::EPSILON_SAT: {
                     ARIADNE_ASSERT(processing.witness.has_value());
                     bool expected=false;
@@ -1029,7 +986,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                     }
                     return;
                 }
-
                 case BoxProcessingStatus::SPLIT:
                     ARIADNE_ASSERT(processing.children.has_value());
                     if(not state->found.load()) {
@@ -1037,11 +993,9 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                         access.append(processing.children->second);
                     }
                     return;
-
                 case BoxProcessingStatus::UNKNOWN:
                     state->unknown.store(true);
                     return;
-
                 default:
                     ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
             }
@@ -1061,92 +1015,44 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
     return SmtResult::unsat(state->statistics);
 }
 
-SmtResult SmtSolver::solve_parallel(RealSpace const& space,
-                                    ExactBoxType const& domain,
-                                    List<SmtTheoryPrimitiveLiteral> const& literals) const
+SmtResult SmtSolver::solve_parallel(
+    ExactBoxType const& domain,
+    List<ValidatedConstraint> const& constraints) const
+{
+    ARIADNE_PRECONDITION(domain.is_bounded());
+    for(SizeType i=0; i!=constraints.size(); ++i) {
+        ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
+    }
+
+    if(domain.is_empty()) {
+        return SmtResult::unsat();
+    }
+    if(constraints.empty()) {
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
+    }
+    return this->_solve_parallel_conjunction(domain,constraints);
+}
+
+SmtResult SmtSolver::solve_parallel(
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals) const
 {
     ARIADNE_PRECONDITION(domain.is_bounded());
     ARIADNE_PRECONDITION(space.size()==domain.dimension());
 
-    auto state=std::make_shared<ParallelSmtSearchState>();
     if(domain.is_empty()) {
-        return SmtResult::unsat(state->statistics);
+        return SmtResult::unsat();
     }
     if(literals.empty()) {
-        return SmtResult::epsilon_sat(
-            singleton_box(domain.midpoint()),state->statistics);
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
     if(compiled.empty()) {
-        return SmtResult::epsilon_sat(
-            singleton_box(domain.midpoint()),state->statistics);
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    ParallelSmtWorkload workload(
-        [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
-        [this,&compiled,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
-            if(state->found.load() || state->limit_reached.load()) {
-                return;
-            }
-
-            {
-                std::lock_guard<std::mutex> lock(state->mutex);
-                if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
-                    ++state->statistics.box_budget_exhaustions;
-                    state->unknown.store(true);
-                    state->limit_reached.store(true);
-                    return;
-                }
-                ++state->statistics.boxes_processed;
-            }
-
-            BoxProcessingResult processing=this->_process_box(box,compiled);
-            {
-                std::lock_guard<std::mutex> lock(state->mutex);
-                this->_accumulate_box_processing_statistics(
-                    state->statistics,processing);
-            }
-
-            switch(processing.status) {
-                case BoxProcessingStatus::PRUNED:
-                    return;
-                case BoxProcessingStatus::EPSILON_SAT: {
-                    ARIADNE_ASSERT(processing.witness.has_value());
-                    bool expected=false;
-                    if(state->found.compare_exchange_strong(expected,true)) {
-                        std::lock_guard<std::mutex> lock(state->mutex);
-                        state->witness=*processing.witness;
-                    }
-                    return;
-                }
-                case BoxProcessingStatus::SPLIT:
-                    ARIADNE_ASSERT(processing.children.has_value());
-                    if(not state->found.load()) {
-                        access.append(processing.children->first);
-                        access.append(processing.children->second);
-                    }
-                    return;
-                case BoxProcessingStatus::UNKNOWN:
-                    state->unknown.store(true);
-                    return;
-
-                default:
-                    ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
-            }
-        });
-
-    workload.append(UpperBoxType(domain));
-    workload.process();
-
-    std::lock_guard<std::mutex> lock(state->mutex);
-    if(state->found.load()) {
-        ARIADNE_ASSERT(state->witness.has_value());
-        return SmtResult::epsilon_sat(*state->witness,state->statistics);
-    }
-    if(state->unknown.load()) {
-        return SmtResult::unknown(state->statistics);
-    }
-    return SmtResult::unsat(state->statistics);
+    return this->_solve_parallel_conjunction(domain,compiled);
 }
 
 

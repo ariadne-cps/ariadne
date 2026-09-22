@@ -42,7 +42,7 @@ void ariadne_main()
 
     StepMaximumError max_err=1e-6;
 
-    GradedTaylorPicardIntegrator integrator(max_err,order=5);
+    GradedTaylorPicardIntegrator integrator(max_err,order=5,step_sweep_threshold=1e-12);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
@@ -79,7 +79,7 @@ void ariadne_main()
     auto diagnostic_initial_box = cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
     StepSizeType diagnostic_step=0.02_dy;
     TaylorPicardIntegrator diagnostic_taylor_picard(max_err);
-    GradedTaylorPicardIntegrator diagnostic_graded_picard(max_err,order=5);
+    GradedTaylorPicardIntegrator diagnostic_graded_picard(max_err,order=5,step_sweep_threshold=1e-12);
 
     Stopwatch<Microseconds> diagnostic_sw;
     std::cerr << "[vanderpol] TaylorPicard direct probe" << std::endl;

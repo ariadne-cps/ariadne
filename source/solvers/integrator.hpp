@@ -255,18 +255,21 @@ class GradedTaylorPicardIntegrator
         : public IntegratorBase
 {
     ExactDouble _step_maximum_error;
-    GradedSweeper<FloatDP> _sweeper;
+    GradedThresholdSweeper<FloatDP> _sweeper;
     ExactDouble _error_refinement_minimum_improvement_percentage;
     DegreeType _order;
+    ApproximateDouble _sweep_threshold;
   public:
-    //! \brief Default constructor.
+    //! \brief Construct with degree truncation only.
     GradedTaylorPicardIntegrator(StepMaximumError err, Order order);
+    //! \brief Construct with degree and coefficient-magnitude truncation.
+    GradedTaylorPicardIntegrator(StepMaximumError err, Order order, StepSweepThreshold sweep_threshold);
 
     //! \brief The order of the method.
     DegreeType order() const { return this->_order; }
     Void set_order(Nat m) {
         this->_order=m;
-        this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m);
+        this->_sweeper = GradedThresholdSweeper<FloatDP>(DoublePrecision(),m,this->_sweep_threshold);
         this->set_function_factory(ValidatedFunctionPatchFactory(make_taylor_function_patch_factory(this->_sweeper)));
     }
     //! \brief  Set the maximum error of a single step.

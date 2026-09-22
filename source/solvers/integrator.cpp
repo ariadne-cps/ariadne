@@ -321,9 +321,14 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
 }
 
 GradedTaylorPicardIntegrator::GradedTaylorPicardIntegrator(StepMaximumError err, Order order)
-        : IntegratorBase(GradedSweeper<FloatDP>(DoublePrecision(), order)),
-          _step_maximum_error(cast_exact(err.value())), _sweeper(GradedSweeper<FloatDP>(DoublePrecision(), order)),
-          _error_refinement_minimum_improvement_percentage(cast_exact(0.02)), _order(order) { }
+        : GradedTaylorPicardIntegrator(err,order,step_sweep_threshold=0.0) { }
+
+GradedTaylorPicardIntegrator::GradedTaylorPicardIntegrator(StepMaximumError err, Order order, StepSweepThreshold sweep_threshold)
+        : IntegratorBase(GradedThresholdSweeper<FloatDP>(DoublePrecision(), order, sweep_threshold.value())),
+          _step_maximum_error(cast_exact(err.value())),
+          _sweeper(GradedThresholdSweeper<FloatDP>(DoublePrecision(), order, sweep_threshold.value())),
+          _error_refinement_minimum_improvement_percentage(cast_exact(0.02)),
+          _order(order), _sweep_threshold(sweep_threshold.value()) { }
 
 FlowStepModelType
 GradedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const

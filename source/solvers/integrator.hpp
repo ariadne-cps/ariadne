@@ -269,7 +269,7 @@ class GradedTaylorPicardIntegrator
     DegreeType order() const { return this->_order; }
     Void set_order(Nat m) {
         this->_order=m;
-        this->_sweeper = GradedThresholdSweeper<FloatDP>(DoublePrecision(),m,this->_sweep_threshold);
+        this->_sweeper = GradedThresholdSweeper<FloatDP>(DoublePrecision(),m,FloatDP(cast_exact(this->_sweep_threshold),DoublePrecision()));
         this->set_function_factory(ValidatedFunctionPatchFactory(make_taylor_function_patch_factory(this->_sweeper)));
     }
     //! \brief  Set the maximum error of a single step.

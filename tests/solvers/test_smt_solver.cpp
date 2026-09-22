@@ -49,6 +49,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_configuration());
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
+        ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -197,6 +198,43 @@ class TestSmtSolver {
             already_bounded,candidates,1u,1u);
         ARIADNE_TEST_EQUAL(none,0u);
         ARIADNE_TEST_ASSERT(already_bounded[9u]);
+    }
+
+    Void test_statistics_aggregation() {
+        std::cout << "[smt-stats] deterministic aggregation semantics" << std::endl;
+
+        SmtSearchStatistics target;
+        target.last_learned_clause_literals=11u;
+        target.last_learned_current_level_literals=7u;
+        target.last_backjump_level=5u;
+
+        SmtSearchStatistics no_conflict;
+        no_conflict.boxes_processed=3u;
+        no_conflict.last_learned_clause_literals=99u;
+        no_conflict.last_learned_current_level_literals=99u;
+        no_conflict.last_backjump_level=99u;
+        SmtSolverTestSupport::accumulate_statistics(target,no_conflict);
+        ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
+        ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
+        ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
+        ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
+
+        SmtSearchStatistics conflict;
+        conflict.boolean_conflicts_analyzed=1u;
+        conflict.last_learned_clause_literals=4u;
+        conflict.last_learned_current_level_literals=1u;
+        conflict.last_backjump_level=2u;
+        conflict.first_minimization_candidate_trail_rank=9u;
+        SmtSolverTestSupport::accumulate_statistics(target,conflict);
+        ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,4u);
+        ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,1u);
+        ARIADNE_TEST_EQUAL(target.last_backjump_level,2u);
+        ARIADNE_TEST_EQUAL(target.first_minimization_candidate_trail_rank,9u);
+
+        SmtSearchStatistics later;
+        later.first_minimization_candidate_trail_rank=13u;
+        SmtSolverTestSupport::accumulate_statistics(target,later);
+        ARIADNE_TEST_EQUAL(target.first_minimization_candidate_trail_rank,9u);
     }
 
     Void test_solve() {

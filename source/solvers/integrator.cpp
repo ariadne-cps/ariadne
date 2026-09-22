@@ -1288,11 +1288,52 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     Matrix<FloatDP> const& A=state.linear_map();
     Matrix<FloatDPBounds> const inverse_A=inverse(A);
 
-    // x = c + A*y on the local preconditioned domain.
-    ValidatedVectorMultivariateFunctionPatch y=factory.create_identity(domy);
-    ValidatedVectorMultivariateFunctionPatch x_of_y=factory.create_zeros(n,domy);
+    // First compute the flow bound in physical coordinates.  The bounder
+    // deliberately enlarges the initial box; constructing the transformed
+    // vector field only on domy would therefore make it invalid exactly where
+    // the bounder needs to evaluate it.
+    ValidatedVectorMultivariateFunctionPatch initial_y=
+        factory.create_identity(domy);
+    ValidatedVectorMultivariateFunctionPatch initial_x=
+        factory.create_zeros(n,domy);
     for(SizeType i=0u; i!=n; ++i) {
-        x_of_y[i]=factory.create_constant(domy,centre[i]);
+        initial_x[i]=factory.create_constant(domy,centre[i]);
+        for(SizeType j=0u; j!=n; ++j) {
+            initial_x[i]=initial_x[i]+initial_y[j]*FloatDPBounds(A[i][j]);
+        }
+    }
+
+    ExactBoxType const physical_initial_domain=
+        cast_exact_box(widen(initial_x.range()));
+
+    StepSizeType h;
+    UpperBoxType physical_bounding_box;
+    make_lpair(h,physical_bounding_box)=
+        this->flow_bounds(f,physical_initial_domain,hsug);
+
+    // Transform the validated physical flow bound to local coordinates.
+    // For a future non-diagonal (QR) A this interval matrix product remains
+    // conservative.
+    UpperBoxType local_bounding_box(n);
+    for(SizeType i=0u; i!=n; ++i) {
+        FloatDPBounds yi(0,dp);
+        for(SizeType j=0u; j!=n; ++j) {
+            FloatDPBounds const xj=cast_singleton(physical_bounding_box[j]);
+            yi=yi+inverse_A[i][j]*(xj-centre[j]);
+        }
+        local_bounding_box[i]=UpperIntervalType(yi.lower(),yi.upper());
+    }
+
+    // Build the transformed vector field on the whole validated local flow
+    // bound, not merely on the local initial domain.
+    ExactBoxType const local_vector_field_domain=
+        cast_exact_box(local_bounding_box);
+    ValidatedVectorMultivariateFunctionPatch y=
+        factory.create_identity(local_vector_field_domain);
+    ValidatedVectorMultivariateFunctionPatch x_of_y=
+        factory.create_zeros(n,local_vector_field_domain);
+    for(SizeType i=0u; i!=n; ++i) {
+        x_of_y[i]=factory.create_constant(local_vector_field_domain,centre[i]);
         for(SizeType j=0u; j!=n; ++j) {
             x_of_y[i]=x_of_y[i]+y[j]*FloatDPBounds(A[i][j]);
         }
@@ -1300,8 +1341,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
 
     // y' = A^{-1} f(c+A*y).  This formulation already supports a full
     // non-diagonal A, so QR preconditioning can later reuse the same core.
-    ValidatedVectorMultivariateFunctionPatch physical_vector_field=compose(f,x_of_y);
-    ValidatedVectorMultivariateFunctionPatch local_vector_field=factory.create_zeros(n,domy);
+    ValidatedVectorMultivariateFunctionPatch physical_vector_field=
+        compose(f,x_of_y);
+    ValidatedVectorMultivariateFunctionPatch local_vector_field=
+        factory.create_zeros(n,local_vector_field_domain);
     for(SizeType i=0u; i!=n; ++i) {
         for(SizeType j=0u; j!=n; ++j) {
             local_vector_field[i]=local_vector_field[i]
@@ -1309,10 +1352,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         }
     }
     ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
-
-    StepSizeType h;
-    UpperBoxType local_bounding_box;
-    make_lpair(h,local_bounding_box)=this->flow_bounds(g,domy,hsug);
 
     ExactIntervalType domt(0,h);
     ExactBoxType doma;

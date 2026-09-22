@@ -29,7 +29,7 @@ function(setup_target_for_coverage_gcc)
         COMMAND "${GENHTML_EXECUTABLE}"
                 --output-directory "${COVERAGE_HTML_DIR}"
                 "${COVERAGE_INFO}"
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
         DEPENDS ${Coverage_DEPENDENCIES}
         VERBATIM
         COMMENT "Running tests and generating GCC/lcov code coverage report."

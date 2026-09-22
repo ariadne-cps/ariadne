@@ -504,7 +504,7 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
     result.reserve(literals.size());
     for(SizeType i=0; i!=literals.size(); ++i) {
         result.push_back({
-            ValidatedScalarMultivariateFunction(space,literals[i].expression()),
+            ValidatedScalarMultivariateFunction(space,simplify(literals[i].expression())),
             literals[i].relation()
         });
     }

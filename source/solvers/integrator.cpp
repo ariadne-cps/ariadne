@@ -1228,6 +1228,96 @@ Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const 
 }
 
 
+FlowStepModelType
+PreconditionedGradedTaylorSeriesIntegrator::flow_step(
+        const ValidatedVectorMultivariateFunction& f,
+        const ExactBoxType& domx,
+        const StepSizeType& h,
+        const UpperBoxType& bndx) const
+{
+    SizeType const n=domx.size();
+    ARIADNE_PRECONDITION(f.result_size()==n);
+    ARIADNE_PRECONDITION(f.argument_size()==n);
+
+    Vector<FloatDP> centre(n,FloatDP(dp));
+    Vector<FloatDP> radius(n,FloatDP(dp));
+    for(SizeType i=0u; i!=n; ++i) {
+        centre[i]=domx[i].midpoint().raw();
+        radius[i]=domx[i].radius().upper().raw();
+        if(radius[i]==FloatDP(0,dp)) {
+            return GradedTaylorSeriesIntegrator::flow_step(f,domx,h,bndx);
+        }
+    }
+
+    ExactBoxType unit_domain(n,ExactIntervalType(-1,+1));
+    auto const& factory=this->function_factory();
+
+    // x = c + R y, with diagonal R.  Build the transformed vector field
+    // y' = R^{-1} f(c+Ry) as a validated function on the normalised domain.
+    ValidatedVectorMultivariateFunctionPatch y=factory.create_identity(unit_domain);
+    ValidatedVectorMultivariateFunctionPatch x_of_y=factory.create_zeros(n,unit_domain);
+    for(SizeType i=0u; i!=n; ++i) {
+        x_of_y[i]=factory.create_constant(unit_domain,centre[i])
+                + y[i]*FloatDPBounds(radius[i]);
+    }
+
+    ValidatedVectorMultivariateFunctionPatch gpatch=compose(f,x_of_y);
+    for(SizeType i=0u; i!=n; ++i) {
+        gpatch[i]=gpatch[i]/FloatDPBounds(radius[i]);
+    }
+    ValidatedVectorMultivariateFunction g=cast_unrestricted(gpatch);
+
+    UpperBoxType normalized_bounding_box(n);
+    for(SizeType i=0u; i!=n; ++i) {
+        FloatDPBounds const bx=cast_singleton(bndx[i]);
+        FloatDPBounds const nb=(bx-centre[i])/radius[i];
+        normalized_bounding_box[i]=UpperIntervalType(nb.lower(),nb.upper());
+    }
+
+    ExactIntervalType domt(0,h);
+    ExactBoxType doma;
+    Vector<ValidatedProcedure> p(g);
+    FlowStepModelType yflow=Ariadne::graded_series_flow_step(
+        p,unit_domain,domt,doma,normalized_bounding_box,
+        this->step_maximum_error(),this->sweeper(),
+        this->minimum_spacial_order(),this->minimum_temporal_order(),
+        this->maximum_spacial_order(),this->maximum_temporal_order());
+
+    if(possibly(yflow.error()>this->step_maximum_error())) {
+        ARIADNE_THROW(FlowTimeStepException,
+                      "PreconditionedGradedTaylorSeriesIntegrator::flow_step",
+                      "Integration of "<<f<<" over "<<domx
+                      <<" for time interval "<<domt
+                      <<" has normalised-flow error "<<yflow.errors()
+                      <<", which exceeds maximum single-step error "
+                      <<this->step_maximum_error());
+    }
+
+    // Convert y(t) back to x(t)=c+Ry while the flow is still expressed over
+    // the normalised state coordinates.
+    ValidatedVectorMultivariateFunctionPatch physical_yflow=yflow;
+    for(SizeType i=0u; i!=n; ++i) {
+        physical_yflow[i]=factory.create_constant(yflow.domain(),centre[i])
+                         + yflow[i]*FloatDPBounds(radius[i]);
+    }
+
+    // Re-express the model on the original physical state domain so callers
+    // can use it exactly like any other IntegratorInterface flow model.
+    ExactBoxType physical_flow_domain=product(domx,domt);
+    ValidatedVectorMultivariateFunctionPatch physical_id=
+        factory.create_identity(physical_flow_domain);
+    ValidatedVectorMultivariateFunctionPatch normalising_arguments=
+        factory.create_zeros(n+1u,physical_flow_domain);
+    for(SizeType i=0u; i!=n; ++i) {
+        normalising_arguments[i]=
+            (physical_id[i]-FloatDPBounds(centre[i]))/FloatDPBounds(radius[i]);
+    }
+    normalising_arguments[n]=physical_id[n];
+
+    return FlowStepModelType(compose(physical_yflow,normalising_arguments));
+}
+
+
 
 
 template<class X> Void truncate(Differential<X>& x, DegreeType spacial_order_, DegreeType temporal_order_) {

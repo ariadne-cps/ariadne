@@ -463,10 +463,23 @@ class PreconditionedGradedTaylorSeriesIntegrator
   public:
     using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
     using GradedTaylorSeriesIntegrator::flow_step;
+
     virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const {
         return new PreconditionedGradedTaylorSeriesIntegrator(*this);
     }
     virtual Void _write(OutputStream& os) const;
+
+    //! \brief Compute a graded Taylor flow after diagonal affine
+    //! preconditioning of the state domain to the unit box.
+    //!
+    //! The returned model is expressed again on the original physical state
+    //! domain, so it remains compatible with IntegratorInterface and existing
+    //! evolvers.
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const override;
 };
 
 

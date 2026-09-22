@@ -1055,9 +1055,6 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
                         if(processing.non_splittable_epsilon_overlap) {
                             ++state->statistics.non_splittable_epsilon_overlap_boxes;
                         }
-                        if(processing.non_splittable_epsilon_overlap) {
-                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
-                        }
                     }
                     return;
 

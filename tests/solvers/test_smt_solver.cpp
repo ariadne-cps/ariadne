@@ -183,6 +183,20 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(candidates[0],9u);
         ARIADNE_TEST_EQUAL(candidates[1],8u);
         ARIADNE_TEST_EQUAL(candidates[2],7u);
+
+        std::vector<Bool> active(entries.size(),true);
+        SizeType pruned=SmtSolverTestSupport::apply_learned_clause_pruning(
+            active,candidates,3u,1u);
+        ARIADNE_TEST_EQUAL(pruned,2u);
+        ARIADNE_TEST_ASSERT(not active[9u]);
+        ARIADNE_TEST_ASSERT(not active[8u]);
+        ARIADNE_TEST_ASSERT(active[7u]);
+
+        std::vector<Bool> already_bounded(entries.size(),true);
+        SizeType none=SmtSolverTestSupport::apply_learned_clause_pruning(
+            already_bounded,candidates,1u,1u);
+        ARIADNE_TEST_EQUAL(none,0u);
+        ARIADNE_TEST_ASSERT(already_bounded[9u]);
     }
 
     Void test_solve() {

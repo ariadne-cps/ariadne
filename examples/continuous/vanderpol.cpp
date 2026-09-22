@@ -48,22 +48,37 @@ ValidatedVectorMultivariateFunctionPatch affine_parameterisation(
     return result;
 }
 
-ValidatedVectorMultivariateFunctionPatch normalise_mapping(
+ValidatedVectorMultivariateFunctionPatch flowstar_normalise_mapping(
     const ValidatedFunctionPatchFactory& factory,
     const ValidatedVectorMultivariateFunctionPatch& state,
-    const ExactBoxType& physical_box)
+    ExactBoxType& physical_box)
 {
+    // Match Flow*'s normalisation more closely: take the Taylor-model
+    // constant as the new centre, remove it, then scale each centred
+    // component by the magnitude of its validated range.  This differs from
+    // centring the bounding box, which can move the centre using nonlinear
+    // range information and is not what Flow* does.
+    auto const& state_taylor =
+        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+            state.reference());
+
     ExactBoxType const domain=state.domain();
-    SizeType const d=physical_box.size();
+    SizeType const d=state_taylor.size();
+    physical_box=ExactBoxType(d);
     ValidatedVectorMultivariateFunctionPatch result=
         factory.create_zeros(d,domain);
+
     for(SizeType i=0u; i!=d; ++i) {
-        FloatDP const c=physical_box[i].midpoint().raw();
-        FloatDP const r=physical_box[i].radius().upper().raw();
+        FloatDP const c=state_taylor.model(i).value().raw();
+        ValidatedScalarMultivariateFunctionPatch centred=
+            state[i]-FloatDPBounds(c);
+        FloatDP const r=mag(centred.range()).raw();
+
+        physical_box[i]=ExactIntervalType(c-r,c+r);
         if(r==FloatDP(0,dp)) {
             result[i]=factory.create_zero(domain);
         } else {
-            result[i]=(state[i]-FloatDPBounds(c))/FloatDPBounds(r);
+            result[i]=centred/FloatDPBounds(r);
         }
     }
     return result;
@@ -266,8 +281,8 @@ void ariadne_main()
                     if(mapping_nnz>max_mapping_nnz) { max_mapping_nnz=mapping_nnz; }
 
                     local_sw.restart();
-                    local_box=cast_exact_box(state.codomain().bounding_box());
-                    normalised_map=normalise_mapping(factory,state,local_box);
+                    normalised_map=
+                        flowstar_normalise_mapping(factory,state,local_box);
                     local_sw.click();
                     normalise_us+=local_sw.duration().count();
                 } catch(const std::exception& e) {
@@ -296,6 +311,7 @@ void ariadne_main()
                       << " compose_us=" << compose_us
                       << " normalise_us=" << normalise_us
                       << " final_error=" << state.error()
+                      << " mapping_error=" << normalised_map.error()
                       << " final_width=" << final_width
                       << " component_widths=[" << component_widths[0]
                       << "," << component_widths[1] << "]"

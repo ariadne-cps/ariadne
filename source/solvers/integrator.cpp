@@ -1215,6 +1215,19 @@ Void GradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
        << " )";
 }
 
+Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
+    os << "PreconditionedGradedTaylorSeriesIntegrator"
+       << "( function_factory = " << this->function_factory()
+       << ", step_maximum_error = " << this->step_maximum_error()
+       << ", sweeper = " << this->sweeper()
+       << ", minimum_spacial_order = " << this->minimum_spacial_order()
+       << ", minimum_temporal_order = " << this->minimum_temporal_order()
+       << ", maximum_temporal_order = " << this->maximum_temporal_order()
+       << ", maximum_spacial_order = " << this->maximum_spacial_order()
+       << " )";
+}
+
+
 
 
 template<class X> Void truncate(Differential<X>& x, DegreeType spacial_order_, DegreeType temporal_order_) {

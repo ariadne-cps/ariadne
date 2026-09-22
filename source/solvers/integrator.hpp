@@ -456,6 +456,20 @@ class GradedTaylorSeriesIntegrator
     using BoundedIntegratorBase::flow_step;
 };
 
+//! \brief A graded Taylor-series integrator with explicit preconditioning support.
+class PreconditionedGradedTaylorSeriesIntegrator
+    : public GradedTaylorSeriesIntegrator
+{
+  public:
+    using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
+    using GradedTaylorSeriesIntegrator::flow_step;
+    virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const {
+        return new PreconditionedGradedTaylorSeriesIntegrator(*this);
+    }
+    virtual Void _write(OutputStream& os) const;
+};
+
+
 
 //! \brief An integrator computes a approximation to the flow which is affine in space.
 //! \internal This code is written to allow higher-spacial order approximations.

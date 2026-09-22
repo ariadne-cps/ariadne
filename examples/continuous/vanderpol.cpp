@@ -108,7 +108,7 @@ void ariadne_main()
     TimeStepType diagnostic_time(0u);
     for(Nat diagnostic_step_index=0; diagnostic_step_index!=20; ++diagnostic_step_index) {
         Nat reconditioning_count=0u;
-        while(possibly(diagnostic_enclosure.state_function().error() > 1e-6)) {
+        while(possibly(diagnostic_enclosure.state_function().error() > 1e-6_pr)) {
             auto const params_before_recondition=diagnostic_enclosure.number_of_parameters();
             auto const errors_before_recondition=diagnostic_enclosure.state_function().errors();
             diagnostic_sw.restart();

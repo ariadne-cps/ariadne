@@ -26,7 +26,6 @@
 #include "function/taylor_function.hpp"
 #include "function/affine_model.hpp"
 #include "function/constraint.hpp"
-#include "geometry/zonotope.hpp"
 #include "dynamics/enclosure.hpp"
 #include "ariadne_main.hpp"
 
@@ -39,44 +38,46 @@ LabelledEnclosure affine_precondition(const LabelledEnclosure& enclosure)
         dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
             enclosure.state_function().reference());
 
-    SizeType const state_dimension=state_taylor.size();
-    SizeType const parameter_dimension=state_taylor.argument_size();
+    SizeType const d=state_taylor.size();
+    SizeType const m=state_taylor.argument_size();
+    SizeType const kept=std::min(d,m);
+    SizeType const new_parameter_dimension=2u*d;
 
-    Vector<FloatDP> centre(state_dimension,FloatDP(dp));
-    Matrix<FloatDP> generators(state_dimension,parameter_dimension,FloatDP(dp));
-    Vector<FloatDP> error(state_dimension,FloatDP(dp));
+    Vector<FloatDP> centre(d,FloatDP(dp));
+    Matrix<FloatDP> leading(d,d,FloatDP(dp));
+    Vector<FloatDP> residual(d,FloatDP(dp));
 
-    for(SizeType i=0u; i!=state_dimension; ++i) {
+    for(SizeType i=0u; i!=d; ++i) {
         AffineModel<ValidatedTag,FloatDP> affine(state_taylor.model(i));
         centre[i]=affine.value();
-        for(SizeType j=0u; j!=parameter_dimension; ++j) {
-            generators[i][j]=affine.gradient(j);
+        residual[i]=FloatDP(affine.error().raw());
+
+        for(SizeType j=0u; j!=kept; ++j) {
+            leading[i][j]=affine.gradient(j);
         }
-        error[i]=FloatDP(affine.error().raw());
+        for(SizeType j=kept; j!=m; ++j) {
+            residual[i]=add(up,residual[i],abs(affine.gradient(j)));
+        }
     }
 
-    // Convert nonlinear/uniform errors into explicit generators, then retain
-    // one correlated generator block and one residual block.  For a
-    // two-dimensional state this yields c + A*y + r with four normalized
-    // parameters: two correlated affine directions and two independent
-    // residual directions.
-    Zonotope affine_set=error_free_over_approximation(
-        Zonotope(centre,generators,error));
-    Zonotope preconditioned=cascade_over_approximation(affine_set,2u);
-
-    ExactBoxType domain(
-        preconditioned.number_of_generators(),ExactIntervalType(-1,+1));
+    // c + A*y + r: keep one correlated state-dimensional affine block and
+    // collapse all remaining affine directions plus nonlinear Taylor terms
+    // into one independent residual generator per state component.
+    ExactBoxType domain(new_parameter_dimension,ExactIntervalType(-1,+1));
     auto const& factory=enclosure.configuration().function_factory();
     ValidatedVectorMultivariateFunctionPatch state=
-        factory.create_zeros(state_dimension,domain);
+        factory.create_zeros(d,domain);
 
-    for(SizeType i=0u; i!=state_dimension; ++i) {
-        state[i]=factory.create_constant(domain,preconditioned.centre()[i]);
-        for(SizeType j=0u; j!=preconditioned.number_of_generators(); ++j) {
+    for(SizeType i=0u; i!=d; ++i) {
+        state[i]=factory.create_constant(domain,centre[i]);
+        for(SizeType j=0u; j!=d; ++j) {
             state[i]=state[i]
                 + factory.create_coordinate(domain,j)
-                  * FloatDPBounds(preconditioned.generators()[i][j]);
+                  * FloatDPBounds(leading[i][j]);
         }
+        state[i]=state[i]
+            + factory.create_coordinate(domain,d+i)
+              * FloatDPBounds(residual[i]);
     }
 
     LabelledEnclosure result(
@@ -85,7 +86,6 @@ LabelledEnclosure affine_precondition(const LabelledEnclosure& enclosure)
     result.set_auxiliary(enclosure.auxiliary_space(),enclosure.auxiliary_mapping());
     return result;
 }
-
 }
 
 void ariadne_main()

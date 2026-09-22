@@ -81,7 +81,11 @@ void ariadne_main()
     {
         GradedTaylorPicardIntegrator chen_integrator(
             step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
-        chen_integrator.set_diagnostics(false);
+        // Keep the diagnostic bounded. Without this cap, loosening the step
+        // acceptance threshold can expose an arbitrarily long remainder
+        // refinement sequence before the first step returns.
+        chen_integrator.set_maximum_error_refinement_iterations(2u);
+        chen_integrator.set_diagnostics(true);
         LabelledEnclosure chen_enclosure(
             initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
             EnclosureConfiguration(chen_integrator.function_factory()));
@@ -125,6 +129,10 @@ void ariadne_main()
             if(state_nnz>chen_max_state_nnz) { chen_max_state_nnz=state_nnz; }
 
             auto box=cast_exact_box(chen_enclosure.euclidean_set().bounding_box());
+            std::cerr << "[ChenStepStart]"
+                      << " step=" << (step_index+1u)
+                      << " box=" << box
+                      << std::endl;
             try {
                 chen_sw.restart();
                 auto flow=chen_integrator.flow_step(dynamics.function(),box,chen_step);

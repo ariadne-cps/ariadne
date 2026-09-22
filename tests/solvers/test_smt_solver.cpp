@@ -1434,6 +1434,26 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] semantically equivalent atoms share one Boolean variable" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+            ExactBoxType xy_domain({ExactIntervalType(-1,1),ExactIntervalType(-1,1)});
+
+            SmtResult reversed_inequality=solver.solve(
+                xy_space,xy_domain,(ex<=ey)&&!(ey>=ex));
+            ARIADNE_TEST_ASSERT(reversed_inequality.is_unsat());
+            ARIADNE_TEST_EQUAL(reversed_inequality.statistics().theory_checks,0u);
+
+            SmtResult sign_comparison=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                sgn(ex)&&!(ex>0));
+            ARIADNE_TEST_ASSERT(sign_comparison.is_unsat());
+            ARIADNE_TEST_EQUAL(sign_comparison.statistics().theory_checks,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] structurally identical atoms share one Boolean variable" << std::endl;
             ContinuousPredicate first=(ex<=0);
             ContinuousPredicate second=(ex<=0);

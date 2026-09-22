@@ -53,6 +53,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
+        ARIADNE_TEST_CALL(test_box_processing_statistics());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -323,6 +324,44 @@ class TestSmtSolver {
             std::runtime_error);
         ARIADNE_TEST_THROWS(
             SmtSolverTestSupport::epsilon_bounds(solver,invalid),
+            std::runtime_error);
+    }
+
+    Void test_box_processing_statistics() {
+        std::cout << "[smt-stats] box processing status accounting" << std::endl;
+        using Status=SmtSolverTestSupport::BoxProcessingStatus;
+        using Input=SmtSolverTestSupport::BoxProcessingStatisticsInput;
+
+        SmtSearchStatistics statistics;
+        SmtSolverTestSupport::accumulate_box_processing_statistics(
+            statistics,Input{Status::PRUNED,1u,1u,2u,1u,true,true,true,true,true,false});
+        ARIADNE_TEST_EQUAL(statistics.boxes_pruned,1u);
+        ARIADNE_TEST_EQUAL(statistics.hull_reduction_rounds,1u);
+        ARIADNE_TEST_EQUAL(statistics.hull_effective_reductions,1u);
+        ARIADNE_TEST_EQUAL(statistics.shaving_reduction_rounds,2u);
+        ARIADNE_TEST_EQUAL(statistics.shaving_effective_reductions,1u);
+        ARIADNE_TEST_EQUAL(statistics.sensitivity_guided_splits,1u);
+        ARIADNE_TEST_EQUAL(statistics.sensitivity_overrides_geometric_splits,1u);
+        ARIADNE_TEST_EQUAL(statistics.epsilon_box_certifications,1u);
+        ARIADNE_TEST_EQUAL(statistics.candidate_witness_searches,1u);
+        ARIADNE_TEST_EQUAL(statistics.candidate_witness_successes,1u);
+
+        SmtSolverTestSupport::accumulate_box_processing_statistics(
+            statistics,Input{Status::SPLIT});
+        ARIADNE_TEST_EQUAL(statistics.boxes_split,1u);
+
+        SmtSolverTestSupport::accumulate_box_processing_statistics(
+            statistics,Input{Status::UNKNOWN,0u,0u,0u,0u,false,false,false,false,false,true});
+        ARIADNE_TEST_EQUAL(statistics.boxes_unknown,1u);
+        ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,1u);
+        ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,1u);
+
+        SmtSolverTestSupport::accumulate_box_processing_statistics(
+            statistics,Input{Status::EPSILON_SAT});
+
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::accumulate_box_processing_statistics(
+                statistics,Input{static_cast<Status>(999)}),
             std::runtime_error);
     }
 

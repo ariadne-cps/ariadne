@@ -229,6 +229,31 @@ SmtResult finalize_search_outcome(
     Bool theory_unknown_seen,
     SmtSearchStatistics const& statistics);
 
+enum class BoxProcessingStatus {
+    PRUNED,
+    EPSILON_SAT,
+    SPLIT,
+    UNKNOWN
+};
+
+struct BoxProcessingStatisticsInput {
+    BoxProcessingStatus status;
+    SizeType hull_rounds = 0u;
+    SizeType hull_effective = 0u;
+    SizeType shaving_rounds = 0u;
+    SizeType shaving_effective = 0u;
+    Bool sensitivity_guided_split = false;
+    Bool sensitivity_overrode_geometric_split = false;
+    Bool epsilon_box_certification = false;
+    Bool candidate_witness_search = false;
+    Bool candidate_witness_success = false;
+    Bool non_splittable_epsilon_overlap = false;
+};
+
+Void accumulate_box_processing_statistics(
+    SmtSearchStatistics& statistics,
+    BoxProcessingStatisticsInput const& input);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);
@@ -283,12 +308,7 @@ class SmtSolver {
     friend ExactIntervalType SmtSolverTestSupport::epsilon_bounds(
         SmtSolver const&, SmtTheoryPrimitiveRelation);
 
-    enum class BoxProcessingStatus {
-        PRUNED,
-        EPSILON_SAT,
-        SPLIT,
-        UNKNOWN
-    };
+    using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 
     struct ReductionStatistics {
         SizeType hull_rounds = 0u;

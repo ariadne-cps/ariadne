@@ -709,46 +709,20 @@ SmtSolver::_accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingResult const& processing) const
 {
-    statistics.hull_reduction_rounds+=processing.reductions.hull_rounds;
-    statistics.hull_effective_reductions+=processing.reductions.hull_effective;
-    statistics.shaving_reduction_rounds+=processing.reductions.shaving_rounds;
-    statistics.shaving_effective_reductions+=processing.reductions.shaving_effective;
-
-    if(processing.sensitivity_guided_split) {
-        ++statistics.sensitivity_guided_splits;
-    }
-    if(processing.sensitivity_overrode_geometric_split) {
-        ++statistics.sensitivity_overrides_geometric_splits;
-    }
-    if(processing.epsilon_box_certification) {
-        ++statistics.epsilon_box_certifications;
-    }
-    if(processing.candidate_witness_search) {
-        ++statistics.candidate_witness_searches;
-    }
-    if(processing.candidate_witness_success) {
-        ++statistics.candidate_witness_successes;
-    }
-
-    switch(processing.status) {
-        case BoxProcessingStatus::PRUNED:
-            ++statistics.boxes_pruned;
-            break;
-        case BoxProcessingStatus::SPLIT:
-            ++statistics.boxes_split;
-            break;
-        case BoxProcessingStatus::UNKNOWN:
-            ++statistics.boxes_unknown;
-            ++statistics.non_splittable_uncertified_boxes;
-            if(processing.non_splittable_epsilon_overlap) {
-                ++statistics.non_splittable_epsilon_overlap_boxes;
-            }
-            break;
-        case BoxProcessingStatus::EPSILON_SAT:
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
-    }
+    SmtSolverTestSupport::accumulate_box_processing_statistics(
+        statistics,{
+            processing.status,
+            processing.reductions.hull_rounds,
+            processing.reductions.hull_effective,
+            processing.reductions.shaving_rounds,
+            processing.reductions.shaving_effective,
+            processing.sensitivity_guided_split,
+            processing.sensitivity_overrode_geometric_split,
+            processing.epsilon_box_certification,
+            processing.candidate_witness_search,
+            processing.candidate_witness_success,
+            processing.non_splittable_epsilon_overlap
+        });
 }
 
 template<class Conjunction>
@@ -1136,6 +1110,52 @@ ExactIntervalType epsilon_bounds(
     SmtTheoryPrimitiveRelation relation)
 {
     return solver._epsilon_bounds(relation);
+}
+
+Void accumulate_box_processing_statistics(
+    SmtSearchStatistics& statistics,
+    BoxProcessingStatisticsInput const& input)
+{
+    statistics.hull_reduction_rounds+=input.hull_rounds;
+    statistics.hull_effective_reductions+=input.hull_effective;
+    statistics.shaving_reduction_rounds+=input.shaving_rounds;
+    statistics.shaving_effective_reductions+=input.shaving_effective;
+
+    if(input.sensitivity_guided_split) {
+        ++statistics.sensitivity_guided_splits;
+    }
+    if(input.sensitivity_overrode_geometric_split) {
+        ++statistics.sensitivity_overrides_geometric_splits;
+    }
+    if(input.epsilon_box_certification) {
+        ++statistics.epsilon_box_certifications;
+    }
+    if(input.candidate_witness_search) {
+        ++statistics.candidate_witness_searches;
+    }
+    if(input.candidate_witness_success) {
+        ++statistics.candidate_witness_successes;
+    }
+
+    switch(input.status) {
+        case BoxProcessingStatus::PRUNED:
+            ++statistics.boxes_pruned;
+            break;
+        case BoxProcessingStatus::SPLIT:
+            ++statistics.boxes_split;
+            break;
+        case BoxProcessingStatus::UNKNOWN:
+            ++statistics.boxes_unknown;
+            ++statistics.non_splittable_uncertified_boxes;
+            if(input.non_splittable_epsilon_overlap) {
+                ++statistics.non_splittable_epsilon_overlap_boxes;
+            }
+            break;
+        case BoxProcessingStatus::EPSILON_SAT:
+            break;
+        default:
+            ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+    }
 }
 
 } // namespace SmtSolverTestSupport

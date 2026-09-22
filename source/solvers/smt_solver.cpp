@@ -1219,12 +1219,10 @@ class SmtDpllSearch {
             SizeType const clause_generation=_learned_clause_generation[i];
             Bool const recent=(current_generation<=clause_generation+2u);
             Bool const short_clause=(_learned_clauses[i].size()<=2u);
-            Bool const useful=(_learned_clause_activity[i]>1u);
             if(not _learned_clause_active[i]
                || _learned_clause_is_theory[i]
                || recent
                || short_clause
-               || useful
                || (protected_clause.has_value() && clause_index==*protected_clause)
                || this->_learned_clause_locked(clause_index)) {
                 continue;

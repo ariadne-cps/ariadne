@@ -72,7 +72,7 @@ ValidatedVectorMultivariateFunctionPatch flowstar_normalise_mapping(
         FloatDP const c=state_taylor.model(i).value().raw();
         ValidatedScalarMultivariateFunctionPatch centred=
             state[i]-FloatDPBounds(c);
-        FloatDP const r=mag(centred.range()).raw();
+        FloatDP const r=cast_exact(mag(centred.range()));
 
         physical_box[i]=ExactIntervalType(c-r,c+r);
         if(r==FloatDP(0,dp)) {

@@ -178,6 +178,49 @@ void ariadne_main()
                   << std::endl;
     }
 
+    // Isolate degree truncation from coefficient cutoff on Chen's first
+    // fixed step.  Use a deliberately loose step error so every case returns
+    // its converged model instead of throwing at the 1e-6 acceptance threshold.
+    {
+        const double first_step_cutoffs[] = {0.0,1e-14,1e-13,1e-12};
+        for(double cutoff_value : first_step_cutoffs) {
+            GradedTaylorPicardIntegrator first_step_integrator(
+                step_maximum_error=1e-3,order=5,
+                StepSweepThreshold(ApproximateDouble(cutoff_value)));
+            auto const first_step_box=
+                cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
+            Stopwatch<Microseconds> first_step_sw;
+            try {
+                auto first_step_flow=
+                    first_step_integrator.flow_step(
+                        dynamics.function(),first_step_box,StepSizeType(0.02_dy));
+                first_step_sw.click();
+                auto const& first_step_taylor =
+                    dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                        first_step_flow.reference());
+                SizeType first_step_nnz=0u;
+                for(SizeType i=0; i!=first_step_taylor.size(); ++i) {
+                    first_step_nnz+=first_step_taylor[i].number_of_nonzeros();
+                }
+                std::cerr << "[FirstStepCutoff]"
+                          << " cutoff=" << cutoff_value
+                          << " error=" << first_step_flow.error()
+                          << " errors=" << first_step_flow.errors()
+                          << " nnz=" << first_step_nnz
+                          << " time_us=" << first_step_sw.duration().count()
+                          << std::endl;
+            } catch(const std::exception& e) {
+                first_step_sw.click();
+                std::cerr << "[FirstStepCutoff]"
+                          << " cutoff=" << cutoff_value
+                          << " failed=true"
+                          << " time_us=" << first_step_sw.duration().count()
+                          << " failure=\"" << e.what() << "\""
+                          << std::endl;
+            }
+        }
+    }
+
     // Chen-aligned fixed-step benchmark.  This deliberately calls the exact
     // StepSizeType overload rather than suggest(...): Ariadne may try a smaller
     // step internally only to prove the flow bound, but then reports

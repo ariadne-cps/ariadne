@@ -173,6 +173,10 @@ FlowStepModelType
 IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h) const
 {
     UpperBoxType bx = dx + 1.5_dy * (dx-dx.centre()) + (1.5_dy * h) * cast_singleton(image(dx,vf));
+    // The flow enclosure must contain the initial state domain at t=0.
+    // The derivative displacement above can shift the whole box when a
+    // component of the vector field has a fixed sign, so explicitly retain dx.
+    bx = hull(UpperBoxType(dx),bx);
     StepSizeType hred=h;
     FlowStepModelType phi = this->flow_step(vf,dx,hred,bx);
     while (not definitely(subset(phi.range(),cast_exact_box(bx)))) {

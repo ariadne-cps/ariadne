@@ -1254,14 +1254,6 @@ Bool epsilon_overlaps(
     return solver._epsilon_overlaps(domain,constraints);
 }
 
-std::optional<UpperBoxType> empty_candidate_witness(
-    SmtSolver const& solver,
-    UpperBoxType const& domain)
-{
-    List<ValidatedConstraint> constraints;
-    return solver._epsilon_candidate_witness(domain,constraints);
-}
-
 Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input)

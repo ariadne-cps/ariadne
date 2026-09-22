@@ -338,10 +338,6 @@ Bool epsilon_overlaps(
     UpperBoxType const& domain,
     List<ValidatedConstraint> const& constraints);
 
-std::optional<UpperBoxType> empty_candidate_witness(
-    SmtSolver const& solver,
-    UpperBoxType const& domain);
-
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers
@@ -391,8 +387,6 @@ class SmtSolver {
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
     friend Bool SmtSolverTestSupport::epsilon_overlaps(
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
-    friend std::optional<UpperBoxType> SmtSolverTestSupport::empty_candidate_witness(
-        SmtSolver const&, UpperBoxType const&);
 
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 

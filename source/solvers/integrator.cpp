@@ -1228,6 +1228,48 @@ Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const 
 }
 
 
+PreconditionedTaylorSeriesState
+PreconditionedGradedTaylorSeriesIntegrator::precondition(
+        const ValidatedVectorMultivariateFunctionPatch& state) const
+{
+    auto const& state_taylor=
+        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+            state.reference());
+
+    SizeType const n=state_taylor.size();
+    auto const& factory=this->function_factory();
+    Vector<FloatDP> centre(n,FloatDP(dp));
+    Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
+    ExactBoxType local_domain(n);
+    ValidatedVectorMultivariateFunctionPatch normalised=
+        factory.create_zeros(n,state.domain());
+
+    for(SizeType i=0u; i!=n; ++i) {
+        FloatDP const c=state_taylor.model(i).value().raw();
+        ValidatedScalarMultivariateFunctionPatch centred=
+            state[i]-FloatDPBounds(c);
+        FloatDP const r=cast_exact(mag(centred.range()));
+
+        centre[i]=c;
+        if(r==FloatDP(0,dp)) {
+            // Preserve an exactly constant component without introducing a
+            // singular change of coordinates.  Its normalised coordinate is
+            // fixed at zero and therefore contributes no additional set width.
+            linear_map[i][i]=FloatDP(1,dp);
+            local_domain[i]=ExactIntervalType(0_z,0_z);
+            normalised[i]=factory.create_zero(state.domain());
+        } else {
+            linear_map[i][i]=r;
+            local_domain[i]=ExactIntervalType(-1,+1);
+            normalised[i]=centred/FloatDPBounds(r);
+        }
+    }
+
+    return PreconditionedTaylorSeriesState(
+        std::move(centre),std::move(linear_map),std::move(local_domain),
+        std::move(normalised));
+}
+
 FlowStepModelType
 PreconditionedGradedTaylorSeriesIntegrator::flow_step(
         const ValidatedVectorMultivariateFunction& f,

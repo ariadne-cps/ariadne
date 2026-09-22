@@ -44,6 +44,7 @@
 #include "utility/pointer.hpp"
 #include "function/affine.hpp"
 #include "algebra/sweeper.hpp"
+#include "algebra/matrix.hpp"
 
 #include "function/function_patch.hpp"
 
@@ -456,6 +457,36 @@ class GradedTaylorSeriesIntegrator
     using BoundedIntegratorBase::flow_step;
 };
 
+//! \brief A factorisation of a parameterised state as x(s)=c+A*y(s).
+//!
+//! The normalised mapping y(s) retains the Taylor-model dependence on the
+//! original enclosure parameters.  Keeping this object separate from the local
+//! flow is the first step towards propagating Flow*-style local initial sets
+//! without storing mutable state in the integrator itself.
+class PreconditionedTaylorSeriesState {
+  private:
+    Vector<FloatDP> _centre;
+    Matrix<FloatDP> _linear_map;
+    ExactBoxType _local_domain;
+    ValidatedVectorMultivariateFunctionPatch _normalised_mapping;
+  public:
+    PreconditionedTaylorSeriesState(
+        Vector<FloatDP> centre,
+        Matrix<FloatDP> linear_map,
+        ExactBoxType local_domain,
+        ValidatedVectorMultivariateFunctionPatch normalised_mapping)
+        : _centre(std::move(centre)),
+          _linear_map(std::move(linear_map)),
+          _local_domain(std::move(local_domain)),
+          _normalised_mapping(std::move(normalised_mapping)) { }
+
+    Vector<FloatDP> const& centre() const { return _centre; }
+    Matrix<FloatDP> const& linear_map() const { return _linear_map; }
+    ExactBoxType const& local_domain() const { return _local_domain; }
+    ValidatedVectorMultivariateFunctionPatch const& normalised_mapping() const { return _normalised_mapping; }
+    ExactBoxType const parameter_domain() const { return _normalised_mapping.domain(); }
+};
+
 //! \brief A graded Taylor-series integrator with explicit preconditioning support.
 class PreconditionedGradedTaylorSeriesIntegrator
     : public GradedTaylorSeriesIntegrator
@@ -468,6 +499,11 @@ class PreconditionedGradedTaylorSeriesIntegrator
         return new PreconditionedGradedTaylorSeriesIntegrator(*this);
     }
     virtual Void _write(OutputStream& os) const override;
+
+    //! \brief Factor a parameterised state as x(s)=c+A*y(s), retaining the
+    //! complete Taylor-model dependence in y(s).
+    PreconditionedTaylorSeriesState
+    precondition(const ValidatedVectorMultivariateFunctionPatch& state) const;
 
     //! \brief Compute a graded Taylor flow after diagonal affine
     //! preconditioning of the state domain to the unit box.

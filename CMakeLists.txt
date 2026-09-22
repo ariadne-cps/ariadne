@@ -275,11 +275,8 @@ if(COVERAGE)
             EXECUTABLE_ARGS --output-on-failure
             DEPENDENCIES tests
             BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-            EXCLUDE
-                "/usr/*"
-                "${PROJECT_SOURCE_DIR}/tests/*"
-                "${PROJECT_SOURCE_DIR}/python/*"
-                "${PROJECT_SOURCE_DIR}/submodules/*"
+            LCOV_CAPTURE_ARGS
+                --include "${PROJECT_SOURCE_DIR}/source/*"
         )
     endif()
 endif()

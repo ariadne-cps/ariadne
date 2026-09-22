@@ -66,7 +66,7 @@ if(NOT LLVM_RAW_PROFILES)
     message(FATAL_ERROR \"No LLVM raw coverage profiles were generated.\")
 endif()
 execute_process(
-    COMMAND \"${LLVM_PROFDATA_EXECUTABLE}\" merge -sparse ${LLVM_RAW_PROFILES} -o \"${PROFDATA_FILE}\"
+    COMMAND \"${LLVM_PROFDATA_EXECUTABLE}\" merge -sparse \${LLVM_RAW_PROFILES} -o \"${PROFDATA_FILE}\"
     RESULT_VARIABLE LLVM_PROFILE_MERGE_RESULT
 )
 if(NOT LLVM_PROFILE_MERGE_RESULT EQUAL 0)

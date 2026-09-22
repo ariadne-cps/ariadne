@@ -24,7 +24,6 @@
 
 #include "utility/stopwatch.hpp"
 #include "function/taylor_function.hpp"
-#include "function/affine_model.hpp"
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "ariadne_main.hpp"
@@ -32,60 +31,44 @@
 
 namespace {
 
-LabelledEnclosure affine_precondition(const LabelledEnclosure& enclosure)
+ValidatedVectorMultivariateFunctionPatch affine_parameterisation(
+    const ValidatedFunctionPatchFactory& factory,
+    const ExactBoxType& unit_domain,
+    const ExactBoxType& physical_box)
 {
-    auto const& state_taylor =
-        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
-            enclosure.state_function().reference());
-
-    SizeType const d=state_taylor.size();
-    SizeType const m=state_taylor.argument_size();
-    SizeType const kept=std::min(d,m);
-    SizeType const new_parameter_dimension=2u*d;
-
-    Vector<FloatDP> centre(d,FloatDP(dp));
-    Matrix<FloatDP> leading(d,d,FloatDP(dp));
-    Vector<FloatDP> residual(d,FloatDP(dp));
-
+    SizeType const d=physical_box.size();
+    ValidatedVectorMultivariateFunctionPatch result=
+        factory.create_zeros(d,unit_domain);
     for(SizeType i=0u; i!=d; ++i) {
-        AffineModel<ValidatedTag,FloatDP> affine(state_taylor.model(i));
-        centre[i]=affine.value();
-        residual[i]=FloatDP(affine.error().raw());
-
-        for(SizeType j=0u; j!=kept; ++j) {
-            leading[i][j]=affine.gradient(j);
-        }
-        for(SizeType j=kept; j!=m; ++j) {
-            residual[i]=add(up,residual[i],abs(affine.gradient(j)));
-        }
+        FloatDP const c=physical_box[i].midpoint().raw();
+        FloatDP const r=physical_box[i].radius().raw();
+        result[i]=factory.create_constant(unit_domain,c)
+            + factory.create_coordinate(unit_domain,i)*FloatDPBounds(r);
     }
-
-    // c + A*y + r: keep one correlated state-dimensional affine block and
-    // collapse all remaining affine directions plus nonlinear Taylor terms
-    // into one independent residual generator per state component.
-    ExactBoxType domain(new_parameter_dimension,ExactIntervalType(-1,+1));
-    auto const& factory=enclosure.configuration().function_factory();
-    ValidatedVectorMultivariateFunctionPatch state=
-        factory.create_zeros(d,domain);
-
-    for(SizeType i=0u; i!=d; ++i) {
-        state[i]=factory.create_constant(domain,centre[i]);
-        for(SizeType j=0u; j!=d; ++j) {
-            state[i]=state[i]
-                + factory.create_coordinate(domain,j)
-                  * FloatDPBounds(leading[i][j]);
-        }
-        state[i]=state[i]
-            + factory.create_coordinate(domain,d+i)
-              * FloatDPBounds(residual[i]);
-    }
-
-    LabelledEnclosure result(
-        Enclosure(domain,state,enclosure.configuration()),
-        enclosure.state_space());
-    result.set_auxiliary(enclosure.auxiliary_space(),enclosure.auxiliary_mapping());
     return result;
 }
+
+ValidatedVectorMultivariateFunctionPatch normalise_mapping(
+    const ValidatedFunctionPatchFactory& factory,
+    const ValidatedVectorMultivariateFunctionPatch& state,
+    const ExactBoxType& physical_box)
+{
+    ExactBoxType const domain=state.domain();
+    SizeType const d=physical_box.size();
+    ValidatedVectorMultivariateFunctionPatch result=
+        factory.create_zeros(d,domain);
+    for(SizeType i=0u; i!=d; ++i) {
+        FloatDP const c=physical_box[i].midpoint().raw();
+        FloatDP const r=physical_box[i].radius().raw();
+        if(r==FloatDP(0,dp)) {
+            result[i]=factory.create_zero(domain);
+        } else {
+            result[i]=(state[i]-FloatDPBounds(c))/FloatDPBounds(r);
+        }
+    }
+    return result;
+}
+
 }
 
 void ariadne_main()
@@ -134,10 +117,7 @@ void ariadne_main()
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
 
-    // Controlled comparison at identical physical reconditioning times.
-    // The standard path uses Enclosure::recondition(); the affine path replaces
-    // the current representation by c+A*y+r using the affine part of the current
-    // Taylor model and explicit residual generators.
+    // Reference Ariadne reconditioning at a fixed physical calendar.
     {
         const StepSizeType benchmark_steps[] = {
             StepSizeType(0.005_dy), StepSizeType(0.0025_dy)
@@ -145,125 +125,184 @@ void ariadne_main()
         const Nat benchmark_num_steps[] = {1400u,2800u};
         const Nat benchmark_period_steps[] = {8u,16u}; // 0.04 physical time
 
-        for(SizeType method=0u; method!=2u; ++method) {
-            for(SizeType step_case=0u; step_case!=2u; ++step_case) {
-                GradedTaylorPicardIntegrator benchmark_integrator(
-                    step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
-                benchmark_integrator.set_maximum_error_refinement_iterations(2u);
-                benchmark_integrator.set_diagnostics(false);
+        for(SizeType step_case=0u; step_case!=2u; ++step_case) {
+            GradedTaylorPicardIntegrator benchmark_integrator(
+                step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
+            benchmark_integrator.set_maximum_error_refinement_iterations(2u);
+            benchmark_integrator.set_diagnostics(false);
 
-                LabelledEnclosure benchmark_enclosure(
-                    initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
-                    EnclosureConfiguration(benchmark_integrator.function_factory()));
-                benchmark_enclosure.set_auxiliary(
-                    dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+            LabelledEnclosure benchmark_enclosure(
+                initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+                EnclosureConfiguration(benchmark_integrator.function_factory()));
+            benchmark_enclosure.set_auxiliary(
+                dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
 
-                StepSizeType const benchmark_step=benchmark_steps[step_case];
-                Nat const num_steps=benchmark_num_steps[step_case];
-                Nat const period_steps=benchmark_period_steps[step_case];
-                Nat preconditionings=0u;
-                SizeType max_parameters=benchmark_enclosure.number_of_parameters();
-                SizeType max_state_nnz=0u;
-                bool completed=true;
-                Nat failed_step=num_steps;
-                String failure;
+            StepSizeType const benchmark_step=benchmark_steps[step_case];
+            Nat const num_steps=benchmark_num_steps[step_case];
+            Nat const period_steps=benchmark_period_steps[step_case];
+            Nat reconditionings=0u;
+            bool completed=true;
+            Nat failed_step=num_steps;
+            String failure;
 
-                Stopwatch<Microseconds> benchmark_sw;
-                long long flow_us=0;
-                long long evolve_us=0;
-                long long precondition_us=0;
-
-                for(Nat step_index=0u; step_index!=num_steps; ++step_index) {
-                    auto box=cast_exact_box(
-                        benchmark_enclosure.euclidean_set().bounding_box());
-                    try {
-                        benchmark_sw.restart();
-                        auto flow=benchmark_integrator.flow_step(
-                            dynamics.function(),box,benchmark_step);
-                        benchmark_sw.click();
-                        flow_us+=benchmark_sw.duration().count();
-
-                        auto const actual_step=static_cast<StepSizeType>(
-                            flow.domain()[flow.argument_size()-1u].upper_bound());
-                        if(actual_step!=benchmark_step) {
-                            completed=false;
-                            failed_step=step_index;
-                            std::stringstream msg;
-                            msg << "returned step " << actual_step
-                                << " instead of " << benchmark_step;
-                            failure=msg.str();
-                            break;
-                        }
-
-                        benchmark_sw.restart();
-                        benchmark_enclosure.apply_fixed_evolve_step(flow,benchmark_step);
-                        benchmark_sw.click();
-                        evolve_us+=benchmark_sw.duration().count();
-
-                        auto const& state_taylor =
-                            dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
-                                benchmark_enclosure.state_function().reference());
-                        SizeType state_nnz=0u;
-                        for(SizeType i=0u; i!=state_taylor.size(); ++i) {
-                            state_nnz+=state_taylor[i].number_of_nonzeros();
-                        }
-                        if(state_nnz>max_state_nnz) { max_state_nnz=state_nnz; }
-
-                        if(((step_index+1u)%period_steps)==0u) {
-                            benchmark_sw.restart();
-                            if(method==0u) {
-                                benchmark_enclosure.recondition();
-                            } else {
-                                benchmark_enclosure=affine_precondition(benchmark_enclosure);
-                            }
-                            benchmark_sw.click();
-                            precondition_us+=benchmark_sw.duration().count();
-                            ++preconditionings;
-                            if(benchmark_enclosure.number_of_parameters()>max_parameters) {
-                                max_parameters=benchmark_enclosure.number_of_parameters();
-                            }
-                        }
-                    } catch(const std::exception& e) {
-                        completed=false;
-                        failed_step=step_index;
-                        failure=e.what();
-                        break;
+            for(Nat step_index=0u; step_index!=num_steps; ++step_index) {
+                auto box=cast_exact_box(
+                    benchmark_enclosure.euclidean_set().bounding_box());
+                try {
+                    auto flow=benchmark_integrator.flow_step(
+                        dynamics.function(),box,benchmark_step);
+                    benchmark_enclosure.apply_fixed_evolve_step(flow,benchmark_step);
+                    if(((step_index+1u)%period_steps)==0u) {
+                        benchmark_enclosure.recondition();
+                        ++reconditionings;
                     }
+                } catch(const std::exception& e) {
+                    completed=false;
+                    failed_step=step_index;
+                    failure=e.what();
+                    break;
                 }
-
-                auto const final_box=
-                    benchmark_enclosure.euclidean_set().bounding_box();
-                double final_width=0.0;
-                std::vector<double> component_widths(final_box.size());
-                for(SizeType i=0u; i!=final_box.size(); ++i) {
-                    double const component_width=final_box[i].width().get_d();
-                    component_widths[i]=component_width;
-                    if(component_width>final_width) { final_width=component_width; }
-                }
-
-                std::cerr << (method==0u
-                              ? "[StandardRecondition]"
-                              : "[AffinePrecondition]")
-                          << " requested_step=" << benchmark_step
-                          << " interval=0.04"
-                          << " completed=" << completed
-                          << " completed_steps=" << (completed ? num_steps : failed_step)
-                          << " preconditionings=" << preconditionings
-                          << " max_parameters=" << max_parameters
-                          << " max_state_nnz=" << max_state_nnz
-                          << " flow_us=" << flow_us
-                          << " evolve_us=" << evolve_us
-                          << " precondition_us=" << precondition_us
-                          << " final_error=" << benchmark_enclosure.state_function().error()
-                          << " final_width=" << final_width
-                          << " component_widths=["
-                          << component_widths[0] << "," << component_widths[1] << "]"
-                          << " final_box=" << final_box;
-                if(not completed) {
-                    std::cerr << " failure=\"" << failure << "\"";
-                }
-                std::cerr << std::endl;
             }
+
+            auto const final_box=benchmark_enclosure.euclidean_set().bounding_box();
+            double final_width=0.0;
+            std::vector<double> component_widths(final_box.size());
+            for(SizeType i=0u; i!=final_box.size(); ++i) {
+                double const w=final_box[i].width().get_d();
+                component_widths[i]=w;
+                if(w>final_width) { final_width=w; }
+            }
+            std::cerr << "[StandardRecondition]"
+                      << " requested_step=" << benchmark_step
+                      << " interval=0.04"
+                      << " completed=" << completed
+                      << " completed_steps=" << (completed ? num_steps : failed_step)
+                      << " reconditionings=" << reconditionings
+                      << " final_width=" << final_width
+                      << " component_widths=[" << component_widths[0]
+                      << "," << component_widths[1] << "]"
+                      << " final_box=" << final_box;
+            if(not completed) { std::cerr << " failure=\"" << failure << "\""; }
+            std::cerr << std::endl;
+        }
+    }
+
+    // Flow*-style local-initial-set normalisation.
+    //
+    // Flow* keeps two Taylor-model layers: a local preconditioned flow and a
+    // normalised map from the original parameters into the local coordinates.
+    // At the end of every step it composes the two once, recentres the resulting
+    // local initial set, scales each component to [-1,1], and carries the
+    // normalised Taylor map to the next step.  No parameter dependence is
+    // discarded here.
+    {
+        const StepSizeType steps[] = {
+            StepSizeType(0.02_dy), StepSizeType(0.01_dy),
+            StepSizeType(0.005_dy), StepSizeType(0.0025_dy)
+        };
+        const Nat num_steps_values[] = {350u,700u,1400u,2800u};
+
+        for(SizeType step_case=0u; step_case!=4u; ++step_case) {
+            GradedTaylorPicardIntegrator local_integrator(
+                step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
+            local_integrator.set_maximum_error_refinement_iterations(2u);
+            local_integrator.set_diagnostics(false);
+
+            auto const& factory=local_integrator.function_factory();
+            StepSizeType const step=steps[step_case];
+            Nat const num_steps=num_steps_values[step_case];
+
+            ExactBoxType local_box=cast_exact_box(
+                initial_set.euclidean_set(dynamics.state_space()).bounding_box());
+            ExactBoxType const unit_domain(
+                local_box.size(),ExactIntervalType(-1,+1));
+
+            // r_0 is the identity on the normalised initial parameters.
+            ValidatedVectorMultivariateFunctionPatch normalised_map=
+                factory.create_identity(unit_domain);
+            ValidatedVectorMultivariateFunctionPatch state=
+                affine_parameterisation(factory,unit_domain,local_box);
+
+            bool completed=true;
+            Nat failed_step=num_steps;
+            String failure;
+            SizeType max_mapping_nnz=0u;
+            Stopwatch<Microseconds> local_sw;
+            long long flow_us=0;
+            long long compose_us=0;
+            long long normalise_us=0;
+
+            for(Nat step_index=0u; step_index!=num_steps; ++step_index) {
+                try {
+                    local_sw.restart();
+                    auto flow=local_integrator.flow_step(
+                        dynamics.function(),local_box,step);
+                    local_sw.click();
+                    flow_us+=local_sw.duration().count();
+
+                    auto flow_model=
+                        dynamic_handle_cast<const ValidatedVectorMultivariateFunctionPatch>(flow);
+                    auto flow_end=partial_evaluate(
+                        flow_model,flow_model.argument_size()-1u,step);
+
+                    // P_l(y,h): compose the physical flow with x=c_l+S_l*y.
+                    auto local_initial_map=
+                        affine_parameterisation(factory,unit_domain,local_box);
+                    auto preconditioned_end=compose(flow_end,local_initial_map);
+
+                    // X_{l+1}(s)=P_l(r_l(s),h), preserving all parameter
+                    // correlations before the normalisation for the next step.
+                    local_sw.restart();
+                    state=compose(preconditioned_end,normalised_map);
+                    local_sw.click();
+                    compose_us+=local_sw.duration().count();
+
+                    auto const& state_taylor =
+                        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                            state.reference());
+                    SizeType mapping_nnz=0u;
+                    for(SizeType i=0u; i!=state_taylor.size(); ++i) {
+                        mapping_nnz+=state_taylor[i].number_of_nonzeros();
+                    }
+                    if(mapping_nnz>max_mapping_nnz) { max_mapping_nnz=mapping_nnz; }
+
+                    local_sw.restart();
+                    local_box=cast_exact_box(state.codomain().bounding_box());
+                    normalised_map=normalise_mapping(factory,state,local_box);
+                    local_sw.click();
+                    normalise_us+=local_sw.duration().count();
+                } catch(const std::exception& e) {
+                    completed=false;
+                    failed_step=step_index;
+                    failure=e.what();
+                    break;
+                }
+            }
+
+            auto const final_box=state.codomain().bounding_box();
+            double final_width=0.0;
+            std::vector<double> component_widths(final_box.size());
+            for(SizeType i=0u; i!=final_box.size(); ++i) {
+                double const w=final_box[i].width().get_d();
+                component_widths[i]=w;
+                if(w>final_width) { final_width=w; }
+            }
+
+            std::cerr << "[FlowstarLikePrecondition]"
+                      << " requested_step=" << step
+                      << " completed=" << completed
+                      << " completed_steps=" << (completed ? num_steps : failed_step)
+                      << " max_mapping_nnz=" << max_mapping_nnz
+                      << " flow_us=" << flow_us
+                      << " compose_us=" << compose_us
+                      << " normalise_us=" << normalise_us
+                      << " final_error=" << state.error()
+                      << " final_width=" << final_width
+                      << " component_widths=[" << component_widths[0]
+                      << "," << component_widths[1] << "]"
+                      << " final_box=" << final_box;
+            if(not completed) { std::cerr << " failure=\"" << failure << "\""; }
+            std::cerr << std::endl;
         }
     }
 

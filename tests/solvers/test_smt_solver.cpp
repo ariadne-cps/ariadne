@@ -1434,6 +1434,20 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] structurally identical atoms share one Boolean variable" << std::endl;
+            ContinuousPredicate first=(ex<=0);
+            ContinuousPredicate second=(ex<=0);
+            ARIADNE_TEST_ASSERT(first.node_raw_ptr()!=second.node_raw_ptr());
+
+            SmtResult duplicate_atom_contradiction=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                first&&!second);
+            ARIADNE_TEST_ASSERT(duplicate_atom_contradiction.is_unsat());
+            ARIADNE_TEST_EQUAL(duplicate_atom_contradiction.statistics().theory_checks,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] Boolean constants" << std::endl;
             ExactBoxType domain({ExactIntervalType(-1,1)});
 

@@ -355,6 +355,7 @@ template Bool is_constant(const Expression<Kleenean>&, const Kleenean&);
 
 template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
+template Bool identical(const Expression<Kleenean>&, const Expression<Kleenean>&);
 
 template Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& spc);
 template Bool is_constant_in(const Expression<Vector<Real>>& e, const Set<Variable<Real>>& spc);

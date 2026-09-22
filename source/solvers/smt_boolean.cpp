@@ -63,6 +63,14 @@ class TseitinBuilder {
             return iter->second;
         }
 
+        for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
+            if(identical(_encoding.atom(i),predicate)) {
+                Int variable=static_cast<Int>(_encoding.atom_variable(i));
+                _atom_variables.emplace(key,variable);
+                return variable;
+            }
+        }
+
         Int variable=this->_new_variable();
         _atom_variables.emplace(key,variable);
         _encoding._add_atom(predicate,static_cast<SizeType>(variable));

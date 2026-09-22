@@ -176,7 +176,7 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     StepSizeType hred=h;
     FlowStepModelType phi = this->flow_step(vf,dx,hred,bx);
     while (not definitely(subset(phi.range(),cast_exact_box(bx)))) {
-        hred=hlf(h);
+        hred=hlf(hred);
         phi = this->flow_step(vf,dx,hred,bx);
     }
     if (hred==h) {

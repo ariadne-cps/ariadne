@@ -41,6 +41,7 @@ class TestSmtBoolean {
         ARIADNE_TEST_CALL(test_disjunction());
         ARIADNE_TEST_CALL(test_shared_atom());
         ARIADNE_TEST_CALL(test_structurally_shared_atom());
+        ARIADNE_TEST_CALL(test_semantically_shared_atom());
         ARIADNE_TEST_CALL(test_nested_formula());
     }
 
@@ -181,6 +182,40 @@ class TestSmtBoolean {
         ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
         ARIADNE_TEST_EQUAL(encoding.clauses().size(),4u);
         ARIADNE_TEST_EQUAL(encoding.atom_variable(0),1u);
+    }
+
+    Void test_semantically_shared_atom() {
+        RealVariable x("x"), y("y");
+        RealExpression ex=x;
+        RealExpression ey=y;
+
+        {
+            std::cout << "[smt-boolean] x<=y and y>=x share an atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode((ex<=ey)&&!(ey>=ex));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        }
+
+        {
+            std::cout << "[smt-boolean] x<y and y>x share an atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode((ex<ey)&&!(ey>ex));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        }
+
+        {
+            std::cout << "[smt-boolean] symmetric equality shares an atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode((ex==ey)&&!(ey==ex));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        }
+
+        {
+            std::cout << "[smt-boolean] sgn(x) and x>0 share an atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(sgn(ex)&&!(ex>0));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        }
     }
 
     Void test_nested_formula() {

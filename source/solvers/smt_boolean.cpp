@@ -27,8 +27,55 @@
 #include <map>
 
 #include "utility/exceptions.hpp"
+#include "solvers/smt_theory.hpp"
 
 namespace Ariadne {
+
+namespace {
+
+struct CanonicalTheoryAtom {
+    RealExpression lhs;
+    SmtTheoryRelation relation;
+    RealExpression rhs;
+};
+
+CanonicalTheoryAtom canonical_theory_atom(ContinuousPredicate const& predicate)
+{
+    SmtTheoryLiteral literal=make_smt_theory_literal(predicate);
+    RealExpression lhs=literal.lhs();
+    RealExpression rhs=literal.rhs();
+    SmtTheoryRelation relation=literal.relation();
+
+    switch(relation) {
+        case SmtTheoryRelation::LEQ:
+            return {rhs,SmtTheoryRelation::GEQ,lhs};
+        case SmtTheoryRelation::LT:
+            return {rhs,SmtTheoryRelation::GT,lhs};
+        case SmtTheoryRelation::EQ:
+        case SmtTheoryRelation::NEQ:
+            if(before(rhs,lhs)) {
+                std::swap(lhs,rhs);
+            }
+            return {lhs,relation,rhs};
+        case SmtTheoryRelation::GEQ:
+        case SmtTheoryRelation::GT:
+            return {lhs,relation,rhs};
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+    }
+}
+
+Bool equivalent_theory_atoms(ContinuousPredicate const& lhs,
+                             ContinuousPredicate const& rhs)
+{
+    CanonicalTheoryAtom left=canonical_theory_atom(lhs);
+    CanonicalTheoryAtom right=canonical_theory_atom(rhs);
+    return left.relation==right.relation
+        && identical(left.lhs,right.lhs)
+        && identical(left.rhs,right.rhs);
+}
+
+} // namespace
 
 class TseitinBuilder {
   public:
@@ -64,7 +111,8 @@ class TseitinBuilder {
         }
 
         for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
-            if(identical(_encoding.atom(i),predicate)) {
+            if(identical(_encoding.atom(i),predicate)
+                    || equivalent_theory_atoms(_encoding.atom(i),predicate)) {
                 Int variable=static_cast<Int>(_encoding.atom_variable(i));
                 _atom_variables.emplace(key,variable);
                 return variable;

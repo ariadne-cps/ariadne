@@ -414,25 +414,25 @@ class TestSmtSolver {
             UpperIntervalType(ExactIntervalType(0,0))
         });
         ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::classify_child_search_outcome(
-                Outcome::found(witness),2u,true),
-            Action::RETURN_OUTCOME);
+            static_cast<Int>(SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::found(witness),2u,true)),
+            static_cast<Int>(Action::RETURN_OUTCOME));
         ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::classify_child_search_outcome(
-                Outcome::backjump(1u),2u,true),
-            Action::RETURN_OUTCOME);
+            static_cast<Int>(SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::backjump(1u),2u,true)),
+            static_cast<Int>(Action::RETURN_OUTCOME));
         ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::classify_child_search_outcome(
-                Outcome::backjump(2u),2u,true),
-            Action::RESTART_AT_PARENT);
+            static_cast<Int>(SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::backjump(2u),2u,true)),
+            static_cast<Int>(Action::RESTART_AT_PARENT));
         ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::classify_child_search_outcome(
-                Outcome::exhausted(),2u,true),
-            Action::TRY_ALTERNATIVE);
+            static_cast<Int>(SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::exhausted(),2u,true)),
+            static_cast<Int>(Action::TRY_ALTERNATIVE));
         ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::classify_child_search_outcome(
-                Outcome::exhausted(),2u,false),
-            Action::EXHAUSTED);
+            static_cast<Int>(SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::exhausted(),2u,false)),
+            static_cast<Int>(Action::EXHAUSTED));
     }
 
     Void test_invalid_internal_relations() {

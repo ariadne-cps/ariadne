@@ -1113,6 +1113,22 @@ class TestSmtSolver {
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
 
         {
+            std::cout << "[smt-dpll] Boolean theory solve preserves disabled candidate search" << std::endl;
+            SmtSolver no_candidate_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ContinuousPredicate formula=(sqr(ex)==0.75_x);
+            SmtResult solve_result=no_candidate_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-2,2)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] unit propagation on single atom" << std::endl;
             ContinuousPredicate formula=(ex>=0);
             SmtResult solve_result=solver.solve(

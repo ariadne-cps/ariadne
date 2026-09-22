@@ -1981,7 +1981,8 @@ class SmtDpllSearch {
             _solver.configuration().epsilon(),
             _solver.configuration().theory_minimization_budget(),
             _solver.configuration().learned_clause_limit(),
-            remaining));
+            remaining,
+            _solver.configuration().candidate_search_enabled()));
         return _parallel
             ? theory_solver.solve_parallel(_space,_domain,literals)
             : theory_solver.solve(_space,_domain,literals);

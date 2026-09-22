@@ -1023,6 +1023,8 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
         source.peak_active_non_theory_learned_clauses);
 }
 
+} // namespace
+
 namespace SmtSolverTestSupport {
 
 std::vector<SizeType> learned_clause_pruning_candidates(
@@ -1053,6 +1055,8 @@ std::vector<SizeType> learned_clause_pruning_candidates(
 }
 
 } // namespace SmtSolverTestSupport
+
+namespace {
 
 class SmtDpllSearch {
   public:
@@ -1265,7 +1269,6 @@ class SmtDpllSearch {
             SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
 
         for(SizeType learned_index:candidates) {
-            SizeType clause_index=this->_original_clause_count()+learned_index;
             if(active<=limit) {
                 break;
             }

@@ -1566,28 +1566,48 @@ class TestSmtSolver {
             std::cout << "[smt-dpll] learned clause pruning removes stale clauses" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
                 0.125_x,std::numeric_limits<SizeType>::max(),0u));
-            RealVariable p0("p0"), p1("p1"), p2("p2"), p3("p3"), p4("p4");
-            RealSpace pruning_space({p0,p1,p2,p3,p4});
-            ExactBoxType pruning_domain({
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1)});
-            std::vector<ContinuousPredicate> atoms({
-                RealExpression(p0)>=0,
-                RealExpression(p1)>=0,
-                RealExpression(p2)>=0,
-                RealExpression(p3)>=0,
-                RealExpression(p4)>=0});
-            ContinuousPredicate formula(true);
-            for(SizeType mask=0u; mask!=32u; ++mask) {
-                ContinuousPredicate clause(false);
-                for(SizeType i=0u; i!=atoms.size(); ++i) {
-                    clause=clause||(((mask>>i)&1u)!=0u ? atoms[i] : !atoms[i]);
-                }
-                formula=formula&&clause;
+
+            // Pigeonhole principle PHP(5,4): every Boolean assignment remains
+            // theory-realizable because each atom uses an independent variable.
+            const char* names[20]={
+                "php00","php01","php02","php03",
+                "php10","php11","php12","php13",
+                "php20","php21","php22","php23",
+                "php30","php31","php32","php33",
+                "php40","php41","php42","php43"};
+            std::vector<RealVariable> variables;
+            variables.reserve(20u);
+            for(SizeType i=0u; i!=20u; ++i) {
+                variables.emplace_back(names[i]);
             }
+            RealSpace pruning_space(variables);
+            ExactBoxType pruning_domain(20u,ExactIntervalType(-1,1));
+
+            std::vector<ContinuousPredicate> atoms;
+            atoms.reserve(20u);
+            for(SizeType i=0u; i!=20u; ++i) {
+                atoms.push_back(RealExpression(variables[i])>=0);
+            }
+            auto atom = [&](SizeType pigeon, SizeType hole) -> ContinuousPredicate const& {
+                return atoms[pigeon*4u+hole];
+            };
+
+            ContinuousPredicate formula(true);
+            for(SizeType pigeon=0u; pigeon!=5u; ++pigeon) {
+                ContinuousPredicate at_least_one(false);
+                for(SizeType hole=0u; hole!=4u; ++hole) {
+                    at_least_one=at_least_one||atom(pigeon,hole);
+                }
+                formula=formula&&at_least_one;
+            }
+            for(SizeType hole=0u; hole!=4u; ++hole) {
+                for(SizeType first=0u; first!=5u; ++first) {
+                    for(SizeType second=first+1u; second!=5u; ++second) {
+                        formula=formula&&(!atom(first,hole)||!atom(second,hole));
+                    }
+                }
+            }
+
             SmtResult solve_result=pruning_solver.solve(
                 pruning_space,pruning_domain,formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());

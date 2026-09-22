@@ -192,6 +192,12 @@ struct LearnedClausePruningEntry {
 std::vector<SizeType> learned_clause_pruning_candidates(
     std::vector<LearnedClausePruningEntry> const& entries);
 
+SizeType apply_learned_clause_pruning(
+    std::vector<Bool>& active,
+    std::vector<SizeType> const& candidates,
+    SizeType active_count,
+    SizeType limit);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers

@@ -1054,6 +1054,24 @@ std::vector<SizeType> learned_clause_pruning_candidates(
     return candidates;
 }
 
+SizeType apply_learned_clause_pruning(
+    std::vector<Bool>& active,
+    std::vector<SizeType> const& candidates,
+    SizeType active_count,
+    SizeType limit)
+{
+    SizeType pruned=0u;
+    for(SizeType index:candidates) {
+        if(active_count<=limit) {
+            break;
+        }
+        active[index]=false;
+        --active_count;
+        ++pruned;
+    }
+    return pruned;
+}
+
 } // namespace SmtSolverTestSupport
 
 namespace {
@@ -1268,14 +1286,9 @@ class SmtDpllSearch {
         std::vector<SizeType> candidates=
             SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
 
-        for(SizeType learned_index:candidates) {
-            if(active<=limit) {
-                break;
-            }
-            _learned_clause_active[learned_index]=false;
-            --active;
-            ++_statistics.learned_clauses_pruned;
-        }
+        _statistics.learned_clauses_pruned+=
+            SmtSolverTestSupport::apply_learned_clause_pruning(
+                _learned_clause_active,candidates,active,limit);
     }
 
     Bool _unit_propagate()

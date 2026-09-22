@@ -353,7 +353,6 @@ GradedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
 FlowStepModelType
 GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
-    std::cerr << "[GradedTaylorPicard] ENTER _flow_step" << std::endl;
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("f="<<f);
     CONCLOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
@@ -384,21 +383,6 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
 
-    auto log_model_size = [](const char* phase, DegreeType iteration, FlowStepModelType const& model) {
-        auto const& taylor_model = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(model.reference());
-        SizeType total_nnz=0;
-        std::stringstream msg;
-        msg << "[GradedTaylorPicard] " << phase << " " << iteration << " nnz=[";
-        for(SizeType i=0; i!=taylor_model.size(); ++i) {
-            SizeType const nnz=taylor_model[i].number_of_nonzeros();
-            total_nnz+=nnz;
-            if(i!=0) { msg << ","; }
-            msg << nnz;
-        }
-        msg << "] total=" << total_nnz << " error=" << taylor_model.error();
-        std::cerr << msg.str() << std::endl;
-    };
-
     FlowStepModelType fphi=compose(f,join(phi0,ta));
     for (DegreeType k=0; k!=this->_order; ++k) {
         try {
@@ -409,13 +393,11 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         }
         phi=antiderivative(fphi,nx)+phi0;
         CONCLOG_PRINTLN_AT(2,"phi="<<phi);
-        log_model_size("picard",k+1,phi);
     }
     auto errors = phi.errors();
     CONCLOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
     fphi=compose(f,join(std::move(phi),ta));
     phi=antiderivative(fphi,nx)+phi0;
-    log_model_size("validation",1,phi);
     auto new_errors = phi.errors();
     for (SizeType i=0; i<errors.size(); ++i) {
         if (not refines(new_errors[i],errors[i])) {
@@ -429,7 +411,6 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         ++refinement_iteration;
         fphi=compose(f,join(std::move(phi),ta));
         phi=antiderivative(fphi,nx)+phi0;
-        log_model_size("refinement",refinement_iteration,phi);
         new_errors = phi.errors();
         Bool has_improved = false;
         for (SizeType i=0; i<errors.size(); ++i) {

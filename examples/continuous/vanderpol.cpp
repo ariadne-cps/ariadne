@@ -74,96 +74,97 @@ void ariadne_main()
     sw.restart();
     CONCLOG_PRINTLN("Computing evolution... ");
 
-    // Temporary diagnostic: compare the two Picard integrators on exactly
-    // the same initial box and requested step before running the full evolver.
-    auto diagnostic_initial_box = cast_exact_box(initial_set.euclidean_set(dynamics.state_space()).bounding_box());
-    StepSizeType diagnostic_step=0.02_dy;
-    TaylorPicardIntegrator diagnostic_taylor_picard(max_err);
-    GradedTaylorPicardIntegrator diagnostic_graded_picard(max_err,order=5,step_sweep_threshold=1e-12);
+    // Compare graded Taylor-Picard cutoff values on the full trajectory using
+    // synchronous enclosure propagation.  Each case is capped in measured work
+    // so that cutoff=0 cannot make the benchmark impractically long.
+    const double cutoff_values[] = {0.0,1e-14,1e-13,1e-12,1e-11,1e-10};
+    const long long cutoff_work_limit_us = 15000000;
+    for(double cutoff_value : cutoff_values) {
+        GradedTaylorPicardIntegrator sweep_integrator(
+            max_err,order=5,StepSweepThreshold(ApproximateDouble(cutoff_value)));
+        LabelledEnclosure sweep_enclosure(
+            initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+            EnclosureConfiguration(sweep_integrator.function_factory()));
+        sweep_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
 
-    Stopwatch<Microseconds> diagnostic_sw;
-    std::cerr << "[vanderpol] TaylorPicard direct probe" << std::endl;
-    auto diagnostic_taylor_flow = diagnostic_taylor_picard.flow_step(
-        dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
-    diagnostic_sw.click();
-    std::cerr << "[vanderpol] TaylorPicard time_us=" << diagnostic_sw.duration().count()
-              << " error=" << diagnostic_taylor_flow.error() << std::endl;
+        TimeStepType sweep_time(0u);
+        Nat sweep_steps=0u;
+        Nat sweep_reconditionings=0u;
+        SizeType max_state_nnz=0u;
+        SizeType max_reach_nnz=0u;
+        long long flow_us_total=0;
+        long long reach_us_total=0;
+        long long evolve_us_total=0;
+        long long recondition_us_total=0;
+        Stopwatch<Microseconds> sweep_sw;
 
-    diagnostic_sw.restart();
-    std::cerr << "[vanderpol] GradedTaylorPicard direct probe" << std::endl;
-    auto diagnostic_graded_flow = diagnostic_graded_picard.flow_step(
-        dynamics.function(),diagnostic_initial_box,suggest(diagnostic_step));
-    diagnostic_sw.click();
-    std::cerr << "[vanderpol] GradedTaylorPicard time_us=" << diagnostic_sw.duration().count()
-              << " error=" << diagnostic_graded_flow.error() << std::endl;
-
-    // Temporary synchronous propagation benchmark.  This deliberately avoids
-    // VectorFieldEvolver/DynamicWorkload and measures flow construction and
-    // enclosure propagation separately for a short prefix of the trajectory.
-    LabelledEnclosure diagnostic_enclosure(
-        initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
-        EnclosureConfiguration(integrator.function_factory()));
-    diagnostic_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
-
-    TimeStepType diagnostic_time(0u);
-    for(Nat diagnostic_step_index=0; diagnostic_step_index!=20; ++diagnostic_step_index) {
-        Nat reconditioning_count=0u;
-        while(possibly(diagnostic_enclosure.state_function().error() > 1e-6_pr)) {
-            auto const params_before_recondition=diagnostic_enclosure.number_of_parameters();
-            auto const errors_before_recondition=diagnostic_enclosure.state_function().errors();
-            diagnostic_sw.restart();
-            diagnostic_enclosure.recondition();
-            diagnostic_sw.click();
-            ++reconditioning_count;
-            std::cerr << "[SyncRecondition] step=" << diagnostic_step_index
-                      << " t=" << diagnostic_time
-                      << " count=" << reconditioning_count
-                      << " time_us=" << diagnostic_sw.duration().count()
-                      << " params_before=" << params_before_recondition
-                      << " params_after=" << diagnostic_enclosure.number_of_parameters()
-                      << " errors_before=" << errors_before_recondition
-                      << " errors_after=" << diagnostic_enclosure.state_function().errors()
-                      << std::endl;
-            if(reconditioning_count>=20u) {
-                std::cerr << "[SyncRecondition] aborting after 20 consecutive reconditionings at same t" << std::endl;
-                break;
+        while(possibly(sweep_time < TimeStepType(7u)) && sweep_steps<2000u
+              && flow_us_total+reach_us_total+evolve_us_total+recondition_us_total < cutoff_work_limit_us) {
+            if(possibly(sweep_enclosure.state_function().error() > 1e-6_pr)) {
+                sweep_sw.restart();
+                sweep_enclosure.recondition();
+                sweep_sw.click();
+                recondition_us_total+=sweep_sw.duration().count();
+                ++sweep_reconditionings;
             }
+
+            auto const& state_taylor =
+                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                    sweep_enclosure.state_function().reference());
+            SizeType state_nnz=0u;
+            for(SizeType i=0; i!=state_taylor.size(); ++i) {
+                state_nnz+=state_taylor[i].number_of_nonzeros();
+            }
+            max_state_nnz=max(max_state_nnz,state_nnz);
+
+            auto box=cast_exact_box(sweep_enclosure.euclidean_set().bounding_box());
+            sweep_sw.restart();
+            auto flow=sweep_integrator.flow_step(dynamics.function(),box,suggest(StepSizeType(0.02_dy)));
+            sweep_sw.click();
+            flow_us_total+=sweep_sw.duration().count();
+
+            StepSizeType actual_step=
+                static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
+
+            LabelledEnclosure reach_enclosure=sweep_enclosure;
+            sweep_sw.restart();
+            reach_enclosure.apply_full_reach_step(flow);
+            sweep_sw.click();
+            reach_us_total+=sweep_sw.duration().count();
+            auto const& reach_taylor =
+                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                    reach_enclosure.state_function().reference());
+            SizeType reach_nnz=0u;
+            for(SizeType i=0; i!=reach_taylor.size(); ++i) {
+                reach_nnz+=reach_taylor[i].number_of_nonzeros();
+            }
+            max_reach_nnz=max(max_reach_nnz,reach_nnz);
+
+            sweep_sw.restart();
+            sweep_enclosure.apply_fixed_evolve_step(flow,actual_step);
+            sweep_sw.click();
+            evolve_us_total+=sweep_sw.duration().count();
+
+            sweep_time+=TimeStepType(actual_step);
+            ++sweep_steps;
         }
 
-        auto const& sf=diagnostic_enclosure.state_function();
-        auto const& sf_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(sf.reference());
-        SizeType state_nnz=0;
-        for(SizeType i=0; i!=sf_taylor.size(); ++i) { state_nnz+=sf_taylor[i].number_of_nonzeros(); }
-        auto const state_error_before=sf.error();
-        SizeType const state_params_before=diagnostic_enclosure.number_of_parameters();
-
-        auto box=cast_exact_box(diagnostic_enclosure.euclidean_set().bounding_box());
-        diagnostic_sw.restart();
-        auto flow=integrator.flow_step(dynamics.function(),box,suggest(diagnostic_step));
-        diagnostic_sw.click();
-        auto const& flow_taylor=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(flow.reference());
-        SizeType flow_nnz=0;
-        for(SizeType i=0; i!=flow_taylor.size(); ++i) { flow_nnz+=flow_taylor[i].number_of_nonzeros(); }
-        auto const flow_us=diagnostic_sw.duration().count();
-
-        StepSizeType actual_step=static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
-        diagnostic_sw.restart();
-        diagnostic_enclosure.apply_fixed_evolve_step(flow,actual_step);
-        diagnostic_sw.click();
-
-        std::cerr << "[SyncProfile] step=" << diagnostic_step_index
-                  << " t=" << diagnostic_time
-                  << " params_before=" << state_params_before
-                  << " state_nnz_before=" << state_nnz
-                  << " state_error_before=" << state_error_before
-                  << " flow_us=" << flow_us
-                  << " flow_nnz=" << flow_nnz
-                  << " flow_error=" << flow.error()
-                  << " evolve_us=" << diagnostic_sw.duration().count()
-                  << " next_error=" << diagnostic_enclosure.state_function().error()
-                  << " reconditionings_before_step=" << reconditioning_count
+        bool const completed=not possibly(sweep_time < TimeStepType(7u));
+        std::cerr << "[CutoffSweep]"
+                  << " cutoff=" << cutoff_value
+                  << " completed=" << completed
+                  << " t=" << sweep_time
+                  << " steps=" << sweep_steps
+                  << " reconditionings=" << sweep_reconditionings
+                  << " max_state_nnz=" << max_state_nnz
+                  << " max_reach_nnz=" << max_reach_nnz
+                  << " flow_us=" << flow_us_total
+                  << " reach_us=" << reach_us_total
+                  << " evolve_us=" << evolve_us_total
+                  << " recondition_us=" << recondition_us_total
+                  << " final_error=" << sweep_enclosure.state_function().error()
+                  << " final_box=" << sweep_enclosure.euclidean_set().bounding_box()
                   << std::endl;
-        diagnostic_time+=TimeStepType(actual_step);
     }
 
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;

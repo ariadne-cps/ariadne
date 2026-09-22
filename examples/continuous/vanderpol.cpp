@@ -310,13 +310,12 @@ void ariadne_main()
     // Keep the physical reconditioning calendar fixed at 0.04 and vary only the
     // number of retained parameter blocks.
     {
-        const SizeType block_counts[] = {2u,3u,4u};
+        const SizeType blocks=4u;
         StepSizeType const block_step=StepSizeType(0.0025_dy);
         Nat const block_num_steps=2800u;
         Nat const block_recondition_period=16u; // 0.04 / 0.0025
 
-        for(SizeType block_case=0u; block_case!=3u; ++block_case) {
-            SizeType const blocks=block_counts[block_case];
+        {
             GradedTaylorPicardIntegrator block_integrator(
                 step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
             block_integrator.set_maximum_error_refinement_iterations(2u);
@@ -369,6 +368,16 @@ void ariadne_main()
                         ++reconditionings;
                         if(block_enclosure.number_of_parameters()>max_parameters) {
                             max_parameters=block_enclosure.number_of_parameters();
+                        }
+                        if((reconditionings%25u)==0u) {
+                            std::cerr << "[ReconditionBlockProgress]"
+                                      << " blocks=" << blocks
+                                      << " reconditionings=" << reconditionings
+                                      << " step=" << (step_index+1u)
+                                      << " parameters=" << block_enclosure.number_of_parameters()
+                                      << " state_nnz=" << state_nnz
+                                      << " error=" << block_enclosure.state_function().error()
+                                      << std::endl;
                         }
                     }
                 } catch(const std::exception& e) {

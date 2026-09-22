@@ -90,6 +90,20 @@ class TseitinBuilder {
         return _encoding._new_variable();
     }
 
+    std::optional<Bool> _constant_value(ContinuousPredicate const& predicate) const {
+        if(predicate.code()!=OperatorCode::CNST) {
+            return std::nullopt;
+        }
+        Kleenean const& value=predicate.val();
+        if(definitely(value)) {
+            return true;
+        }
+        if(definitely(!value)) {
+            return false;
+        }
+        ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+    }
+
     Int _encode_constant(ContinuousPredicate const& predicate) {
         Int variable=this->_new_variable();
         Kleenean const& value=predicate.val();
@@ -139,10 +153,26 @@ class TseitinBuilder {
             case OperatorCode::LT:
                 return this->_encode_atom(predicate);
 
-            case OperatorCode::NOT:
+            case OperatorCode::NOT: {
+                auto value=this->_constant_value(predicate.arg());
+                if(value.has_value()) {
+                    return this->_encode_constant(ContinuousPredicate(!*value));
+                }
                 return -this->_encode(predicate.arg());
+            }
 
             case OperatorCode::AND: {
+                auto lhs_value=this->_constant_value(predicate.arg1());
+                auto rhs_value=this->_constant_value(predicate.arg2());
+                if(lhs_value.has_value()) {
+                    return *lhs_value ? this->_encode(predicate.arg2())
+                                      : this->_encode_constant(ContinuousPredicate(false));
+                }
+                if(rhs_value.has_value()) {
+                    return *rhs_value ? this->_encode(predicate.arg1())
+                                      : this->_encode_constant(ContinuousPredicate(false));
+                }
+
                 Int lhs=this->_encode(predicate.arg1());
                 Int rhs=this->_encode(predicate.arg2());
                 Int variable=this->_new_variable();
@@ -154,6 +184,17 @@ class TseitinBuilder {
             }
 
             case OperatorCode::OR: {
+                auto lhs_value=this->_constant_value(predicate.arg1());
+                auto rhs_value=this->_constant_value(predicate.arg2());
+                if(lhs_value.has_value()) {
+                    return *lhs_value ? this->_encode_constant(ContinuousPredicate(true))
+                                      : this->_encode(predicate.arg2());
+                }
+                if(rhs_value.has_value()) {
+                    return *rhs_value ? this->_encode_constant(ContinuousPredicate(true))
+                                      : this->_encode(predicate.arg1());
+                }
+
                 Int lhs=this->_encode(predicate.arg1());
                 Int rhs=this->_encode(predicate.arg2());
                 Int variable=this->_new_variable();

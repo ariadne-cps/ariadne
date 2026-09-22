@@ -304,6 +304,113 @@ void ariadne_main()
         }
     }
 
+    // Reconditioning-block diagnostic.  Kuhn reconditioning keeps
+    // (blocks-1)*state_dimension existing parameters and replaces all discarded
+    // parameter dependence by one fresh error parameter per state component.
+    // Keep the physical reconditioning calendar fixed at 0.04 and vary only the
+    // number of retained parameter blocks.
+    {
+        const SizeType block_counts[] = {2u,3u,4u};
+        StepSizeType const block_step=StepSizeType(0.0025_dy);
+        Nat const block_num_steps=2800u;
+        Nat const block_recondition_period=16u; // 0.04 / 0.0025
+
+        for(SizeType block_case=0u; block_case!=3u; ++block_case) {
+            SizeType const blocks=block_counts[block_case];
+            GradedTaylorPicardIntegrator block_integrator(
+                step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
+            block_integrator.set_maximum_error_refinement_iterations(2u);
+            block_integrator.set_diagnostics(false);
+
+            LabelledEnclosure block_enclosure(
+                initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+                EnclosureConfiguration(block_integrator.function_factory(),blocks));
+            block_enclosure.set_auxiliary(
+                dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+
+            Nat reconditionings=0u;
+            SizeType max_parameters=block_enclosure.number_of_parameters();
+            SizeType max_state_nnz=0u;
+            bool completed=true;
+            Nat failed_step=block_num_steps;
+            String failure;
+
+            for(Nat step_index=0u; step_index!=block_num_steps; ++step_index) {
+                auto box=cast_exact_box(block_enclosure.euclidean_set().bounding_box());
+                try {
+                    auto flow=block_integrator.flow_step(
+                        dynamics.function(),box,block_step);
+                    auto const actual_step=
+                        static_cast<StepSizeType>(
+                            flow.domain()[flow.argument_size()-1u].upper_bound());
+                    if(actual_step!=block_step) {
+                        completed=false;
+                        failed_step=step_index;
+                        std::stringstream msg;
+                        msg << "returned step " << actual_step
+                            << " instead of " << block_step;
+                        failure=msg.str();
+                        break;
+                    }
+
+                    block_enclosure.apply_fixed_evolve_step(flow,block_step);
+
+                    auto const& state_taylor =
+                        dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                            block_enclosure.state_function().reference());
+                    SizeType state_nnz=0u;
+                    for(SizeType i=0u; i!=state_taylor.size(); ++i) {
+                        state_nnz+=state_taylor[i].number_of_nonzeros();
+                    }
+                    if(state_nnz>max_state_nnz) { max_state_nnz=state_nnz; }
+
+                    if(((step_index+1u)%block_recondition_period)==0u) {
+                        block_enclosure.recondition();
+                        ++reconditionings;
+                        if(block_enclosure.number_of_parameters()>max_parameters) {
+                            max_parameters=block_enclosure.number_of_parameters();
+                        }
+                    }
+                } catch(const std::exception& e) {
+                    completed=false;
+                    failed_step=step_index;
+                    failure=e.what();
+                    break;
+                }
+            }
+
+            auto const final_box=block_enclosure.euclidean_set().bounding_box();
+            double final_width=0.0;
+            std::vector<double> component_widths(final_box.size());
+            for(SizeType i=0u; i!=final_box.size(); ++i) {
+                double const component_width=final_box[i].width().get_d();
+                component_widths[i]=component_width;
+                if(component_width>final_width) { final_width=component_width; }
+            }
+
+            std::cerr << "[ReconditionBlockSweep]"
+                      << " blocks=" << blocks
+                      << " kept_parameters=" << ((blocks-1u)*2u)
+                      << " requested_step=" << block_step
+                      << " interval=0.04"
+                      << " completed=" << completed
+                      << " completed_steps="
+                      << (completed ? block_num_steps : failed_step)
+                      << " reconditionings=" << reconditionings
+                      << " max_parameters=" << max_parameters
+                      << " max_state_nnz=" << max_state_nnz
+                      << " final_error=" << block_enclosure.state_function().error()
+                      << " final_width=" << final_width
+                      << " component_widths=["
+                      << component_widths[0] << "," << component_widths[1] << "]"
+                      << " final_box=" << final_box;
+            if(not completed) {
+                std::cerr << " failure=\"" << failure << "\"";
+            }
+            std::cerr << std::endl;
+        }
+    }
+
     // Compare graded Taylor-Picard cutoff values on the full trajectory using
     // synchronous enclosure propagation.  Each case is capped in measured work
     // so that cutoff=0 cannot make the benchmark impractically long.

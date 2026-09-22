@@ -1181,6 +1181,26 @@ TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
     return {false,false,std::nullopt};
 }
 
+ChildSearchAction classify_child_search_outcome(
+    SearchOutcome const& outcome,
+    SizeType parent_level,
+    Bool has_alternative_branch)
+{
+    if(outcome.witness.has_value()) {
+        return ChildSearchAction::RETURN_OUTCOME;
+    }
+    if(outcome.backjump_level.has_value()) {
+        if(*outcome.backjump_level<parent_level) {
+            return ChildSearchAction::RETURN_OUTCOME;
+        }
+        ARIADNE_ASSERT(*outcome.backjump_level==parent_level);
+        return ChildSearchAction::RESTART_AT_PARENT;
+    }
+    return has_alternative_branch
+        ? ChildSearchAction::TRY_ALTERNATIVE
+        : ChildSearchAction::EXHAUSTED;
+}
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation)
@@ -1720,15 +1740,17 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome first=this->_search_boolean();
-        if(first.witness.has_value()) {
-            return first;
-        }
-        if(first.backjump_level.has_value()) {
-            if(*first.backjump_level<parent_level) {
+        switch(SmtSolverTestSupport::classify_child_search_outcome(
+                   first,parent_level,true)) {
+            case SmtSolverTestSupport::ChildSearchAction::RETURN_OUTCOME:
                 return first;
-            }
-            ARIADNE_ASSERT(*first.backjump_level==parent_level);
-            return this->_search_boolean();
+            case SmtSolverTestSupport::ChildSearchAction::RESTART_AT_PARENT:
+                return this->_search_boolean();
+            case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
+                break;
+            case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
+            default:
+                ARIADNE_FAIL_MSG("Invalid first child search action");
         }
 
         this->_backtrack_to_level(parent_level);
@@ -1740,15 +1762,17 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome second=this->_search_boolean();
-        if(second.witness.has_value()) {
-            return second;
-        }
-        if(second.backjump_level.has_value()) {
-            if(*second.backjump_level<parent_level) {
+        switch(SmtSolverTestSupport::classify_child_search_outcome(
+                   second,parent_level,false)) {
+            case SmtSolverTestSupport::ChildSearchAction::RETURN_OUTCOME:
                 return second;
-            }
-            ARIADNE_ASSERT(*second.backjump_level==parent_level);
-            return this->_search_boolean();
+            case SmtSolverTestSupport::ChildSearchAction::RESTART_AT_PARENT:
+                return this->_search_boolean();
+            case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
+                break;
+            case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
+            default:
+                ARIADNE_FAIL_MSG("Invalid second child search action");
         }
 
         this->_backtrack_to_level(parent_level);

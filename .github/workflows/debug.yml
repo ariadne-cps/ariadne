@@ -62,14 +62,16 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake ninja-build pkg-config clang-16 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
-        sudo pip3 install pytest
+        python3 -m venv "$GITHUB_WORKSPACE/.venv"
+        "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja" -DWARNINGS_AS_ERRORS=ON -DPYTHON_ENFORCE_TESTS=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DPython3_EXECUTABLE="$GITHUB_WORKSPACE/.venv/bin/python" -G "Ninja" -DWARNINGS_AS_ERRORS=ON -DPYTHON_ENFORCE_TESTS=ON
 
     - name: Build Library and Bindings
       working-directory: ${{runner.workspace}}/build

@@ -33,6 +33,7 @@
 
 #include "numeric/numeric.hpp"
 #include "symbolic/expression.hpp"
+#include "solvers/smt_theory.hpp"
 
 namespace Ariadne {
 

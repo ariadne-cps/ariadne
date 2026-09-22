@@ -31,6 +31,8 @@
 #include <mutex>
 #include <cstdint>
 #include <algorithm>
+#include <set>
+#include <thread>
 
 #include "betterthreads/workload.hpp"
 
@@ -774,6 +776,11 @@ SmtResult SmtSolver::solve(RealSpace const& space,
 
 namespace {
 
+std::mutex parallel_execution_observation_mutex;
+Bool parallel_execution_observation_enabled=false;
+std::thread::id parallel_execution_calling_thread;
+std::set<std::thread::id> parallel_execution_threads;
+
 struct ParallelSmtSearchState {
     std::mutex mutex;
     SmtSearchStatistics statistics;
@@ -799,6 +806,7 @@ SmtSolver::_solve_parallel_conjunction(
         [this,&conjunction,state](
                 ParallelSmtWorkload::Access& access,
                 UpperBoxType const& box) {
+            SmtSolverTestSupport::record_parallel_processing_thread();
             if(state->found.load() || state->limit_reached.load()) {
                 return;
             }
@@ -903,6 +911,37 @@ SmtResult SmtSolver::solve_parallel(
 
 
 namespace SmtSolverTestSupport {
+
+Void begin_parallel_execution_observation()
+{
+    std::lock_guard<std::mutex> lock(parallel_execution_observation_mutex);
+    parallel_execution_threads.clear();
+    parallel_execution_calling_thread=std::this_thread::get_id();
+    parallel_execution_observation_enabled=true;
+}
+
+ParallelExecutionObservation end_parallel_execution_observation()
+{
+    std::lock_guard<std::mutex> lock(parallel_execution_observation_mutex);
+    ParallelExecutionObservation result;
+    result.observed_thread_count=parallel_execution_threads.size();
+    result.calling_thread_observed=
+        parallel_execution_threads.find(parallel_execution_calling_thread)
+        != parallel_execution_threads.end();
+    result.worker_thread_count=result.observed_thread_count
+        - (result.calling_thread_observed ? 1u : 0u);
+    parallel_execution_observation_enabled=false;
+    parallel_execution_threads.clear();
+    return result;
+}
+
+Void record_parallel_processing_thread()
+{
+    std::lock_guard<std::mutex> lock(parallel_execution_observation_mutex);
+    if(parallel_execution_observation_enabled) {
+        parallel_execution_threads.insert(std::this_thread::get_id());
+    }
+}
 
 Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)
 {

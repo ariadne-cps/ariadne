@@ -2416,9 +2416,13 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
             });
+            SmtSolverTestSupport::begin_parallel_execution_observation();
             SmtResult solve_result=solver.solve_parallel(domain,constraints);
+            auto observation=SmtSolverTestSupport::end_parallel_execution_observation();
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(observation.calling_thread_observed);
+            ARIADNE_TEST_EQUAL(observation.worker_thread_count,0u);
             std::cout << "[smt-parallel] concurrency=0 processed="
                       << solve_result.statistics().boxes_processed
                       << " pruned=" << solve_result.statistics().boxes_pruned
@@ -2436,9 +2440,13 @@ class TestSmtSolver {
                 List<ValidatedConstraint> constraints({
                     ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
                 });
+                SmtSolverTestSupport::begin_parallel_execution_observation();
                 SmtResult solve_result=solver.solve_parallel(domain,constraints);
+                auto observation=SmtSolverTestSupport::end_parallel_execution_observation();
                 ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
                 ARIADNE_TEST_ASSERT(solve_result.has_witness());
+                ARIADNE_TEST_ASSERT(not observation.calling_thread_observed);
+                ARIADNE_TEST_ASSERT(observation.worker_thread_count>=1u);
                 std::cout << "[smt-parallel] EPSILON_SAT processed="
                           << solve_result.statistics().boxes_processed
                           << " pruned=" << solve_result.statistics().boxes_pruned
@@ -2465,6 +2473,39 @@ class TestSmtSolver {
                         ValidatedNumber(0.3_x))
                 });
                 SmtResult solve_result=split_solver.solve_parallel(domain,constraints);
+                ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+                ARIADNE_TEST_EQUAL(
+                    solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
+            }
+
+            {
+                std::cout << "[smt-parallel] concurrent theory split with one-box budget" << std::endl;
+                RealVariable tx("parallel_theory_x"), ty("parallel_theory_y");
+                RealExpression etx=tx;
+                RealSpace theory_space({tx,ty});
+                SmtSolver split_solver(SmtSolverConfiguration(
+                    0.01_x,
+                    std::numeric_limits<SizeType>::max(),
+                    std::numeric_limits<SizeType>::max(),
+                    1u,
+                    false));
+                auto alternatives=normalize_smt_theory_literal(
+                    make_smt_theory_literal(sin(10*etx)==0.3_x));
+                ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+                ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+                List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+                SmtResult solve_result=split_solver.solve_parallel(
+                    theory_space,
+                    ExactBoxType({
+                        ExactIntervalType(-1,1),
+                        ExactIntervalType(-10000,10000)
+                    }),
+                    literals);
                 ARIADNE_TEST_ASSERT(solve_result.is_unknown());
                 ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
                 ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);

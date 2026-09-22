@@ -1436,9 +1436,6 @@ class SmtDpllSearch {
 
     Bool _learned_clause_locked(SizeType index) const
     {
-        if(not this->_is_learned_clause(index)) {
-            return true;
-        }
         for(AssignmentInfo const& assignment:_assignment) {
             if(SmtSolverTestSupport::assignment_locks_clause(
                     assignment.value,assignment.reason_clause,index)) {
@@ -1534,27 +1531,20 @@ class SmtDpllSearch {
 
                 if(unassigned_count==1u) {
                     SizeType variable=static_cast<SizeType>(unit_literal>0 ? unit_literal : -unit_literal);
-                    if(_assignment[variable].value<0) {
-                        Bool assigned=this->_assign_literal(unit_literal,clause_index);
-                        ARIADNE_ASSERT(assigned);
-                        ARIADNE_ASSERT(_assignment[variable].reason_clause.has_value());
-                        ARIADNE_ASSERT(*_assignment[variable].reason_clause==clause_index);
-                        ++_statistics.boolean_propagations;
-                        ++_statistics.boolean_reasoned_propagations;
-                        if(this->_is_learned_clause(clause_index)) {
-                            this->_bump_learned_clause_activity(clause_index);
-                            ++_statistics.learned_clause_propagations;
-                            if(this->_is_theory_learned_clause(clause_index)) {
-                                ++_statistics.theory_learned_clause_propagations;
-                            }
-                        }
-                        changed=true;
-                    } else if(not this->_literal_true(unit_literal)) {
-                        ++_statistics.boolean_conflicts;
+                    Bool assigned=this->_assign_literal(unit_literal,clause_index);
+                    ARIADNE_ASSERT(assigned);
+                    ARIADNE_ASSERT(_assignment[variable].reason_clause.has_value());
+                    ARIADNE_ASSERT(*_assignment[variable].reason_clause==clause_index);
+                    ++_statistics.boolean_propagations;
+                    ++_statistics.boolean_reasoned_propagations;
+                    if(this->_is_learned_clause(clause_index)) {
                         this->_bump_learned_clause_activity(clause_index);
-                        _last_boolean_conflict_clause=clause_index;
-                        return false;
+                        ++_statistics.learned_clause_propagations;
+                        if(this->_is_theory_learned_clause(clause_index)) {
+                            ++_statistics.theory_learned_clause_propagations;
+                        }
                     }
+                    changed=true;
                 }
             }
         }
@@ -1672,10 +1662,6 @@ class SmtDpllSearch {
     SearchOutcome _search_boolean()
     {
         if(not this->_unit_propagate()) {
-            if(not _last_boolean_conflict_clause.has_value()) {
-                return SearchOutcome::exhausted();
-            }
-
             if(this->_decision_level()==0u) {
                 _last_boolean_conflict_clause.reset();
                 return SearchOutcome::exhausted();
@@ -1714,10 +1700,6 @@ class SmtDpllSearch {
         }
 
         if(not this->_check_partial_theory_consistency()) {
-            if(not _last_theory_conflict_clause.has_value()) {
-                return SearchOutcome::exhausted();
-            }
-
             if(this->_decision_level()==0u) {
                 _last_theory_conflict_clause.reset();
                 return SearchOutcome::exhausted();
@@ -1764,8 +1746,7 @@ class SmtDpllSearch {
             case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
                 break;
             case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
-            default:
-                ARIADNE_FAIL_MSG("Invalid first child search action");
+                ARIADNE_UNREACHABLE;
         }
 
         this->_backtrack_to_level(parent_level);
@@ -1786,8 +1767,7 @@ class SmtDpllSearch {
             case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
                 break;
             case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
-            default:
-                ARIADNE_FAIL_MSG("Invalid second child search action");
+                ARIADNE_UNREACHABLE;
         }
 
         this->_backtrack_to_level(parent_level);

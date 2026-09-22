@@ -31,6 +31,15 @@
 
 namespace Ariadne {
 
+namespace {
+
+[[noreturn]] Void fail_indeterminate_smt_constant()
+{
+    ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+}
+
+} // namespace
+
 namespace SmtBooleanTestSupport {
 
 SmtTheoryRelation canonical_relation(SmtTheoryRelation relation)
@@ -134,7 +143,7 @@ class TseitinBuilder {
         } else if(definitely(!value)) {
             result=false;
         } else {
-            ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+            fail_indeterminate_smt_constant();
         }
         return result;
     }
@@ -143,7 +152,7 @@ class TseitinBuilder {
         Int variable=this->_new_variable();
         Kleenean const& value=predicate.val();
         if(not definitely(value) && not definitely(!value)) {
-            ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
+            fail_indeterminate_smt_constant();
         }
         _encoding._add_clause({definitely(value) ? variable : -variable});
         return variable;

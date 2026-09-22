@@ -333,11 +333,6 @@ Bool epsilon_satisfied(
     UpperBoxType const& domain,
     List<ValidatedConstraint> const& constraints);
 
-Bool epsilon_overlaps(
-    SmtSolver const& solver,
-    UpperBoxType const& domain,
-    List<ValidatedConstraint> const& constraints);
-
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers
@@ -385,9 +380,6 @@ class SmtSolver {
         SmtSolver const&, SmtTheoryPrimitiveRelation);
     friend Bool SmtSolverTestSupport::epsilon_satisfied(
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
-    friend Bool SmtSolverTestSupport::epsilon_overlaps(
-        SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
-
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 
     struct ReductionStatistics {
@@ -454,11 +446,6 @@ class SmtSolver {
                           ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
-
-    Bool _epsilon_overlaps(UpperBoxType const& domain,
-                           List<ValidatedConstraint> const& constraints) const;
-    Bool _epsilon_overlaps(UpperBoxType const& domain,
-                           CompiledTheoryLiterals const& literals) const;
 
     template<class Conjunction>
     std::optional<UpperBoxType> _epsilon_witness(

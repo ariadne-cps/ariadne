@@ -448,7 +448,7 @@ class TestSmtSolver {
     }
 
     Void test_epsilon_predicates() {
-        std::cout << "[smt-epsilon] deterministic satisfaction and overlap failures" << std::endl;
+        std::cout << "[smt-epsilon] deterministic satisfaction" << std::endl;
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         UpperBoxType point({
@@ -464,9 +464,6 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(
             not SmtSolverTestSupport::epsilon_satisfied(
                 solver,point,outside));
-        ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::epsilon_overlaps(
-                solver,point,outside));
 
         List<ValidatedConstraint> inside({
             ValidatedConstraint(
@@ -476,9 +473,6 @@ class TestSmtSolver {
         });
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::epsilon_satisfied(
-                solver,point,inside));
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::epsilon_overlaps(
                 solver,point,inside));
 
     }
@@ -978,6 +972,23 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] rejected interior-point candidate remains UNKNOWN" << std::endl;
+            auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
+            ValidatedScalarMultivariateFunction residual=
+                sqr(sin(sx[0]))+sqr(cos(sx[0]))-1;
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                ExactBoxType({ExactIntervalType(1,1)}),constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
         }
 
         {

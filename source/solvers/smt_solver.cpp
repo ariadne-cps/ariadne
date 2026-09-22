@@ -2024,6 +2024,13 @@ class SmtDpllSearch {
 
     std::optional<UpperBoxType> _check_theory_assignment()
     {
+        if(_encoding.atom_count()==0u) {
+            if(_domain.is_empty()) {
+                return std::nullopt;
+            }
+            return singleton_box(_domain.midpoint());
+        }
+
         ++_statistics.theory_checks;
 
         std::vector<SmtTheoryAlternatives> alternatives;

@@ -464,10 +464,10 @@ class PreconditionedGradedTaylorSeriesIntegrator
     using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
     using GradedTaylorSeriesIntegrator::flow_step;
 
-    virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const {
+    virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const override {
         return new PreconditionedGradedTaylorSeriesIntegrator(*this);
     }
-    virtual Void _write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const override;
 
     //! \brief Compute a graded Taylor flow after diagonal affine
     //! preconditioning of the state domain to the unit box.

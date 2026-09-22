@@ -35,8 +35,7 @@ namespace {
 
 [[noreturn]] Void fail_indeterminate_smt_constant()
 {
-    ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding");
-}
+    ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding"); }
 
 } // namespace
 

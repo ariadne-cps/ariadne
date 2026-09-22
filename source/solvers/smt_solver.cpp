@@ -351,24 +351,6 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
-Bool SmtSolver::_epsilon_overlaps(
-    UpperBoxType const& domain,
-    List<ValidatedConstraint> const& constraints) const
-{
-    UpperBoxType point(domain.dimension(),[&](SizeType i) {
-        auto m=domain[i].midpoint();
-        return UpperIntervalType(m,m);
-    });
-    for(SizeType i=0u; i!=constraints.size(); ++i) {
-        UpperIntervalType image=apply(constraints[i].function(),point);
-        UpperIntervalType bounds(this->_epsilon_bounds(constraints[i]));
-        if(definitely(disjoint(image,bounds))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 SmtSolver::CompiledTheoryLiterals
 SmtSolver::_compile_theory_literals(RealSpace const& space,
                                     List<SmtTheoryPrimitiveLiteral> const& literals) const
@@ -480,30 +462,6 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
             }
         } else if(not definitely(
                 subset(image,this->_epsilon_bounds(literal.relation)))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-Bool SmtSolver::_epsilon_overlaps(
-    UpperBoxType const& domain,
-    CompiledTheoryLiterals const& literals) const
-{
-    UpperBoxType point(domain.dimension(),[&](SizeType i) {
-        auto m=domain[i].midpoint();
-        return UpperIntervalType(m,m);
-    });
-    FloatDP epsilon(_configuration.epsilon(),dp);
-    for(auto const& literal:literals) {
-        UpperIntervalType image=apply(literal.function,point);
-        SmtSolverTestSupport::validate_primitive_relation(literal.relation);
-        if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-            if(definitely(image.upper_bound()<=-epsilon)) {
-                return false;
-            }
-        } else if(definitely(disjoint(
-                image,UpperIntervalType(this->_epsilon_bounds(literal.relation))))) {
             return false;
         }
     }
@@ -640,8 +598,7 @@ SmtSolver::_process_box(
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_outcome.attempted;
-        result.non_splittable_epsilon_overlap=
-            this->_epsilon_overlaps(domain,conjunction);
+        result.non_splittable_epsilon_overlap=true;
         return result;
     }
 
@@ -1246,14 +1203,6 @@ Bool epsilon_satisfied(
     return solver._epsilon_satisfied(domain,constraints);
 }
 
-Bool epsilon_overlaps(
-    SmtSolver const& solver,
-    UpperBoxType const& domain,
-    List<ValidatedConstraint> const& constraints)
-{
-    return solver._epsilon_overlaps(domain,constraints);
-}
-
 Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input)
@@ -1737,17 +1686,15 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome first=this->_search_boolean();
-        switch(SmtSolverTestSupport::classify_child_search_outcome(
-                   first,parent_level,true)) {
-            case SmtSolverTestSupport::ChildSearchAction::RETURN_OUTCOME:
+        if(first.witness.has_value()) {
+            return first;
+        }
+        if(first.backjump_level.has_value()) {
+            if(*first.backjump_level<parent_level) {
                 return first;
-            case SmtSolverTestSupport::ChildSearchAction::RESTART_AT_PARENT:
-                return this->_search_boolean();
-            case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
-                break;
-            case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
-            default:
-                ARIADNE_FAIL_MSG("Invalid first child search action");
+            }
+            ARIADNE_ASSERT(*first.backjump_level==parent_level);
+            return this->_search_boolean();
         }
 
         this->_backtrack_to_level(parent_level);
@@ -1759,17 +1706,15 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome second=this->_search_boolean();
-        switch(SmtSolverTestSupport::classify_child_search_outcome(
-                   second,parent_level,false)) {
-            case SmtSolverTestSupport::ChildSearchAction::RETURN_OUTCOME:
+        if(second.witness.has_value()) {
+            return second;
+        }
+        if(second.backjump_level.has_value()) {
+            if(*second.backjump_level<parent_level) {
                 return second;
-            case SmtSolverTestSupport::ChildSearchAction::RESTART_AT_PARENT:
-                return this->_search_boolean();
-            case SmtSolverTestSupport::ChildSearchAction::EXHAUSTED:
-                break;
-            case SmtSolverTestSupport::ChildSearchAction::TRY_ALTERNATIVE:
-            default:
-                ARIADNE_FAIL_MSG("Invalid second child search action");
+            }
+            ARIADNE_ASSERT(*second.backjump_level==parent_level);
+            return this->_search_boolean();
         }
 
         this->_backtrack_to_level(parent_level);

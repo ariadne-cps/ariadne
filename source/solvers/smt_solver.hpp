@@ -256,6 +256,16 @@ Void accumulate_box_processing_statistics(
 
 Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation);
 
+std::vector<Int> resolve_clause_on_variable(
+    std::vector<Int> const& lhs,
+    std::vector<Int> const& rhs,
+    SizeType variable);
+
+Void order_theory_nogood(
+    std::vector<Int>& clause,
+    std::vector<SizeType> const& decision_levels,
+    std::vector<SizeType> const& trail_rank);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);

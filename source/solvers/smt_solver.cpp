@@ -1068,6 +1068,50 @@ Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation)
     }
 }
 
+std::vector<Int> resolve_clause_on_variable(
+    std::vector<Int> const& lhs,
+    std::vector<Int> const& rhs,
+    SizeType variable)
+{
+    std::vector<Int> result;
+    result.reserve(lhs.size()+rhs.size());
+
+    auto append_unique=[&](Int literal) {
+        SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+        if(literal_variable==variable) {
+            return;
+        }
+        for(Int existing:result) {
+            if(existing==literal) {
+                return;
+            }
+        }
+        result.push_back(literal);
+    };
+
+    for(Int literal:lhs) { append_unique(literal); }
+    for(Int literal:rhs) { append_unique(literal); }
+    return result;
+}
+
+Void order_theory_nogood(
+    std::vector<Int>& clause,
+    std::vector<SizeType> const& decision_levels,
+    std::vector<SizeType> const& trail_rank)
+{
+    std::stable_sort(clause.begin(),clause.end(),
+        [&decision_levels,&trail_rank](Int lhs, Int rhs) {
+            SizeType lhs_variable=static_cast<SizeType>(lhs>0 ? lhs : -lhs);
+            SizeType rhs_variable=static_cast<SizeType>(rhs>0 ? rhs : -rhs);
+            SizeType lhs_level=decision_levels[lhs_variable];
+            SizeType rhs_level=decision_levels[rhs_variable];
+            if(lhs_level!=rhs_level) {
+                return lhs_level>rhs_level;
+            }
+            return trail_rank[lhs_variable]>trail_rank[rhs_variable];
+        });
+}
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation)
@@ -1446,25 +1490,7 @@ class SmtDpllSearch {
         SmtBooleanEncoding::Clause const& rhs,
         SizeType variable) const
     {
-        std::vector<Int> result;
-        result.reserve(lhs.size()+rhs.size());
-
-        auto append_unique=[&](Int literal) {
-            SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
-            if(literal_variable==variable) {
-                return;
-            }
-            for(Int existing:result) {
-                if(existing==literal) {
-                    return;
-                }
-            }
-            result.push_back(literal);
-        };
-
-        for(Int literal:lhs) { append_unique(literal); }
-        for(Int literal:rhs) { append_unique(literal); }
-        return result;
+        return SmtSolverTestSupport::resolve_clause_on_variable(lhs,rhs,variable);
     }
 
     ConflictAnalysis _analyze_boolean_conflict(SizeType conflict_clause_index)
@@ -1748,16 +1774,12 @@ class SmtDpllSearch {
             trail_rank[_trail[rank]]=rank+1u;
         }
 
-        std::stable_sort(clause.begin(),clause.end(),[this,&trail_rank](Int lhs, Int rhs) {
-            SizeType lhs_variable=static_cast<SizeType>(lhs>0 ? lhs : -lhs);
-            SizeType rhs_variable=static_cast<SizeType>(rhs>0 ? rhs : -rhs);
-            SizeType lhs_level=_assignment[lhs_variable].decision_level;
-            SizeType rhs_level=_assignment[rhs_variable].decision_level;
-            if(lhs_level!=rhs_level) {
-                return lhs_level>rhs_level;
-            }
-            return trail_rank[lhs_variable]>trail_rank[rhs_variable];
-        });
+        std::vector<SizeType> decision_levels(_assignment.size(),0u);
+        for(SizeType variable=0u; variable!=_assignment.size(); ++variable) {
+            decision_levels[variable]=_assignment[variable].decision_level;
+        }
+        SmtSolverTestSupport::order_theory_nogood(
+            clause,decision_levels,trail_rank);
 
         if(not clause.empty()
            && _statistics.first_minimization_candidate_trail_rank==0u) {

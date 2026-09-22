@@ -178,6 +178,123 @@ void ariadne_main()
                   << std::endl;
     }
 
+    // Chen-aligned fixed-step benchmark.  This deliberately calls the exact
+    // StepSizeType overload rather than suggest(...): Ariadne may try a smaller
+    // step internally only to prove the flow bound, but then reports
+    // IncompleteFlowException instead of silently accepting that smaller step.
+    {
+        GradedTaylorPicardIntegrator chen_integrator(
+            max_err,order=5,step_sweep_threshold=1e-12);
+        LabelledEnclosure chen_enclosure(
+            initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+            EnclosureConfiguration(chen_integrator.function_factory()));
+        chen_enclosure.set_auxiliary(dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+
+        StepSizeType const chen_step=StepSizeType(0.02_dy);
+        Nat const chen_num_steps=350u;
+        Nat chen_reconditionings=0u;
+        SizeType chen_max_state_nnz=0u;
+        SizeType chen_max_reach_nnz=0u;
+        long long chen_flow_us=0;
+        long long chen_reach_us=0;
+        long long chen_evolve_us=0;
+        long long chen_recondition_us=0;
+        Stopwatch<Microseconds> chen_sw;
+        bool chen_completed=true;
+        Nat chen_failed_step=chen_num_steps;
+        String chen_failure;
+
+        for(Nat step_index=0u; step_index!=chen_num_steps; ++step_index) {
+            if(possibly(chen_enclosure.state_function().error() > 1e-6_pr)) {
+                chen_sw.restart();
+                chen_enclosure.recondition();
+                chen_sw.click();
+                chen_recondition_us+=chen_sw.duration().count();
+                ++chen_reconditionings;
+            }
+
+            auto const& state_taylor =
+                dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                    chen_enclosure.state_function().reference());
+            SizeType state_nnz=0u;
+            for(SizeType i=0; i!=state_taylor.size(); ++i) {
+                state_nnz+=state_taylor[i].number_of_nonzeros();
+            }
+            if(state_nnz>chen_max_state_nnz) { chen_max_state_nnz=state_nnz; }
+
+            auto box=cast_exact_box(chen_enclosure.euclidean_set().bounding_box());
+            try {
+                chen_sw.restart();
+                auto flow=chen_integrator.flow_step(dynamics.function(),box,chen_step);
+                chen_sw.click();
+                chen_flow_us+=chen_sw.duration().count();
+
+                auto const actual_step=
+                    static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
+                if(actual_step!=chen_step) {
+                    chen_completed=false;
+                    chen_failed_step=step_index;
+                    std::stringstream msg;
+                    msg << "returned step " << actual_step << " instead of " << chen_step;
+                    chen_failure=msg.str();
+                    break;
+                }
+
+                LabelledEnclosure reach_enclosure=chen_enclosure;
+                chen_sw.restart();
+                reach_enclosure.apply_full_reach_step(flow);
+                chen_sw.click();
+                chen_reach_us+=chen_sw.duration().count();
+
+                auto const& reach_taylor =
+                    dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                        reach_enclosure.state_function().reference());
+                SizeType reach_nnz=0u;
+                for(SizeType i=0; i!=reach_taylor.size(); ++i) {
+                    reach_nnz+=reach_taylor[i].number_of_nonzeros();
+                }
+                if(reach_nnz>chen_max_reach_nnz) { chen_max_reach_nnz=reach_nnz; }
+
+                chen_sw.restart();
+                chen_enclosure.apply_fixed_evolve_step(flow,chen_step);
+                chen_sw.click();
+                chen_evolve_us+=chen_sw.duration().count();
+            } catch(const std::exception& e) {
+                chen_completed=false;
+                chen_failed_step=step_index;
+                chen_failure=e.what();
+                break;
+            }
+        }
+
+        auto const chen_final_box=chen_enclosure.euclidean_set().bounding_box();
+        double chen_final_width=0.0;
+        for(SizeType i=0; i!=chen_final_box.size(); ++i) {
+            double const component_width=chen_final_box[i].width().get_d();
+            if(component_width>chen_final_width) { chen_final_width=component_width; }
+        }
+
+        std::cerr << "[ChenFixedStep]"
+                  << " completed=" << chen_completed
+                  << " requested_step=" << chen_step
+                  << " completed_steps=" << (chen_completed ? chen_num_steps : chen_failed_step)
+                  << " failed_step=" << (chen_completed ? -1 : static_cast<long long>(chen_failed_step))
+                  << " reconditionings=" << chen_reconditionings
+                  << " max_state_nnz=" << chen_max_state_nnz
+                  << " max_reach_nnz=" << chen_max_reach_nnz
+                  << " flow_us=" << chen_flow_us
+                  << " reach_us=" << chen_reach_us
+                  << " evolve_us=" << chen_evolve_us
+                  << " recondition_us=" << chen_recondition_us
+                  << " final_error=" << chen_enclosure.state_function().error()
+                  << " final_width=" << chen_final_width
+                  << " final_box=" << chen_final_box;
+        if(not chen_completed) {
+            std::cerr << " failure=\"" << chen_failure << "\"";
+        }
+        std::cerr << std::endl;
+    }
+
     std::cerr << "[vanderpol] starting graded Taylor-Picard evolution" << std::endl;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();

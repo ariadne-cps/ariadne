@@ -1170,6 +1170,17 @@ Bool should_bump_learned_clause(
     return active_flags[index-original_clause_count];
 }
 
+TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
+{
+    if(result.is_epsilon_sat()) {
+        return {true,false,result.witness()};
+    }
+    if(result.is_unknown()) {
+        return {true,true,std::nullopt};
+    }
+    return {false,false,std::nullopt};
+}
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation)
@@ -1928,11 +1939,9 @@ class SmtDpllSearch {
         if(atom==alternatives.size()) {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
-            if(result.is_unknown()) {
-                _theory_unknown_seen=true;
-                return true;
-            }
-            return result.is_epsilon_sat();
+            auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
+            _theory_unknown_seen=_theory_unknown_seen || interpretation.unknown;
+            return interpretation.consistent;
         }
 
         for(auto const& alternative:alternatives[atom]) {
@@ -1991,13 +2000,9 @@ class SmtDpllSearch {
         if(atom==alternatives.size()) {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
-            if(result.is_epsilon_sat()) {
-                return result.witness();
-            }
-            if(result.is_unknown()) {
-                _theory_unknown_seen=true;
-            }
-            return std::nullopt;
+            auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
+            _theory_unknown_seen=_theory_unknown_seen || interpretation.unknown;
+            return interpretation.witness;
         }
 
         for(auto const& alternative:alternatives[atom]) {

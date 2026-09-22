@@ -290,6 +290,14 @@ Bool should_bump_learned_clause(
     SizeType original_clause_count,
     std::vector<Bool> const& active_flags);
 
+struct TheoryResultInterpretation {
+    Bool consistent = false;
+    Bool unknown = false;
+    std::optional<UpperBoxType> witness;
+};
+
+TheoryResultInterpretation interpret_theory_result(SmtResult const& result);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);

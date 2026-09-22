@@ -1124,6 +1124,20 @@ SmtResult finalize_search_outcome(
     return SmtResult::unsat(statistics);
 }
 
+ExactIntervalType original_bounds(
+    SmtSolver const& solver,
+    SmtTheoryPrimitiveRelation relation)
+{
+    return solver._original_bounds(relation);
+}
+
+ExactIntervalType epsilon_bounds(
+    SmtSolver const& solver,
+    SmtTheoryPrimitiveRelation relation)
+{
+    return solver._epsilon_bounds(relation);
+}
+
 } // namespace SmtSolverTestSupport
 
 namespace {

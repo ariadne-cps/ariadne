@@ -173,75 +173,73 @@ class TseitinBuilder {
     }
 
     Int _encode(ContinuousPredicate const& predicate) {
-        SmtBooleanTestSupport::supported_operator(predicate.code());
-        switch(predicate.code()) {
-            case OperatorCode::CNST:
-                return this->_encode_constant(predicate);
+        OperatorCode code=predicate.code();
+        SmtBooleanTestSupport::supported_operator(code);
 
-            case OperatorCode::SGN:
-            case OperatorCode::EQ:
-            case OperatorCode::NEQ:
-            case OperatorCode::GEQ:
-            case OperatorCode::LEQ:
-            case OperatorCode::GT:
-            case OperatorCode::LT:
-                return this->_encode_atom(predicate);
-
-            case OperatorCode::NOT: {
-                auto value=this->_constant_value(predicate.arg());
-                if(value.has_value()) {
-                    return this->_encode_constant(ContinuousPredicate(!*value));
-                }
-                return -this->_encode(predicate.arg());
-            }
-
-            case OperatorCode::AND: {
-                auto lhs_value=this->_constant_value(predicate.arg1());
-                auto rhs_value=this->_constant_value(predicate.arg2());
-                if(lhs_value.has_value()) {
-                    return *lhs_value ? this->_encode(predicate.arg2())
-                                      : this->_encode_constant(ContinuousPredicate(false));
-                }
-                if(rhs_value.has_value()) {
-                    return *rhs_value ? this->_encode(predicate.arg1())
-                                      : this->_encode_constant(ContinuousPredicate(false));
-                }
-
-                Int lhs=this->_encode(predicate.arg1());
-                Int rhs=this->_encode(predicate.arg2());
-                Int variable=this->_new_variable();
-
-                _encoding._add_clause({-variable,lhs});
-                _encoding._add_clause({-variable,rhs});
-                _encoding._add_clause({variable,-lhs,-rhs});
-                return variable;
-            }
-
-            case OperatorCode::OR: {
-                auto lhs_value=this->_constant_value(predicate.arg1());
-                auto rhs_value=this->_constant_value(predicate.arg2());
-                if(lhs_value.has_value()) {
-                    return *lhs_value ? this->_encode_constant(ContinuousPredicate(true))
-                                      : this->_encode(predicate.arg2());
-                }
-                if(rhs_value.has_value()) {
-                    return *rhs_value ? this->_encode_constant(ContinuousPredicate(true))
-                                      : this->_encode(predicate.arg1());
-                }
-
-                Int lhs=this->_encode(predicate.arg1());
-                Int rhs=this->_encode(predicate.arg2());
-                Int variable=this->_new_variable();
-
-                _encoding._add_clause({variable,-lhs});
-                _encoding._add_clause({variable,-rhs});
-                _encoding._add_clause({-variable,lhs,rhs});
-                return variable;
-            }
-
-            default:
-                ARIADNE_FAIL_MSG("Unsupported operator in SMT Boolean encoding: "<<predicate.code());
+        if(code==OperatorCode::CNST) {
+            return this->_encode_constant(predicate);
         }
+
+        if(code==OperatorCode::SGN
+           || code==OperatorCode::EQ
+           || code==OperatorCode::NEQ
+           || code==OperatorCode::GEQ
+           || code==OperatorCode::LEQ
+           || code==OperatorCode::GT
+           || code==OperatorCode::LT) {
+            return this->_encode_atom(predicate);
+        }
+
+        if(code==OperatorCode::NOT) {
+            auto value=this->_constant_value(predicate.arg());
+            if(value.has_value()) {
+                return this->_encode_constant(ContinuousPredicate(!*value));
+            }
+            return -this->_encode(predicate.arg());
+        }
+
+        if(code==OperatorCode::AND) {
+            auto lhs_value=this->_constant_value(predicate.arg1());
+            auto rhs_value=this->_constant_value(predicate.arg2());
+            if(lhs_value.has_value()) {
+                return *lhs_value ? this->_encode(predicate.arg2())
+                                  : this->_encode_constant(ContinuousPredicate(false));
+            }
+            if(rhs_value.has_value()) {
+                return *rhs_value ? this->_encode(predicate.arg1())
+                                  : this->_encode_constant(ContinuousPredicate(false));
+            }
+
+            Int lhs=this->_encode(predicate.arg1());
+            Int rhs=this->_encode(predicate.arg2());
+            Int variable=this->_new_variable();
+
+            _encoding._add_clause({-variable,lhs});
+            _encoding._add_clause({-variable,rhs});
+            _encoding._add_clause({variable,-lhs,-rhs});
+            return variable;
+        }
+
+        ARIADNE_ASSERT(code==OperatorCode::OR);
+        auto lhs_value=this->_constant_value(predicate.arg1());
+        auto rhs_value=this->_constant_value(predicate.arg2());
+        if(lhs_value.has_value()) {
+            return *lhs_value ? this->_encode_constant(ContinuousPredicate(true))
+                              : this->_encode(predicate.arg2());
+        }
+        if(rhs_value.has_value()) {
+            return *rhs_value ? this->_encode_constant(ContinuousPredicate(true))
+                              : this->_encode(predicate.arg1());
+        }
+
+        Int lhs=this->_encode(predicate.arg1());
+        Int rhs=this->_encode(predicate.arg2());
+        Int variable=this->_new_variable();
+
+        _encoding._add_clause({variable,-lhs});
+        _encoding._add_clause({variable,-rhs});
+        _encoding._add_clause({-variable,lhs,rhs});
+        return variable;
     }
 
     SmtBooleanEncoding _encoding;

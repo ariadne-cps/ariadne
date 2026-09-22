@@ -43,7 +43,11 @@ void ariadne_main()
 
     StepMaximumError max_err=1e-6;
 
-    GradedTaylorPicardIntegrator integrator(max_err,order=5,step_sweep_threshold=1e-12);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-12);
+    PreconditionedGradedTaylorSeriesIntegrator integrator(
+        max_err,sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);

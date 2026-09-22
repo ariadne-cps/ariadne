@@ -2327,6 +2327,36 @@ class TestSmtSolver {
             }
 
             {
+                std::cout << "[smt-parallel] concurrent split with one-box budget" << std::endl;
+                auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+                SmtSolver split_solver(SmtSolverConfiguration(
+                    0.01_x,
+                    std::numeric_limits<SizeType>::max(),
+                    std::numeric_limits<SizeType>::max(),
+                    1u,
+                    false));
+                ExactBoxType domain({
+                    ExactIntervalType(-1,1),
+                    ExactIntervalType(-10000,10000)
+                });
+                List<ValidatedConstraint> constraints({
+                    ValidatedConstraint(
+                        ValidatedNumber(0.3_x),
+                        sin(10*xy[0]),
+                        ValidatedNumber(0.3_x))
+                });
+                SmtResult solve_result=split_solver.solve_parallel(domain,constraints);
+                ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+                ARIADNE_TEST_EQUAL(
+                    solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
+            }
+
+            {
                 std::cout << "[smt-parallel] concurrent forced splitting UNSAT: sin(x)=0 and cos(x)=0 on [0,7]" << std::endl;
                 ExactBoxType domain({ExactIntervalType(0,7)});
                 List<ValidatedConstraint> constraints({

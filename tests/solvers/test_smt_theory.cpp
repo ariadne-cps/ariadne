@@ -31,6 +31,7 @@ class TestSmtTheory {
         ARIADNE_TEST_CALL(test_negations());
         ARIADNE_TEST_CALL(test_normalization());
         ARIADNE_TEST_CALL(test_weakening());
+        ARIADNE_TEST_CALL(test_streaming());
         ARIADNE_TEST_CALL(test_reject_non_atom());
     }
 
@@ -134,6 +135,9 @@ class TestSmtTheory {
             auto weakened=weaken_smt_theory_literal(alternatives[0][0],epsilon);
             ARIADNE_TEST_EQUAL(weakened.relation(),expected);
             ARIADNE_TEST_EQUAL(weakened.epsilon(),epsilon);
+            ARIADNE_TEST_SAME(
+                weakened.expression(),
+                alternatives[0][0].expression());
         };
 
         check(ex==ey,SmtTheoryWeakRelation::ABS_LEQ_EPSILON,"x==y -> |x-y|<=epsilon");
@@ -144,6 +148,40 @@ class TestSmtTheory {
         std::cout << "[smt-theory] weakening requires positive epsilon" << std::endl;
         auto primitive=normalize_smt_theory_literal(make_smt_theory_literal(ex==ey))[0][0];
         ARIADNE_TEST_THROWS(weaken_smt_theory_literal(primitive,0.0_x),std::runtime_error);
+    }
+
+    Void test_streaming() {
+        std::cout << "[smt-theory] stream all theory relation kinds" << std::endl;
+
+        std::ostringstream relation_stream;
+        relation_stream
+            << SmtTheoryRelation::EQ << " "
+            << SmtTheoryRelation::NEQ << " "
+            << SmtTheoryRelation::LEQ << " "
+            << SmtTheoryRelation::GEQ << " "
+            << SmtTheoryRelation::LT << " "
+            << SmtTheoryRelation::GT;
+        ARIADNE_TEST_EQUAL(
+            relation_stream.str(),
+            String("= != <= >= < >"));
+
+        std::ostringstream primitive_stream;
+        primitive_stream
+            << SmtTheoryPrimitiveRelation::EQ_ZERO << " "
+            << SmtTheoryPrimitiveRelation::GEQ_ZERO << " "
+            << SmtTheoryPrimitiveRelation::GT_ZERO;
+        ARIADNE_TEST_EQUAL(
+            primitive_stream.str(),
+            String("=0 >=0 >0"));
+
+        std::ostringstream weak_stream;
+        weak_stream
+            << SmtTheoryWeakRelation::ABS_LEQ_EPSILON << " "
+            << SmtTheoryWeakRelation::GEQ_MINUS_EPSILON << " "
+            << SmtTheoryWeakRelation::GT_MINUS_EPSILON;
+        ARIADNE_TEST_EQUAL(
+            weak_stream.str(),
+            String("abs<=epsilon >=-epsilon >-epsilon"));
     }
 
     Void test_reject_non_atom() {

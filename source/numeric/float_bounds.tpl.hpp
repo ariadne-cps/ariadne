@@ -120,8 +120,8 @@ template<class F> auto Operations<Bounds<F>>::_tan(Bounds<F> const& x) -> Bounds
     F n(round(div(near,x.value_raw(),pi_val)));
     F::set_rounding_mode(rnd);
     Bounds<F> y=x-n*pi_bnds;
-    assert(y.lower_raw()>=-hlf(pi_val));
-    assert(y.upper_raw()<=+hlf(pi_val));
+    assert(y.lower_raw()>=-hlf(pi_bnds.upper_raw()));
+    assert(y.upper_raw()<=+hlf(pi_bnds.upper_raw()));
 
     F positive_pole_lower=hlf(pi_bnds.lower_raw());
     F positive_pole_upper=hlf(pi_bnds.upper_raw());

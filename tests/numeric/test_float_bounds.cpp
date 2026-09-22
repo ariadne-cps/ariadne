@@ -599,6 +599,25 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         ARIADNE_TEST_EQUAL(tan_around_half_pi.upper_raw(),+inf_);
     }
 
+    // Tangent range reduction must remain valid at both pole enclosures,
+    // including after translation by one period.
+    {
+        FloatBoundsType around_positive_half_pi(1.5707_x,1.5709_x,pr);
+        FloatBoundsType around_negative_half_pi(-1.5709_x,-1.5707_x,pr);
+        FloatBoundsType around_three_half_pi(4.7123_x,4.7125_x,pr);
+
+        FloatBoundsType positive=tan(around_positive_half_pi);
+        FloatBoundsType negative=tan(around_negative_half_pi);
+        FloatBoundsType translated=tan(around_three_half_pi);
+
+        ARIADNE_TEST_EQUAL(positive.lower_raw(),-inf_);
+        ARIADNE_TEST_EQUAL(positive.upper_raw(),+inf_);
+        ARIADNE_TEST_EQUAL(negative.lower_raw(),-inf_);
+        ARIADNE_TEST_EQUAL(negative.upper_raw(),+inf_);
+        ARIADNE_TEST_EQUAL(translated.lower_raw(),-inf_);
+        ARIADNE_TEST_EQUAL(translated.upper_raw(),+inf_);
+    }
+
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
     ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);

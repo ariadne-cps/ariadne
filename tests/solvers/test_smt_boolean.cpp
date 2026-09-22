@@ -167,7 +167,7 @@ class TestSmtBoolean {
 
     Void test_invalid_inputs() {
         std::cout << "[smt-boolean] reject indeterminate constants" << std::endl;
-        ContinuousPredicate indeterminate_constant(Kleenean(indeterminate));
+        ContinuousPredicate indeterminate_constant{Kleenean(indeterminate)};
         ARIADNE_TEST_THROWS(
             SmtBooleanEncoder().encode(indeterminate_constant),
             std::runtime_error);

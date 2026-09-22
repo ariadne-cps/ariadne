@@ -1626,6 +1626,13 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_backtracks>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().max_decision_level>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts_analyzed>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().last_learned_clause_literals>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().last_learned_current_level_literals,1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().last_backjump_level
+                < solve_result.statistics().max_decision_level);
         }
 
         {

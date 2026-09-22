@@ -1216,9 +1216,11 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.max_decision_level=std::max(target.max_decision_level,source.max_decision_level);
     target.boolean_conflicts_analyzed+=source.boolean_conflicts_analyzed;
     target.learned_clause_literals+=source.learned_clause_literals;
-    target.last_learned_clause_literals=source.last_learned_clause_literals;
-    target.last_learned_current_level_literals=source.last_learned_current_level_literals;
-    target.last_backjump_level=source.last_backjump_level;
+    if(source.boolean_conflicts_analyzed!=0u) {
+        target.last_learned_clause_literals=source.last_learned_clause_literals;
+        target.last_learned_current_level_literals=source.last_learned_current_level_literals;
+        target.last_backjump_level=source.last_backjump_level;
+    }
     target.learned_clauses+=source.learned_clauses;
     target.learned_clause_propagations+=source.learned_clause_propagations;
     target.nonchronological_backjumps+=source.nonchronological_backjumps;

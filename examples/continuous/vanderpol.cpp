@@ -41,7 +41,7 @@ ValidatedVectorMultivariateFunctionPatch affine_parameterisation(
         factory.create_zeros(d,unit_domain);
     for(SizeType i=0u; i!=d; ++i) {
         FloatDP const c=physical_box[i].midpoint().raw();
-        FloatDP const r=physical_box[i].radius().raw();
+        FloatDP const r=physical_box[i].radius().upper().raw();
         result[i]=factory.create_constant(unit_domain,c)
             + factory.create_coordinate(unit_domain,i)*FloatDPBounds(r);
     }
@@ -59,7 +59,7 @@ ValidatedVectorMultivariateFunctionPatch normalise_mapping(
         factory.create_zeros(d,domain);
     for(SizeType i=0u; i!=d; ++i) {
         FloatDP const c=physical_box[i].midpoint().raw();
-        FloatDP const r=physical_box[i].radius().raw();
+        FloatDP const r=physical_box[i].radius().upper().raw();
         if(r==FloatDP(0,dp)) {
             result[i]=factory.create_zero(domain);
         } else {
@@ -240,8 +240,7 @@ void ariadne_main()
                     local_sw.click();
                     flow_us+=local_sw.duration().count();
 
-                    auto flow_model=
-                        dynamic_handle_cast<const ValidatedVectorMultivariateFunctionPatch>(flow);
+                    ValidatedVectorMultivariateFunctionPatch flow_model=flow;
                     auto flow_end=partial_evaluate(
                         flow_model,flow_model.argument_size()-1u,step);
 

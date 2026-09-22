@@ -1801,6 +1801,32 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-parallel] non-splittable epsilon-overlap counted once" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ExactBoxType domain({ExactIntervalType(1,1)});
+            ValidatedScalarMultivariateFunction residual=sin(x[0])-sin(x[0]);
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0),
+                    residual,
+                    ValidatedNumber(0))
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve_parallel(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+        }
+
+        {
             std::cout << "[smt-parallel] theory zero box budget returns UNKNOWN" << std::endl;
             RealVariable x("x");
             RealSpace space({x});

@@ -90,9 +90,6 @@ Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl) {
     FloatDP dl(dla.raw());
     FloatDP du(dua.raw());
     FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
-    std::cerr << "[MakeDomainProfile] ivl=" << ivl
-              << " dl=" << dl << " du=" << du
-              << " error=" << e << std::endl;
     return make_pair(make_interval(dl,du),e);
 }
 

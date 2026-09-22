@@ -111,13 +111,9 @@ ValidatedVectorMultivariateFunctionPatch make_identity(const RealBox& bx, const 
     }
 
     ValidatedVectorMultivariateFunctionPatch res=configuration.function_factory().create_identity(dom);
-    std::cerr << "[MakeIdentityProfile] domain=" << dom
-              << " identity_error=" << res.error()
-              << " conversion_errors=" << errs << std::endl;
     for(SizeType i=0; i!=bx.dimension(); ++i) {
         res[i]=res[i]+FloatDPBounds(-errs[i],+errs[i]);
     }
-    std::cerr << "[MakeIdentityProfile] final_error=" << res.error() << std::endl;
 
     return res;
 }

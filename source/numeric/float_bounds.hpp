@@ -404,7 +404,7 @@ template<class F> class Bounds
     friend Bounds<F> log(F const& x) { return Bounds<F>{log(down,x),log(up,x)}; }
     friend Bounds<F> sin(F const& x) { return Bounds<F>{sin(down,x),sin(up,x)}; }
     friend Bounds<F> cos(F const& x) { return Bounds<F>{cos(down,x),cos(up,x)}; }
-    friend Bounds<F> tan(F const& x) { return Bounds<F>{tan(down,x),tan(up,x)}; }
+    friend Bounds<F> tan(F const& x) { return tan(Bounds<F>(x)); }
     friend Bounds<F> asin(F const& x) { return Bounds<F>{asin(down,x),asin(up,x)}; }
     friend Bounds<F> acos(F const& x) { return Bounds<F>{acos(down,x),acos(up,x)}; }
     friend Bounds<F> atan(F const& x) { return Bounds<F>{atan(down,x),atan(up,x)}; }

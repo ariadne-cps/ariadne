@@ -487,6 +487,26 @@ class PreconditionedTaylorSeriesState {
     ExactBoxType const parameter_domain() const { return _normalised_mapping.domain(); }
 };
 
+//! \brief Result of one preconditioned graded Taylor-series step.
+class PreconditionedTaylorSeriesStep {
+  private:
+    StepSizeType _time_step;
+    ValidatedVectorMultivariateFunctionPatch _flowpipe_mapping;
+    PreconditionedTaylorSeriesState _final_state;
+  public:
+    PreconditionedTaylorSeriesStep(
+        StepSizeType time_step,
+        ValidatedVectorMultivariateFunctionPatch flowpipe_mapping,
+        PreconditionedTaylorSeriesState final_state)
+        : _time_step(time_step),
+          _flowpipe_mapping(std::move(flowpipe_mapping)),
+          _final_state(std::move(final_state)) { }
+
+    StepSizeType const& time_step() const { return _time_step; }
+    ValidatedVectorMultivariateFunctionPatch const& flowpipe_mapping() const { return _flowpipe_mapping; }
+    PreconditionedTaylorSeriesState const& final_state() const { return _final_state; }
+};
+
 //! \brief A graded Taylor-series integrator with explicit preconditioning support.
 class PreconditionedGradedTaylorSeriesIntegrator
     : public GradedTaylorSeriesIntegrator
@@ -504,6 +524,13 @@ class PreconditionedGradedTaylorSeriesIntegrator
     //! complete Taylor-model dependence in y(s).
     PreconditionedTaylorSeriesState
     precondition(const ValidatedVectorMultivariateFunctionPatch& state) const;
+
+    //! \brief Propagate a preconditioned local initial set for one validated
+    //! time step, retaining its parameter dependence.
+    PreconditionedTaylorSeriesStep
+    step(const ValidatedVectorMultivariateFunction& vector_field,
+         const PreconditionedTaylorSeriesState& state,
+         const Suggestion<StepSizeType>& suggested_time_step) const;
 
     //! \brief Compute a graded Taylor flow after diagonal affine
     //! preconditioning of the state domain to the unit box.

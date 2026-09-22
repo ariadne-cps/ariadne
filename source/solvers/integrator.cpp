@@ -1270,6 +1270,103 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
         std::move(normalised));
 }
 
+PreconditionedTaylorSeriesStep
+PreconditionedGradedTaylorSeriesIntegrator::step(
+        const ValidatedVectorMultivariateFunction& f,
+        const PreconditionedTaylorSeriesState& state,
+        const Suggestion<StepSizeType>& hsug) const
+{
+    SizeType const n=state.centre().size();
+    ARIADNE_PRECONDITION(f.result_size()==n);
+    ARIADNE_PRECONDITION(f.argument_size()==n);
+    ARIADNE_PRECONDITION(state.linear_map().row_size()==n);
+    ARIADNE_PRECONDITION(state.linear_map().column_size()==n);
+
+    auto const& factory=this->function_factory();
+    ExactBoxType const& domy=state.local_domain();
+    Vector<FloatDP> const& centre=state.centre();
+    Matrix<FloatDP> const& A=state.linear_map();
+    Matrix<FloatDPBounds> const inverse_A=inverse(A);
+
+    // x = c + A*y on the local preconditioned domain.
+    ValidatedVectorMultivariateFunctionPatch y=factory.create_identity(domy);
+    ValidatedVectorMultivariateFunctionPatch x_of_y=factory.create_zeros(n,domy);
+    for(SizeType i=0u; i!=n; ++i) {
+        x_of_y[i]=factory.create_constant(domy,centre[i]);
+        for(SizeType j=0u; j!=n; ++j) {
+            x_of_y[i]=x_of_y[i]+y[j]*FloatDPBounds(A[i][j]);
+        }
+    }
+
+    // y' = A^{-1} f(c+A*y).  This formulation already supports a full
+    // non-diagonal A, so QR preconditioning can later reuse the same core.
+    ValidatedVectorMultivariateFunctionPatch physical_vector_field=compose(f,x_of_y);
+    ValidatedVectorMultivariateFunctionPatch local_vector_field=factory.create_zeros(n,domy);
+    for(SizeType i=0u; i!=n; ++i) {
+        for(SizeType j=0u; j!=n; ++j) {
+            local_vector_field[i]=local_vector_field[i]
+                + physical_vector_field[j]*inverse_A[i][j];
+        }
+    }
+    ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
+
+    StepSizeType h;
+    UpperBoxType local_bounding_box;
+    make_lpair(h,local_bounding_box)=this->flow_bounds(g,domy,hsug);
+
+    ExactIntervalType domt(0,h);
+    ExactBoxType doma;
+    Vector<ValidatedProcedure> p(g);
+    FlowStepModelType local_flow=Ariadne::graded_series_flow_step(
+        p,domy,domt,doma,local_bounding_box,
+        this->step_maximum_error(),this->sweeper(),
+        this->minimum_spacial_order(),this->minimum_temporal_order(),
+        this->maximum_spacial_order(),this->maximum_temporal_order());
+
+    if(possibly(local_flow.error()>this->step_maximum_error())) {
+        ARIADNE_THROW(FlowTimeStepException,
+                      "PreconditionedGradedTaylorSeriesIntegrator::step",
+                      "Integration of preconditioned vector field over "<<domy
+                      <<" for time interval "<<domt
+                      <<" has error "<<local_flow.errors()
+                      <<", which exceeds maximum single-step error "
+                      <<this->step_maximum_error());
+    }
+
+    // Return to physical coordinates while retaining local y and time as the
+    // arguments of the flow model.
+    ValidatedVectorMultivariateFunctionPatch physical_local_flow=
+        factory.create_zeros(n,local_flow.domain());
+    for(SizeType i=0u; i!=n; ++i) {
+        physical_local_flow[i]=factory.create_constant(local_flow.domain(),centre[i]);
+        for(SizeType j=0u; j!=n; ++j) {
+            physical_local_flow[i]=physical_local_flow[i]
+                + local_flow[j]*FloatDPBounds(A[i][j]);
+        }
+    }
+
+    // Compose exactly once with the normalised local-initial-set TM y(s).
+    // The resulting flowpipe is parameterised by the original enclosure
+    // parameters s plus the local time variable.
+    ExactBoxType const parameter_domain=state.parameter_domain();
+    ExactBoxType const flowpipe_domain=product(parameter_domain,domt);
+    ValidatedVectorMultivariateFunctionPatch embedded_mapping=
+        embed(state.normalised_mapping(),domt);
+    ValidatedScalarMultivariateFunctionPatch time_coordinate=
+        factory.create_coordinate(flowpipe_domain,flowpipe_domain.size()-1u);
+    ValidatedVectorMultivariateFunctionPatch arguments=
+        join(embedded_mapping,time_coordinate);
+    ValidatedVectorMultivariateFunctionPatch flowpipe_mapping=
+        compose(physical_local_flow,arguments);
+
+    ValidatedVectorMultivariateFunctionPatch final_mapping=
+        partial_evaluate(flowpipe_mapping,flowpipe_mapping.argument_size()-1u,h);
+    PreconditionedTaylorSeriesState final_state=this->precondition(final_mapping);
+
+    return PreconditionedTaylorSeriesStep(
+        h,std::move(flowpipe_mapping),std::move(final_state));
+}
+
 FlowStepModelType
 PreconditionedGradedTaylorSeriesIntegrator::flow_step(
         const ValidatedVectorMultivariateFunction& f,

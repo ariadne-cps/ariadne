@@ -226,7 +226,7 @@ function(setup_target_for_coverage_lcov)
 
     set(options NO_DEMANGLE SONARQUBE)
     set(oneValueArgs BASE_DIRECTORY NAME)
-    set(multiValueArgs EXCLUDE EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES LCOV_ARGS GENHTML_ARGS)
+    set(multiValueArgs EXCLUDE EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES LCOV_ARGS LCOV_CAPTURE_ARGS GENHTML_ARGS)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
@@ -267,7 +267,7 @@ function(setup_target_for_coverage_lcov)
     )
     # Create baseline to make sure untouched files show up in the report
     set(LCOV_BASELINE_CMD 
-        ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} -c -i -d . -b 
+        ${LCOV_PATH} ${Coverage_LCOV_ARGS} ${Coverage_LCOV_CAPTURE_ARGS} --gcov-tool ${GCOV_PATH} -c -i -d . -b 
         ${BASEDIR} -o ${Coverage_NAME}.base
     )
     # Run tests
@@ -276,7 +276,7 @@ function(setup_target_for_coverage_lcov)
     )    
     # Capturing lcov counters and generating report
     set(LCOV_CAPTURE_CMD 
-        ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} --directory . -b 
+        ${LCOV_PATH} ${Coverage_LCOV_ARGS} ${Coverage_LCOV_CAPTURE_ARGS} --gcov-tool ${GCOV_PATH} --directory . -b 
         ${BASEDIR} --capture --output-file ${Coverage_NAME}.capture
     )
     # add baseline counters

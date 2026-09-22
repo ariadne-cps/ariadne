@@ -241,6 +241,10 @@ class SmtSolver {
         Bool non_splittable_epsilon_overlap = false;
     };
 
+    Void _accumulate_box_processing_statistics(
+        SmtSearchStatistics& statistics,
+        BoxProcessingResult const& processing) const;
+
     struct CompiledTheoryLiteral {
         ValidatedScalarMultivariateFunction function;
         SmtTheoryPrimitiveRelation relation;

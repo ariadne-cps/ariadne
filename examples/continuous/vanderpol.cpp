@@ -112,18 +112,13 @@ void ariadne_main()
         String chen_failure;
 
         for(Nat step_index=0u; step_index!=chen_num_steps; ++step_index) {
-            auto const errors_before_recondition=chen_enclosure.state_function().errors();
-            bool did_recondition=false;
             if(possibly(chen_enclosure.state_function().error() > 1e-6_pr)) {
                 chen_sw.restart();
                 chen_enclosure.recondition();
                 chen_sw.click();
                 chen_recondition_us+=chen_sw.duration().count();
                 ++chen_reconditionings;
-                did_recondition=true;
             }
-            auto const errors_after_recondition=chen_enclosure.state_function().errors();
-            auto const state_errors_before_flow=chen_enclosure.state_function().errors();
 
             auto const& state_taylor =
                 dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
@@ -140,8 +135,6 @@ void ariadne_main()
                 auto flow=chen_integrator.flow_step(dynamics.function(),box,chen_step);
                 chen_sw.click();
                 chen_flow_us+=chen_sw.duration().count();
-                auto const flow_errors=flow.errors();
-
                 auto const actual_step=
                     static_cast<StepSizeType>(flow.domain()[flow.argument_size()-1u].upper_bound());
                 if(actual_step!=chen_step) {
@@ -167,20 +160,10 @@ void ariadne_main()
                     reach_nnz+=reach_taylor[i].number_of_nonzeros();
                 }
                 if(reach_nnz>chen_max_reach_nnz) { chen_max_reach_nnz=reach_nnz; }
-                auto const reach_errors=reach_enclosure.state_function().errors();
-
                 chen_sw.restart();
                 chen_enclosure.apply_fixed_evolve_step(flow,chen_step);
                 chen_sw.click();
                 chen_evolve_us+=chen_sw.duration().count();
-
-                auto const evolved_errors=chen_enclosure.state_function().errors();
-                auto const evolved_box=chen_enclosure.euclidean_set().bounding_box();
-                double evolved_width=0.0;
-                for(SizeType i=0; i!=evolved_box.size(); ++i) {
-                    double const component_width=evolved_box[i].width().get_d();
-                    if(component_width>evolved_width) { evolved_width=component_width; }
-                }
 
             } catch(const std::exception& e) {
                 chen_completed=false;
@@ -219,6 +202,105 @@ void ariadne_main()
             std::cerr << " failure=\"" << chen_failure << "\"";
         }
         std::cerr << std::endl;
+        }
+    }
+
+    // Controlled wrapping experiment: compare h=0.005 and h=0.0025 while
+    // reconditioning at identical physical times.  Reconditioning is performed
+    // after reaching each scheduled time, including T=7, so the 0.02 and 0.04
+    // calendars contain exactly 350 and 175 reconditionings respectively.
+    {
+        const StepSizeType periodic_steps[] = {
+            StepSizeType(0.005_dy), StepSizeType(0.0025_dy)
+        };
+        const Nat periodic_num_steps[] = {1400u,2800u};
+        const Nat periodic_periods[][2] = {
+            {4u,8u},   // every 0.02
+            {8u,16u}   // every 0.04
+        };
+
+        for(SizeType calendar=0u; calendar!=2u; ++calendar) {
+            for(SizeType step_case=0u; step_case!=2u; ++step_case) {
+                StepSizeType const periodic_step=periodic_steps[step_case];
+                Nat const num_steps=periodic_num_steps[step_case];
+                Nat const recondition_period=periodic_periods[calendar][step_case];
+
+                GradedTaylorPicardIntegrator periodic_integrator(
+                    step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
+                periodic_integrator.set_maximum_error_refinement_iterations(2u);
+                periodic_integrator.set_diagnostics(false);
+
+                LabelledEnclosure periodic_enclosure(
+                    initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
+                    EnclosureConfiguration(periodic_integrator.function_factory()));
+                periodic_enclosure.set_auxiliary(
+                    dynamics.auxiliary_space(),dynamics.auxiliary_mapping());
+
+                Nat reconditionings=0u;
+                bool completed=true;
+                Nat failed_step=num_steps;
+                String failure;
+
+                for(Nat step_index=0u; step_index!=num_steps; ++step_index) {
+                    auto box=cast_exact_box(periodic_enclosure.euclidean_set().bounding_box());
+                    try {
+                        auto flow=periodic_integrator.flow_step(
+                            dynamics.function(),box,periodic_step);
+                        auto const actual_step=
+                            static_cast<StepSizeType>(
+                                flow.domain()[flow.argument_size()-1u].upper_bound());
+                        if(actual_step!=periodic_step) {
+                            completed=false;
+                            failed_step=step_index;
+                            std::stringstream msg;
+                            msg << "returned step " << actual_step
+                                << " instead of " << periodic_step;
+                            failure=msg.str();
+                            break;
+                        }
+
+                        periodic_enclosure.apply_fixed_evolve_step(flow,periodic_step);
+
+                        if(((step_index+1u)%recondition_period)==0u) {
+                            periodic_enclosure.recondition();
+                            ++reconditionings;
+                        }
+                    } catch(const std::exception& e) {
+                        completed=false;
+                        failed_step=step_index;
+                        failure=e.what();
+                        break;
+                    }
+                }
+
+                auto const final_box=periodic_enclosure.euclidean_set().bounding_box();
+                double final_width=0.0;
+                std::vector<double> component_widths(final_box.size());
+                for(SizeType i=0; i!=final_box.size(); ++i) {
+                    double const component_width=final_box[i].width().get_d();
+                    component_widths[i]=component_width;
+                    if(component_width>final_width) { final_width=component_width; }
+                }
+
+                std::cerr << "[PeriodicRecondition]"
+                          << " interval=" << (calendar==0u ? 0.02 : 0.04)
+                          << " requested_step=" << periodic_step
+                          << " completed=" << completed
+                          << " completed_steps="
+                          << (completed ? num_steps : failed_step)
+                          << " recondition_period_steps=" << recondition_period
+                          << " reconditionings=" << reconditionings
+                          << " final_error="
+                          << periodic_enclosure.state_function().error()
+                          << " final_width=" << final_width
+                          << " component_widths=["
+                          << component_widths[0] << "," << component_widths[1] << "]"
+                          << " final_box=" << final_box;
+                if(not completed) {
+                    std::cerr << " failure=\"" << failure << "\"";
+                }
+                std::cerr << std::endl;
+            }
         }
     }
 

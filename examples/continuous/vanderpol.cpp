@@ -51,7 +51,7 @@ void ariadne_main()
     CONCLOG_PRINTLN(evolver.configuration());
 
     Real x0 = 1.40_dec;
-    Real y0 = 2.40_dec;
+    Real y0 = 2.30_dec;
     Real eps_x0 = 0.15_dec;
     Real eps_y0 = 0.05_dec;
 
@@ -77,6 +77,10 @@ void ariadne_main()
     // Compare graded Taylor-Picard cutoff values on the full trajectory using
     // synchronous enclosure propagation.  Each case is capped in measured work
     // so that cutoff=0 cannot make the benchmark impractically long.
+    // Chen, Table 5.1: x in [1.25,1.55], y in [2.25,2.35],
+    // T=7, delta=0.02, order=5, cutoff=1e-12.  The reported Flow* widths
+    // are W1=0.6308 and W2=0.6120, where W is the maximum component width
+    // of the interval enclosure at the final time.
     const double cutoff_values[] = {0.0,1e-14,1e-13,1e-12,1e-11,1e-10};
     const long long cutoff_work_limit_us = 15000000;
     for(double cutoff_value : cutoff_values) {
@@ -150,6 +154,12 @@ void ariadne_main()
         }
 
         bool const completed=not possibly(sweep_time < TimeStepType(7u));
+        auto const final_box=sweep_enclosure.euclidean_set().bounding_box();
+        double final_width=0.0;
+        for(SizeType i=0; i!=final_box.size(); ++i) {
+            double const component_width=final_box[i].width().get_d();
+            if(component_width>final_width) { final_width=component_width; }
+        }
         std::cerr << "[CutoffSweep]"
                   << " cutoff=" << cutoff_value
                   << " completed=" << completed
@@ -163,7 +173,8 @@ void ariadne_main()
                   << " evolve_us=" << evolve_us_total
                   << " recondition_us=" << recondition_us_total
                   << " final_error=" << sweep_enclosure.state_function().error()
-                  << " final_box=" << sweep_enclosure.euclidean_set().bounding_box()
+                  << " final_width=" << final_width
+                  << " final_box=" << final_box
                   << std::endl;
     }
 

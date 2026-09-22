@@ -1499,7 +1499,15 @@ class TestSmtSolver {
                 ExactBoxType({ExactIntervalType(-1,1)}),
                 ContinuousPredicate(true)||atom);
             ARIADNE_TEST_ASSERT(folded_true.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(folded_true.has_witness());
             ARIADNE_TEST_EQUAL(folded_true.statistics().theory_checks,0u);
+
+            SmtResult folded_true_empty=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType::empty_interval()}),
+                ContinuousPredicate(true)||atom);
+            ARIADNE_TEST_ASSERT(folded_true_empty.is_unsat());
+            ARIADNE_TEST_EQUAL(folded_true_empty.statistics().theory_checks,0u);
         }
 
         {

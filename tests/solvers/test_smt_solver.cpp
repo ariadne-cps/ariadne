@@ -565,6 +565,22 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] empty constraint list ignores zero box budget" << std::endl;
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ExactBoxType domain({ExactIntervalType(-1,1)});
+            List<ValidatedConstraint> constraints;
+            SmtResult solve_result=zero_budget_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+        }
+
+        {
             std::cout << "[smt-solve] empty constraint list: bounded nonempty domain is EPSILON_SAT" << std::endl;
             ExactBoxType domain({ExactIntervalType(-1,1)});
             List<ValidatedConstraint> constraints;
@@ -611,6 +627,24 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             return alternatives[0][0];
         };
+
+        {
+            std::cout << "[smt-theory-solve] empty primitive list ignores zero box budget" << std::endl;
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            List<SmtTheoryPrimitiveLiteral> literals;
+            SmtResult solve_result=zero_budget_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+        }
 
         {
             std::cout << "[smt-theory-solve] zero box budget propagates UNKNOWN" << std::endl;
@@ -1807,6 +1841,36 @@ class TestSmtSolver {
     }
 
     Void test_parallel_solve() {
+        {
+            std::cout << "[smt-parallel] empty conjunctions ignore zero box budget" << std::endl;
+            SmtSolver zero_budget_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ExactBoxType domain({ExactIntervalType(-1,1)});
+
+            List<ValidatedConstraint> constraints;
+            SmtResult constraints_result=zero_budget_solver.solve_parallel(
+                domain,constraints);
+            ARIADNE_TEST_ASSERT(constraints_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(constraints_result.has_witness());
+            ARIADNE_TEST_EQUAL(constraints_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(
+                constraints_result.statistics().box_budget_exhaustions,0u);
+
+            RealVariable x("x");
+            RealSpace space({x});
+            List<SmtTheoryPrimitiveLiteral> literals;
+            SmtResult theory_result=zero_budget_solver.solve_parallel(
+                space,domain,literals);
+            ARIADNE_TEST_ASSERT(theory_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(theory_result.has_witness());
+            ARIADNE_TEST_EQUAL(theory_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(
+                theory_result.statistics().box_budget_exhaustions,0u);
+        }
+
         {
             std::cout << "[smt-parallel] zero box budget returns UNKNOWN" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);

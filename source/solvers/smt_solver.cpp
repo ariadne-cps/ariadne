@@ -799,6 +799,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     if(domain.is_empty()) {
         return SmtResult::unsat(statistics);
     }
+    if(constraints.empty()) {
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
+    }
 
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
@@ -880,6 +883,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
     SmtSearchStatistics statistics;
     if(domain.is_empty()) {
         return SmtResult::unsat(statistics);
+    }
+    if(literals.empty()) {
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
@@ -975,6 +981,10 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
     auto state=std::make_shared<ParallelSmtSearchState>();
     if(domain.is_empty()) {
         return SmtResult::unsat(state->statistics);
+    }
+    if(constraints.empty()) {
+        return SmtResult::epsilon_sat(
+            singleton_box(domain.midpoint()),state->statistics);
     }
 
     ParallelSmtWorkload workload(
@@ -1087,6 +1097,10 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
     auto state=std::make_shared<ParallelSmtSearchState>();
     if(domain.is_empty()) {
         return SmtResult::unsat(state->statistics);
+    }
+    if(literals.empty()) {
+        return SmtResult::epsilon_sat(
+            singleton_box(domain.midpoint()),state->statistics);
     }
 
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);

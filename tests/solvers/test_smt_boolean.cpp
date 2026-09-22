@@ -40,6 +40,7 @@ class TestSmtBoolean {
         ARIADNE_TEST_CALL(test_conjunction());
         ARIADNE_TEST_CALL(test_disjunction());
         ARIADNE_TEST_CALL(test_shared_atom());
+        ARIADNE_TEST_CALL(test_structurally_shared_atom());
         ARIADNE_TEST_CALL(test_nested_formula());
     }
 
@@ -164,6 +165,22 @@ class TestSmtBoolean {
         ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
         ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
         ARIADNE_TEST_EQUAL(encoding.clauses().size(),4u);
+    }
+
+    Void test_structurally_shared_atom() {
+        RealVariable x("x");
+        RealExpression ex=x;
+        ContinuousPredicate first=(ex<=0);
+        ContinuousPredicate second=(ex<=0);
+
+        ARIADNE_TEST_ASSERT(first.node_raw_ptr()!=second.node_raw_ptr());
+        std::cout << "[smt-boolean] structurally shared atoms built as distinct nodes" << std::endl;
+        SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(first&&!second);
+
+        ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+        ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        ARIADNE_TEST_EQUAL(encoding.clauses().size(),4u);
+        ARIADNE_TEST_EQUAL(encoding.atom_variable(0),1u);
     }
 
     Void test_nested_formula() {

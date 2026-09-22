@@ -34,6 +34,7 @@ class TestSmtBoolean {
   public:
     Void test() {
         ARIADNE_TEST_CALL(test_atom());
+        ARIADNE_TEST_CALL(test_sign_atom());
         ARIADNE_TEST_CALL(test_negation());
         ARIADNE_TEST_CALL(test_conjunction());
         ARIADNE_TEST_CALL(test_disjunction());
@@ -56,6 +57,23 @@ class TestSmtBoolean {
         ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
         ARIADNE_TEST_EQUAL(encoding.atom_variable(0),1u);
         ARIADNE_TEST_EQUAL(encoding.atom(0).code(),OperatorCode::LEQ);
+    }
+
+    Void test_sign_atom() {
+        RealVariable x("x");
+        RealExpression ex=x;
+        ContinuousPredicate predicate=sgn(ex);
+
+        std::cout << "[smt-boolean] sign atom sgn(x)" << std::endl;
+        SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(predicate);
+
+        ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+        ARIADNE_TEST_EQUAL(encoding.variable_count(),1u);
+        ARIADNE_TEST_EQUAL(encoding.clauses().size(),1u);
+        ARIADNE_TEST_EQUAL(encoding.clauses()[0].size(),1u);
+        ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
+        ARIADNE_TEST_EQUAL(encoding.atom_variable(0),1u);
+        ARIADNE_TEST_EQUAL(encoding.atom(0).code(),OperatorCode::SGN);
     }
 
     Void test_negation() {

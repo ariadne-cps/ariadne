@@ -58,6 +58,7 @@ class TseitinBuilder {
 
     Int _encode(ContinuousPredicate const& predicate) {
         switch(predicate.code()) {
+            case OperatorCode::SGN:
             case OperatorCode::EQ:
             case OperatorCode::NEQ:
             case OperatorCode::GEQ:

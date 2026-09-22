@@ -185,6 +185,7 @@ void ariadne_main()
     {
         GradedTaylorPicardIntegrator chen_integrator(
             max_err,order=5,step_sweep_threshold=1e-12);
+        chen_integrator.set_diagnostics(true);
         LabelledEnclosure chen_enclosure(
             initial_set.euclidean_set(dynamics.state_space()),dynamics.state_space(),
             EnclosureConfiguration(chen_integrator.function_factory()));

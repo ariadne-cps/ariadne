@@ -259,6 +259,7 @@ class GradedTaylorPicardIntegrator
     ExactDouble _error_refinement_minimum_improvement_percentage;
     DegreeType _order;
     ApproximateDouble _sweep_threshold;
+    Bool _diagnostics;
   public:
     //! \brief Construct with degree truncation only.
     GradedTaylorPicardIntegrator(StepMaximumError err, Order order);
@@ -277,6 +278,7 @@ class GradedTaylorPicardIntegrator
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
     ExactDouble error_refinement_minimum_improvement_percentage() const { return this->_error_refinement_minimum_improvement_percentage; }
     Void set_error_refinement_minimum_improvement_percentage(ApproximateDouble e) { _error_refinement_minimum_improvement_percentage = cast_exact(e); }
+    Void set_diagnostics(Bool diagnostics) { _diagnostics=diagnostics; }
 
     virtual GradedTaylorPicardIntegrator* clone() const { return new GradedTaylorPicardIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;

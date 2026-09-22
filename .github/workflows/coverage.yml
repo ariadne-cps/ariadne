@@ -9,17 +9,44 @@ on:
 jobs:
   build:
 
-    name: "Coverage"
-
-    runs-on: ubuntu-24.04
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "macOS 26 AppleClang 21 [Coverage]",
+            os: macos-26,
+            cxx: "/usr/bin/clang++"
+          }
+          - {
+            name: "Ubuntu 24.04 GCC 13 [Coverage]",
+            os: ubuntu-24.04,
+            cxx: "g++-13"
+          }
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Get Concurrency
+    - name: Get macOS Concurrency
+      if: runner.os == 'macOS'
+      run: echo NPROC="sysctl -n hw.ncpu" >> $GITHUB_ENV
+
+    - name: Get Linux Concurrency
+      if: runner.os == 'Linux'
       run: echo NPROC="nproc" >> $GITHUB_ENV
 
-    - name: Set Up Dependencies
+    - name: Set Up macOS Dependencies
+      if: runner.os == 'macOS'
+      run: |
+        brew install ninja mpfr cairo gnuplot pkg-config
+        python3 -m venv "$GITHUB_WORKSPACE/.venv"
+        "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
+    - name: Set Up Linux Dependencies
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake ninja-build pkg-config lcov g++-13 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
@@ -30,12 +57,13 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-13 -G "Ninja" -DCOVERAGE=ON -DPYTHON_ENFORCE_TESTS=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja" -DCOVERAGE=ON -DPYTHON_ENFORCE_TESTS=ON
 
     - name: Build, Test and Generate Code Coverage
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --parallel $($NPROC) --target coverage
 
     - name: Upload Code Coverage
+      if: runner.os == 'Linux'
       working-directory: ${{runner.workspace}}/build
       run: bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"

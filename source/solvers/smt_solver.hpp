@@ -298,6 +298,18 @@ struct TheoryResultInterpretation {
 
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result);
 
+enum class ChildSearchAction {
+    RETURN_OUTCOME,
+    RESTART_AT_PARENT,
+    TRY_ALTERNATIVE,
+    EXHAUSTED
+};
+
+ChildSearchAction classify_child_search_outcome(
+    SearchOutcome const& outcome,
+    SizeType parent_level,
+    Bool has_alternative_branch);
+
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);

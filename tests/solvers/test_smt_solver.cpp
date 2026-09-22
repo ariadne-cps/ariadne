@@ -53,6 +53,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_cdcl_helpers());
+        ARIADNE_TEST_CALL(test_child_search_classification());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
         ARIADNE_TEST_CALL(test_epsilon_predicates());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
@@ -402,6 +403,36 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not unsat.consistent);
         ARIADNE_TEST_ASSERT(not unsat.unknown);
         ARIADNE_TEST_ASSERT(not unsat.witness.has_value());
+    }
+
+    Void test_child_search_classification() {
+        std::cout << "[smt-dpll] deterministic child search classification" << std::endl;
+        using Action=SmtSolverTestSupport::ChildSearchAction;
+        using Outcome=SmtSolverTestSupport::SearchOutcome;
+
+        UpperBoxType witness({
+            UpperIntervalType(ExactIntervalType(0,0))
+        });
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::found(witness),2u,true),
+            Action::RETURN_OUTCOME);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::backjump(1u),2u,true),
+            Action::RETURN_OUTCOME);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::backjump(2u),2u,true),
+            Action::RESTART_AT_PARENT);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::exhausted(),2u,true),
+            Action::TRY_ALTERNATIVE);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::classify_child_search_outcome(
+                Outcome::exhausted(),2u,false),
+            Action::EXHAUSTED);
     }
 
     Void test_invalid_internal_relations() {

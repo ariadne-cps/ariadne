@@ -194,6 +194,10 @@ class Enclosure
     Void apply_discrete_time_map_step(ValidatedVectorMultivariateFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     Void apply_fixed_evolve_step(ValidatedVectorMultivariateFunction phi, StepSizeType h);
+    //! \brief Replace the state map directly by a mapping over the current
+    //! parameter domain, then advance time by \a h.
+    Void apply_parameterised_fixed_evolve_step(
+        ValidatedVectorMultivariateFunctionPatch state, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
@@ -205,6 +209,10 @@ class Enclosure
 
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq h\f$.
     Void apply_full_reach_step(ValidatedVectorMultivariateFunctionPatch phi);
+    //! \brief Replace the state map directly by a parameterised flowpipe over
+    //! the current parameter domain and one appended time coordinate.
+    Void apply_parameterised_full_reach_step(
+        ValidatedVectorMultivariateFunctionPatch flowpipe);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionPatch phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq\epsilon(s)\f$.

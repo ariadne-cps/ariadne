@@ -182,8 +182,16 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     CONCLOG_PRINTLN("box = " << current_set.bounding_box())
     CONCLOG_PRINTLN("radius = " << current_set.euclidean_set().bounding_box().radius())
 
-    // Test to see if set requires reconditioning
-    if (this->_configuration->enable_reconditioning() && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+    IntegratorInterface const* integrator=this->_integrator.operator->();
+    auto const* preconditioned_integrator=
+        dynamic_cast<PreconditionedGradedTaylorSeriesIntegrator const*>(integrator);
+
+    // The preconditioned integrator carries the local-initial Taylor mapping
+    // across steps. Standard reconditioning would deliberately discard part of
+    // that dependence, so it is bypassed on this specialised path.
+    if (preconditioned_integrator==nullptr
+        && this->_configuration->enable_reconditioning()
+        && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
         current_set.recondition();
         workload.append({current_time,current_set});
         return;
@@ -199,30 +207,45 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
     CONCLOG_PRINTLN("current_set_bounds = "<<current_set_bounds)
 
-    IntegratorInterface const* integrator=this->_integrator.operator->();
-    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,suggest(maximum_step_size));
-
-    StepSizeType step_size = static_cast<StepSizeType>(flow_model.domain()[flow_model.argument_size()-1u].upper_bound());
-    CONCLOG_PRINTLN("step_size = "<<step_size)
-    CONCLOG_PRINTLN_AT(1,"flow_model = "<<flow_model)
-    FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
-    CONCLOG_PRINTLN_AT(1,"flow_step_model = "<<flow_step_model)
-
-    // Compute the integration time model
-    TimeStepType next_time=current_time+TimeStepType(step_size);
-    CONCLOG_PRINTLN_AT(1,"next_time = "<<next_time)
-    // Compute the flow tube (reachable set) model and the final set
+    StepSizeType step_size;
     EnclosureType reach_set=current_set;
-    reach_set.apply_full_reach_step(flow_model);
-    CONCLOG_PRINTLN_AT(1,"reach_set = " << reach_set)
-
     EnclosureType next_set=current_set;
-    next_set.apply_fixed_evolve_step(flow_model, step_size);
-    CONCLOG_PRINTLN_AT(1,"next_set = " << next_set)
+
+    if(preconditioned_integrator!=nullptr) {
+        PreconditionedTaylorSeriesState local_state=
+            preconditioned_integrator->precondition(current_set.state_function());
+        PreconditionedTaylorSeriesStep local_step=
+            preconditioned_integrator->step(
+                dynamic,local_state,suggest(maximum_step_size));
+
+        step_size=local_step.time_step();
+
+        reach_set.apply_parameterised_full_reach_step(
+            local_step.flowpipe_mapping());
+
+        ValidatedVectorMultivariateFunctionPatch final_mapping=
+            partial_evaluate(
+                local_step.flowpipe_mapping(),
+                local_step.flowpipe_mapping().argument_size()-1u,
+                step_size);
+        next_set.apply_parameterised_fixed_evolve_step(
+            final_mapping,step_size);
+    } else {
+        FlowStepModelType flow_model=
+            integrator->flow_step(
+                dynamic,current_set_bounds,suggest(maximum_step_size));
+
+        step_size=static_cast<StepSizeType>(
+            flow_model.domain()[flow_model.argument_size()-1u].upper_bound());
+
+        reach_set.apply_full_reach_step(flow_model);
+        next_set.apply_fixed_evolve_step(flow_model,step_size);
+    }
+
+    TimeStepType next_time=current_time+TimeStepType(step_size);
 
     result->adjoin_reach(reach_set);
     result->adjoin_intermediate(next_set);
-
     workload.append({next_time,next_set});
 }
 

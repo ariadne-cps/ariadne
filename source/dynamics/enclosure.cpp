@@ -453,6 +453,20 @@ Void Enclosure::apply_fixed_evolve_step(ValidatedVectorMultivariateFunction flow
     this->_check();
 }
 
+Void
+Enclosure::apply_parameterised_fixed_evolve_step(
+        ValidatedVectorMultivariateFunctionPatch state, StepSizeType time)
+{
+    ARIADNE_ASSERT(state.argument_size()==this->number_of_parameters());
+    ARIADNE_ASSERT(state.domain()==this->parameter_domain());
+    ARIADNE_ASSERT(state.result_size()==this->state_dimension());
+    this->_state_function=std::move(state);
+    this->_time_function=this->_time_function+time;
+    this->_dwell_time_function=this->_dwell_time_function+time;
+    this->_check();
+}
+
+
 Void Enclosure::apply_space_evolve_step(ValidatedVectorMultivariateFunction flow, ValidatedScalarMultivariateFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
@@ -509,6 +523,30 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorMultivariateFunctionPatch p
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
 }
+
+Void
+Enclosure::apply_parameterised_full_reach_step(
+        ValidatedVectorMultivariateFunctionPatch flowpipe)
+{
+    ARIADNE_ASSERT(flowpipe.result_size()==this->state_dimension());
+    ARIADNE_ASSERT(flowpipe.argument_size()==this->number_of_parameters()+1u);
+
+    ExactIntervalType const time_domain=
+        flowpipe.domain()[flowpipe.domain().dimension()-1u];
+    ExactBoxType const old_parameter_domain=this->parameter_domain();
+    ARIADNE_ASSERT(flowpipe.domain()==product(old_parameter_domain,time_domain));
+
+    this->_unchecked_new_variable(time_domain,EnclosureVariableKind::TEMPORAL);
+    this->_state_function=std::move(flowpipe);
+
+    ValidatedScalarMultivariateFunctionPatch time_step_function=
+        this->configuration().function_factory().create_coordinate(
+            this->domain(),this->domain().size()-1u);
+    this->_time_function=this->_time_function+time_step_function;
+    this->_dwell_time_function=this->_dwell_time_function+time_step_function;
+    this->_check();
+}
+
 
 Void Enclosure::apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionPatch phi, ValidatedScalarMultivariateFunction elps)
 {

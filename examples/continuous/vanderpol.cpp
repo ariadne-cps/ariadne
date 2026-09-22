@@ -80,10 +80,11 @@ void ariadne_main()
     // IncompleteFlowException instead of silently accepting that smaller step.
     {
         const StepSizeType chen_steps[] = {
-            StepSizeType(0.02_dy), StepSizeType(0.01_dy), StepSizeType(0.005_dy)
+            StepSizeType(0.02_dy), StepSizeType(0.01_dy), StepSizeType(0.005_dy),
+            StepSizeType(0.0025_dy)
         };
-        const Nat chen_num_steps_values[] = {350u,700u,1400u};
-        for(SizeType chen_case=0u; chen_case!=3u; ++chen_case) {
+        const Nat chen_num_steps_values[] = {350u,700u,1400u,2800u};
+        for(SizeType chen_case=0u; chen_case!=4u; ++chen_case) {
         GradedTaylorPicardIntegrator chen_integrator(
             step_maximum_error=1e-3,order=5,step_sweep_threshold=1e-12);
         // Keep the diagnostic bounded. Without this cap, loosening the step

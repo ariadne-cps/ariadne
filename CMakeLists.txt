@@ -271,12 +271,16 @@ if(COVERAGE)
     else()
         setup_target_for_coverage_lcov(
             NAME coverage
+            NO_BASELINE
             EXECUTABLE "${CMAKE_CTEST_COMMAND}"
             EXECUTABLE_ARGS --output-on-failure
             DEPENDENCIES tests
             BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-            LCOV_CAPTURE_ARGS
-                --include "${PROJECT_SOURCE_DIR}/source/*"
+            EXCLUDE
+                "/usr/*"
+                "${PROJECT_SOURCE_DIR}/tests/*"
+                "${PROJECT_SOURCE_DIR}/python/*"
+                "${PROJECT_SOURCE_DIR}/submodules/*"
         )
     endif()
 endif()

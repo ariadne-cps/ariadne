@@ -1162,6 +1162,9 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
                         std::lock_guard<std::mutex> lock(state->mutex);
                         ++state->statistics.boxes_unknown;
                         ++state->statistics.non_splittable_uncertified_boxes;
+                        if(processing.non_splittable_epsilon_overlap) {
+                            ++state->statistics.non_splittable_epsilon_overlap_boxes;
+                        }
                     }
                     return;
 

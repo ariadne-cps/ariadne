@@ -1827,6 +1827,35 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-parallel] theory epsilon-overlap counted once" << std::endl;
+            RealVariable x("x");
+            RealExpression ex=x;
+            RealSpace space({x});
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(residual==0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=tiny_epsilon_solver.solve_parallel(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+        }
+
+        {
             std::cout << "[smt-parallel] theory zero box budget returns UNKNOWN" << std::endl;
             RealVariable x("x");
             RealSpace space({x});

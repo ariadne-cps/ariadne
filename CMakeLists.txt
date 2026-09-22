@@ -260,13 +260,28 @@ target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-    setup_target_for_coverage_llvm(
-        NAME coverage
-        TARGET ariadne
-        DEPENDENCIES tests
-        EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
-    )
+if(COVERAGE)
+    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+        setup_target_for_coverage_llvm(
+            NAME coverage
+            TARGET ariadne
+            DEPENDENCIES tests
+            EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
+        )
+    else()
+        setup_target_for_coverage_lcov(
+            NAME coverage
+            EXECUTABLE "${CMAKE_CTEST_COMMAND}"
+            EXECUTABLE_ARGS --output-on-failure
+            DEPENDENCIES tests
+            BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
+            EXCLUDE
+                "/usr/*"
+                "${PROJECT_SOURCE_DIR}/tests/*"
+                "${PROJECT_SOURCE_DIR}/python/*"
+                "${PROJECT_SOURCE_DIR}/submodules/*"
+        )
+    endif()
 endif()
 
 if(CAIRO_FOUND)

@@ -213,6 +213,20 @@ CandidateWitnessOutcome candidate_witness_outcome(
     std::optional<UpperBoxType> const& candidate,
     Bool certified);
 
+struct SearchOutcome {
+    std::optional<UpperBoxType> witness;
+    std::optional<SizeType> backjump_level;
+
+    static SearchOutcome exhausted();
+    static SearchOutcome found(UpperBoxType const& witness);
+    static SearchOutcome backjump(SizeType level);
+};
+
+SmtResult finalize_search_outcome(
+    SearchOutcome const& outcome,
+    Bool theory_unknown_seen,
+    SmtSearchStatistics const& statistics);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers

@@ -1091,6 +1091,39 @@ CandidateWitnessOutcome candidate_witness_outcome(
     return {true,false,std::nullopt};
 }
 
+SearchOutcome SearchOutcome::exhausted()
+{
+    return {};
+}
+
+SearchOutcome SearchOutcome::found(UpperBoxType const& witness)
+{
+    SearchOutcome result;
+    result.witness=witness;
+    return result;
+}
+
+SearchOutcome SearchOutcome::backjump(SizeType level)
+{
+    SearchOutcome result;
+    result.backjump_level=level;
+    return result;
+}
+
+SmtResult finalize_search_outcome(
+    SearchOutcome const& outcome,
+    Bool theory_unknown_seen,
+    SmtSearchStatistics const& statistics)
+{
+    if(outcome.witness.has_value()) {
+        return SmtResult::epsilon_sat(*outcome.witness,statistics);
+    }
+    if(theory_unknown_seen) {
+        return SmtResult::unknown(statistics);
+    }
+    return SmtResult::unsat(statistics);
+}
+
 } // namespace SmtSolverTestSupport
 
 namespace {
@@ -1116,17 +1149,14 @@ class SmtDpllSearch {
 
     SmtResult solve()
     {
-        SearchOutcome outcome=this->_search_boolean();
-        if(outcome.witness.has_value()) {
-            return SmtResult::epsilon_sat(*outcome.witness,_statistics);
-        }
-        if(_theory_unknown_seen) {
-            return SmtResult::unknown(_statistics);
-        }
-        return SmtResult::unsat(_statistics);
+        SmtSolverTestSupport::SearchOutcome outcome=this->_search_boolean();
+        return SmtSolverTestSupport::finalize_search_outcome(
+            outcome,_theory_unknown_seen,_statistics);
     }
 
   private:
+    using SearchOutcome=SmtSolverTestSupport::SearchOutcome;
+
     struct AssignmentInfo {
         int8_t value = -1;
         SizeType decision_level = 0u;
@@ -1136,23 +1166,6 @@ class SmtDpllSearch {
     struct ConflictAnalysis {
         std::vector<Int> learned_clause;
         SizeType backjump_level = 0u;
-    };
-
-    struct SearchOutcome {
-        std::optional<UpperBoxType> witness;
-        std::optional<SizeType> backjump_level;
-
-        static SearchOutcome exhausted() { return {}; }
-        static SearchOutcome found(UpperBoxType const& witness) {
-            SearchOutcome result;
-            result.witness=witness;
-            return result;
-        }
-        static SearchOutcome backjump(SizeType level) {
-            SearchOutcome result;
-            result.backjump_level=level;
-            return result;
-        }
     };
 
     Bool _literal_true(Int literal) const

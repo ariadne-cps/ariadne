@@ -1023,6 +1023,37 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
         source.peak_active_non_theory_learned_clauses);
 }
 
+namespace SmtSolverTestSupport {
+
+std::vector<SizeType> learned_clause_pruning_candidates(
+    std::vector<LearnedClausePruningEntry> const& entries)
+{
+    std::vector<SizeType> candidates;
+    for(SizeType i=0u; i!=entries.size(); ++i) {
+        auto const& entry=entries[i];
+        if(not entry.active
+           || entry.theory
+           || entry.recent
+           || entry.short_clause
+           || entry.useful
+           || entry.protected_clause
+           || entry.locked) {
+            continue;
+        }
+        candidates.push_back(i);
+    }
+    std::stable_sort(candidates.begin(),candidates.end(),
+        [&entries](SizeType lhs, SizeType rhs) {
+            if(entries[lhs].activity!=entries[rhs].activity) {
+                return entries[lhs].activity<entries[rhs].activity;
+            }
+            return entries[lhs].size>entries[rhs].size;
+        });
+    return candidates;
+}
+
+} // namespace SmtSolverTestSupport
+
 class SmtDpllSearch {
   public:
     SmtDpllSearch(SmtSolver const& solver,
@@ -1212,40 +1243,32 @@ class SmtDpllSearch {
         }
 
         ++_statistics.learned_clause_pruning_runs;
-        std::vector<SizeType> candidates;
+        std::vector<SmtSolverTestSupport::LearnedClausePruningEntry> entries;
+        entries.reserve(_learned_clauses.size());
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
             SizeType clause_index=this->_original_clause_count()+i;
             SizeType const current_generation=_statistics.learned_clauses;
             SizeType const clause_generation=_learned_clause_generation[i];
-            Bool const recent=(current_generation<=clause_generation+2u);
-            Bool const short_clause=(_learned_clauses[i].size()<=2u);
-            Bool const useful=(_learned_clause_activity[i]>1u);
-            if(not _learned_clause_active[i]
-               || _learned_clause_is_theory[i]
-               || recent
-               || short_clause
-               || useful
-               || (protected_clause.has_value() && clause_index==*protected_clause)
-               || this->_learned_clause_locked(clause_index)) {
-                continue;
-            }
-            candidates.push_back(clause_index);
+            entries.push_back({
+                _learned_clause_active[i],
+                _learned_clause_is_theory[i],
+                current_generation<=clause_generation+2u,
+                _learned_clauses[i].size()<=2u,
+                _learned_clause_activity[i]>1u,
+                protected_clause.has_value() && clause_index==*protected_clause,
+                this->_learned_clause_locked(clause_index),
+                _learned_clause_activity[i],
+                _learned_clauses[i].size()
+            });
         }
+        std::vector<SizeType> candidates=
+            SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
 
-        std::stable_sort(candidates.begin(),candidates.end(),[this](SizeType lhs, SizeType rhs) {
-            SizeType li=lhs-this->_original_clause_count();
-            SizeType ri=rhs-this->_original_clause_count();
-            if(_learned_clause_activity[li]!=_learned_clause_activity[ri]) {
-                return _learned_clause_activity[li]<_learned_clause_activity[ri];
-            }
-            return _learned_clauses[li].size()>_learned_clauses[ri].size();
-        });
-
-        for(SizeType clause_index:candidates) {
+        for(SizeType learned_index:candidates) {
+            SizeType clause_index=this->_original_clause_count()+learned_index;
             if(active<=limit) {
                 break;
             }
-            SizeType learned_index=clause_index-this->_original_clause_count();
             _learned_clause_active[learned_index]=false;
             --active;
             ++_statistics.learned_clauses_pruned;

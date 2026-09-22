@@ -175,6 +175,25 @@ class SmtResult {
 
 OutputStream& operator<<(OutputStream& os, SmtResultStatus status);
 
+namespace SmtSolverTestSupport {
+
+struct LearnedClausePruningEntry {
+    Bool active = true;
+    Bool theory = false;
+    Bool recent = false;
+    Bool short_clause = false;
+    Bool useful = false;
+    Bool protected_clause = false;
+    Bool locked = false;
+    SizeType activity = 1u;
+    SizeType size = 0u;
+};
+
+std::vector<SizeType> learned_clause_pruning_candidates(
+    std::vector<LearnedClausePruningEntry> const& entries);
+
+} // namespace SmtSolverTestSupport
+
 //! \ingroup Solvers
 //! \brief Sequential reference epsilon-SMT solver for bounded conjunctions.
 class SmtSolver {

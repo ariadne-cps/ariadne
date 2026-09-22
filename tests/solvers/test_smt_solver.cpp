@@ -48,6 +48,7 @@ class TestSmtSolver {
     Void test() {
         ARIADNE_TEST_CALL(test_configuration());
         ARIADNE_TEST_CALL(test_result());
+        ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -159,6 +160,29 @@ class TestSmtSolver {
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status() << " " << unknown.status();
         ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT UNKNOWN"));
+    }
+
+    Void test_learned_clause_pruning_policy() {
+        std::cout << "[smt-dpll] deterministic learned clause pruning policy" << std::endl;
+        using Entry=SmtSolverTestSupport::LearnedClausePruningEntry;
+        std::vector<Entry> entries({
+            {false,false,false,false,false,false,false,1u,5u},
+            {true,true,false,false,false,false,false,1u,5u},
+            {true,false,true,false,false,false,false,1u,5u},
+            {true,false,false,true,false,false,false,1u,2u},
+            {true,false,false,false,true,false,false,2u,5u},
+            {true,false,false,false,false,true,false,1u,5u},
+            {true,false,false,false,false,false,true,1u,5u},
+            {true,false,false,false,false,false,false,2u,7u},
+            {true,false,false,false,false,false,false,1u,4u},
+            {true,false,false,false,false,false,false,1u,6u}
+        });
+        std::vector<SizeType> candidates=
+            SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
+        ARIADNE_TEST_EQUAL(candidates.size(),3u);
+        ARIADNE_TEST_EQUAL(candidates[0],9u);
+        ARIADNE_TEST_EQUAL(candidates[1],8u);
+        ARIADNE_TEST_EQUAL(candidates[2],7u);
     }
 
     Void test_solve() {

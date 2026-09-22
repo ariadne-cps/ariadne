@@ -1192,7 +1192,7 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,1)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);

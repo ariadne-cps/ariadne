@@ -1353,23 +1353,33 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     }
     ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
 
-    ExactIntervalType domt(0,h);
     ExactBoxType doma;
     Vector<ValidatedProcedure> p(g);
-    FlowStepModelType local_flow=Ariadne::graded_series_flow_step(
-        p,domy,domt,doma,local_bounding_box,
-        this->step_maximum_error(),this->sweeper(),
-        this->minimum_spacial_order(),this->minimum_temporal_order(),
-        this->maximum_spacial_order(),this->maximum_temporal_order());
 
-    if(possibly(local_flow.error()>this->step_maximum_error())) {
-        ARIADNE_THROW(FlowTimeStepException,
-                      "PreconditionedGradedTaylorSeriesIntegrator::step",
-                      "Integration of preconditioned vector field over "<<domy
-                      <<" for time interval "<<domt
-                      <<" has error "<<local_flow.errors()
-                      <<", which exceeds maximum single-step error "
-                      <<this->step_maximum_error());
+    // Match BoundedIntegratorBase's suggested-step semantics: the flow bound
+    // was computed for the initially suggested h and is therefore also valid
+    // for every smaller h.  Reduce the integration step until the graded
+    // Taylor model satisfies the requested single-step error.
+    StepSizeType hprev=h*1.5_dy;
+    FlowStepModelType local_flow;
+    ExactIntervalType domt;
+    while(true) {
+        domt=ExactIntervalType(0,h);
+        local_flow=Ariadne::graded_series_flow_step(
+            p,domy,domt,doma,local_bounding_box,
+            this->step_maximum_error(),this->sweeper(),
+            this->minimum_spacial_order(),this->minimum_temporal_order(),
+            this->maximum_spacial_order(),this->maximum_temporal_order());
+
+        if(definitely(local_flow.error()<=this->step_maximum_error())) {
+            break;
+        }
+
+        StepSizeType const hnew=hlf(hprev);
+        hprev=h;
+        h=StepSizeType(hnew.get_d());
+        CONCLOG_PRINTLN_AT(1,
+            "PreconditionedGradedTaylorSeriesIntegrator reduced h to "<<h);
     }
 
     // Return to physical coordinates while retaining local y and time as the

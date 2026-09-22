@@ -1484,6 +1484,25 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] Boolean constant folding avoids theory work" << std::endl;
+            ContinuousPredicate atom=(ex>=0);
+
+            SmtResult folded_false=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                ContinuousPredicate(false)&&atom);
+            ARIADNE_TEST_ASSERT(folded_false.is_unsat());
+            ARIADNE_TEST_EQUAL(folded_false.statistics().theory_checks,0u);
+
+            SmtResult folded_true=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-1,1)}),
+                ContinuousPredicate(true)||atom);
+            ARIADNE_TEST_ASSERT(folded_true.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(folded_true.statistics().theory_checks,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] Boolean constants" << std::endl;
             ExactBoxType domain({ExactIntervalType(-1,1)});
 

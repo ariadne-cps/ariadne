@@ -92,10 +92,43 @@ class TestSmtBoolean {
             SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(
                 (ContinuousPredicate(true)&&atom)||ContinuousPredicate(false));
             ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
-            ARIADNE_TEST_ASSERT(encoding.variable_count()>=4u);
-            ARIADNE_TEST_ASSERT(encoding.clauses().size()>=1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses().size(),1u);
+            ARIADNE_TEST_EQUAL(encoding.clauses()[0][0],1);
         }
     }
+
+        {
+            RealVariable x("x");
+            ContinuousPredicate atom=(x<=0);
+
+            std::cout << "[smt-boolean] fold false&&atom" << std::endl;
+            SmtBooleanEncoding and_false=SmtBooleanEncoder().encode(
+                ContinuousPredicate(false)&&atom);
+            ARIADNE_TEST_EQUAL(and_false.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(and_false.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(and_false.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(and_false.clauses()[0][0],-1);
+            ARIADNE_TEST_EQUAL(and_false.clauses()[1][0],1);
+
+            std::cout << "[smt-boolean] fold true||atom" << std::endl;
+            SmtBooleanEncoding or_true=SmtBooleanEncoder().encode(
+                ContinuousPredicate(true)||atom);
+            ARIADNE_TEST_EQUAL(or_true.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(or_true.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(or_true.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(or_true.clauses()[0][0],1);
+            ARIADNE_TEST_EQUAL(or_true.clauses()[1][0],1);
+
+            std::cout << "[smt-boolean] fold negated constant" << std::endl;
+            SmtBooleanEncoding negated=SmtBooleanEncoder().encode(
+                !ContinuousPredicate(false));
+            ARIADNE_TEST_EQUAL(negated.atom_count(),0u);
+            ARIADNE_TEST_EQUAL(negated.variable_count(),1u);
+            ARIADNE_TEST_EQUAL(negated.clauses().size(),2u);
+            ARIADNE_TEST_EQUAL(negated.clauses()[0][0],1);
+            ARIADNE_TEST_EQUAL(negated.clauses()[1][0],1);
+        }
 
     Void test_sign_atom() {
         RealVariable x("x");

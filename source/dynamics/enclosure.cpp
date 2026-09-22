@@ -35,6 +35,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/exceptions.hpp"
+#include "utility/stopwatch.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
@@ -1005,8 +1006,31 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
 Void
 Enclosure::recondition()
 {
+    auto const params_before=this->number_of_parameters();
+    auto const errors_before=this->state_function().errors();
+
+    Stopwatch<Microseconds> sw;
     this->uniform_error_recondition();
+    sw.click();
+    auto const uniform_us=sw.duration().count();
+    auto const params_after_uniform=this->number_of_parameters();
+    auto const errors_after_uniform=this->state_function().errors();
+
+    sw.restart();
     this->kuhn_recondition();
+    sw.click();
+
+    std::cerr << "[EnclosureRecondition]"
+              << " uniform_us=" << uniform_us
+              << " kuhn_us=" << sw.duration().count()
+              << " params_before=" << params_before
+              << " params_after_uniform=" << params_after_uniform
+              << " params_after_kuhn=" << this->number_of_parameters()
+              << " errors_before=" << errors_before
+              << " errors_after_uniform=" << errors_after_uniform
+              << " errors_after_kuhn=" << this->state_function().errors()
+              << " blocks=" << this->configuration().reconditioning_num_blocks()
+              << std::endl;
 }
 
 

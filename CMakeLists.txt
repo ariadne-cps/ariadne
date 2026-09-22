@@ -58,15 +58,9 @@ endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
 
-if(COVERAGE)
-    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-        include(LLVMCodeCoverage)
-        append_llvm_coverage_compiler_flags()
-    else()
-        include(CodeCoverage)
-        append_coverage_compiler_flags()
-        include(GCCCodeCoverage)
-    endif()
+if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+    include(LLVMCodeCoverage)
+    append_llvm_coverage_compiler_flags()
 endif()
 
 enable_testing()
@@ -270,6 +264,13 @@ if(COVERAGE)
             EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
         )
     else()
+        # Keep the GCC instrumentation at the same point as the original
+        # Ubuntu coverage configuration. Moving these flags before the
+        # add_subdirectory() calls instruments tests, Python bindings and
+        # submodules as well, changing the gcov dataset.
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+        include(GCCCodeCoverage)
         setup_target_for_coverage_gcc(
             NAME coverage
             DEPENDENCIES tests

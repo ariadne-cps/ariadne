@@ -50,6 +50,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
+        ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -235,6 +236,38 @@ class TestSmtSolver {
         later.first_minimization_candidate_trail_rank=13u;
         SmtSolverTestSupport::accumulate_statistics(target,later);
         ARIADNE_TEST_EQUAL(target.first_minimization_candidate_trail_rank,9u);
+    }
+
+    Void test_candidate_witness_outcome() {
+        std::cout << "[smt-candidate] deterministic candidate outcome" << std::endl;
+        UpperBoxType witness({
+            UpperIntervalType(ExactIntervalType(1,1))
+        });
+
+        auto disabled=SmtSolverTestSupport::candidate_witness_outcome(
+            false,witness,true);
+        ARIADNE_TEST_ASSERT(not disabled.attempted);
+        ARIADNE_TEST_ASSERT(not disabled.certified);
+        ARIADNE_TEST_ASSERT(not disabled.witness.has_value());
+
+        auto failed=SmtSolverTestSupport::candidate_witness_outcome(
+            true,std::nullopt,false);
+        ARIADNE_TEST_ASSERT(failed.attempted);
+        ARIADNE_TEST_ASSERT(not failed.certified);
+        ARIADNE_TEST_ASSERT(not failed.witness.has_value());
+
+        auto rejected=SmtSolverTestSupport::candidate_witness_outcome(
+            true,witness,false);
+        ARIADNE_TEST_ASSERT(rejected.attempted);
+        ARIADNE_TEST_ASSERT(not rejected.certified);
+        ARIADNE_TEST_ASSERT(not rejected.witness.has_value());
+
+        auto success=SmtSolverTestSupport::candidate_witness_outcome(
+            true,witness,true);
+        ARIADNE_TEST_ASSERT(success.attempted);
+        ARIADNE_TEST_ASSERT(success.certified);
+        ARIADNE_TEST_ASSERT(success.witness.has_value());
+        ARIADNE_TEST_EQUAL(success.witness->dimension(),1u);
     }
 
     Void test_solve() {

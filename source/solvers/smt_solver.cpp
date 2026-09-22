@@ -651,17 +651,24 @@ SmtSolver::_process_box(
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    Bool candidate_search_attempted=false;
+    std::optional<UpperBoxType> candidate;
+    Bool candidate_certified=false;
     if(_configuration.candidate_search_enabled()) {
-        candidate_search_attempted=true;
-        if(auto witness=this->_epsilon_candidate_witness(
-                domain,conjunction); witness.has_value()) {
-            BoxProcessingResult result{
-                BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
-            result.candidate_witness_search=true;
-            result.candidate_witness_success=true;
-            return result;
-        }
+        candidate=this->_epsilon_candidate_witness(domain,conjunction);
+        candidate_certified=candidate.has_value();
+    }
+    auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
+        _configuration.candidate_search_enabled(),candidate,candidate_certified);
+    if(candidate_outcome.certified) {
+        ARIADNE_ASSERT(candidate_outcome.witness.has_value());
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,
+            *candidate_outcome.witness,
+            std::nullopt,
+            reductions};
+        result.candidate_witness_search=true;
+        result.candidate_witness_success=true;
+        return result;
     }
 
     auto split_result=this->_split_box(domain,conjunction);
@@ -680,7 +687,7 @@ SmtSolver::_process_box(
     if(first_same and second_same) {
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=candidate_search_attempted;
+        result.candidate_witness_search=candidate_outcome.attempted;
         result.non_splittable_epsilon_overlap=
             this->_epsilon_overlaps(domain,conjunction);
         return result;
@@ -693,7 +700,7 @@ SmtSolver::_process_box(
         reductions,
         split_result.second.first,
         split_result.second.second};
-    result.candidate_witness_search=candidate_search_attempted;
+    result.candidate_witness_search=candidate_outcome.attempted;
     return result;
 }
 
@@ -1067,6 +1074,21 @@ SizeType apply_learned_clause_pruning(
         ++pruned;
     }
     return pruned;
+}
+
+
+CandidateWitnessOutcome candidate_witness_outcome(
+    Bool enabled,
+    std::optional<UpperBoxType> const& candidate,
+    Bool certified)
+{
+    if(not enabled) {
+        return {};
+    }
+    if(candidate.has_value() && certified) {
+        return {true,true,candidate};
+    }
+    return {true,false,std::nullopt};
 }
 
 } // namespace SmtSolverTestSupport

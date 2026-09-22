@@ -202,6 +202,17 @@ Void accumulate_statistics(
     SmtSearchStatistics& target,
     SmtSearchStatistics const& source);
 
+struct CandidateWitnessOutcome {
+    Bool attempted = false;
+    Bool certified = false;
+    std::optional<UpperBoxType> witness;
+};
+
+CandidateWitnessOutcome candidate_witness_outcome(
+    Bool enabled,
+    std::optional<UpperBoxType> const& candidate,
+    Bool certified);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers

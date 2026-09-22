@@ -428,74 +428,6 @@ SmtSolver::_split_box(UpperBoxType const& domain,
     return {domain.split(selection.first),selection.second};
 }
 
-SmtSolver::BoxProcessingResult
-SmtSolver::_process_box(UpperBoxType domain,
-                        List<ValidatedConstraint> const& constraints) const
-{
-    ReductionStatistics reductions;
-    if(this->_original_reduce(domain,constraints,reductions)) {
-        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
-    }
-
-    if(this->_epsilon_satisfied(domain,constraints)) {
-        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-            auto m=domain[i].midpoint();
-            return UpperIntervalType(m,m);
-        });
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt,reductions};
-        result.epsilon_box_certification=true;
-        return result;
-    }
-
-    if(auto witness=this->_epsilon_witness(domain,constraints); witness.has_value()) {
-        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
-    }
-
-    Bool candidate_search_attempted=false;
-    if(_configuration.candidate_search_enabled()) {
-        candidate_search_attempted=true;
-        if(auto witness=this->_epsilon_candidate_witness(domain,constraints); witness.has_value()) {
-            BoxProcessingResult result{
-                BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
-            result.candidate_witness_search=true;
-            result.candidate_witness_success=true;
-            return result;
-        }
-    }
-
-    auto split_result=this->_split_box(domain,constraints);
-    Pair<UpperBoxType,UpperBoxType> children=split_result.first;
-
-    Bool first_same=true;
-    Bool second_same=true;
-    for(SizeType i=0; i!=domain.dimension(); ++i) {
-        first_same = first_same
-            and children.first[i].lower_bound().raw()==domain[i].lower_bound().raw()
-            and children.first[i].upper_bound().raw()==domain[i].upper_bound().raw();
-        second_same = second_same
-            and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
-            and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
-    }
-    if(first_same and second_same) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=candidate_search_attempted;
-        result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,constraints);
-        return result;
-    }
-
-    BoxProcessingResult result{
-        BoxProcessingStatus::SPLIT,
-        std::nullopt,
-        children,
-        reductions,
-        split_result.second.first,
-        split_result.second.second};
-    result.candidate_witness_search=candidate_search_attempted;
-    return result;
-}
-
 SmtSolver::CompiledTheoryLiterals
 SmtSolver::_compile_theory_literals(RealSpace const& space,
                                     List<SmtTheoryPrimitiveLiteral> const& literals) const
@@ -722,16 +654,18 @@ SmtSolver::_split_box(UpperBoxType const& domain,
     return {domain.split(selection.first),selection.second};
 }
 
+template<class Conjunction>
 SmtSolver::BoxProcessingResult
-SmtSolver::_process_box(UpperBoxType domain,
-                        CompiledTheoryLiterals const& literals) const
+SmtSolver::_process_box(
+    UpperBoxType domain,
+    Conjunction const& conjunction) const
 {
     ReductionStatistics reductions;
-    if(this->_original_reduce(domain,literals,reductions)) {
+    if(this->_original_reduce(domain,conjunction,reductions)) {
         return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
     }
 
-    if(this->_epsilon_satisfied(domain,literals)) {
+    if(this->_epsilon_satisfied(domain,conjunction)) {
         UpperBoxType witness(domain.dimension(),[&](SizeType i) {
             auto m=domain[i].midpoint();
             return UpperIntervalType(m,m);
@@ -742,14 +676,15 @@ SmtSolver::_process_box(UpperBoxType domain,
         return result;
     }
 
-    if(auto witness=this->_epsilon_witness(domain,literals); witness.has_value()) {
+    if(auto witness=this->_epsilon_witness(domain,conjunction); witness.has_value()) {
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
     Bool candidate_search_attempted=false;
     if(_configuration.candidate_search_enabled()) {
         candidate_search_attempted=true;
-        if(auto witness=this->_epsilon_candidate_witness(domain,literals); witness.has_value()) {
+        if(auto witness=this->_epsilon_candidate_witness(
+                domain,conjunction); witness.has_value()) {
             BoxProcessingResult result{
                 BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
             result.candidate_witness_search=true;
@@ -758,7 +693,7 @@ SmtSolver::_process_box(UpperBoxType domain,
         }
     }
 
-    auto split_result=this->_split_box(domain,literals);
+    auto split_result=this->_split_box(domain,conjunction);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
     Bool first_same=true;
@@ -775,7 +710,8 @@ SmtSolver::_process_box(UpperBoxType domain,
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=candidate_search_attempted;
-        result.non_splittable_epsilon_overlap=this->_epsilon_overlaps(domain,literals);
+        result.non_splittable_epsilon_overlap=
+            this->_epsilon_overlaps(domain,conjunction);
         return result;
     }
 

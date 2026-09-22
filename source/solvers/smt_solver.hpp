@@ -241,6 +241,11 @@ class SmtSolver {
         Bool non_splittable_epsilon_overlap = false;
     };
 
+    template<class Conjunction>
+    BoxProcessingResult _process_box(
+        UpperBoxType domain,
+        Conjunction const& conjunction) const;
+
     Void _accumulate_box_processing_statistics(
         SmtSearchStatistics& statistics,
         BoxProcessingResult const& processing) const;
@@ -276,8 +281,6 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_candidate_witness(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints) const;
-    BoxProcessingResult _process_box(UpperBoxType domain,
-                                     List<ValidatedConstraint> const& constraints) const;
     Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints) const;
@@ -302,8 +305,6 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_candidate_witness(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;
-    BoxProcessingResult _process_box(UpperBoxType domain,
-                                     CompiledTheoryLiterals const& literals) const;
     Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals) const;

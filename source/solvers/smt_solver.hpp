@@ -175,6 +175,8 @@ class SmtResult {
 
 OutputStream& operator<<(OutputStream& os, SmtResultStatus status);
 
+class SmtSolver;
+
 namespace SmtSolverTestSupport {
 
 struct LearnedClausePruningEntry {
@@ -227,6 +229,14 @@ SmtResult finalize_search_outcome(
     Bool theory_unknown_seen,
     SmtSearchStatistics const& statistics);
 
+ExactIntervalType original_bounds(
+    SmtSolver const& solver,
+    SmtTheoryPrimitiveRelation relation);
+
+ExactIntervalType epsilon_bounds(
+    SmtSolver const& solver,
+    SmtTheoryPrimitiveRelation relation);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers
@@ -268,6 +278,11 @@ class SmtSolver {
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 
   private:
+    friend ExactIntervalType SmtSolverTestSupport::original_bounds(
+        SmtSolver const&, SmtTheoryPrimitiveRelation);
+    friend ExactIntervalType SmtSolverTestSupport::epsilon_bounds(
+        SmtSolver const&, SmtTheoryPrimitiveRelation);
+
     enum class BoxProcessingStatus {
         PRUNED,
         EPSILON_SAT,

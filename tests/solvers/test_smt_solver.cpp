@@ -52,6 +52,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_search_outcome());
+        ARIADNE_TEST_CALL(test_invalid_internal_relations());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -311,6 +312,18 @@ class TestSmtSolver {
         SmtResult unsat=SmtSolverTestSupport::finalize_search_outcome(
             exhausted,false,statistics);
         ARIADNE_TEST_ASSERT(unsat.is_unsat());
+    }
+
+    Void test_invalid_internal_relations() {
+        std::cout << "[smt-internal] reject invalid primitive relation" << std::endl;
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+        auto invalid=static_cast<SmtTheoryPrimitiveRelation>(999);
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::original_bounds(solver,invalid),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::epsilon_bounds(solver,invalid),
+            std::runtime_error);
     }
 
     Void test_solve() {

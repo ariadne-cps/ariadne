@@ -1986,6 +1986,40 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] second child performs nonchronological theory backjump" << std::endl;
+            RealVariable y("nonchronological_y");
+            RealExpression ey=y;
+            RealSpace yx_space({y,x});
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+
+            ContinuousPredicate outer=(ey>=0);
+            ContinuousPredicate conflicting=(ex>=2);
+            ContinuousPredicate uncertain=
+                (sqr(sin(ex))+sqr(cos(ex))-1==0);
+            ContinuousPredicate formula=
+                (outer||(!outer))&&(conflicting||uncertain);
+
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                yx_space,
+                ExactBoxType({
+                    ExactIntervalType(-1,1),
+                    ExactIntervalType(1,1)
+                }),
+                formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().max_decision_level>=2u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().nonchronological_backjumps>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().last_backjump_level,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);
+        }
+
+        {
             std::cout << "[smt-dpll] learned clause propagation after backjump" << std::endl;
             ContinuousPredicate a=(ex>=-2);
             ContinuousPredicate b=(ex>=-1);
@@ -2038,6 +2072,50 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_activity_bumps>=1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().peak_active_non_theory_learned_clauses>=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] aged learned clauses are physically pruned" << std::endl;
+            SmtSolver pruning_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                0u));
+
+            std::vector<ContinuousPredicate> atoms({
+                ex>=-3,
+                ex>=-2,
+                ex>=-1,
+                ex>=0,
+                ex>=1,
+                ex>=2
+            });
+            auto make_clause=[&](SizeType mask) {
+                ContinuousPredicate clause=
+                    ((mask&SizeType(1u))!=0u) ? !atoms[0] : atoms[0];
+                for(SizeType i=1u; i!=atoms.size(); ++i) {
+                    SizeType bit=SizeType(1u)<<i;
+                    clause=clause||(
+                        ((mask&bit)!=0u) ? !atoms[i] : atoms[i]);
+                }
+                return clause;
+            };
+
+            ContinuousPredicate formula=make_clause(0u);
+            SizeType const assignment_count=SizeType(1u)<<atoms.size();
+            for(SizeType mask=1u; mask!=assignment_count; ++mask) {
+                formula=formula&&make_clause(mask);
+            }
+
+            SmtResult solve_result=pruning_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-4,4)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().learned_clause_pruning_runs>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().learned_clauses_pruned>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().learned_clauses
+                > solve_result.statistics().learned_clauses_pruned);
         }
 
         {

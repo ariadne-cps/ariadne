@@ -774,7 +774,7 @@ SmtSolver::_solve_parallel_conjunction(
                 ++state->statistics.boxes_processed;
             }
 
-            BoxProcessingResult processing=this->_process_box(box,conjunction);
+            auto processing=this->_process_box(box,conjunction);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 this->_accumulate_box_processing_statistics(

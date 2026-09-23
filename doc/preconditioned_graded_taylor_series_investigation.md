@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `557f2a3554d37627c5997913bc1b7e6e7805ceaa`
+**Latest analysed investigation HEAD:** `e797d6c2164adf6a9e04f6108303471c26d6057a`
 
 ## Purpose of this document
 
@@ -781,6 +781,54 @@ Interpretation:
 - if the defect is already large, then simply separating polynomial and remainder will not be enough and the polynomial construction itself must change.
 
 This is deliberately a diagnostic before implementing a full Flow*-style remainder iteration. A small defect would justify the next step: derive a rigorous remainder enclosure from the defect plus a Lipschitz/Jacobian bound on the validated physical flow box.
+
+---
+
+
+### 9.8 Centre-polynomial defect is small: separate remainder validation is justified (2026-09-23)
+
+The diagnostic from `e797d6c2164adf6a9e04f6108303471c26d6057a` compiled and ran successfully.
+
+For the important second-step QR state, the centre-only polynomial has essentially negligible construction error (about `2e-11`) and an initial-condition mismatch of the same order. At `h=0.02`:
+
+```
+polynomial_errors ~ [1.97e-11, 1.67e-11]
+
+defect R = dP/dt - g(P):
+  component 0 ~ [-1.93e-7,  2.02e-7]
+  component 1 ~ [-1.09e-6,  1.39e-6]
+
+initial mismatch:
+  component 0 ~ +/-1.97e-11
+  component 1 ~ +/-1.66e-11
+```
+
+When the candidate step is reduced, the defect decreases rapidly:
+
+```
+h=0.020: max |R| ~ 1.39e-6
+h=0.015: max |R| ~ 3.39e-7
+h=0.010: max |R| ~ 5.47e-8
+```
+
+The raw scale `h * sup|R|` at `h=0.02` is only about `2.8e-8`, before accounting for dynamical amplification. This is orders of magnitude below the current QR graded-series local remainder (about `4.3e-6`) and also below the improved direct-physical-box diagnostic (about `2.9e-6`).
+
+**Conclusion:** the polynomial approximation itself is not the source of the large QR remainder. The evidence now directly supports the Flow*-like split architecture: retain the centre/polynomial expansion and certify a separate remainder around it, instead of replacing highest-order coefficients by the recursively inflated bounding graded differential.
+
+This does **not** yet prove that a rigorous remainder of order `1e-8` is attainable: the defect must be propagated through a validated Jacobian/Lipschitz bound on a tube containing the exact flow. The next diagnostic therefore computes a conservative infinity-norm Lipschitz bound `L` over the already validated local flow box. With
+
+```
+epsilon = sup |dP/dt - g(P)|
+e0      = sup |P(y,0)-y|
+```
+
+the first a-posteriori enclosure to test is the Gronwall bound
+
+```
+|e(h)| <= exp(L h) e0 + (exp(L h)-1)/L * epsilon.
+```
+
+If this already beats the current graded bounding remainder by a large factor, implement it as the first rigorous polynomial+remainder prototype. If it is too pessimistic, move directly to componentwise/matrix remainder refinement rather than returning to the old graded bounding recurrence.
 
 ---
 

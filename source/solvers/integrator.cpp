@@ -1864,12 +1864,33 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             ValidatedVectorMultivariateFunctionPatch initial_defect=
                 initial_polynomial-identity_on_domy;
 
+            // Crude infinity-norm Lipschitz bound on the whole validated
+            // local flow box.  Together with the defect range this is enough
+            // to form the a-posteriori Gronwall estimate
+            //   |e(h)| <= exp(Lh)|e(0)| + (exp(Lh)-1)/L * sup|R|.
+            // Print the ingredients first; keep this diagnostic independent
+            // of any particular scalar-bound implementation.
+            Vector<ValidatedNumericType> local_bounding_values=
+                cast_singleton(local_bounding_box);
+            Vector<ValidatedDifferential> dg=
+                g.differential(local_bounding_values,1u);
+            auto lipschitz_inf=mag(dg[0u].gradient()[0u]);
+            lipschitz_inf=FloatDPUpperBound(0,dp);
+            for(SizeType i=0u; i!=n; ++i) {
+                auto row_sum=mag(dg[i].gradient()[0u]);
+                for(SizeType j=1u; j!=n; ++j) {
+                    row_sum+=mag(dg[i].gradient()[j]);
+                }
+                lipschitz_inf=max(lipschitz_inf,row_sum);
+            }
+
             std::cerr << "[CentrePolynomialDefectDiagnostic]"
                       << " h=" << h
                       << " polynomial_errors=" << centre_polynomial.errors()
                       << " polynomial_range=" << centre_polynomial.range()
                       << " defect_range=" << defect.range()
                       << " initial_defect_range=" << initial_defect.range()
+                      << " lipschitz_inf=" << lipschitz_inf
                       << std::endl;
         }
 

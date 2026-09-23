@@ -972,17 +972,24 @@ graded_series_centre_polynomial_step(
         p.temporaries_size(),residual_null);
     DegreeType const final_degree=dphic[0u].degree();
     ValidatedDifferential const z=nul(dphic[0u][0u]);
-    for(SizeType i=0u; i!=n; ++i) {
-        for(DegreeType k=0u; k!=final_degree; ++k) {
-            final_f[i].append(z);
-        }
+
+    // compute_procedure appends exactly one graded degree.  Evaluate g(P)
+    // degree-by-degree using prefixes of P; a single call with the complete
+    // argument and empty outputs only computes the first degree.
+    Vector<GradedValidatedDifferential> argument_prefix=dphic;
+    for(SizeType i=0u; i!=argument_prefix.size(); ++i) {
+        argument_prefix[i]=GradedValidatedDifferential(0u,dphic[i].characteristics());
     }
-    for(SizeType j=0u; j!=final_tmp.size(); ++j) {
-        for(DegreeType k=0u; k!=final_degree; ++k) {
-            final_tmp[j].append(z);
+    for(DegreeType k=0u; k<=final_degree; ++k) {
+        for(SizeType i=0u; i!=argument_prefix.size(); ++i) {
+            if(k!=0u) {
+                argument_prefix[i].append(dphic[i][k]);
+            } else {
+                argument_prefix[i][0u]=dphic[i][0u];
+            }
         }
+        Ariadne::compute_procedure(p,final_f,final_tmp,argument_prefix);
     }
-    Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
 
     Vector<ValidatedDifferential> recurrence_field_differential=
         differential(final_f,n,so,to);

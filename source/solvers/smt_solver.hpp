@@ -30,6 +30,7 @@
 #define ARIADNE_SMT_SOLVER_HPP
 
 #include <optional>
+#include <vector>
 #include <mutex>
 #include <limits>
 
@@ -224,6 +225,16 @@ CandidateWitnessOutcome candidate_witness_outcome(
     Bool enabled,
     std::optional<UpperBoxType> const& candidate,
     Bool certified);
+
+struct SensitivitySplitSelection {
+    SizeType coordinate = 0u;
+    Bool guided = false;
+    Bool overrode_geometric = false;
+};
+
+SensitivitySplitSelection sensitivity_split_selection(
+    UpperBoxType const& domain,
+    std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
 struct SearchOutcome {
     std::optional<UpperBoxType> witness;

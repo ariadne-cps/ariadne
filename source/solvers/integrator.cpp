@@ -1251,17 +1251,14 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     // Taylor map.  Flow* obtains an orthogonal matrix from these linear
     // coefficients; the same idea is used here.  If the parameter dimension
     // does not match the state dimension, retain the identity orientation.
-    Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n);
+    Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n,dp);
     if(state_taylor.argument_size()==n) {
         Matrix<FloatDP> const J=jacobian_value(state_taylor.models());
         Matrix<FloatDPApproximation> const& approximate_J=
             reinterpret_cast<Matrix<FloatDPApproximation> const&>(J);
 
-        Matrix<FloatDPApproximation> approximate_Q;
-        Matrix<FloatDPApproximation> approximate_R;
-        PivotMatrix permutation;
-        make_ltuple(approximate_Q,approximate_R,permutation)=
-            orthogonal_decomposition(approximate_J,true);
+        auto const approximate_QR=orthogonal_decomposition(approximate_J);
+        Matrix<FloatDPApproximation> const& approximate_Q=std::get<0>(approximate_QR);
 
         rotation=
             reinterpret_cast<Matrix<FloatDP> const&>(approximate_Q);
@@ -1297,9 +1294,11 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     }
 
     Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
+    Matrix<FloatDP> const& const_rotation=rotation;
+    Vector<FloatDP> const& const_radius=radius;
     for(SizeType i=0u; i!=n; ++i) {
         for(SizeType j=0u; j!=n; ++j) {
-            linear_map[i][j]=rotation[i][j]*radius[j];
+            linear_map[i][j]=const_rotation[i][j]*const_radius[j];
         }
     }
 

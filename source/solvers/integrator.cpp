@@ -1298,7 +1298,7 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     Vector<FloatDP> const& const_radius=radius;
     for(SizeType i=0u; i!=n; ++i) {
         for(SizeType j=0u; j!=n; ++j) {
-            linear_map[i][j]=const_rotation[i][j]*const_radius[j];
+            linear_map[i][j]=mul(near,const_rotation[i][j],const_radius[j]);
         }
     }
 

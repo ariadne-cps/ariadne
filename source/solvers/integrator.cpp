@@ -1253,9 +1253,19 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     // does not match the state dimension, retain the identity orientation.
     Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n,dp);
     if(state_taylor.argument_size()==n) {
-        Matrix<FloatDP> const J=jacobian_value(state_taylor.models());
-        Matrix<FloatDPApproximation> const& approximate_J=
-            reinterpret_cast<Matrix<FloatDPApproximation> const&>(J);
+        // Extract the first-order coefficients directly.  Calling the
+        // jacobian_value template here would require a FloatDP instantiation
+        // that is not exported by the algebra library.
+        Matrix<FloatDPApproximation> approximate_J(n,n,dp);
+        MultiIndex a(n);
+        for(SizeType i=0u; i!=n; ++i) {
+            for(SizeType j=0u; j!=n; ++j) {
+                a[j]=1u;
+                approximate_J[i][j]=
+                    FloatDPApproximation(state_taylor.model(i)[a]);
+                a[j]=0u;
+            }
+        }
 
         auto const approximate_QR=orthogonal_decomposition(approximate_J);
         Matrix<FloatDPApproximation> const& approximate_Q=std::get<0>(approximate_QR);

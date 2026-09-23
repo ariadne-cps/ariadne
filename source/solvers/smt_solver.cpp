@@ -735,6 +735,26 @@ struct ParallelSmtSearchState {
 
 using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
 
+Bool parallel_stop_condition_impl(
+    std::atomic<bool> const& found,
+    std::atomic<bool> const& limit_reached)
+{
+    return found.load() || limit_reached.load();
+}
+
+Bool claim_parallel_witness(
+    ParallelSmtSearchState& state,
+    UpperBoxType const& witness)
+{
+    bool expected=false;
+    if(not state.found.compare_exchange_strong(expected,true)) {
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(state.mutex);
+    state.witness=witness;
+    return true;
+}
+
 } // namespace
 
 struct SmtParallelTask {
@@ -746,7 +766,7 @@ struct SmtParallelTask {
         ParallelSmtWorkload::Access& access,
         UpperBoxType const& box) const
     {
-        if(state->found.load() || state->limit_reached.load()) {
+        if(parallel_stop_condition_impl(state->found,state->limit_reached)) {
             return;
         }
 
@@ -773,11 +793,7 @@ struct SmtParallelTask {
             return;
         }
         if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::EPSILON_SAT) {
-            bool expected=false;
-            if(state->found.compare_exchange_strong(expected,true)) {
-                std::lock_guard<std::mutex> lock(state->mutex);
-                state->witness=*processing.witness;
-            }
+            claim_parallel_witness(*state,*processing.witness);
             return;
         }
         if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
@@ -888,6 +904,22 @@ Void record_parallel_processing_thread()
     if(parallel_execution_observation_enabled) {
         parallel_execution_threads.insert(std::this_thread::get_id());
     }
+}
+
+Bool parallel_stop_condition(Bool found, Bool limit_reached)
+{
+    std::atomic<bool> atomic_found{static_cast<bool>(found)};
+    std::atomic<bool> atomic_limit{static_cast<bool>(limit_reached)};
+    return parallel_stop_condition_impl(atomic_found,atomic_limit);
+}
+
+Pair<Bool,Bool> parallel_witness_claim_sequence()
+{
+    ParallelSmtSearchState state;
+    UpperBoxType witness({UpperIntervalType(ExactIntervalType(0,0))});
+    Bool first=claim_parallel_witness(state,witness);
+    Bool second=claim_parallel_witness(state,witness);
+    return {first,second};
 }
 
 Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)

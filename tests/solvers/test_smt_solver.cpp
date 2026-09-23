@@ -51,6 +51,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
+        ARIADNE_TEST_CALL(test_parallel_state_transitions());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_sensitivity_split_selection());
         ARIADNE_TEST_CALL(test_search_outcome());
@@ -318,6 +319,18 @@ class TestSmtSolver {
         later.first_minimization_candidate_trail_rank=13u;
         SmtSolverTestSupport::accumulate_statistics(target,later);
         ARIADNE_TEST_EQUAL(target.first_minimization_candidate_trail_rank,9u);
+    }
+
+    Void test_parallel_state_transitions() {
+        std::cout << "[smt-parallel] deterministic shared-state transitions" << std::endl;
+        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::parallel_stop_condition(false,false));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,false));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(false,true));
+        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,true));
+
+        auto claims=SmtSolverTestSupport::parallel_witness_claim_sequence();
+        ARIADNE_TEST_ASSERT(claims.first);
+        ARIADNE_TEST_ASSERT(not claims.second);
     }
 
     Void test_candidate_witness_outcome() {

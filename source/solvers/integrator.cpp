@@ -1284,7 +1284,7 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
                 for(SizeType i=0u; i!=n; ++i) {
                     norm_square+=sqr(approximate_J[i][k]);
                 }
-                if(norm_square>max_norm_square) {
+                if(decide(norm_square>max_norm_square)) {
                     max_norm_square=norm_square;
                     jmax=k;
                 }

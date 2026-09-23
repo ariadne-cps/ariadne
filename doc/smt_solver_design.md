@@ -227,6 +227,10 @@ structural issues while pursuing complete coverage:
 - candidate-search states were simplified so that only semantically meaningful
   combinations are represented;
 - repeated signed-literal-to-variable conversion is centralized;
+- point-box construction used by witness and epsilon checks is explicit rather than
+  lambda-generated; this avoids compiler-generated template control-flow being
+  attributed to `smt_solver.cpp` as unsupported semantic branches while preserving
+  the same tested solver behavior;
 - redundant internal assertions have been removed where their failure state was
   impossible by construction;
 - test-only classification scaffolding is removed when production control flow already

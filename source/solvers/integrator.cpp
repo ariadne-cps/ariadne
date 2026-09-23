@@ -1840,12 +1840,15 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         if(this->preconditioning()==TaylorSeriesPreconditioning::QR
             && this->minimum_spacial_order()==this->maximum_spacial_order()
             && this->minimum_temporal_order()==this->maximum_temporal_order()) {
+            Stopwatch<Microseconds> centre_polynomial_stopwatch;
             FlowStepTaylorModelType centre_polynomial=
                 graded_series_centre_polynomial_step(
                     p,domy,domt,this->sweeper(),
                     this->minimum_spacial_order(),
                     this->minimum_temporal_order());
+            centre_polynomial_stopwatch.click();
 
+            Stopwatch<Microseconds> residual_stopwatch;
             // Compute the ODE defect R(y,t)=dP/dt-g(P) of the centre-only
             // Taylor polynomial.  If this is already small, the remaining
             // challenge is to validate a separate remainder around P rather
@@ -1870,6 +1873,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             ValidatedVectorMultivariateFunctionPatch initial_defect=
                 initial_polynomial-identity_on_domy;
 
+            residual_stopwatch.click();
+            Stopwatch<Microseconds> jacobian_stopwatch;
             // Crude infinity-norm Lipschitz bound on the whole validated
             // local flow box.  Together with the defect range this is enough
             // to form the a-posteriori Gronwall estimate
@@ -1890,6 +1895,24 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     row_sum+=mag(dg[i].gradient()[j]);
                 }
                 lipschitz_inf=max(lipschitz_inf,row_sum);
+            }
+
+            jacobian_stopwatch.click();
+            static SizeType production_profile_calls=0u;
+            static double production_centre_seconds=0.0;
+            static double production_residual_seconds=0.0;
+            static double production_jacobian_seconds=0.0;
+            ++production_profile_calls;
+            production_centre_seconds+=centre_polynomial_stopwatch.elapsed_seconds();
+            production_residual_seconds+=residual_stopwatch.elapsed_seconds();
+            production_jacobian_seconds+=jacobian_stopwatch.elapsed_seconds();
+            if(!this->diagnostics() && production_profile_calls%100u==0u) {
+                std::cerr << "[GronwallCostProfile]"
+                          << " calls=" << production_profile_calls
+                          << " centre_seconds=" << production_centre_seconds
+                          << " residual_seconds=" << production_residual_seconds
+                          << " jacobian_seconds=" << production_jacobian_seconds
+                          << std::endl;
             }
 
             if(this->diagnostics()) {

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `4472fe8f13de58d1591c5ab91fb66021672b9821`
+**Latest analysed investigation HEAD:** `67375135dd34fe6c8bea9a31ef7c374163fc877a`
 
 ## Purpose of this document
 
@@ -1107,6 +1107,34 @@ Reconditioning remains disabled deliberately for this experiment. This exposes t
 The long-horizon result should be interpreted along two axes:
 - accepted-step efficiency: number of reach sets;
 - accumulated per-step cost: elapsed time divided by the number of sets, and how total runtime scales relative to the earlier t=1.0 benchmark.
+
+---
+
+
+### 9.18 Long-horizon benchmark confirms both better scaling and increasing per-step cost (2026-09-23)
+
+At horizon t=5.0 and max_step=0.04:
+
+```
+tolerance 1e-6:
+  GRONWALL: 5.805 s, 134 sets  (~43.3 ms/set)
+  GRADED:   3.485 s, 169 sets  (~20.6 ms/set)
+
+tolerance 1e-8:
+  GRONWALL: 14.592 s, 215 sets (~67.9 ms/set)
+  GRADED:    8.643 s, 401 sets (~21.6 ms/set)
+```
+
+The accuracy scaling advantage is robust and increases at tighter tolerance: at 1e-8 the Gronwall path uses about 46% fewer sets. But the long-horizon result also confirms that its average cost per set grows substantially: roughly 43 ms/set at 1e-6 and 68 ms/set at 1e-8, compared with about 21 ms/set for the ordinary graded path.
+
+Relative to the t=1.0 runs, this indicates that the persistent/composed representation and/or the residual certification work becomes increasingly expensive as the carried state evolves. The next task is therefore profiling, not another blind algorithmic change.
+
+A lightweight production profiler has been added around three major local certification phases:
+- centre graded polynomial construction;
+- residual construction/range evaluation;
+- Jacobian/Lipschitz evaluation.
+
+It emits cumulative `[GronwallCostProfile]` lines every 100 candidate calls with diagnostics disabled. Comparing these cumulative costs with total wall time will tell us whether the dominant growth is inside local certification or outside it (composition/preconditioning/evolver state propagation). This distinction determines the next optimisation target.
 
 ---
 

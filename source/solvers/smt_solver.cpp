@@ -739,7 +739,8 @@ Bool parallel_stop_condition_impl(
     std::atomic<bool> const& found,
     std::atomic<bool> const& limit_reached)
 {
-    return found.load() | limit_reached.load();
+    return static_cast<unsigned>(found.load())
+        | static_cast<unsigned>(limit_reached.load());
 }
 
 Bool parallel_should_append_children_impl(std::atomic<bool> const& found)
@@ -1432,7 +1433,8 @@ class SmtDpllSearch {
     {
         SizeType count=0u;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
-            if(_learned_clause_active[i] & (not _learned_clause_is_theory[i])) {
+            if(static_cast<unsigned>(_learned_clause_active[i])
+               & static_cast<unsigned>(not _learned_clause_is_theory[i])) {
                 ++count;
             }
         }

@@ -1406,83 +1406,52 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     Matrix<FloatDP> const& A=state.linear_map();
     Matrix<FloatDPBounds> const inverse_A=inverse(A);
 
-    // First compute the flow bound in physical coordinates.  The bounder
-    // deliberately enlarges the initial box; constructing the transformed
-    // vector field only on domy would therefore make it invalid exactly where
-    // the bounder needs to evaluate it.
-    ValidatedVectorMultivariateFunctionPatch initial_y=
-        factory.create_identity(domy);
-    ValidatedVectorMultivariateFunctionPatch initial_x=
-        factory.create_zeros(n,domy);
+    // Build the transformed vector field as an unrestricted validated
+    // function, rather than as a FunctionPatch on a guessed local box.
+    // EulerBounder deliberately probes enlarged candidate boxes; casting a
+    // restricted patch to an unrestricted interface does not remove its
+    // domain checks and caused DomainException as soon as one probe left the
+    // patch domain.
+    ValidatedVectorMultivariateFunction y=
+        ValidatedVectorMultivariateFunction::identity(n);
+    ValidatedVectorMultivariateFunction x_of_y=
+        ValidatedVectorMultivariateFunction::zeros(n,n);
+
     for(SizeType i=0u; i!=n; ++i) {
-        initial_x[i]=factory.create_constant(domy,centre[i]);
+        ValidatedScalarMultivariateFunction xi=
+            ValidatedScalarMultivariateFunction::constant(
+                n,ValidatedNumber(FloatDPBounds(centre[i])));
         for(SizeType j=0u; j!=n; ++j) {
-            initial_x[i]=initial_x[i]+initial_y[j]*FloatDPBounds(A[i][j]);
+            xi=xi+y[j]*ValidatedNumber(FloatDPBounds(A[i][j]));
         }
+        x_of_y.set(i,xi);
     }
 
-    ExactBoxType const physical_initial_domain=
-        cast_exact_box(widen(initial_x.range()));
-
-    StepSizeType h;
-    UpperBoxType physical_bounding_box;
-    make_lpair(h,physical_bounding_box)=
-        this->flow_bounds(f,physical_initial_domain,hsug);
-
-    // Transform the validated physical flow bound to local coordinates.
-    // This preliminary box is used only to give the transformed vector field
-    // a domain large enough for validation.
-    UpperBoxType preliminary_local_bounding_box(n);
-    for(SizeType i=0u; i!=n; ++i) {
-        FloatDPBounds yi(0,dp);
-        for(SizeType j=0u; j!=n; ++j) {
-            FloatDPBounds const xj=cast_singleton(physical_bounding_box[j]);
-            yi=yi+inverse_A[i][j]*(xj-centre[j]);
-        }
-        preliminary_local_bounding_box[i]=
-            UpperIntervalType(yi.lower(),yi.upper());
-    }
-
-    // Build the transformed vector field on the conservative preliminary
-    // local flow bound, not merely on the local initial domain.
-    ExactBoxType const local_vector_field_domain=
-        cast_exact_box(preliminary_local_bounding_box);
-    ValidatedVectorMultivariateFunctionPatch y=
-        factory.create_identity(local_vector_field_domain);
-    ValidatedVectorMultivariateFunctionPatch x_of_y=
-        factory.create_zeros(n,local_vector_field_domain);
-    for(SizeType i=0u; i!=n; ++i) {
-        x_of_y[i]=factory.create_constant(local_vector_field_domain,centre[i]);
-        for(SizeType j=0u; j!=n; ++j) {
-            x_of_y[i]=x_of_y[i]+y[j]*FloatDPBounds(A[i][j]);
-        }
-    }
-
-    // y' = A^{-1} f(c+A*y).  This formulation already supports a full
-    // non-diagonal A, so QR preconditioning can later reuse the same core.
-    ValidatedVectorMultivariateFunctionPatch physical_vector_field=
+    // y' = A^{-1} f(c+A*y).  Since both the affine substitution and f are
+    // unrestricted functions, the bounder may safely enlarge its candidate
+    // boxes while searching for a contraction.
+    ValidatedVectorMultivariateFunction physical_vector_field=
         compose(f,x_of_y);
-    ValidatedVectorMultivariateFunctionPatch local_vector_field=
-        factory.create_zeros(n,local_vector_field_domain);
-    for(SizeType i=0u; i!=n; ++i) {
-        for(SizeType j=0u; j!=n; ++j) {
-            local_vector_field[i]=local_vector_field[i]
-                + physical_vector_field[j]*inverse_A[i][j];
-        }
-    }
-    ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
+    ValidatedVectorMultivariateFunction g=
+        ValidatedVectorMultivariateFunction::zeros(n,n);
 
-    // Compute the actual validated flow bound in the preconditioned
-    // coordinates.  Using the interval image A^{-1}(B_x-c) directly as the
-    // Taylor-series bounding box introduces a second axis-aligned wrapping
-    // after a QR rotation and was forcing much smaller steps.  The physical
-    // bound above is retained only to define g safely; the bound consumed by
-    // graded_series_flow_step is now obtained by bounding y'=g(y) from domy.
-    StepSizeType local_h;
+    for(SizeType i=0u; i!=n; ++i) {
+        ValidatedScalarMultivariateFunction gi=
+            ValidatedScalarMultivariateFunction::zero(n);
+        for(SizeType j=0u; j!=n; ++j) {
+            gi=gi+physical_vector_field[j]
+                *ValidatedNumber(FloatDPBounds(inverse_A[i][j]));
+        }
+        g.set(i,gi);
+    }
+
+    // Bound the flow directly in the local coordinates.  This avoids the
+    // extra axis-aligned wrapping from transforming a physical bounding box
+    // through A^{-1}.
+    StepSizeType h;
     UpperBoxType local_bounding_box;
-    make_lpair(local_h,local_bounding_box)=
-        this->flow_bounds(g,domy,suggest(h));
-    h=local_h;
+    make_lpair(h,local_bounding_box)=
+        this->flow_bounds(g,domy,hsug);
 
     ExactBoxType doma;
     Vector<ValidatedProcedure> p(g);

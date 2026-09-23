@@ -1430,22 +1430,23 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         this->flow_bounds(f,physical_initial_domain,hsug);
 
     // Transform the validated physical flow bound to local coordinates.
-    // For a future non-diagonal (QR) A this interval matrix product remains
-    // conservative.
-    UpperBoxType local_bounding_box(n);
+    // This preliminary box is used only to give the transformed vector field
+    // a domain large enough for validation.
+    UpperBoxType preliminary_local_bounding_box(n);
     for(SizeType i=0u; i!=n; ++i) {
         FloatDPBounds yi(0,dp);
         for(SizeType j=0u; j!=n; ++j) {
             FloatDPBounds const xj=cast_singleton(physical_bounding_box[j]);
             yi=yi+inverse_A[i][j]*(xj-centre[j]);
         }
-        local_bounding_box[i]=UpperIntervalType(yi.lower(),yi.upper());
+        preliminary_local_bounding_box[i]=
+            UpperIntervalType(yi.lower(),yi.upper());
     }
 
-    // Build the transformed vector field on the whole validated local flow
-    // bound, not merely on the local initial domain.
+    // Build the transformed vector field on the conservative preliminary
+    // local flow bound, not merely on the local initial domain.
     ExactBoxType const local_vector_field_domain=
-        cast_exact_box(local_bounding_box);
+        cast_exact_box(preliminary_local_bounding_box);
     ValidatedVectorMultivariateFunctionPatch y=
         factory.create_identity(local_vector_field_domain);
     ValidatedVectorMultivariateFunctionPatch x_of_y=
@@ -1470,6 +1471,18 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         }
     }
     ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
+
+    // Compute the actual validated flow bound in the preconditioned
+    // coordinates.  Using the interval image A^{-1}(B_x-c) directly as the
+    // Taylor-series bounding box introduces a second axis-aligned wrapping
+    // after a QR rotation and was forcing much smaller steps.  The physical
+    // bound above is retained only to define g safely; the bound consumed by
+    // graded_series_flow_step is now obtained by bounding y'=g(y) from domy.
+    StepSizeType local_h;
+    UpperBoxType local_bounding_box;
+    make_lpair(local_h,local_bounding_box)=
+        this->flow_bounds(g,domy,suggest(h));
+    h=local_h;
 
     ExactBoxType doma;
     Vector<ValidatedProcedure> p(g);

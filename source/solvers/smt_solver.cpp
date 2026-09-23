@@ -561,26 +561,6 @@ SmtSolver::_process_box(
         return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
     }
 
-    std::optional<UpperBoxType> candidate;
-    Bool candidate_certified=false;
-    if(_configuration.candidate_search_enabled()) {
-        candidate=this->_epsilon_candidate_witness(domain,conjunction);
-        candidate_certified=candidate.has_value();
-    }
-    auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
-        _configuration.candidate_search_enabled(),candidate,candidate_certified);
-    if(candidate_outcome.certified) {
-        ARIADNE_ASSERT(candidate_outcome.witness.has_value());
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,
-            *candidate_outcome.witness,
-            std::nullopt,
-            reductions};
-        result.candidate_witness_search=true;
-        result.candidate_witness_success=true;
-        return result;
-    }
-
     auto split_result=this->_split_box(domain,conjunction);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
@@ -594,10 +574,34 @@ SmtSolver::_process_box(
             and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
             and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
     }
-    if(first_same and second_same) {
+    Bool const splittable=not (first_same and second_same);
+
+    std::optional<UpperBoxType> candidate;
+    Bool candidate_certified=false;
+    Bool const candidate_search_attempted=
+        _configuration.candidate_search_enabled() and splittable;
+    if(candidate_search_attempted) {
+        candidate=this->_epsilon_candidate_witness(domain,conjunction);
+        candidate_certified=candidate.has_value();
+    }
+    auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
+        candidate_search_attempted,candidate,candidate_certified);
+    if(candidate_outcome.certified) {
+        ARIADNE_ASSERT(candidate_outcome.witness.has_value());
+        BoxProcessingResult result{
+            BoxProcessingStatus::EPSILON_SAT,
+            *candidate_outcome.witness,
+            std::nullopt,
+            reductions};
+        result.candidate_witness_search=true;
+        result.candidate_witness_success=true;
+        return result;
+    }
+
+    if(not splittable) {
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=candidate_outcome.attempted;
+        result.candidate_witness_search=false;
         result.non_splittable_epsilon_overlap=true;
         return result;
     }

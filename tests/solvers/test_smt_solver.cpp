@@ -975,6 +975,25 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] terminal box skips interior-point candidate search" << std::endl;
+            auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
+            ValidatedScalarMultivariateFunction residual=
+                sqr(sin(sx[0]))+sqr(cos(sx[0]))-1;
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                ExactBoxType({ExactIntervalType(1,1)}),constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+        }
+
+        {
             std::cout << "[smt-solve] reject constraint dimension mismatch" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             ExactBoxType domain({ExactIntervalType(0,1)});

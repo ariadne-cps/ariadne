@@ -492,18 +492,22 @@ class PreconditionedTaylorSeriesStep {
   private:
     StepSizeType _time_step;
     ValidatedVectorMultivariateFunctionPatch _flowpipe_mapping;
+    ValidatedVectorMultivariateFunctionPatch _evolved_mapping;
     PreconditionedTaylorSeriesState _final_state;
   public:
     PreconditionedTaylorSeriesStep(
         StepSizeType time_step,
         ValidatedVectorMultivariateFunctionPatch flowpipe_mapping,
+        ValidatedVectorMultivariateFunctionPatch evolved_mapping,
         PreconditionedTaylorSeriesState final_state)
         : _time_step(time_step),
           _flowpipe_mapping(std::move(flowpipe_mapping)),
+          _evolved_mapping(std::move(evolved_mapping)),
           _final_state(std::move(final_state)) { }
 
     StepSizeType const& time_step() const { return _time_step; }
     ValidatedVectorMultivariateFunctionPatch const& flowpipe_mapping() const { return _flowpipe_mapping; }
+    ValidatedVectorMultivariateFunctionPatch const& evolved_mapping() const { return _evolved_mapping; }
     PreconditionedTaylorSeriesState const& final_state() const { return _final_state; }
 };
 

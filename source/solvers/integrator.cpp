@@ -1407,12 +1407,24 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     ValidatedVectorMultivariateFunctionPatch flowpipe_mapping=
         compose(physical_local_flow,arguments);
 
-    ValidatedVectorMultivariateFunctionPatch final_mapping=
-        partial_evaluate(flowpipe_mapping,flowpipe_mapping.argument_size()-1u,h);
-    PreconditionedTaylorSeriesState final_state=this->precondition(final_mapping);
+    // For the evolved set, evaluate time before composing with the local
+    // initial Taylor model.  Composing the complete space-time flowpipe first
+    // and only then evaluating t=h introduces unnecessary mixed space/time
+    // terms and substantially larger sweep/remainder errors.  This also
+    // matches the TM-integration update X_{l+1}=p_l(X_l,delta_l)+I_l.
+    ValidatedVectorMultivariateFunctionPatch local_endpoint=
+        partial_evaluate(
+            physical_local_flow,
+            physical_local_flow.argument_size()-1u,h);
+    ValidatedVectorMultivariateFunctionPatch evolved_mapping=
+        compose(local_endpoint,state.normalised_mapping());
+
+    PreconditionedTaylorSeriesState final_state=
+        this->precondition(evolved_mapping);
 
     return PreconditionedTaylorSeriesStep(
-        h,std::move(flowpipe_mapping),std::move(final_state));
+        h,std::move(flowpipe_mapping),std::move(evolved_mapping),
+        std::move(final_state));
 }
 
 FlowStepModelType

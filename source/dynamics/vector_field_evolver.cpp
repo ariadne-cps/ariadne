@@ -223,18 +223,20 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
         reach_set.apply_parameterised_full_reach_step(
             local_step.flowpipe_mapping());
 
-        ValidatedVectorMultivariateFunctionPatch final_mapping=
-            partial_evaluate(
-                local_step.flowpipe_mapping(),
-                local_step.flowpipe_mapping().argument_size()-1u,
-                step_size);
+        ValidatedVectorMultivariateFunctionPatch const& final_mapping=
+            local_step.evolved_mapping();
         next_set.apply_parameterised_fixed_evolve_step(
             final_mapping,step_size);
 
-        // Temporary diagnostic: follow exactly where remainder growth is
-        // introduced during the first preconditioned steps.
+        // Temporary diagnostic: compare endpoint-first composition with the
+        // old endpoint-after-full-flowpipe ordering.
         if(result->reach_size()<20u) {
             auto const& final_state=local_step.final_state();
+            ValidatedVectorMultivariateFunctionPatch old_order_endpoint=
+                partial_evaluate(
+                    local_step.flowpipe_mapping(),
+                    local_step.flowpipe_mapping().argument_size()-1u,
+                    step_size);
             std::cerr << "[PreconditionedStepDiagnostic]"
                       << " step=" << result->reach_size()
                       << " t=" << current_time
@@ -244,6 +246,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
                       << " normalized_range=" << local_state.normalised_mapping().range()
                       << " A=" << local_state.linear_map()
                       << " flowpipe_error=" << local_step.flowpipe_mapping().error()
+                      << " old_order_endpoint_error=" << old_order_endpoint.error()
                       << " final_mapping_error=" << final_mapping.error()
                       << " final_normalized_error=" << final_state.normalised_mapping().error()
                       << " final_normalized_range=" << final_state.normalised_mapping().range()

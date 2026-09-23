@@ -32,6 +32,7 @@
 
 #include "conclog/logging.hpp"
 #include "utility/container.hpp"
+#include "utility/stopwatch.hpp"
 #include "utility/tuple.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

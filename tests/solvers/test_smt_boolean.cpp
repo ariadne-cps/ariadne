@@ -316,6 +316,22 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(encoding.atom_count(),2u);
             ARIADNE_TEST_EQUAL(encoding.variable_count(),3u);
         }
+
+        {
+            std::cout << "[smt-boolean] different canonical relations stay distinct" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(
+                (ex>=0)&&(ex==0));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),2u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),3u);
+        }
+
+        {
+            std::cout << "[smt-boolean] same relation with different lhs stays distinct" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(
+                (ex>=0)&&(ey>=0));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),2u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),3u);
+        }
     }
 
     Void test_nested_formula() {

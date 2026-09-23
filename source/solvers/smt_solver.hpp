@@ -422,30 +422,43 @@ class SmtSolver {
         Bool non_splittable_epsilon_overlap = false;
     };
 
-    template<class Conjunction>
-    BoxProcessingResult _process_box(
-        UpperBoxType domain,
-        Conjunction const& conjunction) const;
-
-    Void _accumulate_box_processing_statistics(
-        SmtSearchStatistics& statistics,
-        BoxProcessingResult const& processing) const;
-
-    template<class Conjunction>
-    SmtResult _solve_sequential_conjunction(
-        ExactBoxType const& domain,
-        Conjunction const& conjunction) const;
-
-    template<class Conjunction>
-    SmtResult _solve_parallel_conjunction(
-        ExactBoxType const& domain,
-        Conjunction const& conjunction) const;
-
     struct CompiledTheoryLiteral {
         ValidatedScalarMultivariateFunction function;
         SmtTheoryPrimitiveRelation relation;
     };
     using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;
+
+    struct ConjunctionReference {
+        List<ValidatedConstraint> const* constraints;
+        CompiledTheoryLiterals const* theory_literals;
+
+        explicit ConjunctionReference(List<ValidatedConstraint> const& conjunction)
+            : constraints(&conjunction), theory_literals(nullptr) { }
+
+        explicit ConjunctionReference(CompiledTheoryLiterals const& conjunction)
+            : constraints(nullptr), theory_literals(&conjunction) { }
+    };
+
+    template<class Conjunction>
+    BoxProcessingResult _process_box(
+        UpperBoxType domain,
+        Conjunction const& conjunction) const;
+
+    BoxProcessingResult _process_box(
+        UpperBoxType domain,
+        ConjunctionReference const& conjunction) const;
+
+    Void _accumulate_box_processing_statistics(
+        SmtSearchStatistics& statistics,
+        BoxProcessingResult const& processing) const;
+
+    SmtResult _solve_sequential_conjunction(
+        ExactBoxType const& domain,
+        ConjunctionReference const& conjunction) const;
+
+    SmtResult _solve_parallel_conjunction(
+        ExactBoxType const& domain,
+        ConjunctionReference const& conjunction) const;
 
     ExactIntervalType _original_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _original_bounds(SmtTheoryPrimitiveRelation relation) const;

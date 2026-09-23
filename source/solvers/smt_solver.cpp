@@ -610,6 +610,19 @@ SmtSolver::_process_box(
     return result;
 }
 
+SmtSolver::BoxProcessingResult
+SmtSolver::_process_box(
+    UpperBoxType domain,
+    ConjunctionReference const& conjunction) const
+{
+    if(conjunction.constraints!=nullptr) {
+        return this->_process_box(
+            std::move(domain),*conjunction.constraints);
+    }
+    return this->_process_box(
+        std::move(domain),*conjunction.theory_literals);
+}
+
 Void
 SmtSolver::_accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
@@ -631,11 +644,10 @@ SmtSolver::_accumulate_box_processing_statistics(
         });
 }
 
-template<class Conjunction>
 SmtResult
 SmtSolver::_solve_sequential_conjunction(
     ExactBoxType const& domain,
-    Conjunction const& conjunction) const
+    ConjunctionReference const& conjunction) const
 {
     SmtSearchStatistics statistics;
     SequentialSmtWorkQueue pending;
@@ -687,7 +699,8 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     if(constraints.empty()) {
         return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    return this->_solve_sequential_conjunction(domain,constraints);
+    return this->_solve_sequential_conjunction(
+        domain,ConjunctionReference(constraints));
 }
 
 SmtResult SmtSolver::solve(RealSpace const& space,
@@ -708,7 +721,8 @@ SmtResult SmtSolver::solve(RealSpace const& space,
     if(compiled.empty()) {
         return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    return this->_solve_sequential_conjunction(domain,compiled);
+    return this->_solve_sequential_conjunction(
+        domain,ConjunctionReference(compiled));
 }
 
 
@@ -732,11 +746,10 @@ using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
 
 } // namespace
 
-template<class Conjunction>
 SmtResult
 SmtSolver::_solve_parallel_conjunction(
     ExactBoxType const& domain,
-    Conjunction const& conjunction) const
+    ConjunctionReference const& conjunction) const
 {
     auto state=std::make_shared<ParallelSmtSearchState>();
     ParallelSmtWorkload workload(
@@ -822,7 +835,8 @@ SmtResult SmtSolver::solve_parallel(
     if(constraints.empty()) {
         return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    return this->_solve_parallel_conjunction(domain,constraints);
+    return this->_solve_parallel_conjunction(
+        domain,ConjunctionReference(constraints));
 }
 
 SmtResult SmtSolver::solve_parallel(
@@ -844,7 +858,8 @@ SmtResult SmtSolver::solve_parallel(
     if(compiled.empty()) {
         return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
-    return this->_solve_parallel_conjunction(domain,compiled);
+    return this->_solve_parallel_conjunction(
+        domain,ConjunctionReference(compiled));
 }
 
 

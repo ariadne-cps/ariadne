@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `f2a8ae611a7de2992ab00ccf0bb2e8e087029c50`
+**Latest analysed investigation HEAD:** `9e4c4d659edadc732d26c7d19593a7379ae9bed0`
 
 ## Purpose of this document
 
@@ -1036,6 +1036,27 @@ The old graded integrator pays for the centre+bounding recurrence but no separat
 The result changes the immediate optimisation question. The main potential speed advantage of the new method is not cheaper work per fixed h=0.02 step; it is the ability to take larger validated steps because its remainder is much smaller. A fair next experiment must therefore remove the artificial common maximum-step bottleneck.
 
 The next benchmark extends the horizon to t=1.0 and compares both methods at max_step=0.02, then runs the Gronwall method at max_step=0.04. This tests whether the accuracy headroom can be converted into fewer steps. If 0.04 is accepted robustly, follow with the ordinary graded method at 0.04 to determine whether its local-error criterion forces reductions.
+
+---
+
+
+### 9.15 Larger steps convert accuracy headroom into fewer steps, but current cost remains dominant (2026-09-23)
+
+On the t=1.0 benchmark:
+
+```
+GRONWALL max_step=0.02: 1.45701 s, 50 reach sets
+GRADED   max_step=0.02: 0.499001 s, 51 reach sets
+GRONWALL max_step=0.04: 1.32101 s, 28 reach sets
+```
+
+Increasing the Gronwall maximum step from 0.02 to 0.04 reduces the number of reach sets from 50 to 28, confirming that the smaller certified remainder can be converted into substantially larger accepted steps. Runtime, however, improves only from 1.46 s to 1.32 s. The current per-step cost of residual construction/range evaluation, Jacobian evaluation, QR factorisation and carried-state composition therefore dominates enough that halving the nominal step count is not yet sufficient to beat the old graded method.
+
+The 28-set result also shows that h=0.04 is not accepted uniformly; the method reduces the step on some states. Adaptive step choice will matter.
+
+**Next experiment:** run the ordinary graded integrator with the same max_step=0.04. This distinguishes two possibilities:
+- if graded is forced close to its previous ~0.02 step count, the new method has a real step-size advantage and optimisation should focus on reducing per-step residual/Jacobian cost;
+- if graded also takes near-0.04 steps, then the current tolerance/benchmark regime does not expose the accuracy advantage strongly enough for speed comparison, and tighter tolerances should be tested.
 
 ---
 

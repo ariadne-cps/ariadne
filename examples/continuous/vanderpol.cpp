@@ -94,4 +94,19 @@ void ariadne_main()
               << " intermediate_sets=" << gronwall_orbit_004.intermediate().size()
               << std::endl;
 
+    VectorFieldEvolver graded_evolver_004(dynamics,graded_integrator);
+    configure_evolver(graded_evolver_004,0.04_x);
+
+    Stopwatch<Milliseconds> graded_stopwatch_004;
+    auto graded_orbit_004=
+        graded_evolver_004.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
+    graded_stopwatch_004.click();
+
+    std::cerr << "[IntegratorBenchmark]"
+              << " method=GRADED max_step=0.04"
+              << " elapsed_seconds=" << graded_stopwatch_004.elapsed_seconds()
+              << " reach_sets=" << graded_orbit_004.reach().size()
+              << " intermediate_sets=" << graded_orbit_004.intermediate().size()
+              << std::endl;
+
 }

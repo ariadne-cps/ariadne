@@ -511,7 +511,7 @@ class PreconditionedTaylorSeriesStep {
     PreconditionedTaylorSeriesState const& final_state() const { return _final_state; }
 };
 
-enum class TaylorSeriesPreconditioning { IDENTITY, QR };
+enum class TaylorSeriesPreconditioning { IDENTITY, QR, SCALED_QR };
 
 //! \brief A graded Taylor-series integrator with explicit preconditioning support.
 class PreconditionedGradedTaylorSeriesIntegrator

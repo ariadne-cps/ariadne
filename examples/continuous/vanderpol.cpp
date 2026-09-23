@@ -90,7 +90,7 @@ void ariadne_main()
             std::cerr << std::endl;
         };
 
-    run_preconditioned(TaylorSeriesPreconditioning::IDENTITY,"IDENTITY");
     run_preconditioned(TaylorSeriesPreconditioning::QR,"QR");
+    run_preconditioned(TaylorSeriesPreconditioning::SCALED_QR,"SCALED_QR");
 
 }

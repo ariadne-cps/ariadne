@@ -1225,7 +1225,10 @@ Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const 
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << ", maximum_spacial_order = " << this->maximum_spacial_order()
        << ", preconditioning = "
-       << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
+       << (this->preconditioning()==TaylorSeriesPreconditioning::IDENTITY
+               ? "IDENTITY"
+               : (this->preconditioning()==TaylorSeriesPreconditioning::QR
+                      ? "QR" : "SCALED_QR"))
        << " )";
 }
 
@@ -1254,7 +1257,7 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     // coefficients; the same idea is used here.  If the parameter dimension
     // does not match the state dimension, retain the identity orientation.
     Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n,dp);
-    if(this->preconditioning()==TaylorSeriesPreconditioning::QR
+    if(this->preconditioning()!=TaylorSeriesPreconditioning::IDENTITY
         && state_taylor.argument_size()==n) {
         // Extract the first-order coefficients directly.  Calling the
         // jacobian_value template here would require a FloatDP instantiation
@@ -1336,11 +1339,46 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
         }
     }
 
-    // Do not explicitly rescale the rotated variables to [-1,1].  A Taylor
-    // FunctionPatch in Ariadne is already internally scaled to the unit box
-    // of its external domain.  Repeating that scaling here divides the
-    // accumulated remainder by the physical set radius at every step and was
-    // the source of the rapid error growth seen in the QR diagnostic.
+    if(this->preconditioning()==TaylorSeriesPreconditioning::SCALED_QR) {
+        // Flow*-style scaling: after choosing the QR orientation, scale each
+        // rotated component by a bound on its magnitude so that the local
+        // variables live in the unit box.  This used to be unstable when we
+        // re-preconditioned the already-composed global Taylor map.  With the
+        // persistent two-layer state we now apply it only to the fresh local
+        // transition before composition, which is the relevant experiment.
+        Vector<FloatDP> radius(n,FloatDP(dp));
+        ExactBoxType local_domain(n);
+        ValidatedVectorMultivariateFunctionPatch normalised=
+            factory.create_zeros(n,state.domain());
+
+        for(SizeType i=0u; i!=n; ++i) {
+            radius[i]=cast_exact(mag(rotated[i].range()));
+            if(radius[i]==FloatDP(0,dp)) {
+                radius[i]=FloatDP(1,dp);
+                local_domain[i]=ExactIntervalType(0_z,0_z);
+                normalised[i]=factory.create_zero(state.domain());
+            } else {
+                local_domain[i]=ExactIntervalType(-1,+1);
+                normalised[i]=rotated[i]/FloatDPBounds(radius[i]);
+            }
+        }
+
+        Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
+        Matrix<FloatDP> const& const_rotation=rotation;
+        Vector<FloatDP> const& const_radius=radius;
+        for(SizeType i=0u; i!=n; ++i) {
+            for(SizeType j=0u; j!=n; ++j) {
+                linear_map[i][j]=
+                    mul(near,const_rotation[i][j],const_radius[j]);
+            }
+        }
+
+        return PreconditionedTaylorSeriesState(
+            std::move(centre),std::move(linear_map),std::move(local_domain),
+            std::move(normalised));
+    }
+
+    // Unscaled baselines: identity or rotation-only QR.
     Matrix<FloatDP> linear_map=rotation;
     ExactBoxType local_domain=
         cast_exact_box(widen(rotated.range()));

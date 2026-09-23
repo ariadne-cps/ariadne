@@ -1850,8 +1850,11 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 factory.create_zeros(n,centre_polynomial.domain());
             SizeType const time_index=centre_polynomial.argument_size()-1u;
             for(SizeType i=0u; i!=n; ++i) {
-                defect[i]=derivative(centre_polynomial.get(i),time_index)
-                         -field_on_polynomial.get(i);
+                ValidatedScalarMultivariateFunctionPatch dpoly =
+                    derivative(centre_polynomial.get(i),time_index);
+                ValidatedScalarMultivariateFunctionPatch fpoly =
+                    field_on_polynomial.get(i);
+                defect[i]=dpoly-fpoly;
             }
 
             ValidatedVectorMultivariateFunctionPatch initial_polynomial=

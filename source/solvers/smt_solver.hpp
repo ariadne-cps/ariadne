@@ -333,6 +333,12 @@ Bool epsilon_satisfied(
     UpperBoxType const& domain,
     List<ValidatedConstraint> const& constraints);
 
+Bool epsilon_satisfied(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    UpperBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals);
+
 } // namespace SmtSolverTestSupport
 
 //! \ingroup Solvers
@@ -380,6 +386,9 @@ class SmtSolver {
         SmtSolver const&, SmtTheoryPrimitiveRelation);
     friend Bool SmtSolverTestSupport::epsilon_satisfied(
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
+    friend Bool SmtSolverTestSupport::epsilon_satisfied(
+        SmtSolver const&, RealSpace const&, UpperBoxType const&,
+        List<SmtTheoryPrimitiveLiteral> const&);
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 
     struct ReductionStatistics {
@@ -452,7 +461,7 @@ class SmtSolver {
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
     template<class Conjunction>
-    std::optional<UpperBoxType> _epsilon_candidate_witness(
+    UpperBoxType _epsilon_candidate_witness(
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
     template<class Conjunction>

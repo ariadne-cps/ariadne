@@ -40,7 +40,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja mpfr cairo gnuplot pkg-config
+        brew install ninja mpfr cairo gnuplot pkg-config gnupg
         python3 -m venv "$GITHUB_WORKSPACE/.venv"
         "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
@@ -66,6 +66,10 @@ jobs:
       run: cmake --build . --parallel $($NPROC) --target coverage
 
     - name: Upload Code Coverage
-      if: runner.os == 'Linux'
-      working-directory: ${{runner.workspace}}/build
-      run: bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+      if: runner.os == 'macOS'
+      uses: codecov/codecov-action@v7.1.1
+      with:
+        files: ${{runner.workspace}}/build/coverage.info
+        disable_search: true
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}

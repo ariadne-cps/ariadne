@@ -391,6 +391,7 @@ class SmtSolver {
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 
   private:
+    friend struct SmtParallelTask;
     friend ExactIntervalType SmtSolverTestSupport::original_bounds(
         SmtSolver const&, SmtTheoryPrimitiveRelation);
     friend ExactIntervalType SmtSolverTestSupport::epsilon_bounds(
@@ -446,10 +447,6 @@ class SmtSolver {
 
     BoxProcessingResult _process_box(
         UpperBoxType domain,
-        ConjunctionReference const& conjunction) const;
-
-    BoxProcessingResult _process_parallel_box(
-        UpperBoxType const& box,
         ConjunctionReference const& conjunction) const;
 
     Void _accumulate_box_processing_statistics(

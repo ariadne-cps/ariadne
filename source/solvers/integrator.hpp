@@ -511,13 +511,20 @@ class PreconditionedTaylorSeriesStep {
     PreconditionedTaylorSeriesState const& final_state() const { return _final_state; }
 };
 
+enum class TaylorSeriesPreconditioning { IDENTITY, QR };
+
 //! \brief A graded Taylor-series integrator with explicit preconditioning support.
 class PreconditionedGradedTaylorSeriesIntegrator
     : public GradedTaylorSeriesIntegrator
 {
+  private:
+    TaylorSeriesPreconditioning _preconditioning=TaylorSeriesPreconditioning::QR;
   public:
     using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
     using GradedTaylorSeriesIntegrator::flow_step;
+
+    TaylorSeriesPreconditioning preconditioning() const { return _preconditioning; }
+    Void set_preconditioning(TaylorSeriesPreconditioning value) { _preconditioning=value; }
 
     virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const override {
         return new PreconditionedGradedTaylorSeriesIntegrator(*this);

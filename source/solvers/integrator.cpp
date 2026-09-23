@@ -1224,6 +1224,8 @@ Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const 
        << ", minimum_temporal_order = " << this->minimum_temporal_order()
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << ", maximum_spacial_order = " << this->maximum_spacial_order()
+       << ", preconditioning = "
+       << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
        << " )";
 }
 
@@ -1252,7 +1254,8 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     // coefficients; the same idea is used here.  If the parameter dimension
     // does not match the state dimension, retain the identity orientation.
     Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n,dp);
-    if(state_taylor.argument_size()==n) {
+    if(this->preconditioning()==TaylorSeriesPreconditioning::QR
+        && state_taylor.argument_size()==n) {
         // Extract the first-order coefficients directly.  Calling the
         // jacobian_value template here would require a FloatDP instantiation
         // that is not exported by the algebra library.
@@ -1264,6 +1267,34 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
                 approximate_J[i][j]=
                     FloatDPApproximation(state_taylor.model(i)[a]);
                 a[j]=0u;
+            }
+        }
+
+        // Flow* sorts the linear-coefficient columns by decreasing
+        // Euclidean size before QR.  With unpivoted Gram-Schmidt this makes
+        // the first orthogonal direction follow the dominant dependency.
+        for(SizeType j=0u; j+1u<n; ++j) {
+            SizeType jmax=j;
+            FloatDPApproximation max_norm_square(0,dp);
+            for(SizeType i=0u; i!=n; ++i) {
+                max_norm_square+=sqr(approximate_J[i][j]);
+            }
+            for(SizeType k=j+1u; k!=n; ++k) {
+                FloatDPApproximation norm_square(0,dp);
+                for(SizeType i=0u; i!=n; ++i) {
+                    norm_square+=sqr(approximate_J[i][k]);
+                }
+                if(norm_square>max_norm_square) {
+                    max_norm_square=norm_square;
+                    jmax=k;
+                }
+            }
+            if(jmax!=j) {
+                for(SizeType i=0u; i!=n; ++i) {
+                    auto tmp=approximate_J[i][j];
+                    approximate_J[i][j]=approximate_J[i][jmax];
+                    approximate_J[i][jmax]=tmp;
+                }
             }
         }
 

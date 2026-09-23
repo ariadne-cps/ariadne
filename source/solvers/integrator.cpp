@@ -1406,54 +1406,123 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     Matrix<FloatDP> const& A=state.linear_map();
     Matrix<FloatDPBounds> const inverse_A=inverse(A);
 
-    // Build the transformed vector field as an unrestricted validated
-    // function, rather than as a FunctionPatch on a guessed local box.
-    // EulerBounder deliberately probes enlarged candidate boxes; casting a
-    // restricted patch to an unrestricted interface does not remove its
-    // domain checks and caused DomainException as soon as one probe left the
-    // patch domain.
-    ValidatedVectorMultivariateFunction y=
-        ValidatedVectorMultivariateFunction::identity(n);
-    ValidatedVectorMultivariateFunction x_of_y=
-        ValidatedVectorMultivariateFunction::zeros(n,n);
+    // Approach III of Chen's Taylor-model flowpipe construction: follow the
+    // trajectory of the centre with a univariate Taylor polynomial p_c(t) and
+    // integrate only the preconditioned deviation
+    //
+    //   x = p_c(t) + A y,
+    //   y' = A^{-1}( f(p_c(t)+A y) - p_c'(t) ).
+    //
+    // The previous implementation used the fixed translation x=c+A y.  That
+    // makes the transformed vector field carry the full drift of the centre
+    // trajectory and explains why QR reduced the admissible series step.
 
+    // First obtain a validated physical flow bound for the whole local initial
+    // set.  Besides supplying h, this gives a rigorous box from which a bound
+    // for the deviation coordinates can be derived.
+    ValidatedVectorMultivariateFunctionPatch initial_y=
+        factory.create_identity(domy);
+    ValidatedVectorMultivariateFunctionPatch initial_x=
+        factory.create_zeros(n,domy);
     for(SizeType i=0u; i!=n; ++i) {
-        ValidatedScalarMultivariateFunction xi=
-            ValidatedScalarMultivariateFunction::constant(
-                n,ValidatedNumber(FloatDPBounds(centre[i])));
+        initial_x[i]=factory.create_constant(domy,centre[i]);
         for(SizeType j=0u; j!=n; ++j) {
-            xi=xi+y[j]*ValidatedNumber(FloatDPBounds(A[i][j]));
+            initial_x[i]=initial_x[i]
+                + initial_y[j]*FloatDPBounds(A[i][j]);
         }
-        x_of_y.set(i,xi);
     }
 
-    // y' = A^{-1} f(c+A*y).  Since both the affine substitution and f are
-    // unrestricted functions, the bounder may safely enlarge its candidate
-    // boxes while searching for a contraction.
-    ValidatedVectorMultivariateFunction physical_vector_field=
-        compose(f,x_of_y);
-    ValidatedVectorMultivariateFunction g=
-        ValidatedVectorMultivariateFunction::zeros(n,n);
+    ExactBoxType const physical_initial_domain=
+        cast_exact_box(widen(initial_x.range()));
 
-    for(SizeType i=0u; i!=n; ++i) {
-        ValidatedScalarMultivariateFunction gi=
-            ValidatedScalarMultivariateFunction::zero(n);
-        for(SizeType j=0u; j!=n; ++j) {
-            gi=gi+physical_vector_field[j]
-                *ValidatedNumber(FloatDPBounds(inverse_A[i][j]));
-        }
-        g.set(i,gi);
-    }
-
-    // Bound the flow directly in the local coordinates.  This avoids the
-    // extra axis-aligned wrapping from transforming a physical bounding box
-    // through A^{-1}.
     StepSizeType h;
-    UpperBoxType local_bounding_box;
-    make_lpair(h,local_bounding_box)=
-        this->flow_bounds(g,domy,hsug);
+    UpperBoxType physical_bounding_box;
+    make_lpair(h,physical_bounding_box)=
+        this->flow_bounds(f,physical_initial_domain,hsug);
+
+    ExactIntervalType maximal_domt(0,h);
+    ExactBoxType centre_domain(n);
+    for(SizeType i=0u; i!=n; ++i) {
+        FloatDP const ci=centre[i];
+        centre_domain[i]=ExactIntervalType(ci,ci);
+    }
 
     ExactBoxType doma;
+    FlowStepModelType centre_flow=
+        Ariadne::graded_series_flow_step(
+            f,centre_domain,maximal_domt,doma,physical_bounding_box,
+            this->step_maximum_error(),this->sweeper(),
+            this->minimum_spacial_order(),this->minimum_temporal_order(),
+            this->maximum_spacial_order(),this->maximum_temporal_order());
+
+    // Remove the degenerate initial-state arguments, leaving p_c(t).  We use
+    // its polynomial part as the moving reference curve.  This is deliberate:
+    // p_c need not itself be a validated enclosure of the centre trajectory;
+    // the transformed ODE below is exact for any differentiable polynomial
+    // reference satisfying p_c(0)=c.
+    ValidatedVectorMultivariateFunctionPatch centre_polynomial=centre_flow;
+    for(SizeType i=0u; i!=n; ++i) {
+        centre_polynomial=partial_evaluate(
+            centre_polynomial,0u,
+            ValidatedNumber(FloatDPBounds(centre[i])));
+    }
+    centre_polynomial.clobber();
+
+    // Derive a rigorous box for y=A^{-1}(x-p_c(t)) from the validated physical
+    // flow bound.  Correlation with t is lost here, but this box is used only
+    // as the range bound required by graded_series_flow_step.
+    UpperBoxType local_bounding_box(n);
+    auto const centre_range=centre_polynomial.range();
+    for(SizeType i=0u; i!=n; ++i) {
+        FloatDPBounds yi(0,dp);
+        for(SizeType j=0u; j!=n; ++j) {
+            FloatDPBounds const xj=cast_singleton(physical_bounding_box[j]);
+            FloatDPBounds const pcj=cast_singleton(centre_range[j]);
+            yi=yi+inverse_A[i][j]*(xj-pcj);
+        }
+        local_bounding_box[i]=UpperIntervalType(yi.lower(),yi.upper());
+    }
+
+    ExactBoxType const local_vector_field_domain=
+        cast_exact_box(local_bounding_box);
+    ExactBoxType const local_space_time_domain=
+        product(local_vector_field_domain,maximal_domt);
+
+    ValidatedVectorMultivariateFunctionPatch yt=
+        factory.create_identity(local_space_time_domain);
+    ValidatedVectorMultivariateFunctionPatch embedded_centre=
+        embed(local_vector_field_domain,centre_polynomial);
+
+    ValidatedVectorMultivariateFunctionPatch x_of_yt=
+        factory.create_zeros(n,local_space_time_domain);
+    ValidatedVectorMultivariateFunctionPatch centre_derivative=
+        factory.create_zeros(n,local_space_time_domain);
+
+    for(SizeType i=0u; i!=n; ++i) {
+        x_of_yt[i]=embedded_centre[i];
+        for(SizeType j=0u; j!=n; ++j) {
+            x_of_yt[i]=x_of_yt[i]+yt[j]*FloatDPBounds(A[i][j]);
+        }
+        centre_derivative[i]=
+            embed(local_vector_field_domain,
+                  derivative(centre_polynomial[i],0u));
+    }
+
+    ValidatedVectorMultivariateFunctionPatch physical_vector_field=
+        compose(f,x_of_yt);
+    ValidatedVectorMultivariateFunctionPatch local_vector_field=
+        factory.create_zeros(n,local_space_time_domain);
+    for(SizeType i=0u; i!=n; ++i) {
+        for(SizeType j=0u; j!=n; ++j) {
+            local_vector_field[i]=local_vector_field[i]
+                +(physical_vector_field[j]-centre_derivative[j])
+                    *inverse_A[i][j];
+        }
+    }
+
+    ValidatedVectorMultivariateFunction g=
+        cast_unrestricted(local_vector_field);
+
     Vector<ValidatedProcedure> p(g);
 
     // Match BoundedIntegratorBase's suggested-step semantics: the flow bound
@@ -1475,14 +1544,20 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             this->minimum_spacial_order(),this->minimum_temporal_order(),
             this->maximum_spacial_order(),this->maximum_temporal_order());
 
-        // Return to physical coordinates before deciding whether the local
-        // approximation satisfies StepMaximumError.  This is the quantity
-        // corresponding to the flow model returned by ordinary integrators.
+        // Reconstruct x=p_c(t)+A*y before applying the physical error
+        // criterion.  Restrict p_c to the currently accepted candidate h
+        // because the adaptive loop may reduce the original bounder step.
+        ValidatedVectorMultivariateFunctionPatch current_centre=
+            restriction(
+                centre_polynomial,
+                ExactBoxType(1u,domt));
+        ValidatedVectorMultivariateFunctionPatch embedded_current_centre=
+            embed(domy,current_centre);
+
         physical_local_flow=
             factory.create_zeros(n,local_flow.domain());
         for(SizeType i=0u; i!=n; ++i) {
-            physical_local_flow[i]=
-                factory.create_constant(local_flow.domain(),centre[i]);
+            physical_local_flow[i]=embedded_current_centre[i];
             for(SizeType j=0u; j!=n; ++j) {
                 physical_local_flow[i]=physical_local_flow[i]
                     + local_flow[j]*FloatDPBounds(A[i][j]);

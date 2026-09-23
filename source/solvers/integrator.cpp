@@ -1358,10 +1358,14 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
 
     // Match BoundedIntegratorBase's suggested-step semantics: the flow bound
     // was computed for the initially suggested h and is therefore also valid
-    // for every smaller h.  Reduce the integration step until the graded
-    // Taylor model satisfies the requested single-step error.
+    // for every smaller h.  The step tolerance is a tolerance in the physical
+    // state coordinates, not in the arbitrarily scaled local coordinates y.
+    // Testing local_flow.error() here would make the accepted step depend on
+    // the choice of preconditioner A (for example a small diagonal entry
+    // multiplies the corresponding normalised error by A when returning to x).
     StepSizeType hprev=h*1.5_dy;
     FlowStepModelType local_flow;
+    ValidatedVectorMultivariateFunctionPatch physical_local_flow;
     ExactIntervalType domt;
     while(true) {
         domt=ExactIntervalType(0,h);
@@ -1371,7 +1375,21 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             this->minimum_spacial_order(),this->minimum_temporal_order(),
             this->maximum_spacial_order(),this->maximum_temporal_order());
 
-        if(definitely(local_flow.error()<=this->step_maximum_error())) {
+        // Return to physical coordinates before deciding whether the local
+        // approximation satisfies StepMaximumError.  This is the quantity
+        // corresponding to the flow model returned by ordinary integrators.
+        physical_local_flow=
+            factory.create_zeros(n,local_flow.domain());
+        for(SizeType i=0u; i!=n; ++i) {
+            physical_local_flow[i]=
+                factory.create_constant(local_flow.domain(),centre[i]);
+            for(SizeType j=0u; j!=n; ++j) {
+                physical_local_flow[i]=physical_local_flow[i]
+                    + local_flow[j]*FloatDPBounds(A[i][j]);
+            }
+        }
+
+        if(definitely(physical_local_flow.error()<=this->step_maximum_error())) {
             break;
         }
 
@@ -1380,18 +1398,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         h=StepSizeType(hnew.get_d());
         CONCLOG_PRINTLN_AT(1,
             "PreconditionedGradedTaylorSeriesIntegrator reduced h to "<<h);
-    }
-
-    // Return to physical coordinates while retaining local y and time as the
-    // arguments of the flow model.
-    ValidatedVectorMultivariateFunctionPatch physical_local_flow=
-        factory.create_zeros(n,local_flow.domain());
-    for(SizeType i=0u; i!=n; ++i) {
-        physical_local_flow[i]=factory.create_constant(local_flow.domain(),centre[i]);
-        for(SizeType j=0u; j!=n; ++j) {
-            physical_local_flow[i]=physical_local_flow[i]
-                + local_flow[j]*FloatDPBounds(A[i][j]);
-        }
     }
 
     // Compose exactly once with the normalised local-initial-set TM y(s).

@@ -228,6 +228,11 @@ structural issues while pursuing complete coverage:
   combinations are represented;
 - repeated signed-literal-to-variable conversion is centralized, including theory
   nogood reconstruction;
+- signed Boolean literal truth values are derived directly from the sign bit
+  instead of ternary control flow; the representation invariant is negative = false,
+  positive = true;
+- parallel worker accounting subtracts the Boolean calling-thread observation
+  directly, avoiding a redundant ternary branch in statistics-only code;
 - box splittability is represented by whether the two children returned by
   `Box::split` differ; for a degenerate split both children equal the parent, so
   separately comparing each child with the parent represented an impossible

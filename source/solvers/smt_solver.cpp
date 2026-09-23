@@ -893,7 +893,7 @@ ParallelExecutionObservation end_parallel_execution_observation()
         parallel_execution_threads.find(parallel_execution_calling_thread)
         != parallel_execution_threads.end();
     result.worker_thread_count=result.observed_thread_count
-        - (result.calling_thread_observed ? 1u : 0u);
+        - static_cast<SizeType>(result.calling_thread_observed);
     parallel_execution_observation_enabled=false;
     parallel_execution_threads.clear();
     return result;
@@ -1348,13 +1348,14 @@ class SmtDpllSearch {
     {
         SizeType variable=variable_from_literal(literal);
         int8_t value=_assignment[variable].value;
-        return literal>0 ? value==1 : value==0;
+        int8_t expected_value=static_cast<int8_t>(literal>0);
+        return value==expected_value;
     }
 
     Bool _assign_literal(Int literal, std::optional<SizeType> reason_clause = std::nullopt)
     {
         SizeType variable=variable_from_literal(literal);
-        int8_t value=literal>0 ? 1 : 0;
+        int8_t value=static_cast<int8_t>(literal>0);
         AssignmentInfo& assignment=_assignment[variable];
         auto decision=SmtSolverTestSupport::assignment_decision(
             assignment.value,value);

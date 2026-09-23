@@ -556,8 +556,7 @@ SmtSolver::_process_box(
     auto split_result=this->_split_box(domain,conjunction);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
-    Bool const splittable=
-        not (same_box(children.first,domain) and same_box(children.second,domain));
+    Bool const splittable=not same_box(children.first,children.second);
 
     std::optional<UpperBoxType> candidate;
     Bool candidate_certified=false;
@@ -1047,6 +1046,11 @@ CandidateWitnessOutcome candidate_witness_outcome(
         return {true,true,certified_witness};
     }
     return {true,false,std::nullopt};
+}
+
+SizeType epsilon_witness_candidate_count(UpperBoxType const& domain)
+{
+    return epsilon_witness_candidates(domain).size();
 }
 
 SensitivitySplitSelection sensitivity_split_selection(
@@ -1787,8 +1791,7 @@ class SmtDpllSearch {
         alternatives.reserve(clause.size());
 
         for(Int nogood_literal:clause) {
-            SizeType variable=static_cast<SizeType>(
-                nogood_literal>0 ? nogood_literal : -nogood_literal);
+            SizeType variable=variable_from_literal(nogood_literal);
 
             std::optional<SizeType> atom_index;
             for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
@@ -1832,8 +1835,7 @@ class SmtDpllSearch {
         SmtSolverTestSupport::order_theory_nogood(
             clause,decision_levels,trail_rank);
 
-        if(not clause.empty()
-           && _statistics.first_minimization_candidate_trail_rank==0u) {
+        if(_statistics.first_minimization_candidate_trail_rank==0u) {
             SizeType first_variable=
                 static_cast<SizeType>(std::abs(clause.front()));
             _statistics.first_minimization_candidate_trail_rank=

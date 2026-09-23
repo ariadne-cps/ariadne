@@ -226,7 +226,15 @@ structural issues while pursuing complete coverage:
   artificially;
 - candidate-search states were simplified so that only semantically meaningful
   combinations are represented;
-- repeated signed-literal-to-variable conversion is centralized;
+- repeated signed-literal-to-variable conversion is centralized, including theory
+  nogood reconstruction;
+- box splittability is represented by whether the two children returned by
+  `Box::split` differ; for a degenerate split both children equal the parent, so
+  separately comparing each child with the parent represented an impossible
+  short-circuit state;
+- deterministic witness-candidate tests cover both corner-enumeration cutoffs:
+  dimensions whose full corner set is capped and dimensions at or above the
+  machine shift width;
 - point-box construction used by witness and epsilon checks is explicit rather than
   lambda-generated; this avoids compiler-generated template control-flow being
   attributed to `smt_solver.cpp` as unsupported semantic branches while preserving

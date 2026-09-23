@@ -52,6 +52,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_parallel_state_transitions());
+        ARIADNE_TEST_CALL(test_epsilon_witness_candidate_limits());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_sensitivity_split_selection());
         ARIADNE_TEST_CALL(test_search_outcome());
@@ -341,6 +342,25 @@ class TestSmtSolver {
         auto claims=SmtSolverTestSupport::parallel_witness_claim_sequence();
         ARIADNE_TEST_ASSERT(claims.first);
         ARIADNE_TEST_ASSERT(not claims.second);
+    }
+
+    Void test_epsilon_witness_candidate_limits() {
+        std::cout << "[smt-candidate] deterministic corner candidate limits" << std::endl;
+
+        UpperIntervalType unit(ExactIntervalType(0,1));
+        UpperBoxType six_dimensions(6u,unit);
+        UpperBoxType seven_dimensions(7u,unit);
+        UpperBoxType sixty_four_dimensions(64u,unit);
+
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::epsilon_witness_candidate_count(six_dimensions),
+            79u);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::epsilon_witness_candidate_count(seven_dimensions),
+            17u);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::epsilon_witness_candidate_count(sixty_four_dimensions),
+            131u);
     }
 
     Void test_candidate_witness_outcome() {
@@ -1230,12 +1250,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-theory-solve] sequential terminal uncertainty propagates UNKNOWN" << std::endl;
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                false));
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
@@ -1245,6 +1260,8 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().candidate_witness_searches,0u);
         }
 
         {

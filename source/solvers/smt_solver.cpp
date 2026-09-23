@@ -623,6 +623,14 @@ SmtSolver::_process_box(
         std::move(domain),*conjunction.theory_literals);
 }
 
+SmtSolver::BoxProcessingResult
+SmtSolver::_process_parallel_box(
+    UpperBoxType const& box,
+    ConjunctionReference const& conjunction) const
+{
+    return this->_process_box(box,conjunction);
+}
+
 Void
 SmtSolver::_accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
@@ -774,7 +782,7 @@ SmtSolver::_solve_parallel_conjunction(
                 ++state->statistics.boxes_processed;
             }
 
-            auto processing=this->_process_box(box,conjunction); {
+            auto processing=this->_process_parallel_box(box,conjunction); {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 this->_accumulate_box_processing_statistics(
                     state->statistics,processing);

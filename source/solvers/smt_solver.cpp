@@ -93,10 +93,15 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
         PositiveFloatDPUpperBound sensitivity(0u,dp);
         Bool active=false;
+        UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
         for(auto const& function:functions) {
             UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
-            if(not definitely(derivative_image.lower_bound()==0)
-               || not definitely(derivative_image.upper_bound()==0)) {
+            Bool const derivative_is_exactly_zero=
+                derivative_image.lower_bound().raw()
+                    ==zero_derivative.lower_bound().raw()
+                && derivative_image.upper_bound().raw()
+                    ==zero_derivative.upper_bound().raw();
+            if(not derivative_is_exactly_zero) {
                 active=true;
                 PositiveFloatDPUpperBound candidate=
                     domain[variable].width()*mag(derivative_image);

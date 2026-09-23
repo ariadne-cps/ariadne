@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `9993215f9e0cb3857738f9a69fe6ff7f0821a290`
+**Latest analysed investigation HEAD:** `2c82b9af8f67868bc2790c736042cd2a4f8c9276`
 
 ## Purpose of this document
 
@@ -918,6 +918,40 @@ definitely(subset(phi.range(), cast_exact_box(bx)))
 rather than comparing a validated range directly against an `UpperBoxType`.
 
 The next commit changes only this guard to compare against `cast_exact_box(local_bounding_box)`. No remainder formula or polynomial construction is changed. The experiment must be rerun before drawing conclusions about the attached remainder.
+
+---
+
+
+### 9.11 Attached Gronwall remainder succeeds; next experiment propagates it (2026-09-23)
+
+After fixing the containment guard, the first actual polynomial+remainder Taylor models were produced.
+
+On the important second-step QR state:
+
+```
+h=0.020:
+  Gronwall physical error = 3.6709e-8
+  dense graded QR error   = 4.3669e-6
+  improvement             ~119x
+
+h=0.015:
+  Gronwall physical error = 6.3262e-9
+  dense graded QR error   = 1.0372e-6
+  improvement             ~164x
+
+h=0.010:
+  Gronwall physical error = 6.9795e-10
+  dense graded QR error   = 1.3691e-7
+  improvement             ~196x
+```
+
+The first step at `h=0.02` similarly improves from about `5.45e-7` to `3.51e-8`.
+
+Later carried-state diagnostics are also stable: with `L ~ 13.87`, the prototype remains around `3.65e-8` at `h=0.02` while the dense graded path reaches about `9.50e-6`.
+
+This is substantially stronger evidence than the earlier scalar estimate because the remainder has now actually been attached to the Taylor model, transformed back to physical coordinates, and its resulting model error measured.
+
+**Next experiment:** use the certified polynomial+remainder flow for the actual step acceptance and subsequent state propagation, while still computing the dense graded flow in parallel as an A/B diagnostic. This tests whether the local gain survives composition, preconditioning, and multiple carried steps. The dense path remains as a temporary fallback only if the Gronwall candidate cannot be certified.
 
 ---
 

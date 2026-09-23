@@ -1821,8 +1821,11 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     StepSizeType hprev=h*1.5_dy;
     FlowStepModelType local_flow;
     ValidatedVectorMultivariateFunctionPatch physical_local_flow;
+    ValidatedVectorMultivariateFunctionPatch gronwall_physical_local_flow;
+    Bool have_gronwall_flow=false;
     ExactIntervalType domt;
     while(true) {
+        have_gronwall_flow=false;
         domt=ExactIntervalType(0,h);
         local_flow=Ariadne::graded_series_flow_step(
             p,domy,domt,doma,local_bounding_box,
@@ -1958,6 +1961,9 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     }
                 }
 
+                gronwall_physical_local_flow=physical_gronwall_polynomial;
+                have_gronwall_flow=true;
+
                 std::cerr << "[GronwallPolynomialPrototype]"
                           << " h=" << h
                           << " amplification=" << amplification_raw
@@ -2033,7 +2039,37 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << std::endl;
         }
 
-        if(definitely(physical_local_flow.error()<=this->step_maximum_error())) {
+        Bool const gronwall_acceptable=
+            have_gronwall_flow
+            && definitely(gronwall_physical_local_flow.error()
+                          <=this->step_maximum_error());
+        Bool const dense_acceptable=
+            definitely(physical_local_flow.error()
+                       <=this->step_maximum_error());
+
+        if(this->diagnostics() && have_gronwall_flow) {
+            std::cerr << "[GronwallAcceptanceComparison]"
+                      << " h=" << h
+                      << " gronwall_physical_error="
+                      << gronwall_physical_local_flow.error()
+                      << " dense_physical_error="
+                      << physical_local_flow.error()
+                      << " gronwall_acceptable=" << gronwall_acceptable
+                      << " dense_acceptable=" << dense_acceptable
+                      << std::endl;
+        }
+
+        if(gronwall_acceptable) {
+            // From this point on, propagate the polynomial+remainder flow.
+            // The dense graded flow above remains computed only to provide an
+            // A/B diagnostic during this experiment.
+            physical_local_flow=gronwall_physical_local_flow;
+            break;
+        }
+
+        // If the certification guard could not build a Gronwall candidate,
+        // retain the old validated path as a safety fallback for now.
+        if(!have_gronwall_flow && dense_acceptable) {
             break;
         }
 

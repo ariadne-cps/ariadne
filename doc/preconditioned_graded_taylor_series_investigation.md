@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `96c18da6d8a8c687c09e6781c5e91e27dc6f0391`
+**Latest analysed investigation HEAD:** `557f2a3554d37627c5997913bc1b7e6e7805ceaa`
 
 ## Purpose of this document
 
@@ -757,6 +757,30 @@ This distinction should be kept explicit:
 - not yet achieved: preserving the correlated polynomial dependence of the incoming Taylor model inside the high-order validated flow computation itself.
 
 A Flow*-like polynomial+remainder prototype should target the second point rather than claiming that the current persistent state already preserves symbolic information absent from the standard evolver.
+
+---
+
+
+### 9.7 Centre-polynomial defect experiment prepared (2026-09-23)
+
+The next experiment targets the key architectural question directly: is the centre/polynomial temporal expansion already a good approximation, with the large error coming mainly from the way the bounding recurrence certifies it?
+
+A diagnostic path now constructs a **centre-only graded Taylor polynomial** by running the ordinary centre branch of the graded recurrence and using it for all retained coefficients, including the highest temporal/spatial terms. This object is not claimed to be a validated flow enclosure by itself.
+
+For this polynomial candidate `P(y,t)`, the diagnostic computes the ODE defect
+
+```
+R(y,t) = dP/dt - g(P(y,t))
+```
+
+over the same local domain and time interval, together with the initial-condition mismatch `P(y,0)-y`.
+
+Interpretation:
+
+- if the defect and initial mismatch are small while the validated bounding branch still produces `dphib ~ 3.5e3--5.3e3`, then the polynomial approximation is intrinsically good and the main missing piece is a separate a-posteriori remainder validation/refinement mechanism;
+- if the defect is already large, then simply separating polynomial and remainder will not be enough and the polynomial construction itself must change.
+
+This is deliberately a diagnostic before implementing a full Flow*-style remainder iteration. A small defect would justify the next step: derive a rigorous remainder enclosure from the defect plus a Lipschitz/Jacobian bound on the validated physical flow box.
 
 ---
 

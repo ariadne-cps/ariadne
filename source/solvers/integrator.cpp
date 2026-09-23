@@ -915,6 +915,46 @@ Void graded_flow_iterate_affine_procedure(
 
 
 FlowStepTaylorModelType
+graded_series_centre_polynomial_step(
+        const Vector<ValidatedProcedure>& p,
+        const ExactBoxType& domx,
+        const ExactIntervalType& domt,
+        Sweeper<FloatDP> const& sweeper,
+        DegreeType so,
+        DegreeType to)
+{
+    const SizeType n=domx.dimension();
+    ExactBoxType doma;
+    Vector<ValidatedNumericType> dx=cast_singleton(domx);
+    Vector<ValidatedNumericType> mdx=midpoint(dx);
+    Vector<ValidatedNumericType> da;
+    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
+    ExactIntervalType widt(t-h,t+h);
+    Scalar<ValidatedNumericType> mdt=midpoint(cast_singleton(widt));
+
+    ValidatedDifferential dzero(n,so,dx.element_characteristics());
+    GradedValidatedDifferential null(0u,dzero);
+    Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null);
+    List<GradedValidatedDifferential> tmpdphic;
+
+    Ariadne::graded_flow_init(
+        p,fdphic,tmpdphic,dphic,mdx,mdt,da,so,to);
+    for(DegreeType i=0u; i!=to; ++i) {
+        graded_flow_iterate(p,fdphic,tmpdphic,dphic);
+    }
+
+    // Use the centre branch for every retained coefficient, including the
+    // highest temporal/spatial terms.  This is intentionally not a validated
+    // flow enclosure; it is the polynomial candidate whose residual we want
+    // to measure before attaching a separate validated remainder.
+    Vector<ValidatedDifferential> dphi=
+        flow_differential(dphic,dphic,so,to);
+    return flow_function(dphi,domx,domt,doma,sweeper);
+}
+
+
+FlowStepTaylorModelType
 graded_series_flow_step_affine_procedure(
         const Vector<ValidatedProcedure>& physical_p,
         const Vector<FloatDP>& centre,
@@ -1789,6 +1829,46 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             this->step_maximum_error(),this->sweeper(),
             this->minimum_spacial_order(),this->minimum_temporal_order(),
             this->maximum_spacial_order(),this->maximum_temporal_order());
+
+        if(this->diagnostics()
+            && this->preconditioning()==TaylorSeriesPreconditioning::QR
+            && this->minimum_spacial_order()==this->maximum_spacial_order()
+            && this->minimum_temporal_order()==this->maximum_temporal_order()) {
+            FlowStepTaylorModelType centre_polynomial=
+                graded_series_centre_polynomial_step(
+                    p,domy,domt,this->sweeper(),
+                    this->minimum_spacial_order(),
+                    this->minimum_temporal_order());
+
+            // Compute the ODE defect R(y,t)=dP/dt-g(P) of the centre-only
+            // Taylor polynomial.  If this is already small, the remaining
+            // challenge is to validate a separate remainder around P rather
+            // than to propagate a full interval-valued graded recurrence.
+            ValidatedVectorMultivariateFunctionPatch field_on_polynomial=
+                compose(g,centre_polynomial);
+            ValidatedVectorMultivariateFunctionPatch defect=
+                factory.create_zeros(n,centre_polynomial.domain());
+            SizeType const time_index=centre_polynomial.argument_size()-1u;
+            for(SizeType i=0u; i!=n; ++i) {
+                defect[i]=derivative(centre_polynomial[i],time_index)
+                         -field_on_polynomial[i];
+            }
+
+            ValidatedVectorMultivariateFunctionPatch initial_polynomial=
+                partial_evaluate(centre_polynomial,time_index,StepSizeType(0.0));
+            ValidatedVectorMultivariateFunctionPatch identity_on_domy=
+                factory.create_identity(domy);
+            ValidatedVectorMultivariateFunctionPatch initial_defect=
+                initial_polynomial-identity_on_domy;
+
+            std::cerr << "[CentrePolynomialDefectDiagnostic]"
+                      << " h=" << h
+                      << " polynomial_errors=" << centre_polynomial.errors()
+                      << " polynomial_range=" << centre_polynomial.range()
+                      << " defect_range=" << defect.range()
+                      << " initial_defect_range=" << initial_defect.range()
+                      << std::endl;
+        }
 
         // Return to physical coordinates before deciding whether the local
         // approximation satisfies StepMaximumError.  This is the quantity

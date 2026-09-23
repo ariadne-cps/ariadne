@@ -696,6 +696,112 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
 
 
 
+
+
+
+Vector<GradedValidatedDifferential>
+graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
+                         DegreeType so, DegreeType to)
+{
+    const SizeType rs=dphic.size();
+    const SizeType as=dphic[0][0].argument_size();
+    auto z=dphic[0][0].zero_coefficient();
+
+    Vector<GradedValidatedDifferential> gdphi(rs,GradedValidatedDifferential(List<ValidatedDifferential>(to+1u,ValidatedDifferential(as,so,z))));
+    for(SizeType i=0; i!=rs; ++i) {
+        for(DegreeType j=0; j!=to; ++j) {
+            for(ValidatedDifferential::ConstIterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
+                if(iter->index().degree()<so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
+            }
+            for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
+                if(iter->index().degree()==so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
+            }
+        }
+        DegreeType j=to;
+        for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
+            gdphi[i][j].expansion().append(iter->index(),iter->coefficient());
+        }
+    }
+    CONCLOG_PRINTLN_AT(1,"gdphi="<<gdphi);
+
+    return gdphi;
+}
+
+Vector<ValidatedDifferential>
+differential(Vector<GradedValidatedDifferential> const& gdphi, SizeType gind,
+             DegreeType so, DegreeType to)
+{
+    SizeType rs=gdphi.size();
+    SizeType as=gdphi[0][0].argument_size();
+    auto z=gdphi[0][0].zero_coefficient();
+
+    Vector<ValidatedDifferential> dphi(rs,as+1u,so+to,z);
+    MultiIndex a(as+1u);
+    for(SizeType i=0; i!=rs; ++i) {
+        Expansion<MultiIndex,FloatDPBounds>& component=dphi[i].expansion();
+        for(DegreeType j=0; j<=to; ++j) {
+            a[gind]=j;
+            const Expansion<MultiIndex,FloatDPBounds>& expansion=gdphi[i][j].expansion();
+            for(auto term : expansion) {
+                for(SizeType k=0; k!=gind; ++k) { a[k]=term.index()[k]; }
+                for(SizeType k=gind; k!=as; ++k) { a[k+1u]=term.index()[k]; }
+                component.append(a,term.coefficient());
+            }
+        }
+    }
+    CONCLOG_PRINTLN_AT(1,"dphi="<<dphi);
+    return dphi;
+}
+
+Vector<ValidatedDifferential>
+flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
+                  DegreeType so, DegreeType to)
+{
+    Vector<GradedValidatedDifferential> gdphi=graded_flow_differential(dphic,dphib,so,to);
+    return differential(gdphi, dphic.size(),so,to);
+}
+
+
+FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<FloatBounds<DP>>>& df, const ExactBoxType& dom, Sweeper<FloatDP> swp) {
+    ARIADNE_ASSERT(df.argument_size()==dom.dimension());
+    const SizeType rs=df.size();
+    const SizeType as=dom.dimension();
+    const DegreeType deg = df.degree();
+    FlowStepTaylorModelType tf(rs,dom,swp);
+
+    Vector<Differential<FloatBounds<DP>>> ds=scale(Differential<FloatBounds<DP>>::variables(deg,Vector<FloatBounds<DP>>(as,dp)),dom);
+    CONCLOG_PRINTLN_AT(1,"ds="<<ds<<"\rs");
+    Vector<Differential<FloatBounds<DP>>> dfs = compose(df,ds);
+
+    for(SizeType i=0; i!=rs; ++i) {
+        ValidatedTaylorModelDP& model=tf.model(i);
+        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
+        FloatDPError& error=model.error();
+        error=0u;
+        expansion.reserve(dfs[i].expansion().number_of_nonzeros());
+
+        typename Differential<FloatDPBounds>::ConstIterator iter=dfs[i].begin();
+        while(iter!=dfs[i].end()) {
+            MultiIndex const a=iter->index();
+            FloatDPBounds coef=iter->coefficient();
+            FloatDP x=coef.value();
+            error+=coef.error();
+            expansion.append(a,x);
+            ++iter;
+        }
+        model.cleanup();
+    }
+    return tf;
+}
+
+FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, Sweeper<FloatDP> swp) {
+    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
+    ExactIntervalType wdt(t-h,t+h);
+
+    return restriction(make_taylor_function_model(dphi,join(domx,wdt,doma),swp),join(domx,domt,doma));
+}
+
 // Experimental evaluator for an affine-preconditioned vector field which keeps
 // the original physical Procedure intact.  Instead of first constructing the
 // dense local function g(y)=A^{-1}f(c+Ay), transform the graded arguments to
@@ -817,10 +923,10 @@ graded_series_flow_step_affine_procedure(
     Vector<ValidatedNumericType> mdy=midpoint(dy);
     ExactBoxType doma;
     Vector<ValidatedNumericType> da;
-    Scalar<ValidatedNumericType> mdt=midpoint(
-        cast_singleton(ExactIntervalType(
-            domt.lower_bound()-(domt.upper_bound()-domt.lower_bound()),
-            domt.upper_bound())));
+    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
+    ExactIntervalType widt(t-h,t+h);
+    Scalar<ValidatedNumericType> mdt=midpoint(cast_singleton(widt));
 
     ValidatedDifferential dzero(n,so,dy.element_characteristics());
     GradedValidatedDifferential null(0u,dzero);
@@ -834,10 +940,8 @@ graded_series_flow_step_affine_procedure(
         physical_p,fdphib,unused_tmp_b,dphib,by,dt,da,so,to);
 
     GradedValidatedDifferential physical_null(dphic[0u].characteristics());
-    Vector<GradedValidatedDifferential> physical_f_c(
-        n,physical_null,dphic.element_characteristics());
-    Vector<GradedValidatedDifferential> physical_f_b(
-        n,physical_null,dphib.element_characteristics());
+    Vector<GradedValidatedDifferential> physical_f_c(n,physical_null);
+    Vector<GradedValidatedDifferential> physical_f_b(n,physical_null);
     List<GradedValidatedDifferential> physical_tmp_c(
         physical_p.temporaries_size(),physical_null);
     List<GradedValidatedDifferential> physical_tmp_b(
@@ -855,9 +959,9 @@ graded_series_flow_step_affine_procedure(
     }
 
     Vector<ValidatedDifferential> dphi=
-        Ariadne::flow_differential(dphic,dphib,so,to);
+        flow_differential(dphic,dphib,so,to);
     FlowStepTaylorModelType tphi=
-        Ariadne::flow_function(dphi,domy,domt,doma,sweeper);
+        flow_function(dphi,domy,domt,doma,sweeper);
 
     auto differential_coefficient_mag =
         [](ValidatedDifferential const& d) {
@@ -888,110 +992,6 @@ graded_series_flow_step_affine_procedure(
     return tphi;
 }
 
-
-
-Vector<GradedValidatedDifferential>
-graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
-                         DegreeType so, DegreeType to)
-{
-    const SizeType rs=dphic.size();
-    const SizeType as=dphic[0][0].argument_size();
-    auto z=dphic[0][0].zero_coefficient();
-
-    Vector<GradedValidatedDifferential> gdphi(rs,GradedValidatedDifferential(List<ValidatedDifferential>(to+1u,ValidatedDifferential(as,so,z))));
-    for(SizeType i=0; i!=rs; ++i) {
-        for(DegreeType j=0; j!=to; ++j) {
-            for(ValidatedDifferential::ConstIterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
-                if(iter->index().degree()<so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
-            }
-            for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
-                if(iter->index().degree()==so) { gdphi[i][j].expansion().append(iter->index(),iter->coefficient()); }
-            }
-        }
-        DegreeType j=to;
-        for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
-            gdphi[i][j].expansion().append(iter->index(),iter->coefficient());
-        }
-    }
-    CONCLOG_PRINTLN_AT(1,"gdphi="<<gdphi);
-
-    return gdphi;
-}
-
-Vector<ValidatedDifferential>
-differential(Vector<GradedValidatedDifferential> const& gdphi, SizeType gind,
-             DegreeType so, DegreeType to)
-{
-    SizeType rs=gdphi.size();
-    SizeType as=gdphi[0][0].argument_size();
-    auto z=gdphi[0][0].zero_coefficient();
-
-    Vector<ValidatedDifferential> dphi(rs,as+1u,so+to,z);
-    MultiIndex a(as+1u);
-    for(SizeType i=0; i!=rs; ++i) {
-        Expansion<MultiIndex,FloatDPBounds>& component=dphi[i].expansion();
-        for(DegreeType j=0; j<=to; ++j) {
-            a[gind]=j;
-            const Expansion<MultiIndex,FloatDPBounds>& expansion=gdphi[i][j].expansion();
-            for(auto term : expansion) {
-                for(SizeType k=0; k!=gind; ++k) { a[k]=term.index()[k]; }
-                for(SizeType k=gind; k!=as; ++k) { a[k+1u]=term.index()[k]; }
-                component.append(a,term.coefficient());
-            }
-        }
-    }
-    CONCLOG_PRINTLN_AT(1,"dphi="<<dphi);
-    return dphi;
-}
-
-Vector<ValidatedDifferential>
-flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
-                  DegreeType so, DegreeType to)
-{
-    Vector<GradedValidatedDifferential> gdphi=graded_flow_differential(dphic,dphib,so,to);
-    return differential(gdphi, dphic.size(),so,to);
-}
-
-
-FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<FloatBounds<DP>>>& df, const ExactBoxType& dom, Sweeper<FloatDP> swp) {
-    ARIADNE_ASSERT(df.argument_size()==dom.dimension());
-    const SizeType rs=df.size();
-    const SizeType as=dom.dimension();
-    const DegreeType deg = df.degree();
-    FlowStepTaylorModelType tf(rs,dom,swp);
-
-    Vector<Differential<FloatBounds<DP>>> ds=scale(Differential<FloatBounds<DP>>::variables(deg,Vector<FloatBounds<DP>>(as,dp)),dom);
-    CONCLOG_PRINTLN_AT(1,"ds="<<ds<<"\rs");
-    Vector<Differential<FloatBounds<DP>>> dfs = compose(df,ds);
-
-    for(SizeType i=0; i!=rs; ++i) {
-        ValidatedTaylorModelDP& model=tf.model(i);
-        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
-        FloatDPError& error=model.error();
-        error=0u;
-        expansion.reserve(dfs[i].expansion().number_of_nonzeros());
-
-        typename Differential<FloatDPBounds>::ConstIterator iter=dfs[i].begin();
-        while(iter!=dfs[i].end()) {
-            MultiIndex const a=iter->index();
-            FloatDPBounds coef=iter->coefficient();
-            FloatDP x=coef.value();
-            error+=coef.error();
-            expansion.append(a,x);
-            ++iter;
-        }
-        model.cleanup();
-    }
-    return tf;
-}
-
-FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, Sweeper<FloatDP> swp) {
-    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
-    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
-    ExactIntervalType wdt(t-h,t+h);
-
-    return restriction(make_taylor_function_model(dphi,join(domx,wdt,doma),swp),join(domx,domt,doma));
-}
 
 } // namespace
 
@@ -1102,10 +1102,10 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     CONCLOG_PRINTLN_AT(3,"dphic="<<dphic);
     CONCLOG_PRINTLN_AT(3,"dphib="<<dphib);
 
-    Vector<ValidatedDifferential> dphi=Ariadne::flow_differential(dphic,dphib,so,to);
+    Vector<ValidatedDifferential> dphi=flow_differential(dphic,dphib,so,to);
     CONCLOG_PRINTLN_AT(2,"dphi="<<dphi);
 
-    FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
+    FlowStepTaylorModelType tphi=flow_function(dphi,domx,domt,doma,sweeper);
 
     if(graded_internal_diagnostic_count<8u) {
         auto differential_vector_mag =

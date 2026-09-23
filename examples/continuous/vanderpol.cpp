@@ -109,4 +109,41 @@ void ariadne_main()
               << " intermediate_sets=" << graded_orbit_004.intermediate().size()
               << std::endl;
 
+    PreconditionedGradedTaylorSeriesIntegrator tight_gronwall_integrator(
+        StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
+    tight_gronwall_integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    tight_gronwall_integrator.set_diagnostics(false);
+
+    VectorFieldEvolver tight_gronwall_evolver(dynamics,tight_gronwall_integrator);
+    configure_evolver(tight_gronwall_evolver,0.04_x);
+    Stopwatch<Milliseconds> tight_gronwall_stopwatch;
+    auto tight_gronwall_orbit=
+        tight_gronwall_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
+    tight_gronwall_stopwatch.click();
+    std::cerr << "[IntegratorBenchmark]"
+              << " method=GRONWALL tolerance=1e-8 max_step=0.04"
+              << " elapsed_seconds=" << tight_gronwall_stopwatch.elapsed_seconds()
+              << " reach_sets=" << tight_gronwall_orbit.reach().size()
+              << " intermediate_sets=" << tight_gronwall_orbit.intermediate().size()
+              << std::endl;
+
+    GradedTaylorSeriesIntegrator tight_graded_integrator(
+        StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
+    VectorFieldEvolver tight_graded_evolver(dynamics,tight_graded_integrator);
+    configure_evolver(tight_graded_evolver,0.04_x);
+    Stopwatch<Milliseconds> tight_graded_stopwatch;
+    auto tight_graded_orbit=
+        tight_graded_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
+    tight_graded_stopwatch.click();
+    std::cerr << "[IntegratorBenchmark]"
+              << " method=GRADED tolerance=1e-8 max_step=0.04"
+              << " elapsed_seconds=" << tight_graded_stopwatch.elapsed_seconds()
+              << " reach_sets=" << tight_graded_orbit.reach().size()
+              << " intermediate_sets=" << tight_graded_orbit.intermediate().size()
+              << std::endl;
+
 }

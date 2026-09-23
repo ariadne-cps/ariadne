@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `9e4c4d659edadc732d26c7d19593a7379ae9bed0`
+**Latest analysed investigation HEAD:** `8ec671301c6fa91479bf76da5525824f944ca022`
 
 ## Purpose of this document
 
@@ -1057,6 +1057,29 @@ The 28-set result also shows that h=0.04 is not accepted uniformly; the method r
 **Next experiment:** run the ordinary graded integrator with the same max_step=0.04. This distinguishes two possibilities:
 - if graded is forced close to its previous ~0.02 step count, the new method has a real step-size advantage and optimisation should focus on reducing per-step residual/Jacobian cost;
 - if graded also takes near-0.04 steps, then the current tolerance/benchmark regime does not expose the accuracy advantage strongly enough for speed comparison, and tighter tolerances should be tested.
+
+---
+
+
+### 9.16 Gronwall has a real step-size advantage at max_step=0.04, but is still slower (2026-09-23)
+
+The direct larger-step comparison gives:
+
+```
+tolerance 1e-6, horizon 1.0:
+
+GRONWALL max_step=0.02: 1.48901 s, 50 reach sets
+GRADED   max_step=0.02: 0.515001 s, 51 reach sets
+
+GRONWALL max_step=0.04: 1.35201 s, 28 reach sets
+GRADED   max_step=0.04: 0.746001 s, 45 reach sets
+```
+
+Thus the new method has a genuine accepted-step advantage: with the same 0.04 ceiling it needs 28 sets versus 45 for the ordinary graded integrator. The graded method is being forced to reduce h much more often by its larger local remainder.
+
+However, the current prototype is still about 1.8x slower overall at max_step=0.04. The per-step overhead is therefore the dominant performance problem now; accuracy/step-size behaviour is already moving in the desired direction.
+
+The next experiment tightens `StepMaximumError` from 1e-6 to 1e-8 at max_step=0.04 for both methods. This directly probes the original scaling question: if the graded remainder hits its accuracy floor sooner while the separate Gronwall remainder continues to scale, the reach-set count ratio should widen substantially. If both methods simply shrink h with similar asymptotics, optimisation rather than accuracy architecture becomes the main task.
 
 ---
 

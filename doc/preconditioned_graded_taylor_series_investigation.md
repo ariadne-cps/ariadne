@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `67375135dd34fe6c8bea9a31ef7c374163fc877a`
+**Latest analysed investigation HEAD:** `1c3b48d78a8d50f97cd3f5e8c500620def118d1e`
 
 ## Purpose of this document
 
@@ -1135,6 +1135,35 @@ A lightweight production profiler has been added around three major local certif
 - Jacobian/Lipschitz evaluation.
 
 It emits cumulative `[GronwallCostProfile]` lines every 100 candidate calls with diagnostics disabled. Comparing these cumulative costs with total wall time will tell us whether the dominant growth is inside local certification or outside it (composition/preconditioning/evolver state propagation). This distinction determines the next optimisation target.
+
+---
+
+
+### 9.19 Profiling identifies residual construction/range as the dominant local-certification cost (2026-09-23)
+
+The first production profile gives a clear result.
+
+At the first 100 Gronwall candidate calls:
+
+```
+centre polynomial: 0.732 s
+residual:          1.385 s
+Jacobian:          0.0027 s
+```
+
+During the tighter-tolerance run, cumulative totals by 700 calls are:
+
+```
+centre polynomial: 4.137 s
+residual:          9.362 s
+Jacobian:          0.0175 s
+```
+
+Thus the Jacobian/Lipschitz calculation is negligible. The dominant measured local-certification cost is constructing and ranging the generic function-patch residual `dP/dt-g(P)`, roughly 2.3 times the centre-polynomial construction cost by 700 calls.
+
+The cumulative profiler is shared across the two Gronwall benchmark instances, so absolute totals at calls 200--700 include both tolerance runs. This does not affect identification of the dominant phase, but a later profiler should be per-integrator if exact per-run attribution is needed.
+
+There is still meaningful unaccounted wall time. The next profile should measure the physical affine reconstruction and then carried-map composition/preconditioning. The optimisation direction suggested by this result is already clear: do not spend effort optimising the Jacobian bound. A high-value Flow*-like change is to avoid constructing/ranging the residual as a generic composed Taylor-function patch, deriving the defect/remainder directly from Taylor coefficients/recurrence or using specialised polynomial arithmetic.
 
 ---
 

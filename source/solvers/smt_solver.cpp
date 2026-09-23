@@ -542,10 +542,7 @@ SmtSolver::_process_box(
     }
 
     if(this->_epsilon_satisfied(domain,conjunction)) {
-        UpperBoxType witness(domain.dimension(),[&](SizeType i) {
-            auto m=domain[i].midpoint();
-            return UpperIntervalType(m,m);
-        });
+        UpperBoxType witness=midpoint_box(domain);
         BoxProcessingResult result{
             BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt,reductions};
         result.epsilon_box_certification=true;

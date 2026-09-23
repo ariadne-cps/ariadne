@@ -827,6 +827,23 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
 
+    static SizeType graded_internal_diagnostic_count=0u;
+    if(graded_internal_diagnostic_count<8u) {
+        std::cerr << "[GradedInternalDiagnostic]"
+                  << " call=" << graded_internal_diagnostic_count
+                  << " domx=" << domx
+                  << " domt=" << domt
+                  << " bndx=" << bndx
+                  << " fdphic_error=" << fdphic.error()
+                  << " fdphib_error=" << fdphib.error()
+                  << " dphic_error=" << dphic.error()
+                  << " dphib_error=" << dphib.error()
+                  << " dphi_error=" << dphi.error()
+                  << " tphi_errors=" << tphi.errors()
+                  << std::endl;
+        ++graded_internal_diagnostic_count;
+    }
+
     CONCLOG_PRINTLN("phi="<<tphi);
 
     return tphi;

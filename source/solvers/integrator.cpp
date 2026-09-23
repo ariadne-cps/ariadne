@@ -1225,10 +1225,7 @@ Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const 
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << ", maximum_spacial_order = " << this->maximum_spacial_order()
        << ", preconditioning = "
-       << (this->preconditioning()==TaylorSeriesPreconditioning::IDENTITY
-               ? "IDENTITY"
-               : (this->preconditioning()==TaylorSeriesPreconditioning::QR
-                      ? "QR" : "SCALED_QR"))
+       << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
        << " )";
 }
 
@@ -1257,7 +1254,7 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     // coefficients; the same idea is used here.  If the parameter dimension
     // does not match the state dimension, retain the identity orientation.
     Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n,dp);
-    if(this->preconditioning()!=TaylorSeriesPreconditioning::IDENTITY
+    if(this->preconditioning()==TaylorSeriesPreconditioning::QR
         && state_taylor.argument_size()==n) {
         // Extract the first-order coefficients directly.  Calling the
         // jacobian_value template here would require a FloatDP instantiation
@@ -1339,46 +1336,11 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
         }
     }
 
-    if(this->preconditioning()==TaylorSeriesPreconditioning::SCALED_QR) {
-        // Flow*-style scaling: after choosing the QR orientation, scale each
-        // rotated component by a bound on its magnitude so that the local
-        // variables live in the unit box.  This used to be unstable when we
-        // re-preconditioned the already-composed global Taylor map.  With the
-        // persistent two-layer state we now apply it only to the fresh local
-        // transition before composition, which is the relevant experiment.
-        Vector<FloatDP> radius(n,FloatDP(dp));
-        ExactBoxType local_domain(n);
-        ValidatedVectorMultivariateFunctionPatch normalised=
-            factory.create_zeros(n,state.domain());
-
-        for(SizeType i=0u; i!=n; ++i) {
-            radius[i]=cast_exact(mag(rotated[i].range()));
-            if(radius[i]==FloatDP(0,dp)) {
-                radius[i]=FloatDP(1,dp);
-                local_domain[i]=ExactIntervalType(0_z,0_z);
-                normalised[i]=factory.create_zero(state.domain());
-            } else {
-                local_domain[i]=ExactIntervalType(-1,+1);
-                normalised[i]=rotated[i]/FloatDPBounds(radius[i]);
-            }
-        }
-
-        Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
-        Matrix<FloatDP> const& const_rotation=rotation;
-        Vector<FloatDP> const& const_radius=radius;
-        for(SizeType i=0u; i!=n; ++i) {
-            for(SizeType j=0u; j!=n; ++j) {
-                linear_map[i][j]=
-                    mul(near,const_rotation[i][j],const_radius[j]);
-            }
-        }
-
-        return PreconditionedTaylorSeriesState(
-            std::move(centre),std::move(linear_map),std::move(local_domain),
-            std::move(normalised));
-    }
-
-    // Unscaled baselines: identity or rotation-only QR.
+    // Do not explicitly rescale the rotated variables to [-1,1].  A Taylor
+    // FunctionPatch in Ariadne is already internally scaled to the unit box
+    // of its external domain.  Repeating that scaling here divides the
+    // accumulated remainder by the physical set radius at every step and was
+    // the source of the rapid error growth seen in the QR diagnostic.
     Matrix<FloatDP> linear_map=rotation;
     ExactBoxType local_domain=
         cast_exact_box(widen(rotated.range()));
@@ -1406,20 +1368,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     Matrix<FloatDP> const& A=state.linear_map();
     Matrix<FloatDPBounds> const inverse_A=inverse(A);
 
-    // Approach III of Chen's Taylor-model flowpipe construction: follow the
-    // trajectory of the centre with a univariate Taylor polynomial p_c(t) and
-    // integrate only the preconditioned deviation
-    //
-    //   x = p_c(t) + A y,
-    //   y' = A^{-1}( f(p_c(t)+A y) - p_c'(t) ).
-    //
-    // The previous implementation used the fixed translation x=c+A y.  That
-    // makes the transformed vector field carry the full drift of the centre
-    // trajectory and explains why QR reduced the admissible series step.
-
-    // First obtain a validated physical flow bound for the whole local initial
-    // set.  Besides supplying h, this gives a rigorous box from which a bound
-    // for the deviation coordinates can be derived.
+    // First compute the flow bound in physical coordinates.  The bounder
+    // deliberately enlarges the initial box; constructing the transformed
+    // vector field only on domy would therefore make it invalid exactly where
+    // the bounder needs to evaluate it.
     ValidatedVectorMultivariateFunctionPatch initial_y=
         factory.create_identity(domy);
     ValidatedVectorMultivariateFunctionPatch initial_x=
@@ -1427,8 +1379,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     for(SizeType i=0u; i!=n; ++i) {
         initial_x[i]=factory.create_constant(domy,centre[i]);
         for(SizeType j=0u; j!=n; ++j) {
-            initial_x[i]=initial_x[i]
-                + initial_y[j]*FloatDPBounds(A[i][j]);
+            initial_x[i]=initial_x[i]+initial_y[j]*FloatDPBounds(A[i][j]);
         }
     }
 
@@ -1440,90 +1391,49 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     make_lpair(h,physical_bounding_box)=
         this->flow_bounds(f,physical_initial_domain,hsug);
 
-    ExactIntervalType maximal_domt(0,h);
-    ExactBoxType centre_domain(n);
-    for(SizeType i=0u; i!=n; ++i) {
-        FloatDP const ci=centre[i];
-        centre_domain[i]=ExactIntervalType(ci,ci);
-    }
-
-    ExactBoxType doma;
-    FlowStepModelType centre_flow=
-        Ariadne::graded_series_flow_step(
-            f,centre_domain,Interval<StepSizeType>(StepSizeType(0),h),
-            doma,physical_bounding_box,
-            this->step_maximum_error(),this->sweeper(),
-            this->minimum_spacial_order(),this->minimum_temporal_order(),
-            this->maximum_spacial_order(),this->maximum_temporal_order());
-
-    // Remove the degenerate initial-state arguments, leaving p_c(t).  We use
-    // its polynomial part as the moving reference curve.  This is deliberate:
-    // p_c need not itself be a validated enclosure of the centre trajectory;
-    // the transformed ODE below is exact for any differentiable polynomial
-    // reference satisfying p_c(0)=c.
-    ValidatedVectorMultivariateFunctionPatch centre_polynomial=centre_flow;
-    for(SizeType i=0u; i!=n; ++i) {
-        centre_polynomial=partial_evaluate(
-            centre_polynomial,0u,
-            ValidatedNumber(FloatDPBounds(centre[i])));
-    }
-    centre_polynomial.clobber();
-
-    // Derive a rigorous box for y=A^{-1}(x-p_c(t)) from the validated physical
-    // flow bound.  Correlation with t is lost here, but this box is used only
-    // as the range bound required by graded_series_flow_step.
+    // Transform the validated physical flow bound to local coordinates.
+    // For a future non-diagonal (QR) A this interval matrix product remains
+    // conservative.
     UpperBoxType local_bounding_box(n);
-    auto const centre_range=centre_polynomial.range();
     for(SizeType i=0u; i!=n; ++i) {
         FloatDPBounds yi(0,dp);
         for(SizeType j=0u; j!=n; ++j) {
             FloatDPBounds const xj=cast_singleton(physical_bounding_box[j]);
-            FloatDPBounds const pcj=cast_singleton(centre_range[j]);
-            yi=yi+inverse_A[i][j]*(xj-pcj);
+            yi=yi+inverse_A[i][j]*(xj-centre[j]);
         }
         local_bounding_box[i]=UpperIntervalType(yi.lower(),yi.upper());
     }
 
+    // Build the transformed vector field on the whole validated local flow
+    // bound, not merely on the local initial domain.
     ExactBoxType const local_vector_field_domain=
         cast_exact_box(local_bounding_box);
-    ExactBoxType const local_space_time_domain=
-        product(local_vector_field_domain,maximal_domt);
-
-    ValidatedVectorMultivariateFunctionPatch yt=
-        factory.create_identity(local_space_time_domain);
-    ValidatedVectorMultivariateFunctionPatch embedded_centre=
-        embed(local_vector_field_domain,centre_polynomial);
-
-    ValidatedVectorMultivariateFunctionPatch x_of_yt=
-        factory.create_zeros(n,local_space_time_domain);
-    ValidatedVectorMultivariateFunctionPatch centre_derivative=
-        factory.create_zeros(n,local_space_time_domain);
-
+    ValidatedVectorMultivariateFunctionPatch y=
+        factory.create_identity(local_vector_field_domain);
+    ValidatedVectorMultivariateFunctionPatch x_of_y=
+        factory.create_zeros(n,local_vector_field_domain);
     for(SizeType i=0u; i!=n; ++i) {
-        x_of_yt[i]=embedded_centre[i];
+        x_of_y[i]=factory.create_constant(local_vector_field_domain,centre[i]);
         for(SizeType j=0u; j!=n; ++j) {
-            x_of_yt[i]=x_of_yt[i]+yt[j]*FloatDPBounds(A[i][j]);
+            x_of_y[i]=x_of_y[i]+y[j]*FloatDPBounds(A[i][j]);
         }
-        centre_derivative[i]=
-            embed(local_vector_field_domain,
-                  derivative(centre_polynomial.get(i),0u));
     }
 
+    // y' = A^{-1} f(c+A*y).  This formulation already supports a full
+    // non-diagonal A, so QR preconditioning can later reuse the same core.
     ValidatedVectorMultivariateFunctionPatch physical_vector_field=
-        compose(f,x_of_yt);
+        compose(f,x_of_y);
     ValidatedVectorMultivariateFunctionPatch local_vector_field=
-        factory.create_zeros(n,local_space_time_domain);
+        factory.create_zeros(n,local_vector_field_domain);
     for(SizeType i=0u; i!=n; ++i) {
         for(SizeType j=0u; j!=n; ++j) {
             local_vector_field[i]=local_vector_field[i]
-                +(physical_vector_field[j]-centre_derivative[j])
-                    *inverse_A[i][j];
+                + physical_vector_field[j]*inverse_A[i][j];
         }
     }
+    ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
 
-    ValidatedVectorMultivariateFunction g=
-        cast_unrestricted(local_vector_field);
-
+    ExactBoxType doma;
     Vector<ValidatedProcedure> p(g);
 
     // Match BoundedIntegratorBase's suggested-step semantics: the flow bound
@@ -1545,20 +1455,14 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             this->minimum_spacial_order(),this->minimum_temporal_order(),
             this->maximum_spacial_order(),this->maximum_temporal_order());
 
-        // Reconstruct x=p_c(t)+A*y before applying the physical error
-        // criterion.  Restrict p_c to the currently accepted candidate h
-        // because the adaptive loop may reduce the original bounder step.
-        ValidatedVectorMultivariateFunctionPatch current_centre=
-            restriction(
-                centre_polynomial,
-                ExactBoxType(1u,domt));
-        ValidatedVectorMultivariateFunctionPatch embedded_current_centre=
-            embed(domy,current_centre);
-
+        // Return to physical coordinates before deciding whether the local
+        // approximation satisfies StepMaximumError.  This is the quantity
+        // corresponding to the flow model returned by ordinary integrators.
         physical_local_flow=
             factory.create_zeros(n,local_flow.domain());
         for(SizeType i=0u; i!=n; ++i) {
-            physical_local_flow[i]=embedded_current_centre[i];
+            physical_local_flow[i]=
+                factory.create_constant(local_flow.domain(),centre[i]);
             for(SizeType j=0u; j!=n; ++j) {
                 physical_local_flow[i]=physical_local_flow[i]
                     + local_flow[j]*FloatDPBounds(A[i][j]);

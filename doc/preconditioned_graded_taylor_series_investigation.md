@@ -436,6 +436,50 @@ The goal is to determine the earliest stage at which IDENTITY and QR diverge str
 
 ---
 
+
+
+### 9.1 Result of coefficient-magnitude diagnostic (2026-09-23)
+
+The diagnostic introduced by `cb1496eb436a1d4ed226554a4f18eaa4da39f29a` localised the QR inflation further.
+
+On the same second-step physical state, at `h=0.02`:
+
+```
+IDENTITY:
+fdphic_coeff_mag = 973.45623
+fdphib_coeff_mag = 3616.2787
+dphic_coeff_mag  = 194.69125
+dphib_coeff_mag  = 723.25573
+dphi_coeff_mag   = 723.25573
+tphi dominant error ~ 6.35e-7
+
+QR:
+fdphic_coeff_mag = 1023.8441
+fdphib_coeff_mag = 26610.952
+dphic_coeff_mag  = 204.76882
+dphib_coeff_mag  = 5322.1903
+dphi_coeff_mag   = 5322.1903
+tphi dominant error ~ 4.30e-6
+```
+
+The centre-based branch (`c`) changes by only about 5%, whereas the validated bounding-box branch (`b`) inflates by about 7.36x. The final dominant Taylor-model error inflates by about 6.8x.
+
+This is strong evidence that the QR penalty is generated in the **bounding differential computation**, before `flow_differential` and before conversion to the Taylor function model. In `flow_differential`, highest-spatial-degree terms and the highest temporal degree are intentionally taken from `dphib`; consequently the inflated bounding derivatives directly become the certified remainder terms.
+
+The fact that `fdphib` and `dphib` retain the same large magnitude for the QR candidates at `h=0.02`, `0.015`, and `0.01`, while `tphi_errors` shrink strongly with `h`, is consistent with the derivative enclosure being a property of the spatial bounding box and the temporal powers subsequently scaling its contribution.
+
+### Updated NEXT STEP
+
+Find **which temporal iteration first creates the ~7x inflation** in the bounding branch. Instrument `graded_flow_init` / each subsequent `graded_flow_iterate` separately for centre and bounding data. Compare IDENTITY and QR at the second physical step.
+
+If the inflation is already present immediately after `graded_flow_init`, inspect direct interval evaluation of the transformed vector field and its spatial differential on the rotated box.
+
+If it emerges only after one or more `graded_flow_iterate` calls, inspect repeated interval composition / antidifferentiation at that temporal degree.
+
+Do not change the preconditioning strategy before this is identified.
+
+---
+
 ## 10. Direction of the project
 
 The preconditioned direction remains worth investigating, but the target is now precise:

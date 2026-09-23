@@ -807,12 +807,53 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null),dphib(0u,null),fdphib(0u,null);
     List<GradedValidatedDifferential> tmpdphic,tmpdphib;
 
+    static SizeType graded_internal_diagnostic_count=0u;
+    auto differential_coefficient_mag =
+        [](ValidatedDifferential const& d) {
+            auto r=mag(d.value());
+            for(auto const& term : d.expansion()) {
+                r=max(r,mag(term.coefficient()));
+            }
+            return r;
+        };
+    auto graded_coefficient_mag =
+        [&](Vector<GradedValidatedDifferential> const& v) {
+            auto r=differential_coefficient_mag(v[0u][0u]);
+            for(SizeType i=0u; i!=v.size(); ++i) {
+                for(DegreeType k=0u; k<=v[i].degree(); ++k) {
+                    r=max(r,differential_coefficient_mag(v[i][k]));
+                }
+            }
+            return r;
+        };
+
     Ariadne::graded_flow_init(f,fdphic,tmpdphic,dphic,mdx,mdt,mda,so,to);
     Ariadne::graded_flow_init(f,fdphib,tmpdphib,dphib,bx,dt,da,so,to);
+
+    if(graded_internal_diagnostic_count<8u) {
+        std::cerr << "[GradedIterationDiagnostic]"
+                  << " call=" << graded_internal_diagnostic_count
+                  << " iteration=init"
+                  << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
+                  << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
+                  << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
+                  << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
+                  << std::endl;
+    }
 
     for(DegreeType i=0; i!=to; ++i) {
         Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic);
         Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib);
+        if(graded_internal_diagnostic_count<8u) {
+            std::cerr << "[GradedIterationDiagnostic]"
+                      << " call=" << graded_internal_diagnostic_count
+                      << " iteration=" << (i+1u)
+                      << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
+                      << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
+                      << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
+                      << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
+                      << std::endl;
+        }
     }
     CONCLOG_PRINTLN_AT(3,"dphic="<<dphic);
     CONCLOG_PRINTLN_AT(3,"dphib="<<dphib);
@@ -827,31 +868,7 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
 
-    static SizeType graded_internal_diagnostic_count=0u;
     if(graded_internal_diagnostic_count<8u) {
-        // These intermediate objects are raw Differential/Graded containers,
-        // not Taylor models, so they do not carry an explicit error field.
-        // Measure instead the largest magnitude of any stored interval
-        // coefficient.  This lets us see where the QR representation first
-        // inflates the interval differential data.
-        auto differential_coefficient_mag =
-            [](ValidatedDifferential const& d) {
-                auto r=mag(d.value());
-                for(auto const& term : d.expansion()) {
-                    r=max(r,mag(term.coefficient()));
-                }
-                return r;
-            };
-        auto graded_coefficient_mag =
-            [&](Vector<GradedValidatedDifferential> const& v) {
-                auto r=differential_coefficient_mag(v[0u][0u]);
-                for(SizeType i=0u; i!=v.size(); ++i) {
-                    for(DegreeType k=0u; k<=v[i].degree(); ++k) {
-                        r=max(r,differential_coefficient_mag(v[i][k]));
-                    }
-                }
-                return r;
-            };
         auto differential_vector_mag =
             [&](Vector<ValidatedDifferential> const& v) {
                 auto r=differential_coefficient_mag(v[0u]);

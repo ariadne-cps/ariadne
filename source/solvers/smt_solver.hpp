@@ -229,6 +229,8 @@ CandidateWitnessOutcome candidate_witness_outcome(
     Bool attempted,
     std::optional<UpperBoxType> const& certified_witness);
 
+SizeType epsilon_witness_candidate_count(UpperBoxType const& domain);
+
 struct SensitivitySplitSelection {
     SizeType coordinate = 0u;
     Bool guided = false;

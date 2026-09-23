@@ -1894,6 +1894,84 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << " initial_defect_range=" << initial_defect.range()
                       << " lipschitz_inf=" << lipschitz_inf
                       << std::endl;
+
+            // First rigorous polynomial+remainder prototype.  The existing
+            // bounder still certifies that the exact local flow stays inside
+            // local_bounding_box.  If the centre polynomial also stays in
+            // that convex box, the Jacobian bound above applies on every
+            // segment joining P(y,t) to the exact solution.
+            auto polynomial_range=centre_polynomial.range();
+            Bool const polynomial_in_certification_box=
+                definitely(subset(polynomial_range,local_bounding_box));
+
+            if(polynomial_in_certification_box) {
+                auto defect_ranges=defect.range();
+                auto initial_defect_ranges=initial_defect.range();
+
+                // Use the monotone, fully upper-rounded estimate
+                //
+                //   |e(t)| <= exp(L h) ( |e(0)| + h sup|R| )
+                //
+                // for every t in [0,h].  This is slightly looser than the
+                // exact scalar Gronwall factor (exp(Lh)-1)/L, but avoids any
+                // division by a lower bound for L and is therefore a simple
+                // rigorous first prototype.
+                FloatDP const hraw(h,dp);
+                FloatDP const Lraw=lipschitz_inf.raw();
+                FloatDP const amplification_raw=
+                    exp(up,mul(up,Lraw,hraw));
+
+                Vector<Error<FloatDP>> gronwall_remainder(
+                    n,Error<FloatDP>(0u,dp));
+                for(SizeType i=0u; i!=n; ++i) {
+                    auto epsilon_i=mag(defect_ranges[i]);
+                    auto initial_i=mag(initial_defect_ranges[i]);
+                    FloatDP const residual_raw=
+                        add(up,initial_i.raw(),
+                            mul(up,hraw,epsilon_i.raw()));
+                    FloatDP const remainder_raw=
+                        mul(up,amplification_raw,residual_raw);
+                    gronwall_remainder[i]=Error<FloatDP>(remainder_raw);
+                    centre_polynomial.model(i).set_error(
+                        centre_polynomial.model(i).error()
+                        +gronwall_remainder[i]);
+                }
+
+                ValidatedVectorMultivariateFunctionPatch
+                    physical_gronwall_polynomial=
+                        factory.create_zeros(n,centre_polynomial.domain());
+                for(SizeType i=0u; i!=n; ++i) {
+                    physical_gronwall_polynomial[i]=
+                        factory.create_constant(
+                            centre_polynomial.domain(),centre[i]);
+                    for(SizeType j=0u; j!=n; ++j) {
+                        physical_gronwall_polynomial[i]=
+                            physical_gronwall_polynomial[i]
+                            +centre_polynomial[j]
+                                *FloatDPBounds(A[i][j]);
+                    }
+                }
+
+                std::cerr << "[GronwallPolynomialPrototype]"
+                          << " h=" << h
+                          << " amplification=" << amplification_raw
+                          << " local_remainder=" << gronwall_remainder
+                          << " local_errors=" << centre_polynomial.errors()
+                          << " physical_errors="
+                          << physical_gronwall_polynomial.errors()
+                          << " physical_error="
+                          << physical_gronwall_polynomial.error()
+                          << " physical_range="
+                          << physical_gronwall_polynomial.range()
+                          << std::endl;
+            } else {
+                std::cerr << "[GronwallPolynomialPrototype]"
+                          << " h=" << h
+                          << " rejected=polynomial_outside_certification_box"
+                          << " polynomial_range=" << polynomial_range
+                          << " certification_box=" << local_bounding_box
+                          << std::endl;
+            }
         }
 
         // Return to physical coordinates before deciding whether the local

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `2c82b9af8f67868bc2790c736042cd2a4f8c9276`
+**Latest analysed investigation HEAD:** `c80b8718804e23402323417bcc6e04ebf1226a69`
 
 ## Purpose of this document
 
@@ -952,6 +952,38 @@ Later carried-state diagnostics are also stable: with `L ~ 13.87`, the prototype
 This is substantially stronger evidence than the earlier scalar estimate because the remainder has now actually been attached to the Taylor model, transformed back to physical coordinates, and its resulting model error measured.
 
 **Next experiment:** use the certified polynomial+remainder flow for the actual step acceptance and subsequent state propagation, while still computing the dense graded flow in parallel as an A/B diagnostic. This tests whether the local gain survives composition, preconditioning, and multiple carried steps. The dense path remains as a temporary fallback only if the Gronwall candidate cannot be certified.
+
+---
+
+
+### 9.12 Multi-step propagation preserves the gain (2026-09-23)
+
+The first run in which the certified Gronwall polynomial flow was actually propagated across steps succeeded.
+
+Step 0 at h=0.02:
+
+- Gronwall physical error: 3.5113e-8
+- dense graded error: 5.4533e-7
+- both methods accept the step
+- propagated mapping error: 3.5113e-8
+- normalised state error: 3.5402e-8
+
+At the next carried QR state, again at h=0.02:
+
+- Gronwall physical error: 3.6709e-8
+- dense graded error: 4.3669e-6
+- Gronwall accepts the step
+- dense graded QR rejects the step
+
+After composition and preconditioning of that second step:
+
+- flowpipe error: 7.5228e-8
+- final mapping error: 7.3449e-8
+- final normalised error: 7.2455e-8
+
+Thus the local improvement survives the actual inter-step machinery. More importantly, the new method accepts h=0.02 on the second carried step where the old graded QR path would already reduce the step.
+
+**Next step:** stop paying for the dense graded bounding recurrence in normal execution. Keep it only under diagnostics for A/B comparison. The production candidate should be the centre polynomial plus separately certified remainder; if that candidate cannot be certified, reduce h and retry. Only after this change are runtime comparisons meaningful.
 
 ---
 

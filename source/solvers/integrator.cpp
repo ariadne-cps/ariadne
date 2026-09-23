@@ -818,9 +818,13 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
         };
     auto graded_coefficient_mag =
         [&](Vector<GradedValidatedDifferential> const& v) {
-            auto r=differential_coefficient_mag(v[0u][0u]);
+            // The fy vectors returned by graded_flow_init contain empty
+            // Graded elements until the first graded_flow_iterate evaluates
+            // the vector field.  Start from a genuine zero Differential and
+            // skip empty graded elements instead of dereferencing [0].
+            auto r=mag(dzero.value());
             for(SizeType i=0u; i!=v.size(); ++i) {
-                for(DegreeType k=0u; k<=v[i].degree(); ++k) {
+                for(SizeType k=0u; k!=v[i].size(); ++k) {
                     r=max(r,differential_coefficient_mag(v[i][k]));
                 }
             }

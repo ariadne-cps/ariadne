@@ -696,6 +696,199 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
 
 
 
+// Experimental evaluator for an affine-preconditioned vector field which keeps
+// the original physical Procedure intact.  Instead of first constructing the
+// dense local function g(y)=A^{-1}f(c+Ay), transform the graded arguments to
+// physical coordinates, evaluate the original sparse Procedure, and transform
+// only its result back to local coordinates.  This is a diagnostic path used
+// to separate expression densification from the graded-differential
+// representation itself.
+Void graded_flow_iterate_affine_procedure(
+        const Vector<ValidatedProcedure>& physical_p,
+        const Vector<FloatDP>& centre,
+        const Matrix<FloatDP>& A,
+        const Matrix<FloatDPBounds>& inverse_A,
+        Vector<GradedValidatedDifferential>& local_fy,
+        Vector<GradedValidatedDifferential>& physical_fy,
+        List<GradedValidatedDifferential>& physical_tmp,
+        Vector<GradedValidatedDifferential>& local_yta,
+        const char* diagnostic_branch,
+        DegreeType diagnostic_iteration)
+{
+    const SizeType n=physical_p.result_size();
+    ARIADNE_ASSERT(physical_p.argument_size()==n);
+    ARIADNE_ASSERT(local_yta.size()==n);
+    ARIADNE_ASSERT(centre.size()==n);
+    ARIADNE_ASSERT(A.row_size()==n && A.column_size()==n);
+    ARIADNE_ASSERT(inverse_A.row_size()==n && inverse_A.column_size()==n);
+
+    Vector<GradedValidatedDifferential> physical_yta(local_yta);
+
+    // Build c+A*y coefficient by coefficient.  Doing this directly on the
+    // Differential coefficients preserves the affine dependence instead of
+    // compiling it into a denser Procedure in the rotated variables.
+    for(SizeType i=0u; i!=n; ++i) {
+        for(SizeType k=0u; k!=local_yta[i].size(); ++k) {
+            ValidatedDifferential d=nul(local_yta[0u][k]);
+            if(k==0u) {
+                d+=FloatDPBounds(centre[i]);
+            }
+            for(SizeType j=0u; j!=n; ++j) {
+                d+=local_yta[j][k]*FloatDPBounds(A[i][j]);
+            }
+            physical_yta[i][k]=d;
+        }
+    }
+
+    Ariadne::compute_procedure(
+        physical_p,physical_fy,physical_tmp,physical_yta);
+
+    // Transform only the current temporal coefficient of f back with A^{-1}.
+    // local_fy stores the previous temporal coefficients and receives one new
+    // coefficient on each call, exactly like compute_procedure does in the
+    // ordinary graded iterator.
+    for(SizeType i=0u; i!=n; ++i) {
+        ValidatedDifferential gi=nul(physical_fy[0u].back());
+        for(SizeType j=0u; j!=n; ++j) {
+            gi+=physical_fy[j].back()*inverse_A[i][j];
+        }
+        local_fy[i].append(gi);
+    }
+
+    if(diagnostic_iteration>=1u) {
+        auto differential_coefficient_mag =
+            [](ValidatedDifferential const& d) {
+                auto r=mag(d.value());
+                for(auto const& term : d.expansion()) {
+                    r=max(r,mag(term.coefficient()));
+                }
+                return r;
+            };
+        auto graded_mag =
+            [&](GradedValidatedDifferential const& g) {
+                auto r=differential_coefficient_mag(g[0u]);
+                for(SizeType k=1u; k!=g.size(); ++k) {
+                    r=max(r,differential_coefficient_mag(g[k]));
+                }
+                return r;
+            };
+        auto vector_mag =
+            [&](Vector<GradedValidatedDifferential> const& w) {
+                auto r=graded_mag(w[0u]);
+                for(SizeType i=1u; i!=w.size(); ++i) {
+                    r=max(r,graded_mag(w[i]));
+                }
+                return r;
+            };
+        std::cerr << "[AffineProcedureIterationDiagnostic]"
+                  << " branch=" << diagnostic_branch
+                  << " iteration=" << diagnostic_iteration
+                  << " physical_f_coeff_mag=" << vector_mag(physical_fy)
+                  << " local_f_coeff_mag=" << vector_mag(local_fy)
+                  << std::endl;
+    }
+
+    for(SizeType i=0u; i!=n; ++i) {
+        local_yta[i]=antidifferential(local_fy[i]);
+    }
+}
+
+
+FlowStepTaylorModelType
+graded_series_flow_step_affine_procedure(
+        const Vector<ValidatedProcedure>& physical_p,
+        const Vector<FloatDP>& centre,
+        const Matrix<FloatDP>& A,
+        const Matrix<FloatDPBounds>& inverse_A,
+        const ExactBoxType& domy,
+        const ExactIntervalType& domt,
+        const UpperBoxType& bndy,
+        Sweeper<FloatDP> const& sweeper,
+        DegreeType so,
+        DegreeType to)
+{
+    const SizeType n=domy.dimension();
+    ARIADNE_PRECONDITION(physical_p.result_size()==n);
+    ARIADNE_PRECONDITION(physical_p.argument_size()==n);
+
+    Vector<ValidatedNumericType> dy=cast_singleton(domy);
+    Scalar<ValidatedNumericType> dt=cast_singleton(domt);
+    Vector<ValidatedNumericType> by=cast_singleton(bndy);
+    Vector<ValidatedNumericType> mdy=midpoint(dy);
+    ExactBoxType doma;
+    Vector<ValidatedNumericType> da;
+    Scalar<ValidatedNumericType> mdt=midpoint(
+        cast_singleton(ExactIntervalType(
+            domt.lower_bound()-(domt.upper_bound()-domt.lower_bound()),
+            domt.upper_bound())));
+
+    ValidatedDifferential dzero(n,so,dy.element_characteristics());
+    GradedValidatedDifferential null(0u,dzero);
+    Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null);
+    Vector<GradedValidatedDifferential> dphib(0u,null),fdphib(0u,null);
+    List<GradedValidatedDifferential> unused_tmp_c,unused_tmp_b;
+
+    Ariadne::graded_flow_init(
+        physical_p,fdphic,unused_tmp_c,dphic,mdy,mdt,da,so,to);
+    Ariadne::graded_flow_init(
+        physical_p,fdphib,unused_tmp_b,dphib,by,dt,da,so,to);
+
+    GradedValidatedDifferential physical_null(dphic[0u].characteristics());
+    Vector<GradedValidatedDifferential> physical_f_c(
+        n,physical_null,dphic.element_characteristics());
+    Vector<GradedValidatedDifferential> physical_f_b(
+        n,physical_null,dphib.element_characteristics());
+    List<GradedValidatedDifferential> physical_tmp_c(
+        physical_p.temporaries_size(),physical_null);
+    List<GradedValidatedDifferential> physical_tmp_b(
+        physical_p.temporaries_size(),physical_null);
+
+    for(DegreeType i=0u; i!=to; ++i) {
+        graded_flow_iterate_affine_procedure(
+            physical_p,centre,A,inverse_A,
+            fdphic,physical_f_c,physical_tmp_c,dphic,
+            "centre",i+1u);
+        graded_flow_iterate_affine_procedure(
+            physical_p,centre,A,inverse_A,
+            fdphib,physical_f_b,physical_tmp_b,dphib,
+            "bounding",i+1u);
+    }
+
+    Vector<ValidatedDifferential> dphi=
+        Ariadne::flow_differential(dphic,dphib,so,to);
+    FlowStepTaylorModelType tphi=
+        Ariadne::flow_function(dphi,domy,domt,doma,sweeper);
+
+    auto differential_coefficient_mag =
+        [](ValidatedDifferential const& d) {
+            auto r=mag(d.value());
+            for(auto const& term : d.expansion()) {
+                r=max(r,mag(term.coefficient()));
+            }
+            return r;
+        };
+    auto graded_vector_mag =
+        [&](Vector<GradedValidatedDifferential> const& w) {
+            auto r=differential_coefficient_mag(w[0u][0u]);
+            for(SizeType i=0u; i!=w.size(); ++i) {
+                for(SizeType k=0u; k!=w[i].size(); ++k) {
+                    r=max(r,differential_coefficient_mag(w[i][k]));
+                }
+            }
+            return r;
+        };
+
+    std::cerr << "[AffineProcedureFlowDiagnostic]"
+              << " h=" << (domt.upper_bound()-domt.lower_bound())
+              << " centre_dphi_coeff_mag=" << graded_vector_mag(dphic)
+              << " bounding_dphi_coeff_mag=" << graded_vector_mag(dphib)
+              << " tphi_errors=" << tphi.errors()
+              << std::endl;
+
+    return tphi;
+}
+
+
 
 Vector<GradedValidatedDifferential>
 graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
@@ -1583,6 +1776,32 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         // Return to physical coordinates before deciding whether the local
         // approximation satisfies StepMaximumError.  This is the quantity
         // corresponding to the flow model returned by ordinary integrators.
+        // Controlled comparison for the QR investigation.  Evaluate the same
+        // local step with the original sparse physical Procedure and perform
+        // c+A*y / A^{-1} only on graded Differential objects.  The returned
+        // model is diagnostic only; acceptance below still uses the existing
+        // dense transformed Procedure so this experiment does not alter the
+        // integration semantics.
+        if(this->diagnostics()
+            && this->preconditioning()==TaylorSeriesPreconditioning::QR
+            && this->minimum_spacial_order()==this->maximum_spacial_order()
+            && this->minimum_temporal_order()==this->maximum_temporal_order()) {
+            Vector<ValidatedProcedure> physical_p(f);
+            FlowStepTaylorModelType affine_procedure_flow=
+                graded_series_flow_step_affine_procedure(
+                    physical_p,centre,A,inverse_A,
+                    domy,domt,local_bounding_box,
+                    this->sweeper(),
+                    this->minimum_spacial_order(),
+                    this->minimum_temporal_order());
+            std::cerr << "[AffineProcedureComparison]"
+                      << " h=" << h
+                      << " dense_local_errors=" << local_flow.errors()
+                      << " affine_procedure_errors="
+                      << affine_procedure_flow.errors()
+                      << std::endl;
+        }
+
         physical_local_flow=
             factory.create_zeros(n,local_flow.domain());
         for(SizeType i=0u; i!=n; ++i) {

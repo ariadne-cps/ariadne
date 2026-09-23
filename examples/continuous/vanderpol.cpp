@@ -35,6 +35,7 @@ void ariadne_main()
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
     integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    integrator.set_diagnostics(true);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);

@@ -1837,8 +1837,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 this->maximum_spacial_order(),this->maximum_temporal_order());
         }
 
-        if(this->diagnostics()
-            && this->preconditioning()==TaylorSeriesPreconditioning::QR
+        if(this->preconditioning()==TaylorSeriesPreconditioning::QR
             && this->minimum_spacial_order()==this->maximum_spacial_order()
             && this->minimum_temporal_order()==this->maximum_temporal_order()) {
             FlowStepTaylorModelType centre_polynomial=
@@ -1893,14 +1892,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 lipschitz_inf=max(lipschitz_inf,row_sum);
             }
 
-            std::cerr << "[CentrePolynomialDefectDiagnostic]"
-                      << " h=" << h
-                      << " polynomial_errors=" << centre_polynomial.errors()
-                      << " polynomial_range=" << centre_polynomial.range()
-                      << " defect_range=" << defect.range()
-                      << " initial_defect_range=" << initial_defect.range()
-                      << " lipschitz_inf=" << lipschitz_inf
-                      << std::endl;
+            if(this->diagnostics()) {
+                std::cerr << "[CentrePolynomialDefectDiagnostic]"
+                          << " h=" << h
+                          << " polynomial_errors=" << centre_polynomial.errors()
+                          << " polynomial_range=" << centre_polynomial.range()
+                          << " defect_range=" << defect.range()
+                          << " initial_defect_range=" << initial_defect.range()
+                          << " lipschitz_inf=" << lipschitz_inf
+                          << std::endl;
+            }
 
             // First rigorous polynomial+remainder prototype.  The existing
             // bounder still certifies that the exact local flow stays inside
@@ -1968,25 +1969,29 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 gronwall_physical_local_flow=physical_gronwall_polynomial;
                 have_gronwall_flow=true;
 
-                std::cerr << "[GronwallPolynomialPrototype]"
-                          << " h=" << h
-                          << " amplification=" << amplification_raw
-                          << " local_remainder=" << gronwall_remainder
-                          << " local_errors=" << centre_polynomial.errors()
-                          << " physical_errors="
-                          << physical_gronwall_polynomial.errors()
-                          << " physical_error="
-                          << physical_gronwall_polynomial.error()
-                          << " physical_range="
-                          << physical_gronwall_polynomial.range()
-                          << std::endl;
+                if(this->diagnostics()) {
+                    std::cerr << "[GronwallPolynomialPrototype]"
+                              << " h=" << h
+                              << " amplification=" << amplification_raw
+                              << " local_remainder=" << gronwall_remainder
+                              << " local_errors=" << centre_polynomial.errors()
+                              << " physical_errors="
+                              << physical_gronwall_polynomial.errors()
+                              << " physical_error="
+                              << physical_gronwall_polynomial.error()
+                              << " physical_range="
+                              << physical_gronwall_polynomial.range()
+                              << std::endl;
+                }
             } else {
-                std::cerr << "[GronwallPolynomialPrototype]"
-                          << " h=" << h
-                          << " rejected=polynomial_outside_certification_box"
-                          << " polynomial_range=" << polynomial_range
-                          << " certification_box=" << certification_box
-                          << std::endl;
+                if(this->diagnostics()) {
+                    std::cerr << "[GronwallPolynomialPrototype]"
+                              << " h=" << h
+                              << " rejected=polynomial_outside_certification_box"
+                              << " polynomial_range=" << polynomial_range
+                              << " certification_box=" << certification_box
+                              << std::endl;
+                }
             }
         }
 

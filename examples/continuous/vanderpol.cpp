@@ -37,113 +37,58 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    PreconditionedGradedTaylorSeriesIntegrator gronwall_integrator(
+    auto run_long_benchmark =
+        [&](String const& method,
+            IntegratorInterface const& integrator,
+            ExactDouble tolerance,
+            ExactDouble max_step) {
+            VectorFieldEvolver evolver(dynamics,integrator);
+            configure_evolver(evolver,max_step);
+
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(
+                initial_set,Real(5.00_dec),Semantics::UPPER);
+            stopwatch.click();
+
+            std::cerr << "[IntegratorLongBenchmark]"
+                      << " method=" << method
+                      << " tolerance=" << tolerance
+                      << " max_step=" << max_step
+                      << " horizon=5.0"
+                      << " elapsed_seconds=" << stopwatch.elapsed_seconds()
+                      << " reach_sets=" << orbit.reach().size()
+                      << " intermediate_sets=" << orbit.intermediate().size()
+                      << std::endl;
+        };
+
+    PreconditionedGradedTaylorSeriesIntegrator gronwall_1e6(
         StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
-    gronwall_integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    gronwall_integrator.set_diagnostics(false);
+    gronwall_1e6.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    gronwall_1e6.set_diagnostics(false);
 
-    VectorFieldEvolver gronwall_evolver(dynamics,gronwall_integrator);
-    configure_evolver(gronwall_evolver,0.02_x);
-
-    Stopwatch<Milliseconds> gronwall_stopwatch;
-    auto gronwall_orbit=
-        gronwall_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    gronwall_stopwatch.click();
-
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRONWALL max_step=0.02"
-              << " elapsed_seconds=" << gronwall_stopwatch.elapsed_seconds()
-              << " reach_sets=" << gronwall_orbit.reach().size()
-              << " intermediate_sets=" << gronwall_orbit.intermediate().size()
-              << std::endl;
-
-    GradedTaylorSeriesIntegrator graded_integrator(
+    GradedTaylorSeriesIntegrator graded_1e6(
         StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
 
-    VectorFieldEvolver graded_evolver(dynamics,graded_integrator);
-    configure_evolver(graded_evolver,0.02_x);
+    run_long_benchmark("GRONWALL",gronwall_1e6,1e-6_x,0.04_x);
+    run_long_benchmark("GRADED",graded_1e6,1e-6_x,0.04_x);
 
-    Stopwatch<Milliseconds> graded_stopwatch;
-    auto graded_orbit=
-        graded_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    graded_stopwatch.click();
-
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRADED max_step=0.02"
-              << " elapsed_seconds=" << graded_stopwatch.elapsed_seconds()
-              << " reach_sets=" << graded_orbit.reach().size()
-              << " intermediate_sets=" << graded_orbit.intermediate().size()
-              << std::endl;
-
-    VectorFieldEvolver gronwall_evolver_004(dynamics,gronwall_integrator);
-    configure_evolver(gronwall_evolver_004,0.04_x);
-
-    Stopwatch<Milliseconds> gronwall_stopwatch_004;
-    auto gronwall_orbit_004=
-        gronwall_evolver_004.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    gronwall_stopwatch_004.click();
-
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRONWALL max_step=0.04"
-              << " elapsed_seconds=" << gronwall_stopwatch_004.elapsed_seconds()
-              << " reach_sets=" << gronwall_orbit_004.reach().size()
-              << " intermediate_sets=" << gronwall_orbit_004.intermediate().size()
-              << std::endl;
-
-    VectorFieldEvolver graded_evolver_004(dynamics,graded_integrator);
-    configure_evolver(graded_evolver_004,0.04_x);
-
-    Stopwatch<Milliseconds> graded_stopwatch_004;
-    auto graded_orbit_004=
-        graded_evolver_004.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    graded_stopwatch_004.click();
-
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRADED max_step=0.04"
-              << " elapsed_seconds=" << graded_stopwatch_004.elapsed_seconds()
-              << " reach_sets=" << graded_orbit_004.reach().size()
-              << " intermediate_sets=" << graded_orbit_004.intermediate().size()
-              << std::endl;
-
-    PreconditionedGradedTaylorSeriesIntegrator tight_gronwall_integrator(
+    PreconditionedGradedTaylorSeriesIntegrator gronwall_1e8(
         StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
-    tight_gronwall_integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    tight_gronwall_integrator.set_diagnostics(false);
+    gronwall_1e8.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    gronwall_1e8.set_diagnostics(false);
 
-    VectorFieldEvolver tight_gronwall_evolver(dynamics,tight_gronwall_integrator);
-    configure_evolver(tight_gronwall_evolver,0.04_x);
-    Stopwatch<Milliseconds> tight_gronwall_stopwatch;
-    auto tight_gronwall_orbit=
-        tight_gronwall_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    tight_gronwall_stopwatch.click();
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRONWALL tolerance=1e-8 max_step=0.04"
-              << " elapsed_seconds=" << tight_gronwall_stopwatch.elapsed_seconds()
-              << " reach_sets=" << tight_gronwall_orbit.reach().size()
-              << " intermediate_sets=" << tight_gronwall_orbit.intermediate().size()
-              << std::endl;
-
-    GradedTaylorSeriesIntegrator tight_graded_integrator(
+    GradedTaylorSeriesIntegrator graded_1e8(
         StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
-    VectorFieldEvolver tight_graded_evolver(dynamics,tight_graded_integrator);
-    configure_evolver(tight_graded_evolver,0.04_x);
-    Stopwatch<Milliseconds> tight_graded_stopwatch;
-    auto tight_graded_orbit=
-        tight_graded_evolver.orbit(initial_set,Real(1.00_dec),Semantics::UPPER);
-    tight_graded_stopwatch.click();
-    std::cerr << "[IntegratorBenchmark]"
-              << " method=GRADED tolerance=1e-8 max_step=0.04"
-              << " elapsed_seconds=" << tight_graded_stopwatch.elapsed_seconds()
-              << " reach_sets=" << tight_graded_orbit.reach().size()
-              << " intermediate_sets=" << tight_graded_orbit.intermediate().size()
-              << std::endl;
+
+    run_long_benchmark("GRONWALL",gronwall_1e8,1e-8_x,0.04_x);
+    run_long_benchmark("GRADED",graded_1e8,1e-8_x,0.04_x);
 
 }

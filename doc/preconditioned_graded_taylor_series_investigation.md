@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `8ec671301c6fa91479bf76da5525824f944ca022`
+**Latest analysed investigation HEAD:** `4472fe8f13de58d1591c5ab91fb66021672b9821`
 
 ## Purpose of this document
 
@@ -1080,6 +1080,33 @@ Thus the new method has a genuine accepted-step advantage: with the same 0.04 ce
 However, the current prototype is still about 1.8x slower overall at max_step=0.04. The per-step overhead is therefore the dominant performance problem now; accuracy/step-size behaviour is already moving in the desired direction.
 
 The next experiment tightens `StepMaximumError` from 1e-6 to 1e-8 at max_step=0.04 for both methods. This directly probes the original scaling question: if the graded remainder hits its accuracy floor sooner while the separate Gronwall remainder continues to scale, the reach-set count ratio should widen substantially. If both methods simply shrink h with similar asymptotics, optimisation rather than accuracy architecture becomes the main task.
+
+---
+
+
+### 9.17 Benchmark fairness requires a longer horizon (2026-09-23)
+
+A short horizon can understate an important cost of the persistent Taylor-model approach: as evolution proceeds, the carried symbolic map is repeatedly composed with fresh local transitions, so the cost of later steps may differ substantially from the cost of early steps. A benchmark over t=0.4 or t=1.0 therefore does not yet characterise steady multi-step behaviour.
+
+The benchmark has been changed to a longer horizon, t=5.0, and stripped down to the comparisons that now matter:
+
+```
+tolerance = 1e-6, max_step = 0.04:
+  GRONWALL
+  GRADED
+
+tolerance = 1e-8, max_step = 0.04:
+  GRONWALL
+  GRADED
+```
+
+The output marker is `[IntegratorLongBenchmark]` and reports elapsed time and reach/intermediate-set counts.
+
+Reconditioning remains disabled deliberately for this experiment. This exposes the raw long-term cost of the two propagation architectures instead of allowing periodic reconditioning to reset the symbolic complexity. If one method becomes pathological purely because reconditioning is disabled, that itself must be recorded; a later benchmark can then re-enable a matched reconditioning policy for both methods.
+
+The long-horizon result should be interpreted along two axes:
+- accepted-step efficiency: number of reach sets;
+- accumulated per-step cost: elapsed time divided by the number of sets, and how total runtime scales relative to the earlier t=1.0 benchmark.
 
 ---
 

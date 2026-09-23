@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `c80b8718804e23402323417bcc6e04ebf1226a69`
+**Latest analysed investigation HEAD:** `ed352a13f20480a54d67d81d7965fe912ce29532`
 
 ## Purpose of this document
 
@@ -984,6 +984,32 @@ After composition and preconditioning of that second step:
 Thus the local improvement survives the actual inter-step machinery. More importantly, the new method accepts h=0.02 on the second carried step where the old graded QR path would already reduce the step.
 
 **Next step:** stop paying for the dense graded bounding recurrence in normal execution. Keep it only under diagnostics for A/B comparison. The production candidate should be the centre polynomial plus separately certified remainder; if that candidate cannot be certified, reduce h and retry. Only after this change are runtime comparisons meaningful.
+
+---
+
+
+### 9.13 Clean production benchmark established (2026-09-23)
+
+After gating the evolver investigation probes on the integrator diagnostics flag, the production-only Gronwall run over Van der Pol from t=0 to t=0.40 is clean:
+
+```
+elapsed_seconds = 0.700001
+reach_sets       = 21
+intermediate_sets= 21
+```
+
+With maximum step size 0.02, 21 reach/intermediate sets are consistent with taking the full requested step throughout this run. This is now a usable timing baseline because the dense graded A/B path and the IDENTITY/QR investigation probes are absent.
+
+The next experiment runs the ordinary `GradedTaylorSeriesIntegrator` immediately after the Gronwall integrator in the same executable, with the same:
+- Van der Pol initial set and horizon 0.40;
+- `StepMaximumError(1e-6)`;
+- threshold sweeper `1e-12`;
+- spatial/temporal order fixed at 5;
+- maximum evolver step 0.02;
+- enclosure radius and spatial-error configuration;
+- reconditioning disabled.
+
+The output marker `[IntegratorBenchmark]` reports elapsed time and set counts for both methods. This gives the first controlled speed/accepted-step comparison without relying on separate process timings.
 
 ---
 

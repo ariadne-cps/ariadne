@@ -205,6 +205,10 @@ Void accumulate_statistics(
     SmtSearchStatistics& target,
     SmtSearchStatistics const& source);
 
+Void record_first_minimization_candidate_trail_rank(
+    SmtSearchStatistics& statistics,
+    SizeType trail_rank);
+
 struct ParallelExecutionObservation {
     SizeType observed_thread_count = 0u;
     SizeType worker_thread_count = 0u;
@@ -216,7 +220,9 @@ ParallelExecutionObservation end_parallel_execution_observation();
 Void record_parallel_processing_thread();
 
 Bool parallel_stop_condition(Bool found, Bool limit_reached);
-Bool parallel_should_append_children(Bool found);
+std::vector<UpperBoxType> parallel_children_to_append(
+    Bool found,
+    Pair<UpperBoxType,UpperBoxType> const& children);
 Pair<Bool,Bool> parallel_witness_claim_sequence();
 
 struct CandidateWitnessOutcome {
@@ -273,7 +279,6 @@ struct BoxProcessingStatisticsInput {
     Bool epsilon_box_certification = false;
     Bool candidate_witness_search = false;
     Bool candidate_witness_success = false;
-    Bool non_splittable_epsilon_overlap = false;
 };
 
 Void accumulate_box_processing_statistics(
@@ -292,12 +297,6 @@ Void order_theory_nogood(
     std::vector<SizeType> const& decision_levels,
     std::vector<SizeType> const& trail_rank);
 
-struct AssignmentDecision {
-    Bool accepted = false;
-    Bool newly_assigned = false;
-};
-
-AssignmentDecision assignment_decision(int8_t current_value, int8_t requested_value);
 Bool clause_is_learned(SizeType index, SizeType original_clause_count);
 Bool learned_clause_is_theory(
     SizeType index,

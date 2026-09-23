@@ -1901,8 +1901,14 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             // that convex box, the Jacobian bound above applies on every
             // segment joining P(y,t) to the exact solution.
             auto polynomial_range=centre_polynomial.range();
+            // Compare against an exact outer box, as elsewhere in the
+            // integrator.  Comparing a validated range directly with an
+            // UpperBox can remain indeterminate even when the printed
+            // endpoints show strict containment.
+            ExactBoxType const certification_box=
+                cast_exact_box(local_bounding_box);
             Bool const polynomial_in_certification_box=
-                definitely(subset(polynomial_range,local_bounding_box));
+                definitely(subset(polynomial_range,certification_box));
 
             if(polynomial_in_certification_box) {
                 auto defect_ranges=defect.range();
@@ -1969,7 +1975,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " h=" << h
                           << " rejected=polynomial_outside_certification_box"
                           << " polynomial_range=" << polynomial_range
-                          << " certification_box=" << local_bounding_box
+                          << " certification_box=" << certification_box
                           << std::endl;
             }
         }

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `a0f4842485b8dddd58fde132203f10603071a458`
+**Latest analysed investigation HEAD:** `9993215f9e0cb3857738f9a69fe6ff7f0821a290`
 
 ## Purpose of this document
 
@@ -891,6 +891,33 @@ The prototype should:
 5. compare the resulting physical-coordinate error and accepted step against the current graded-series path.
 
 Only after this succeeds should the scalar bound be replaced by Flow*-style componentwise/fast remainder refinement.
+
+---
+
+
+### 9.10 First polynomial+remainder run exposed a containment-test API issue (2026-09-23)
+
+Commit `9993215f9e0cb3857738f9a69fe6ff7f0821a290` ran the first prototype that would attach the Gronwall remainder to the centre polynomial. The numerical ranges show that the centre polynomial is comfortably inside the existing certification box; for example on the second-step QR probe at `h=0.02`:
+
+```
+polynomial range:
+  [-0.16156445, 0.21679093]
+  [-0.14619583, 0.071965785]
+
+local certification box:
+  [-0.34362090, 0.41198114]
+  [-0.33444289, 0.19626299]
+```
+
+Nevertheless the prototype reported `rejected=polynomial_outside_certification_box` for every tested candidate. This is not evidence against the polynomial+remainder method: it is a comparison-type issue. Existing integrator code performs the analogous check as
+
+```
+definitely(subset(phi.range(), cast_exact_box(bx)))
+```
+
+rather than comparing a validated range directly against an `UpperBoxType`.
+
+The next commit changes only this guard to compare against `cast_exact_box(local_bounding_box)`. No remainder formula or polynomial construction is changed. The experiment must be rerun before drawing conclusions about the attached remainder.
 
 ---
 

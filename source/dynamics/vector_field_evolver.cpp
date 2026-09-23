@@ -214,6 +214,47 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     SharedPointer<PreconditionedTaylorSeriesState> next_preconditioned_state;
 
     if(preconditioned_integrator!=nullptr) {
+        if(result->reach_size()==1u
+           && preconditioned_integrator->preconditioning()==TaylorSeriesPreconditioning::QR) {
+            PreconditionedGradedTaylorSeriesIntegrator identity_probe=
+                *preconditioned_integrator;
+            identity_probe.set_preconditioning(TaylorSeriesPreconditioning::IDENTITY);
+            identity_probe.set_diagnostics(true);
+
+            PreconditionedGradedTaylorSeriesIntegrator qr_probe=
+                *preconditioned_integrator;
+            qr_probe.set_preconditioning(TaylorSeriesPreconditioning::QR);
+            qr_probe.set_diagnostics(true);
+
+            auto identity_state=
+                identity_probe.precondition(current_set.state_function());
+            auto qr_state=
+                qr_probe.precondition(current_set.state_function());
+
+            std::cerr << "[PreconditionedSecondStepState]"
+                      << " physical_error=" << current_set.state_function().error()
+                      << " physical_range=" << current_set.state_function().range()
+                      << " identity_domy=" << identity_state.local_domain()
+                      << " identity_A=" << identity_state.linear_map()
+                      << " identity_normalized_error=" << identity_state.normalised_mapping().error()
+                      << " qr_domy=" << qr_state.local_domain()
+                      << " qr_A=" << qr_state.linear_map()
+                      << " qr_normalized_error=" << qr_state.normalised_mapping().error()
+                      << std::endl;
+
+            auto identity_step=
+                identity_probe.step(dynamic,identity_state,suggest(maximum_step_size));
+            auto qr_step=
+                qr_probe.step(dynamic,qr_state,suggest(maximum_step_size));
+
+            std::cerr << "[PreconditionedSecondStepResult]"
+                      << " identity_h=" << identity_step.time_step()
+                      << " identity_flow_error=" << identity_step.flowpipe_mapping().error()
+                      << " qr_h=" << qr_step.time_step()
+                      << " qr_flow_error=" << qr_step.flowpipe_mapping().error()
+                      << std::endl;
+        }
+
         PreconditionedTaylorSeriesState local_state=
             carried_preconditioned_state
                 ? *carried_preconditioned_state

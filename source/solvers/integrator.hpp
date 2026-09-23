@@ -519,12 +519,15 @@ class PreconditionedGradedTaylorSeriesIntegrator
 {
   private:
     TaylorSeriesPreconditioning _preconditioning=TaylorSeriesPreconditioning::QR;
+    Bool _diagnostics=false;
   public:
     using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
     using GradedTaylorSeriesIntegrator::flow_step;
 
     TaylorSeriesPreconditioning preconditioning() const { return _preconditioning; }
     Void set_preconditioning(TaylorSeriesPreconditioning value) { _preconditioning=value; }
+    Bool diagnostics() const { return _diagnostics; }
+    Void set_diagnostics(Bool value) { _diagnostics=value; }
 
     virtual PreconditionedGradedTaylorSeriesIntegrator* clone() const override {
         return new PreconditionedGradedTaylorSeriesIntegrator(*this);

@@ -1433,6 +1433,19 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     }
     ValidatedVectorMultivariateFunction g=cast_unrestricted(local_vector_field);
 
+    if(this->diagnostics()) {
+        std::cerr << "[PreconditionedSecondStepGeometry]"
+                  << " mode="
+                  << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
+                  << " domy=" << domy
+                  << " A=" << A
+                  << " physical_initial_domain=" << physical_initial_domain
+                  << " physical_bounding_box=" << physical_bounding_box
+                  << " local_bounding_box=" << local_bounding_box
+                  << " local_vector_field_range=" << local_vector_field.range()
+                  << std::endl;
+    }
+
     ExactBoxType doma;
     Vector<ValidatedProcedure> p(g);
 
@@ -1467,6 +1480,19 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 physical_local_flow[i]=physical_local_flow[i]
                     + local_flow[j]*FloatDPBounds(A[i][j]);
             }
+        }
+
+        if(this->diagnostics()) {
+            std::cerr << "[PreconditionedSecondStepCandidate]"
+                      << " mode="
+                      << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
+                      << " h=" << h
+                      << " local_errors=" << local_flow.errors()
+                      << " local_error=" << local_flow.error()
+                      << " physical_errors=" << physical_local_flow.errors()
+                      << " physical_error=" << physical_local_flow.error()
+                      << " local_flow_range=" << local_flow.range()
+                      << std::endl;
         }
 
         if(definitely(physical_local_flow.error()<=this->step_maximum_error())) {

@@ -1475,8 +1475,26 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     ValidatedVectorMultivariateFunctionPatch evolved_mapping=
         compose(local_endpoint,state.normalised_mapping());
 
-    PreconditionedTaylorSeriesState final_state=
-        this->precondition(evolved_mapping);
+    // Preserve the two-layer TM representation across steps.  Precondition
+    // the fresh local endpoint Phi_l(y,h) first, while its remainder is still
+    // a single-step remainder, and only then compose the resulting local
+    // coordinate map with the accumulated y_l(s).  Re-preconditioning the
+    // already-composed physical map rotates its axis-aligned accumulated
+    // remainder at every step and causes an artificial wrapping explosion.
+    PreconditionedTaylorSeriesState local_transition=
+        this->precondition(local_endpoint);
+    ValidatedVectorMultivariateFunctionPatch next_normalised_mapping=
+        compose(
+            local_transition.normalised_mapping(),
+            state.normalised_mapping());
+    ExactBoxType next_local_domain=
+        cast_exact_box(widen(next_normalised_mapping.range()));
+
+    PreconditionedTaylorSeriesState final_state(
+        local_transition.centre(),
+        local_transition.linear_map(),
+        std::move(next_local_domain),
+        std::move(next_normalised_mapping));
 
     return PreconditionedTaylorSeriesStep(
         h,std::move(flowpipe_mapping),std::move(evolved_mapping),

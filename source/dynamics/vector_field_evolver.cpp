@@ -171,10 +171,11 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     CONCLOG_SCOPE_CREATE
     typedef EffectiveVectorMultivariateFunction FunctionType;
 
-    EnclosureType current_set;
-    TimeStepType current_time;
-    CONCLOG_PRINTLN_AT(1,"working_timed_set_model = "<<working_timed_set_model)
-    make_lpair(current_time, current_set)=working_timed_set_model;
+    EnclosureType current_set=working_timed_set_model.second;
+    TimeStepType current_time=working_timed_set_model.first;
+    SharedPointer<PreconditionedTaylorSeriesState> carried_preconditioned_state=
+        working_timed_set_model.preconditioned_state;
+    CONCLOG_PRINTLN_AT(1,"working_timed_set_model time = "<<current_time)
 
     CONCLOG_PRINTLN("current_time = "<<current_time)
     CONCLOG_PRINTLN("current_set = " << current_set)
@@ -210,10 +211,13 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     StepSizeType step_size;
     EnclosureType reach_set=current_set;
     EnclosureType next_set=current_set;
+    SharedPointer<PreconditionedTaylorSeriesState> next_preconditioned_state;
 
     if(preconditioned_integrator!=nullptr) {
         PreconditionedTaylorSeriesState local_state=
-            preconditioned_integrator->precondition(current_set.state_function());
+            carried_preconditioned_state
+                ? *carried_preconditioned_state
+                : preconditioned_integrator->precondition(current_set.state_function());
         PreconditionedTaylorSeriesStep local_step=
             preconditioned_integrator->step(
                 dynamic,local_state,suggest(maximum_step_size));
@@ -227,6 +231,9 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
             local_step.evolved_mapping();
         next_set.apply_parameterised_fixed_evolve_step(
             final_mapping,step_size);
+        next_preconditioned_state=
+            std::make_shared<PreconditionedTaylorSeriesState>(
+                local_step.final_state());
 
         // Temporary diagnostic: compare endpoint-first composition with the
         // old endpoint-after-full-flowpipe ordering.
@@ -239,6 +246,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
                     step_size);
             std::cerr << "[PreconditionedStepDiagnostic]"
                       << " step=" << result->reach_size()
+                      << " carried_state=" << (carried_preconditioned_state ? 1 : 0)
                       << " t=" << current_time
                       << " h=" << step_size
                       << " state_error=" << current_set.state_function().error()
@@ -269,7 +277,11 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     result->adjoin_reach(reach_set);
     result->adjoin_intermediate(next_set);
-    workload.append({next_time,next_set});
+    if(next_preconditioned_state) {
+        workload.append({next_time,next_set,std::move(next_preconditioned_state)});
+    } else {
+        workload.append({next_time,next_set});
+    }
 }
 
 

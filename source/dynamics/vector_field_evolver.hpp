@@ -59,6 +59,7 @@ template<class T> using LockGuard = std::lock_guard<T>;
 using BetterThreads::DynamicWorkload;
 
 class VectorFieldEvolverConfiguration;
+class PreconditionedTaylorSeriesState;
 
 class RealExpressionBoundedConstraintSet;
 
@@ -78,7 +79,21 @@ class VectorFieldEvolver
     typedef TimeType TerminationType;
     typedef LabelledEnclosure EnclosureType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef Pair<TimeStepType,EnclosureType> TimedEnclosureType;
+    struct TimedEnclosureType {
+        TimeStepType first;
+        EnclosureType second;
+        SharedPointer<PreconditionedTaylorSeriesState> preconditioned_state;
+
+        TimedEnclosureType(TimeStepType const& time, EnclosureType const& enclosure)
+            : first(time), second(enclosure), preconditioned_state() { }
+
+        TimedEnclosureType(
+                TimeStepType const& time,
+                EnclosureType const& enclosure,
+                SharedPointer<PreconditionedTaylorSeriesState> state)
+            : first(time), second(enclosure),
+              preconditioned_state(std::move(state)) { }
+    };
     typedef Orbit<EnclosureType> OrbitType;
     typedef ValidatedFunctionPatchFactory FunctionFactoryType;
   private:

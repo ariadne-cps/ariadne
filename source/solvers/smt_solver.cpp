@@ -559,17 +559,8 @@ SmtSolver::_process_box(
     auto split_result=this->_split_box(domain,conjunction);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
-    Bool first_same=true;
-    Bool second_same=true;
-    for(SizeType i=0; i!=domain.dimension(); ++i) {
-        first_same = first_same
-            and children.first[i].lower_bound().raw()==domain[i].lower_bound().raw()
-            and children.first[i].upper_bound().raw()==domain[i].upper_bound().raw();
-        second_same = second_same
-            and children.second[i].lower_bound().raw()==domain[i].lower_bound().raw()
-            and children.second[i].upper_bound().raw()==domain[i].upper_bound().raw();
-    }
-    Bool const splittable=not (first_same and second_same);
+    Bool const splittable=
+        not (same_box(children.first,domain) and same_box(children.second,domain));
 
     std::optional<UpperBoxType> candidate;
     Bool candidate_certified=false;
@@ -1187,26 +1178,6 @@ TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
     return {false,false,std::nullopt};
 }
 
-ChildSearchAction classify_child_search_outcome(
-    SearchOutcome const& outcome,
-    SizeType parent_level,
-    Bool has_alternative_branch)
-{
-    if(outcome.witness.has_value()) {
-        return ChildSearchAction::RETURN_OUTCOME;
-    }
-    if(outcome.backjump_level.has_value()) {
-        if(*outcome.backjump_level<parent_level) {
-            return ChildSearchAction::RETURN_OUTCOME;
-        }
-        ARIADNE_ASSERT(*outcome.backjump_level==parent_level);
-        return ChildSearchAction::RESTART_AT_PARENT;
-    }
-    return has_alternative_branch
-        ? ChildSearchAction::TRY_ALTERNATIVE
-        : ChildSearchAction::EXHAUSTED;
-}
-
 ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation)
@@ -1569,24 +1540,22 @@ class SmtDpllSearch {
         analysis.learned_clause.assign(conflict_clause.begin(),conflict_clause.end());
 
         while(this->_current_level_literal_count(analysis.learned_clause)>1u) {
-            std::optional<SizeType> pivot;
             for(auto iter=_trail.rbegin(); iter!=_trail.rend(); ++iter) {
-                SizeType variable=*iter;
-                AssignmentInfo const& assignment=_assignment[variable];
+                SizeType pivot_variable=*iter;
+                AssignmentInfo const& assignment=_assignment[pivot_variable];
                 if(assignment.decision_level==this->_decision_level()
                    && assignment.reason_clause.has_value()
-                   && this->_clause_contains_variable(analysis.learned_clause,variable)) {
-                    pivot=variable;
+                   && this->_clause_contains_variable(
+                       analysis.learned_clause,pivot_variable)) {
+                    SizeType reason_index=*assignment.reason_clause;
+                    this->_bump_learned_clause_activity(reason_index);
+                    analysis.learned_clause=this->_resolve_on_variable(
+                        analysis.learned_clause,
+                        this->_clause(reason_index),
+                        pivot_variable);
                     break;
                 }
             }
-
-            ARIADNE_ASSERT(pivot.has_value());
-            SizeType pivot_variable=*pivot;
-            SizeType reason_index=*_assignment[pivot_variable].reason_clause;
-            this->_bump_learned_clause_activity(reason_index);
-            analysis.learned_clause=this->_resolve_on_variable(
-                analysis.learned_clause,this->_clause(reason_index),pivot_variable);
         }
 
         SizeType current_level=this->_decision_level();
@@ -1906,7 +1875,7 @@ class SmtDpllSearch {
     {
         SizeType const limit=_solver.configuration().box_processing_limit();
         SizeType const processed=_statistics.boxes_processed;
-        SizeType const remaining=processed>=limit ? 0u : limit-processed;
+        SizeType const remaining=limit-std::min(processed,limit);
         SmtSolver theory_solver(SmtSolverConfiguration(
             _solver.configuration().epsilon(),
             _solver.configuration().theory_minimization_budget(),
@@ -1927,7 +1896,7 @@ class SmtDpllSearch {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
-            _theory_unknown_seen=_theory_unknown_seen || interpretation.unknown;
+            _theory_unknown_seen|=interpretation.unknown;
             return interpretation.consistent;
         }
 
@@ -1987,7 +1956,7 @@ class SmtDpllSearch {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
-            _theory_unknown_seen=_theory_unknown_seen || interpretation.unknown;
+            _theory_unknown_seen|=interpretation.unknown;
             return interpretation.witness;
         }
 

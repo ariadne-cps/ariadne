@@ -229,6 +229,9 @@ structural issues while pursuing complete coverage:
 - repeated signed-literal-to-variable conversion is centralized;
 - redundant internal assertions have been removed where their failure state was
   impossible by construction;
+- test-only classification scaffolding is removed when production control flow already
+  expresses the invariant directly; coverage helpers must not create extra state-space
+  branches of their own;
 - public precondition failure paths are tested explicitly.
 
 Coverage is therefore being used as an audit of the state space, not only as a

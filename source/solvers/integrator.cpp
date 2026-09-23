@@ -1238,25 +1238,70 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
 
     SizeType const n=state_taylor.size();
     auto const& factory=this->function_factory();
+
     Vector<FloatDP> centre(n,FloatDP(dp));
-    Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
+    ValidatedVectorMultivariateFunctionPatch centred=
+        factory.create_zeros(n,state.domain());
+    for(SizeType i=0u; i!=n; ++i) {
+        centre[i]=state_taylor.model(i).value().raw();
+        centred[i]=state[i]-FloatDPBounds(centre[i]);
+    }
+
+    // QR preconditioning follows the linear part of the current local initial
+    // Taylor map.  Flow* obtains an orthogonal matrix from these linear
+    // coefficients; the same idea is used here.  If the parameter dimension
+    // does not match the state dimension, retain the identity orientation.
+    Matrix<FloatDP> rotation=Matrix<FloatDP>::identity(n);
+    if(state_taylor.argument_size()==n) {
+        Matrix<FloatDP> const J=jacobian_value(state_taylor.models());
+        Matrix<FloatDPApproximation> const& approximate_J=
+            reinterpret_cast<Matrix<FloatDPApproximation> const&>(J);
+
+        Matrix<FloatDPApproximation> approximate_Q;
+        Matrix<FloatDPApproximation> approximate_R;
+        PivotMatrix permutation;
+        make_ltuple(approximate_Q,approximate_R,permutation)=
+            orthogonal_decomposition(approximate_J,true);
+
+        rotation=
+            reinterpret_cast<Matrix<FloatDP> const&>(approximate_Q);
+    }
+
+    Matrix<FloatDPBounds> const inverse_rotation=inverse(rotation);
+    ValidatedVectorMultivariateFunctionPatch rotated=
+        factory.create_zeros(n,state.domain());
+    for(SizeType i=0u; i!=n; ++i) {
+        for(SizeType j=0u; j!=n; ++j) {
+            rotated[i]=rotated[i]+centred[j]*inverse_rotation[i][j];
+        }
+    }
+
+    // Normalise the rotated local variables componentwise.  This combines the
+    // QR orientation with the same [-1,1] range normalisation used for local
+    // Taylor variables.  Hence x = c + A*y with A = Q*diag(r).
+    Vector<FloatDP> radius(n,FloatDP(dp));
+    ExactBoxType local_domain(n);
     ValidatedVectorMultivariateFunctionPatch normalised=
         factory.create_zeros(n,state.domain());
 
-    // Identity preconditioning in the sense used by Flow*: translate the
-    // local initial set by its centre, but do not rescale each component to
-    // fill [-1,1].  The previous diagonal range normalisation was a different
-    // transformation and made the local variables artificially O(1) at every
-    // step, which substantially amplified Taylor-model remainders.
     for(SizeType i=0u; i!=n; ++i) {
-        FloatDP const c=state_taylor.model(i).value().raw();
-        centre[i]=c;
-        linear_map[i][i]=FloatDP(1,dp);
-        normalised[i]=state[i]-FloatDPBounds(c);
+        radius[i]=cast_exact(mag(rotated[i].range()));
+        if(radius[i]==FloatDP(0,dp)) {
+            radius[i]=FloatDP(1,dp);
+            local_domain[i]=ExactIntervalType(0_z,0_z);
+            normalised[i]=factory.create_zero(state.domain());
+        } else {
+            local_domain[i]=ExactIntervalType(-1,+1);
+            normalised[i]=rotated[i]/FloatDPBounds(radius[i]);
+        }
     }
 
-    ExactBoxType local_domain=
-        cast_exact_box(widen(normalised.range()));
+    Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
+    for(SizeType i=0u; i!=n; ++i) {
+        for(SizeType j=0u; j!=n; ++j) {
+            linear_map[i][j]=rotation[i][j]*radius[j];
+        }
+    }
 
     return PreconditionedTaylorSeriesState(
         std::move(centre),std::move(linear_map),std::move(local_domain),

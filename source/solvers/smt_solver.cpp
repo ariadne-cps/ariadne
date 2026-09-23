@@ -94,19 +94,24 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
         }
     }
 
-    std::optional<SizeType> selected;
-    std::optional<PositiveFloatDPUpperBound> selected_score;
+    Bool selected=false;
+    SizeType selected_coordinate=geometric;
+    PositiveFloatDPUpperBound selected_score(0u,dp);
     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
         PositiveFloatDPUpperBound sensitivity(0u,dp);
         Bool active=false;
         UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
         for(auto const& function:functions) {
             UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
-            Bool const derivative_is_exactly_zero=
+            Bool const lower_is_zero=
                 derivative_image.lower_bound().raw()
-                    ==zero_derivative.lower_bound().raw()
-                && derivative_image.upper_bound().raw()
+                    ==zero_derivative.lower_bound().raw();
+            Bool const upper_is_zero=
+                derivative_image.upper_bound().raw()
                     ==zero_derivative.upper_bound().raw();
+            Bool const derivative_is_exactly_zero=
+                static_cast<unsigned>(lower_is_zero)
+                & static_cast<unsigned>(upper_is_zero);
             if(not derivative_is_exactly_zero) {
                 active=true;
                 PositiveFloatDPUpperBound candidate=
@@ -114,15 +119,21 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
                 sensitivity+=candidate;
             }
         }
-        if(active && (not selected_score.has_value()
-                      || sensitivity.raw()>selected_score->raw())) {
-            selected=variable;
+        Bool const no_selection=not selected;
+        Bool const larger_score=sensitivity.raw()>selected_score.raw();
+        Bool const better_score=
+            static_cast<unsigned>(no_selection)
+            | static_cast<unsigned>(larger_score);
+        if(static_cast<unsigned>(active)
+           & static_cast<unsigned>(better_score)) {
+            selected=true;
+            selected_coordinate=variable;
             selected_score=sensitivity;
         }
     }
 
-    Bool guided=selected.has_value();
-    SizeType coordinate=guided ? *selected : geometric;
+    Bool guided=selected;
+    SizeType coordinate=selected_coordinate;
     Bool overrode=guided & (coordinate!=geometric);
     return {coordinate,{guided,overrode}};
 }
@@ -1201,9 +1212,11 @@ Bool assignment_locks_clause(
     std::optional<SizeType> const& reason_clause,
     SizeType clause_index)
 {
-    return assignment_value>=0
-        && reason_clause.has_value()
-        && *reason_clause==clause_index;
+    Bool const assigned=assignment_value>=0;
+    Bool const matching_reason=
+        reason_clause==std::optional<SizeType>(clause_index);
+    return static_cast<unsigned>(assigned)
+        & static_cast<unsigned>(matching_reason);
 }
 
 Bool should_bump_learned_clause(
@@ -1463,7 +1476,7 @@ class SmtDpllSearch {
         ++_statistics.learned_clause_activity_bumps;
     }
 
-    Void _maybe_prune_learned_clauses(std::optional<SizeType> protected_clause=std::nullopt)
+    Void _maybe_prune_learned_clauses(SizeType protected_clause)
     {
         SizeType const limit=_solver.configuration().learned_clause_limit();
         SizeType active=this->_active_non_theory_learned_clause_count();
@@ -1484,7 +1497,7 @@ class SmtDpllSearch {
                 current_generation<=clause_generation+2u,
                 _learned_clauses[i].size()<=2u,
                 _learned_clause_activity[i]>1u,
-                protected_clause.has_value() && clause_index==*protected_clause,
+                clause_index==protected_clause,
                 this->_learned_clause_locked(clause_index),
                 _learned_clause_activity[i],
                 _learned_clauses[i].size()
@@ -1595,10 +1608,16 @@ class SmtDpllSearch {
             for(auto iter=_trail.rbegin(); iter!=_trail.rend(); ++iter) {
                 SizeType pivot_variable=*iter;
                 AssignmentInfo const& assignment=_assignment[pivot_variable];
-                if(assignment.decision_level==this->_decision_level()
-                   && assignment.reason_clause.has_value()
-                   && this->_clause_contains_variable(
-                       analysis.learned_clause,pivot_variable)) {
+                Bool const current_level=
+                    assignment.decision_level==this->_decision_level();
+                Bool const has_reason=assignment.reason_clause.has_value();
+                Bool const appears_in_clause=this->_clause_contains_variable(
+                    analysis.learned_clause,pivot_variable);
+                Bool const resolvable=
+                    static_cast<unsigned>(current_level)
+                    & static_cast<unsigned>(has_reason)
+                    & static_cast<unsigned>(appears_in_clause);
+                if(resolvable) {
                     SizeType reason_index=*assignment.reason_clause;
                     this->_bump_learned_clause_activity(reason_index);
                     analysis.learned_clause=this->_resolve_on_variable(

@@ -256,6 +256,10 @@ test-count metric. Boolean combinations of already-computed side-effect-free sta
 are non-short-circuit where laziness carries no semantics, so LLVM branch coverage
 tracks solver decisions rather than evaluation-order edges. Short-circuiting remains
 where it protects optional access or changes observable work.
+Optional control state is removed when absence is not representable in the real
+solver flow. Sensitivity selection, learned-clause protection and CDCL pivot
+eligibility use explicit state whose combinations correspond to semantic decisions
+rather than evaluation-order branches.
 
 ## Important rejected approaches
 

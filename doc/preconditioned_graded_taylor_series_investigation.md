@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `24022ccf8abba99b74dc44c55e22f68d8eb2bc18`
+**Latest analysed investigation HEAD:** `1e0c8c4e752da91baea705cdd0f47c8c37f69a1b`
 
 ## Purpose of this document
 
@@ -587,6 +587,59 @@ The next experiment should test whether preserving the polynomial/correlated par
 A useful short diagnostic before implementing either full approach is to compute the QR second step with the same physical state and same `h=0.02`, but replace the bounding Procedure evaluation by a hand-factored implementation of the transformed Van der Pol polynomial. If the order-5 `dphib` drops materially below `5322`, expression dependency is confirmed as a major cause. If it does not, the problem lies deeper in the bounding graded-differential representation itself.
 
 Do not interpret this result as evidence that QR preconditioning is intrinsically unsuitable. It shows that **QR plus the current interval-valued graded Procedure evaluator** is a poor combination on this benchmark.
+
+---
+
+
+### 9.4 Sparse physical-Procedure experiment rejects expression densification as the main cause (2026-09-23)
+
+Commit `1e0c8c4e752da91baea705cdd0f47c8c37f69a1b` evaluated the same QR local step through the **original sparse physical Procedure** instead of the 70-instruction dense transformed Procedure. The affine maps `x=c+A*y` and `A^{-1}` were applied directly to graded differentials, while the production path remained unchanged.
+
+At the first step, where `A=I`, the two paths agree closely, as expected. At the important same-state second-step QR probe with `h=0.02`:
+
+```
+dense transformed Procedure:
+  dphib order 5       = 5322.1903
+  local errors        = [8.3626e-7, 4.2908e-6]
+
+sparse physical Procedure:
+  dphib order 5       = 5177.6996
+  local errors        = [8.60e-7, 4.41e-6]
+```
+
+The per-order sparse-path bounding magnitudes were:
+
+```
+iteration 1: local_f ~ 10.078
+iteration 2: local_f ~ 62.946
+iteration 3: local_f ~ 478.875
+iteration 4: local_f ~ 3724.779
+iteration 5: local_f ~ 25888.498
+```
+
+These are essentially the same explosive progression as the dense transformed Procedure. The final Taylor-model error is even slightly worse in the sparse path. The same conclusion holds at `h=0.015` and `h=0.01`.
+
+**Conclusion:** algebraic densification from 38 to 70 Procedure instructions is **not the main cause** of the QR penalty. The previous hypothesis in section 9.3 was useful but is now rejected by direct experiment. The dominant loss occurs in the interval-valued graded-differential representation/evaluation itself once rotated coordinates are bounded axis-aligned.
+
+A further observation is important: the sparse diagnostic currently obtains the physical zero-order enclosure by mapping the axis-aligned local bounding box back through `A`. But that local box was itself obtained by interval-evaluating `A^{-1}` on the physical flow bound. The round trip
+
+```
+physical box -> interval(A^{-1} box) -> interval(A local box)
+```
+
+can introduce a second wrapping enlargement before the sparse physical Procedure is evaluated.
+
+### Updated NEXT STEP
+
+Test whether this **box round-trip**, rather than expression structure, accounts for a significant fraction of the remaining QR growth.
+
+For the bounding branch only, initialise the zero-temporal-order physical differentials directly with the already validated `physical_bounding_box`, while retaining the affine gradient with respect to local variables given by `A`. Higher temporal coefficients continue to be transformed by `A` from the local graded state.
+
+This is a diagnostic separation:
+- if order-5 growth drops strongly, the dominant mechanism is repeated axis-aligned box conversion around the coordinate transform;
+- if growth remains near `5e3`, the deeper limitation is the interval-coefficient graded differential representation under rotated dependencies.
+
+Do not use the sparse-Procedure path as a production optimisation: this experiment showed no accuracy benefit by itself.
 
 ---
 

@@ -818,6 +818,7 @@ Void graded_flow_iterate_affine_procedure(
         Vector<GradedValidatedDifferential>& physical_fy,
         List<GradedValidatedDifferential>& physical_tmp,
         Vector<GradedValidatedDifferential>& local_yta,
+        const Vector<ValidatedNumericType>* direct_physical_values,
         const char* diagnostic_branch,
         DegreeType diagnostic_iteration)
 {
@@ -836,11 +837,24 @@ Void graded_flow_iterate_affine_procedure(
     for(SizeType i=0u; i!=n; ++i) {
         for(SizeType k=0u; k!=local_yta[i].size(); ++k) {
             ValidatedDifferential d=nul(local_yta[0u][k]);
-            if(k==0u) {
-                d+=FloatDPBounds(centre[i]);
-            }
-            for(SizeType j=0u; j!=n; ++j) {
-                d+=local_yta[j][k]*FloatDPBounds(A[i][j]);
+            if(k==0u && direct_physical_values!=nullptr) {
+                // Keep the already validated physical flow-box value instead
+                // of interval-mapping the local axis-aligned box back through
+                // A.  Retain the local-coordinate gradient A so only the
+                // zero-order box wrapping is removed by this diagnostic.
+                Covector<FloatDPBounds> gradient(n,FloatDPBounds(0,dp));
+                for(SizeType j=0u; j!=n; ++j) {
+                    gradient[j]=FloatDPBounds(A[i][j]);
+                }
+                d=ValidatedDifferential::affine(
+                    n,d.degree(),(*direct_physical_values)[i],gradient);
+            } else {
+                if(k==0u) {
+                    d+=FloatDPBounds(centre[i]);
+                }
+                for(SizeType j=0u; j!=n; ++j) {
+                    d+=local_yta[j][k]*FloatDPBounds(A[i][j]);
+                }
             }
             physical_yta[i][k]=d;
         }
@@ -909,6 +923,7 @@ graded_series_flow_step_affine_procedure(
         const ExactBoxType& domy,
         const ExactIntervalType& domt,
         const UpperBoxType& bndy,
+        const UpperBoxType& physical_bounding_box,
         Sweeper<FloatDP> const& sweeper,
         DegreeType so,
         DegreeType to)
@@ -920,6 +935,8 @@ graded_series_flow_step_affine_procedure(
     Vector<ValidatedNumericType> dy=cast_singleton(domy);
     Scalar<ValidatedNumericType> dt=cast_singleton(domt);
     Vector<ValidatedNumericType> by=cast_singleton(bndy);
+    Vector<ValidatedNumericType> physical_bounding_values=
+        cast_singleton(physical_bounding_box);
     Vector<ValidatedNumericType> mdy=midpoint(dy);
     ExactBoxType doma;
     Vector<ValidatedNumericType> da;
@@ -951,11 +968,11 @@ graded_series_flow_step_affine_procedure(
         graded_flow_iterate_affine_procedure(
             physical_p,centre,A,inverse_A,
             fdphic,physical_f_c,physical_tmp_c,dphic,
-            "centre",i+1u);
+            nullptr,"centre",i+1u);
         graded_flow_iterate_affine_procedure(
             physical_p,centre,A,inverse_A,
             fdphib,physical_f_b,physical_tmp_b,dphib,
-            "bounding",i+1u);
+            &physical_bounding_values,"bounding",i+1u);
     }
 
     Vector<ValidatedDifferential> dphi=
@@ -1790,7 +1807,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             FlowStepTaylorModelType affine_procedure_flow=
                 graded_series_flow_step_affine_procedure(
                     physical_p,centre,A,inverse_A,
-                    domy,domt,local_bounding_box,
+                    domy,domt,local_bounding_box,physical_bounding_box,
                     this->sweeper(),
                     this->minimum_spacial_order(),
                     this->minimum_temporal_order());

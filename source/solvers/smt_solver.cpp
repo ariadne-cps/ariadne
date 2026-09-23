@@ -784,8 +784,7 @@ struct SmtParallelTask {
             ++state->statistics.boxes_processed;
         }
 
-        auto processing=solver._process_box(box,conjunction);
-        {
+        auto processing=solver._process_box(box,conjunction); {
             std::lock_guard<std::mutex> lock(state->mutex);
             solver._accumulate_box_processing_statistics(
                 state->statistics,processing);

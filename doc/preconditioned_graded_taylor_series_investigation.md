@@ -2,7 +2,8 @@
 
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
-**Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`
+**Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
+**Latest analysed investigation HEAD:** `24022ccf8abba99b74dc44c55e22f68d8eb2bc18`
 
 ## Purpose of this document
 
@@ -512,6 +513,80 @@ Instrument the temporary values produced by `compute_procedure` for the same-sta
 The key target is the bounding branch at iterations 2--5. Determine whether the amplification is associated with `sqr`, multiplication, subtraction, or another operation in the Van der Pol procedure.
 
 Do not modify the QR preconditioner until that operation-level source is known.
+
+---
+
+
+### 9.3 Procedure-level diagnostic: rotation destroys the sparse expression structure (2026-09-23)
+
+The output from commit `24022ccf8abba99b74dc44c55e22f68d8eb2bc18` gives a more specific explanation than "a multiplication inside `compute_procedure` is bad".
+
+First, the IDENTITY and QR Procedures are **not the same instruction stream**, so instruction numbers cannot be compared one-for-one:
+
+- the IDENTITY transformed field uses 38 instructions (0--37);
+- the QR transformed field uses 70 instructions (0--69).
+
+The reason is structural. With IDENTITY coordinates, the Van der Pol field retains its sparse original algebraic form. After the affine QR transformation
+
+```
+x = c + A y
+y' = A^{-1} f(c + A y)
+```
+
+the same polynomial field becomes a denser mixed polynomial in both local variables. The generated Procedure therefore contains longer Horner-like multiplication chains and both output components depend nontrivially on both local variables.
+
+This matters because the validated bounding branch repeatedly feeds interval-valued graded coefficients through those chains. The first temporal iteration is still benign:
+
+```
+IDENTITY dphib_1 = 9.4940427
+QR       dphib_1 = 9.4436234
+```
+
+but the QR Procedure then recursively feeds already enlarged coefficients back through the dense polynomial. In particular, in the QR bounding branch the second local input (`x[1]`, instruction 27) evolves as
+
+```
+iteration 1:   1.000
+iteration 2:   9.444
+iteration 3:  29.576
+iteration 4: 147.420
+iteration 5: 914.136
+```
+
+and is multiplied by the fixed factor represented by instruction 30 (`c[13] ~ 3.7686`), after which it participates in further multiplication chains. By iteration 5:
+
+```
+instruction 31: mul(v[29],v[30])  ~ 3.445e3
+instruction 36: mul(v[35],v[31])  ~ 4.572e3
+instruction 66: mul(v[65],v[31])  ~ 2.482e4
+final output                         2.661e4
+```
+
+For comparison, the final IDENTITY bounding Procedure output at iteration 5 is about `3.616e3`.
+
+The important conclusion is therefore **not** that a single erroneous primitive operation has been found. Ordinary validated multiplication is doing what it is asked to do. The QR penalty comes from the interaction of:
+
+1. coordinate rotation,
+2. algebraic densification of the polynomial vector field,
+3. axis-aligned interval bounding of graded coefficients,
+4. repeated validated multiplication/composition across temporal orders.
+
+This also explains why the centre branch remains close: point/centre coefficients preserve cancellations and correlations that interval bounding cannot retain.
+
+The result strengthens the hypothesis that the efficiency gap is a **representation/evaluation issue**, not a defect in the QR matrix itself. A rotation can geometrically reduce wrapping of the reachable set while simultaneously making the local polynomial vector field much worse for interval-based graded-differential evaluation.
+
+### Updated NEXT STEP
+
+Do **not** tune the QR matrix yet.
+
+The next experiment should test whether preserving the polynomial/correlated part of the transformed field longer avoids this interval dependency amplification. Two concrete directions are worth separating:
+
+1. **Expression/evaluation experiment:** compare the current generated QR Procedure against an algebraically equivalent representation chosen to minimise interval dependency (e.g. retain factored/Horner structure derived from the original Van der Pol field rather than fully composing/expanding the affine transform). The purpose is to see whether the 70-instruction dense Procedure itself is responsible for most of the growth.
+
+2. **Flow*-style Taylor-model experiment:** evaluate the transformed vector field on Taylor-model/polynomial objects and push only truncation/residual terms into interval remainders, instead of using the bounding graded differential as the principal high-order enclosure. This is closer to the mechanism described by Chen, where polynomial dependence is preserved and remainder validation/refinement is handled separately.
+
+A useful short diagnostic before implementing either full approach is to compute the QR second step with the same physical state and same `h=0.02`, but replace the bounding Procedure evaluation by a hand-factored implementation of the transformed Van der Pol polynomial. If the order-5 `dphib` drops materially below `5322`, expression dependency is confirmed as a major cause. If it does not, the problem lies deeper in the bounding graded-differential representation itself.
+
+Do not interpret this result as evidence that QR preconditioning is intrinsically unsuitable. It shows that **QR plus the current interval-valued graded Procedure evaluator** is a poor combination on this benchmark.
 
 ---
 

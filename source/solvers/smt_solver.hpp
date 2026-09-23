@@ -448,6 +448,10 @@ class SmtSolver {
         UpperBoxType domain,
         ConjunctionReference const& conjunction) const;
 
+    BoxProcessingResult _process_parallel_box(
+        UpperBoxType const& box,
+        ConjunctionReference const& conjunction) const;
+
     Void _accumulate_box_processing_statistics(
         SmtSearchStatistics& statistics,
         BoxProcessingResult const& processing) const;

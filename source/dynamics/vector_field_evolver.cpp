@@ -230,6 +230,26 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
                 step_size);
         next_set.apply_parameterised_fixed_evolve_step(
             final_mapping,step_size);
+
+        // Temporary diagnostic: follow exactly where remainder growth is
+        // introduced during the first preconditioned steps.
+        if(result->reach_size()<20u) {
+            auto const& final_state=local_step.final_state();
+            std::cerr << "[PreconditionedStepDiagnostic]"
+                      << " step=" << result->reach_size()
+                      << " t=" << current_time
+                      << " h=" << step_size
+                      << " state_error=" << current_set.state_function().error()
+                      << " normalized_error=" << local_state.normalised_mapping().error()
+                      << " normalized_range=" << local_state.normalised_mapping().range()
+                      << " A=" << local_state.linear_map()
+                      << " flowpipe_error=" << local_step.flowpipe_mapping().error()
+                      << " final_mapping_error=" << final_mapping.error()
+                      << " final_normalized_error=" << final_state.normalised_mapping().error()
+                      << " final_normalized_range=" << final_state.normalised_mapping().range()
+                      << " final_A=" << final_state.linear_map()
+                      << std::endl;
+        }
     } else {
         FlowStepModelType flow_model=
             integrator->flow_step(

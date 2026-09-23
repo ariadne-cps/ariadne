@@ -222,9 +222,8 @@ struct CandidateWitnessOutcome {
 };
 
 CandidateWitnessOutcome candidate_witness_outcome(
-    Bool enabled,
-    std::optional<UpperBoxType> const& candidate,
-    Bool certified);
+    Bool attempted,
+    std::optional<UpperBoxType> const& certified_witness);
 
 struct SensitivitySplitSelection {
     SizeType coordinate = 0u;

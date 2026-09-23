@@ -46,6 +46,11 @@ namespace Ariadne {
 
 namespace {
 
+SizeType literal_variable(Int literal)
+{
+    return static_cast<SizeType>(std::abs(literal));
+}
+
 class SequentialSmtWorkQueue {
   public:
     Void push(UpperBoxType box) { _boxes.push_back(std::move(box)); }
@@ -575,7 +580,8 @@ SmtSolver::_process_box(
         candidate_certified=this->_epsilon_satisfied(*candidate,conjunction);
     }
     auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
-        candidate_search_attempted,candidate,candidate_certified);
+        candidate_search_attempted,
+        candidate_certified ? candidate : std::nullopt);
     if(candidate_outcome.certified) {
         BoxProcessingResult result{
             BoxProcessingStatus::EPSILON_SAT,
@@ -749,7 +755,6 @@ struct SmtParallelTask {
         ParallelSmtWorkload::Access& access,
         UpperBoxType const& box) const
     {
-        SmtSolverTestSupport::record_parallel_processing_thread();
         if(state->found.load() || state->limit_reached.load()) {
             return;
         }
@@ -766,7 +771,7 @@ struct SmtParallelTask {
             ++state->statistics.boxes_processed;
         }
 
-        auto processing=solver._process_box(box,conjunction);
+        SmtSolverTestSupport::record_parallel_processing_thread(); auto processing=solver._process_box(box,conjunction);
         {
             std::lock_guard<std::mutex> lock(state->mutex);
             solver._accumulate_box_processing_statistics(
@@ -1000,15 +1005,14 @@ SizeType apply_learned_clause_pruning(
 
 
 CandidateWitnessOutcome candidate_witness_outcome(
-    Bool enabled,
-    std::optional<UpperBoxType> const& candidate,
-    Bool certified)
+    Bool attempted,
+    std::optional<UpperBoxType> const& certified_witness)
 {
-    if(not enabled) {
+    if(not attempted) {
         return {};
     }
-    if(candidate.has_value() && certified) {
-        return {true,true,candidate};
+    if(certified_witness.has_value()) {
+        return {true,true,certified_witness};
     }
     return {true,false,std::nullopt};
 }
@@ -1079,7 +1083,7 @@ std::vector<Int> resolve_clause_on_variable(
     result.reserve(lhs.size()+rhs.size());
 
     auto append_unique=[&](Int literal) {
-        SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+        SizeType literal_variable=literal_variable(literal);
         if(literal_variable==variable) {
             return;
         }
@@ -1103,8 +1107,8 @@ Void order_theory_nogood(
 {
     std::stable_sort(clause.begin(),clause.end(),
         [&decision_levels,&trail_rank](Int lhs, Int rhs) {
-            SizeType lhs_variable=static_cast<SizeType>(lhs>0 ? lhs : -lhs);
-            SizeType rhs_variable=static_cast<SizeType>(rhs>0 ? rhs : -rhs);
+            SizeType lhs_variable=literal_variable(lhs);
+            SizeType rhs_variable=literal_variable(rhs);
             SizeType lhs_level=decision_levels[lhs_variable];
             SizeType rhs_level=decision_levels[rhs_variable];
             if(lhs_level!=rhs_level) {
@@ -1327,14 +1331,14 @@ class SmtDpllSearch {
 
     Bool _literal_true(Int literal) const
     {
-        SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+        SizeType variable=literal_variable(literal);
         int8_t value=_assignment[variable].value;
         return literal>0 ? value==1 : value==0;
     }
 
     Bool _assign_literal(Int literal, std::optional<SizeType> reason_clause = std::nullopt)
     {
-        SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+        SizeType variable=literal_variable(literal);
         int8_t value=literal>0 ? 1 : 0;
         AssignmentInfo& assignment=_assignment[variable];
         auto decision=SmtSolverTestSupport::assignment_decision(
@@ -1485,7 +1489,7 @@ class SmtDpllSearch {
                 Int unit_literal=0;
 
                 for(Int literal:clause) {
-                    SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+                    SizeType variable=literal_variable(literal);
                     int8_t value=_assignment[variable].value;
                     if(value<0) {
                         ++unassigned_count;
@@ -1529,7 +1533,7 @@ class SmtDpllSearch {
     Bool _clause_contains_variable(std::vector<Int> const& clause, SizeType variable) const
     {
         for(Int literal:clause) {
-            SizeType literal_variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            SizeType literal_variable=literal_variable(literal);
             if(literal_variable==variable) {
                 return true;
             }
@@ -1541,7 +1545,7 @@ class SmtDpllSearch {
     {
         SizeType count=0u;
         for(Int literal:clause) {
-            SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            SizeType variable=literal_variable(literal);
             if(_assignment[variable].decision_level==this->_decision_level()) {
                 ++count;
             }
@@ -1588,7 +1592,7 @@ class SmtDpllSearch {
         SizeType current_level=this->_decision_level();
         SizeType backjump_level=0u;
         for(Int literal:analysis.learned_clause) {
-            SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
+            SizeType variable=literal_variable(literal);
             SizeType level=_assignment[variable].decision_level;
             if(level!=current_level) {
                 backjump_level=std::max(backjump_level,level);

@@ -961,12 +961,30 @@ graded_series_centre_polynomial_step(
         flow_function(dphi,domx,domt,doma,sweeper);
 
     Stopwatch<Microseconds> recurrence_residual_stopwatch;
-    Vector<GradedValidatedDifferential> final_f=fdphic;
-    List<GradedValidatedDifferential> final_tmp=tmpdphic;
+    // compute_procedure is incremental on Graded values: result and
+    // temporaries must start one degree shorter than the arguments.  Reusing
+    // the completed fdphic/tmpdphic violates that invariant.  Initialise
+    // fresh degree-(m-1) storage and let the Procedure append degree m.
+    GradedValidatedDifferential const residual_null(
+        dphic[0u].characteristics());
+    Vector<GradedValidatedDifferential> final_f(n,residual_null);
+    List<GradedValidatedDifferential> final_tmp(
+        p.temporaries_size(),residual_null);
+    DegreeType const final_degree=dphic[0u].degree();
+    ValidatedDifferential const z=nul(dphic[0u][0u]);
+    for(SizeType i=0u; i!=n; ++i) {
+        for(DegreeType k=0u; k!=final_degree; ++k) {
+            final_f[i].append(z);
+        }
+    }
+    for(SizeType j=0u; j!=final_tmp.size(); ++j) {
+        for(DegreeType k=0u; k!=final_degree; ++k) {
+            final_tmp[j].append(z);
+        }
+    }
     Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
 
     Vector<GradedValidatedDifferential> derivative_graded=fdphic;
-    ValidatedDifferential const z=nul(dphic[0u][0u]);
     for(SizeType i=0u; i!=n; ++i) {
         while(derivative_graded[i].degree()<final_f[i].degree()) {
             derivative_graded[i].append(z);
@@ -974,7 +992,9 @@ graded_series_centre_polynomial_step(
     }
     Vector<GradedValidatedDifferential> residual_graded=derivative_graded;
     for(SizeType i=0u; i!=n; ++i) {
-        residual_graded[i]=derivative_graded[i]-final_f[i];
+        for(DegreeType k=0u; k<=final_f[i].degree(); ++k) {
+            residual_graded[i][k]=derivative_graded[i][k]-final_f[i][k];
+        }
     }
     Vector<ValidatedDifferential> residual_differential=
         differential(residual_graded,n,so,to);

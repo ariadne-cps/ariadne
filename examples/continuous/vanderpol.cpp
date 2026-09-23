@@ -30,6 +30,23 @@ void ariadne_main()
         y0-eps_y0<=y<=y0+eps_y0
     });
 
+    PreconditionedGradedTaylorSeriesIntegrator residual_probe(
+        StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
+    residual_probe.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    residual_probe.set_diagnostics(true);
+    VectorFieldEvolver residual_probe_evolver(dynamics,residual_probe);
+    residual_probe_evolver.configuration().set_maximum_enclosure_radius(1.0);
+    residual_probe_evolver.configuration().set_maximum_step_size(0.02);
+    residual_probe_evolver.configuration().set_maximum_spacial_error(1e-6);
+    residual_probe_evolver.configuration().set_enable_reconditioning(false);
+    auto residual_probe_orbit=
+        residual_probe_evolver.orbit(initial_set,Real(0.02_dec),Semantics::UPPER);
+    std::cerr << "[RecurrenceResidualProbe]"
+              << " reach_sets=" << residual_probe_orbit.reach().size()
+              << std::endl;
+
     auto configure_evolver = [](VectorFieldEvolver& evolver, ExactDouble max_step) {
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(max_step);

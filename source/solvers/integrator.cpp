@@ -1827,11 +1827,15 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     while(true) {
         have_gronwall_flow=false;
         domt=ExactIntervalType(0,h);
-        local_flow=Ariadne::graded_series_flow_step(
-            p,domy,domt,doma,local_bounding_box,
-            this->step_maximum_error(),this->sweeper(),
-            this->minimum_spacial_order(),this->minimum_temporal_order(),
-            this->maximum_spacial_order(),this->maximum_temporal_order());
+        if(this->diagnostics()) {
+            // Baseline only: the production path below uses the centre
+            // polynomial plus separately certified remainder.
+            local_flow=Ariadne::graded_series_flow_step(
+                p,domy,domt,doma,local_bounding_box,
+                this->step_maximum_error(),this->sweeper(),
+                this->minimum_spacial_order(),this->minimum_temporal_order(),
+                this->maximum_spacial_order(),this->maximum_temporal_order());
+        }
 
         if(this->diagnostics()
             && this->preconditioning()==TaylorSeriesPreconditioning::QR
@@ -2015,18 +2019,18 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << std::endl;
         }
 
-        physical_local_flow=
-            factory.create_zeros(n,local_flow.domain());
-        for(SizeType i=0u; i!=n; ++i) {
-            physical_local_flow[i]=
-                factory.create_constant(local_flow.domain(),centre[i]);
-            for(SizeType j=0u; j!=n; ++j) {
-                physical_local_flow[i]=physical_local_flow[i]
-                    + local_flow[j]*FloatDPBounds(A[i][j]);
-            }
-        }
-
         if(this->diagnostics()) {
+            physical_local_flow=
+                factory.create_zeros(n,local_flow.domain());
+            for(SizeType i=0u; i!=n; ++i) {
+                physical_local_flow[i]=
+                    factory.create_constant(local_flow.domain(),centre[i]);
+                for(SizeType j=0u; j!=n; ++j) {
+                    physical_local_flow[i]=physical_local_flow[i]
+                        + local_flow[j]*FloatDPBounds(A[i][j]);
+                }
+            }
+
             std::cerr << "[PreconditionedSecondStepCandidate]"
                       << " mode="
                       << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
@@ -2039,13 +2043,22 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << std::endl;
         }
 
+        auto dense_physical_error =
+            this->diagnostics() ? physical_local_flow.error()
+                                : gronwall_physical_local_flow.error();
+        if(have_gronwall_flow) {
+            physical_local_flow=gronwall_physical_local_flow;
+        }
+
         Bool const gronwall_acceptable=
             have_gronwall_flow
             && definitely(gronwall_physical_local_flow.error()
                           <=this->step_maximum_error());
-        Bool const dense_acceptable=
-            definitely(physical_local_flow.error()
-                       <=this->step_maximum_error());
+        Bool dense_acceptable=false;
+        if(this->diagnostics()) {
+            dense_acceptable=
+                definitely(dense_physical_error<=this->step_maximum_error());
+        }
 
         if(this->diagnostics() && have_gronwall_flow) {
             std::cerr << "[GronwallAcceptanceComparison]"
@@ -2053,23 +2066,29 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << " gronwall_physical_error="
                       << gronwall_physical_local_flow.error()
                       << " dense_physical_error="
-                      << physical_local_flow.error()
+                      << dense_physical_error
                       << " gronwall_acceptable=" << gronwall_acceptable
                       << " dense_acceptable=" << dense_acceptable
                       << std::endl;
         }
 
         if(gronwall_acceptable) {
-            // From this point on, propagate the polynomial+remainder flow.
-            // The dense graded flow above remains computed only to provide an
-            // A/B diagnostic during this experiment.
-            physical_local_flow=gronwall_physical_local_flow;
             break;
         }
 
         // If the certification guard could not build a Gronwall candidate,
         // retain the old validated path as a safety fallback for now.
-        if(!have_gronwall_flow && dense_acceptable) {
+        if(!have_gronwall_flow && this->diagnostics() && dense_acceptable) {
+            physical_local_flow=
+                factory.create_zeros(n,local_flow.domain());
+            for(SizeType i=0u; i!=n; ++i) {
+                physical_local_flow[i]=
+                    factory.create_constant(local_flow.domain(),centre[i]);
+                for(SizeType j=0u; j!=n; ++j) {
+                    physical_local_flow[i]=physical_local_flow[i]
+                        + local_flow[j]*FloatDPBounds(A[i][j]);
+                }
+            }
             break;
         }
 

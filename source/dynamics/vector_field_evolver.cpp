@@ -214,7 +214,8 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     SharedPointer<PreconditionedTaylorSeriesState> next_preconditioned_state;
 
     if(preconditioned_integrator!=nullptr) {
-        if(result->reach_size()==1u
+        if(preconditioned_integrator->diagnostics()
+           && result->reach_size()==1u
            && preconditioned_integrator->preconditioning()==TaylorSeriesPreconditioning::QR) {
             PreconditionedGradedTaylorSeriesIntegrator identity_probe=
                 *preconditioned_integrator;
@@ -278,7 +279,8 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
         // Temporary diagnostic: compare endpoint-first composition with the
         // old endpoint-after-full-flowpipe ordering.
-        if(result->reach_size()<20u) {
+        if(preconditioned_integrator->diagnostics()
+           && result->reach_size()<20u) {
             auto const& final_state=local_step.final_state();
             ValidatedVectorMultivariateFunctionPatch old_order_endpoint=
                 partial_evaluate(

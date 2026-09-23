@@ -915,7 +915,13 @@ Void graded_flow_iterate_affine_procedure(
 }
 
 
-FlowStepTaylorModelType
+struct CentrePolynomialRecurrenceResult {
+    FlowStepTaylorModelType polynomial;
+    FlowStepTaylorModelType residual;
+    double residual_seconds;
+};
+
+CentrePolynomialRecurrenceResult
 graded_series_centre_polynomial_step(
         const Vector<ValidatedProcedure>& p,
         const ExactBoxType& domx,
@@ -951,7 +957,34 @@ graded_series_centre_polynomial_step(
     // to measure before attaching a separate validated remainder.
     Vector<ValidatedDifferential> dphi=
         flow_differential(dphic,dphic,so,to);
-    return flow_function(dphi,domx,domt,doma,sweeper);
+    FlowStepTaylorModelType polynomial=
+        flow_function(dphi,domx,domt,doma,sweeper);
+
+    Stopwatch<Microseconds> recurrence_residual_stopwatch;
+    Vector<GradedValidatedDifferential> final_f=fdphic;
+    List<GradedValidatedDifferential> final_tmp=tmpdphic;
+    Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
+
+    Vector<GradedValidatedDifferential> derivative_graded=fdphic;
+    ValidatedDifferential const z=nul(dphic[0u][0u]);
+    for(SizeType i=0u; i!=n; ++i) {
+        while(derivative_graded[i].degree()<final_f[i].degree()) {
+            derivative_graded[i].append(z);
+        }
+    }
+    Vector<GradedValidatedDifferential> residual_graded=derivative_graded;
+    for(SizeType i=0u; i!=n; ++i) {
+        residual_graded[i]=derivative_graded[i]-final_f[i];
+    }
+    Vector<ValidatedDifferential> residual_differential=
+        differential(residual_graded,n,so,to);
+    FlowStepTaylorModelType residual=
+        flow_function(residual_differential,domx,domt,doma,sweeper);
+    recurrence_residual_stopwatch.click();
+
+    return CentrePolynomialRecurrenceResult{
+        std::move(polynomial),std::move(residual),
+        recurrence_residual_stopwatch.elapsed_seconds()};
 }
 
 
@@ -1842,12 +1875,28 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             && this->minimum_spacial_order()==this->maximum_spacial_order()
             && this->minimum_temporal_order()==this->maximum_temporal_order()) {
             Stopwatch<Microseconds> centre_polynomial_stopwatch;
-            FlowStepTaylorModelType centre_polynomial=
+            CentrePolynomialRecurrenceResult centre_result=
                 graded_series_centre_polynomial_step(
                     p,domy,domt,this->sweeper(),
                     this->minimum_spacial_order(),
                     this->minimum_temporal_order());
+            FlowStepTaylorModelType centre_polynomial=
+                std::move(centre_result.polynomial);
+            FlowStepTaylorModelType recurrence_residual=
+                std::move(centre_result.residual);
             centre_polynomial_stopwatch.click();
+
+            static SizeType recurrence_residual_calls=0u;
+            static double recurrence_residual_seconds=0.0;
+            ++recurrence_residual_calls;
+            recurrence_residual_seconds+=centre_result.residual_seconds;
+            if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
+                std::cerr << "[RecurrenceResidualProfile]"
+                          << " calls=" << recurrence_residual_calls
+                          << " residual_seconds=" << recurrence_residual_seconds
+                          << " residual_range=" << recurrence_residual.range()
+                          << std::endl;
+            }
 
             Stopwatch<Microseconds> residual_stopwatch;
             Stopwatch<Microseconds> residual_compose_stopwatch;
@@ -1943,6 +1992,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " polynomial_errors=" << centre_polynomial.errors()
                           << " polynomial_range=" << centre_polynomial.range()
                           << " defect_range=" << defect.range()
+                          << " recurrence_defect_range=" << recurrence_residual.range()
                           << " initial_defect_range=" << initial_defect.range()
                           << " lipschitz_inf=" << lipschitz_inf
                           << std::endl;

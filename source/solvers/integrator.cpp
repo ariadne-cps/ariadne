@@ -1240,30 +1240,23 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
     auto const& factory=this->function_factory();
     Vector<FloatDP> centre(n,FloatDP(dp));
     Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
-    ExactBoxType local_domain(n);
     ValidatedVectorMultivariateFunctionPatch normalised=
         factory.create_zeros(n,state.domain());
 
+    // Identity preconditioning in the sense used by Flow*: translate the
+    // local initial set by its centre, but do not rescale each component to
+    // fill [-1,1].  The previous diagonal range normalisation was a different
+    // transformation and made the local variables artificially O(1) at every
+    // step, which substantially amplified Taylor-model remainders.
     for(SizeType i=0u; i!=n; ++i) {
         FloatDP const c=state_taylor.model(i).value().raw();
-        ValidatedScalarMultivariateFunctionPatch centred=
-            state[i]-FloatDPBounds(c);
-        FloatDP const r=cast_exact(mag(centred.range()));
-
         centre[i]=c;
-        if(r==FloatDP(0,dp)) {
-            // Preserve an exactly constant component without introducing a
-            // singular change of coordinates.  Its normalised coordinate is
-            // fixed at zero and therefore contributes no additional set width.
-            linear_map[i][i]=FloatDP(1,dp);
-            local_domain[i]=ExactIntervalType(0_z,0_z);
-            normalised[i]=factory.create_zero(state.domain());
-        } else {
-            linear_map[i][i]=r;
-            local_domain[i]=ExactIntervalType(-1,+1);
-            normalised[i]=centred/FloatDPBounds(r);
-        }
+        linear_map[i][i]=FloatDP(1,dp);
+        normalised[i]=state[i]-FloatDPBounds(c);
     }
+
+    ExactBoxType local_domain=
+        cast_exact_box(widen(normalised.range()));
 
     return PreconditionedTaylorSeriesState(
         std::move(centre),std::move(linear_map),std::move(local_domain),

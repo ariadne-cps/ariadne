@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `8221d5c5ebc2d0b5d54977f7dbbd73402a3edd9c`
+**Latest analysed investigation HEAD:** `96c18da6d8a8c687c09e6781c5e91e27dc6f0391`
 
 ## Purpose of this document
 
@@ -704,6 +704,59 @@ Stop refining the dense transformed-Procedure path as the main architecture. The
 - maintain and refine a separate interval remainder.
 
 The next prototype should therefore be a **single-step polynomial + remainder experiment**, not another QR-matrix tweak. On the Van der Pol second-step state, compute the temporal Taylor polynomial using centre/polynomial coefficients, evaluate its image over the local initial Taylor model, and validate only the missing/truncation part against the physical bounding box. The immediate target is to reproduce the same `h=0.02` step while avoiding the bounding `Graded<Differential<Bounds>>` recursion that produces `dphib ~ 3525--5322`.
+
+---
+
+
+### 9.6 Clarification: the persistent affine-local state is a factorisation, not extra symbolic information (2026-09-23)
+
+A conceptual correction is important for interpreting the improvements seen so far.
+
+The ordinary `GradedTaylorSeriesIntegrator`, when used by the evolver, does **not** simply discard all dependence on the previous evolved set. It constructs a fresh one-step flow map `Phi_k(x,t)`, and the evolved set is obtained by composing that map with the previous Taylor-model state `X_k(s)`:
+
+```
+X_{k+1}(s) = Phi_k(X_k(s), h).
+```
+
+Therefore the previous symbolic dependence is present in the standard pipeline as well.
+
+The preconditioned prototype instead stores the current state in the factorised form
+
+```
+X_k(s) = c_k + A_k Y_k(s),
+```
+
+where:
+- `centre` is `c_k`;
+- `linear_map` is `A_k`;
+- `normalised_mapping` is `Y_k(s)`;
+- `local_domain` is only an enclosure of the range of `Y_k`.
+
+These objects do **not** contain more mathematical information than the corresponding full Taylor map. The benefit is representational: the affine frame is kept outside the accumulated Taylor-model mapping.
+
+For a local endpoint transition `E_k(y)`, the implementation first preconditions the fresh local endpoint,
+
+```
+E_k(y) = c_{k+1} + A_{k+1} T_k(y),
+```
+
+and only afterwards composes its local map with the accumulated previous local map:
+
+```
+Y_{k+1}(s) = T_k(Y_k(s)),
+X_{k+1}(s) = c_{k+1} + A_{k+1} Y_{k+1}(s).
+```
+
+This ordering matters numerically even though it is mathematically equivalent to composing the physical maps directly. It prevents the new affine transformation from repeatedly acting on and being swept together with the already accumulated interval remainder. Earlier experiments showed that re-preconditioning the already-composed physical map causes artificial remainder growth; preconditioning the fresh local endpoint before accumulated composition avoids that failure mode.
+
+**Current limitation:** this factorisation is used primarily **between steps**. During construction of a new local flow, the current `graded_series_flow_step` still receives the axis-aligned `local_domain` / `local_bounding_box`, rather than exploiting the full symbolic structure of `Y_k(s)`. Thus the high-order validated recurrence inside the step remains essentially the same machinery as `GradedTaylorSeriesIntegrator`.
+
+This distinction should be kept explicit:
+
+- current improvement: better factorisation and ordering of inter-step representation/composition;
+- not yet achieved: preserving the correlated polynomial dependence of the incoming Taylor model inside the high-order validated flow computation itself.
+
+A Flow*-like polynomial+remainder prototype should target the second point rather than claiming that the current persistent state already preserves symbolic information absent from the standard evolver.
 
 ---
 

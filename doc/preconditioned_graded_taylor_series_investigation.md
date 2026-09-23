@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `e797d6c2164adf6a9e04f6108303471c26d6057a`
+**Latest analysed investigation HEAD:** `a0f4842485b8dddd58fde132203f10603071a458`
 
 ## Purpose of this document
 
@@ -829,6 +829,68 @@ the first a-posteriori enclosure to test is the Gronwall bound
 ```
 
 If this already beats the current graded bounding remainder by a large factor, implement it as the first rigorous polynomial+remainder prototype. If it is too pessimistic, move directly to componentwise/matrix remainder refinement rather than returning to the old graded bounding recurrence.
+
+---
+
+
+### 9.9 Scalar a-posteriori Gronwall bound preserves the defect advantage (2026-09-23)
+
+The Lipschitz diagnostic confirms that the simple scalar amplification bound is not large enough to destroy the centre-polynomial advantage.
+
+For the important second-step QR state, the validated infinity-norm Jacobian bound over the local flow box is
+
+```
+L = 13.210077
+```
+
+and the centre-polynomial diagnostics give:
+
+```
+h=0.020:
+  epsilon = sup |dP/dt-g(P)| ~ 1.3928304e-6
+  e0      ~ 1.9695e-11
+  exp(Lh) ~ 1.30239
+  Gronwall endpoint bound ~ 3.19e-8
+
+h=0.015:
+  epsilon ~ 3.3896547e-7
+  e0      ~ 1.8710e-11
+  exp(Lh) ~ 1.21915
+  Gronwall endpoint bound ~ 5.65e-9
+
+h=0.010:
+  epsilon ~ 5.4732665e-8
+  e0      ~ 2.4786e-11
+  exp(Lh) ~ 1.14122
+  Gronwall endpoint bound ~ 6.13e-10
+```
+
+These values use
+
+```
+e(h) <= exp(Lh)e0 + (exp(Lh)-1)/L * epsilon.
+```
+
+At `h=0.02`, the resulting ~`3.2e-8` bound is roughly 17 times smaller than the current dense QR local-flow error (~`5.45e-7`) for this same second-step probe, even before implementing componentwise refinement. The gap grows rapidly as `h` decreases.
+
+The first-step diagnostic has `L=11.445905` and similarly small defect, so the effect is not unique to the rotated second step. Later carried states show `L` around `13.87`, still moderate.
+
+**Conclusion:** a separate a-posteriori remainder is now quantitatively justified. The old bounding graded recurrence is not needed to obtain a competitive local error on this benchmark, provided the defect bound and Jacobian bound are validated on a tube known to contain the exact solution.
+
+### Updated NEXT STEP
+
+Implement a first rigorous prototype which returns the centre polynomial plus a uniform interval remainder derived from the scalar Gronwall estimate.
+
+There is one validation issue that must not be skipped: the Jacobian bound currently uses the pre-existing validated `local_bounding_box`, which itself comes from the ordinary flow bounder, while the defect is evaluated on the polynomial image. For a production replacement, verify that the proposed polynomial-plus-remainder tube is contained in a domain on which both the defect and Jacobian bounds were computed. Initially it is acceptable to reuse the existing validated flow box as the certification domain; this isolates the remainder mechanism without changing the bounder at the same time.
+
+The prototype should:
+1. retain the centre-only Taylor polynomial;
+2. compute validated componentwise defect magnitudes;
+3. compute a validated scalar `L` over the existing local flow box;
+4. attach the Gronwall endpoint/tube remainder to the Taylor model;
+5. compare the resulting physical-coordinate error and accepted step against the current graded-series path.
+
+Only after this succeeds should the scalar bound be replaced by Flow*-style componentwise/fast remainder refinement.
 
 ---
 

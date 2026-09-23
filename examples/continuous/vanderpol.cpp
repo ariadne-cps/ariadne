@@ -41,19 +41,8 @@ void ariadne_main()
     VectorFieldSimulator simulator(dynamics);
     simulator.configuration().set_step_size(0.02);
 
-    StepMaximumError max_err=1e-6;
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-12);
-
-    GradedTaylorSeriesIntegrator integrator(
-        max_err,sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
-
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
-    evolver.configuration().set_maximum_spacial_error(1e-6);
-    evolver.configuration().set_enable_reconditioning(false);
+    StepMaximumError max_err=1e-3;
+    ThresholdSweeper<FloatDP> series_sweeper(DoublePrecision(),1e-12);
 
     Real x0 = 1.40_dec;
     Real y0 = 2.30_dec;
@@ -64,16 +53,44 @@ void ariadne_main()
         y0-eps_y0<=y<=y0+eps_y0
     });
 
-    auto orbit=evolver.orbit(initial_set,Real(0.02_dec),Semantics::UPPER);
-    std::cerr << "[GradedRemainderDiagnosticSummary]"
-              << " reach_sets=" << orbit.reach().size()
-              << " intermediate_sets=" << orbit.intermediate().size();
-    if(!orbit.final().empty()) {
-        auto const& final_set=orbit.final()[0];
-        std::cerr << " final_error=" << final_set.state_function().error()
-                  << " final_radius=" << final_set.radius()
-                  << " final_box=" << final_set.euclidean_set().bounding_box();
-    }
-    std::cerr << std::endl;
+    auto run_first_step =
+        [&](IntegratorInterface const& integrator, const char* name) {
+            VectorFieldEvolver evolver(dynamics,integrator);
+            evolver.configuration().set_maximum_enclosure_radius(1.0);
+            evolver.configuration().set_maximum_step_size(0.02);
+            evolver.configuration().set_maximum_spacial_error(1e-3);
+            evolver.configuration().set_enable_reconditioning(false);
+
+            auto orbit=evolver.orbit(initial_set,Real(0.02_dec),Semantics::UPPER);
+            std::cerr << "[RemainderMechanismComparison]"
+                      << " method=" << name
+                      << " reach_sets=" << orbit.reach().size()
+                      << " intermediate_sets=" << orbit.intermediate().size();
+            if(!orbit.reach().empty()) {
+                auto const& reach=orbit.reach()[0];
+                std::cerr << " reach_error=" << reach.state_function().error()
+                          << " reach_radius=" << reach.radius();
+            }
+            if(!orbit.final().empty()) {
+                auto const& final_set=orbit.final()[0];
+                std::cerr << " final_error=" << final_set.state_function().error()
+                          << " final_radius=" << final_set.radius()
+                          << " final_box=" << final_set.euclidean_set().bounding_box();
+            }
+            std::cerr << std::endl;
+        };
+
+    GradedTaylorSeriesIntegrator series_integrator(
+        max_err,series_sweeper,lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
+
+    GradedTaylorPicardIntegrator picard_integrator(
+        max_err,order=5,step_sweep_threshold=1e-12);
+    picard_integrator.set_diagnostics(true);
+    picard_integrator.set_maximum_error_refinement_iterations(8u);
+
+    run_first_step(series_integrator,"GradedTaylorSeries");
+    run_first_step(picard_integrator,"GradedTaylorPicard");
 
 }

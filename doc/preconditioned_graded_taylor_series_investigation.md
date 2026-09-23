@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `1e0c8c4e752da91baea705cdd0f47c8c37f69a1b`
+**Latest analysed investigation HEAD:** `8221d5c5ebc2d0b5d54977f7dbbd73402a3edd9c`
 
 ## Purpose of this document
 
@@ -640,6 +640,70 @@ This is a diagnostic separation:
 - if growth remains near `5e3`, the deeper limitation is the interval-coefficient graded differential representation under rotated dependencies.
 
 Do not use the sparse-Procedure path as a production optimisation: this experiment showed no accuracy benefit by itself.
+
+---
+
+
+### 9.5 Direct physical bounding box helps materially, but does not remove high-order growth (2026-09-23)
+
+Commit `8221d5c5ebc2d0b5d54977f7dbbd73402a3edd9c` tested the sparse physical-Procedure path again, but initialized the bounding branch zero-order physical differentials directly from the already validated `physical_bounding_box`, avoiding the interval round trip
+
+```
+physical box -> interval(A^{-1} box) -> interval(A local box).
+```
+
+For the same second-step QR probe at `h=0.02`, the result improved materially:
+
+```
+dense transformed Procedure:
+  dphib order 5       = 5322.1903
+  dominant local err  = 4.2908e-6
+
+sparse physical Procedure, with box round-trip:
+  dphib order 5       = 5177.6996
+  dominant local err  = 4.41e-6
+
+sparse physical Procedure, direct physical box:
+  dphib order 5       = 3525.2330
+  dominant local err  = 2.91e-6
+```
+
+The direct-physical-box bounding progression is:
+
+```
+iteration 1: local_f ~ 9.397
+iteration 2: local_f ~ 51.208
+iteration 3: local_f ~ 381.622
+iteration 4: local_f ~ 2854.998
+iteration 5: local_f ~ 17626.165
+```
+
+Thus the box round-trip accounts for a significant part of the QR penalty: order-5 `dphib` falls by about one third relative to the dense production path, and the dominant Taylor-model error falls by about 32%. The improvement persists when the candidate step is reduced:
+
+```
+h=0.015: 1.019e-6 -> 6.91e-7
+h=0.010: 1.345e-7 -> 9.12e-8
+```
+
+However, the high-order coefficient growth is still severe. Even after removing this avoidable box wrapping, the bounding branch grows from roughly `9.4` at order 1 to `1.76e4` in the vector-field coefficient at order 5, corresponding to `dphib ~ 3525`. This is still far above the IDENTITY second-step `dphib ~ 723`.
+
+**Conclusion:** there are two distinct effects.
+
+1. The current QR implementation pays an avoidable penalty by converting a validated physical box to an axis-aligned local box and then, directly or indirectly, losing that correlation again. This should not be part of a final design.
+2. Removing that penalty is not sufficient. The remaining factor of roughly 4.9 in order-5 `dphib` versus IDENTITY points to the interval-coefficient graded representation itself as the deeper limitation under rotated dependencies.
+
+The expression-densification hypothesis remains rejected: keeping the sparse physical Procedure only becomes useful once the physical enclosure is also kept in physical coordinates.
+
+### Updated NEXT STEP
+
+Stop refining the dense transformed-Procedure path as the main architecture. The evidence now supports a split representation closer to Flow*:
+
+- keep the polynomial/Taylor dependence in correlated symbolic or Taylor-model form;
+- keep the validated physical flow box for range/remainder validation rather than repeatedly rotating it into axis-aligned local boxes;
+- apply QR/preconditioning to the polynomial dependence, not to every interval enclosure;
+- maintain and refine a separate interval remainder.
+
+The next prototype should therefore be a **single-step polynomial + remainder experiment**, not another QR-matrix tweak. On the Van der Pol second-step state, compute the temporal Taylor polynomial using centre/polynomial coefficients, evaluate its image over the local initial Taylor model, and validate only the missing/truncation part against the physical bounding box. The immediate target is to reproduce the same `h=0.02` step while avoiding the bounding `Graded<Differential<Bounds>>` recursion that produces `dphib ~ 3525--5322`.
 
 ---
 

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `ed352a13f20480a54d67d81d7965fe912ce29532`
+**Latest analysed investigation HEAD:** `f2a8ae611a7de2992ab00ccf0bb2e8e087029c50`
 
 ## Purpose of this document
 
@@ -1010,6 +1010,32 @@ The next experiment runs the ordinary `GradedTaylorSeriesIntegrator` immediately
 - reconditioning disabled.
 
 The output marker `[IntegratorBenchmark]` reports elapsed time and set counts for both methods. This gives the first controlled speed/accepted-step comparison without relying on separate process timings.
+
+---
+
+
+### 9.14 First controlled speed comparison: accuracy gain does not yet imply per-step speed gain (2026-09-23)
+
+The controlled t=0.40 benchmark with identical order/tolerance/evolver configuration produced:
+
+```
+GRONWALL: 0.706001 s, 21 reach sets
+GRADED:   0.221001 s, 21 reach sets
+```
+
+At a forced maximum step of 0.02 both methods complete with the same number of sets, so the current Gronwall prototype is about 3.2x slower in wall-clock time on this short benchmark despite its much smaller local remainder.
+
+This is not surprising architecturally: the new path currently pays for
+- a centre graded recurrence;
+- construction and range evaluation of the polynomial ODE defect `dP/dt-g(P)`;
+- a first-order differential/Jacobian evaluation on the certification box;
+- QR/state factorisation and the specialised carried-state evolver path.
+
+The old graded integrator pays for the centre+bounding recurrence but no separate residual composition/range pass.
+
+The result changes the immediate optimisation question. The main potential speed advantage of the new method is not cheaper work per fixed h=0.02 step; it is the ability to take larger validated steps because its remainder is much smaller. A fair next experiment must therefore remove the artificial common maximum-step bottleneck.
+
+The next benchmark extends the horizon to t=1.0 and compares both methods at max_step=0.02, then runs the Gronwall method at max_step=0.04. This tests whether the accuracy headroom can be converted into fewer steps. If 0.04 is accepted robustly, follow with the ordinary graded method at 0.04 to determine whether its local-error criterion forces reductions.
 
 ---
 

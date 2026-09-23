@@ -1450,7 +1450,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     ExactBoxType doma;
     FlowStepModelType centre_flow=
         Ariadne::graded_series_flow_step(
-            f,centre_domain,maximal_domt,doma,physical_bounding_box,
+            f,centre_domain,Interval<StepSizeType>(StepSizeType(0),h),
+            doma,physical_bounding_box,
             this->step_maximum_error(),this->sweeper(),
             this->minimum_spacial_order(),this->minimum_temporal_order(),
             this->maximum_spacial_order(),this->maximum_temporal_order());
@@ -1505,7 +1506,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         }
         centre_derivative[i]=
             embed(local_vector_field_domain,
-                  derivative(centre_polynomial[i],0u));
+                  derivative(centre_polynomial.get(i),0u));
     }
 
     ValidatedVectorMultivariateFunctionPatch physical_vector_field=

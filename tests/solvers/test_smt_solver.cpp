@@ -305,7 +305,7 @@ class TestSmtSolver {
 
         {
             std::vector<ValidatedScalarMultivariateFunction> functions({
-                xy[0]-xy[0]
+                ValidatedScalarMultivariateFunction::zero(2u)
             });
             auto selection=SmtSolverTestSupport::sensitivity_split_selection(
                 domain,functions);

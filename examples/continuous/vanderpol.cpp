@@ -35,7 +35,7 @@ void ariadne_main()
         minimum_spacial_order=5,minimum_temporal_order=5,
         maximum_spacial_order=5,maximum_temporal_order=5);
     integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    integrator.set_diagnostics(true);
+    integrator.set_diagnostics(false);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
@@ -43,8 +43,11 @@ void ariadne_main()
     evolver.configuration().set_maximum_spacial_error(1e-6);
     evolver.configuration().set_enable_reconditioning(false);
 
-    auto orbit=evolver.orbit(initial_set,Real(0.04_dec),Semantics::UPPER);
-    std::cerr << "[PreconditionedSecondStepSummary]"
+    Stopwatch<Milliseconds> stopwatch;
+    auto orbit=evolver.orbit(initial_set,Real(0.40_dec),Semantics::UPPER);
+    stopwatch.click();
+    std::cerr << "[GronwallProductionBenchmark]"
+              << " elapsed_seconds=" << stopwatch.elapsed_seconds()
               << " reach_sets=" << orbit.reach().size()
               << " intermediate_sets=" << orbit.intermediate().size()
               << std::endl;

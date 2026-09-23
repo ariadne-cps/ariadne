@@ -829,16 +829,48 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     static SizeType graded_internal_diagnostic_count=0u;
     if(graded_internal_diagnostic_count<8u) {
+        // These intermediate objects are raw Differential/Graded containers,
+        // not Taylor models, so they do not carry an explicit error field.
+        // Measure instead the largest magnitude of any stored interval
+        // coefficient.  This lets us see where the QR representation first
+        // inflates the interval differential data.
+        auto differential_coefficient_mag =
+            [](ValidatedDifferential const& d) {
+                auto r=mag(d.value());
+                for(auto const& term : d.expansion()) {
+                    r=max(r,mag(term.coefficient()));
+                }
+                return r;
+            };
+        auto graded_coefficient_mag =
+            [&](Vector<GradedValidatedDifferential> const& v) {
+                auto r=differential_coefficient_mag(v[0u][0u]);
+                for(SizeType i=0u; i!=v.size(); ++i) {
+                    for(DegreeType k=0u; k<=v[i].degree(); ++k) {
+                        r=max(r,differential_coefficient_mag(v[i][k]));
+                    }
+                }
+                return r;
+            };
+        auto differential_vector_mag =
+            [&](Vector<ValidatedDifferential> const& v) {
+                auto r=differential_coefficient_mag(v[0u]);
+                for(SizeType i=1u; i!=v.size(); ++i) {
+                    r=max(r,differential_coefficient_mag(v[i]));
+                }
+                return r;
+            };
+
         std::cerr << "[GradedInternalDiagnostic]"
                   << " call=" << graded_internal_diagnostic_count
                   << " domx=" << domx
                   << " domt=" << domt
                   << " bndx=" << bndx
-                  << " fdphic_error=" << fdphic.error()
-                  << " fdphib_error=" << fdphib.error()
-                  << " dphic_error=" << dphic.error()
-                  << " dphib_error=" << dphib.error()
-                  << " dphi_error=" << dphi.error()
+                  << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
+                  << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
+                  << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
+                  << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
+                  << " dphi_coeff_mag=" << differential_vector_mag(dphi)
                   << " tphi_errors=" << tphi.errors()
                   << std::endl;
         ++graded_internal_diagnostic_count;

@@ -303,6 +303,13 @@ class TestSmtBoolean {
         }
 
         {
+            std::cout << "[smt-boolean] symmetric disequality shares an atom" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode((ex!=ey)&&!(ey!=ex));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
+        }
+
+        {
             std::cout << "[smt-boolean] sgn(x) and x>0 share an atom" << std::endl;
             SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(sgn(ex)&&!(ex>0));
             ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);

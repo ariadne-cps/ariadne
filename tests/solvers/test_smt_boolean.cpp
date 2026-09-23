@@ -308,6 +308,14 @@ class TestSmtBoolean {
             ARIADNE_TEST_EQUAL(encoding.atom_count(),1u);
             ARIADNE_TEST_EQUAL(encoding.variable_count(),2u);
         }
+
+        {
+            std::cout << "[smt-boolean] same lhs with different rhs stays distinct" << std::endl;
+            SmtBooleanEncoding encoding=SmtBooleanEncoder().encode(
+                (ex>=0)&&(ex>=1));
+            ARIADNE_TEST_EQUAL(encoding.atom_count(),2u);
+            ARIADNE_TEST_EQUAL(encoding.variable_count(),3u);
+        }
     }
 
     Void test_nested_formula() {

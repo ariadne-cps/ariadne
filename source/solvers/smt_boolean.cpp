@@ -228,7 +228,6 @@ class TseitinBuilder {
             return variable;
         }
 
-        ARIADNE_ASSERT(code==OperatorCode::OR);
         auto lhs_value=this->_constant_value(predicate.arg1());
         auto rhs_value=this->_constant_value(predicate.arg2());
         if(lhs_value.has_value()) {

@@ -51,6 +51,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
+        ARIADNE_TEST_CALL(test_sensitivity_split_selection());
         ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_cdcl_helpers());
         ARIADNE_TEST_CALL(test_child_search_classification());
@@ -281,6 +282,37 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(success.certified);
         ARIADNE_TEST_ASSERT(success.witness.has_value());
         ARIADNE_TEST_EQUAL(success.witness->dimension(),1u);
+    }
+
+    Void test_sensitivity_split_selection() {
+        std::cout << "[smt-split] deterministic sensitivity selection" << std::endl;
+        auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+        UpperBoxType domain({
+            UpperIntervalType(ExactIntervalType(0,1)),
+            UpperIntervalType(ExactIntervalType(0,4))
+        });
+
+        {
+            std::vector<ValidatedScalarMultivariateFunction> functions({
+                sqr(xy[0])
+            });
+            auto selection=SmtSolverTestSupport::sensitivity_split_selection(
+                domain,functions);
+            ARIADNE_TEST_ASSERT(selection.guided);
+            ARIADNE_TEST_EQUAL(selection.coordinate,0u);
+            ARIADNE_TEST_ASSERT(selection.overrode_geometric);
+        }
+
+        {
+            std::vector<ValidatedScalarMultivariateFunction> functions({
+                xy[0]-xy[0]
+            });
+            auto selection=SmtSolverTestSupport::sensitivity_split_selection(
+                domain,functions);
+            ARIADNE_TEST_ASSERT(not selection.guided);
+            ARIADNE_TEST_EQUAL(selection.coordinate,1u);
+            ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
+        }
     }
 
     Void test_search_outcome() {
@@ -597,6 +629,24 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
+        }
+
+        {
+            std::cout << "[smt-solve] constant function UNSAT after direct range check" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            ValidatedScalarMultivariateFunction constant=
+                ValidatedScalarMultivariateFunction::constant(
+                    1u,ValidatedNumber(2));
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0),
+                    constant,
+                    ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
         }
 
         {

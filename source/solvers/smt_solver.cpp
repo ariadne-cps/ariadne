@@ -30,6 +30,7 @@
 #include <memory>
 #include <mutex>
 #include <cstdint>
+#include <cstdlib>
 #include <algorithm>
 #include <functional>
 #include <set>
@@ -994,6 +995,18 @@ CandidateWitnessOutcome candidate_witness_outcome(
     return {true,false,std::nullopt};
 }
 
+SensitivitySplitSelection sensitivity_split_selection(
+    UpperBoxType const& domain,
+    std::vector<ValidatedScalarMultivariateFunction> const& functions)
+{
+    auto selection=sensitivity_split_coordinate(domain,functions);
+    return {
+        selection.first,
+        selection.second.first,
+        selection.second.second
+    };
+}
+
 SearchOutcome SearchOutcome::exhausted()
 {
     return {};
@@ -1802,8 +1815,8 @@ class SmtDpllSearch {
 
         if(not clause.empty()
            && _statistics.first_minimization_candidate_trail_rank==0u) {
-            SizeType first_variable=static_cast<SizeType>(
-                clause.front()>0 ? clause.front() : -clause.front());
+            SizeType first_variable=
+                static_cast<SizeType>(std::abs(clause.front()));
             _statistics.first_minimization_candidate_trail_rank=
                 trail_rank[first_variable];
         }

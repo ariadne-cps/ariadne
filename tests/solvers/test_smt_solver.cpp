@@ -47,6 +47,7 @@ class TestSmtSolver {
   public:
     Void test() {
         ARIADNE_TEST_CALL(test_configuration());
+        ARIADNE_TEST_CALL(test_public_preconditions());
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_learned_clause_pruning_policy());
         ARIADNE_TEST_CALL(test_statistics_aggregation());
@@ -108,6 +109,74 @@ class TestSmtSolver {
 
         std::cout << "[smt-config] reject negative epsilon=-0.125" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(-0.125_x),std::runtime_error);
+    }
+
+    Void test_public_preconditions() {
+        std::cout << "[smt-preconditions] reject invalid public inputs" << std::endl;
+
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+        ExactBoxType bounded({ExactIntervalType(0,1)});
+        ExactBoxType unbounded({ExactIntervalType(-inf,inf)});
+
+        auto x1=ValidatedScalarMultivariateFunction::coordinates(1);
+        auto x2=ValidatedScalarMultivariateFunction::coordinates(2);
+        List<ValidatedConstraint> one_dimensional({
+            ValidatedConstraint(
+                ValidatedNumber(0),x1[0],ValidatedNumber(1))
+        });
+        List<ValidatedConstraint> two_dimensional({
+            ValidatedConstraint(
+                ValidatedNumber(0),x2[0],ValidatedNumber(1))
+        });
+
+        ARIADNE_TEST_THROWS(
+            solver.solve(unbounded,one_dimensional),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve(bounded,two_dimensional),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(unbounded,one_dimensional),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(bounded,two_dimensional),
+            std::runtime_error);
+
+        RealVariable x("precondition_x"), y("precondition_y");
+        RealExpression ex=x;
+        RealSpace one_space({x});
+        RealSpace two_space({x,y});
+        List<SmtTheoryPrimitiveLiteral> literals({
+            normalize_smt_theory_literal(
+                make_smt_theory_literal(ex>=0))[0][0]
+        });
+
+        ARIADNE_TEST_THROWS(
+            solver.solve(one_space,unbounded,literals),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve(two_space,bounded,literals),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(one_space,unbounded,literals),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(two_space,bounded,literals),
+            std::runtime_error);
+
+        ContinuousPredicate predicate=(ex>=0);
+        ARIADNE_TEST_THROWS(
+            solver.solve(one_space,unbounded,predicate),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve(two_space,bounded,predicate),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(one_space,unbounded,predicate),
+            std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            solver.solve_parallel(two_space,bounded,predicate),
+            std::runtime_error);
     }
 
     Void test_result() {
@@ -311,6 +380,32 @@ class TestSmtSolver {
                 domain,functions);
             ARIADNE_TEST_ASSERT(not selection.guided);
             ARIADNE_TEST_EQUAL(selection.coordinate,1u);
+            ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
+        }
+
+        {
+            std::vector<ValidatedScalarMultivariateFunction> functions({
+                xy[0]+2*xy[1]
+            });
+            auto selection=SmtSolverTestSupport::sensitivity_split_selection(
+                domain,functions);
+            ARIADNE_TEST_ASSERT(selection.guided);
+            ARIADNE_TEST_EQUAL(selection.coordinate,1u);
+            ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
+        }
+
+        {
+            UpperBoxType wide_first({
+                UpperIntervalType(ExactIntervalType(0,4)),
+                UpperIntervalType(ExactIntervalType(0,1))
+            });
+            std::vector<ValidatedScalarMultivariateFunction> functions({
+                2*xy[0]+xy[1]
+            });
+            auto selection=SmtSolverTestSupport::sensitivity_split_selection(
+                wide_first,functions);
+            ARIADNE_TEST_ASSERT(selection.guided);
+            ARIADNE_TEST_EQUAL(selection.coordinate,0u);
             ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
         }
     }

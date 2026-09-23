@@ -480,6 +480,41 @@ Do not change the preconditioning strategy before this is identified.
 
 ---
 
+
+
+### 9.2 Temporal-iteration localisation (2026-09-23)
+
+The per-iteration diagnostic shows that the QR penalty is **not present at the first vector-field evaluation** and then grows rapidly with temporal order.
+
+For the same second-step state:
+
+| temporal iteration | IDENTITY `dphib` magnitude | QR `dphib` magnitude | QR / IDENTITY |
+|---:|---:|---:|---:|
+| 1 | 9.494 | 9.444 | 0.99x |
+| 2 | 23.183 | 29.576 | 1.28x |
+| 3 | 75.192 | 147.420 | 1.96x |
+| 4 | 282.395 | 914.136 | 3.24x |
+| 5 | 723.256 | 5322.190 | 7.36x |
+
+The centre branch remains close throughout; at order 5 it is about `194.69` for IDENTITY and `204.77` for QR.
+
+Also, `fdphib / dphib = k` at temporal order `k` (for example `26610.952 / 5322.1903 = 5`), so the antidifferentiation is not generating the excessive ratio. The inflation is already present in the output of `compute_procedure`.
+
+**Conclusion:** the current bottleneck is repeated validated evaluation of the vector-field Procedure on the bounding graded differential. The next diagnostic must identify the first Procedure instruction / elementary operation that amplifies QR relative to IDENTITY.
+
+### Updated NEXT STEP
+
+Instrument the temporary values produced by `compute_procedure` for the same-state second-step IDENTITY and QR probes, for every temporal iteration. Record:
+- Procedure instruction index and operation,
+- centre/bounding branch,
+- maximum stored interval-coefficient magnitude.
+
+The key target is the bounding branch at iterations 2--5. Determine whether the amplification is associated with `sqr`, multiplication, subtraction, or another operation in the Van der Pol procedure.
+
+Do not modify the QR preconditioner until that operation-level source is known.
+
+---
+
 ## 10. Direction of the project
 
 The preconditioned direction remains worth investigating, but the target is now precise:

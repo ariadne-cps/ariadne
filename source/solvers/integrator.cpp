@@ -634,7 +634,10 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 
 
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
-                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta)
+                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta,
+                         SizeType diagnostic_call=std::numeric_limits<SizeType>::max(),
+                         const char* diagnostic_branch="",
+                         DegreeType diagnostic_iteration=0u)
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"degree="<<yta[0].degree());
@@ -643,6 +646,41 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
 
     ValidatedDifferential z=nul(yta[0][0]);
     Ariadne::compute_procedure(p,fy,tmp,yta);
+
+    // Temporary diagnostic for the same-state second-step comparison.
+    // Calls 1 and 2 are respectively the IDENTITY and QR probes.  Expose the
+    // magnitude after each Procedure instruction so we can identify which
+    // operation first amplifies the bounding graded differential.
+    if((diagnostic_call==1u || diagnostic_call==2u)
+       && diagnostic_iteration>=1u) {
+        auto differential_coefficient_mag =
+            [](ValidatedDifferential const& d) {
+                auto r=mag(d.value());
+                for(auto const& term : d.expansion()) {
+                    r=max(r,mag(term.coefficient()));
+                }
+                return r;
+            };
+        auto graded_mag =
+            [&](GradedValidatedDifferential const& g) {
+                auto r=mag(z.value());
+                for(SizeType k=0u; k!=g.size(); ++k) {
+                    r=max(r,differential_coefficient_mag(g[k]));
+                }
+                return r;
+            };
+        for(SizeType j=0u; j!=tmp.size(); ++j) {
+            std::cerr << "[GradedProcedureDiagnostic]"
+                      << " call=" << diagnostic_call
+                      << " branch=" << diagnostic_branch
+                      << " iteration=" << diagnostic_iteration
+                      << " instruction=" << j
+                      << " op=" << p._instructions[j]
+                      << " coeff_mag=" << graded_mag(tmp[j])
+                      << std::endl;
+        }
+    }
+
     for(SizeType i=0; i!=n; ++i) {
         yta[i]=antidifferential(fy[i]);
     }
@@ -846,8 +884,12 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     }
 
     for(DegreeType i=0; i!=to; ++i) {
-        Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic);
-        Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib);
+        Ariadne::graded_flow_iterate(
+            f,fdphic,tmpdphic,dphic,
+            graded_internal_diagnostic_count,"centre",i+1u);
+        Ariadne::graded_flow_iterate(
+            f,fdphib,tmpdphib,dphib,
+            graded_internal_diagnostic_count,"bounding",i+1u);
         if(graded_internal_diagnostic_count<8u) {
             std::cerr << "[GradedIterationDiagnostic]"
                       << " call=" << graded_internal_diagnostic_count

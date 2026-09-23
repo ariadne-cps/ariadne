@@ -1642,6 +1642,23 @@ class SmtDpllSearch {
         _decision_level_markers.resize(level+1u);
     }
 
+    std::optional<SearchOutcome> _propagate_child_outcome(
+        SearchOutcome const& outcome,
+        SizeType parent_level)
+    {
+        if(outcome.witness.has_value()) {
+            return outcome;
+        }
+        if(outcome.backjump_level.has_value()) {
+            if(*outcome.backjump_level<parent_level) {
+                return outcome;
+            }
+            ARIADNE_ASSERT(*outcome.backjump_level==parent_level);
+            return this->_search_boolean();
+        }
+        return std::nullopt;
+    }
+
     SearchOutcome _search_boolean()
     {
         if(not this->_unit_propagate()) {
@@ -1720,15 +1737,9 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome first=this->_search_boolean();
-        if(first.witness.has_value()) {
-            return first;
-        }
-        if(first.backjump_level.has_value()) {
-            if(*first.backjump_level<parent_level) {
-                return first;
-            }
-            ARIADNE_ASSERT(*first.backjump_level==parent_level);
-            return this->_search_boolean();
+        if(auto outcome=this->_propagate_child_outcome(first,parent_level);
+           outcome.has_value()) {
+            return *outcome;
         }
 
         this->_backtrack_to_level(parent_level);
@@ -1740,15 +1751,9 @@ class SmtDpllSearch {
         ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
 
         SearchOutcome second=this->_search_boolean();
-        if(second.witness.has_value()) {
-            return second;
-        }
-        if(second.backjump_level.has_value()) {
-            if(*second.backjump_level<parent_level) {
-                return second;
-            }
-            ARIADNE_ASSERT(*second.backjump_level==parent_level);
-            return this->_search_boolean();
+        if(auto outcome=this->_propagate_child_outcome(second,parent_level);
+           outcome.has_value()) {
+            return *outcome;
         }
 
         this->_backtrack_to_level(parent_level);

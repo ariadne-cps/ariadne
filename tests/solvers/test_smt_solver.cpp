@@ -303,6 +303,11 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
 
+        SmtSearchStatistics empty_target;
+        SmtSearchStatistics empty_source;
+        SmtSolverTestSupport::accumulate_statistics(empty_target,empty_source);
+        ARIADNE_TEST_EQUAL(empty_target.first_minimization_candidate_trail_rank,0u);
+
         SmtSearchStatistics conflict;
         conflict.boolean_conflicts_analyzed=1u;
         conflict.last_learned_clause_literals=4u;
@@ -327,6 +332,11 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,false));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(false,true));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,true));
+
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::parallel_should_append_children(false));
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::parallel_should_append_children(true));
 
         auto claims=SmtSolverTestSupport::parallel_witness_claim_sequence();
         ARIADNE_TEST_ASSERT(claims.first);

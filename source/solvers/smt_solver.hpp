@@ -216,6 +216,7 @@ ParallelExecutionObservation end_parallel_execution_observation();
 Void record_parallel_processing_thread();
 
 Bool parallel_stop_condition(Bool found, Bool limit_reached);
+Bool parallel_should_append_children(Bool found);
 Pair<Bool,Bool> parallel_witness_claim_sequence();
 
 struct CandidateWitnessOutcome {

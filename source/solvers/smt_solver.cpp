@@ -742,6 +742,11 @@ Bool parallel_stop_condition_impl(
     return found.load() || limit_reached.load();
 }
 
+Bool parallel_should_append_children_impl(std::atomic<bool> const& found)
+{
+    return not found.load();
+}
+
 Bool claim_parallel_witness(
     ParallelSmtSearchState& state,
     UpperBoxType const& witness)
@@ -797,7 +802,7 @@ struct SmtParallelTask {
             return;
         }
         if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
-            if(not state->found.load()) {
+            if(parallel_should_append_children_impl(state->found)) {
                 access.append(processing.children->first);
                 access.append(processing.children->second);
             }
@@ -911,6 +916,12 @@ Bool parallel_stop_condition(Bool found, Bool limit_reached)
     std::atomic<bool> atomic_found{static_cast<bool>(found)};
     std::atomic<bool> atomic_limit{static_cast<bool>(limit_reached)};
     return parallel_stop_condition_impl(atomic_found,atomic_limit);
+}
+
+Bool parallel_should_append_children(Bool found)
+{
+    std::atomic<bool> atomic_found{static_cast<bool>(found)};
+    return parallel_should_append_children_impl(atomic_found);
 }
 
 Pair<Bool,Bool> parallel_witness_claim_sequence()

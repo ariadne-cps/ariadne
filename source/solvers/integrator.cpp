@@ -1268,7 +1268,29 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
         }
 
         auto const approximate_QR=orthogonal_decomposition(approximate_J);
-        Matrix<FloatDPApproximation> const& approximate_Q=std::get<0>(approximate_QR);
+        Matrix<FloatDPApproximation> approximate_Q=std::get<0>(approximate_QR);
+
+        // Ariadne's public orthogonal_decomposition returns orthogonal
+        // columns, but they are not required to have unit norm.  Turn them
+        // into an actual rotation so that the coordinate change itself has
+        // condition number one.
+        for(SizeType j=0u; j!=n; ++j) {
+            FloatDPApproximation norm_square(0,dp);
+            for(SizeType i=0u; i!=n; ++i) {
+                norm_square+=sqr(approximate_Q[i][j]);
+            }
+            FloatDPApproximation const column_norm=sqrt(norm_square);
+            if(column_norm.raw()!=FloatDP(0,dp)) {
+                for(SizeType i=0u; i!=n; ++i) {
+                    approximate_Q[i][j]/=column_norm;
+                }
+            } else {
+                // Degenerate linear direction: use the identity orientation
+                // rather than introducing a singular preconditioner.
+                approximate_Q=Matrix<FloatDPApproximation>::identity(n,dp);
+                break;
+            }
+        }
 
         rotation=
             reinterpret_cast<Matrix<FloatDP> const&>(approximate_Q);
@@ -1283,38 +1305,18 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
         }
     }
 
-    // Normalise the rotated local variables componentwise.  This combines the
-    // QR orientation with the same [-1,1] range normalisation used for local
-    // Taylor variables.  Hence x = c + A*y with A = Q*diag(r).
-    Vector<FloatDP> radius(n,FloatDP(dp));
-    ExactBoxType local_domain(n);
-    ValidatedVectorMultivariateFunctionPatch normalised=
-        factory.create_zeros(n,state.domain());
-
-    for(SizeType i=0u; i!=n; ++i) {
-        radius[i]=cast_exact(mag(rotated[i].range()));
-        if(radius[i]==FloatDP(0,dp)) {
-            radius[i]=FloatDP(1,dp);
-            local_domain[i]=ExactIntervalType(0_z,0_z);
-            normalised[i]=factory.create_zero(state.domain());
-        } else {
-            local_domain[i]=ExactIntervalType(-1,+1);
-            normalised[i]=rotated[i]/FloatDPBounds(radius[i]);
-        }
-    }
-
-    Matrix<FloatDP> linear_map(n,n,FloatDP(dp));
-    Matrix<FloatDP> const& const_rotation=rotation;
-    Vector<FloatDP> const& const_radius=radius;
-    for(SizeType i=0u; i!=n; ++i) {
-        for(SizeType j=0u; j!=n; ++j) {
-            linear_map[i][j]=mul(near,const_rotation[i][j],const_radius[j]);
-        }
-    }
+    // Do not explicitly rescale the rotated variables to [-1,1].  A Taylor
+    // FunctionPatch in Ariadne is already internally scaled to the unit box
+    // of its external domain.  Repeating that scaling here divides the
+    // accumulated remainder by the physical set radius at every step and was
+    // the source of the rapid error growth seen in the QR diagnostic.
+    Matrix<FloatDP> linear_map=rotation;
+    ExactBoxType local_domain=
+        cast_exact_box(widen(rotated.range()));
 
     return PreconditionedTaylorSeriesState(
         std::move(centre),std::move(linear_map),std::move(local_domain),
-        std::move(normalised));
+        std::move(rotated));
 }
 
 PreconditionedTaylorSeriesStep

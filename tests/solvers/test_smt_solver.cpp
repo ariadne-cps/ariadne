@@ -328,25 +328,19 @@ class TestSmtSolver {
         });
 
         auto disabled=SmtSolverTestSupport::candidate_witness_outcome(
-            false,witness,true);
+            false,std::nullopt);
         ARIADNE_TEST_ASSERT(not disabled.attempted);
         ARIADNE_TEST_ASSERT(not disabled.certified);
         ARIADNE_TEST_ASSERT(not disabled.witness.has_value());
 
         auto failed=SmtSolverTestSupport::candidate_witness_outcome(
-            true,std::nullopt,false);
+            true,std::nullopt);
         ARIADNE_TEST_ASSERT(failed.attempted);
         ARIADNE_TEST_ASSERT(not failed.certified);
         ARIADNE_TEST_ASSERT(not failed.witness.has_value());
 
-        auto rejected=SmtSolverTestSupport::candidate_witness_outcome(
-            true,witness,false);
-        ARIADNE_TEST_ASSERT(rejected.attempted);
-        ARIADNE_TEST_ASSERT(not rejected.certified);
-        ARIADNE_TEST_ASSERT(not rejected.witness.has_value());
-
         auto success=SmtSolverTestSupport::candidate_witness_outcome(
-            true,witness,true);
+            true,witness);
         ARIADNE_TEST_ASSERT(success.attempted);
         ARIADNE_TEST_ASSERT(success.certified);
         ARIADNE_TEST_ASSERT(success.witness.has_value());

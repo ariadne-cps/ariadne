@@ -57,8 +57,10 @@ function(setup_target_for_coverage_llvm)
 
     set(PROFILE_DIR "${PROJECT_BINARY_DIR}/coverage/profiles")
     set(PROFDATA_FILE "${PROJECT_BINARY_DIR}/coverage/coverage.profdata")
+    set(LCOV_FILE "${PROJECT_BINARY_DIR}/coverage.info")
     set(HTML_DIR "${PROJECT_BINARY_DIR}/coverage/html")
     set(MERGE_SCRIPT "${PROJECT_BINARY_DIR}/merge-llvm-coverage.cmake")
+    set(EXPORT_SCRIPT "${PROJECT_BINARY_DIR}/export-llvm-coverage.cmake")
 
     file(WRITE "${MERGE_SCRIPT}"
 "file(GLOB LLVM_RAW_PROFILES \"${PROFILE_DIR}/*.profraw\")
@@ -73,6 +75,26 @@ if(NOT LLVM_PROFILE_MERGE_RESULT EQUAL 0)
     message(FATAL_ERROR \"llvm-profdata merge failed.\")
 endif()
 ")
+
+    file(WRITE "${EXPORT_SCRIPT}" [=[
+set(LLVM_COV_EXPORT_ARGS
+    export
+    "${BINARY_FILE}"
+    "-instr-profile=${PROFDATA_FILE}"
+    "-format=lcov"
+)
+if(EXCLUDE_REGEX)
+    list(APPEND LLVM_COV_EXPORT_ARGS "-ignore-filename-regex=${EXCLUDE_REGEX}")
+endif()
+execute_process(
+    COMMAND "${LLVM_COV_EXECUTABLE}" ${LLVM_COV_EXPORT_ARGS}
+    OUTPUT_FILE "${LCOV_FILE}"
+    RESULT_VARIABLE LLVM_COV_EXPORT_RESULT
+)
+if(NOT LLVM_COV_EXPORT_RESULT EQUAL 0)
+    message(FATAL_ERROR "llvm-cov export failed.")
+endif()
+]=])
 
     set(LLVM_COV_FILTER_ARGS "")
     if(Coverage_EXCLUDE_REGEX)
@@ -90,6 +112,13 @@ endif()
                 "$<TARGET_FILE:${Coverage_TARGET}>"
                 "-instr-profile=${PROFDATA_FILE}"
                 ${LLVM_COV_FILTER_ARGS}
+        COMMAND "${CMAKE_COMMAND}"
+                "-DLLVM_COV_EXECUTABLE=${LLVM_COV_EXECUTABLE}"
+                "-DBINARY_FILE=$<TARGET_FILE:${Coverage_TARGET}>"
+                "-DPROFDATA_FILE=${PROFDATA_FILE}"
+                "-DLCOV_FILE=${LCOV_FILE}"
+                "-DEXCLUDE_REGEX=${Coverage_EXCLUDE_REGEX}"
+                -P "${EXPORT_SCRIPT}"
         COMMAND "${CMAKE_COMMAND}" -E make_directory "${HTML_DIR}"
         COMMAND "${LLVM_COV_EXECUTABLE}" show
                 "$<TARGET_FILE:${Coverage_TARGET}>"
@@ -104,6 +133,8 @@ endif()
     )
 
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo
+                "LLVM coverage LCOV report: ${LCOV_FILE}"
         COMMAND "${CMAKE_COMMAND}" -E echo
                 "LLVM coverage HTML report: ${HTML_DIR}/index.html"
     )

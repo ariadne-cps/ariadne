@@ -1875,8 +1875,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             Vector<ValidatedDifferential> dg=
                 g.differential(local_bounding_values,1u);
             auto lipschitz_inf=mag(dg[0u].gradient()[0u]);
-            lipschitz_inf=FloatDPUpperBound(0,dp);
-            for(SizeType i=0u; i!=n; ++i) {
+            for(SizeType j=1u; j!=n; ++j) {
+                lipschitz_inf+=mag(dg[0u].gradient()[j]);
+            }
+            for(SizeType i=1u; i!=n; ++i) {
                 auto row_sum=mag(dg[i].gradient()[0u]);
                 for(SizeType j=1u; j!=n; ++j) {
                     row_sum+=mag(dg[i].gradient()[j]);

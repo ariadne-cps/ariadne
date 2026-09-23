@@ -2139,20 +2139,24 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         factory.create_coordinate(flowpipe_domain,flowpipe_domain.size()-1u);
     ValidatedVectorMultivariateFunctionPatch arguments=
         join(embedded_mapping,time_coordinate);
+    Stopwatch<Microseconds> flowpipe_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch flowpipe_mapping=
         compose(physical_local_flow,arguments);
+    flowpipe_compose_stopwatch.click();
 
     // For the evolved set, evaluate time before composing with the local
     // initial Taylor model.  Composing the complete space-time flowpipe first
     // and only then evaluating t=h introduces unnecessary mixed space/time
     // terms and substantially larger sweep/remainder errors.  This also
     // matches the TM-integration update X_{l+1}=p_l(X_l,delta_l)+I_l.
+    Stopwatch<Microseconds> endpoint_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch local_endpoint=
         partial_evaluate(
             physical_local_flow,
             physical_local_flow.argument_size()-1u,h);
     ValidatedVectorMultivariateFunctionPatch evolved_mapping=
         compose(local_endpoint,state.normalised_mapping());
+    endpoint_compose_stopwatch.click();
 
     // Preserve the two-layer TM representation across steps.  Precondition
     // the fresh local endpoint Phi_l(y,h) first, while its remainder is still
@@ -2160,14 +2164,46 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     // coordinate map with the accumulated y_l(s).  Re-preconditioning the
     // already-composed physical map rotates its axis-aligned accumulated
     // remainder at every step and causes an artificial wrapping explosion.
+    Stopwatch<Microseconds> precondition_stopwatch;
     PreconditionedTaylorSeriesState local_transition=
         this->precondition(local_endpoint);
+    precondition_stopwatch.click();
+
+    Stopwatch<Microseconds> state_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch next_normalised_mapping=
         compose(
             local_transition.normalised_mapping(),
             state.normalised_mapping());
+    state_compose_stopwatch.click();
+
+    Stopwatch<Microseconds> state_range_stopwatch;
     ExactBoxType next_local_domain=
         cast_exact_box(widen(next_normalised_mapping.range()));
+    state_range_stopwatch.click();
+
+    static SizeType carried_profile_steps=0u;
+    static double carried_flowpipe_compose_seconds=0.0;
+    static double carried_endpoint_compose_seconds=0.0;
+    static double carried_precondition_seconds=0.0;
+    static double carried_state_compose_seconds=0.0;
+    static double carried_state_range_seconds=0.0;
+    ++carried_profile_steps;
+    carried_flowpipe_compose_seconds+=flowpipe_compose_stopwatch.elapsed_seconds();
+    carried_endpoint_compose_seconds+=endpoint_compose_stopwatch.elapsed_seconds();
+    carried_precondition_seconds+=precondition_stopwatch.elapsed_seconds();
+    carried_state_compose_seconds+=state_compose_stopwatch.elapsed_seconds();
+    carried_state_range_seconds+=state_range_stopwatch.elapsed_seconds();
+
+    if(!this->diagnostics() && carried_profile_steps%50u==0u) {
+        std::cerr << "[CarriedStateCostProfile]"
+                  << " steps=" << carried_profile_steps
+                  << " flowpipe_compose_seconds=" << carried_flowpipe_compose_seconds
+                  << " endpoint_compose_seconds=" << carried_endpoint_compose_seconds
+                  << " precondition_seconds=" << carried_precondition_seconds
+                  << " state_compose_seconds=" << carried_state_compose_seconds
+                  << " state_range_seconds=" << carried_state_range_seconds
+                  << std::endl;
+    }
 
     PreconditionedTaylorSeriesState final_state(
         local_transition.centre(),

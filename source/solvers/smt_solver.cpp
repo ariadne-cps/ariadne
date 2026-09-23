@@ -31,6 +31,7 @@
 #include <mutex>
 #include <cstdint>
 #include <algorithm>
+#include <functional>
 #include <set>
 #include <thread>
 
@@ -234,7 +235,7 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
         case SmtResultStatus::UNSAT: return os << "UNSAT";
         case SmtResultStatus::EPSILON_SAT: return os << "EPSILON_SAT";
         case SmtResultStatus::UNKNOWN: return os << "UNKNOWN";
-        default: ARIADNE_FAIL_MSG("Unknown SmtResultStatus");
+        default: throw std::runtime_error("Unknown SmtResultStatus");
     }
 }
 
@@ -290,6 +291,10 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                     domain,constraints[i].function(),this->_original_bounds(constraints[i]))) {
                 return true;
             }
+            UpperIntervalType image=apply(constraints[i].function(),domain);
+            if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
+                return true;
+            }
         }
         if(not same_box(domain,previous)) {
             ++statistics.hull_effective;
@@ -313,12 +318,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
-                for(SizeType i=0; i!=constraints.size(); ++i) {
-                    UpperIntervalType image=apply(constraints[i].function(),domain);
-                    if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
-                        return true;
-                    }
-                }
                 return false;
             }
             continue;
@@ -383,11 +382,15 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                     domain,literal.function,this->_original_bounds(literal.relation))) {
                 return true;
             }
+            UpperIntervalType image=apply(literal.function,domain);
+            SmtSolverTestSupport::validate_primitive_relation(literal.relation);
             if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-                UpperIntervalType image=apply(literal.function,domain);
                 if(definitely(image.upper_bound()<=0)) {
                     return true;
                 }
+            } else if(definitely(disjoint(
+                    image,this->_original_bounds(literal.relation)))) {
+                return true;
             }
         }
         if(not same_box(domain,previous)) {
@@ -412,18 +415,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
-                for(auto const& literal:literals) {
-                    UpperIntervalType image=apply(literal.function,domain);
-                    SmtSolverTestSupport::validate_primitive_relation(literal.relation);
-                    if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-                        if(definitely(image.upper_bound()<=0)) {
-                            return true;
-                        }
-                    } else if(definitely(disjoint(
-                            image,this->_original_bounds(literal.relation)))) {
-                        return true;
-                    }
-                }
                 return false;
             }
             continue;
@@ -495,7 +486,7 @@ SmtSolver::_epsilon_witness(
 }
 
 template<class Conjunction>
-std::optional<UpperBoxType>
+UpperBoxType
 SmtSolver::_epsilon_candidate_witness(
     UpperBoxType const& domain,
     Conjunction const& conjunction) const
@@ -513,11 +504,7 @@ SmtSolver::_epsilon_candidate_witness(
     NonlinearInfeasibleInteriorPointOptimiser candidate_solver;
     auto result=candidate_solver.feasible_candidate(
         cast_exact_box(domain),function,codomain);
-    UpperBoxType witness=singleton_box(cast_exact(result.second));
-    if(this->_epsilon_satisfied(witness,conjunction)) {
-        return witness;
-    }
-    return std::nullopt;
+    return singleton_box(cast_exact(result.second));
 }
 
 template<class Conjunction>
@@ -582,7 +569,7 @@ SmtSolver::_process_box(
         _configuration.candidate_search_enabled() and splittable;
     if(candidate_search_attempted) {
         candidate=this->_epsilon_candidate_witness(domain,conjunction);
-        candidate_certified=candidate.has_value();
+        candidate_certified=this->_epsilon_satisfied(*candidate,conjunction);
     }
     auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
         candidate_search_attempted,candidate,candidate_certified);
@@ -747,7 +734,7 @@ SmtSolver::_solve_parallel_conjunction(
 {
     auto state=std::make_shared<ParallelSmtSearchState>();
     ParallelSmtWorkload workload(
-        [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
+        std::bind(&std::this_thread::yield),
         [this,&conjunction,state](
                 ParallelSmtWorkload::Access& access,
                 UpperBoxType const& box) {
@@ -1048,7 +1035,7 @@ Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation)
         case SmtTheoryPrimitiveRelation::GT_ZERO:
             return;
         default:
-            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+            throw std::runtime_error("Unknown SMT primitive theory relation");
     }
 }
 
@@ -1207,6 +1194,16 @@ Bool epsilon_satisfied(
     return solver._epsilon_satisfied(domain,constraints);
 }
 
+Bool epsilon_satisfied(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    UpperBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals)
+{
+    auto compiled=solver._compile_theory_literals(space,literals);
+    return solver._epsilon_satisfied(domain,compiled);
+}
+
 Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input)
@@ -1249,7 +1246,7 @@ Void accumulate_box_processing_statistics(
         case BoxProcessingStatus::EPSILON_SAT:
             break;
         default:
-            ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+            throw std::runtime_error("Unknown BoxProcessingStatus");
     }
 }
 

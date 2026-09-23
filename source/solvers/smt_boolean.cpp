@@ -35,7 +35,8 @@ namespace {
 
 [[noreturn]] Void fail_indeterminate_smt_constant()
 {
-    ARIADNE_FAIL_MSG("Indeterminate constant in SMT Boolean encoding"); }
+    throw std::runtime_error("Indeterminate constant in SMT Boolean encoding");
+}
 
 } // namespace
 
@@ -52,7 +53,7 @@ SmtTheoryRelation canonical_relation(SmtTheoryRelation relation)
         case SmtTheoryRelation::GT:
             return relation;
         default:
-            ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+            throw std::runtime_error("Unknown SMT theory relation");
     }
 }
 
@@ -72,7 +73,7 @@ Bool supported_operator(OperatorCode code)
         case OperatorCode::OR:
             return true;
         default:
-            ARIADNE_FAIL_MSG("Unsupported operator in SMT Boolean encoding: "<<code);
+            throw std::runtime_error("Unsupported operator in SMT Boolean encoding");
     }
 }
 

@@ -1097,6 +1097,63 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
+        {
+            std::cout << "[smt-theory-solve] sequential terminal uncertainty propagates UNKNOWN" << std::endl;
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                space,ExactBoxType({ExactIntervalType(1,1)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] shaving proves dependency-hidden strict UNSAT" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                primitive(ex*(1-ex)>0.32_x)
+            });
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().shaving_reduction_rounds>=1u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] later hull reduction invalidates earlier strict literal" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                primitive(sin(ex)>0),
+                primitive(ex==4)
+            });
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,7)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().hull_effective_reductions>=1u);
+        }
+
+        {
+            std::cout << "[smt-theory-solve] strict epsilon predicate rejects negative point" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex>0)});
+            ARIADNE_TEST_ASSERT(
+                not SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(-0.25_x,-0.25_x))}),
+                    literals));
+        }
+
 
         {
             std::cout << "[smt-theory-solve] simplify repeated expression before interval solving" << std::endl;
@@ -2103,6 +2160,26 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_learned_clauses>=1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().theory_learned_clause_propagations>=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] both Boolean branches exhaust on theory UNKNOWN" << std::endl;
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ContinuousPredicate uncertain=
+                (sqr(sin(ex))+sqr(cos(ex))-1==0);
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                uncertain||(!uncertain));
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_decisions>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_backtracks>=2u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=2u);
         }
 
         {

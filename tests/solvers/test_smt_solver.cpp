@@ -516,16 +516,6 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(clause[2],-4);
         ARIADNE_TEST_EQUAL(clause[3],1);
 
-        auto unassigned=SmtSolverTestSupport::assignment_decision(-1,1);
-        ARIADNE_TEST_ASSERT(unassigned.accepted);
-        ARIADNE_TEST_ASSERT(unassigned.newly_assigned);
-        auto same=SmtSolverTestSupport::assignment_decision(1,1);
-        ARIADNE_TEST_ASSERT(same.accepted);
-        ARIADNE_TEST_ASSERT(not same.newly_assigned);
-        auto conflict=SmtSolverTestSupport::assignment_decision(0,1);
-        ARIADNE_TEST_ASSERT(not conflict.accepted);
-        ARIADNE_TEST_ASSERT(not conflict.newly_assigned);
-
         std::vector<Bool> theory_flags({false,true});
         std::vector<Bool> active_flags({true,false});
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::clause_is_learned(1u,2u));

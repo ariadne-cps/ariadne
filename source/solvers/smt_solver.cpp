@@ -774,8 +774,7 @@ SmtSolver::_solve_parallel_conjunction(
                 ++state->statistics.boxes_processed;
             }
 
-            auto processing=this->_process_box(box,conjunction);
-            {
+            auto processing=this->_process_box(box,conjunction); {
                 std::lock_guard<std::mutex> lock(state->mutex);
                 this->_accumulate_box_processing_statistics(
                     state->statistics,processing);
@@ -1481,9 +1480,7 @@ class SmtDpllSearch {
         while(changed) {
             changed=false;
             for(SizeType clause_index=0u; clause_index<this->_clause_count(); ++clause_index) {
-                if(not this->_is_active_clause(clause_index)) {
-                    continue;
-                }
+                if(this->_is_active_clause(clause_index)) {
                 auto const& clause=this->_clause(clause_index);
                 Bool satisfied=false;
                 SizeType unassigned_count=0u;
@@ -1528,6 +1525,7 @@ class SmtDpllSearch {
                         }
                     }
                     changed=true;
+                }
                 }
             }
         }

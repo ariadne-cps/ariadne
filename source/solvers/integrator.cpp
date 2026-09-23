@@ -1193,6 +1193,45 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
         max_err,this->sweeper(), init_so,init_to,max_so,max_to);
 
+    // Temporary first-step diagnostic.  Chen/Flow* validates a polynomial p
+    // by applying a TM Picard operator to (p,I) and checking/refining the
+    // remainder interval I.  Ariadne instead obtains its remainder from
+    // interval ranges of the highest-order graded differentials.  Expose the
+    // defect of Ariadne's polynomial part so the two mechanisms can be
+    // compared on exactly the same Van der Pol step.
+    static Bool remainder_diagnostic_done=false;
+    if(!remainder_diagnostic_done) {
+        remainder_diagnostic_done=true;
+
+        ValidatedVectorMultivariateFunctionPatch polynomial=tphi;
+        polynomial.clobber();
+
+        SizeType const time_argument=domx.dimension();
+        ValidatedVectorMultivariateFunctionPatch time_derivative=
+            factory(polynomial).create_zeros(polynomial.result_size());
+        for(SizeType i=0u; i!=polynomial.result_size(); ++i) {
+            time_derivative[i]=derivative(polynomial.get(i),time_argument);
+        }
+
+        ValidatedVectorMultivariateFunctionPatch vector_field_on_polynomial=
+            compose(f,polynomial);
+        ValidatedVectorMultivariateFunctionPatch defect=
+            vector_field_on_polynomial-time_derivative;
+
+        auto const polynomial_range=polynomial.range();
+        auto const defect_range=defect.range();
+
+        std::cerr << "[GradedRemainderDiagnostic]"
+                  << " domx=" << domx
+                  << " domt=" << domt
+                  << " bndx=" << bndx
+                  << " polynomial_range=" << polynomial_range
+                  << " model_errors=" << tphi.errors()
+                  << " model_error=" << tphi.error()
+                  << " defect_range=" << defect_range
+                  << std::endl;
+    }
+
     if (possibly(tphi.error()>this->step_maximum_error())) {
         ARIADNE_THROW(FlowTimeStepException,"GradedTaylorSeriesIntegrator::flow_step",
                       "Integration of "<<f<<" over "<<domx<<" for time interval "<<domt<<" has error "<<tphi.errors()<<

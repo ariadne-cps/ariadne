@@ -127,9 +127,21 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
 UpperBoxType singleton_box(
     ConstraintSolverInterface::ExactPointType const& point)
 {
-    return UpperBoxType(point.dimension(),[&](SizeType i) {
-        return UpperIntervalType(ExactIntervalType(point[i],point[i]));
-    });
+    UpperBoxType result(point.dimension());
+    for(SizeType i=0u; i!=point.dimension(); ++i) {
+        result[i]=UpperIntervalType(ExactIntervalType(point[i],point[i]));
+    }
+    return result;
+}
+
+UpperBoxType midpoint_box(UpperBoxType const& domain)
+{
+    UpperBoxType result(domain.dimension());
+    for(SizeType i=0u; i!=domain.dimension(); ++i) {
+        auto m=domain[i].midpoint();
+        result[i]=UpperIntervalType(m,m);
+    }
+    return result;
 }
 
 std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
@@ -139,13 +151,7 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
     std::vector<UpperBoxType> candidates;
     candidates.reserve(3u+2u*domain.dimension()+max_corner_candidates);
 
-    auto midpoint_point=[&]() {
-        return UpperBoxType(domain.dimension(),[&](SizeType i) {
-            auto m=domain[i].midpoint();
-            return UpperIntervalType(m,m);
-        });
-    };
-    UpperBoxType midpoint=midpoint_point();
+    UpperBoxType midpoint=midpoint_box(domain);
     candidates.push_back(midpoint);
 
     UpperBoxType lower=midpoint;
@@ -344,10 +350,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    List<ValidatedConstraint> const& constraints) const
 {
-    UpperBoxType point(domain.dimension(),[&](SizeType i) {
-        auto m=domain[i].midpoint();
-        return UpperIntervalType(m,m);
-    });
+    UpperBoxType point=midpoint_box(domain);
 
     for(SizeType i=0; i!=constraints.size(); ++i) {
         auto const& constraint=constraints[i];
@@ -447,10 +450,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    CompiledTheoryLiterals const& literals) const
 {
-    UpperBoxType point(domain.dimension(),[&](SizeType i) {
-        auto m=domain[i].midpoint();
-        return UpperIntervalType(m,m);
-    });
+    UpperBoxType point=midpoint_box(domain);
 
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {

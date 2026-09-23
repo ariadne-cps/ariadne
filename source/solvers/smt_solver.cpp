@@ -618,6 +618,7 @@ SmtSolver::_accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingResult const& processing) const
 {
+    SmtSolverTestSupport::record_parallel_processing_thread();
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
             processing.status,
@@ -784,7 +785,7 @@ struct SmtParallelTask {
             ++state->statistics.boxes_processed;
         }
 
-        SmtSolverTestSupport::record_parallel_processing_thread(); auto processing=solver._process_box(box,conjunction);
+        auto processing=solver._process_box(box,conjunction);
         {
             std::lock_guard<std::mutex> lock(state->mutex);
             solver._accumulate_box_processing_statistics(

@@ -1850,12 +1850,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             centre_polynomial_stopwatch.click();
 
             Stopwatch<Microseconds> residual_stopwatch;
+            Stopwatch<Microseconds> residual_compose_stopwatch;
             // Compute the ODE defect R(y,t)=dP/dt-g(P) of the centre-only
             // Taylor polynomial.  If this is already small, the remaining
             // challenge is to validate a separate remainder around P rather
             // than to propagate a full interval-valued graded recurrence.
             ValidatedVectorMultivariateFunctionPatch field_on_polynomial=
                 compose(g,centre_polynomial);
+            residual_compose_stopwatch.click();
+
+            Stopwatch<Microseconds> residual_assembly_stopwatch;
             ValidatedVectorMultivariateFunctionPatch defect=
                 factory.create_zeros(n,centre_polynomial.domain());
             SizeType const time_index=centre_polynomial.argument_size()-1u;
@@ -1866,13 +1870,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     field_on_polynomial.get(i);
                 defect[i]=dpoly-fpoly;
             }
+            residual_assembly_stopwatch.click();
 
+            Stopwatch<Microseconds> initial_defect_stopwatch;
             ValidatedVectorMultivariateFunctionPatch initial_polynomial=
                 partial_evaluate(centre_polynomial,time_index,StepSizeType(0.0));
             ValidatedVectorMultivariateFunctionPatch identity_on_domy=
                 factory.create_identity(domy);
             ValidatedVectorMultivariateFunctionPatch initial_defect=
                 initial_polynomial-identity_on_domy;
+            initial_defect_stopwatch.click();
 
             residual_stopwatch.click();
             Stopwatch<Microseconds> jacobian_stopwatch;
@@ -1902,16 +1909,30 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             static SizeType production_profile_calls=0u;
             static double production_centre_seconds=0.0;
             static double production_residual_seconds=0.0;
+            static double production_residual_compose_seconds=0.0;
+            static double production_residual_assembly_seconds=0.0;
+            static double production_initial_defect_seconds=0.0;
+            static double production_range_seconds=0.0;
+            static double production_physical_reconstruction_seconds=0.0;
             static double production_jacobian_seconds=0.0;
             ++production_profile_calls;
             production_centre_seconds+=centre_polynomial_stopwatch.elapsed_seconds();
             production_residual_seconds+=residual_stopwatch.elapsed_seconds();
+            production_residual_compose_seconds+=residual_compose_stopwatch.elapsed_seconds();
+            production_residual_assembly_seconds+=residual_assembly_stopwatch.elapsed_seconds();
+            production_initial_defect_seconds+=initial_defect_stopwatch.elapsed_seconds();
             production_jacobian_seconds+=jacobian_stopwatch.elapsed_seconds();
             if(!this->diagnostics() && production_profile_calls%100u==0u) {
                 std::cerr << "[GronwallCostProfile]"
                           << " calls=" << production_profile_calls
                           << " centre_seconds=" << production_centre_seconds
                           << " residual_seconds=" << production_residual_seconds
+                          << " residual_compose_seconds=" << production_residual_compose_seconds
+                          << " residual_assembly_seconds=" << production_residual_assembly_seconds
+                          << " initial_defect_seconds=" << production_initial_defect_seconds
+                          << " range_seconds=" << production_range_seconds
+                          << " physical_reconstruction_seconds="
+                          << production_physical_reconstruction_seconds
                           << " jacobian_seconds=" << production_jacobian_seconds
                           << std::endl;
             }
@@ -1932,6 +1953,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             // local_bounding_box.  If the centre polynomial also stays in
             // that convex box, the Jacobian bound above applies on every
             // segment joining P(y,t) to the exact solution.
+            Stopwatch<Microseconds> range_stopwatch;
             auto polynomial_range=centre_polynomial.range();
             // Compare against an exact outer box, as elsewhere in the
             // integrator.  Comparing a validated range directly with an
@@ -1945,6 +1967,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             if(polynomial_in_certification_box) {
                 auto defect_ranges=defect.range();
                 auto initial_defect_ranges=initial_defect.range();
+                range_stopwatch.click();
+                production_range_seconds+=range_stopwatch.elapsed_seconds();
 
                 // Use the monotone, fully upper-rounded estimate
                 //
@@ -1975,6 +1999,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                         +gronwall_remainder[i]);
                 }
 
+                Stopwatch<Microseconds> physical_reconstruction_stopwatch;
                 ValidatedVectorMultivariateFunctionPatch
                     physical_gronwall_polynomial=
                         factory.create_zeros(n,centre_polynomial.domain());
@@ -1989,6 +2014,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                                 *FloatDPBounds(A[i][j]);
                     }
                 }
+
+                physical_reconstruction_stopwatch.click();
+                production_physical_reconstruction_seconds+=
+                    physical_reconstruction_stopwatch.elapsed_seconds();
 
                 gronwall_physical_local_flow=physical_gronwall_polynomial;
                 have_gronwall_flow=true;

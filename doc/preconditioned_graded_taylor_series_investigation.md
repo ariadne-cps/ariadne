@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `1c3b48d78a8d50f97cd3f5e8c500620def118d1e`
+**Latest analysed investigation HEAD:** `f662b9c40441578c94290a4cd7b5decaefab353b`
 
 ## Purpose of this document
 
@@ -1164,6 +1164,51 @@ Thus the Jacobian/Lipschitz calculation is negligible. The dominant measured loc
 The cumulative profiler is shared across the two Gronwall benchmark instances, so absolute totals at calls 200--700 include both tolerance runs. This does not affect identification of the dominant phase, but a later profiler should be per-integrator if exact per-run attribution is needed.
 
 There is still meaningful unaccounted wall time. The next profile should measure the physical affine reconstruction and then carried-map composition/preconditioning. The optimisation direction suggested by this result is already clear: do not spend effort optimising the Jacobian bound. A high-value Flow*-like change is to avoid constructing/ranging the residual as a generic composed Taylor-function patch, deriving the defect/remainder directly from Taylor coefficients/recurrence or using specialised polynomial arithmetic.
+
+---
+
+
+### 9.20 Carried-state profiling: residual remains the largest cost, but flowpipe composition is also material (2026-09-23)
+
+The carried-state profile resolves the previous uncertainty.
+
+For the first Gronwall run, by 100 propagated steps:
+
+```
+flowpipe composition: 1.273 s
+endpoint composition: 0.359 s
+state composition:    0.324 s
+preconditioning:      0.0058 s
+state range:          0.00045 s
+```
+
+At 300 propagated steps cumulatively across the two Gronwall runs:
+
+```
+flowpipe composition: 3.415 s
+endpoint composition: 1.012 s
+state composition:    0.943 s
+preconditioning:      0.017 s
+state range:          0.0014 s
+```
+
+At roughly the same stage the local-certification cumulative profile reaches:
+
+```
+centre polynomial: 3.863 s
+residual:          8.932 s
+Jacobian:          0.0168 s
+```
+
+So the dominant single measured phase is still residual construction/evaluation, but the three composition paths together are also significant. Preconditioning itself and range extraction are negligible.
+
+The next profile splits the residual into:
+- `compose(g,P)`;
+- derivative/subtraction assembly;
+- initial-condition defect;
+- explicit range evaluation;
+
+and separately measures physical affine reconstruction. This is needed before changing the algorithm, because a dominant `compose(g,P)` suggests replacing generic composition with a recurrence/coefficient-level defect, while a dominant `range()` suggests a cheaper specialised enclosure may be sufficient.
 
 ---
 

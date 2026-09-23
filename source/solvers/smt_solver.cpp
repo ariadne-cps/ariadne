@@ -619,14 +619,6 @@ SmtSolver::_process_box(
         std::move(domain),*conjunction.theory_literals);
 }
 
-SmtSolver::BoxProcessingResult
-SmtSolver::_process_parallel_box(
-    UpperBoxType const& box,
-    ConjunctionReference const& conjunction) const
-{
-    return this->_process_box(box,conjunction);
-}
-
 Void
 SmtSolver::_accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
@@ -748,6 +740,61 @@ using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
 
 } // namespace
 
+struct SmtParallelTask {
+    SmtSolver const& solver;
+    SmtSolver::ConjunctionReference const& conjunction;
+    std::shared_ptr<ParallelSmtSearchState> state;
+
+    Void operator()(
+        ParallelSmtWorkload::Access& access,
+        UpperBoxType const& box) const
+    {
+        SmtSolverTestSupport::record_parallel_processing_thread();
+        if(state->found.load() || state->limit_reached.load()) {
+            return;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(state->mutex);
+            if(state->statistics.boxes_processed>=
+                    solver._configuration.box_processing_limit()) {
+                ++state->statistics.box_budget_exhaustions;
+                state->unknown.store(true);
+                state->limit_reached.store(true);
+                return;
+            }
+            ++state->statistics.boxes_processed;
+        }
+
+        auto processing=solver._process_box(box,conjunction);
+        {
+            std::lock_guard<std::mutex> lock(state->mutex);
+            solver._accumulate_box_processing_statistics(
+                state->statistics,processing);
+        }
+
+        if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::PRUNED) {
+            return;
+        }
+        if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::EPSILON_SAT) {
+            bool expected=false;
+            if(state->found.compare_exchange_strong(expected,true)) {
+                std::lock_guard<std::mutex> lock(state->mutex);
+                state->witness=*processing.witness;
+            }
+            return;
+        }
+        if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
+            if(not state->found.load()) {
+                access.append(processing.children->first);
+                access.append(processing.children->second);
+            }
+            return;
+        }
+        state->unknown.store(true);
+    }
+};
+
 SmtResult
 SmtSolver::_solve_parallel_conjunction(
     ExactBoxType const& domain,
@@ -756,53 +803,7 @@ SmtSolver::_solve_parallel_conjunction(
     auto state=std::make_shared<ParallelSmtSearchState>();
     ParallelSmtWorkload workload(
         std::bind(&std::this_thread::yield),
-        [this,&conjunction,state](
-                ParallelSmtWorkload::Access& access,
-                UpperBoxType const& box) {
-            SmtSolverTestSupport::record_parallel_processing_thread();
-            if(state->found.load() || state->limit_reached.load()) {
-                return;
-            }
-
-            {
-                std::lock_guard<std::mutex> lock(state->mutex);
-                if(state->statistics.boxes_processed>=
-                        _configuration.box_processing_limit()) {
-                    ++state->statistics.box_budget_exhaustions;
-                    state->unknown.store(true);
-                    state->limit_reached.store(true);
-                    return;
-                }
-                ++state->statistics.boxes_processed;
-            }
-
-            auto processing=this->_process_parallel_box(box,conjunction); {
-                std::lock_guard<std::mutex> lock(state->mutex);
-                this->_accumulate_box_processing_statistics(
-                    state->statistics,processing);
-            }
-
-            if(processing.status==BoxProcessingStatus::PRUNED) {
-                return;
-            }
-            if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
-                bool expected=false;
-                if(state->found.compare_exchange_strong(expected,true)) {
-                    std::lock_guard<std::mutex> lock(state->mutex);
-                    state->witness=*processing.witness;
-                }
-                return;
-            }
-            if(processing.status==BoxProcessingStatus::SPLIT) {
-                if(not state->found.load()) {
-                    access.append(processing.children->first);
-                    access.append(processing.children->second);
-                }
-                return;
-            }
-            state->unknown.store(true);
-            return;
-        });
+        SmtParallelTask{*this,conjunction,state});
 
     workload.append(UpperBoxType(domain));
     workload.process();
@@ -1507,7 +1508,6 @@ class SmtDpllSearch {
                 }
 
                 if(unassigned_count==1u) {
-                    SizeType variable=static_cast<SizeType>(unit_literal>0 ? unit_literal : -unit_literal);
                     this->_assign_literal(unit_literal,clause_index);
                     ++_statistics.boolean_propagations;
                     ++_statistics.boolean_reasoned_propagations;

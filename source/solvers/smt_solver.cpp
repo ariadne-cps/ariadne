@@ -70,8 +70,11 @@ class SequentialSmtWorkQueue {
 Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
 {
     for(SizeType i=0; i!=first.dimension(); ++i) {
-        if(first[i].lower_bound().raw()!=second[i].lower_bound().raw()
-           || first[i].upper_bound().raw()!=second[i].upper_bound().raw()) {
+        Bool same_lower=
+            first[i].lower_bound().raw()==second[i].lower_bound().raw();
+        Bool same_upper=
+            first[i].upper_bound().raw()==second[i].upper_bound().raw();
+        if(not (same_lower & same_upper)) {
             return false;
         }
     }
@@ -120,7 +123,7 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
 
     Bool guided=selected.has_value();
     SizeType coordinate=guided ? *selected : geometric;
-    Bool overrode=guided && coordinate!=geometric;
+    Bool overrode=guided & (coordinate!=geometric);
     return {coordinate,{guided,overrode}};
 }
 
@@ -561,7 +564,7 @@ SmtSolver::_process_box(
     std::optional<UpperBoxType> candidate;
     Bool candidate_certified=false;
     Bool const candidate_search_attempted=
-        _configuration.candidate_search_enabled() and splittable;
+        _configuration.candidate_search_enabled() & splittable;
     if(candidate_search_attempted) {
         candidate=this->_epsilon_candidate_witness(domain,conjunction);
         candidate_certified=this->_epsilon_satisfied(*candidate,conjunction);
@@ -736,7 +739,7 @@ Bool parallel_stop_condition_impl(
     std::atomic<bool> const& found,
     std::atomic<bool> const& limit_reached)
 {
-    return found.load() || limit_reached.load();
+    return found.load() | limit_reached.load();
 }
 
 Bool parallel_should_append_children_impl(std::atomic<bool> const& found)
@@ -974,8 +977,8 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.theory_nogood_literals_removed+=source.theory_nogood_literals_removed;
     target.theory_minimization_budget_exhaustions+=
         source.theory_minimization_budget_exhaustions;
-    if(target.first_minimization_candidate_trail_rank==0u
-       && source.first_minimization_candidate_trail_rank!=0u) {
+    if((target.first_minimization_candidate_trail_rank==0u)
+       & (source.first_minimization_candidate_trail_rank!=0u)) {
         target.first_minimization_candidate_trail_rank=
             source.first_minimization_candidate_trail_rank;
     }
@@ -994,13 +997,15 @@ std::vector<SizeType> learned_clause_pruning_candidates(
     std::vector<SizeType> candidates;
     for(SizeType i=0u; i!=entries.size(); ++i) {
         auto const& entry=entries[i];
-        if(not entry.active
-           || entry.theory
-           || entry.recent
-           || entry.short_clause
-           || entry.useful
-           || entry.protected_clause
-           || entry.locked) {
+        Bool const excluded=
+            (not entry.active)
+            | entry.theory
+            | entry.recent
+            | entry.short_clause
+            | entry.useful
+            | entry.protected_clause
+            | entry.locked;
+        if(excluded) {
             continue;
         }
         candidates.push_back(i);
@@ -1427,7 +1432,7 @@ class SmtDpllSearch {
     {
         SizeType count=0u;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
-            if(_learned_clause_active[i] && not _learned_clause_is_theory[i]) {
+            if(_learned_clause_active[i] & (not _learned_clause_is_theory[i])) {
                 ++count;
             }
         }

@@ -259,7 +259,12 @@ where it protects optional access or changes observable work.
 Optional control state is removed when absence is not representable in the real
 solver flow. Sensitivity selection, learned-clause protection and CDCL pivot
 eligibility use explicit state whose combinations correspond to semantic decisions
-rather than evaluation-order branches.
+rather than evaluation-order branches. DPLL literal assignment is likewise structural: callers select only unassigned
+variables, so reassignment/conflict states are not represented inside the assignment
+primitive. UNKNOWN box-processing statistics encode the only currently reachable
+terminal-uncertified case directly instead of carrying a redundant Boolean flag.
+Parallel child suppression remains semantically meaningful under races, but its
+decision is isolated in a deterministic helper so both outcomes can be tested.
 
 ## Important rejected approaches
 

@@ -643,8 +643,7 @@ SmtSolver::_accumulate_box_processing_statistics(
             processing.sensitivity_overrode_geometric_split,
             processing.epsilon_box_certification,
             processing.candidate_witness_search,
-            processing.candidate_witness_success,
-            processing.non_splittable_epsilon_overlap
+            processing.candidate_witness_success
         });
 }
 
@@ -754,11 +753,6 @@ Bool parallel_stop_condition_impl(
         | static_cast<unsigned>(limit_reached.load());
 }
 
-Bool parallel_should_append_children_impl(std::atomic<bool> const& found)
-{
-    return not found.load();
-}
-
 Bool claim_parallel_witness(
     ParallelSmtSearchState& state,
     UpperBoxType const& witness)
@@ -813,9 +807,10 @@ struct SmtParallelTask {
             return;
         }
         if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
-            if(parallel_should_append_children_impl(state->found)) {
-                access.append(processing.children->first);
-                access.append(processing.children->second);
+            auto children=SmtSolverTestSupport::parallel_children_to_append(
+                state->found.load(),*processing.children);
+            for(auto const& child:children) {
+                access.append(child);
             }
             return;
         }
@@ -929,10 +924,14 @@ Bool parallel_stop_condition(Bool found, Bool limit_reached)
     return parallel_stop_condition_impl(atomic_found,atomic_limit);
 }
 
-Bool parallel_should_append_children(Bool found)
+std::vector<UpperBoxType> parallel_children_to_append(
+    Bool found,
+    Pair<UpperBoxType,UpperBoxType> const& children)
 {
-    std::atomic<bool> atomic_found{static_cast<bool>(found)};
-    return parallel_should_append_children_impl(atomic_found);
+    if(found) {
+        return {};
+    }
+    return {children.first,children.second};
 }
 
 Pair<Bool,Bool> parallel_witness_claim_sequence()
@@ -942,6 +941,15 @@ Pair<Bool,Bool> parallel_witness_claim_sequence()
     Bool first=claim_parallel_witness(state,witness);
     Bool second=claim_parallel_witness(state,witness);
     return {first,second};
+}
+
+Void record_first_minimization_candidate_trail_rank(
+    SmtSearchStatistics& statistics,
+    SizeType trail_rank)
+{
+    if(statistics.first_minimization_candidate_trail_rank==0u) {
+        statistics.first_minimization_candidate_trail_rank=trail_rank;
+    }
 }
 
 Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)
@@ -1170,16 +1178,6 @@ Void order_theory_nogood(
         });
 }
 
-AssignmentDecision assignment_decision(
-    int8_t current_value,
-    int8_t requested_value)
-{
-    if(current_value<0) {
-        return {true,true};
-    }
-    return {current_value==requested_value,false};
-}
-
 Bool clause_is_learned(SizeType index, SizeType original_clause_count)
 {
     return index>=original_clause_count;
@@ -1308,9 +1306,7 @@ Void accumulate_box_processing_statistics(
         case BoxProcessingStatus::UNKNOWN:
             ++statistics.boxes_unknown;
             ++statistics.non_splittable_uncertified_boxes;
-            if(input.non_splittable_epsilon_overlap) {
-                ++statistics.non_splittable_epsilon_overlap_boxes;
-            }
+            ++statistics.non_splittable_epsilon_overlap_boxes;
             break;
         case BoxProcessingStatus::EPSILON_SAT:
             break;
@@ -1371,20 +1367,15 @@ class SmtDpllSearch {
         return value==expected_value;
     }
 
-    Bool _assign_literal(Int literal, std::optional<SizeType> reason_clause = std::nullopt)
+    Void _assign_literal(Int literal, std::optional<SizeType> reason_clause = std::nullopt)
     {
         SizeType variable=variable_from_literal(literal);
         int8_t value=static_cast<int8_t>(literal>0);
         AssignmentInfo& assignment=_assignment[variable];
-        auto decision=SmtSolverTestSupport::assignment_decision(
-            assignment.value,value);
-        if(decision.newly_assigned) {
-            assignment.value=value;
-            assignment.decision_level=this->_decision_level();
-            assignment.reason_clause=reason_clause;
-            _trail.push_back(variable);
-        }
-        return decision.accepted;
+        assignment.value=value;
+        assignment.decision_level=this->_decision_level();
+        assignment.reason_clause=reason_clause;
+        _trail.push_back(variable);
     }
 
     SizeType _original_clause_count() const
@@ -1861,12 +1852,10 @@ class SmtDpllSearch {
         SmtSolverTestSupport::order_theory_nogood(
             clause,decision_levels,trail_rank);
 
-        if(_statistics.first_minimization_candidate_trail_rank==0u) {
-            SizeType first_variable=
-                static_cast<SizeType>(std::abs(clause.front()));
-            _statistics.first_minimization_candidate_trail_rank=
-                trail_rank[first_variable];
-        }
+        SizeType first_variable=
+            static_cast<SizeType>(std::abs(clause.front()));
+        SmtSolverTestSupport::record_first_minimization_candidate_trail_rank(
+            _statistics,trail_rank[first_variable]);
 
         SizeType const budget=_solver.configuration().theory_minimization_budget();
         SizeType checks=0u;

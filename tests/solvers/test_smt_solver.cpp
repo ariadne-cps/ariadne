@@ -309,6 +309,14 @@ class TestSmtSolver {
         SmtSolverTestSupport::accumulate_statistics(empty_target,empty_source);
         ARIADNE_TEST_EQUAL(empty_target.first_minimization_candidate_trail_rank,0u);
 
+        SmtSearchStatistics first_rank;
+        SmtSolverTestSupport::record_first_minimization_candidate_trail_rank(
+            first_rank,7u);
+        SmtSolverTestSupport::record_first_minimization_candidate_trail_rank(
+            first_rank,11u);
+        ARIADNE_TEST_EQUAL(
+            first_rank.first_minimization_candidate_trail_rank,7u);
+
         SmtSearchStatistics conflict;
         conflict.boolean_conflicts_analyzed=1u;
         conflict.last_learned_clause_literals=4u;
@@ -334,10 +342,15 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(false,true));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,true));
 
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::parallel_should_append_children(false));
-        ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::parallel_should_append_children(true));
+        UpperBoxType left({UpperIntervalType(ExactIntervalType(-1,0))});
+        UpperBoxType right({UpperIntervalType(ExactIntervalType(0,1))});
+        Pair<UpperBoxType,UpperBoxType> children(left,right);
+        auto append_children=
+            SmtSolverTestSupport::parallel_children_to_append(false,children);
+        ARIADNE_TEST_EQUAL(append_children.size(),2u);
+        auto stopped_children=
+            SmtSolverTestSupport::parallel_children_to_append(true,children);
+        ARIADNE_TEST_ASSERT(stopped_children.empty());
 
         auto claims=SmtSolverTestSupport::parallel_witness_claim_sequence();
         ARIADNE_TEST_ASSERT(claims.first);
@@ -617,7 +630,7 @@ class TestSmtSolver {
 
         SmtSearchStatistics statistics;
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::PRUNED,1u,1u,2u,1u,true,true,true,true,true,false});
+            statistics,Input{Status::PRUNED,1u,1u,2u,1u,true,true,true,true,true});
         ARIADNE_TEST_EQUAL(statistics.boxes_pruned,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_reduction_rounds,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_effective_reductions,1u);
@@ -634,7 +647,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(statistics.boxes_split,1u);
 
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::UNKNOWN,0u,0u,0u,0u,false,false,false,false,false,true});
+            statistics,Input{Status::UNKNOWN});
         ARIADNE_TEST_EQUAL(statistics.boxes_unknown,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,1u);

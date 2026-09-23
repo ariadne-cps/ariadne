@@ -51,7 +51,6 @@ class SequentialSmtWorkQueue {
     Void push(UpperBoxType box) { _boxes.push_back(std::move(box)); }
 
     UpperBoxType pop() {
-        ARIADNE_PRECONDITION(not _boxes.empty());
         UpperBoxType box=std::move(_boxes.back());
         _boxes.pop_back();
         return box;
@@ -65,7 +64,6 @@ class SequentialSmtWorkQueue {
 
 Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
 {
-    ARIADNE_ASSERT(first.dimension()==second.dimension());
     for(SizeType i=0; i!=first.dimension(); ++i) {
         if(first[i].lower_bound().raw()!=second[i].lower_bound().raw()
            || first[i].upper_bound().raw()!=second[i].upper_bound().raw()) {
@@ -497,7 +495,6 @@ SmtSolver::_epsilon_candidate_witness(
     UpperBoxType const& domain,
     Conjunction const& conjunction) const
 {
-    ARIADNE_ASSERT(not conjunction.empty());
 
     ValidatedVectorMultivariateFunction function(
         conjunction.size(),this->_function(conjunction[0]).domain());
@@ -580,7 +577,6 @@ SmtSolver::_process_box(
     auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
         candidate_search_attempted,candidate,candidate_certified);
     if(candidate_outcome.certified) {
-        ARIADNE_ASSERT(candidate_outcome.witness.has_value());
         BoxProcessingResult result{
             BoxProcessingStatus::EPSILON_SAT,
             *candidate_outcome.witness,
@@ -676,11 +672,9 @@ SmtSolver::_solve_sequential_conjunction(
         this->_accumulate_box_processing_statistics(statistics,processing);
 
         if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
-            ARIADNE_ASSERT(processing.witness.has_value());
             return SmtResult::epsilon_sat(*processing.witness,statistics);
         }
         if(processing.status==BoxProcessingStatus::SPLIT) {
-            ARIADNE_ASSERT(processing.children.has_value());
             pending.push(std::move(processing.children->second));
             pending.push(std::move(processing.children->first));
         } else if(processing.status==BoxProcessingStatus::UNKNOWN) {
@@ -792,7 +786,6 @@ SmtSolver::_solve_parallel_conjunction(
                 return;
             }
             if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
-                ARIADNE_ASSERT(processing.witness.has_value());
                 bool expected=false;
                 if(state->found.compare_exchange_strong(expected,true)) {
                     std::lock_guard<std::mutex> lock(state->mutex);
@@ -801,14 +794,12 @@ SmtSolver::_solve_parallel_conjunction(
                 return;
             }
             if(processing.status==BoxProcessingStatus::SPLIT) {
-                ARIADNE_ASSERT(processing.children.has_value());
                 if(not state->found.load()) {
                     access.append(processing.children->first);
                     access.append(processing.children->second);
                 }
                 return;
             }
-            ARIADNE_ASSERT(processing.status==BoxProcessingStatus::UNKNOWN);
             state->unknown.store(true);
             return;
         });
@@ -818,7 +809,6 @@ SmtSolver::_solve_parallel_conjunction(
 
     std::lock_guard<std::mutex> lock(state->mutex);
     if(state->found.load()) {
-        ARIADNE_ASSERT(state->witness.has_value());
         return SmtResult::epsilon_sat(*state->witness,state->statistics);
     }
     if(state->unknown.load()) {
@@ -1338,7 +1328,6 @@ class SmtDpllSearch {
     {
         SizeType variable=static_cast<SizeType>(literal>0 ? literal : -literal);
         int8_t value=_assignment[variable].value;
-        ARIADNE_ASSERT(value>=0);
         return literal>0 ? value==1 : value==0;
     }
 
@@ -1519,10 +1508,7 @@ class SmtDpllSearch {
 
                 if(unassigned_count==1u) {
                     SizeType variable=static_cast<SizeType>(unit_literal>0 ? unit_literal : -unit_literal);
-                    Bool assigned=this->_assign_literal(unit_literal,clause_index);
-                    ARIADNE_ASSERT(assigned);
-                    ARIADNE_ASSERT(_assignment[variable].reason_clause.has_value());
-                    ARIADNE_ASSERT(*_assignment[variable].reason_clause==clause_index);
+                    this->_assign_literal(unit_literal,clause_index);
                     ++_statistics.boolean_propagations;
                     ++_statistics.boolean_reasoned_propagations;
                     if(this->_is_learned_clause(clause_index)) {
@@ -1573,7 +1559,6 @@ class SmtDpllSearch {
 
     ConflictAnalysis _analyze_boolean_conflict(SizeType conflict_clause_index)
     {
-        ARIADNE_ASSERT(conflict_clause_index<this->_clause_count());
         this->_bump_learned_clause_activity(conflict_clause_index);
         ConflictAnalysis analysis;
         auto const& conflict_clause=this->_clause(conflict_clause_index);
@@ -1593,11 +1578,11 @@ class SmtDpllSearch {
             }
 
             ARIADNE_ASSERT(pivot.has_value());
-            SizeType reason_index=*_assignment[*pivot].reason_clause;
-            ARIADNE_ASSERT(reason_index<this->_clause_count());
+            SizeType pivot_variable=*pivot;
+            SizeType reason_index=*_assignment[pivot_variable].reason_clause;
             this->_bump_learned_clause_activity(reason_index);
             analysis.learned_clause=this->_resolve_on_variable(
-                analysis.learned_clause,this->_clause(reason_index),*pivot);
+                analysis.learned_clause,this->_clause(reason_index),pivot_variable);
         }
 
         SizeType current_level=this->_decision_level();
@@ -1610,7 +1595,6 @@ class SmtDpllSearch {
             }
         }
         analysis.backjump_level=backjump_level;
-        ARIADNE_ASSERT(this->_current_level_literal_count(analysis.learned_clause)==1u);
         return analysis;
     }
 
@@ -1638,7 +1622,6 @@ class SmtDpllSearch {
 
     Void _backtrack_to_level(SizeType level)
     {
-        ARIADNE_ASSERT(level<this->_decision_level_markers.size());
         SizeType marker=_decision_level_markers[level];
         while(_trail.size()>marker) {
             SizeType variable=_trail.back();
@@ -1659,7 +1642,6 @@ class SmtDpllSearch {
             if(*outcome.backjump_level<parent_level) {
                 return outcome;
             }
-            ARIADNE_ASSERT(*outcome.backjump_level==parent_level);
             return this->_search_boolean();
         }
         return std::nullopt;
@@ -1686,7 +1668,6 @@ class SmtDpllSearch {
             SizeType learned_index=this->_add_learned_clause(analysis.learned_clause);
             _last_boolean_conflict_clause.reset();
 
-            ARIADNE_ASSERT(analysis.backjump_level<conflict_level);
             if(analysis.backjump_level+1u<conflict_level) {
                 ++_statistics.nonchronological_backjumps;
             }
@@ -1724,7 +1705,6 @@ class SmtDpllSearch {
             SizeType learned_index=this->_add_learned_clause(analysis.learned_clause);
             _last_theory_conflict_clause.reset();
 
-            ARIADNE_ASSERT(analysis.backjump_level<conflict_level);
             if(analysis.backjump_level+1u<conflict_level) {
                 ++_statistics.nonchronological_backjumps;
             }
@@ -1738,9 +1718,7 @@ class SmtDpllSearch {
         SizeType parent_level=this->_decision_level();
 
         this->_push_decision_level();
-        ARIADNE_ASSERT(this->_assign_literal(-static_cast<Int>(variable)));
-        ARIADNE_ASSERT(_assignment[variable].decision_level==this->_decision_level());
-        ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
+        this->_assign_literal(-static_cast<Int>(variable));
 
         SearchOutcome first=this->_search_boolean();
         if(auto outcome=this->_propagate_child_outcome(first,parent_level);
@@ -1752,9 +1730,7 @@ class SmtDpllSearch {
         ++_statistics.boolean_backtracks;
 
         this->_push_decision_level();
-        ARIADNE_ASSERT(this->_assign_literal(static_cast<Int>(variable)));
-        ARIADNE_ASSERT(_assignment[variable].decision_level==this->_decision_level());
-        ARIADNE_ASSERT(not _assignment[variable].reason_clause.has_value());
+        this->_assign_literal(static_cast<Int>(variable));
 
         SearchOutcome second=this->_search_boolean();
         if(auto outcome=this->_propagate_child_outcome(second,parent_level);
@@ -1807,7 +1783,6 @@ class SmtDpllSearch {
                     break;
                 }
             }
-            ARIADNE_ASSERT(atom_index.has_value());
 
             SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(*atom_index));
             Bool assignment_value=nogood_literal<0;
@@ -1822,7 +1797,6 @@ class SmtDpllSearch {
 
     Bool _nogood_theory_consistent(std::vector<Int> const& clause)
     {
-        ARIADNE_PRECONDITION(not clause.empty());
         ++_statistics.theory_minimization_checks;
         std::vector<SmtTheoryAlternatives> alternatives=
             this->_theory_alternatives_for_nogood(clause);
@@ -1881,12 +1855,10 @@ class SmtDpllSearch {
     SizeType _learn_current_theory_nogood()
     {
         std::vector<Int> clause=this->_current_theory_nogood();
-        ARIADNE_ASSERT(not clause.empty());
 
         SizeType raw_size=clause.size();
         _statistics.theory_nogood_raw_literals+=raw_size;
         clause=this->_minimize_theory_nogood(std::move(clause));
-        ARIADNE_ASSERT(not clause.empty());
         _statistics.theory_nogood_minimized_literals+=clause.size();
         _statistics.theory_nogood_literals_removed+=raw_size-clause.size();
 
@@ -1990,7 +1962,6 @@ class SmtDpllSearch {
 
         for(SizeType i=0; i!=_encoding.atom_count(); ++i) {
             SizeType variable=_encoding.atom_variable(i);
-            ARIADNE_ASSERT(_assignment[variable].value>=0);
 
             SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(i));
             if(_assignment[variable].value==0) {

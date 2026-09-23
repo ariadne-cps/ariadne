@@ -917,7 +917,7 @@ Void graded_flow_iterate_affine_procedure(
 
 struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
-    FlowStepTaylorModelType residual;
+    FlowStepTaylorModelType recurrence_field;
     double residual_seconds;
 };
 
@@ -984,26 +984,15 @@ graded_series_centre_polynomial_step(
     }
     Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
 
-    Vector<GradedValidatedDifferential> derivative_graded=fdphic;
-    for(SizeType i=0u; i!=n; ++i) {
-        while(derivative_graded[i].degree()<final_f[i].degree()) {
-            derivative_graded[i].append(z);
-        }
-    }
-    Vector<GradedValidatedDifferential> residual_graded=derivative_graded;
-    for(SizeType i=0u; i!=n; ++i) {
-        for(DegreeType k=0u; k<=final_f[i].degree(); ++k) {
-            residual_graded[i][k]=derivative_graded[i][k]-final_f[i][k];
-        }
-    }
-    Vector<ValidatedDifferential> residual_differential=
-        differential(residual_graded,n,so,to);
-    FlowStepTaylorModelType residual=
-        flow_function(residual_differential,domx,domt,doma,sweeper);
+    Vector<ValidatedDifferential> recurrence_field_differential=
+        differential(final_f,n,so,to);
+    FlowStepTaylorModelType recurrence_field=
+        flow_function(
+            recurrence_field_differential,domx,domt,doma,sweeper);
     recurrence_residual_stopwatch.click();
 
     return CentrePolynomialRecurrenceResult{
-        std::move(polynomial),std::move(residual),
+        std::move(polynomial),std::move(recurrence_field),
         recurrence_residual_stopwatch.elapsed_seconds()};
 }
 
@@ -1902,8 +1891,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     this->minimum_temporal_order());
             FlowStepTaylorModelType centre_polynomial=
                 std::move(centre_result.polynomial);
-            FlowStepTaylorModelType recurrence_residual=
-                std::move(centre_result.residual);
+            FlowStepTaylorModelType recurrence_field=
+                std::move(centre_result.recurrence_field);
             centre_polynomial_stopwatch.click();
 
             static SizeType recurrence_residual_calls=0u;
@@ -1914,7 +1903,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
                           << " residual_seconds=" << recurrence_residual_seconds
-                          << " residual_range=" << recurrence_residual.range()
+                          << " field_range=" << recurrence_field.range()
                           << std::endl;
             }
 
@@ -2012,7 +2001,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " polynomial_errors=" << centre_polynomial.errors()
                           << " polynomial_range=" << centre_polynomial.range()
                           << " defect_range=" << defect.range()
-                          << " recurrence_defect_range=" << recurrence_residual.range()
+                          << " generic_field_range=" << field_on_polynomial.range()
+                          << " recurrence_field_range=" << recurrence_field.range()
                           << " initial_defect_range=" << initial_defect.range()
                           << " lipschitz_inf=" << lipschitz_inf
                           << std::endl;

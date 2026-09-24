@@ -987,6 +987,7 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.learned_clause_propagations+=source.learned_clause_propagations;
     target.nonchronological_backjumps+=source.nonchronological_backjumps;
     target.theory_checks+=source.theory_checks;
+    target.domain_theory_propagations+=source.domain_theory_propagations;
     target.theory_conflicts+=source.theory_conflicts;
     target.theory_learned_clauses+=source.theory_learned_clauses;
     target.theory_learned_clause_literals+=source.theory_learned_clause_literals;
@@ -1196,6 +1197,57 @@ Bool assignment_locks_clause(
         & static_cast<unsigned>(matching_reason);
 }
 
+TheoryAtomTruth classify_theory_atom(
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    ContinuousPredicate const& atom)
+{
+    SmtTheoryLiteral literal=make_smt_theory_literal(atom);
+    RealExpression difference=simplify(literal.lhs()-literal.rhs());
+    ValidatedScalarMultivariateFunction function(space,difference);
+    UpperIntervalType image=apply(function,UpperBoxType(domain));
+
+    Bool const definitely_negative=definitely(image.upper_bound()<0);
+    Bool const definitely_positive=definitely(image.lower_bound()>0);
+    Bool const definitely_nonnegative=definitely(image.lower_bound()>=0);
+    Bool const definitely_nonpositive=definitely(image.upper_bound()<=0);
+    Bool const definitely_zero=
+        static_cast<unsigned>(definitely_nonnegative)
+        & static_cast<unsigned>(definitely_nonpositive);
+    Bool const definitely_nonzero=
+        static_cast<unsigned>(definitely_negative)
+        | static_cast<unsigned>(definitely_positive);
+
+    switch(literal.relation()) {
+        case SmtTheoryRelation::EQ:
+            if(definitely_zero) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_nonzero) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        case SmtTheoryRelation::NEQ:
+            if(definitely_nonzero) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_zero) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        case SmtTheoryRelation::GEQ:
+            if(definitely_nonnegative) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_negative) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        case SmtTheoryRelation::LEQ:
+            if(definitely_nonpositive) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_positive) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        case SmtTheoryRelation::GT:
+            if(definitely_positive) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_nonpositive) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        case SmtTheoryRelation::LT:
+            if(definitely_negative) { return TheoryAtomTruth::TRUE_VALUE; }
+            if(definitely_nonnegative) { return TheoryAtomTruth::FALSE_VALUE; }
+            return TheoryAtomTruth::UNKNOWN;
+        default:
+            throw std::runtime_error("Unknown SMT theory relation");
+    }
+}
+
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
 {
     if(result.is_epsilon_sat()) {
@@ -1308,6 +1360,10 @@ class SmtDpllSearch {
 
     SmtResult solve()
     {
+        if(_domain.is_empty()) {
+            return SmtResult::unsat(_statistics);
+        }
+        this->_propagate_domain_theory_facts();
         SmtSolverTestSupport::SearchOutcome outcome=this->_search_boolean();
         return SmtSolverTestSupport::finalize_search_outcome(
             outcome,_theory_unknown_seen,_statistics);
@@ -1344,6 +1400,24 @@ class SmtDpllSearch {
         assignment.decision_level=this->_decision_level();
         assignment.reason_clause=reason_clause;
         _trail.push_back(variable);
+    }
+
+    Void _propagate_domain_theory_facts()
+    {
+        for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
+            SizeType variable=_encoding.atom_variable(i);
+            auto truth=SmtSolverTestSupport::classify_theory_atom(
+                _space,_domain,_encoding.atom(i));
+            if(truth==SmtSolverTestSupport::TheoryAtomTruth::UNKNOWN) {
+                continue;
+            }
+            Int literal=static_cast<Int>(variable);
+            if(truth==SmtSolverTestSupport::TheoryAtomTruth::FALSE_VALUE) {
+                literal=-literal;
+            }
+            this->_assign_literal(literal);
+            ++_statistics.domain_theory_propagations;
+        }
     }
 
     SizeType _original_clause_count() const

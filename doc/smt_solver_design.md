@@ -101,6 +101,8 @@ The current implementation includes:
 - Boolean conflict analysis;
 - learned clauses;
 - theory-generated nogoods;
+- validated level-zero theory propagation for atoms whose truth value is fixed
+  over the complete bounded domain;
 - nonchronological backjump accounting;
 - learned-clause activity;
 - conservative learned-clause pruning;
@@ -212,12 +214,13 @@ A missed function, line, or branch must be resolved in one of two ways:
 
 Coverage must not be increased by manufacturing impossible internal states.
 
-At the last fully measured checkpoint before the most recent coverage cleanup,
-`smt_boolean.cpp` and `smt_theory.cpp` had reached 100% functions, lines and
-branches. `smt_solver.cpp` had reached 100% functions and was being reduced
-from a small residual set of line/branch misses. The exact current percentage
-must always be taken from a fresh coverage run after the latest commit rather
-than from this document.
+At the baseline immediately before resuming functional development,
+`smt_boolean.cpp` and `smt_theory.cpp` had 100% functions, lines and
+branches, while `smt_solver.cpp` had 100% functions and branches. One
+compiler-mapped line in the parallel task remained the previously audited line
+coverage anomaly. The exact current percentage must always be taken from a
+fresh coverage run after the latest functional commit rather than from this
+document.
 
 ## Coverage-related design work
 
@@ -303,12 +306,13 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. finish 100% function/line/branch coverage for `smt_solver.cpp`;
-2. audit each remaining branch as a real state-space case or a redundant
-   representation;
-3. preserve deterministic, nontrivial tests for every retained behavior;
-4. once the coverage baseline is complete, continue improving epsilon-solver
-   completeness and numerical refinement toward the long-term dReal-like goal;
+1. improve epsilon-SMT completeness and pruning/propagation strength toward the
+   long-term dReal-like goal;
+2. preserve deterministic, nontrivial tests for every introduced behavior;
+3. after every green functional test run, regenerate coverage and restore 100%
+   function and branch coverage before starting the next feature tranche;
+4. retain the audited single compiler-mapped line anomaly unless a semantic
+   source change resolves it naturally;
 5. later add CI coverage gates so regressions in functions, lines or branches
    fail automatically.
 

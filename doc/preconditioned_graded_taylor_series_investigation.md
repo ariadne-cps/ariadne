@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `ca5949503e37614150cab4e4e7f4cb645fcdf6df`
+**Latest analysed investigation HEAD:** `cb02a284e61a811b7668736f3a53cfe1f492018f`
 
 ## Purpose of this document
 
@@ -2018,6 +2018,30 @@ This changes the interpretation of objective 1. We do **not** require the error 
 A direct spatial-order test is therefore the next diagnostic. At fixed horizon [0,5], fixed max_step=0.0025, fixed temporal order 5 and fixed sweeper, run the Gronwall integrator with spatial orders 4, 5 and 6. If the final error decreases materially with spatial order, the observed small-h floor is primarily the expected representation-order floor. If it barely moves, a carried-state representation issue remains.
 
 Temporary carried-state attribution logging is removed before this benchmark so its timing is not polluted.
+
+---
+
+
+### 9.51 Sweeper threshold is the dominant small-step accuracy floor (2026-09-24)
+
+At fixed horizon [0,5], max_step=0.0025, spatial order 5, temporal order 5 and loose local tolerance 1e-2, varying only the ThresholdSweeper cutoff gives:
+
+| sweep threshold | runtime | achieved final error | sets |
+|---:|---:|---:|---:|
+| 1e-10 | 21.215 s | 2.06453e-4 | 2000 |
+| 1e-12 | 32.214 s | 3.88849e-6 | 2000 |
+| 1e-14 | 56.618 s | 6.67444e-8 | 2000 |
+| 1e-16 | 103.174 s | 1.35309e-9 | 2000 |
+
+This is decisive: the apparent small-h plateau is controlled overwhelmingly by the sweeper threshold, not by the configured spatial degree. Tightening the threshold by two decades lowers final error by approximately 53x, then 58x, then 49x. Across 1e-10 -> 1e-16 the final error improves by more than five orders of magnitude while the number of steps is unchanged.
+
+Therefore objective 1 must be interpreted relative to both representation degree **and representation simplification threshold**. The previous q=4/5/6 test did not move the floor because all three representations were being simplified at the same 1e-12 cutoff before the extra degree could matter.
+
+The cost tradeoff is equally strong: retaining these small coefficients makes the representation much more expensive. Runtime grows 21.2 -> 32.2 -> 56.6 -> 103.2 s. Thus simply setting the threshold near machine precision is not a production solution, even though it demonstrates that the new flow/carry architecture can reach much lower errors.
+
+Architectural implication: the remaining accuracy/performance problem is now sharply identified as **representation management**. We need to preserve the coefficients that matter to long-horizon dependency without paying the full cost of a globally tiny threshold. Candidate directions include graded/adaptive sweeping, scale-aware sweeping, and retaining terms based on their propagated impact rather than instantaneous coefficient magnitude.
+
+This also strengthens the interpretation of the earlier equal-error benchmark: the current 1e-12 configuration is not a hard mathematical accuracy limit. Its floor is a tunable simplification/cost tradeoff.
 
 ---
 

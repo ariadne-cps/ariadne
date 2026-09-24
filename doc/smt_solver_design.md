@@ -102,9 +102,13 @@ The current implementation includes:
 - learned clauses;
 - theory-generated nogoods;
 - validated whole-domain theory-atom classification (`TRUE`, `FALSE` or
-  `UNKNOWN`) as infrastructure for future theory propagation; classification is
-  not yet injected as CDCL assignments because doing so must preserve the existing
-  theory-conflict/nogood learning paths and delta semantics;
+  `UNKNOWN`);
+- epsilon-safe domain theory propagation: when one Boolean polarity is proven
+  infeasible even after epsilon weakening over the complete domain, the opposite
+  polarity is introduced as a unit theory-implication clause. Unit propagation
+  therefore records a real clause reason and conflict analysis can resolve through
+  the implication graph. Exact falsity alone is never propagated when epsilon
+  weakening still admits the literal;
 - nonchronological backjump accounting;
 - learned-clause activity;
 - conservative learned-clause pruning;
@@ -308,6 +312,8 @@ The following approaches were tried or considered and deliberately rejected:
   bypassed theory-conflict learning/minimization paths and changed the treatment
   of simplified strict atoms under epsilon semantics. Propagation must therefore
   be integrated as theory implications with reasons rather than raw assignments.
+  The implemented replacement derives only implications justified by
+  epsilon-infeasibility and stores each implication as a unit theory clause.
 
 The Git history contains the experimental details; this document records the
 resulting design decisions.

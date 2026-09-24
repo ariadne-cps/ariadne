@@ -120,6 +120,8 @@ struct SmtSearchStatistics {
     SizeType learned_clause_propagations = 0u;
     SizeType nonchronological_backjumps = 0u;
     SizeType theory_checks = 0u;
+    SizeType domain_theory_implication_clauses = 0u;
+    SizeType domain_theory_propagations = 0u;
     SizeType theory_conflicts = 0u;
     SizeType theory_learned_clauses = 0u;
     SizeType theory_learned_clause_literals = 0u;
@@ -317,6 +319,23 @@ TheoryAtomTruth classify_theory_relation(
     UpperIntervalType const& image);
 
 TheoryAtomTruth classify_theory_atom(
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    ContinuousPredicate const& atom);
+
+struct TheoryAtomImplication {
+    Bool force_true = false;
+    Bool force_false = false;
+};
+
+Bool epsilon_theory_literal_infeasible(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    SmtTheoryLiteral const& literal);
+
+TheoryAtomImplication domain_theory_implication(
+    SmtSolver const& solver,
     RealSpace const& space,
     ExactBoxType const& domain,
     ContinuousPredicate const& atom);

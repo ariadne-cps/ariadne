@@ -2774,3 +2774,21 @@ dense_3e-14
 Both use final-coefficient sweep semantics and disable the earlier incremental
 early-discard path. The comparison will show whether direct keyed accumulation recovers
 the remaining cost of append/sort/unique.
+
+
+### 9.74 Fix dense-accumulator MultiIndex construction (2026-09-24)
+
+The first build of the keyed dense accumulator failed because the touched-index vector
+attempted to construct a `MultiIndex` directly from a `MultiIndexData const&`.
+`MultiIndex` has no such constructor; the available owning constructor takes the
+argument size and a pointer to the degree array.
+
+The touched-index insertion now uses:
+
+```
+MultiIndex(as, index.begin())
+```
+
+via `emplace_back(as,index.begin())`, which creates an owning copy of the current
+multi-index. This is a construction/API fix only; the ranking, accumulation, roundoff
+accounting and final-sweep semantics are unchanged.

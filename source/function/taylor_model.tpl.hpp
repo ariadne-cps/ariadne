@@ -1145,7 +1145,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 SizeType& touched=slot_to_touched[slot];
                 if(touched==unused) {
                     touched=touched_indices.size();
-                    touched_indices.emplace_back(index);
+                    touched_indices.emplace_back(as,index.begin());
                     touched_coefficients.emplace_back(value);
                 } else {
                     touched_coefficients[touched]=add_err(

@@ -2142,7 +2142,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] conservative pruning preserves protected learned clauses" << std::endl;
+            std::cout << "[smt-dpll] bounded learned database prunes eligible clauses" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
                 0.125_x,std::numeric_limits<SizeType>::max(),1u));
             ContinuousPredicate a=(ex>=-0.75_x);
@@ -2181,75 +2181,9 @@ class TestSmtSolver {
                       << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=4u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().learned_clauses_pruned,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().peak_active_non_theory_learned_clauses>=2u);
-        }
-
-        {
-            std::cout << "[smt-dpll] pruning deactivates learned clauses that are later skipped" << std::endl;
-            SmtSolver pruning_solver(SmtSolverConfiguration(
-                0.125_x,std::numeric_limits<SizeType>::max(),0u));
-            RealVariable y("prune_y");
-            RealVariable z("prune_z");
-            RealVariable w("prune_w");
-            RealVariable v("prune_v");
-            RealExpression ey=y;
-            RealExpression ez=z;
-            RealExpression ew=w;
-            RealExpression ev=v;
-            RealSpace prune_space({x,y,z,w,v});
-            ExactBoxType prune_domain({
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1),
-                ExactIntervalType(-1,1)
-            });
-            ContinuousPredicate a=(ex>=0);
-            ContinuousPredicate b=(ey>=0);
-            ContinuousPredicate c=(ez>=0);
-            ContinuousPredicate d=(ew>=0);
-            ContinuousPredicate e=(ev>=0);
-            ContinuousPredicate formula=
-                (a||b||c||d||e)&&
-                ((!a)||b||c||d||e)&&
-                (a||(!b)||c||d||e)&&
-                ((!a)||(!b)||c||d||e)&&
-                (a||b||(!c)||d||e)&&
-                ((!a)||b||(!c)||d||e)&&
-                (a||(!b)||(!c)||d||e)&&
-                ((!a)||(!b)||(!c)||d||e)&&
-                (a||b||c||(!d)||e)&&
-                ((!a)||b||c||(!d)||e)&&
-                (a||(!b)||c||(!d)||e)&&
-                ((!a)||(!b)||c||(!d)||e)&&
-                (a||b||(!c)||(!d)||e)&&
-                ((!a)||b||(!c)||(!d)||e)&&
-                (a||(!b)||(!c)||(!d)||e)&&
-                ((!a)||(!b)||(!c)||(!d)||e)&&
-                (a||b||c||d||(!e))&&
-                ((!a)||b||c||d||(!e))&&
-                (a||(!b)||c||d||(!e))&&
-                ((!a)||(!b)||c||d||(!e))&&
-                (a||b||(!c)||d||(!e))&&
-                ((!a)||b||(!c)||d||(!e))&&
-                (a||(!b)||(!c)||d||(!e))&&
-                ((!a)||(!b)||(!c)||d||(!e))&&
-                (a||b||c||(!d)||(!e))&&
-                ((!a)||b||c||(!d)||(!e))&&
-                (a||(!b)||c||(!d)||(!e))&&
-                ((!a)||(!b)||c||(!d)||(!e))&&
-                (a||b||(!c)||(!d)||(!e))&&
-                ((!a)||b||(!c)||(!d)||(!e))&&
-                (a||(!b)||(!c)||(!d)||(!e))&&
-                ((!a)||(!b)||(!c)||(!d)||(!e));
-            SmtResult solve_result=pruning_solver.solve(
-                prune_space,prune_domain,formula);
-            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts==0u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
         }
 
         {

@@ -103,7 +103,9 @@ The current implementation includes:
 - theory-generated nogoods;
 - nonchronological backjump accounting;
 - learned-clause activity;
-- conservative learned-clause pruning;
+- conservative learned-clause pruning with unit clauses retained permanently and
+  older eligible binary-or-longer clauses removable when the configured active
+  non-theory learned-clause limit is exceeded;
 - theory-nogood minimization with a configurable budget.
 
 Theory results are interpreted centrally: `EPSILON_SAT` is consistent and

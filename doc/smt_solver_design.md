@@ -252,7 +252,10 @@ structural issues while pursuing complete coverage:
 - public precondition failure paths are tested explicitly.
 
 Coverage is therefore being used as an audit of the state space, not only as a
-test-count metric. Boolean combinations of already-computed side-effect-free state
+test-count metric.
+ Structurally infinite contractor fixed-point loops are written without a Boolean
+condition; representing them as `while(true)` creates a compiler-visible false
+branch that is not part of the solver state space. Boolean combinations of already-computed side-effect-free state
 are non-short-circuit where laziness carries no semantics, so LLVM branch coverage
 tracks solver decisions rather than evaluation-order edges. Short-circuiting remains
 where it protects optional access or changes observable work.

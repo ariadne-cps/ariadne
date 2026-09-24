@@ -100,6 +100,8 @@ struct SmtSearchStatistics {
     SizeType hull_effective_reductions = 0u;
     SizeType shaving_reduction_rounds = 0u;
     SizeType shaving_effective_reductions = 0u;
+    SizeType monotone_reduction_rounds = 0u;
+    SizeType monotone_effective_reductions = 0u;
     SizeType sensitivity_guided_splits = 0u;
     SizeType sensitivity_overrides_geometric_splits = 0u;
     SizeType epsilon_box_certifications = 0u;
@@ -273,6 +275,8 @@ struct BoxProcessingStatisticsInput {
     SizeType hull_effective = 0u;
     SizeType shaving_rounds = 0u;
     SizeType shaving_effective = 0u;
+    SizeType monotone_rounds = 0u;
+    SizeType monotone_effective = 0u;
     Bool sensitivity_guided_split = false;
     Bool sensitivity_overrode_geometric_split = false;
     Bool epsilon_box_certification = false;
@@ -428,6 +432,8 @@ class SmtSolver {
         SizeType hull_effective = 0u;
         SizeType shaving_rounds = 0u;
         SizeType shaving_effective = 0u;
+        SizeType monotone_rounds = 0u;
+        SizeType monotone_effective = 0u;
     };
 
     struct BoxProcessingResult {

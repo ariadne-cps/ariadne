@@ -25,6 +25,9 @@ The solver roadmap therefore prioritizes, in this order:
 1. epsilon-safe SAT/theory interaction with explained theory propagation;
 2. strong validated ICP for large smooth composed expressions, including
    monotonicity/Newton-style contraction where applicable;
+   The SMT ICP fixed point now invokes Ariadne's validated
+   `ConstraintSolver::monotone_reduce` after hull reduction and coordinate
+   shaving stall, and records monotone rounds/effective contractions separately;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives;
 4. robust support for polynomial and transcendental activations and dynamics;

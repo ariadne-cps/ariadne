@@ -289,11 +289,15 @@ class TestSmtSolver {
 
         SmtSearchStatistics no_conflict;
         no_conflict.boxes_processed=3u;
+        no_conflict.monotone_reduction_rounds=4u;
+        no_conflict.monotone_effective_reductions=2u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
         SmtSolverTestSupport::accumulate_statistics(target,no_conflict);
         ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
+        ARIADNE_TEST_EQUAL(target.monotone_reduction_rounds,4u);
+        ARIADNE_TEST_EQUAL(target.monotone_effective_reductions,2u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -716,12 +720,14 @@ class TestSmtSolver {
 
         SmtSearchStatistics statistics;
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::PRUNED,1u,1u,2u,1u,true,true,true,true,true});
+            statistics,Input{Status::PRUNED,1u,1u,2u,1u,3u,1u,true,true,true,true,true});
         ARIADNE_TEST_EQUAL(statistics.boxes_pruned,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_reduction_rounds,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_effective_reductions,1u);
         ARIADNE_TEST_EQUAL(statistics.shaving_reduction_rounds,2u);
         ARIADNE_TEST_EQUAL(statistics.shaving_effective_reductions,1u);
+        ARIADNE_TEST_EQUAL(statistics.monotone_reduction_rounds,3u);
+        ARIADNE_TEST_EQUAL(statistics.monotone_effective_reductions,1u);
         ARIADNE_TEST_EQUAL(statistics.sensitivity_guided_splits,1u);
         ARIADNE_TEST_EQUAL(statistics.sensitivity_overrides_geometric_splits,1u);
         ARIADNE_TEST_EQUAL(statistics.epsilon_box_certifications,1u);
@@ -1068,6 +1074,27 @@ class TestSmtSolver {
                       << solve_result.statistics().shaving_effective_reductions
                       << "/" << solve_result.statistics().shaving_reduction_rounds
                       << std::endl;
+        }
+
+        {
+            std::cout << "[smt-solve] monotone contractor on smooth composed constraint" << std::endl;
+            RealVariable mx("monotone_x");
+            RealExpression emx=mx;
+            RealSpace mspace({mx});
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal((exp(emx)+emx==3)));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> mliterals;
+            mliterals.append(alternatives[0][0]);
+            SmtResult monotone_result=solver.solve(
+                mspace,ExactBoxType({ExactIntervalType(0,2)}),mliterals);
+            ARIADNE_TEST_ASSERT(not monotone_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                monotone_result.statistics().monotone_reduction_rounds>=1u);
+            ARIADNE_TEST_ASSERT(
+                monotone_result.statistics().monotone_effective_reductions
+                <= monotone_result.statistics().monotone_reduction_rounds);
         }
 
         {

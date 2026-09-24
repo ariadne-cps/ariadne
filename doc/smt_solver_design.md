@@ -104,10 +104,12 @@ The current implementation includes:
 - nonchronological backjump accounting;
 - learned-clause activity;
 - conservative learned-clause pruning;
-  The current policy deliberately protects recent, short, useful, protected and
-  locked clauses. This is a soft retention policy rather than a hard bounded
-  database guarantee; making pruning more aggressive requires an explicit
-  progress argument to avoid rediscovering the same conflicts indefinitely.
+  The current CDCL implementation retains learned clauses once created. Candidate
+  ranking and pruning statistics remain scaffolding for a future database
+  reduction scheme, but clauses are not deactivated until that scheme has an
+  explicit progress guarantee; experiments showed that aggressive deactivation
+  can rediscover the same conflicts indefinitely. The configured learned-clause
+  limit is therefore currently advisory rather than a hard bound.
 - theory-nogood minimization with a configurable budget.
 
 Theory results are interpreted centrally: `EPSILON_SAT` is consistent and

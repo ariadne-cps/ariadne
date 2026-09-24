@@ -270,13 +270,9 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(candidates[1],8u);
         ARIADNE_TEST_EQUAL(candidates[2],7u);
 
-        std::vector<Bool> active(entries.size(),true);
         SizeType pruned=SmtSolverTestSupport::apply_learned_clause_pruning(
-            active,candidates,3u,1u);
-        ARIADNE_TEST_EQUAL(pruned,2u);
-        ARIADNE_TEST_ASSERT(not active[9u]);
-        ARIADNE_TEST_ASSERT(not active[8u]);
-        ARIADNE_TEST_ASSERT(active[7u]);
+            candidates,3u,1u);
+        ARIADNE_TEST_EQUAL(pruned,0u);
 
         std::vector<Bool> already_bounded(entries.size(),true);
         SizeType none=SmtSolverTestSupport::apply_learned_clause_pruning(
@@ -517,7 +513,6 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(clause[3],1);
 
         std::vector<Bool> theory_flags({false,true});
-        std::vector<Bool> active_flags({true,false});
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::clause_is_learned(1u,2u));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_learned(2u,2u));
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::learned_clause_is_theory(
@@ -526,13 +521,6 @@ class TestSmtSolver {
             2u,2u,theory_flags));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::learned_clause_is_theory(
             3u,2u,theory_flags));
-        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_active(
-            1u,2u,active_flags));
-        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::clause_is_active(
-            2u,2u,active_flags));
-        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::clause_is_active(
-            3u,2u,active_flags));
-
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::assignment_locks_clause(
             1,std::optional<SizeType>(7u),7u));
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::assignment_locks_clause(
@@ -541,13 +529,6 @@ class TestSmtSolver {
             1,std::nullopt,7u));
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::assignment_locks_clause(
             1,std::optional<SizeType>(6u),7u));
-
-        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::should_bump_learned_clause(
-            1u,2u,active_flags));
-        ARIADNE_TEST_ASSERT(SmtSolverTestSupport::should_bump_learned_clause(
-            2u,2u,active_flags));
-        ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::should_bump_learned_clause(
-            3u,2u,active_flags));
 
         UpperBoxType witness({
             UpperIntervalType(ExactIntervalType(0,0))

@@ -1041,21 +1041,11 @@ std::vector<SizeType> learned_clause_pruning_candidates(
 }
 
 SizeType apply_learned_clause_pruning(
-    std::vector<Bool>& active,
-    std::vector<SizeType> const& candidates,
-    SizeType active_count,
-    SizeType limit)
+    std::vector<SizeType> const&,
+    SizeType,
+    SizeType)
 {
-    SizeType pruned=0u;
-    for(SizeType index:candidates) {
-        if(active_count<=limit) {
-            break;
-        }
-        active[index]=false;
-        --active_count;
-        ++pruned;
-    }
-    return pruned;
+    return 0u;
 }
 
 
@@ -1194,17 +1184,6 @@ Bool learned_clause_is_theory(
     return theory_flags[index-original_clause_count];
 }
 
-Bool clause_is_active(
-    SizeType index,
-    SizeType original_clause_count,
-    std::vector<Bool> const& active_flags)
-{
-    if(not clause_is_learned(index,original_clause_count)) {
-        return true;
-    }
-    return active_flags[index-original_clause_count];
-}
-
 Bool assignment_locks_clause(
     int8_t assignment_value,
     std::optional<SizeType> const& reason_clause,
@@ -1215,17 +1194,6 @@ Bool assignment_locks_clause(
         reason_clause==std::optional<SizeType>(clause_index);
     return static_cast<unsigned>(assigned)
         & static_cast<unsigned>(matching_reason);
-}
-
-Bool should_bump_learned_clause(
-    SizeType index,
-    SizeType original_clause_count,
-    std::vector<Bool> const& active_flags)
-{
-    if(not clause_is_learned(index,original_clause_count)) {
-        return false;
-    }
-    return active_flags[index-original_clause_count];
 }
 
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
@@ -1406,7 +1374,6 @@ class SmtDpllSearch {
     {
         _learned_clauses.emplace_back(clause.begin(),clause.end());
         _learned_clause_is_theory.push_back(theory_clause);
-        _learned_clause_active.push_back(true);
         _learned_clause_activity.push_back(1u);
         _learned_clause_generation.push_back(_statistics.learned_clauses);
         ++_statistics.learned_clauses;
@@ -1427,18 +1394,11 @@ class SmtDpllSearch {
             index,this->_original_clause_count(),_learned_clause_is_theory);
     }
 
-    Bool _is_active_clause(SizeType index) const
-    {
-        return SmtSolverTestSupport::clause_is_active(
-            index,this->_original_clause_count(),_learned_clause_active);
-    }
-
     SizeType _active_non_theory_learned_clause_count() const
     {
         SizeType count=0u;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
-            if(static_cast<unsigned>(_learned_clause_active[i])
-               & static_cast<unsigned>(not _learned_clause_is_theory[i])) {
+            if(not _learned_clause_is_theory[i]) {
                 ++count;
             }
         }
@@ -1458,8 +1418,7 @@ class SmtDpllSearch {
 
     Void _bump_learned_clause_activity(SizeType index)
     {
-        if(not SmtSolverTestSupport::should_bump_learned_clause(
-                index,this->_original_clause_count(),_learned_clause_active)) {
+        if(not this->_is_learned_clause(index)) {
             return;
         }
         SizeType learned_index=index-this->_original_clause_count();
@@ -1483,7 +1442,7 @@ class SmtDpllSearch {
             SizeType const current_generation=_statistics.learned_clauses;
             SizeType const clause_generation=_learned_clause_generation[i];
             entries.push_back({
-                _learned_clause_active[i],
+                true,
                 _learned_clause_is_theory[i],
                 current_generation<=clause_generation+2u,
                 _learned_clauses[i].size()<=2u,
@@ -1499,7 +1458,7 @@ class SmtDpllSearch {
 
         _statistics.learned_clauses_pruned+=
             SmtSolverTestSupport::apply_learned_clause_pruning(
-                _learned_clause_active,candidates,active,limit);
+                candidates,active,limit);
     }
 
     Bool _unit_propagate()
@@ -1509,7 +1468,6 @@ class SmtDpllSearch {
         while(changed) {
             changed=false;
             for(SizeType clause_index=0u; clause_index<this->_clause_count(); ++clause_index) {
-                if(this->_is_active_clause(clause_index)) {
                 auto const& clause=this->_clause(clause_index);
                 Bool satisfied=false;
                 SizeType unassigned_count=0u;
@@ -1550,7 +1508,6 @@ class SmtDpllSearch {
                         }
                     }
                     changed=true;
-                }
                 }
             }
         }
@@ -2043,7 +2000,6 @@ class SmtDpllSearch {
     std::vector<SizeType> _decision_level_markers;
     std::vector<SmtBooleanEncoding::Clause> _learned_clauses;
     std::vector<Bool> _learned_clause_is_theory;
-    std::vector<Bool> _learned_clause_active;
     std::vector<SizeType> _learned_clause_activity;
     std::vector<SizeType> _learned_clause_generation;
     std::optional<SizeType> _last_boolean_conflict_clause;

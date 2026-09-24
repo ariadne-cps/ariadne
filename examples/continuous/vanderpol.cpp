@@ -97,6 +97,14 @@ void ariadne_main()
                               << " context=" << context
                               << " calls=" << profile.calls
                               << " product_pairs=" << profile.product_pairs
+                              << " individual_below_threshold="
+                              << profile.individual_products_below_threshold
+                              << " individual_above_threshold="
+                              << profile.individual_products_above_threshold
+                              << " individual_below_threshold_abs_mass="
+                              << profile.individual_products_below_threshold_abs_mass
+                              << " individual_above_threshold_abs_mass="
+                              << profile.individual_products_above_threshold_abs_mass
                               << " sweep_passes=" << profile.sweep_passes
                               << " sweep_input_terms=" << profile.sweep_input_terms
                               << " sweep_output_terms=" << profile.sweep_output_terms

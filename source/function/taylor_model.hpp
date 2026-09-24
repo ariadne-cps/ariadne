@@ -76,6 +76,10 @@ enum class TaylorModelProductProfileContext { GENERAL, COMPOSE };
 struct TaylorModelProductProfileCounters {
     unsigned long long calls=0u;
     unsigned long long product_pairs=0u;
+    unsigned long long individual_products_below_threshold=0u;
+    unsigned long long individual_products_above_threshold=0u;
+    double individual_products_below_threshold_abs_mass=0.0;
+    double individual_products_above_threshold_abs_mass=0.0;
     unsigned long long sweep_passes=0u;
     unsigned long long sweep_input_terms=0u;
     unsigned long long sweep_output_terms=0u;
@@ -99,6 +103,10 @@ Void set_taylor_model_product_profile_context(TaylorModelProductProfileContext);
 Void record_taylor_model_product_profile(
     TaylorModelProductProfileContext,
     unsigned long long product_pairs,
+    unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_above_threshold,
+    double individual_products_below_threshold_abs_mass,
+    double individual_products_above_threshold_abs_mass,
     unsigned long long sweep_passes,
     unsigned long long sweep_input_terms,
     unsigned long long sweep_output_terms,

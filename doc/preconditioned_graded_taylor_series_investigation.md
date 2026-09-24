@@ -2310,3 +2310,24 @@ Output marker:
 ```
 
 This experiment does not change sweeping or certification. Its purpose is to determine whether the tighter cutoff primarily increases (a) the number of coefficient products generated, (b) the size of intermediate merged expansions, or (c) both, and how much of the additional product-kernel time is specifically attributable to composition.
+
+
+### 9.61 Classify individual Taylor coefficient products before merging (2026-09-24)
+
+The product-generation profile localized most of the `3e-14` runtime increase inside the general Taylor-model product kernel rather than the carried-state composition context. The next diagnostic therefore classifies every coefficient product `x_i*y_j` at the point where it is generated inside `_ifma`, before it is merged with an existing coefficient carrying the same multi-index.
+
+For the `ValidatedTag,FloatDP` path used by this benchmark, the profiler records:
+
+- number of individual coefficient products with `|x_i*y_j| < sweep_threshold`;
+- number with `|x_i*y_j| >= sweep_threshold`;
+- summed absolute mass of each class.
+
+These counters are reported separately for the existing `general` and `compose` contexts through the same marker:
+
+```
+[TaylorProductGenerationProfile]
+```
+
+The classification uses ordinary double values only for diagnostics and does not affect the Taylor arithmetic, sweep decisions, error term, or certification.
+
+The decisive question is whether a large majority of generated products are already individually below the active cutoff. If so, a rigorous early-discard product kernel becomes worth prototyping; if not, the main opportunity lies elsewhere in merge/sweep implementation rather than product generation.

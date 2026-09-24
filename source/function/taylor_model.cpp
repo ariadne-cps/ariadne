@@ -36,6 +36,10 @@ TaylorModelProductProfileSnapshot g_taylor_model_product_profile;
 Void accumulate_product_profile(
     TaylorModelProductProfileCounters& counters,
     unsigned long long product_pairs,
+    unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_above_threshold,
+    double individual_products_below_threshold_abs_mass,
+    double individual_products_above_threshold_abs_mass,
     unsigned long long sweep_passes,
     unsigned long long sweep_input_terms,
     unsigned long long sweep_output_terms,
@@ -45,6 +49,14 @@ Void accumulate_product_profile(
 {
     ++counters.calls;
     counters.product_pairs+=product_pairs;
+    counters.individual_products_below_threshold+=
+        individual_products_below_threshold;
+    counters.individual_products_above_threshold+=
+        individual_products_above_threshold;
+    counters.individual_products_below_threshold_abs_mass+=
+        individual_products_below_threshold_abs_mass;
+    counters.individual_products_above_threshold_abs_mass+=
+        individual_products_above_threshold_abs_mass;
     counters.sweep_passes+=sweep_passes;
     counters.sweep_input_terms+=sweep_input_terms;
     counters.sweep_output_terms+=sweep_output_terms;
@@ -85,6 +97,10 @@ Void set_taylor_model_product_profile_context(TaylorModelProductProfileContext c
 Void record_taylor_model_product_profile(
     TaylorModelProductProfileContext context,
     unsigned long long product_pairs,
+    unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_above_threshold,
+    double individual_products_below_threshold_abs_mass,
+    double individual_products_above_threshold_abs_mass,
     unsigned long long sweep_passes,
     unsigned long long sweep_input_terms,
     unsigned long long sweep_output_terms,
@@ -96,8 +112,12 @@ Void record_taylor_model_product_profile(
         ? g_taylor_model_product_profile.compose
         : g_taylor_model_product_profile.general;
     accumulate_product_profile(
-        counters,product_pairs,sweep_passes,
-        sweep_input_terms,sweep_output_terms,
+        counters,product_pairs,
+        individual_products_below_threshold,
+        individual_products_above_threshold,
+        individual_products_below_threshold_abs_mass,
+        individual_products_above_threshold_abs_mass,
+        sweep_passes,sweep_input_terms,sweep_output_terms,
         maximum_sweep_input_terms,maximum_sweep_output_terms,
         elapsed_seconds);
 }

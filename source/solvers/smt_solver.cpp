@@ -312,7 +312,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    while(true) {
+    for(;;) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
         for(SizeType i=0; i!=constraints.size(); ++i) {
@@ -400,7 +400,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    while(true) {
+    for(;;) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
         for(auto const& literal:literals) {

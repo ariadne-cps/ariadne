@@ -1242,9 +1242,9 @@ TheoryAtomTruth classify_theory_atom(
             if(definitely_negative) { return TheoryAtomTruth::TRUE_VALUE; }
             if(definitely_nonnegative) { return TheoryAtomTruth::FALSE_VALUE; }
             return TheoryAtomTruth::UNKNOWN;
-        default:
-            throw std::runtime_error("Unknown SMT theory relation");
     }
+    ARIADNE_UNREACHABLE;
+
 }
 
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)

@@ -289,11 +289,15 @@ class TestSmtSolver {
 
         SmtSearchStatistics no_conflict;
         no_conflict.boxes_processed=3u;
+        no_conflict.domain_theory_implication_clauses=2u;
+        no_conflict.domain_theory_propagations=1u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
         SmtSolverTestSupport::accumulate_statistics(target,no_conflict);
         ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
+        ARIADNE_TEST_EQUAL(target.domain_theory_implication_clauses,2u);
+        ARIADNE_TEST_EQUAL(target.domain_theory_propagations,1u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -580,6 +584,38 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
                     tspace,crossing,(etx<0))==Truth::UNKNOWN);
+        }
+
+        {
+            std::cout << "[smt-theory-propagation] epsilon-safe domain implications" << std::endl;
+            RealVariable ix("implication_x");
+            RealExpression eix=ix;
+            RealSpace ispace({ix});
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            SmtSolver implication_solver(SmtSolverConfiguration(0.125_x));
+
+            auto false_implication=SmtSolverTestSupport::domain_theory_implication(
+                implication_solver,ispace,domain,(eix>2));
+            ARIADNE_TEST_ASSERT(not false_implication.force_true);
+            ARIADNE_TEST_ASSERT(false_implication.force_false);
+
+            auto true_implication=SmtSolverTestSupport::domain_theory_implication(
+                implication_solver,ispace,domain,(eix>=-2));
+            ARIADNE_TEST_ASSERT(true_implication.force_true);
+            ARIADNE_TEST_ASSERT(not true_implication.force_false);
+
+            auto relaxed_strict=SmtSolverTestSupport::domain_theory_implication(
+                implication_solver,
+                ispace,
+                ExactBoxType({ExactIntervalType(0,0)}),
+                (eix>0));
+            ARIADNE_TEST_ASSERT(not relaxed_strict.force_true);
+            ARIADNE_TEST_ASSERT(not relaxed_strict.force_false);
+
+            auto undecided=SmtSolverTestSupport::domain_theory_implication(
+                implication_solver,ispace,domain,(eix==0.5_x));
+            ARIADNE_TEST_ASSERT(not undecided.force_true);
+            ARIADNE_TEST_ASSERT(not undecided.force_false);
         }
 
         std::vector<Bool> theory_flags({false,true});
@@ -1977,6 +2013,34 @@ class TestSmtSolver {
                 solve_result.is_epsilon_sat() || solve_result.is_unknown());
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] epsilon-safe theory implications propagate with clause reasons" << std::endl;
+            ContinuousPredicate formula=(ex>2)||(ex<-2);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().domain_theory_implication_clauses,2u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().domain_theory_propagations,2u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
+        }
+
+        {
+            std::cout << "[smt-dpll] epsilon relaxation prevents unsound strict propagation" << std::endl;
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),(ex>0));
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().domain_theory_implication_clauses,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().domain_theory_propagations,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
         }
 
         {

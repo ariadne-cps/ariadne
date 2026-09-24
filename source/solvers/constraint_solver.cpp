@@ -355,12 +355,21 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMu
 
 Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
+    return this->monotone_reduce(
+        domain,function,function.derivative(variable),bounds,variable);
+}
+
+Bool ConstraintSolver::monotone_reduce(
+    UpperBoxType& domain,
+    const ValidatedScalarMultivariateFunction& function,
+    const ValidatedScalarMultivariateFunction& derivative,
+    const ExactIntervalType& bounds,
+    SizeType variable) const
+{
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("domain="<<domain);
     CONCLOG_PRINTLN("function="<<function);
     CONCLOG_PRINTLN("bounds="<<bounds);
-
-    ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
     FloatDP splitpoint(dp);
     UpperIntervalType lower=domain[variable];

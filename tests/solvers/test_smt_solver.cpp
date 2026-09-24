@@ -475,6 +475,10 @@ class TestSmtSolver {
         UpperBoxType monotone_sine_domain({UpperIntervalType(ExactIntervalType(3,4))});
         UpperBoxType nonmonotone_sine_domain({UpperIntervalType(ExactIntervalType(0,4))});
 
+        auto positive_derivative=(exp(x[0])+x[0]).derivative(0u);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::monotone_coordinate_is_safe(
+                positive_derivative,positive_domain));
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
                 exp(x[0])+x[0],positive_domain,0u));

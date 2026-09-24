@@ -121,6 +121,10 @@ class ConstraintSolver
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
     Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
+    Bool monotone_reduce(UpperBoxType& bx,
+                         const ValidatedScalarMultivariateFunction& function,
+                         const ValidatedScalarMultivariateFunction& derivative,
+                         const ExactIntervalType&, SizeType j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<UpperBoxType,UpperBoxType> split(const UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;

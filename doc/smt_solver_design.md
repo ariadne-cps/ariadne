@@ -45,7 +45,12 @@ The solver roadmap therefore prioritizes, in this order:
    regressions exercise both validated-constraint and normalized-theory paths,
    including effective contraction and validated nonmonotone-coordinate skipping;
 3. efficient handling of large shared expression DAGs produced by feed-forward
-   networks and their derivatives;
+   networks and their derivatives. As a first step, normalized SMT theory literals
+   cache their validated coordinate derivatives at compilation time; the monotone
+   contractor accepts an already compiled derivative so gating and Newton reuse
+   the same object instead of rebuilding it per box. ValidatedConstraint inputs
+   likewise compute each coordinate derivative once per monotone sweep rather
+   than once for gating and again inside the contractor;
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
 6. elimination of algorithmic UNKNOWN outcomes on the declared bounded QF_NRA

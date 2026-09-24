@@ -349,9 +349,11 @@ class TestConstraintSolver
 
         UpperBoxType smooth_domain=ExactBoxType{{0.0_x,2.0_x}};
         UpperBoxType smooth_original=smooth_domain;
+        auto smooth_function=exp(x[0])+x[0];
         Bool smooth_empty=propagator.monotone_reduce(
             smooth_domain,
-            exp(x[0])+x[0],
+            smooth_function,
+            smooth_function.derivative(0u),
             ExactIntervalType(3.0_x,3.0_x),
             0u);
         ARIADNE_TEST_ASSERT(not smooth_empty);

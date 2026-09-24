@@ -254,6 +254,10 @@ SensitivitySplitSelection sensitivity_split_selection(
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
 Bool monotone_coordinate_is_safe(
+    ValidatedScalarMultivariateFunction const& derivative,
+    UpperBoxType const& domain);
+
+Bool monotone_coordinate_is_safe(
     ValidatedScalarMultivariateFunction const& function,
     UpperBoxType const& domain,
     SizeType variable);
@@ -461,6 +465,7 @@ class SmtSolver {
 
     struct CompiledTheoryLiteral {
         ValidatedScalarMultivariateFunction function;
+        std::vector<ValidatedScalarMultivariateFunction> derivatives;
         SmtTheoryPrimitiveRelation relation;
     };
     using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;

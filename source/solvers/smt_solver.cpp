@@ -347,6 +347,20 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                UpperBoxType before_monotone=domain;
+                ++statistics.monotone_rounds;
+                for(SizeType i=0; i!=constraints.size(); ++i) {
+                    if(contractor.monotone_reduce(
+                            domain,
+                            constraints[i].function(),
+                            this->_original_bounds(constraints[i]))) {
+                        return true;
+                    }
+                }
+                if(not same_box(domain,before_monotone)) {
+                    ++statistics.monotone_effective;
+                    continue;
+                }
                 return false;
             }
             continue;
@@ -441,6 +455,20 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                UpperBoxType before_monotone=domain;
+                ++statistics.monotone_rounds;
+                for(auto const& literal:literals) {
+                    if(contractor.monotone_reduce(
+                            domain,
+                            literal.function,
+                            this->_original_bounds(literal.relation))) {
+                        return true;
+                    }
+                }
+                if(not same_box(domain,before_monotone)) {
+                    ++statistics.monotone_effective;
+                    continue;
+                }
                 return false;
             }
             continue;
@@ -639,6 +667,8 @@ SmtSolver::_accumulate_box_processing_statistics(
             processing.reductions.hull_effective,
             processing.reductions.shaving_rounds,
             processing.reductions.shaving_effective,
+            processing.reductions.monotone_rounds,
+            processing.reductions.monotone_effective,
             processing.sensitivity_guided_split,
             processing.sensitivity_overrode_geometric_split,
             processing.epsilon_box_certification,
@@ -965,6 +995,8 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
+    target.monotone_reduction_rounds+=source.monotone_reduction_rounds;
+    target.monotone_effective_reductions+=source.monotone_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
     target.sensitivity_overrides_geometric_splits+=source.sensitivity_overrides_geometric_splits;
     target.epsilon_box_certifications+=source.epsilon_box_certifications;
@@ -1368,6 +1400,8 @@ Void accumulate_box_processing_statistics(
     statistics.hull_effective_reductions+=input.hull_effective;
     statistics.shaving_reduction_rounds+=input.shaving_rounds;
     statistics.shaving_effective_reductions+=input.shaving_effective;
+    statistics.monotone_reduction_rounds+=input.monotone_rounds;
+    statistics.monotone_effective_reductions+=input.monotone_effective;
 
     if(input.sensitivity_guided_split) {
         ++statistics.sensitivity_guided_splits;

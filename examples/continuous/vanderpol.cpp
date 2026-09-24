@@ -86,21 +86,14 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Instrument actual sweeping decisions over the whole integration.
-    // This measures where each absolute-threshold policy transfers symbolic
-    // coefficients into the uniform remainder.
+    // Reverse selective-sweeping test suggested by the full-run profile.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_sweep_profile =
-        [&](String const& policy, ExactDouble threshold) {
-            auto profile=std::make_shared<SweepDegreeProfile>();
-            ProfiledThresholdSweeperDP profiled_sweeper(
-                DoublePrecision(),threshold,profile);
-
+    auto run_reverse_selective_probe =
+        [&](String const& policy, Sweeper<FloatDP> const& probe_sweeper) {
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
-                StepMaximumError(loose_tolerance),
-                Sweeper<FloatDP>(profiled_sweeper),
+                StepMaximumError(loose_tolerance),probe_sweeper,
                 lipschitz_tolerance=0.5_x,
                 minimum_spacial_order=5,minimum_temporal_order=5,
                 maximum_spacial_order=5,maximum_temporal_order=5);
@@ -127,33 +120,31 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorSweepProfileBenchmark]"
+            std::cerr << "[IntegratorReverseSelectiveBenchmark]"
                       << " policy=" << policy
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
-
-            for(std::size_t degree=0u;
-                degree!=SweepDegreeProfile::degree_slots; ++degree) {
-                if(profile->discarded_count[degree]==0u
-                    && profile->retained_count[degree]==0u) {
-                    continue;
-                }
-                std::cerr << "[SweepDegreeProfile]"
-                          << " policy=" << policy
-                          << " degree=" << degree
-                          << " discarded_count="
-                          << profile->discarded_count[degree]
-                          << " retained_count="
-                          << profile->retained_count[degree]
-                          << " discarded_abs_mass="
-                          << profile->discarded_abs_mass[degree]
-                          << std::endl;
-            }
         };
 
-    run_sweep_profile("absolute_1e-12",1e-12_x);
-    run_sweep_profile("absolute_1e-14",1e-14_x);
+    run_reverse_selective_probe(
+        "absolute_1e-12",
+        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
+    run_reverse_selective_probe(
+        "absolute_1e-14",
+        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
+    run_reverse_selective_probe(
+        "tight_below_degree7",
+        Sweeper<FloatDP>(DegreeThresholdSweeper<FloatDP>(
+            DoublePrecision(),7u,
+            FloatDP(1e-14_x,DoublePrecision()),
+            FloatDP(1e-12_x,DoublePrecision()))));
+    run_reverse_selective_probe(
+        "tight_below_degree10",
+        Sweeper<FloatDP>(DegreeThresholdSweeper<FloatDP>(
+            DoublePrecision(),10u,
+            FloatDP(1e-14_x,DoublePrecision()),
+            FloatDP(1e-12_x,DoublePrecision()))));
 
 }

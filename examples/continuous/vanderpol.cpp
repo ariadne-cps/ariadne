@@ -75,24 +75,60 @@ void ariadne_main()
                       << std::endl;
         };
 
-    // Focused carried-state error diagnostic at and below the observed
-    // Gronwall error minimum.  Only the new integrator is run here because the
-    // purpose is to locate where its per-step representation error is injected.
+    // Spatial-order plateau diagnostic.  Keep time horizon, max step,
+    // temporal order, sweeper and loose local tolerance fixed; vary only the
+    // spatial order of the flow/state representation.
     const ExactDouble loose_tolerance=1e-2_x;
+    const ExactDouble plateau_step=0.0025_x;
 
-    auto run_carried_error_probe = [&](ExactDouble max_step) {
+    auto run_spatial_order_probe = [&](DegreeType spatial_order) {
         PreconditionedGradedTaylorSeriesIntegrator gronwall(
             StepMaximumError(loose_tolerance),sweeper,
             lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=5,minimum_temporal_order=5,
-            maximum_spacial_order=5,maximum_temporal_order=5);
+            minimum_spacial_order=spatial_order,
+            minimum_temporal_order=5,
+            maximum_spacial_order=spatial_order,
+            maximum_temporal_order=5);
         gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
         gronwall.set_diagnostics(false);
-        run_long_benchmark("GRONWALL",gronwall,loose_tolerance,max_step);
+
+        VectorFieldEvolver evolver(dynamics,gronwall);
+        configure_evolver(evolver,plateau_step);
+
+        Stopwatch<Milliseconds> stopwatch;
+        auto orbit=evolver.orbit(
+            initial_set,Real(5.00_dec),Semantics::UPPER);
+        stopwatch.click();
+
+        ARIADNE_ASSERT(!orbit.final().empty());
+        auto achieved_error=
+            orbit.final()[0u].state_function().get(0u).error();
+        for(auto const& enclosure : orbit.final()) {
+            for(SizeType i=0u;
+                i!=enclosure.state_function().result_size(); ++i) {
+                achieved_error=max(
+                    achieved_error,
+                    enclosure.state_function().get(i).error());
+            }
+        }
+
+        std::cerr << "[IntegratorSpatialOrderBenchmark]"
+                  << " method=GRONWALL"
+                  << " spatial_order=" << spatial_order
+                  << " temporal_order=5"
+                  << " tolerance=" << loose_tolerance
+                  << " max_step=" << plateau_step
+                  << " horizon=5.0"
+                  << " elapsed_seconds=" << stopwatch.elapsed_seconds()
+                  << " achieved_final_error=" << achieved_error
+                  << " reach_sets=" << orbit.reach().size()
+                  << " intermediate_sets=" << orbit.intermediate().size()
+                  << " final_sets=" << orbit.final().size()
+                  << std::endl;
     };
 
-    run_carried_error_probe(0.01_x);
-    run_carried_error_probe(0.005_x);
-    run_carried_error_probe(0.0025_x);
+    run_spatial_order_probe(4u);
+    run_spatial_order_probe(5u);
+    run_spatial_order_probe(6u);
 
 }

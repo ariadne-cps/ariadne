@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `1dc9e67186b43da964ba638dcfcd226691a4dcf4`
+**Latest analysed investigation HEAD:** `ca5949503e37614150cab4e4e7f4cb645fcdf6df`
 
 ## Purpose of this document
 
@@ -1986,6 +1986,38 @@ clean_composition_errors=...
 ```
 
 This diagnostic is not used for certification or returned state; it is an attribution experiment only.
+
+---
+
+
+### 9.49 Composition probe: new composition error is tiny; accumulated incoming remainder dominates (2026-09-24)
+
+The clean-composition experiment answers the attribution question.
+
+At h=0.01, step 500:
+- state input error: 2.055e-6 / 1.959e-7;
+- actual composed error: 2.071e-6 / 1.948e-7;
+- clean composition error (same polynomial parts, incoming uniform errors clobbered): 1.30e-10 / 1.27e-10.
+
+At h=0.005, the same pattern persists. For example at the end of the run (global step 1500):
+- state input error: 2.762e-6 / 2.627e-7;
+- actual composition error: 2.773e-6 / 2.620e-7;
+- clean composition error: 1.12e-10 / 1.23e-10.
+
+At h=0.0025, final global step 3500:
+- state input error: 4.345e-6 / 4.137e-7;
+- actual composition error: 4.354e-6 / 4.131e-7;
+- clean composition error: 8.92e-11 / 1.13e-10.
+
+Thus the repeated composition is **not creating O(1e-6) fresh truncation error at each step**. Its newly generated error, when incoming uniform remainders are removed, stays around O(1e-10). The dominant O(1e-6) quantity is the already-carried uniform remainder.
+
+The small-step plateau/upturn is therefore mainly the result of repeatedly propagating a finite-order carried-state remainder through many steps, not a catastrophic loss of precision in one composition operation. This is consistent with the expected existence of a spatial-order floor: at fixed spatial degree, the per-step map becomes more accurate with h, but the finite-order state representation still has a non-zero truncation/remainder scale that is transported over T/h steps.
+
+This changes the interpretation of objective 1. We do **not** require the error to tend to zero for fixed spatial order. We require the plateau to occur at the natural finite-order floor and to move downward when the spatial order is increased, rather than being dominated by an avoidable implementation artefact.
+
+A direct spatial-order test is therefore the next diagnostic. At fixed horizon [0,5], fixed max_step=0.0025, fixed temporal order 5 and fixed sweeper, run the Gronwall integrator with spatial orders 4, 5 and 6. If the final error decreases materially with spatial order, the observed small-h floor is primarily the expected representation-order floor. If it barely moves, a carried-state representation issue remains.
+
+Temporary carried-state attribution logging is removed before this benchmark so its timing is not polluted.
 
 ---
 

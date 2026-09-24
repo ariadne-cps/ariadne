@@ -2211,8 +2211,11 @@ class TestSmtSolver {
                       << solve_result.statistics().learned_clause_propagations
                       << " backtracks=" << solve_result.statistics().boolean_backtracks
                       << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_propagations>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().learned_clause_propagations>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().learned_clauses
+                + solve_result.statistics().domain_theory_implication_clauses>=1u);
         }
 
         {

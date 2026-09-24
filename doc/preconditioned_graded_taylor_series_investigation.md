@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `da737ad829292e1e9769d1bc07ce11034a99d829`
+**Latest analysed investigation HEAD:** `6661355935e67b47f2ff84e3816976d23f47d4ac`
 
 ## Purpose of this document
 
@@ -1524,6 +1524,23 @@ direct Differential defect path:        0.588 s
 roughly a 4.2x reduction for this subphase. The direct path itself still includes `make_taylor_function_model`; the expensive `restriction` is absent.
 
 The next production experiment uses `direct_defect_range` as the Gronwall forcing bound while retaining the old recurrence-field patch solely for diagnostics/profiling comparison. This deliberately isolates the semantic/step-size effect before deleting the old path. If accepted-step counts improve or remain stable and no enclosure failures appear, the old recurrence-field `flow_function` can then be removed entirely, recovering its ~2.5 s/700-call cost.
+
+---
+
+
+### 9.34 Rigour caveat: do not use the direct Differential defect in production yet (2026-09-24)
+
+The direct Differential-level defect path is computationally promising, but the previous commit switched it into production too early. A close inspection of the representations shows that numerical agreement and use of interval arithmetic are not by themselves a proof that the resulting range encloses the full ODE defect required by the Gronwall argument.
+
+There are two distinct issues to settle:
+
+1. `final_f` is a finite graded/Differential representation of `g(P)`. We must prove that all terms omitted by the spatial/temporal truncation are either absent for the relevant vector field or are enclosed by an explicit remainder. The generic Taylor-model composition has its own truncation/error machinery; a coefficient-level recurrence cannot silently assume the omitted terms are zero.
+
+2. The existing Taylor-model diagnostic `derivative(centre_polynomial,...)` is not a suitable proof oracle for this question: `TaylorModel::differentiate` calls `clobber()`, discarding the model's uniform error before differentiating. Therefore the close agreement of `direct_differential_defect_range` with the patch-based defect is useful diagnostically but does not constitute a proof of rigour.
+
+For these reasons the production Gronwall forcing range is reverted to the previously used patch-based path. The direct Differential path remains diagnostic only.
+
+The next rigorous route should construct the centre polynomial and its derivative directly from the same validated coefficient representation, and attach an explicit enclosure for the omitted tail of `g(P)`. Only after that remainder is accounted for can the direct coefficient-level defect replace the generic/patch path while preserving a validated Gronwall certificate.
 
 ---
 

@@ -2095,7 +2095,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 definitely(subset(polynomial_range,certification_box));
 
             if(polynomial_in_certification_box) {
-                auto defect_ranges=centre_result.direct_defect_range;
+                auto defect_ranges=defect.range();
                 auto initial_defect_ranges=initial_defect.range();
                 range_stopwatch.click();
                 production_range_seconds+=range_stopwatch.elapsed_seconds();

@@ -84,7 +84,12 @@ carried_expansion_snapshot(ValidatedVectorMultivariateFunctionPatch const& mappi
 {
     CarriedExpansionSnapshot profile;
     for(SizeType component=0u; component!=mapping.result_size(); ++component) {
-        auto const& expansion=mapping.get(component).expansion();
+        auto const& generic_component=mapping.get(component);
+        auto const* taylor_component=
+            dynamic_cast<ValidatedScalarMultivariateTaylorFunctionModelDP const*>(
+                generic_component.raw_pointer());
+        ARIADNE_ASSERT(taylor_component!=nullptr);
+        auto const& expansion=taylor_component->expansion();
         for(auto const& term : expansion) {
             auto degree=static_cast<std::size_t>(term.index().degree());
             if(degree>=CarriedExpansionSnapshot::degree_slots) {

@@ -2189,7 +2189,7 @@ class TestSmtSolver {
         {
             std::cout << "[smt-dpll] pruning deactivates learned clauses that are later skipped" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
-                0.125_x,std::numeric_limits<SizeType>::max(),1u));
+                0.125_x,std::numeric_limits<SizeType>::max(),0u));
             ContinuousPredicate a=(ex>=-0.8_x);
             ContinuousPredicate b=(ex>=-0.4_x);
             ContinuousPredicate c=(ex>=0);

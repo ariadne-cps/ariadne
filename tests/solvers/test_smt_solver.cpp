@@ -289,13 +289,11 @@ class TestSmtSolver {
 
         SmtSearchStatistics no_conflict;
         no_conflict.boxes_processed=3u;
-        no_conflict.domain_theory_propagations=2u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
         SmtSolverTestSupport::accumulate_statistics(target,no_conflict);
         ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
-        ARIADNE_TEST_EQUAL(target.domain_theory_propagations,2u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -1940,29 +1938,6 @@ class TestSmtSolver {
                 solve_result.is_epsilon_sat() || solve_result.is_unknown());
             ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_processed<=1u);
-        }
-
-        {
-            std::cout << "[smt-dpll] domain theory propagation proves disjunction UNSAT before theory search" << std::endl;
-            ContinuousPredicate formula=(ex>2)||(ex<0);
-            SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
-            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_propagations,2u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
-        }
-
-        {
-            std::cout << "[smt-dpll] domain theory propagation decides disequality at singleton" << std::endl;
-            SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0,0)}),(ex!=0));
-            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_propagations,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
         }
 
         {

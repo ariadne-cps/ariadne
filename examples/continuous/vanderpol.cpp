@@ -86,12 +86,16 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Reverse selective-sweeping test suggested by the full-run profile.
+    // Intermediate absolute-threshold control benchmark.
+    // This tests whether the degree-selective policy actually improves the
+    // accuracy/cost frontier, or merely chooses another point on the same
+    // scalar-threshold tradeoff.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_reverse_selective_probe =
-        [&](String const& policy, Sweeper<FloatDP> const& probe_sweeper) {
+    auto run_absolute_control_probe =
+        [&](String const& policy, double threshold) {
+            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
                 StepMaximumError(loose_tolerance),probe_sweeper,
                 lipschitz_tolerance=0.5_x,
@@ -120,7 +124,7 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorReverseSelectiveBenchmark]"
+            std::cerr << "[IntegratorAbsoluteControlBenchmark]"
                       << " policy=" << policy
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
@@ -128,23 +132,9 @@ void ariadne_main()
                       << std::endl;
         };
 
-    run_reverse_selective_probe(
-        "absolute_1e-12",
-        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
-    run_reverse_selective_probe(
-        "absolute_1e-14",
-        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
-    run_reverse_selective_probe(
-        "tight_below_degree7",
-        Sweeper<FloatDP>(DegreeThresholdSweeper<FloatDP>(
-            DoublePrecision(),7u,
-            FloatDP(1e-14_x,DoublePrecision()),
-            FloatDP(1e-12_x,DoublePrecision()))));
-    run_reverse_selective_probe(
-        "tight_below_degree10",
-        Sweeper<FloatDP>(DegreeThresholdSweeper<FloatDP>(
-            DoublePrecision(),10u,
-            FloatDP(1e-14_x,DoublePrecision()),
-            FloatDP(1e-12_x,DoublePrecision()))));
+    run_absolute_control_probe("absolute_1e-12",1e-12);
+    run_absolute_control_probe("absolute_1e-13",1e-13);
+    run_absolute_control_probe("absolute_3e-14",3e-14);
+    run_absolute_control_probe("absolute_1e-14",1e-14);
 
 }

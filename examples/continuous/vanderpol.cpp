@@ -91,7 +91,13 @@ void ariadne_main()
                       << std::endl;
         };
 
-    run_sweep_semantics_probe("absolute_3e-14_incremental",3e-14,true);
-    run_sweep_semantics_probe("absolute_3e-14_final",3e-14,false);
+    // Map the final-sweep accuracy/runtime frontier. The 3e-14 point has
+    // already shown a substantial accuracy gain over incremental sweeping;
+    // these additional cutoffs test whether that gain can be traded for a
+    // looser threshold and a better Pareto point.
+    run_sweep_semantics_probe("final_1e-12",1e-12,false);
+    run_sweep_semantics_probe("final_3e-13",3e-13,false);
+    run_sweep_semantics_probe("final_1e-13",1e-13,false);
+    run_sweep_semantics_probe("final_3e-14",3e-14,false);
 
 }

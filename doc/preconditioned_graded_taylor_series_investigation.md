@@ -2511,3 +2511,53 @@ Output marker:
 This test answers whether the existing incremental cutoff is merely a performance
 engineering choice or whether delaying cutoff until complete multi-index aggregation
 materially changes the accuracy/runtime frontier.
+
+
+### 9.68 Final-sweep cutoff frontier (2026-09-24)
+
+The direct semantic comparison at absolute cutoff `3e-14` gave:
+
+```
+incremental sweep: 49.1471 s   final error 1.7496349409095074e-7
+final sweep:       56.2521 s   final error 8.5378288508794491e-8
+```
+
+Thus delaying the cutoff until all contributions to each product multi-index have been
+aggregated reduces the final error by about 51% at the same threshold, at a runtime cost
+of about 14%.
+
+This confirms that the placement of the sweep is not merely an implementation detail:
+the existing incremental sweep loses polynomial information before later contributions to
+the same multi-index arrive. The enclosure remains rigorous, but the cutoff is applied to
+partial coefficients rather than to the fully accumulated product coefficient.
+
+The next experiment maps the accuracy/runtime frontier of final-sweep multiplication at:
+
+```
+1e-12
+3e-13
+1e-13
+3e-14
+```
+
+All runs use `incremental_sweep=false` and early discard remains disabled. The goal is
+to determine whether final-sweep semantics allow a looser cutoff to match or improve the
+accuracy of the current incremental `3e-14` point while reducing runtime.
+
+The decisive comparison is against the established incremental frontier, especially:
+
+```
+incremental 1e-12  ~32 s   3.888e-6
+incremental 1e-13  ~43 s   5.026e-7
+incremental 3e-14  ~49 s   1.750e-7
+incremental 1e-14  ~57 s   6.674e-8
+```
+
+If a final-sweep point lies below and to the left of one of these points, then the new
+sweep semantics improve the Pareto frontier rather than merely trading time for accuracy.
+
+Output marker remains:
+
+```
+[IntegratorSweepSemanticsBenchmark]
+```

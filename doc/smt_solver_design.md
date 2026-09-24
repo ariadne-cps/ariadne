@@ -27,7 +27,11 @@ The solver roadmap therefore prioritizes, in this order:
    monotonicity/Newton-style contraction where applicable;
    The SMT ICP fixed point now invokes Ariadne's validated
    `ConstraintSolver::monotone_reduce` after hull reduction and coordinate
-   shaving stall, and records monotone rounds/effective contractions separately;
+   shaving stall, and records monotone rounds/effective contractions separately.
+   Because the contractor divides by a derivative interval, it is invoked on a
+   coordinate only when validated derivative range analysis proves that interval
+   strictly positive or strictly negative on the current box; coordinates whose
+   derivative interval contains zero are skipped;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives;
 4. robust support for polynomial and transcendental activations and dynamics;

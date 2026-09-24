@@ -351,6 +351,10 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.monotone_rounds;
                 for(SizeType i=0; i!=constraints.size(); ++i) {
                     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
+                                constraints[i].function(),domain,variable)) {
+                            continue;
+                        }
                         if(contractor.monotone_reduce(
                                 domain,
                                 constraints[i].function(),
@@ -462,6 +466,10 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.monotone_rounds;
                 for(auto const& literal:literals) {
                     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
+                                literal.function,domain,variable)) {
+                            continue;
+                        }
                         if(contractor.monotone_reduce(
                                 domain,
                                 literal.function,
@@ -1115,6 +1123,16 @@ SensitivitySplitSelection sensitivity_split_selection(
         selection.second.first,
         selection.second.second
     };
+}
+
+Bool monotone_coordinate_is_safe(
+    ValidatedScalarMultivariateFunction const& function,
+    UpperBoxType const& domain,
+    SizeType variable)
+{
+    UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
+    return definitely(derivative_image.lower_bound()>0)
+        || definitely(derivative_image.upper_bound()<0);
 }
 
 SearchOutcome SearchOutcome::exhausted()

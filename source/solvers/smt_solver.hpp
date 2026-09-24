@@ -248,6 +248,11 @@ SensitivitySplitSelection sensitivity_split_selection(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
+Bool monotone_coordinate_is_safe(
+    ValidatedScalarMultivariateFunction const& function,
+    UpperBoxType const& domain,
+    SizeType variable);
+
 struct SearchOutcome {
     std::optional<UpperBoxType> witness;
     std::optional<SizeType> backjump_level;

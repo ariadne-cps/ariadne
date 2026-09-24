@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `6661355935e67b47f2ff84e3816976d23f47d4ac`
+**Latest analysed investigation HEAD:** `70d5de324bb8556b3e6bb1294b77c5bc9dd883fb`
 
 ## Purpose of this document
 
@@ -1541,6 +1541,28 @@ There are two distinct issues to settle:
 For these reasons the production Gronwall forcing range is reverted to the previously used patch-based path. The direct Differential path remains diagnostic only.
 
 The next rigorous route should construct the centre polynomial and its derivative directly from the same validated coefficient representation, and attach an explicit enclosure for the omitted tail of `g(P)`. Only after that remainder is accounted for can the direct coefficient-level defect replace the generic/patch path while preserving a validated Gronwall certificate.
+
+---
+
+
+### 9.35 Rigorous polynomial-field residual experiment (2026-09-24)
+
+The unresolved issue in the cheap Differential-level residual is truncation of `g(P)`. For polynomial vector fields this can be removed exactly rather than estimated.
+
+A Procedure degree analyser now accepts only operations that preserve polynomiality:
+constants/variables, add/subtract, multiply, division by a degree-zero quantity, sign/halve, square, and non-negative integer power. Any transcendental, reciprocal of a non-constant, root, min/max, etc. rejects the exact-polynomial path.
+
+If the vector field has algebraic degree `q` and the retained polynomial `P` has Differential degree `d`, the Procedure is re-evaluated on a copy of `P` padded to degree `q*d`. Differential multiplication can then no longer discard any polynomial composition term. The defect
+
+```
+dP/dt - g(P)
+```
+
+is formed at that full degree, converted once on the correct widened time domain, and evaluated on the normalised forward half-box. All coefficients remain validated intervals.
+
+For Van der Pol the Procedure is cubic, so with the current centre polynomial degree 10 the exact composition degree is 30. This path is diagnostic only until its output and cost are measured.
+
+This is materially different from the previous cheap truncated Differential path: for an accepted polynomial Procedure there is no unrepresented algebraic tail of `g(P)`. The remaining rigour question is then only whether the polynomial candidate represented by `dphi` is exactly the candidate around which the final Taylor patch/remainder certificate is constructed; its conversion/sweeping error is already carried by the output Taylor model and must not be differentiated as though it were a smooth error function.
 
 ---
 

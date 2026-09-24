@@ -940,6 +940,56 @@ Void graded_flow_iterate_affine_procedure(
 }
 
 
+
+Bool polynomial_procedure_degree(
+        const Vector<ValidatedProcedure>& p,
+        DegreeType& result_degree)
+{
+    std::vector<DegreeType> degrees(p._instructions.size(),0u);
+    for(SizeType j=0u; j!=p._instructions.size(); ++j) {
+        ProcedureInstruction const& ins=p._instructions[j];
+        switch(ins.op().code()) {
+            case OperatorCode::CNST:
+                degrees[j]=0u;
+                break;
+            case OperatorCode::VAR:
+                degrees[j]=1u;
+                break;
+            case OperatorCode::ADD:
+            case OperatorCode::SUB:
+                degrees[j]=max(degrees[ins.arg1()],degrees[ins.arg2()]);
+                break;
+            case OperatorCode::MUL:
+                degrees[j]=degrees[ins.arg1()]+degrees[ins.arg2()];
+                break;
+            case OperatorCode::DIV:
+                if(degrees[ins.arg2()]!=0u) { return false; }
+                degrees[j]=degrees[ins.arg1()];
+                break;
+            case OperatorCode::POS:
+            case OperatorCode::NEG:
+            case OperatorCode::HLF:
+                degrees[j]=degrees[ins.arg()];
+                break;
+            case OperatorCode::SQR:
+                degrees[j]=2u*degrees[ins.arg()];
+                break;
+            case OperatorCode::POW:
+                if(ins.num()<0) { return false; }
+                degrees[j]=static_cast<DegreeType>(
+                    static_cast<Nat>(ins.num())*degrees[ins.arg()]);
+                break;
+            default:
+                return false;
+        }
+    }
+    result_degree=0u;
+    for(SizeType i=0u; i!=p.result_size(); ++i) {
+        result_degree=max(result_degree,degrees[p._results[i]]);
+    }
+    return true;
+}
+
 struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
     FlowStepTaylorModelType recurrence_field;
@@ -948,6 +998,10 @@ struct CentrePolynomialRecurrenceResult {
     double flow_function_seconds;
     Vector<FloatDPBounds> direct_defect_range;
     double direct_defect_seconds;
+    Bool exact_polynomial_available;
+    DegreeType exact_polynomial_degree;
+    Vector<FloatDPBounds> exact_polynomial_defect_range;
+    double exact_polynomial_defect_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -1034,13 +1088,62 @@ graded_series_centre_polynomial_step(
     }
     direct_defect_stopwatch.click();
 
+    // For polynomial vector fields we can remove the unresolved truncation
+    // question entirely: determine the algebraic degree of the Procedure,
+    // pad P with structural zero coefficients to the full composition degree,
+    // and evaluate the Procedure with Differential arithmetic at that degree.
+    // Since only polynomial operations are admitted by the degree analyser,
+    // no composition terms are then truncated.
+    Stopwatch<Microseconds> exact_polynomial_defect_stopwatch;
+    DegreeType vector_field_degree=0u;
+    Bool exact_polynomial_available=
+        polynomial_procedure_degree(p,vector_field_degree);
+    DegreeType exact_polynomial_degree=0u;
+    Vector<FloatDPBounds> exact_polynomial_defect_range(
+        n,FloatDPBounds(0,dp));
+    if(exact_polynomial_available) {
+        exact_polynomial_degree=static_cast<DegreeType>(
+            vector_field_degree*dphi.degree());
+        Vector<ValidatedDifferential> padded_dphi(
+            n,[&](SizeType i) {
+                return ValidatedDifferential(
+                    dphi[i].expansion(),exact_polynomial_degree);
+            });
+        Vector<ValidatedDifferential> exact_field=
+            evaluate(p,padded_dphi);
+
+        Vector<ValidatedDifferential> derivative_dphi_exact=
+            derivative(dphi,n);
+        Vector<ValidatedDifferential> padded_derivative(
+            n,[&](SizeType i) {
+                return ValidatedDifferential(
+                    derivative_dphi_exact[i].expansion(),
+                    exact_polynomial_degree);
+            });
+        Vector<ValidatedDifferential> exact_defect=
+            padded_derivative-exact_field;
+
+        FlowStepTaylorModelType exact_wide_defect=
+            make_taylor_function_model(
+                exact_defect,join(domx,widt,doma),sweeper);
+        for(SizeType i=0u; i!=n; ++i) {
+            exact_polynomial_defect_range[i]=evaluate(
+                exact_wide_defect.model(i),forward_half_box);
+        }
+    }
+    exact_polynomial_defect_stopwatch.click();
+
     return CentrePolynomialRecurrenceResult{
         std::move(polynomial),std::move(recurrence_field),
         recurrence_residual_stopwatch.elapsed_seconds(),
         recurrence_differential_stopwatch.elapsed_seconds(),
         recurrence_flow_function_stopwatch.elapsed_seconds(),
         std::move(direct_defect_range),
-        direct_defect_stopwatch.elapsed_seconds()};
+        direct_defect_stopwatch.elapsed_seconds(),
+        exact_polynomial_available,
+        exact_polynomial_degree,
+        std::move(exact_polynomial_defect_range),
+        exact_polynomial_defect_stopwatch.elapsed_seconds()};
 }
 
 
@@ -1947,11 +2050,14 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             static double recurrence_differential_seconds=0.0;
             static double recurrence_flow_function_seconds=0.0;
             static double direct_defect_seconds=0.0;
+            static double exact_polynomial_defect_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
             recurrence_differential_seconds+=centre_result.differential_seconds;
             recurrence_flow_function_seconds+=centre_result.flow_function_seconds;
             direct_defect_seconds+=centre_result.direct_defect_seconds;
+            exact_polynomial_defect_seconds+=
+                centre_result.exact_polynomial_defect_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
@@ -1960,6 +2066,14 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " flow_function_seconds=" << recurrence_flow_function_seconds
                           << " direct_defect_seconds=" << direct_defect_seconds
                           << " direct_defect_range=" << centre_result.direct_defect_range
+                          << " exact_polynomial_available="
+                          << centre_result.exact_polynomial_available
+                          << " exact_polynomial_degree="
+                          << centre_result.exact_polynomial_degree
+                          << " exact_polynomial_defect_seconds="
+                          << exact_polynomial_defect_seconds
+                          << " exact_polynomial_defect_range="
+                          << centre_result.exact_polynomial_defect_range
                           << " field_range=" << recurrence_field.range()
                           << std::endl;
             }
@@ -2071,6 +2185,12 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " recurrence_defect_range=" << defect.range()
                           << " direct_differential_defect_range="
                           << centre_result.direct_defect_range
+                          << " exact_polynomial_available="
+                          << centre_result.exact_polynomial_available
+                          << " exact_polynomial_degree="
+                          << centre_result.exact_polynomial_degree
+                          << " exact_polynomial_defect_range="
+                          << centre_result.exact_polynomial_defect_range
                           << " generic_field_range=" << generic_field.range()
                           << " recurrence_field_range=" << recurrence_field.range()
                           << " initial_defect_range=" << initial_defect.range()

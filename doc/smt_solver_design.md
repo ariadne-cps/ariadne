@@ -46,11 +46,14 @@ The solver roadmap therefore prioritizes, in this order:
    including effective contraction and validated nonmonotone-coordinate skipping;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives. As a first step, normalized SMT theory literals
-   cache their validated coordinate derivatives at compilation time; the monotone
+   cache validated coordinate derivatives at compilation time when those
+   derivatives exist. Derivative entries are optional so non-smooth expressions
+   such as `max` and `min` remain supported by the normal ICP path and merely
+   skip monotone/Newton contraction on unavailable coordinates. The monotone
    contractor accepts an already compiled derivative so gating and Newton reuse
    the same object instead of rebuilding it per box. ValidatedConstraint inputs
-   likewise compute each coordinate derivative once per monotone sweep rather
-   than once for gating and again inside the contractor;
+   likewise compute each available coordinate derivative once per monotone sweep
+   rather than once for gating and again inside the contractor;
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
 6. elimination of algorithmic UNKNOWN outcomes on the declared bounded QF_NRA

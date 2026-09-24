@@ -108,6 +108,17 @@ Void set_taylor_model_product_accumulator_enabled(Bool);
 Bool taylor_model_dense_accumulator_enabled();
 Void set_taylor_model_dense_accumulator_enabled(Bool);
 
+struct TaylorModelDenseWorkspaceStats {
+    unsigned long long calls=0u;
+    unsigned long long slot_resizes=0u;
+    unsigned long long coefficient_capacity_grows=0u;
+    unsigned long long maximum_slot_count=0u;
+    unsigned long long maximum_touched_count=0u;
+};
+
+Void reset_taylor_model_dense_workspace_stats();
+TaylorModelDenseWorkspaceStats taylor_model_dense_workspace_stats();
+
 struct TaylorModelAccumulatorProfile {
     unsigned long long calls=0u;
     unsigned long long product_pairs=0u;

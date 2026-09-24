@@ -124,12 +124,21 @@ void ariadne_main()
         configure_evolver(evolver,plateau_step);
 
         configure_taylor_kernel(true);
+        reset_taylor_model_dense_workspace_stats();
         Stopwatch<Milliseconds> stopwatch;
         auto orbit=evolver.orbit(
             initial_set,Real(5.00_dec),Semantics::UPPER);
         stopwatch.click();
         reset_taylor_kernel();
         report_orbit("preconditioned_dense_3e-14",stopwatch,orbit);
+        auto const ws=taylor_model_dense_workspace_stats();
+        std::cerr << "[TaylorDenseWorkspaceProfile]"
+                  << " calls=" << ws.calls
+                  << " slot_resizes=" << ws.slot_resizes
+                  << " coefficient_capacity_grows=" << ws.coefficient_capacity_grows
+                  << " max_slot_count=" << ws.maximum_slot_count
+                  << " max_touched_count=" << ws.maximum_touched_count
+                  << std::endl;
     }
 
 }

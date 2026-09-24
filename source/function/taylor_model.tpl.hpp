@@ -1056,6 +1056,43 @@ template<class P, class F> inline Void _sma(TaylorModel<P,F>& r, const TaylorMod
 // Compute r+=x*y
 // Compute monomial-by-monomial in y
 // Avoid changing rounding mode
+template<class C> struct TaylorDenseAccumulatorWorkspace {
+    std::vector<SizeType> slot_to_touched;
+    std::vector<SizeType> touched_slots;
+    std::vector<C> touched_coefficients;
+
+    Void prepare(SizeType requested_slots, SizeType expected_occupied) {
+        const SizeType unused=std::numeric_limits<SizeType>::max();
+        if(slot_to_touched.size()<requested_slots) {
+            slot_to_touched.resize(requested_slots,unused);
+            ++g_taylor_model_dense_workspace_stats.slot_resizes;
+        }
+        touched_slots.clear();
+        touched_coefficients.clear();
+        if(touched_slots.capacity()<expected_occupied) {
+            touched_slots.reserve(expected_occupied);
+            ++g_taylor_model_dense_workspace_stats.coefficient_capacity_grows;
+        }
+        if(touched_coefficients.capacity()<expected_occupied) {
+            touched_coefficients.reserve(expected_occupied);
+        }
+        ++g_taylor_model_dense_workspace_stats.calls;
+        g_taylor_model_dense_workspace_stats.maximum_slot_count=
+            std::max(g_taylor_model_dense_workspace_stats.maximum_slot_count,
+                     static_cast<unsigned long long>(requested_slots));
+    }
+
+    Void reset_used_slots() {
+        const SizeType unused=std::numeric_limits<SizeType>::max();
+        for(SizeType slot : touched_slots) {
+            slot_to_touched[slot]=unused;
+        }
+        g_taylor_model_dense_workspace_stats.maximum_touched_count=
+            std::max(g_taylor_model_dense_workspace_stats.maximum_touched_count,
+                     static_cast<unsigned long long>(touched_slots.size()));
+    }
+};
+
 template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorModel<P,F>& x, const TaylorModel<P,F>& y)
 {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
@@ -1119,16 +1156,16 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             }
 
             const SizeType unused=std::numeric_limits<SizeType>::max();
-            std::vector<SizeType> slot_to_touched(slot_count,unused);
-            std::vector<SizeType> touched_slots;
-            std::vector<CoefficientType> touched_coefficients;
             const SizeType expected_occupied=
                 static_cast<SizeType>(std::min<unsigned long long>(
                     slot_count,
                     static_cast<unsigned long long>(
                         r.number_of_terms()+x.number_of_terms()*y.number_of_terms())));
-            touched_slots.reserve(expected_occupied);
-            touched_coefficients.reserve(expected_occupied);
+            static thread_local TaylorDenseAccumulatorWorkspace<CoefficientType> workspace;
+            workspace.prepare(slot_count,expected_occupied);
+            auto& slot_to_touched=workspace.slot_to_touched;
+            auto& touched_slots=workspace.touched_slots;
+            auto& touched_coefficients=workspace.touched_coefficients;
 
             auto rank_index=[&](MultiIndexData const& index) {
                 SizeType slot=0u;
@@ -1196,6 +1233,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             accumulated.sweep();
             r.expansion().swap(accumulated.expansion());
             r.error()=accumulated.error();
+            workspace.reset_used_slots();
         } else {
             TaylorModel<P,F> accumulated(as,r.sweeper());
             const SizeType product_terms=

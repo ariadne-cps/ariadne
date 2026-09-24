@@ -2972,3 +2972,20 @@ The next optimisation target is the remaining per-call dense-workspace overhead:
 allocated afresh in every `_ifma`. The immediate investigation should determine whether
 reusing workspace storage (or moving it to a small reusable helper object) yields a
 material gain before changing arithmetic or cutoff semantics.
+
+
+### 9.80 Reusable dense accumulator workspace (2026-09-24)
+
+The QR-preconditioned dense kernel still allocated and initialised its dense workspace
+vectors afresh for every `_ifma` call. A reusable `thread_local` workspace is now
+used instead. The slot map grows only when a larger product is encountered; touched-slot
+and coefficient vectors retain capacity between calls. At the end of each product only
+the slots actually used are reset to the unused sentinel.
+
+The arithmetic and cutoff semantics are unchanged: products still use `mul_err`,
+collisions still use `add_err`, and sweeping still happens only after complete
+coefficient aggregation.
+
+The benchmark remains a single `preconditioned_dense_3e-14` run. Lightweight workspace
+counters report total calls, slot-map growth events, touched/coefficient capacity growth
+events, maximum slot count, and maximum touched count.

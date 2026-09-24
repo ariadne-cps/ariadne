@@ -1124,10 +1124,10 @@ class TestSmtSolver {
                     exp(x[0])+x[0],
                     ValidatedNumber(3))
             });
-            SmtResult result=monotone_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(not result.is_unknown());
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,1u);
+            SmtResult solve_result=monotone_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_effective_reductions,1u);
         }
 
         {
@@ -1146,10 +1146,10 @@ class TestSmtSolver {
                     sin(x[0]),
                     ValidatedNumber(0))
             });
-            SmtResult result=monotone_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(not result.is_unknown());
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,0u);
+            SmtResult solve_result=monotone_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_effective_reductions,0u);
         }
 
         {
@@ -1197,11 +1197,11 @@ class TestSmtSolver {
                 std::numeric_limits<SizeType>::max(),
                 false,
                 true));
-            SmtResult result=monotone_solver.solve(
+            SmtResult solve_result=monotone_solver.solve(
                 mspace,ExactBoxType({ExactIntervalType(0,4)}),mliterals);
-            ARIADNE_TEST_ASSERT(not result.is_unknown());
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,0u);
+            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_effective_reductions,0u);
         }
 
         {

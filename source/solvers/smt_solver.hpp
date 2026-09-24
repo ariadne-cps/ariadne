@@ -120,7 +120,6 @@ struct SmtSearchStatistics {
     SizeType learned_clause_propagations = 0u;
     SizeType nonchronological_backjumps = 0u;
     SizeType theory_checks = 0u;
-    SizeType domain_theory_propagations = 0u;
     SizeType theory_conflicts = 0u;
     SizeType theory_learned_clauses = 0u;
     SizeType theory_learned_clause_literals = 0u;

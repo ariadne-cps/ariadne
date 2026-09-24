@@ -987,7 +987,6 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.learned_clause_propagations+=source.learned_clause_propagations;
     target.nonchronological_backjumps+=source.nonchronological_backjumps;
     target.theory_checks+=source.theory_checks;
-    target.domain_theory_propagations+=source.domain_theory_propagations;
     target.theory_conflicts+=source.theory_conflicts;
     target.theory_learned_clauses+=source.theory_learned_clauses;
     target.theory_learned_clause_literals+=source.theory_learned_clause_literals;
@@ -1373,7 +1372,6 @@ class SmtDpllSearch {
         if(_domain.is_empty()) {
             return SmtResult::unsat(_statistics);
         }
-        this->_propagate_domain_theory_facts();
         SmtSolverTestSupport::SearchOutcome outcome=this->_search_boolean();
         return SmtSolverTestSupport::finalize_search_outcome(
             outcome,_theory_unknown_seen,_statistics);
@@ -1410,24 +1408,6 @@ class SmtDpllSearch {
         assignment.decision_level=this->_decision_level();
         assignment.reason_clause=reason_clause;
         _trail.push_back(variable);
-    }
-
-    Void _propagate_domain_theory_facts()
-    {
-        for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
-            SizeType variable=_encoding.atom_variable(i);
-            auto truth=SmtSolverTestSupport::classify_theory_atom(
-                _space,_domain,_encoding.atom(i));
-            if(truth==SmtSolverTestSupport::TheoryAtomTruth::UNKNOWN) {
-                continue;
-            }
-            Int literal=static_cast<Int>(variable);
-            if(truth==SmtSolverTestSupport::TheoryAtomTruth::FALSE_VALUE) {
-                literal=-literal;
-            }
-            this->_assign_literal(literal);
-            ++_statistics.domain_theory_propagations;
-        }
     }
 
     SizeType _original_clause_count() const

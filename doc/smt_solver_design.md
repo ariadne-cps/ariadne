@@ -101,8 +101,10 @@ The current implementation includes:
 - Boolean conflict analysis;
 - learned clauses;
 - theory-generated nogoods;
-- validated level-zero theory propagation for atoms whose truth value is fixed
-  over the complete bounded domain;
+- validated whole-domain theory-atom classification (`TRUE`, `FALSE` or
+  `UNKNOWN`) as infrastructure for future theory propagation; classification is
+  not yet injected as CDCL assignments because doing so must preserve the existing
+  theory-conflict/nogood learning paths and delta semantics;
 - nonchronological backjump accounting;
 - learned-clause activity;
 - conservative learned-clause pruning;
@@ -298,6 +300,11 @@ The following approaches were tried or considered and deliberately rejected:
   branch;
 - preserving branches known to be unreachable merely so they can be
   artificially exercised.
+- injecting all domain-fixed theory atoms as unconditional level-zero CDCL
+  assignments: although exact-domain classification is sound, the first attempt
+  bypassed theory-conflict learning/minimization paths and changed the treatment
+  of simplified strict atoms under epsilon semantics. Propagation must therefore
+  be integrated as theory implications with reasons rather than raw assignments.
 
 The Git history contains the experimental details; this document records the
 resulting design decisions.

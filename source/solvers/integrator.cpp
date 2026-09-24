@@ -946,6 +946,8 @@ struct CentrePolynomialRecurrenceResult {
     double residual_seconds;
     double differential_seconds;
     double flow_function_seconds;
+    Vector<FloatDPBounds> direct_defect_range;
+    double direct_defect_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -1009,11 +1011,36 @@ graded_series_centre_polynomial_step(
             recurrence_field_differential,domx,domt,doma,sweeper);
     recurrence_flow_function_stopwatch.click();
 
+    // Experimental coefficient-level defect path.  Build dP/dt-g(P) before
+    // creating any Taylor patch, materialise it once on the same widened time
+    // domain used by flow_function, then evaluate the model directly on the
+    // forward half of the normalised time coordinate.  This avoids the costly
+    // restriction() while preserving the widened-domain coefficient scaling.
+    Stopwatch<Microseconds> direct_defect_stopwatch;
+    Vector<ValidatedDifferential> derivative_dphi=derivative(dphi,n);
+    Vector<ValidatedDifferential> direct_defect_differential=
+        derivative_dphi-recurrence_field_differential;
+    FlowStepTaylorModelType wide_defect=
+        make_taylor_function_model(
+            direct_defect_differential,join(domx,widt,doma),sweeper);
+    Vector<FloatDPBounds> forward_half_box(
+        wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
+    forward_half_box[n]=FloatDPBounds(0,1,dp);
+    Vector<FloatDPBounds> direct_defect_range(
+        n,FloatDPBounds(0,dp));
+    for(SizeType i=0u; i!=n; ++i) {
+        direct_defect_range[i]=evaluate(
+            wide_defect.model(i),forward_half_box);
+    }
+    direct_defect_stopwatch.click();
+
     return CentrePolynomialRecurrenceResult{
         std::move(polynomial),std::move(recurrence_field),
         recurrence_residual_stopwatch.elapsed_seconds(),
         recurrence_differential_stopwatch.elapsed_seconds(),
-        recurrence_flow_function_stopwatch.elapsed_seconds()};
+        recurrence_flow_function_stopwatch.elapsed_seconds(),
+        std::move(direct_defect_range),
+        direct_defect_stopwatch.elapsed_seconds()};
 }
 
 
@@ -1919,16 +1946,20 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             static double recurrence_residual_seconds=0.0;
             static double recurrence_differential_seconds=0.0;
             static double recurrence_flow_function_seconds=0.0;
+            static double direct_defect_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
             recurrence_differential_seconds+=centre_result.differential_seconds;
             recurrence_flow_function_seconds+=centre_result.flow_function_seconds;
+            direct_defect_seconds+=centre_result.direct_defect_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
                           << " procedure_seconds=" << recurrence_residual_seconds
                           << " differential_seconds=" << recurrence_differential_seconds
                           << " flow_function_seconds=" << recurrence_flow_function_seconds
+                          << " direct_defect_seconds=" << direct_defect_seconds
+                          << " direct_defect_range=" << centre_result.direct_defect_range
                           << " field_range=" << recurrence_field.range()
                           << std::endl;
             }
@@ -2038,6 +2069,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " polynomial_range=" << centre_polynomial.range()
                           << " defect_range=" << generic_defect.range()
                           << " recurrence_defect_range=" << defect.range()
+                          << " direct_differential_defect_range="
+                          << centre_result.direct_defect_range
                           << " generic_field_range=" << generic_field.range()
                           << " recurrence_field_range=" << recurrence_field.range()
                           << " initial_defect_range=" << initial_defect.range()

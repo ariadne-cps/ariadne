@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `639782197e01889cad88e0b7ee9e66260f8ceb5d`
+**Latest analysed investigation HEAD:** `46398d4d3c984d12e06a2fe336a88acbf2cb8f1a`
 
 ## Purpose of this document
 
@@ -1464,6 +1464,32 @@ The Gronwall remainder therefore jumps to about 3.9e-3 on h=0.02 and the step is
 This experiment is reverted.
 
 The profiling result remains useful: restriction is expensive, but bypassing it by changing the domain is not semantically valid. The next optimisation should instead avoid materialising the auxiliary field Taylor patch entirely. Since `differential(final_f,...)` is essentially free, the promising route is to construct the defect directly at the Differential/graded level and only create the minimal enclosure needed by Gronwall, rather than converting `g(P)` into a full function patch and then subtracting/ranging it.
+
+---
+
+
+### 9.32 Direct Differential-level defect range experiment (2026-09-24)
+
+The direct final-domain field experiment was invalid because changing the model domain changes the coefficient scaling. The next experiment keeps the correct widened-domain scaling but avoids restricting the auxiliary field patch.
+
+The candidate path is:
+
+```
+dphi = Differential representation of P
+field = Differential representation of g(P)
+defect = derivative(dphi,time) - field
+wide_defect = make_taylor_function_model(defect, domx x [t-h,t+h])
+range = evaluate(wide_defect, normalised box with time in [0,1])
+```
+
+The key observation is that, in the widened time model, the actual forward step `[t,t+h]` is exactly the normalised half-interval `[0,1]`. Therefore the defect can be ranged directly on that sub-box without constructing a restricted Taylor function patch.
+
+This experiment runs in parallel with the current rigorous production path. It reports `direct_differential_defect_range` in the same-step diagnostic and `direct_defect_seconds` in `[RecurrenceResidualProfile]`.
+
+Acceptance gates:
+1. its range must safely contain or match the current recurrence defect range on the identical step;
+2. the cost must be materially below the current `flow_function` materialisation;
+3. production remains unchanged until those checks pass.
 
 ---
 

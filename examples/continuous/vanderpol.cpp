@@ -106,29 +106,6 @@ void ariadne_main()
             report_orbit(method,stopwatch,orbit);
         };
 
-    auto run_preconditioned_dense = [&]() {
-            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
-            PreconditionedGradedTaylorSeriesIntegrator integrator(
-                StepMaximumError(loose_tolerance),probe_sweeper,
-                lipschitz_tolerance=0.5_x,
-                minimum_spacial_order=5,minimum_temporal_order=5,
-                maximum_spacial_order=5,maximum_temporal_order=5);
-            integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
-            integrator.set_diagnostics(false);
-            integrator.set_carried_expansion_diagnostics(false);
-
-            VectorFieldEvolver evolver(dynamics,integrator);
-            configure_evolver(evolver,plateau_step);
-
-            configure_taylor_kernel(true);
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(
-                initial_set,Real(5.00_dec),Semantics::UPPER);
-            stopwatch.click();
-            reset_taylor_kernel();
-            report_orbit("preconditioned_dense_3e-14",stopwatch,orbit);
-        };
-
     // Map the graded+dense accuracy/runtime frontier below 3e-14 and
     // compare against the established preconditioned+dense 3e-14 target
     // error (~8.54e-8). The 3e-14 graded point is retained as an anchor.

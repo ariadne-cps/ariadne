@@ -2933,3 +2933,13 @@ Output marker remains:
 ```
 [IntegratorArchitectureBenchmark]
 ```
+
+
+### 9.78 Benchmark warning cleanup (2026-09-24)
+
+After switching the Van der Pol driver from the three-way architecture comparison to the
+graded+dense cutoff frontier, the local `run_preconditioned_dense` lambda remained in
+the source but was no longer called, triggering `-Wunused-variable`.
+
+The obsolete lambda has been removed. This is benchmark-driver cleanup only and does not
+change the four graded+dense frontier runs or the Taylor-product kernel.

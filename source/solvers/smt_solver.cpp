@@ -350,11 +350,14 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 UpperBoxType before_monotone=domain;
                 ++statistics.monotone_rounds;
                 for(SizeType i=0; i!=constraints.size(); ++i) {
-                    if(contractor.monotone_reduce(
-                            domain,
-                            constraints[i].function(),
-                            this->_original_bounds(constraints[i]))) {
-                        return true;
+                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(contractor.monotone_reduce(
+                                domain,
+                                constraints[i].function(),
+                                this->_original_bounds(constraints[i]),
+                                variable)) {
+                            return true;
+                        }
                     }
                 }
                 if(not same_box(domain,before_monotone)) {
@@ -458,11 +461,14 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 UpperBoxType before_monotone=domain;
                 ++statistics.monotone_rounds;
                 for(auto const& literal:literals) {
-                    if(contractor.monotone_reduce(
-                            domain,
-                            literal.function,
-                            this->_original_bounds(literal.relation))) {
-                        return true;
+                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(contractor.monotone_reduce(
+                                domain,
+                                literal.function,
+                                this->_original_bounds(literal.relation),
+                                variable)) {
+                            return true;
+                        }
                     }
                 }
                 if(not same_box(domain,before_monotone)) {

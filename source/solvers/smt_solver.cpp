@@ -1254,6 +1254,24 @@ TheoryAtomTruth classify_theory_atom(
 
 }
 
+Bool epsilon_primitive_image_infeasible(
+    SmtTheoryPrimitiveRelation relation,
+    UpperIntervalType const& image,
+    FloatDP const& epsilon)
+{
+    switch(relation) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO:
+            return definitely(disjoint(
+                image,ExactIntervalType(-epsilon,+epsilon)));
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+            return definitely(image.upper_bound()<-epsilon);
+        case SmtTheoryPrimitiveRelation::GT_ZERO:
+            return definitely(image.upper_bound()<=-epsilon);
+        default:
+            throw std::runtime_error("Unknown SMT primitive theory relation");
+    }
+}
+
 Bool epsilon_theory_literal_infeasible(
     SmtSolver const& solver,
     RealSpace const& space,
@@ -1270,21 +1288,8 @@ Bool epsilon_theory_literal_infeasible(
             ValidatedScalarMultivariateFunction function(space,expression);
             UpperIntervalType image=apply(function,UpperBoxType(domain));
 
-            Bool primitive_infeasible=false;
-            switch(primitive.relation()) {
-                case SmtTheoryPrimitiveRelation::EQ_ZERO:
-                    primitive_infeasible=definitely(disjoint(
-                        image,ExactIntervalType(-epsilon,+epsilon)));
-                    break;
-                case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-                    primitive_infeasible=definitely(image.upper_bound()<-epsilon);
-                    break;
-                case SmtTheoryPrimitiveRelation::GT_ZERO:
-                    primitive_infeasible=definitely(image.upper_bound()<=-epsilon);
-                    break;
-                default:
-                    throw std::runtime_error("Unknown SMT primitive theory relation");
-            }
+            Bool primitive_infeasible=epsilon_primitive_image_infeasible(
+                primitive.relation(),image,epsilon);
 
             if(primitive_infeasible) {
                 alternative_infeasible=true;

@@ -664,6 +664,12 @@ class TestSmtSolver {
         ARIADNE_TEST_THROWS(
             SmtSolverTestSupport::epsilon_bounds(solver,invalid),
             std::runtime_error);
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::epsilon_primitive_image_infeasible(
+                invalid,
+                UpperIntervalType(ExactIntervalType(0,0)),
+                FloatDP(0.125_x,dp)),
+            std::runtime_error);
         SmtTheoryRelation invalid_theory_relation=
             static_cast<SmtTheoryRelation>(999);
         ARIADNE_TEST_THROWS(

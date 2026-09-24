@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `fe87e9b121f8ca03ed2b02aaf2e8bfa753dea7e2`
+**Latest analysed investigation HEAD:** `cad7465089374ebe2af164fb18dbdc1578cfdfb5`
 
 ## Purpose of this document
 
@@ -2098,6 +2098,30 @@ This means the relative policy is retaining far more structure than the absolute
 `relative_threshold * (radius(polynomial) + uniform_error)`, the current model scale can make the effective threshold substantially smaller than 1e-12. Repeated composition then grows the retained expansion and causes a severe cost explosion.
 
 Conclusion: `RelativeThresholdSweeper(1e-12)` does not provide the desired accuracy/cost compromise on this benchmark. The concept of scale-aware sweeping remains relevant, but the raw existing relative policy is too permissive at this parameter value. The next useful test should first measure the effective norm/cutoff or use substantially larger relative thresholds (for example 1e-10 and 1e-8) rather than attempting `relative_1e-14`, which would almost certainly be even more expensive.
+
+---
+
+
+### 9.55 Calibrate relative sweeping with coarser thresholds (2026-09-24)
+
+The interrupted `relative_1e-12` run showed that the raw relative threshold was far too permissive on this benchmark: the carried polynomial representation grew enough to make repeated compositions prohibitively expensive.
+
+The next benchmark therefore keeps the two absolute references and replaces the overly aggressive relative values with:
+
+```
+relative_1e-8
+relative_1e-10
+```
+
+at the same horizon [0,5], max_step=0.0025 and spatial/temporal order 5.
+
+The intent is not to match numeric threshold values across absolute and relative sweepers. Their semantics differ:
+- absolute: discard if `|c| < tau_abs`;
+- relative: discard if `|c| < tau_rel * (radius(polynomial) + uniform_error)`.
+
+Hence the useful comparison is empirical: find whether a relative threshold can produce an error between the absolute 1e-12 and 1e-14 references at runtime close to or below the absolute 1e-12 baseline.
+
+If relative 1e-8 is already too inaccurate, while relative 1e-10 is still too expensive, the existing relative policy is too sensitive to model scale for this workload and a more controlled adaptive/budget policy will be needed.
 
 ---
 

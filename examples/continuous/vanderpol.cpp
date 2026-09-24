@@ -100,14 +100,14 @@ void ariadne_main()
         "absolute_1e-14",
         Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
     run_sweeper_policy_probe(
-        "relative_1e-12",
+        "relative_1e-8",
         Sweeper<FloatDP>(
             RelativeThresholdSweeper<FloatDP>(
-                DoublePrecision(),FloatDP(1e-12_x,DoublePrecision()))));
+                DoublePrecision(),FloatDP(1e-8_x,DoublePrecision()))));
     run_sweeper_policy_probe(
-        "relative_1e-14",
+        "relative_1e-10",
         Sweeper<FloatDP>(
             RelativeThresholdSweeper<FloatDP>(
-                DoublePrecision(),FloatDP(1e-14_x,DoublePrecision()))));
+                DoublePrecision(),FloatDP(1e-10_x,DoublePrecision()))));
 
 }

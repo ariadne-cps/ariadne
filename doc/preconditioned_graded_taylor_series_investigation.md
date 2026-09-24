@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `2484c8818a5466fb3d75a772ebb6908a5c048e13`
+**Latest analysed investigation HEAD:** `8277cc7d7d5d8be9b31b6e8c998f29713693d2e3`
 
 ## Purpose of this document
 
@@ -1726,6 +1726,40 @@ Thus this is not the previous "assume truncated terms are zero" Differential pat
 Unsupported Procedure operations currently make the lightweight path unavailable rather than silently losing rigour. The next stages will add reciprocal/division and analytic unary operations using the same validated Taylor-series truncation logic already present in `TaylorModel::compose(AnalyticFunction,...)`.
 
 The experiment reports `lightweight_defect_range` and cumulative `lightweight_defect_seconds`. Production certification is unchanged. The important first gate on Van der Pol is whether this cheap enclosure contains/agrees with the full general-TaylorModel oracle and the degree-complete polynomial oracle while costing materially less.
+
+---
+
+
+### 9.41 Naive scalar-tail Procedure algebra fails: dependency blow-up and excessive cost (2026-09-24)
+
+The first lightweight `(Differential, scalar remainder)` prototype is not promising and is removed.
+
+On the identical first step it produces:
+
+```
+general TaylorModel defect:
+  x [-1.34e-7, 1.80e-7]
+  y [-9.9e-7, 1.40e-6]
+
+naive scalar-tail defect:
+  x [-1e-9, 1.76e-7]
+  y [-7.1026861e7, 7.1026861e7]
+```
+
+The second component explodes by roughly fourteen orders of magnitude. Later candidate calls show scalar remainders from 1e6 to 1e10. This is not a small implementation-tuning issue: independently collapsing the tail of every Procedure temporary to a scalar interval destroys correlations, then multiplication repeatedly feeds those independent errors back through the expression DAG.
+
+Performance is also poor. At 700 calls the lightweight experiment costs 12.63 s cumulatively, versus:
+- retained incremental Procedure update: 0.84 s;
+- recurrence-field flow_function: 2.46 s;
+- cheap truncated Differential defect: 0.59 s.
+
+The 1e-8 benchmark consequently rises to 22.15 s while retaining the same 215 accepted sets. The experiment is therefore removed from the active code, not merely disabled.
+
+Architectural conclusion: reproducing TaylorModel error formulas with a scalar remainder per Procedure temporary is too coarse. Ariadne's full TaylorModel path remains tight because the polynomial part and its error are propagated together and truncation/sweeping occurs at controlled representation boundaries, rather than replacing every discarded dependency by an independent scalar error at every DAG node.
+
+The next investigation should exploit the already-existing incremental `Graded<Differential>` state more directly. In particular, instead of propagating a scalar tail through the whole Procedure DAG, measure whether only the **newly generated final grade(s)** omitted from the retained field are sufficient to bound the residual tail. For analytic operations the graded recurrence already computes coefficients degree-by-degree. A local tail estimate based on the first omitted grade and a validated convergence/majorant bound may preserve dependency information in retained grades and add a scalar enclosure only once at the final output.
+
+This is closer to Flow*-style high-order remainder estimation than a scalar interval algebra threaded through every elementary operation.
 
 ---
 

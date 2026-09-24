@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `8277cc7d7d5d8be9b31b6e8c998f29713693d2e3`
+**Latest analysed investigation HEAD:** `4abe08407013abde74a9a6bdc40e75066e8f7b6a`
 
 ## Purpose of this document
 
@@ -1760,6 +1760,40 @@ Architectural conclusion: reproducing TaylorModel error formulas with a scalar r
 The next investigation should exploit the already-existing incremental `Graded<Differential>` state more directly. In particular, instead of propagating a scalar tail through the whole Procedure DAG, measure whether only the **newly generated final grade(s)** omitted from the retained field are sufficient to bound the residual tail. For analytic operations the graded recurrence already computes coefficients degree-by-degree. A local tail estimate based on the first omitted grade and a validated convergence/majorant bound may preserve dependency information in retained grades and add a scalar enclosure only once at the final output.
 
 This is closer to Flow*-style high-order remainder estimation than a scalar interval algebra threaded through every elementary operation.
+
+---
+
+
+### 9.42 Project success criteria: three simultaneous objectives (2026-09-24)
+
+The investigation must be judged against **three distinct objectives**, not only local runtime or step count:
+
+1. **Remove or substantially lower the approximation-error plateau as the integration step decreases.**
+   The key symptom that motivated this branch is that Ariadne's current Taylor/graded integrators stop gaining accuracy below a residual over-approximation floor as the step size is reduced, whereas Flow* appears to continue scaling better. Any new integrator architecture must demonstrate that reducing the step continues to reduce the over-approximation error over a meaningfully wider regime.
+
+2. **Permit larger validated integration steps.**
+   The new method should obtain a useful validated flow enclosure at larger `h` than the current GradedTaylorSeriesIntegrator for comparable approximation quality. The present Gronwall-based prototype already shows evidence in this direction through substantially fewer accepted sets at tight tolerances.
+
+3. **Improve total execution time at equal over-approximation error.**
+   Raw cost per step is not the right final metric. The comparison must fix the achieved over-approximation error and compare total runtime over the same simulated horizon. A method that takes fewer/larger steps but has more expensive individual steps is only successful if the end-to-end runtime at equal final error is lower.
+
+These objectives are coupled but must be measured separately. In particular:
+- fewer steps alone does not prove better accuracy scaling;
+- a lower local residual alone does not prove better end-to-end runtime;
+- a faster step alone is irrelevant if the method reaches the same approximation-error plateau;
+- wall-clock comparisons at different achieved errors are not fair.
+
+The benchmark protocol should therefore retain, for each method and tolerance/step regime:
+- simulated horizon;
+- accepted/rejected step count and effective step sizes;
+- final or maximum over-approximation error using the same metric;
+- total runtime;
+- runtime versus achieved error curve;
+- error versus step-size curve.
+
+A successful Flow*-like integrator should improve all three axes together: a lower error floor, larger viable steps, and a better runtime/error Pareto curve.
+
+This triple objective is now the governing criterion for future experiments. Optimisations that improve only a local subphase but do not plausibly contribute to at least one of these three goals should be deprioritised.
 
 ---
 

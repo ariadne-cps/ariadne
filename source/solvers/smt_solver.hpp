@@ -120,6 +120,7 @@ struct SmtSearchStatistics {
     SizeType learned_clause_propagations = 0u;
     SizeType nonchronological_backjumps = 0u;
     SizeType theory_checks = 0u;
+    SizeType domain_theory_propagations = 0u;
     SizeType theory_conflicts = 0u;
     SizeType theory_learned_clauses = 0u;
     SizeType theory_learned_clause_literals = 0u;
@@ -305,6 +306,17 @@ Bool assignment_locks_clause(
     int8_t assignment_value,
     std::optional<SizeType> const& reason_clause,
     SizeType clause_index);
+
+enum class TheoryAtomTruth {
+    FALSE_VALUE,
+    UNKNOWN,
+    TRUE_VALUE
+};
+
+TheoryAtomTruth classify_theory_atom(
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    ContinuousPredicate const& atom);
 
 struct TheoryResultInterpretation {
     Bool consistent = false;

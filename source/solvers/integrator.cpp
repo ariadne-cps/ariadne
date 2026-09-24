@@ -1114,7 +1114,7 @@ Bool evaluate_lightweight_validated_procedure(
                 break;
             case OperatorCode::HLF:
                 values[j]=hlf(values[ins.arg()]);
-                errors[j]=errors[ins.arg()]/2;
+                errors[j]=hlf(errors[ins.arg()]);
                 break;
             case OperatorCode::MUL: {
                 SizeType const a1=ins.arg1();
@@ -1138,7 +1138,7 @@ Bool evaluate_lightweight_validated_procedure(
                     differential_product_tail_bound(
                         values[a],values[a],retained_degree);
                 values[j]=sqr(values[a]);
-                errors[j]=overflow+2*n*e+e*e;
+                errors[j]=overflow+Nat(2)*n*e+e*e;
                 break;
             }
             default:
@@ -1282,7 +1282,7 @@ graded_series_centre_polynomial_step(
             FloatDPBounds base=evaluate(
                 lightweight_wide_defect.model(i),forward_half_box);
             FloatDPError const e=lightweight_field_errors[i];
-            lightweight_defect_range[i]=base+FloatDPBounds(-e,e);
+            lightweight_defect_range[i]=base+pm(e);
         }
     }
     lightweight_defect_stopwatch.click();

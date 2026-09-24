@@ -133,14 +133,12 @@ The current implementation includes:
 - theory-generated nogoods;
 - validated whole-domain theory-atom classification (`TRUE`, `FALSE` or
   `UNKNOWN`);
-- epsilon-safe domain theory propagation: after the currently assigned theory
-  literals have passed the normal partial-consistency check, an unassigned atom
-  whose one Boolean polarity is proven infeasible even after epsilon weakening
-  over the complete domain receives the opposite polarity as a unit
-  theory-implication clause. This ordering preserves theory-conflict/nogood
-  learning for already assigned literals while still allowing explained
-  propagation of free atoms. Exact falsity alone is never propagated when epsilon
-  weakening still admits the literal;
+- epsilon-safe whole-domain implication analysis for individual theory atoms is
+  available as tested infrastructure, but is not currently injected into the CDCL
+  search. Domain-only unit implications proved too strong operationally: they
+  collapse Boolean branches that intentionally exercise resource budgets,
+  backtracking and theory-conflict learning. Future theory propagation therefore
+  needs contextual explanations derived from the current partial theory state;
 - nonchronological backjump accounting;
 - learned-clause activity;
 - conservative learned-clause pruning;
@@ -344,8 +342,12 @@ The following approaches were tried or considered and deliberately rejected:
   bypassed theory-conflict learning/minimization paths and changed the treatment
   of simplified strict atoms under epsilon semantics. Propagation must therefore
   be integrated as theory implications with reasons rather than raw assignments.
-  The implemented replacement derives only implications justified by
-  epsilon-infeasibility and stores each implication as a unit theory clause.
+  A second experiment restricted propagation to epsilon-infeasible polarities
+  and delayed it until after partial-theory consistency. It remained too strong:
+  domain-only unit clauses still collapsed Boolean branches that existing CDCL,
+  resource-budget and theory-learning regressions intentionally exercise. The
+  epsilon-infeasibility classifier is retained, but production propagation is
+  deferred until implications can carry contextual theory explanations.
 
 The Git history contains the experimental details; this document records the
 resulting design decisions.

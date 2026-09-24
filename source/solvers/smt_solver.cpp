@@ -987,8 +987,6 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.learned_clause_propagations+=source.learned_clause_propagations;
     target.nonchronological_backjumps+=source.nonchronological_backjumps;
     target.theory_checks+=source.theory_checks;
-    target.domain_theory_implication_clauses+=source.domain_theory_implication_clauses;
-    target.domain_theory_propagations+=source.domain_theory_propagations;
     target.theory_conflicts+=source.theory_conflicts;
     target.theory_learned_clauses+=source.theory_learned_clauses;
     target.theory_learned_clause_literals+=source.theory_learned_clause_literals;
@@ -1491,28 +1489,20 @@ class SmtDpllSearch {
             index,this->_original_clause_count());
     }
 
-    SizeType _add_learned_clause(
-        std::vector<Int> const& clause,
-        Bool theory_clause = false,
-        Bool theory_implication = false)
+    SizeType _add_learned_clause(std::vector<Int> const& clause, Bool theory_clause = false)
     {
         _learned_clauses.emplace_back(clause.begin(),clause.end());
         _learned_clause_is_theory.push_back(theory_clause);
-        _learned_clause_is_theory_implication.push_back(theory_implication);
         _learned_clause_activity.push_back(1u);
         _learned_clause_generation.push_back(_statistics.learned_clauses);
-        if(theory_implication) {
-            ++_statistics.domain_theory_implication_clauses;
+        ++_statistics.learned_clauses;
+        if(theory_clause) {
+            ++_statistics.theory_learned_clauses;
+            _statistics.theory_learned_clause_literals+=clause.size();
         } else {
-            ++_statistics.learned_clauses;
-            if(theory_clause) {
-                ++_statistics.theory_learned_clauses;
-                _statistics.theory_learned_clause_literals+=clause.size();
-            } else {
-                _statistics.peak_active_non_theory_learned_clauses=std::max(
-                    _statistics.peak_active_non_theory_learned_clauses,
-                    this->_active_non_theory_learned_clause_count());
-            }
+            _statistics.peak_active_non_theory_learned_clauses=std::max(
+                _statistics.peak_active_non_theory_learned_clauses,
+                this->_active_non_theory_learned_clause_count());
         }
         return this->_original_clause_count()+_learned_clauses.size()-1u;
     }
@@ -1521,39 +1511,6 @@ class SmtDpllSearch {
     {
         return SmtSolverTestSupport::learned_clause_is_theory(
             index,this->_original_clause_count(),_learned_clause_is_theory);
-    }
-
-    Bool _is_theory_implication_clause(SizeType index) const
-    {
-        if(not this->_is_learned_clause(index)) {
-            return false;
-        }
-        return _learned_clause_is_theory_implication[
-            index-this->_original_clause_count()];
-    }
-
-    Bool _add_domain_theory_implications()
-    {
-        Bool added=false;
-        for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
-            SizeType variable=_encoding.atom_variable(i);
-            if(_assignment[variable].value>=0) {
-                continue;
-            }
-            auto implication=SmtSolverTestSupport::domain_theory_implication(
-                _solver,_space,_domain,_encoding.atom(i));
-            if(implication.force_true) {
-                this->_add_learned_clause(
-                    {static_cast<Int>(variable)},true,true);
-                added=true;
-            }
-            if(implication.force_false) {
-                this->_add_learned_clause(
-                    {-static_cast<Int>(variable)},true,true);
-                added=true;
-            }
-        }
-        return added;
     }
 
     SizeType _active_non_theory_learned_clause_count() const
@@ -1665,9 +1622,7 @@ class SmtDpllSearch {
                     if(this->_is_learned_clause(clause_index)) {
                         this->_bump_learned_clause_activity(clause_index);
                         ++_statistics.learned_clause_propagations;
-                        if(this->_is_theory_implication_clause(clause_index)) {
-                            ++_statistics.domain_theory_propagations;
-                        } else if(this->_is_theory_learned_clause(clause_index)) {
+                        if(this->_is_theory_learned_clause(clause_index)) {
                             ++_statistics.theory_learned_clause_propagations;
                         }
                     }
@@ -1870,10 +1825,6 @@ class SmtDpllSearch {
             ++_statistics.boolean_backtracks;
             this->_maybe_prune_learned_clauses(learned_index);
             return SearchOutcome::backjump(analysis.backjump_level);
-        }
-
-        if(this->_add_domain_theory_implications()) {
-            return this->_search_boolean();
         }
 
         ++_statistics.boolean_decisions;
@@ -2165,7 +2116,6 @@ class SmtDpllSearch {
     std::vector<SizeType> _decision_level_markers;
     std::vector<SmtBooleanEncoding::Clause> _learned_clauses;
     std::vector<Bool> _learned_clause_is_theory;
-    std::vector<Bool> _learned_clause_is_theory_implication;
     std::vector<SizeType> _learned_clause_activity;
     std::vector<SizeType> _learned_clause_generation;
     std::optional<SizeType> _last_boolean_conflict_clause;

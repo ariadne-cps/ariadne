@@ -253,18 +253,16 @@ SensitivitySplitSelection sensitivity_split_selection(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
+Bool expression_is_differentiable(RealExpression const& expression);
+
 std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
+    RealExpression const& expression,
     ValidatedScalarMultivariateFunction const& function,
     SizeType variable);
 
 Bool monotone_coordinate_is_safe(
     ValidatedScalarMultivariateFunction const& derivative,
     UpperBoxType const& domain);
-
-Bool monotone_coordinate_is_safe(
-    ValidatedScalarMultivariateFunction const& function,
-    UpperBoxType const& domain,
-    SizeType variable);
 
 struct SearchOutcome {
     std::optional<UpperBoxType> witness;

@@ -632,6 +632,13 @@ class TestSmtSolver {
         ARIADNE_TEST_THROWS(
             SmtSolverTestSupport::epsilon_bounds(solver,invalid),
             std::runtime_error);
+        SmtTheoryRelation invalid_theory_relation=
+            static_cast<SmtTheoryRelation>(999);
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::classify_theory_relation(
+                invalid_theory_relation,
+                UpperIntervalType(ExactIntervalType(0,0))),
+            std::runtime_error);
     }
 
     Void test_epsilon_predicates() {

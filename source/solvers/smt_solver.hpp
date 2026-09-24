@@ -312,6 +312,10 @@ enum class TheoryAtomTruth {
     TRUE_VALUE
 };
 
+TheoryAtomTruth classify_theory_relation(
+    SmtTheoryRelation relation,
+    UpperIntervalType const& image);
+
 TheoryAtomTruth classify_theory_atom(
     RealSpace const& space,
     ExactBoxType const& domain,

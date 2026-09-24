@@ -30,23 +30,6 @@ void ariadne_main()
         y0-eps_y0<=y<=y0+eps_y0
     });
 
-    PreconditionedGradedTaylorSeriesIntegrator residual_probe(
-        StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
-    residual_probe.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    residual_probe.set_diagnostics(true);
-    VectorFieldEvolver residual_probe_evolver(dynamics,residual_probe);
-    residual_probe_evolver.configuration().set_maximum_enclosure_radius(1.0);
-    residual_probe_evolver.configuration().set_maximum_step_size(0.02);
-    residual_probe_evolver.configuration().set_maximum_spacial_error(1e-6);
-    residual_probe_evolver.configuration().set_enable_reconditioning(false);
-    auto residual_probe_orbit=
-        residual_probe_evolver.orbit(initial_set,Real(0.02_dec),Semantics::UPPER);
-    std::cerr << "[RecurrenceResidualProbe]"
-              << " reach_sets=" << residual_probe_orbit.reach().size()
-              << std::endl;
-
     auto configure_evolver = [](VectorFieldEvolver& evolver, ExactDouble max_step) {
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(max_step);
@@ -67,45 +50,52 @@ void ariadne_main()
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
 
-            std::cerr << "[IntegratorLongBenchmark]"
+            ARIADNE_ASSERT(!orbit.final().empty());
+            auto achieved_error=
+                orbit.final()[0u].state_function().get(0u).error();
+            for(auto const& enclosure : orbit.final()) {
+                for(SizeType i=0u;
+                    i!=enclosure.state_function().result_size(); ++i) {
+                    achieved_error=max(
+                        achieved_error,
+                        enclosure.state_function().get(i).error());
+                }
+            }
+
+            std::cerr << "[IntegratorAccuracyBenchmark]"
                       << " method=" << method
                       << " tolerance=" << tolerance
                       << " max_step=" << max_step
                       << " horizon=5.0"
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
+                      << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << " intermediate_sets=" << orbit.intermediate().size()
+                      << " final_sets=" << orbit.final().size()
                       << std::endl;
         };
 
-    PreconditionedGradedTaylorSeriesIntegrator gronwall_1e6(
-        StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
-    gronwall_1e6.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    gronwall_1e6.set_diagnostics(false);
+    auto run_pair = [&](ExactDouble tolerance) {
+        PreconditionedGradedTaylorSeriesIntegrator gronwall(
+            StepMaximumError(tolerance),sweeper,lipschitz_tolerance=0.5_x,
+            minimum_spacial_order=5,minimum_temporal_order=5,
+            maximum_spacial_order=5,maximum_temporal_order=5);
+        gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
+        gronwall.set_diagnostics(false);
 
-    GradedTaylorSeriesIntegrator graded_1e6(
-        StepMaximumError(1e-6),sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
+        GradedTaylorSeriesIntegrator graded(
+            StepMaximumError(tolerance),sweeper,lipschitz_tolerance=0.5_x,
+            minimum_spacial_order=5,minimum_temporal_order=5,
+            maximum_spacial_order=5,maximum_temporal_order=5);
 
-    run_long_benchmark("GRONWALL",gronwall_1e6,1e-6_x,0.04_x);
-    run_long_benchmark("GRADED",graded_1e6,1e-6_x,0.04_x);
+        run_long_benchmark("GRONWALL",gronwall,tolerance,0.04_x);
+        run_long_benchmark("GRADED",graded,tolerance,0.04_x);
+    };
 
-    PreconditionedGradedTaylorSeriesIntegrator gronwall_1e8(
-        StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
-    gronwall_1e8.set_preconditioning(TaylorSeriesPreconditioning::QR);
-    gronwall_1e8.set_diagnostics(false);
-
-    GradedTaylorSeriesIntegrator graded_1e8(
-        StepMaximumError(1e-8),sweeper,lipschitz_tolerance=0.5_x,
-        minimum_spacial_order=5,minimum_temporal_order=5,
-        maximum_spacial_order=5,maximum_temporal_order=5);
-
-    run_long_benchmark("GRONWALL",gronwall_1e8,1e-8_x,0.04_x);
-    run_long_benchmark("GRADED",graded_1e8,1e-8_x,0.04_x);
+    run_pair(1e-5_x);
+    run_pair(1e-6_x);
+    run_pair(1e-7_x);
+    run_pair(1e-8_x);
+    run_pair(1e-9_x);
 
 }

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `4abe08407013abde74a9a6bdc40e75066e8f7b6a`
+**Latest analysed investigation HEAD:** `036a41fe804ad85268cad40e5fcfbd2bb3df24b6`
 
 ## Purpose of this document
 
@@ -1795,6 +1795,30 @@ The benchmark protocol should therefore retain, for each method and tolerance/st
 A successful Flow*-like integrator should improve all three axes together: a lower error floor, larger viable steps, and a better runtime/error Pareto curve.
 
 This triple objective is now the governing criterion for future experiments. Optimisations that improve only a local subphase but do not plausibly contribute to at least one of these three goals should be deprioritised.
+
+---
+
+
+### 9.43 Equal-horizon runtime-vs-achieved-error benchmark (2026-09-24)
+
+A dedicated benchmark now compares the current Gronwall prototype and GradedTaylorSeriesIntegrator over the **same simulated interval [0,5]** and the same maximum configured step 0.04.
+
+The sweep uses step-error tolerances:
+
+```
+1e-5, 1e-6, 1e-7, 1e-8, 1e-9
+```
+
+For every run it reports:
+- wall-clock runtime;
+- achieved final enclosure error, defined as the maximum Taylor-model error among all state components of all final enclosures;
+- reach/intermediate/final set counts.
+
+The output marker is `[IntegratorAccuracyBenchmark]`.
+
+This is intended to build the first fair runtime-versus-achieved-overapproximation-error curve at fixed time horizon. The old one-step residual probe is removed from this benchmark program so it does not contaminate timing.
+
+The final-state Taylor-model error is a representation-level over-approximation metric, not yet a complete geometric distance to the exact reachable set. It is nevertheless common to both integrators and directly measures the accumulated model remainder that motivated this investigation. If later a stronger common geometric metric is introduced, this benchmark should retain both metrics.
 
 ---
 

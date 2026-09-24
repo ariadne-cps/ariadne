@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `036a41fe804ad85268cad40e5fcfbd2bb3df24b6`
+**Latest analysed investigation HEAD:** `49db11a9f7536d69199ecdae68b845049eb133da`
 
 ## Purpose of this document
 
@@ -1819,6 +1819,37 @@ The output marker is `[IntegratorAccuracyBenchmark]`.
 This is intended to build the first fair runtime-versus-achieved-overapproximation-error curve at fixed time horizon. The old one-step residual probe is removed from this benchmark program so it does not contaminate timing.
 
 The final-state Taylor-model error is a representation-level over-approximation metric, not yet a complete geometric distance to the exact reachable set. It is nevertheless common to both integrators and directly measures the accumulated model remainder that motivated this investigation. If later a stronger common geometric metric is introduced, this benchmark should retain both metrics.
+
+---
+
+
+### 9.44 First fixed-horizon runtime-vs-achieved-error result (2026-09-24)
+
+The [0,5] benchmark with max_step=0.04 gives:
+
+| tolerance | Gronwall time | Gronwall achieved error | Gronwall sets | Graded time | Graded achieved error | Graded sets |
+|---|---:|---:|---:|---:|---:|---:|
+| 1e-5 | 4.047 s | 5.3598e-4 | 125 | 2.619 s | 5.6439e-3 | 133 |
+| 1e-6 | 4.766 s | 1.9037e-4 | 135 | 3.469 s | 1.3084e-3 | 169 |
+| 1e-7 | 7.205 s | 3.7193e-5 | 165 | 5.859 s | 2.0525e-4 | 268 |
+| 1e-8 | 11.330 s | 8.2638e-6 | 215 | 8.847 s | 4.6583e-5 | 401 |
+| 1e-9 | 20.542 s | 1.8731e-6 | 327 | 15.357 s | 8.8297e-6 | 675 |
+
+Important conclusions:
+
+1. At equal nominal tolerance, Gronwall is slower, but it also delivers about 4.7x--10.5x lower final Taylor-model error. Equal-tolerance wall-clock comparisons therefore substantially understate its efficiency at equal achieved error.
+
+2. The curves overlap enough for a first equal-error comparison. Gronwall at tolerance 1e-6 gives error 1.90e-4 in 4.77 s, slightly better error than Graded at 1e-7 (2.05e-4) in 5.86 s. Thus at approximately 2e-4 achieved error, Gronwall is already about 19% faster while using 135 vs 268 sets.
+
+3. Gronwall at tolerance 1e-8 gives error 8.26e-6 in 11.33 s, slightly better than Graded at 1e-9 (8.83e-6) in 15.36 s. Thus around 9e-6 achieved error, Gronwall is about 26% faster while using 215 vs 675 sets.
+
+4. The achieved error continues to decrease strongly across the tested Gronwall sweep:
+5.36e-4 -> 1.90e-4 -> 3.72e-5 -> 8.26e-6 -> 1.87e-6.
+There is no plateau visible down to the current 1e-9 tolerance in this final-Taylor-error metric. The Graded curve also continues decreasing over this range, so this benchmark alone does not yet reproduce the original plateau symptom; a dedicated fixed-step/error-vs-h experiment remains necessary for objective 1.
+
+5. Larger-step capability is strongly supported by set counts. The advantage grows with accuracy: 125 vs 133 sets at 1e-5, reaching 327 vs 675 at 1e-9. Since both runs cover exactly [0,5], these counts imply materially larger average accepted steps for Gronwall.
+
+This is the first evidence that the current prototype meets objective 3 at two directly overlapping achieved-error levels, despite being slower at equal nominal tolerance. The next benchmark should target objective 1 explicitly: disable tolerance-driven ambiguity as much as possible and sweep maximum/fixed step size while measuring achieved over-approximation, so that an error plateau as h decreases can be observed directly.
 
 ---
 

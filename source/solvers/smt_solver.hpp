@@ -326,6 +326,11 @@ struct TheoryAtomImplication {
     Bool force_false = false;
 };
 
+Bool epsilon_primitive_image_infeasible(
+    SmtTheoryPrimitiveRelation relation,
+    UpperIntervalType const& image,
+    FloatDP const& epsilon);
+
 Bool epsilon_theory_literal_infeasible(
     SmtSolver const& solver,
     RealSpace const& space,

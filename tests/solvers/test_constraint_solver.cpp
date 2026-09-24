@@ -369,21 +369,19 @@ class TestConstraintSolver
         ARIADNE_TEST_SAME(
             singleton_domain,UpperBoxType(ExactBoxType{{1.0_x,1.0_x}}));
 
-        UpperBoxType below_domain=ExactBoxType{{0.0_x,2.0_x}};
-        Bool below_empty=propagator.monotone_reduce(
-            below_domain,
-            x[0],
-            ExactIntervalType(-2.0_x,-2.0_x),
-            0u);
-        ARIADNE_TEST_ASSERT(below_empty);
+        UpperBoxType lower_boundary_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool lower_boundary_empty=propagator.monotone_reduce(
+            lower_boundary_domain,x[0],ExactIntervalType(0.0_x,0.0_x),0u);
+        ARIADNE_TEST_ASSERT(not lower_boundary_empty);
+        ARIADNE_TEST_ASSERT(
+            possibly(contains(lower_boundary_domain[0],ExactDouble(0.0_x))));
 
-        UpperBoxType above_domain=ExactBoxType{{0.0_x,2.0_x}};
-        Bool above_empty=propagator.monotone_reduce(
-            above_domain,
-            x[0],
-            ExactIntervalType(4.0_x,4.0_x),
-            0u);
-        ARIADNE_TEST_ASSERT(above_empty);
+        UpperBoxType upper_boundary_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool upper_boundary_empty=propagator.monotone_reduce(
+            upper_boundary_domain,x[0],ExactIntervalType(2.0_x,2.0_x),0u);
+        ARIADNE_TEST_ASSERT(not upper_boundary_empty);
+        ARIADNE_TEST_ASSERT(
+            possibly(contains(upper_boundary_domain[0],ExactDouble(2.0_x))));
     }
 
     Void test_split() {

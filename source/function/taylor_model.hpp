@@ -113,6 +113,11 @@ struct TaylorModelAccumulatorProfile {
     unsigned long long unique_entries=0u;
     unsigned long long maximum_temporary_entries=0u;
     unsigned long long maximum_unique_entries=0u;
+    unsigned long long maximum_argument_size=0u;
+    unsigned long long maximum_x_degree=0u;
+    unsigned long long maximum_y_degree=0u;
+    unsigned long long maximum_product_degree=0u;
+    unsigned long long maximum_dense_slots=0u;
 };
 
 Void reset_taylor_model_accumulator_profile();
@@ -120,7 +125,12 @@ TaylorModelAccumulatorProfile taylor_model_accumulator_profile();
 Void record_taylor_model_accumulator_profile(
     unsigned long long product_pairs,
     unsigned long long temporary_entries,
-    unsigned long long unique_entries);
+    unsigned long long unique_entries,
+    unsigned long long argument_size,
+    unsigned long long x_degree,
+    unsigned long long y_degree,
+    unsigned long long product_degree,
+    unsigned long long dense_slots);
 Void reset_taylor_model_product_profile();
 TaylorModelProductProfileSnapshot taylor_model_product_profile_snapshot();
 TaylorModelProductProfileContext taylor_model_product_profile_context();

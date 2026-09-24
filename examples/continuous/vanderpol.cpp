@@ -112,6 +112,16 @@ void ariadne_main()
                           << ap.maximum_temporary_entries
                           << " max_unique_entries="
                           << ap.maximum_unique_entries
+                          << " max_argument_size="
+                          << ap.maximum_argument_size
+                          << " max_x_degree="
+                          << ap.maximum_x_degree
+                          << " max_y_degree="
+                          << ap.maximum_y_degree
+                          << " max_product_degree="
+                          << ap.maximum_product_degree
+                          << " max_dense_slots="
+                          << ap.maximum_dense_slots
                           << std::endl;
             }
         };

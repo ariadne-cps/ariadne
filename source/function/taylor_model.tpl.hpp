@@ -1121,10 +1121,41 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         accumulated.unique();
         const auto unique_entries=
             static_cast<unsigned long long>(accumulated.number_of_terms());
+
+        unsigned long long x_degree=0u;
+        for(auto iter=x.begin(); iter!=x.end(); ++iter) {
+            x_degree=std::max(
+                x_degree,
+                static_cast<unsigned long long>(iter->index().degree()));
+        }
+        unsigned long long y_degree=0u;
+        for(auto iter=y.begin(); iter!=y.end(); ++iter) {
+            y_degree=std::max(
+                y_degree,
+                static_cast<unsigned long long>(iter->index().degree()));
+        }
+        const unsigned long long product_degree=x_degree+y_degree;
+
+        // Number of monomials of total degree <= product_degree in as
+        // variables: C(as+product_degree, product_degree).
+        unsigned long long dense_slots=1u;
+        const unsigned long long choose_k=
+            std::min(static_cast<unsigned long long>(as),product_degree);
+        const unsigned long long choose_n=
+            static_cast<unsigned long long>(as)+product_degree;
+        for(unsigned long long k=1u; k<=choose_k; ++k) {
+            dense_slots=(dense_slots*(choose_n-choose_k+k))/k;
+        }
+
         record_taylor_model_accumulator_profile(
             static_cast<unsigned long long>(product_terms),
             temporary_entries,
-            unique_entries);
+            unique_entries,
+            static_cast<unsigned long long>(as),
+            x_degree,
+            y_degree,
+            product_degree,
+            dense_slots);
         accumulated.sweep();
         r.expansion().swap(accumulated.expansion());
         r.error()=accumulated.error();

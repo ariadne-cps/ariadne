@@ -125,7 +125,12 @@ TaylorModelAccumulatorProfile taylor_model_accumulator_profile() {
 Void record_taylor_model_accumulator_profile(
     unsigned long long product_pairs,
     unsigned long long temporary_entries,
-    unsigned long long unique_entries)
+    unsigned long long unique_entries,
+    unsigned long long argument_size,
+    unsigned long long x_degree,
+    unsigned long long y_degree,
+    unsigned long long product_degree,
+    unsigned long long dense_slots)
 {
     ++g_taylor_model_accumulator_profile.calls;
     g_taylor_model_accumulator_profile.product_pairs+=product_pairs;
@@ -137,6 +142,19 @@ Void record_taylor_model_accumulator_profile(
     g_taylor_model_accumulator_profile.maximum_unique_entries=
         std::max(g_taylor_model_accumulator_profile.maximum_unique_entries,
                  unique_entries);
+    g_taylor_model_accumulator_profile.maximum_argument_size=
+        std::max(g_taylor_model_accumulator_profile.maximum_argument_size,
+                 argument_size);
+    g_taylor_model_accumulator_profile.maximum_x_degree=
+        std::max(g_taylor_model_accumulator_profile.maximum_x_degree,x_degree);
+    g_taylor_model_accumulator_profile.maximum_y_degree=
+        std::max(g_taylor_model_accumulator_profile.maximum_y_degree,y_degree);
+    g_taylor_model_accumulator_profile.maximum_product_degree=
+        std::max(g_taylor_model_accumulator_profile.maximum_product_degree,
+                 product_degree);
+    g_taylor_model_accumulator_profile.maximum_dense_slots=
+        std::max(g_taylor_model_accumulator_profile.maximum_dense_slots,
+                 dense_slots);
 }
 
 Void reset_taylor_model_product_profile() {

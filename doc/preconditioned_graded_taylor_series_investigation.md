@@ -2685,3 +2685,42 @@ Interpretation:
 - a large compression ratio favours a keyed or degree-addressed accumulator;
 - a ratio near one suggests that contiguous append/sort may already be close to optimal,
   and effort should focus on sorting/allocation rather than hashing/tree structures.
+
+
+### 9.72 Multi-index enumeration and dense-workspace feasibility (2026-09-24)
+
+The compression profile at `3e-14` reported:
+
+```
+calls                 1,256,468
+product_pairs         208,224,840
+temporary_entries     208,224,840
+unique_entries         36,018,650
+duplication_ratio           5.78103
+max_temporary_entries       7,777
+max_unique_entries             325
+```
+
+This strongly favours accumulating directly by destination multi-index rather than
+materialising duplicate products and sorting them afterward.
+
+Inspection of `MultiIndex` found that Ariadne already provides `operator++()`, which
+enumerates successive multi-indices by total degree/composition, but there is no active
+public rank/position method: the declarations for `position()` / `number()` are
+commented out. Therefore a dense accumulator would need either a small combinatorial
+ranking helper or a precomputed index-to-slot table.
+
+Before choosing that representation, the accumulator profiler now also records:
+
+- maximum Taylor-model argument size;
+- maximum degree present in `x`;
+- maximum degree present in `y`;
+- maximum possible product degree `degree(x)+degree(y)`;
+- maximum number of dense slots needed to represent all monomials up to that degree,
+  computed as `C(argument_size + product_degree, product_degree)`.
+
+These values decide whether a dense combinatorial workspace is genuinely small enough
+for the observed workload. If the slot count remains modest, direct rank-to-array
+accumulation should avoid hashing, tree nodes, duplicate MultiIndex storage, and sorting.
+If it grows too large, the next implementation should instead use a compact sparse
+index-to-slot structure.

@@ -358,6 +358,32 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(refines(smooth_domain,smooth_original));
         ARIADNE_TEST_ASSERT(
             smooth_domain[0].width().raw()<=smooth_original[0].width().raw());
+
+        UpperBoxType singleton_domain=ExactBoxType{{1.0_x,1.0_x}};
+        Bool singleton_empty=propagator.monotone_reduce(
+            singleton_domain,
+            x[0],
+            ExactIntervalType(1.0_x,1.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(not singleton_empty);
+        ARIADNE_TEST_SAME(
+            singleton_domain,UpperBoxType(ExactBoxType{{1.0_x,1.0_x}}));
+
+        UpperBoxType below_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool below_empty=propagator.monotone_reduce(
+            below_domain,
+            x[0],
+            ExactIntervalType(-2.0_x,-2.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(below_empty);
+
+        UpperBoxType above_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool above_empty=propagator.monotone_reduce(
+            above_domain,
+            x[0],
+            ExactIntervalType(4.0_x,4.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(above_empty);
     }
 
     Void test_split() {

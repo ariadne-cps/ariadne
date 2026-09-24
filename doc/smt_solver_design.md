@@ -41,7 +41,9 @@ The solver roadmap therefore prioritizes, in this order:
    bounded to its declared three Newton steps: its previous width-only
    `do/while` could fail to terminate when a Newton step made no progress. The
    direct constraint-solver regression now calls `monotone_reduce` explicitly
-   on both a linear and a smooth monotone function;
+   on linear, smooth, singleton and rigorously infeasible monotone cases. SMT
+   regressions exercise both validated-constraint and normalized-theory paths,
+   including effective contraction and validated nonmonotone-coordinate skipping;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives;
 4. robust support for polynomial and transcendental activations and dynamics;

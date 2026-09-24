@@ -37,7 +37,11 @@ The solver roadmap therefore prioritizes, in this order:
    `[3,4]` showed that even a bounded monotone sweep can substantially perturb
    the normal witness/search path. It is therefore opt-in through solver
    configuration and intended first for measured smooth-network workloads such as
-   FOSSIL/CARe;
+   FOSSIL/CARe. The underlying `ConstraintSolver::monotone_reduce` is also
+   bounded to its declared three Newton steps: its previous width-only
+   `do/while` could fail to terminate when a Newton step made no progress. The
+   direct constraint-solver regression now calls `monotone_reduce` explicitly
+   on both a linear and a smooth monotone function;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives;
 4. robust support for polynomial and transcendental activations and dynamics;

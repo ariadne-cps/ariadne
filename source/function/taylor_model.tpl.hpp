@@ -1063,23 +1063,22 @@ template<class C> struct TaylorDenseAccumulatorWorkspace {
 
     Void prepare(SizeType requested_slots, SizeType expected_occupied) {
         const SizeType unused=std::numeric_limits<SizeType>::max();
-        if(slot_to_touched.size()<requested_slots) {
+        const Bool slot_resize=slot_to_touched.size()<requested_slots;
+        if(slot_resize) {
             slot_to_touched.resize(requested_slots,unused);
-            ++g_taylor_model_dense_workspace_stats.slot_resizes;
         }
         touched_slots.clear();
         touched_coefficients.clear();
-        if(touched_slots.capacity()<expected_occupied) {
+        const Bool capacity_grow=touched_slots.capacity()<expected_occupied;
+        if(capacity_grow) {
             touched_slots.reserve(expected_occupied);
-            ++g_taylor_model_dense_workspace_stats.coefficient_capacity_grows;
         }
         if(touched_coefficients.capacity()<expected_occupied) {
             touched_coefficients.reserve(expected_occupied);
         }
-        ++g_taylor_model_dense_workspace_stats.calls;
-        g_taylor_model_dense_workspace_stats.maximum_slot_count=
-            std::max(g_taylor_model_dense_workspace_stats.maximum_slot_count,
-                     static_cast<unsigned long long>(requested_slots));
+        record_taylor_model_dense_workspace_prepare(
+            slot_resize,capacity_grow,
+            static_cast<unsigned long long>(requested_slots));
     }
 
     Void reset_used_slots() {
@@ -1087,9 +1086,8 @@ template<class C> struct TaylorDenseAccumulatorWorkspace {
         for(SizeType slot : touched_slots) {
             slot_to_touched[slot]=unused;
         }
-        g_taylor_model_dense_workspace_stats.maximum_touched_count=
-            std::max(g_taylor_model_dense_workspace_stats.maximum_touched_count,
-                     static_cast<unsigned long long>(touched_slots.size()));
+        record_taylor_model_dense_workspace_touched(
+            static_cast<unsigned long long>(touched_slots.size()));
     }
 };
 

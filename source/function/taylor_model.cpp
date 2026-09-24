@@ -132,6 +132,31 @@ TaylorModelDenseWorkspaceStats taylor_model_dense_workspace_stats() {
     return g_taylor_model_dense_workspace_stats;
 }
 
+Void record_taylor_model_dense_workspace_prepare(
+    Bool slot_resize,
+    Bool capacity_grow,
+    unsigned long long slot_count)
+{
+    ++g_taylor_model_dense_workspace_stats.calls;
+    if(slot_resize) {
+        ++g_taylor_model_dense_workspace_stats.slot_resizes;
+    }
+    if(capacity_grow) {
+        ++g_taylor_model_dense_workspace_stats.coefficient_capacity_grows;
+    }
+    g_taylor_model_dense_workspace_stats.maximum_slot_count=
+        std::max(g_taylor_model_dense_workspace_stats.maximum_slot_count,
+                 slot_count);
+}
+
+Void record_taylor_model_dense_workspace_touched(
+    unsigned long long touched_count)
+{
+    g_taylor_model_dense_workspace_stats.maximum_touched_count=
+        std::max(g_taylor_model_dense_workspace_stats.maximum_touched_count,
+                 touched_count);
+}
+
 Void reset_taylor_model_accumulator_profile() {
     g_taylor_model_accumulator_profile=TaylorModelAccumulatorProfile();
 }

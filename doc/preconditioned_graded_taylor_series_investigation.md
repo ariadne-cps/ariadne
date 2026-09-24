@@ -2989,3 +2989,17 @@ coefficient aggregation.
 The benchmark remains a single `preconditioned_dense_3e-14` run. Lightweight workspace
 counters report total calls, slot-map growth events, touched/coefficient capacity growth
 events, maximum slot count, and maximum touched count.
+
+
+### 9.81 Fix dense-workspace statistics linkage (2026-09-24)
+
+The first reusable-workspace build failed because the header-only/template workspace code
+in `taylor_model.tpl.hpp` referenced the implementation-only global
+`g_taylor_model_dense_workspace_stats`, which is defined in `taylor_model.cpp` and is
+not visible at template instantiation sites.
+
+The template no longer touches that global directly. Two public recording helpers declared
+in `taylor_model.hpp` and implemented in `taylor_model.cpp` now update the statistics:
+one for workspace preparation/growth and one for maximum touched count. This fixes linkage
+and keeps the profiling state encapsulated in the implementation unit. Dense arithmetic
+and workspace reuse are otherwise unchanged.

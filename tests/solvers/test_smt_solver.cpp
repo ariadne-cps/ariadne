@@ -1109,6 +1109,50 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] monotone contractor on validated smooth constraint" << std::endl;
+            SmtSolver monotone_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                true,
+                true));
+            ExactBoxType domain({ExactIntervalType(0,2)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(3),
+                    exp(x[0])+x[0],
+                    ValidatedNumber(3))
+            });
+            SmtResult result=monotone_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(not result.is_unknown());
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] monotone contractor skips nonmonotone validated coordinate" << std::endl;
+            SmtSolver monotone_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false,
+                true));
+            ExactBoxType domain({ExactIntervalType(0,4)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0),
+                    sin(x[0]),
+                    ValidatedNumber(0))
+            });
+            SmtResult result=monotone_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(not result.is_unknown());
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,0u);
+        }
+
+        {
             std::cout << "[smt-solve] monotone contractor on smooth composed constraint" << std::endl;
             RealVariable mx("monotone_x");
             RealExpression emx=mx;
@@ -1131,9 +1175,33 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(not monotone_result.is_unknown());
             ARIADNE_TEST_EQUAL(
                 monotone_result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_ASSERT(
-                monotone_result.statistics().monotone_effective_reductions
-                <= monotone_result.statistics().monotone_reduction_rounds);
+            ARIADNE_TEST_EQUAL(
+                monotone_result.statistics().monotone_effective_reductions,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] monotone contractor skips nonmonotone theory coordinate" << std::endl;
+            RealVariable mx("nonmonotone_theory_x");
+            RealExpression emx=mx;
+            RealSpace mspace({mx});
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(sin(emx)==0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> mliterals;
+            mliterals.append(alternatives[0][0]);
+            SmtSolver monotone_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false,
+                true));
+            SmtResult result=monotone_solver.solve(
+                mspace,ExactBoxType({ExactIntervalType(0,4)}),mliterals);
+            ARIADNE_TEST_ASSERT(not result.is_unknown());
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_reduction_rounds,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().monotone_effective_reductions,0u);
         }
 
         {

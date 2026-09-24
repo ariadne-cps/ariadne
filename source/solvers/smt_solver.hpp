@@ -196,7 +196,6 @@ std::vector<SizeType> learned_clause_pruning_candidates(
     std::vector<LearnedClausePruningEntry> const& entries);
 
 SizeType apply_learned_clause_pruning(
-    std::vector<Bool>& active,
     std::vector<SizeType> const& candidates,
     SizeType active_count,
     SizeType limit);
@@ -302,18 +301,10 @@ Bool learned_clause_is_theory(
     SizeType index,
     SizeType original_clause_count,
     std::vector<Bool> const& theory_flags);
-Bool clause_is_active(
-    SizeType index,
-    SizeType original_clause_count,
-    std::vector<Bool> const& active_flags);
 Bool assignment_locks_clause(
     int8_t assignment_value,
     std::optional<SizeType> const& reason_clause,
     SizeType clause_index);
-Bool should_bump_learned_clause(
-    SizeType index,
-    SizeType original_clause_count,
-    std::vector<Bool> const& active_flags);
 
 struct TheoryResultInterpretation {
     Bool consistent = false;

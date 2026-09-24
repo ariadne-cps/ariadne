@@ -265,10 +265,11 @@ class TestSmtSolver {
         });
         std::vector<SizeType> candidates=
             SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
-        ARIADNE_TEST_EQUAL(candidates.size(),3u);
+        ARIADNE_TEST_EQUAL(candidates.size(),4u);
         ARIADNE_TEST_EQUAL(candidates[0],9u);
         ARIADNE_TEST_EQUAL(candidates[1],8u);
-        ARIADNE_TEST_EQUAL(candidates[2],7u);
+        ARIADNE_TEST_EQUAL(candidates[2],4u);
+        ARIADNE_TEST_EQUAL(candidates[3],7u);
 
         std::vector<Bool> active(entries.size(),true);
         SizeType pruned=SmtSolverTestSupport::apply_learned_clause_pruning(

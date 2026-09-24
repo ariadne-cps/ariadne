@@ -1022,7 +1022,6 @@ std::vector<SizeType> learned_clause_pruning_candidates(
             | entry.theory
             | entry.recent
             | entry.short_clause
-            | entry.useful
             | entry.protected_clause
             | entry.locked;
         if(excluded) {

@@ -800,7 +800,30 @@ FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>
     StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
     ExactIntervalType wdt(t-h,t+h);
 
-    return restriction(make_taylor_function_model(dphi,join(domx,wdt,doma),swp),join(domx,domt,doma));
+    Stopwatch<Microseconds> make_model_stopwatch;
+    FlowStepTaylorModelType wide_model=
+        make_taylor_function_model(dphi,join(domx,wdt,doma),swp);
+    make_model_stopwatch.click();
+
+    Stopwatch<Microseconds> restriction_stopwatch;
+    FlowStepTaylorModelType result=
+        restriction(wide_model,join(domx,domt,doma));
+    restriction_stopwatch.click();
+
+    static SizeType flow_function_profile_calls=0u;
+    static double make_model_seconds=0.0;
+    static double restriction_seconds=0.0;
+    ++flow_function_profile_calls;
+    make_model_seconds+=make_model_stopwatch.elapsed_seconds();
+    restriction_seconds+=restriction_stopwatch.elapsed_seconds();
+    if(flow_function_profile_calls%500u==0u) {
+        std::cerr << "[FlowFunctionCostProfile]"
+                  << " calls=" << flow_function_profile_calls
+                  << " make_model_seconds=" << make_model_seconds
+                  << " restriction_seconds=" << restriction_seconds
+                  << std::endl;
+    }
+    return result;
 }
 
 // Experimental evaluator for an affine-preconditioned vector field which keeps

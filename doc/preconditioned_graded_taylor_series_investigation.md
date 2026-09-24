@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `820e01cec78610f123ba891e42dc6b5f2b17af68`
+**Latest analysed investigation HEAD:** `a264ea94a2f80d2f7ee2e62061d8d6ca8fe1e885`
 
 ## Purpose of this document
 
@@ -1381,6 +1381,29 @@ This rules out further optimisation of `compute_procedure` as the immediate prio
 If `flow_function` dominates, a promising design is to form/range the defect directly from graded differentials and only materialise the final physical flow polynomial. If `differential` dominates, the graded-to-multivariate coefficient extraction itself needs a specialised residual path.
 
 Flowpipe composition (~3.95 s cumulatively at 350 propagated steps) is now comparable to or larger than any single local-certification subphase and remains the other major optimisation target.
+
+---
+
+
+### 9.29 flow_function materialisation is the recurrence-field conversion bottleneck (2026-09-24)
+
+At 700 candidate calls:
+
+```
+retained compute_procedure: 0.866 s
+differential extraction:    0.00145 s
+flow_function:              2.717 s
+```
+
+So `differential(...)` is effectively free; almost the entire conversion cost is `flow_function`, which constructs a Taylor function model on the widened time domain and then restricts it to the step domain.
+
+This strongly supports keeping the residual in coefficient/graded form rather than materialising `g(P)` as a standalone Taylor patch. Before implementing that larger change, the next profile splits `flow_function` itself into:
+- `make_taylor_function_model(...)`;
+- `restriction(...)`.
+
+If model construction dominates, the direct graded-defect route is the right target. If restriction dominates, a cheaper domain construction or direct creation on the final domain may recover much of the cost with less architectural change.
+
+The long-run timing fluctuates between runs (this run: 11.196 s vs 9.008 s at 1e-8), so optimisation decisions should be based primarily on cumulative internal timers and set counts, not sub-second wall-clock differences between individual runs.
 
 ---
 

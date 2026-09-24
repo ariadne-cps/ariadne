@@ -2943,3 +2943,32 @@ the source but was no longer called, triggering `-Wunused-variable`.
 
 The obsolete lambda has been removed. This is benchmark-driver cleanup only and does not
 change the four graded+dense frontier runs or the Taylor-product kernel.
+
+
+### 9.79 Stop graded-frontier work; return to preconditioned dense optimisation (2026-09-24)
+
+The graded+dense cutoff frontier was completed and is now considered sufficient for the
+current investigation:
+
+```
+cutoff   elapsed_s   final_error
+3e-14    21.2951     3.3536682299918048e-7
+1e-14    25.3351     2.7345746418298614e-7
+3e-15    31.2151     2.4947609102080698e-7
+1e-15    37.8401     2.4157692596632773e-7
+```
+
+The graded integrator is clearly approaching an accuracy plateau well above the
+preconditioned+dense `3e-14` result (`8.5378297219108396e-8`). Further tightening of
+the graded cutoff is therefore not pursued here.
+
+Development focus returns to the QR-preconditioned integrator and specifically to the
+dense full-product accumulator. The benchmark driver is reduced again to one stable
+preconditioned+dense `3e-14` run so subsequent kernel changes can be compared directly
+against the established ~44.7--45.1 s baseline.
+
+The next optimisation target is the remaining per-call dense-workspace overhead:
+`slot_to_touched`, `touched_slots`, and `touched_coefficients` are currently
+allocated afresh in every `_ifma`. The immediate investigation should determine whether
+reusing workspace storage (or moving it to a small reusable helper object) yields a
+material gain before changing arithmetic or cutoff semantics.

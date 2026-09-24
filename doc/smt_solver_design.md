@@ -268,6 +268,11 @@ primitive. UNKNOWN box-processing statistics encode the only currently reachable
 terminal-uncertified case directly instead of carrying a redundant Boolean flag.
 Parallel child suppression remains semantically meaningful under races, but its
 decision is isolated in a deterministic helper so both outcomes can be tested.
+Conflict analysis relies on the 1-UIP implication-graph invariant: while more than
+one current-level literal remains, a resolvable trail pivot exists. Theory nogoods
+likewise contain only variables originating from encoded theory atoms. Iteration over
+those structures therefore does not represent a fall-through/end state that the
+solver can reach.
 
 ## Important rejected approaches
 

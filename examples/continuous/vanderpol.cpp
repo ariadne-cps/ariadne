@@ -46,42 +46,15 @@ void ariadne_main()
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_product_accumulator_probe =
-        [&](String const& policy, double threshold, Bool accumulator) {
-            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
-            PreconditionedGradedTaylorSeriesIntegrator gronwall(
-                StepMaximumError(loose_tolerance),probe_sweeper,
-                lipschitz_tolerance=0.5_x,
-                minimum_spacial_order=5,minimum_temporal_order=5,
-                maximum_spacial_order=5,maximum_temporal_order=5);
-            gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
-            gronwall.set_diagnostics(false);
-            gronwall.set_carried_expansion_diagnostics(false);
-
-            VectorFieldEvolver evolver(dynamics,gronwall);
-            configure_evolver(evolver,plateau_step);
-
-            set_taylor_model_product_profile_enabled(false);
-            set_taylor_model_early_discard_enabled(false);
-            set_taylor_model_incremental_sweep_enabled(false);
-            set_taylor_model_product_accumulator_enabled(accumulator);
-            set_taylor_model_dense_accumulator_enabled(
-                policy=="dense_3e-14");
-            if(accumulator) {
-                reset_taylor_model_accumulator_profile();
-            }
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(
-                initial_set,Real(5.00_dec),Semantics::UPPER);
-            stopwatch.click();
-            set_taylor_model_dense_accumulator_enabled(false);
-            set_taylor_model_product_accumulator_enabled(false);
-            set_taylor_model_incremental_sweep_enabled(true);
-
+    auto report_orbit =
+        [&](String const& method, Stopwatch<Milliseconds> const& stopwatch,
+            auto const& orbit) {
             ARIADNE_ASSERT(!orbit.final().empty());
             auto achieved_error=
                 orbit.final()[0u].state_function().get(0u).error();
+            auto final_radius=orbit.final()[0u].radius();
             for(auto const& enclosure : orbit.final()) {
+                final_radius=max(final_radius,enclosure.radius());
                 for(SizeType i=0u;
                     i!=enclosure.state_function().result_size(); ++i) {
                     achieved_error=max(
@@ -89,48 +62,77 @@ void ariadne_main()
                         enclosure.state_function().get(i).error());
                 }
             }
-
-            std::cerr << "[IntegratorProductAccumulatorBenchmark]"
-                      << " policy=" << policy
-                      << " accumulator=" << accumulator
+            std::cerr << "[IntegratorArchitectureBenchmark]"
+                      << " method=" << method
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
+                      << " final_radius=" << final_radius
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
-            if(accumulator && policy!="dense_3e-14") {
-                auto const ap=taylor_model_accumulator_profile();
-                const double duplication_ratio=
-                    ap.unique_entries
-                        ? static_cast<double>(ap.temporary_entries)
-                            / static_cast<double>(ap.unique_entries)
-                        : 0.0;
-                std::cerr << "[TaylorProductAccumulatorProfile]"
-                          << " policy=" << policy
-                          << " calls=" << ap.calls
-                          << " product_pairs=" << ap.product_pairs
-                          << " temporary_entries=" << ap.temporary_entries
-                          << " unique_entries=" << ap.unique_entries
-                          << " duplication_ratio=" << duplication_ratio
-                          << " max_temporary_entries="
-                          << ap.maximum_temporary_entries
-                          << " max_unique_entries="
-                          << ap.maximum_unique_entries
-                          << " max_argument_size="
-                          << ap.maximum_argument_size
-                          << " max_x_degree="
-                          << ap.maximum_x_degree
-                          << " max_y_degree="
-                          << ap.maximum_y_degree
-                          << " max_product_degree="
-                          << ap.maximum_product_degree
-                          << " max_dense_slots="
-                          << ap.maximum_dense_slots
-                          << std::endl;
-            }
         };
 
-    // Re-run the refined dense accumulator. The previous sort/unique
-    // and first dense measurements are recorded in the investigation log.
-    run_product_accumulator_probe("dense_3e-14",3e-14,true);
+    auto configure_taylor_kernel =
+        [&](Bool dense) {
+            set_taylor_model_product_profile_enabled(false);
+            set_taylor_model_early_discard_enabled(false);
+            set_taylor_model_incremental_sweep_enabled(!dense);
+            set_taylor_model_product_accumulator_enabled(dense);
+            set_taylor_model_dense_accumulator_enabled(dense);
+        };
+
+    auto reset_taylor_kernel = [&]() {
+        set_taylor_model_dense_accumulator_enabled(false);
+        set_taylor_model_product_accumulator_enabled(false);
+        set_taylor_model_incremental_sweep_enabled(true);
+    };
+
+    auto run_graded =
+        [&](String const& method, Bool dense) {
+            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
+            GradedTaylorSeriesIntegrator integrator(
+                StepMaximumError(loose_tolerance),probe_sweeper,
+                lipschitz_tolerance=0.5_x,
+                minimum_spacial_order=5,minimum_temporal_order=5,
+                maximum_spacial_order=5,maximum_temporal_order=5);
+            VectorFieldEvolver evolver(dynamics,integrator);
+            configure_evolver(evolver,plateau_step);
+
+            configure_taylor_kernel(dense);
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(
+                initial_set,Real(5.00_dec),Semantics::UPPER);
+            stopwatch.click();
+            reset_taylor_kernel();
+            report_orbit(method,stopwatch,orbit);
+        };
+
+    auto run_preconditioned_dense = [&]() {
+            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
+            PreconditionedGradedTaylorSeriesIntegrator integrator(
+                StepMaximumError(loose_tolerance),probe_sweeper,
+                lipschitz_tolerance=0.5_x,
+                minimum_spacial_order=5,minimum_temporal_order=5,
+                maximum_spacial_order=5,maximum_temporal_order=5);
+            integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
+            integrator.set_diagnostics(false);
+            integrator.set_carried_expansion_diagnostics(false);
+
+            VectorFieldEvolver evolver(dynamics,integrator);
+            configure_evolver(evolver,plateau_step);
+
+            configure_taylor_kernel(true);
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(
+                initial_set,Real(5.00_dec),Semantics::UPPER);
+            stopwatch.click();
+            reset_taylor_kernel();
+            report_orbit("preconditioned_dense_3e-14",stopwatch,orbit);
+        };
+
+    // Separate the effect of the Taylor-product kernel from the effect of
+    // preconditioning itself.
+    run_graded("graded_legacy_3e-14",false);
+    run_graded("graded_dense_3e-14",true);
+    run_preconditioned_dense();
 
 }

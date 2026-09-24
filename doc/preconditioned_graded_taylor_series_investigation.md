@@ -2831,3 +2831,55 @@ The benchmark is reduced to a single `dense_3e-14` run. The previous
 `TaylorProductAccumulatorProfile` output is suppressed for the dense branch because
 those counters instrument only the append/sort/unique path and would otherwise print
 misleading zeros.
+
+
+### 9.76 Refined dense result and apples-to-apples architecture benchmark (2026-09-24)
+
+Removing per-distinct-index `MultiIndex` allocations and sorting mixed-radix slots
+directly improved the dense `3e-14` run from 45.4911 s to 45.0521 s. The final error
+remained exactly `8.5378297219108396e-8` in the reported run. The additional gain is
+about 1%, so further micro-optimisation of index storage is not currently the highest
+priority.
+
+The next benchmark addresses the comparison with Ariadne's original
+`GradedTaylorSeriesIntegrator`. A two-way comparison would be misleading because the
+new dense product kernel is global Taylor-model machinery and can also benefit the
+original graded integrator. The benchmark therefore runs three configurations under the
+same Van der Pol setup:
+
+```
+graded_legacy_3e-14
+graded_dense_3e-14
+preconditioned_dense_3e-14
+```
+
+All three use:
+- absolute Taylor sweep threshold `3e-14`;
+- `StepMaximumError(1e-2)`;
+- Lipschitz tolerance `0.5`;
+- fixed spatial and temporal orders 5;
+- evolver maximum step `0.0025`;
+- maximum enclosure radius 1;
+- maximum spacial error `1e-6`;
+- evolver reconditioning disabled;
+- evolution time 5.
+
+The legacy graded run uses the original incremental Taylor-product kernel. The graded
+dense run uses the same final-coefficient dense accumulator as the preconditioned run.
+This separates the benefit of the product-kernel redesign from the benefit or overhead
+of the persistent QR-preconditioned architecture.
+
+Each run reports:
+
+```
+[IntegratorArchitectureBenchmark]
+method
+elapsed_seconds
+achieved_final_error
+final_radius
+reach_sets
+```
+
+The key comparison for architectural competitiveness is
+`graded_dense_3e-14` versus `preconditioned_dense_3e-14`; the legacy point is retained
+to quantify how much of the improvement comes purely from the Taylor-product kernel.

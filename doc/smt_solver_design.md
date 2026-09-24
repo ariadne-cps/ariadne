@@ -133,11 +133,13 @@ The current implementation includes:
 - theory-generated nogoods;
 - validated whole-domain theory-atom classification (`TRUE`, `FALSE` or
   `UNKNOWN`);
-- epsilon-safe domain theory propagation: when one Boolean polarity is proven
-  infeasible even after epsilon weakening over the complete domain, the opposite
-  polarity is introduced as a unit theory-implication clause. Unit propagation
-  therefore records a real clause reason and conflict analysis can resolve through
-  the implication graph. Exact falsity alone is never propagated when epsilon
+- epsilon-safe domain theory propagation: after the currently assigned theory
+  literals have passed the normal partial-consistency check, an unassigned atom
+  whose one Boolean polarity is proven infeasible even after epsilon weakening
+  over the complete domain receives the opposite polarity as a unit
+  theory-implication clause. This ordering preserves theory-conflict/nogood
+  learning for already assigned literals while still allowing explained
+  propagation of free atoms. Exact falsity alone is never propagated when epsilon
   weakening still admits the literal;
 - nonchronological backjump accounting;
 - learned-clause activity;

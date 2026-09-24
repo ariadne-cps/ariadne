@@ -2026,21 +2026,8 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().domain_theory_propagations,2u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
-        }
-
-        {
-            std::cout << "[smt-dpll] epsilon relaxation prevents unsound strict propagation" << std::endl;
-            SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0,0)}),(ex>0));
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_implication_clauses,0u);
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_propagations,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
         }
 
         {

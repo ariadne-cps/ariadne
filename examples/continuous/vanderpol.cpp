@@ -93,21 +93,23 @@ void ariadne_main()
                             final_state.get(i).managed_pointer());
                 ARIADNE_ASSERT(taylor_model!=nullptr);
                 auto const& expansion=taylor_model->model().expansion();
-                SizeType max_degree=0u;
+                DegreeType max_degree=0u;
                 for(auto const& term : expansion) {
-                    max_degree=max(max_degree,term.index().degree());
+                    if(term.index().degree()>max_degree) {
+                        max_degree=term.index().degree();
+                    }
                 }
                 for(SizeType degree=0u; degree<=max_degree; ++degree) {
                     SizeType count=0u;
-                    ApproximateDouble max_abs=0.0;
-                    ApproximateDouble sum_abs=0.0;
+                    double max_abs=0.0;
+                    double sum_abs=0.0;
                     SizeType band_lt_1e14=0u;
                     SizeType band_1e14_1e12=0u;
                     SizeType band_1e12_1e10=0u;
                     SizeType band_ge_1e10=0u;
                     for(auto const& term : expansion) {
                         if(term.index().degree()!=degree) { continue; }
-                        auto a=cast_exact(abs(term.coefficient())).get_d();
+                        double a=std::abs(term.coefficient().get_d());
                         ++count;
                         sum_abs+=a;
                         if(a>max_abs) { max_abs=a; }

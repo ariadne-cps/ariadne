@@ -1247,16 +1247,6 @@ TheoryAtomTruth classify_theory_atom(
     }
 }
 
-OutputStream& operator<<(OutputStream& os, TheoryAtomTruth truth)
-{
-    switch(truth) {
-        case TheoryAtomTruth::FALSE_VALUE: return os << "FALSE";
-        case TheoryAtomTruth::UNKNOWN: return os << "UNKNOWN";
-        case TheoryAtomTruth::TRUE_VALUE: return os << "TRUE";
-        default: return os << "INVALID";
-    }
-}
-
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
 {
     if(result.is_epsilon_sat()) {
@@ -2000,9 +1990,6 @@ class SmtDpllSearch {
     std::optional<UpperBoxType> _check_theory_assignment()
     {
         if(_encoding.atom_count()==0u) {
-            if(_domain.is_empty()) {
-                return std::nullopt;
-            }
             return singleton_box(_domain.midpoint());
         }
 

@@ -46,8 +46,8 @@ void ariadne_main()
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_early_discard_probe =
-        [&](String const& policy, double threshold, Bool early_discard) {
+    auto run_sweep_semantics_probe =
+        [&](String const& policy, double threshold, Bool incremental_sweep) {
             ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
                 StepMaximumError(loose_tolerance),probe_sweeper,
@@ -62,12 +62,13 @@ void ariadne_main()
             configure_evolver(evolver,plateau_step);
 
             set_taylor_model_product_profile_enabled(false);
-            set_taylor_model_early_discard_enabled(early_discard);
+            set_taylor_model_early_discard_enabled(false);
+            set_taylor_model_incremental_sweep_enabled(incremental_sweep);
             Stopwatch<Milliseconds> stopwatch;
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
-            set_taylor_model_early_discard_enabled(false);
+            set_taylor_model_incremental_sweep_enabled(true);
 
             ARIADNE_ASSERT(!orbit.final().empty());
             auto achieved_error=
@@ -81,16 +82,16 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorEarlyDiscardBenchmark]"
+            std::cerr << "[IntegratorSweepSemanticsBenchmark]"
                       << " policy=" << policy
-                      << " early_discard=" << early_discard
+                      << " incremental_sweep=" << incremental_sweep
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
         };
 
-    run_early_discard_probe("absolute_3e-14_baseline",3e-14,false);
-    run_early_discard_probe("absolute_3e-14_early",3e-14,true);
+    run_sweep_semantics_probe("absolute_3e-14_incremental",3e-14,true);
+    run_sweep_semantics_probe("absolute_3e-14_final",3e-14,false);
 
 }

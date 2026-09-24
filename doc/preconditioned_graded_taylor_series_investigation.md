@@ -2453,3 +2453,61 @@ absolute_3e-14_early      early_discard=true
 ```
 
 No Taylor arithmetic or early-discard logic is changed by this fix.
+
+
+### 9.66 Conservative early-discard result (2026-09-24)
+
+The conservative early-discard prototype was benchmarked at absolute cutoff `3e-14`
+with all product profiling and carried-expansion snapshots disabled.
+
+Results:
+
+```
+baseline:      49.3621 s   final error 1.7496349409095074e-7
+early discard: 48.1391 s   final error 1.7496349409095074e-7
+```
+
+The observed speedup is about 2.5%, while the reported final error is identical. This
+shows that avoiding materialisation of newly-created terms which the same threshold
+sweeper would immediately remove is a valid optimisation opportunity, but materialisation
+alone is not the dominant cost. The prototype still pays for `mul_err`, multi-index
+construction and merge traversal.
+
+Before attempting a more aggressive pre-product cutoff test, the investigation now
+revisits the semantics of the existing multiplication kernel. In the current `_ifma`,
+`t.sweep()` is executed after each source monomial of `x`. Consequently, partial
+contributions to the same final multi-index can be swept into the remainder before later
+source monomials contribute to that index. This remains rigorous as an enclosure, but it
+is not equivalent to accumulating the complete coefficient for each multi-index and then
+applying the cutoff once to the multiplication result.
+
+### 9.67 Compare incremental sweep with final-product sweep (2026-09-24)
+
+A diagnostic switch now allows `_ifma` to use either:
+
+```
+incremental_sweep=true   # existing behaviour: sweep after every source monomial
+incremental_sweep=false  # accumulate the full product, sweep once at the end
+```
+
+The merge arithmetic itself is unchanged. In final-sweep mode the temporary expansion is
+carried unswept through all source monomials; after the complete product has been merged,
+a single `r.sweep()` is applied. Early discard is disabled for both runs so that the test
+isolates only the placement of the cutoff operation.
+
+The Van der Pol comparison uses the same absolute cutoff `3e-14`:
+
+```
+absolute_3e-14_incremental
+absolute_3e-14_final
+```
+
+Output marker:
+
+```
+[IntegratorSweepSemanticsBenchmark]
+```
+
+This test answers whether the existing incremental cutoff is merely a performance
+engineering choice or whether delaying cutoff until complete multi-index aggregation
+materially changes the accuracy/runtime frontier.

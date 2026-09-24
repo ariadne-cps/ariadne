@@ -1079,6 +1079,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     unsigned long long profile_maximum_sweep_output_terms=0u;
 
     const SizeType as=r.argument_size();
+    const bool incremental_sweep=taylor_model_incremental_sweep_enabled();
+    bool processed_source_term=false;
 
     const ThresholdSweeper<FloatDP>* early_threshold_sweeper=nullptr;
     if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
@@ -1096,6 +1098,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     ErrorType te=t.error();
 
     for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        processed_source_term=true;
         UniformConstReference<MultiIndex> xa=xiter->index();
         UniformConstReference<CoefficientType> xv=xiter->coefficient();
 
@@ -1195,25 +1198,46 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         t.error()=r.error()+te;
         te = 0u;
 
+        if(incremental_sweep) {
+            if(profile) {
+                const auto n=static_cast<unsigned long long>(t.number_of_terms());
+                ++profile_sweep_passes;
+                profile_sweep_input_terms+=n;
+                if(n>profile_maximum_sweep_input_terms) {
+                    profile_maximum_sweep_input_terms=n;
+                }
+            }
+            t.sweep();
+            if(profile) {
+                const auto n=static_cast<unsigned long long>(t.number_of_terms());
+                profile_sweep_output_terms+=n;
+                if(n>profile_maximum_sweep_output_terms) {
+                    profile_maximum_sweep_output_terms=n;
+                }
+            }
+        }
+        r.expansion().swap(t.expansion());
+        r.error()=t.error();
+        t.clear();
+    }
+
+    if(!incremental_sweep && processed_source_term) {
         if(profile) {
-            const auto n=static_cast<unsigned long long>(t.number_of_terms());
+            const auto n=static_cast<unsigned long long>(r.number_of_terms());
             ++profile_sweep_passes;
             profile_sweep_input_terms+=n;
             if(n>profile_maximum_sweep_input_terms) {
                 profile_maximum_sweep_input_terms=n;
             }
         }
-        t.sweep();
+        r.sweep();
         if(profile) {
-            const auto n=static_cast<unsigned long long>(t.number_of_terms());
+            const auto n=static_cast<unsigned long long>(r.number_of_terms());
             profile_sweep_output_terms+=n;
             if(n>profile_maximum_sweep_output_terms) {
                 profile_maximum_sweep_output_terms=n;
             }
         }
-        r.expansion().swap(t.expansion());
-        r.error()=t.error();
-        t.clear();
     }
 
     ErrorType xs=nul(r.error());

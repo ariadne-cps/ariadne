@@ -30,6 +30,7 @@ namespace Ariadne {
 namespace {
 Bool g_taylor_model_product_profile_enabled=false;
 Bool g_taylor_model_early_discard_enabled=false;
+Bool g_taylor_model_incremental_sweep_enabled=true;
 TaylorModelProductProfileContext g_taylor_model_product_profile_context=
     TaylorModelProductProfileContext::GENERAL;
 TaylorModelProductProfileSnapshot g_taylor_model_product_profile;
@@ -93,6 +94,14 @@ Bool taylor_model_early_discard_enabled() {
 
 Void set_taylor_model_early_discard_enabled(Bool enabled) {
     g_taylor_model_early_discard_enabled=enabled;
+}
+
+Bool taylor_model_incremental_sweep_enabled() {
+    return g_taylor_model_incremental_sweep_enabled;
+}
+
+Void set_taylor_model_incremental_sweep_enabled(Bool enabled) {
+    g_taylor_model_incremental_sweep_enabled=enabled;
 }
 
 Void reset_taylor_model_product_profile() {

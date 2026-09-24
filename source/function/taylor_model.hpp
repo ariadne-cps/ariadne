@@ -101,6 +101,8 @@ Bool taylor_model_product_profile_enabled();
 Void set_taylor_model_product_profile_enabled(Bool);
 Bool taylor_model_early_discard_enabled();
 Void set_taylor_model_early_discard_enabled(Bool);
+Bool taylor_model_incremental_sweep_enabled();
+Void set_taylor_model_incremental_sweep_enabled(Bool);
 Void reset_taylor_model_product_profile();
 TaylorModelProductProfileSnapshot taylor_model_product_profile_snapshot();
 TaylorModelProductProfileContext taylor_model_product_profile_context();

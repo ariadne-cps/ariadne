@@ -55,6 +55,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_epsilon_witness_candidate_limits());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_sensitivity_split_selection());
+        ARIADNE_TEST_CALL(test_monotone_coordinate_gating());
         ARIADNE_TEST_CALL(test_search_outcome());
         ARIADNE_TEST_CALL(test_cdcl_helpers());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
@@ -455,6 +456,23 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(selection.coordinate,0u);
             ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
         }
+    }
+
+    Void test_monotone_coordinate_gating() {
+        std::cout << "[smt-icp] validated monotone coordinate gating" << std::endl;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+        UpperBoxType positive_domain({UpperIntervalType(ExactIntervalType(0,2))});
+        UpperBoxType crossing_domain({UpperIntervalType(ExactIntervalType(3,4))});
+
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::monotone_coordinate_is_safe(
+                exp(x[0])+x[0],positive_domain,0u));
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::monotone_coordinate_is_safe(
+                -exp(x[0])-x[0],positive_domain,0u));
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::monotone_coordinate_is_safe(
+                sin(x[0]),crossing_domain,0u));
     }
 
     Void test_search_outcome() {

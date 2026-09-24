@@ -313,7 +313,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
@@ -349,38 +348,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
-                if(not _configuration.monotone_reduction_enabled()) {
-                    return false;
-                }
-                if(monotone_attempted) {
-                    return false;
-                }
-                monotone_attempted=true;
-                UpperBoxType before_monotone=domain;
-                ++statistics.monotone_rounds;
-                for(SizeType i=0; i!=constraints.size(); ++i) {
-                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-                        auto derivative=SmtSolverTestSupport::optional_derivative(
-                            constraints[i].function(),variable);
-                        if(not derivative.has_value()) {
-                            continue;
-                        }
-                        if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                                *derivative,domain)) {
-                            continue;
-                        }
-                        contractor.monotone_reduce(
-                            domain,
-                            constraints[i].function(),
-                            *derivative,
-                            this->_original_bounds(constraints[i]),
-                            variable);
-                    }
-                }
-                if(not same_box(domain,before_monotone)) {
-                    ++statistics.monotone_effective;
-                    continue;
-                }
                 return false;
             }
             continue;
@@ -426,7 +393,8 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
         derivatives.reserve(space.dimension());
         for(SizeType variable=0u; variable!=space.dimension(); ++variable) {
             derivatives.push_back(
-                SmtSolverTestSupport::optional_derivative(function,variable));
+                SmtSolverTestSupport::optional_derivative(
+                    expression,function,variable));
         }
         result.push_back({
             function,
@@ -1158,15 +1126,39 @@ SensitivitySplitSelection sensitivity_split_selection(
     };
 }
 
+Bool expression_is_differentiable(RealExpression const& expression)
+{
+    OperatorCode code=expression.code();
+    if(code==OperatorCode::ABS
+       || code==OperatorCode::MAX
+       || code==OperatorCode::MIN) {
+        return false;
+    }
+
+    switch(expression.kind()) {
+        case OperatorKind::NULLARY:
+        case OperatorKind::VARIABLE:
+            return true;
+        case OperatorKind::UNARY:
+        case OperatorKind::GRADED:
+            return expression_is_differentiable(expression.arg());
+        case OperatorKind::BINARY:
+            return expression_is_differentiable(expression.arg1())
+                && expression_is_differentiable(expression.arg2());
+        default:
+            return true;
+    }
+}
+
 std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
+    RealExpression const& expression,
     ValidatedScalarMultivariateFunction const& function,
     SizeType variable)
 {
-    try {
-        return function.derivative(variable);
-    } catch(std::runtime_error const&) {
+    if(not expression_is_differentiable(expression)) {
         return std::nullopt;
     }
+    return function.derivative(variable);
 }
 
 Bool monotone_coordinate_is_safe(
@@ -1176,18 +1168,6 @@ Bool monotone_coordinate_is_safe(
     UpperIntervalType derivative_image=apply(derivative,domain);
     return definitely(derivative_image.lower_bound()>0)
         || definitely(derivative_image.upper_bound()<0);
-}
-
-Bool monotone_coordinate_is_safe(
-    ValidatedScalarMultivariateFunction const& function,
-    UpperBoxType const& domain,
-    SizeType variable)
-{
-    auto derivative=optional_derivative(function,variable);
-    if(not derivative.has_value()) {
-        return false;
-    }
-    return monotone_coordinate_is_safe(*derivative,domain);
 }
 
 SearchOutcome SearchOutcome::exhausted()

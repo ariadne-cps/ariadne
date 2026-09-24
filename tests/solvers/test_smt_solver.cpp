@@ -475,19 +475,28 @@ class TestSmtSolver {
         UpperBoxType monotone_sine_domain({UpperIntervalType(ExactIntervalType(3,4))});
         UpperBoxType nonmonotone_sine_domain({UpperIntervalType(ExactIntervalType(0,4))});
 
+        RealVariable sx("smooth_gate_x");
+        RealExpression smooth_expression=exp(RealExpression(sx))+RealExpression(sx);
+        RealSpace smooth_space({sx});
+        ValidatedScalarMultivariateFunction smooth_function(
+            smooth_space,smooth_expression);
         auto positive_derivative=SmtSolverTestSupport::optional_derivative(
-            exp(x[0])+x[0],0u);
+            smooth_expression,smooth_function,0u);
         ARIADNE_TEST_ASSERT(positive_derivative.has_value());
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
                 *positive_derivative,positive_domain));
 
+        RealExpression nonsmooth_expression=max(
+            RealExpression(sx),RealExpression(0));
+        ValidatedScalarMultivariateFunction nonsmooth_function(
+            smooth_space,nonsmooth_expression);
         auto nonsmooth_derivative=SmtSolverTestSupport::optional_derivative(
-            max(x[0],ValidatedScalarMultivariateFunction::constant(1,0.0_x)),0u);
+            nonsmooth_expression,nonsmooth_function,0u);
         ARIADNE_TEST_ASSERT(not nonsmooth_derivative.has_value());
         ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::monotone_coordinate_is_safe(
-                exp(x[0])+x[0],positive_domain,0u));
+            not SmtSolverTestSupport::expression_is_differentiable(
+                abs(nonsmooth_expression)));
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
                 -exp(x[0])-x[0],positive_domain,0u));
@@ -1116,50 +1125,6 @@ class TestSmtSolver {
                       << solve_result.statistics().shaving_effective_reductions
                       << "/" << solve_result.statistics().shaving_reduction_rounds
                       << std::endl;
-        }
-
-        {
-            std::cout << "[smt-solve] monotone contractor on validated smooth constraint" << std::endl;
-            SmtSolver monotone_solver(SmtSolverConfiguration(
-                0.125_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                true,
-                true));
-            ExactBoxType domain({ExactIntervalType(0,2)});
-            List<ValidatedConstraint> constraints({
-                ValidatedConstraint(
-                    ValidatedNumber(3),
-                    exp(x[0])+x[0],
-                    ValidatedNumber(3))
-            });
-            SmtResult solve_result=monotone_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
-            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_effective_reductions,1u);
-        }
-
-        {
-            std::cout << "[smt-solve] monotone contractor skips nonmonotone validated coordinate" << std::endl;
-            SmtSolver monotone_solver(SmtSolverConfiguration(
-                0.125_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                false,
-                true));
-            ExactBoxType domain({ExactIntervalType(0,4)});
-            List<ValidatedConstraint> constraints({
-                ValidatedConstraint(
-                    ValidatedNumber(0),
-                    sin(x[0]),
-                    ValidatedNumber(0))
-            });
-            SmtResult solve_result=monotone_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(not solve_result.is_unknown());
-            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_reduction_rounds,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().monotone_effective_reductions,0u);
         }
 
         {

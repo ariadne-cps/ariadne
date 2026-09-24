@@ -2390,3 +2390,48 @@ below_collision + below_new_term + below_trailing == below
 
 The sum `below_new_term + below_trailing` is the conservative candidate pool for an
 early-discard implementation. No arithmetic or certification rule is changed by this diagnostic.
+
+
+### 9.64 Prototype conservative early discard in Taylor products (2026-09-24)
+
+The merge-role profile shows that, for the `3e-14` general Taylor-product workload,
+the overwhelming majority of individually below-threshold products occur in the
+`new_term` and `trailing` branches rather than in collisions with existing coefficients.
+These are precisely the branches where a coefficient is materialised only to be removed
+by the intermediate sweep.
+
+An experimental global switch now enables a conservative early-discard path in `_ifma`
+for `ValidatedTag,FloatDP` Taylor models using a concrete `ThresholdSweeper<FloatDP>`.
+
+The prototype deliberately keeps `mul_err(xv,yv,te)`: it therefore preserves the
+existing coefficient computation and its roundoff contribution. Only after `tv` has
+been computed does it ask the same threshold sweeper whether the newly-created term
+would be discarded. If so, it adds `abs(tv)` rigorously to the error term and does not
+append the coefficient to the temporary expansion.
+
+The optimisation is applied only in:
+- the `ta < ra` new-term branch;
+- the trailing `while(yiter!=y.end())` branch.
+
+The `ra == ta` collision branch is intentionally unchanged.
+
+This prototype therefore targets materialisation, subsequent merge traffic, and sweep
+traffic without yet attempting to avoid the floating-point multiplication itself.
+
+The Van der Pol benchmark is temporarily reduced to an apples-to-apples comparison at
+`3e-14` with all product profiling and carried-expansion snapshots disabled:
+
+```
+absolute_3e-14_baseline   early_discard=false
+absolute_3e-14_early      early_discard=true
+```
+
+Output marker:
+
+```
+[IntegratorEarlyDiscardBenchmark]
+```
+
+The first acceptance criterion is that the early path remains rigorous and preserves
+essentially the same final accuracy while reducing runtime. If successful, a second
+stage can investigate a rigorous pre-product cutoff test that avoids `mul_err` itself.

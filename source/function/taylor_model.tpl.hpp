@@ -1079,6 +1079,17 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     unsigned long long profile_maximum_sweep_output_terms=0u;
 
     const SizeType as=r.argument_size();
+
+    const ThresholdSweeper<FloatDP>* early_threshold_sweeper=nullptr;
+    if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
+        if(taylor_model_early_discard_enabled()) {
+            auto const sweeper=r.sweeper();
+            early_threshold_sweeper=
+                dynamic_cast<ThresholdSweeper<FloatDP> const*>(
+                    &static_cast<SweeperInterface<FloatDP> const&>(sweeper));
+        }
+    }
+
     TaylorModel<P,F> t(as,r.sweeper());
     MultiIndex ta(as);
     CoefficientType tv(t.precision());
@@ -1132,6 +1143,14 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                     }
                 }
                 tv=mul_err(xv,yv,te);
+                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
+                    if(early_threshold_sweeper
+                       && early_threshold_sweeper->discard(ta,tv)) {
+                        te+=cast_positive(abs(tv));
+                        ++yiter;
+                        continue;
+                    }
+                }
                 t._append(ta,tv);
                 ++yiter;
             }
@@ -1161,6 +1180,14 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             }
             ta = xa + ya;
             tv=mul_err(xv,yv,te);
+            if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
+                if(early_threshold_sweeper
+                   && early_threshold_sweeper->discard(ta,tv)) {
+                    te+=cast_positive(abs(tv));
+                    ++yiter;
+                    continue;
+                }
+            }
             t._append(ta,tv);
             ++yiter;
         }

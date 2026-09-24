@@ -46,8 +46,8 @@ void ariadne_main()
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_carried_expansion_probe =
-        [&](String const& policy, double threshold) {
+    auto run_early_discard_probe =
+        [&](String const& policy, double threshold, Bool early_discard) {
             ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
                 StepMaximumError(loose_tolerance),probe_sweeper,
@@ -56,19 +56,18 @@ void ariadne_main()
                 maximum_spacial_order=5,maximum_temporal_order=5);
             gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
             gronwall.set_diagnostics(false);
-            gronwall.set_carried_expansion_diagnostics(true);
+            gronwall.set_carried_expansion_diagnostics(false);
 
             VectorFieldEvolver evolver(dynamics,gronwall);
             configure_evolver(evolver,plateau_step);
 
-            reset_taylor_model_product_profile();
-            set_taylor_model_product_profile_enabled(true);
+            set_taylor_model_product_profile_enabled(false);
+            set_taylor_model_early_discard_enabled(early_discard);
             Stopwatch<Milliseconds> stopwatch;
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
-            set_taylor_model_product_profile_enabled(false);
-            auto const product_profile=taylor_model_product_profile_snapshot();
+            set_taylor_model_early_discard_enabled(false);
 
             ARIADNE_ASSERT(!orbit.final().empty());
             auto achieved_error=
@@ -82,60 +81,19 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorCarriedExpansionBenchmark]"
+            std::cerr << "[IntegratorEarlyDiscardBenchmark]"
                       << " policy=" << policy
+                      << " early_discard=" << early_discard
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
-
-            auto print_product_profile =
-                [&](String const& context,
-                    TaylorModelProductProfileCounters const& profile) {
-                    ARIADNE_ASSERT(
-                        profile.individual_products_below_threshold
-                        + profile.individual_products_above_threshold
-                        == profile.product_pairs);
-                    ARIADNE_ASSERT(
-                        profile.individual_products_below_threshold_collision
-                        + profile.individual_products_below_threshold_new_term
-                        + profile.individual_products_below_threshold_trailing
-                        == profile.individual_products_below_threshold);
-                    std::cerr << "[TaylorProductGenerationProfile]"
-                              << " policy=" << policy
-                              << " context=" << context
-                              << " calls=" << profile.calls
-                              << " product_pairs=" << profile.product_pairs
-                              << " individual_below_threshold="
-                              << profile.individual_products_below_threshold
-                              << " individual_below_collision="
-                              << profile.individual_products_below_threshold_collision
-                              << " individual_below_new_term="
-                              << profile.individual_products_below_threshold_new_term
-                              << " individual_below_trailing="
-                              << profile.individual_products_below_threshold_trailing
-                              << " individual_above_threshold="
-                              << profile.individual_products_above_threshold
-                              << " individual_below_threshold_abs_mass="
-                              << profile.individual_products_below_threshold_abs_mass
-                              << " individual_above_threshold_abs_mass="
-                              << profile.individual_products_above_threshold_abs_mass
-                              << " sweep_passes=" << profile.sweep_passes
-                              << " sweep_input_terms=" << profile.sweep_input_terms
-                              << " sweep_output_terms=" << profile.sweep_output_terms
-                              << " swept_terms=" << profile.swept_terms
-                              << " max_sweep_input_terms="
-                              << profile.maximum_sweep_input_terms
-                              << " max_sweep_output_terms="
-                              << profile.maximum_sweep_output_terms
-                              << " elapsed_seconds=" << profile.elapsed_seconds
-                              << std::endl;
-                };
+        };
             print_product_profile("general",product_profile.general);
             print_product_profile("compose",product_profile.compose);
         };
 
-    run_carried_expansion_probe("absolute_1e-12",1e-12);
-    run_carried_expansion_probe("absolute_3e-14",3e-14);
+    run_early_discard_probe("absolute_3e-14_baseline",3e-14,false);
+    run_early_discard_probe("absolute_3e-14_early",3e-14,true);
 
 }

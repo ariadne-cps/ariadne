@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `cad7465089374ebe2af164fb18dbdc1578cfdfb5`
+**Latest analysed investigation HEAD:** `f2fb94ce5a3b2dabd9341e3ab051d2c625dbf916`
 
 ## Purpose of this document
 
@@ -2122,6 +2122,29 @@ The intent is not to match numeric threshold values across absolute and relative
 Hence the useful comparison is empirical: find whether a relative threshold can produce an error between the absolute 1e-12 and 1e-14 references at runtime close to or below the absolute 1e-12 baseline.
 
 If relative 1e-8 is already too inaccurate, while relative 1e-10 is still too expensive, the existing relative policy is too sensitive to model scale for this workload and a more controlled adaptive/budget policy will be needed.
+
+---
+
+
+### 9.56 Existing RelativeThresholdSweeper does not improve the accuracy/cost frontier (2026-09-24)
+
+The calibrated relative-threshold benchmark completed:
+
+| policy | runtime | achieved final error | sets |
+|---|---:|---:|---:|
+| absolute 1e-12 | 32.172 s | 3.88849e-6 | 2000 |
+| absolute 1e-14 | 57.576 s | 6.67444e-8 | 2000 |
+| relative 1e-8 | 36.408 s | 4.32786e-4 | 2000 |
+| relative 1e-10 | 96.740 s | 7.36170e-6 | 2000 |
+
+Neither relative point is competitive with the absolute baseline:
+- relative 1e-8 is about 1.13x slower than absolute 1e-12 while roughly 111x less accurate;
+- relative 1e-10 is about 3.0x slower than absolute 1e-12 while roughly 1.9x less accurate;
+- absolute 1e-14 is both faster and about 110x more accurate than relative 1e-10.
+
+Therefore the existing `RelativeThresholdSweeper` is not the selective sweeping policy needed for this carried-state workload. Its single model-wide scale `radius(polynomial)+uniform_error` does not discriminate which coefficients preserve important dependency. Tuning the scalar relative threshold merely moves between aggressive information loss and representation explosion, without improving the Pareto frontier established by absolute threshold sweeping.
+
+This closes the immediate sweeper-reuse branch. The next step should not be more scalar-threshold tuning. Instrument the carried expansion to determine which retained terms account for the accuracy gain from absolute 1e-12 to 1e-14: coefficient counts by degree and magnitude band, ideally sampled at representative late steps. That evidence can support a genuinely selective policy (degree-dependent threshold, retained-term budget, or propagated-impact criterion) rather than another global scalar cutoff.
 
 ---
 

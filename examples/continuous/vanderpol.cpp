@@ -62,7 +62,7 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorStepScalingBenchmark]"
+            std::cerr << "[IntegratorCarriedErrorBenchmark]"
                       << " method=" << method
                       << " tolerance=" << tolerance
                       << " max_step=" << max_step
@@ -75,13 +75,12 @@ void ariadne_main()
                       << std::endl;
         };
 
-    // Fixed-max-step sweep for the error-vs-h investigation.
-    // Use a deliberately loose local-error threshold so that, whenever the
-    // enclosure/bounder permits it, the configured maximum step rather than
-    // StepMaximumError controls the integration step.
+    // Focused carried-state error diagnostic at and below the observed
+    // Gronwall error minimum.  Only the new integrator is run here because the
+    // purpose is to locate where its per-step representation error is injected.
     const ExactDouble loose_tolerance=1e-2_x;
 
-    auto run_fixed_step_pair = [&](ExactDouble max_step) {
+    auto run_carried_error_probe = [&](ExactDouble max_step) {
         PreconditionedGradedTaylorSeriesIntegrator gronwall(
             StepMaximumError(loose_tolerance),sweeper,
             lipschitz_tolerance=0.5_x,
@@ -89,21 +88,11 @@ void ariadne_main()
             maximum_spacial_order=5,maximum_temporal_order=5);
         gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
         gronwall.set_diagnostics(false);
-
-        GradedTaylorSeriesIntegrator graded(
-            StepMaximumError(loose_tolerance),sweeper,
-            lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=5,minimum_temporal_order=5,
-            maximum_spacial_order=5,maximum_temporal_order=5);
-
         run_long_benchmark("GRONWALL",gronwall,loose_tolerance,max_step);
-        run_long_benchmark("GRADED",graded,loose_tolerance,max_step);
     };
 
-    run_fixed_step_pair(0.04_x);
-    run_fixed_step_pair(0.02_x);
-    run_fixed_step_pair(0.01_x);
-    run_fixed_step_pair(0.005_x);
-    run_fixed_step_pair(0.0025_x);
+    run_carried_error_probe(0.01_x);
+    run_carried_error_probe(0.005_x);
+    run_carried_error_probe(0.0025_x);
 
 }

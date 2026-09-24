@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `ab2d86dd8b7c25f6c17c3de56955fd680cbc5fa0`
+**Latest analysed investigation HEAD:** `eee4ef3ad5f11b2cf9436575dcf41e2b06bae28b`
 
 ## Purpose of this document
 
@@ -1907,6 +1907,36 @@ Therefore objective 1 is not solved end-to-end yet. The new local flow certifica
 5. This redirects the next investigation: do not spend the next effort tightening the local residual. At h <= 0.01 the local residual is no longer the visible limiting factor. Instrument the final state-function error immediately before and after endpoint composition, preconditioning, state composition and sweeping, and determine which carried-state operation injects the approximately per-step floor.
 
 This result also explains why a Flow*-like integrator cannot be obtained solely by improving the one-step flow polynomial/certificate. The representation of the propagated set between steps must preserve the tighter local accuracy.
+
+---
+
+
+### 9.47 Instrument carried-state error injection below the h=0.01 minimum (2026-09-24)
+
+The next diagnostic targets the newly exposed small-step floor rather than the local residual.
+
+For each accepted preconditioned step it samples the Taylor-model error vectors at these representation boundaries:
+
+```
+input_normalised_errors
+physical_local_flow_errors
+local_endpoint_errors
+evolved_physical_errors
+local_transition_errors
+next_normalised_errors
+```
+
+under the marker `[CarriedStateErrorProfile]`. The first five steps and then every 100th step are reported.
+
+Interpretation:
+- `physical_local_flow_errors -> local_endpoint_errors` isolates endpoint evaluation of the fresh one-step flow;
+- `local_endpoint_errors -> local_transition_errors` shows the effect of preconditioning the fresh endpoint;
+- `input_normalised_errors + local_transition_errors -> next_normalised_errors` exposes the accumulation introduced by composing the new local coordinate transition with the carried symbolic state;
+- `evolved_physical_errors` gives a physical-coordinate reference after direct endpoint composition with the carried state.
+
+The benchmark is reduced to the Gronwall/preconditioned integrator at max_step 0.01, 0.005 and 0.0025, exactly the regime where the final error changes from 1.85e-6 to 2.47e-6 to 3.89e-6. This avoids rerunning the already-understood Graded comparison and keeps the diagnostic focused.
+
+No production arithmetic or certification decision is changed by this instrumentation.
 
 ---
 

@@ -2190,11 +2190,27 @@ class TestSmtSolver {
             std::cout << "[smt-dpll] pruning deactivates learned clauses that are later skipped" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
                 0.125_x,std::numeric_limits<SizeType>::max(),0u));
-            ContinuousPredicate a=(ex>=-0.8_x);
-            ContinuousPredicate b=(ex>=-0.4_x);
-            ContinuousPredicate c=(ex>=0);
-            ContinuousPredicate d=(ex>=0.4_x);
-            ContinuousPredicate e=(ex>=0.8_x);
+            RealVariable y("prune_y");
+            RealVariable z("prune_z");
+            RealVariable w("prune_w");
+            RealVariable v("prune_v");
+            RealExpression ey=y;
+            RealExpression ez=z;
+            RealExpression ew=w;
+            RealExpression ev=v;
+            RealSpace prune_space({x,y,z,w,v});
+            ExactBoxType prune_domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-1,1)
+            });
+            ContinuousPredicate a=(ex>=0);
+            ContinuousPredicate b=(ey>=0);
+            ContinuousPredicate c=(ez>=0);
+            ContinuousPredicate d=(ew>=0);
+            ContinuousPredicate e=(ev>=0);
             ContinuousPredicate formula=
                 (a||b||c||d||e)&&
                 ((!a)||b||c||d||e)&&
@@ -2229,8 +2245,9 @@ class TestSmtSolver {
                 (a||(!b)||(!c)||(!d)||(!e))&&
                 ((!a)||(!b)||(!c)||(!d)||(!e));
             SmtResult solve_result=pruning_solver.solve(
-                space,ExactBoxType({ExactIntervalType(-1,1)}),formula);
+                prune_space,prune_domain,formula);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts==0u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
         }

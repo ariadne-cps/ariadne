@@ -312,6 +312,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
+    Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
@@ -347,6 +348,10 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                if(monotone_attempted) {
+                    return false;
+                }
+                monotone_attempted=true;
                 UpperBoxType before_monotone=domain;
                 ++statistics.monotone_rounds;
                 for(SizeType i=0; i!=constraints.size(); ++i) {
@@ -421,6 +426,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
+    Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
@@ -462,6 +468,10 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                if(monotone_attempted) {
+                    return false;
+                }
+                monotone_attempted=true;
                 UpperBoxType before_monotone=domain;
                 ++statistics.monotone_rounds;
                 for(auto const& literal:literals) {

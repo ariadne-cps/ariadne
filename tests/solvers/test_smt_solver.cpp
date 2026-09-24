@@ -1108,8 +1108,8 @@ class TestSmtSolver {
             SmtResult monotone_result=solver.solve(
                 mspace,ExactBoxType({ExactIntervalType(0,2)}),mliterals);
             ARIADNE_TEST_ASSERT(not monotone_result.is_unknown());
-            ARIADNE_TEST_ASSERT(
-                monotone_result.statistics().monotone_reduction_rounds>=1u);
+            ARIADNE_TEST_EQUAL(
+                monotone_result.statistics().monotone_reduction_rounds,1u);
             ARIADNE_TEST_ASSERT(
                 monotone_result.statistics().monotone_effective_reductions
                 <= monotone_result.statistics().monotone_reduction_rounds);

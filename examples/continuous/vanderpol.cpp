@@ -37,57 +37,20 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    auto run_long_benchmark =
-        [&](String const& method,
-            IntegratorInterface const& integrator,
-            ExactDouble tolerance,
-            ExactDouble max_step) {
-            VectorFieldEvolver evolver(dynamics,integrator);
-            configure_evolver(evolver,max_step);
-
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(
-                initial_set,Real(5.00_dec),Semantics::UPPER);
-            stopwatch.click();
-
-            ARIADNE_ASSERT(!orbit.final().empty());
-            auto achieved_error=
-                orbit.final()[0u].state_function().get(0u).error();
-            for(auto const& enclosure : orbit.final()) {
-                for(SizeType i=0u;
-                    i!=enclosure.state_function().result_size(); ++i) {
-                    achieved_error=max(
-                        achieved_error,
-                        enclosure.state_function().get(i).error());
-                }
-            }
-
-            std::cerr << "[IntegratorCarriedErrorBenchmark]"
-                      << " method=" << method
-                      << " tolerance=" << tolerance
-                      << " max_step=" << max_step
-                      << " horizon=5.0"
-                      << " elapsed_seconds=" << stopwatch.elapsed_seconds()
-                      << " achieved_final_error=" << achieved_error
-                      << " reach_sets=" << orbit.reach().size()
-                      << " intermediate_sets=" << orbit.intermediate().size()
-                      << " final_sets=" << orbit.final().size()
-                      << std::endl;
-        };
-
-    // Spatial-order plateau diagnostic.  Keep time horizon, max step,
-    // temporal order, sweeper and loose local tolerance fixed; vary only the
-    // spatial order of the flow/state representation.
+    // Sweeper-threshold diagnostic at the observed small-step floor.
+    // Keep horizon, maximum step, spatial/temporal order and tolerance fixed;
+    // vary only the threshold used to sweep small Taylor coefficients.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_spatial_order_probe = [&](DegreeType spatial_order) {
+    auto run_sweeper_probe = [&](double threshold) {
+        ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
         PreconditionedGradedTaylorSeriesIntegrator gronwall(
-            StepMaximumError(loose_tolerance),sweeper,
+            StepMaximumError(loose_tolerance),probe_sweeper,
             lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=spatial_order,
+            minimum_spacial_order=5,
             minimum_temporal_order=5,
-            maximum_spacial_order=spatial_order,
+            maximum_spacial_order=5,
             maximum_temporal_order=5);
         gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
         gronwall.set_diagnostics(false);
@@ -112,9 +75,10 @@ void ariadne_main()
             }
         }
 
-        std::cerr << "[IntegratorSpatialOrderBenchmark]"
+        std::cerr << "[IntegratorSweeperBenchmark]"
                   << " method=GRONWALL"
-                  << " spatial_order=" << spatial_order
+                  << " sweep_threshold=" << threshold
+                  << " spatial_order=5"
                   << " temporal_order=5"
                   << " tolerance=" << loose_tolerance
                   << " max_step=" << plateau_step
@@ -127,8 +91,9 @@ void ariadne_main()
                   << std::endl;
     };
 
-    run_spatial_order_probe(4u);
-    run_spatial_order_probe(5u);
-    run_spatial_order_probe(6u);
+    run_sweeper_probe(1e-10);
+    run_sweeper_probe(1e-12);
+    run_sweeper_probe(1e-14);
+    run_sweeper_probe(1e-16);
 
 }

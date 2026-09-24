@@ -106,6 +106,6 @@ void ariadne_main()
         "graded_threshold_degree_5_1e-14",
         Sweeper<FloatDP>(
             GradedThresholdSweeper<FloatDP>(
-                DoublePrecision(),5u,FloatDP(1e-14))));
+                DoublePrecision(),5u,FloatDP(1e-14_x,DoublePrecision()))));
 
 }

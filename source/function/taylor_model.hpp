@@ -77,6 +77,9 @@ struct TaylorModelProductProfileCounters {
     unsigned long long calls=0u;
     unsigned long long product_pairs=0u;
     unsigned long long individual_products_below_threshold=0u;
+    unsigned long long individual_products_below_threshold_collision=0u;
+    unsigned long long individual_products_below_threshold_new_term=0u;
+    unsigned long long individual_products_below_threshold_trailing=0u;
     unsigned long long individual_products_above_threshold=0u;
     double individual_products_below_threshold_abs_mass=0.0;
     double individual_products_above_threshold_abs_mass=0.0;
@@ -104,6 +107,9 @@ Void record_taylor_model_product_profile(
     TaylorModelProductProfileContext,
     unsigned long long product_pairs,
     unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_below_threshold_collision,
+    unsigned long long individual_products_below_threshold_new_term,
+    unsigned long long individual_products_below_threshold_trailing,
     unsigned long long individual_products_above_threshold,
     double individual_products_below_threshold_abs_mass,
     double individual_products_above_threshold_abs_mass,

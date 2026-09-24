@@ -96,6 +96,11 @@ void ariadne_main()
                         profile.individual_products_below_threshold
                         + profile.individual_products_above_threshold
                         == profile.product_pairs);
+                    ARIADNE_ASSERT(
+                        profile.individual_products_below_threshold_collision
+                        + profile.individual_products_below_threshold_new_term
+                        + profile.individual_products_below_threshold_trailing
+                        == profile.individual_products_below_threshold);
                     std::cerr << "[TaylorProductGenerationProfile]"
                               << " policy=" << policy
                               << " context=" << context
@@ -103,6 +108,12 @@ void ariadne_main()
                               << " product_pairs=" << profile.product_pairs
                               << " individual_below_threshold="
                               << profile.individual_products_below_threshold
+                              << " individual_below_collision="
+                              << profile.individual_products_below_threshold_collision
+                              << " individual_below_new_term="
+                              << profile.individual_products_below_threshold_new_term
+                              << " individual_below_trailing="
+                              << profile.individual_products_below_threshold_trailing
                               << " individual_above_threshold="
                               << profile.individual_products_above_threshold
                               << " individual_below_threshold_abs_mass="

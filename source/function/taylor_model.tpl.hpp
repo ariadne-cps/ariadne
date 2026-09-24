@@ -1063,6 +1063,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     const auto profile_start=profile ? std::chrono::steady_clock::now()
                                      : std::chrono::steady_clock::time_point();
     unsigned long long profile_individual_products_below_threshold=0u;
+    unsigned long long profile_individual_products_below_threshold_collision=0u;
+    unsigned long long profile_individual_products_below_threshold_new_term=0u;
+    unsigned long long profile_individual_products_below_threshold_trailing=0u;
     unsigned long long profile_individual_products_above_threshold=0u;
     double profile_individual_products_below_threshold_abs_mass=0.0;
     double profile_individual_products_above_threshold_abs_mass=0.0;
@@ -1099,6 +1102,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                             std::abs(xv.get_d()*yv.get_d());
                         if(product_magnitude<profile_threshold) {
                             ++profile_individual_products_below_threshold;
+                            ++profile_individual_products_below_threshold_collision;
                             profile_individual_products_below_threshold_abs_mass+=product_magnitude;
                         } else {
                             ++profile_individual_products_above_threshold;
@@ -1119,6 +1123,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                             std::abs(xv.get_d()*yv.get_d());
                         if(product_magnitude<profile_threshold) {
                             ++profile_individual_products_below_threshold;
+                            ++profile_individual_products_below_threshold_new_term;
                             profile_individual_products_below_threshold_abs_mass+=product_magnitude;
                         } else {
                             ++profile_individual_products_above_threshold;
@@ -1146,6 +1151,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         std::abs(xv.get_d()*yv.get_d());
                     if(product_magnitude<profile_threshold) {
                         ++profile_individual_products_below_threshold;
+                        ++profile_individual_products_below_threshold_trailing;
                         profile_individual_products_below_threshold_abs_mass+=product_magnitude;
                     } else {
                         ++profile_individual_products_above_threshold;
@@ -1208,6 +1214,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             static_cast<unsigned long long>(x.number_of_terms())
                 * static_cast<unsigned long long>(y.number_of_terms()),
             profile_individual_products_below_threshold,
+            profile_individual_products_below_threshold_collision,
+            profile_individual_products_below_threshold_new_term,
+            profile_individual_products_below_threshold_trailing,
             profile_individual_products_above_threshold,
             profile_individual_products_below_threshold_abs_mass,
             profile_individual_products_above_threshold_abs_mass,

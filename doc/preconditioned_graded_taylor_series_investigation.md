@@ -2358,3 +2358,35 @@ individual_below_threshold + individual_above_threshold == product_pairs
 
 for both `general` and `compose` contexts. The arithmetic and certification remain
 unchanged; this commit only repairs the profiler.
+
+
+### 9.63 Split below-threshold products by merge role (2026-09-24)
+
+The corrected individual-product profile shows that roughly 83--85% of products in the
+general Taylor-model product context are individually below the active cutoff, and that
+their count is close to the number of terms later removed by intermediate sweeps.
+
+Before implementing early discard, the profiler now partitions below-threshold products
+according to the merge role in which they are consumed:
+
+- `collision`: `ra == ta`, where the product is fused into an already resident coefficient;
+- `new_term`: `ta < ra`, where the product creates a new coefficient before the next resident term;
+- `trailing`: the final `while(yiter!=y.end())`, where every remaining product necessarily creates a new coefficient.
+
+New output fields on `[TaylorProductGenerationProfile]` are:
+
+```
+individual_below_collision
+individual_below_new_term
+individual_below_trailing
+```
+
+The reporting code asserts both diagnostic invariants:
+
+```
+below + above == product_pairs
+below_collision + below_new_term + below_trailing == below
+```
+
+The sum `below_new_term + below_trailing` is the conservative candidate pool for an
+early-discard implementation. No arithmetic or certification rule is changed by this diagnostic.

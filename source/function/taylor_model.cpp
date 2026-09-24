@@ -37,6 +37,9 @@ Void accumulate_product_profile(
     TaylorModelProductProfileCounters& counters,
     unsigned long long product_pairs,
     unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_below_threshold_collision,
+    unsigned long long individual_products_below_threshold_new_term,
+    unsigned long long individual_products_below_threshold_trailing,
     unsigned long long individual_products_above_threshold,
     double individual_products_below_threshold_abs_mass,
     double individual_products_above_threshold_abs_mass,
@@ -51,6 +54,12 @@ Void accumulate_product_profile(
     counters.product_pairs+=product_pairs;
     counters.individual_products_below_threshold+=
         individual_products_below_threshold;
+    counters.individual_products_below_threshold_collision+=
+        individual_products_below_threshold_collision;
+    counters.individual_products_below_threshold_new_term+=
+        individual_products_below_threshold_new_term;
+    counters.individual_products_below_threshold_trailing+=
+        individual_products_below_threshold_trailing;
     counters.individual_products_above_threshold+=
         individual_products_above_threshold;
     counters.individual_products_below_threshold_abs_mass+=
@@ -98,6 +107,9 @@ Void record_taylor_model_product_profile(
     TaylorModelProductProfileContext context,
     unsigned long long product_pairs,
     unsigned long long individual_products_below_threshold,
+    unsigned long long individual_products_below_threshold_collision,
+    unsigned long long individual_products_below_threshold_new_term,
+    unsigned long long individual_products_below_threshold_trailing,
     unsigned long long individual_products_above_threshold,
     double individual_products_below_threshold_abs_mass,
     double individual_products_above_threshold_abs_mass,
@@ -114,6 +126,9 @@ Void record_taylor_model_product_profile(
     accumulate_product_profile(
         counters,product_pairs,
         individual_products_below_threshold,
+        individual_products_below_threshold_collision,
+        individual_products_below_threshold_new_term,
+        individual_products_below_threshold_trailing,
         individual_products_above_threshold,
         individual_products_below_threshold_abs_mass,
         individual_products_above_threshold_abs_mass,

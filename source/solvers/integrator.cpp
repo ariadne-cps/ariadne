@@ -827,15 +827,6 @@ FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>
 }
 
 
-FlowStepTaylorModelType direct_flow_function(
-        const Vector<Differential<FloatBounds<DP>>>& dphi,
-        const ExactBoxType& domx,
-        const ExactIntervalType& domt,
-        const ExactBoxType& doma,
-        Sweeper<FloatDP> swp)
-{
-    return make_taylor_function_model(dphi,join(domx,domt,doma),swp);
-}
 
 // Experimental evaluator for an affine-preconditioned vector field which keeps
 // the original physical Procedure intact.  Instead of first constructing the
@@ -1014,7 +1005,7 @@ graded_series_centre_polynomial_step(
 
     Stopwatch<Microseconds> recurrence_flow_function_stopwatch;
     FlowStepTaylorModelType recurrence_field=
-        direct_flow_function(
+        flow_function(
             recurrence_field_differential,domx,domt,doma,sweeper);
     recurrence_flow_function_stopwatch.click();
 

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `334af826e7466788a7c2376387234c955e441bc5`
+**Latest analysed investigation HEAD:** `639782197e01889cad88e0b7ee9e66260f8ceb5d`
 
 ## Purpose of this document
 
@@ -1429,6 +1429,41 @@ For the recurrence-field path specifically, `flow_function` costs about 2.42 s a
 The standard `flow_function` deliberately builds on a widened time domain `[t-h,t+h]` and then restricts to the actual step domain `[t,t+h]`. That construction is appropriate for the original flow-model path, but for the auxiliary residual field it may be unnecessary: the field is used only to form/range the defect on the actual step domain.
 
 The next experiment therefore leaves centre-polynomial construction unchanged but materialises the recurrence field directly on `join(domx,domt,doma)`, bypassing `restriction`. This is a semantic experiment, not yet an assumed-safe optimisation. The existing diagnostics compare its field and defect ranges with the generic path on the identical first step. If those remain valid enclosures and the accepted-step counts remain stable, this cheaper final-domain construction can replace the widened-domain route for residual certification.
+
+---
+
+
+### 9.31 Direct final-domain materialisation is invalid; revert (2026-09-24)
+
+The direct-domain experiment fails the semantic gate immediately.
+
+On the identical first step:
+
+```
+generic_field_range:
+  [{2.1514581:2.3727625},{-5.1240475:-2.4433552}]
+
+direct recurrence_field_range:
+  [{2.2007242:2.3979110},{-5.0048405:-2.3084512}]
+```
+
+and the corresponding defect explodes from roughly 1e-7--1e-6 to order 1e-2--1e-1:
+
+```
+generic defect:
+  x ~ [-1.34e-7, 1.79e-7]
+  y ~ [-9.85e-7, 1.40e-6]
+
+direct recurrence defect:
+  x ~ [-5.07e-2,-2.38e-2]
+  y ~ [-1.57e-1,-9.75e-2]
+```
+
+The Gronwall remainder therefore jumps to about 3.9e-3 on h=0.02 and the step is rejected. The adaptive search is then forced down to h=0.0003125 in many states, explaining the runaway runtime. The widened-domain construction plus restriction is not an incidental implementation detail here; it is part of how the Taylor coefficients are interpreted/scaled by `make_taylor_function_model`.
+
+This experiment is reverted.
+
+The profiling result remains useful: restriction is expensive, but bypassing it by changing the domain is not semantically valid. The next optimisation should instead avoid materialising the auxiliary field Taylor patch entirely. Since `differential(final_f,...)` is essentially free, the promising route is to construct the defect directly at the Differential/graded level and only create the minimal enclosure needed by Gronwall, rather than converting `g(P)` into a full function patch and then subtracting/ranging it.
 
 ---
 

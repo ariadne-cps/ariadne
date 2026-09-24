@@ -55,7 +55,8 @@ void ariadne_main()
                 minimum_spacial_order=5,minimum_temporal_order=5,
                 maximum_spacial_order=5,maximum_temporal_order=5);
             gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
-            gronwall.set_diagnostics(true);
+            gronwall.set_diagnostics(false);
+            gronwall.set_carried_expansion_diagnostics(true);
 
             VectorFieldEvolver evolver(dynamics,gronwall);
             configure_evolver(evolver,plateau_step);

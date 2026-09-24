@@ -339,7 +339,8 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
         const bool carried_snapshot_step=
             diagnostic_step==500u || diagnostic_step==1000u
             || diagnostic_step==1500u || diagnostic_step==2000u;
-        if(preconditioned_integrator->diagnostics() && carried_snapshot_step) {
+        if(preconditioned_integrator->carried_expansion_diagnostics()
+           && carried_snapshot_step) {
             print_carried_expansion_snapshot(
                 "input",diagnostic_step,
                 local_state.normalised_mapping(),
@@ -350,7 +351,8 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
             preconditioned_integrator->step(
                 dynamic,local_state,suggest(maximum_step_size));
 
-        if(preconditioned_integrator->diagnostics() && carried_snapshot_step) {
+        if(preconditioned_integrator->carried_expansion_diagnostics()
+           && carried_snapshot_step) {
             print_carried_expansion_snapshot(
                 "output",diagnostic_step,
                 local_step.final_state().normalised_mapping(),

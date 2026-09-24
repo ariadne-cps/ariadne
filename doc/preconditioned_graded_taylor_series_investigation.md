@@ -2262,3 +2262,19 @@ Interpretation:
 - comparing input/output snapshots at the same milestone reveals how much one local transition changes the resident structure.
 
 No certification rule is changed by this diagnostic.
+
+
+### 9.59 Separate carried-expansion snapshots from verbose integrator diagnostics (2026-09-24)
+
+The first carried-expansion snapshot run was interrupted before step 500 because it enabled the existing global `diagnostics` flag. That flag activates the full historical diagnostic stack, including per-instruction `[GradedProcedureDiagnostic]` output, producing tens of thousands of lines long before the first requested snapshot.
+
+This was a diagnostic-control mistake, not evidence that the carried-expansion inspection itself is expensive.
+
+A dedicated `carried_expansion_diagnostics` flag is now added to `PreconditionedGradedTaylorSeriesIntegrator`. The Van der Pol probe uses:
+
+```
+diagnostics = false
+carried_expansion_diagnostics = true
+```
+
+The evolver therefore emits only the requested `[CarriedExpansionSnapshot]` records at steps 500, 1000, 1500 and 2000, while all pre-existing verbose diagnostics remain disabled. The numerical algorithm and certification rules are unchanged.

@@ -105,6 +105,8 @@ Bool taylor_model_incremental_sweep_enabled();
 Void set_taylor_model_incremental_sweep_enabled(Bool);
 Bool taylor_model_product_accumulator_enabled();
 Void set_taylor_model_product_accumulator_enabled(Bool);
+Bool taylor_model_dense_accumulator_enabled();
+Void set_taylor_model_dense_accumulator_enabled(Bool);
 
 struct TaylorModelAccumulatorProfile {
     unsigned long long calls=0u;
@@ -126,7 +128,7 @@ Void record_taylor_model_accumulator_profile(
     unsigned long long product_pairs,
     unsigned long long temporary_entries,
     unsigned long long unique_entries,
-    unsigned long long argument_size,
+    unsigned long long num_variables,
     unsigned long long x_degree,
     unsigned long long y_degree,
     unsigned long long product_degree,

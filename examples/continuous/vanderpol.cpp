@@ -65,6 +65,8 @@ void ariadne_main()
             set_taylor_model_early_discard_enabled(false);
             set_taylor_model_incremental_sweep_enabled(false);
             set_taylor_model_product_accumulator_enabled(accumulator);
+            set_taylor_model_dense_accumulator_enabled(
+                policy=="dense_3e-14");
             if(accumulator) {
                 reset_taylor_model_accumulator_profile();
             }
@@ -72,6 +74,7 @@ void ariadne_main()
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
+            set_taylor_model_dense_accumulator_enabled(false);
             set_taylor_model_product_accumulator_enabled(false);
             set_taylor_model_incremental_sweep_enabled(true);
 
@@ -126,8 +129,8 @@ void ariadne_main()
             }
         };
 
-    // Profile accumulator compression at the tighter cutoff, where
-    // product volume is largest and the next data-structure choice matters most.
-    run_product_accumulator_probe("accumulator_profile_3e-14",3e-14,true);
+    // Compare append/sort/unique with the keyed dense-slot accumulator.
+    run_product_accumulator_probe("sort_unique_3e-14",3e-14,true);
+    run_product_accumulator_probe("dense_3e-14",3e-14,true);
 
 }

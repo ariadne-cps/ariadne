@@ -2724,3 +2724,53 @@ for the observed workload. If the slot count remains modest, direct rank-to-arra
 accumulation should avoid hashing, tree nodes, duplicate MultiIndex storage, and sorting.
 If it grows too large, the next implementation should instead use a compact sparse
 index-to-slot structure.
+
+
+### 9.73 Dense-workspace feasibility and keyed accumulator prototype (2026-09-24)
+
+The `3e-14` feasibility run reported:
+
+```
+max_argument_size   3
+max_x_degree       16
+max_y_degree       17
+max_product_degree 31
+max_dense_slots  5456
+max_unique_entries 325
+```
+
+The complete total-degree monomial space is therefore small, and the actually occupied
+set is smaller still. This makes a dense index-to-slot workspace practical.
+
+The profiler parameter named `argument_size` also shadowed Ariadne's namespace-level
+`argument_size` attribute generator under `-Wshadow`. It has been renamed
+`num_variables`.
+
+A first keyed accumulator is now implemented. Rather than materialising all coefficient
+products and sorting them, it uses a collision-free mixed-radix rank for each multi-index:
+
+```
+slot = a0 + base*a1 + base^2*a2 + ...
+base = maximum_degree + 1
+```
+
+Only the slot-to-touched map is dense. Multi-indices and coefficients are stored only
+for occupied slots, so the large dense space does not require constructing thousands of
+floating-point coefficient objects on every call. Repeated contributions are accumulated
+immediately with `add_err`; individual products still use `mul_err`.
+
+At the end of a product, only the occupied indices are sorted into Ariadne's reverse
+lexicographic order, an `Expansion` is constructed once, and a single final sweep is
+performed. For the observed workload this means sorting at most a few hundred occupied
+indices instead of thousands of duplicate coefficient-product entries.
+
+The benchmark now compares at `3e-14`:
+
+```
+sort_unique_3e-14
+dense_3e-14
+```
+
+Both use final-coefficient sweep semantics and disable the earlier incremental
+early-discard path. The comparison will show whether direct keyed accumulation recovers
+the remaining cost of append/sort/unique.

@@ -27,6 +27,8 @@
 #include <iomanip>
 #include <chrono>
 #include <limits>
+#include <algorithm>
+#include <vector>
 
 #include "numeric/rounding.hpp"
 #include "numeric/numeric.hpp"
@@ -1082,83 +1084,181 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     const bool incremental_sweep=taylor_model_incremental_sweep_enabled();
     bool processed_source_term=false;
 
-    // Experimental direct product accumulator.  Materialise the unsummed
-    // coefficient products once, sort by multi-index, combine equal indices
-    // rigorously, and apply the sweeper only to the fully aggregated
-    // coefficients.  This preserves final-sweep semantics while avoiding the
-    // repeated full-expansion merge/swap performed by the legacy kernel.
+    // Experimental full-product accumulators.
     if(taylor_model_product_accumulator_enabled()) {
-        TaylorModel<P,F> accumulated(as,r.sweeper());
-        const SizeType product_terms=
-            x.number_of_terms()*y.number_of_terms();
-        accumulated.expansion().reserve(
-            r.number_of_terms()+product_terms);
-
-        for(auto riter=r.begin(); riter!=r.end(); ++riter) {
-            accumulated._append(
-                riter->index(),riter->coefficient());
-        }
-
         ErrorType product_roundoff=nul(r.error());
-        MultiIndex product_index(as);
-        for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            UniformConstReference<MultiIndex> xa=xiter->index();
-            UniformConstReference<CoefficientType> xv=xiter->coefficient();
-            for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
-                UniformConstReference<MultiIndex> ya=yiter->index();
-                UniformConstReference<CoefficientType> yv=yiter->coefficient();
-                product_index=xa+ya;
-                CoefficientType product=
-                    mul_err(xv,yv,product_roundoff);
-                accumulated._append(product_index,product);
+
+        if(taylor_model_dense_accumulator_enabled()) {
+            // Use a collision-free mixed-radix rank for the observed
+            // multi-index range.  Only the slot-to-touched map is dense;
+            // coefficients and indices are stored only for occupied slots.
+            unsigned long long maximum_degree=0u;
+            for(auto iter=r.begin(); iter!=r.end(); ++iter) {
+                maximum_degree=std::max(
+                    maximum_degree,
+                    static_cast<unsigned long long>(iter->index().degree()));
             }
-        }
+            unsigned long long x_degree=0u;
+            for(auto iter=x.begin(); iter!=x.end(); ++iter) {
+                x_degree=std::max(
+                    x_degree,
+                    static_cast<unsigned long long>(iter->index().degree()));
+            }
+            unsigned long long y_degree=0u;
+            for(auto iter=y.begin(); iter!=y.end(); ++iter) {
+                y_degree=std::max(
+                    y_degree,
+                    static_cast<unsigned long long>(iter->index().degree()));
+            }
+            maximum_degree=std::max(maximum_degree,x_degree+y_degree);
 
-        accumulated.error()=r.error()+product_roundoff;
-        const auto temporary_entries=
-            static_cast<unsigned long long>(accumulated.number_of_terms());
-        accumulated.sort();
-        accumulated.unique();
-        const auto unique_entries=
-            static_cast<unsigned long long>(accumulated.number_of_terms());
+            const SizeType base=static_cast<SizeType>(maximum_degree+1u);
+            SizeType slot_count=1u;
+            for(SizeType j=0u; j!=as; ++j) {
+                slot_count*=base;
+            }
 
-        unsigned long long x_degree=0u;
-        for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-            x_degree=std::max(
+            const SizeType unused=std::numeric_limits<SizeType>::max();
+            std::vector<SizeType> slot_to_touched(slot_count,unused);
+            std::vector<MultiIndex> touched_indices;
+            std::vector<CoefficientType> touched_coefficients;
+            touched_indices.reserve(
+                static_cast<SizeType>(std::min<unsigned long long>(
+                    slot_count,
+                    static_cast<unsigned long long>(
+                        r.number_of_terms()+x.number_of_terms()*y.number_of_terms()))));
+            touched_coefficients.reserve(touched_indices.capacity());
+
+            auto rank_index=[&](MultiIndexData const& index) {
+                SizeType slot=0u;
+                SizeType stride=1u;
+                for(SizeType j=0u; j!=as; ++j) {
+                    slot+=static_cast<SizeType>(index[j])*stride;
+                    stride*=base;
+                }
+                return slot;
+            };
+
+            auto accumulate=[&](MultiIndexData const& index,
+                                CoefficientType const& value) {
+                const SizeType slot=rank_index(index);
+                SizeType& touched=slot_to_touched[slot];
+                if(touched==unused) {
+                    touched=touched_indices.size();
+                    touched_indices.emplace_back(index);
+                    touched_coefficients.emplace_back(value);
+                } else {
+                    touched_coefficients[touched]=add_err(
+                        touched_coefficients[touched],value,product_roundoff);
+                }
+            };
+
+            for(auto riter=r.begin(); riter!=r.end(); ++riter) {
+                accumulate(riter->index(),riter->coefficient());
+            }
+
+            MultiIndex product_index(as);
+            for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+                UniformConstReference<MultiIndex> xa=xiter->index();
+                UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+                    UniformConstReference<MultiIndex> ya=yiter->index();
+                    UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                    product_index=xa+ya;
+                    CoefficientType product=
+                        mul_err(xv,yv,product_roundoff);
+                    accumulate(product_index,product);
+                }
+            }
+
+            std::vector<SizeType> order(touched_indices.size());
+            for(SizeType i=0u; i!=order.size(); ++i) { order[i]=i; }
+            std::sort(order.begin(),order.end(),
+                [&](SizeType i, SizeType j) {
+                    return reverse_lexicographic_less(
+                        touched_indices[i],touched_indices[j]);
+                });
+
+            TaylorModel<P,F> accumulated(as,r.sweeper());
+            accumulated.expansion().reserve(order.size());
+            for(SizeType i : order) {
+                accumulated._append(
+                    touched_indices[i],touched_coefficients[i]);
+            }
+            accumulated.error()=r.error()+product_roundoff;
+            accumulated.sweep();
+            r.expansion().swap(accumulated.expansion());
+            r.error()=accumulated.error();
+        } else {
+            TaylorModel<P,F> accumulated(as,r.sweeper());
+            const SizeType product_terms=
+                x.number_of_terms()*y.number_of_terms();
+            accumulated.expansion().reserve(
+                r.number_of_terms()+product_terms);
+
+            for(auto riter=r.begin(); riter!=r.end(); ++riter) {
+                accumulated._append(
+                    riter->index(),riter->coefficient());
+            }
+
+            MultiIndex product_index(as);
+            for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+                UniformConstReference<MultiIndex> xa=xiter->index();
+                UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+                    UniformConstReference<MultiIndex> ya=yiter->index();
+                    UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                    product_index=xa+ya;
+                    CoefficientType product=
+                        mul_err(xv,yv,product_roundoff);
+                    accumulated._append(product_index,product);
+                }
+            }
+
+            accumulated.error()=r.error()+product_roundoff;
+            const auto temporary_entries=
+                static_cast<unsigned long long>(accumulated.number_of_terms());
+            accumulated.sort();
+            accumulated.unique();
+            const auto unique_entries=
+                static_cast<unsigned long long>(accumulated.number_of_terms());
+
+            unsigned long long x_degree=0u;
+            for(auto iter=x.begin(); iter!=x.end(); ++iter) {
+                x_degree=std::max(
+                    x_degree,
+                    static_cast<unsigned long long>(iter->index().degree()));
+            }
+            unsigned long long y_degree=0u;
+            for(auto iter=y.begin(); iter!=y.end(); ++iter) {
+                y_degree=std::max(
+                    y_degree,
+                    static_cast<unsigned long long>(iter->index().degree()));
+            }
+            const unsigned long long product_degree=x_degree+y_degree;
+
+            unsigned long long dense_slots=1u;
+            const unsigned long long choose_k=
+                std::min(static_cast<unsigned long long>(as),product_degree);
+            const unsigned long long choose_n=
+                static_cast<unsigned long long>(as)+product_degree;
+            for(unsigned long long k=1u; k<=choose_k; ++k) {
+                dense_slots=(dense_slots*(choose_n-choose_k+k))/k;
+            }
+
+            record_taylor_model_accumulator_profile(
+                static_cast<unsigned long long>(product_terms),
+                temporary_entries,
+                unique_entries,
+                static_cast<unsigned long long>(as),
                 x_degree,
-                static_cast<unsigned long long>(iter->index().degree()));
-        }
-        unsigned long long y_degree=0u;
-        for(auto iter=y.begin(); iter!=y.end(); ++iter) {
-            y_degree=std::max(
                 y_degree,
-                static_cast<unsigned long long>(iter->index().degree()));
+                product_degree,
+                dense_slots);
+            accumulated.sweep();
+            r.expansion().swap(accumulated.expansion());
+            r.error()=accumulated.error();
         }
-        const unsigned long long product_degree=x_degree+y_degree;
-
-        // Number of monomials of total degree <= product_degree in as
-        // variables: C(as+product_degree, product_degree).
-        unsigned long long dense_slots=1u;
-        const unsigned long long choose_k=
-            std::min(static_cast<unsigned long long>(as),product_degree);
-        const unsigned long long choose_n=
-            static_cast<unsigned long long>(as)+product_degree;
-        for(unsigned long long k=1u; k<=choose_k; ++k) {
-            dense_slots=(dense_slots*(choose_n-choose_k+k))/k;
-        }
-
-        record_taylor_model_accumulator_profile(
-            static_cast<unsigned long long>(product_terms),
-            temporary_entries,
-            unique_entries,
-            static_cast<unsigned long long>(as),
-            x_degree,
-            y_degree,
-            product_degree,
-            dense_slots);
-        accumulated.sweep();
-        r.expansion().swap(accumulated.expansion());
-        r.error()=accumulated.error();
 
         ErrorType xs=nul(r.error());
         for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {

@@ -32,6 +32,7 @@ Bool g_taylor_model_product_profile_enabled=false;
 Bool g_taylor_model_early_discard_enabled=false;
 Bool g_taylor_model_incremental_sweep_enabled=true;
 Bool g_taylor_model_product_accumulator_enabled=false;
+Bool g_taylor_model_dense_accumulator_enabled=false;
 TaylorModelAccumulatorProfile g_taylor_model_accumulator_profile;
 TaylorModelProductProfileContext g_taylor_model_product_profile_context=
     TaylorModelProductProfileContext::GENERAL;
@@ -114,6 +115,14 @@ Void set_taylor_model_product_accumulator_enabled(Bool enabled) {
     g_taylor_model_product_accumulator_enabled=enabled;
 }
 
+Bool taylor_model_dense_accumulator_enabled() {
+    return g_taylor_model_dense_accumulator_enabled;
+}
+
+Void set_taylor_model_dense_accumulator_enabled(Bool enabled) {
+    g_taylor_model_dense_accumulator_enabled=enabled;
+}
+
 Void reset_taylor_model_accumulator_profile() {
     g_taylor_model_accumulator_profile=TaylorModelAccumulatorProfile();
 }
@@ -126,7 +135,7 @@ Void record_taylor_model_accumulator_profile(
     unsigned long long product_pairs,
     unsigned long long temporary_entries,
     unsigned long long unique_entries,
-    unsigned long long argument_size,
+    unsigned long long num_variables,
     unsigned long long x_degree,
     unsigned long long y_degree,
     unsigned long long product_degree,
@@ -144,7 +153,7 @@ Void record_taylor_model_accumulator_profile(
                  unique_entries);
     g_taylor_model_accumulator_profile.maximum_argument_size=
         std::max(g_taylor_model_accumulator_profile.maximum_argument_size,
-                 argument_size);
+                 num_variables);
     g_taylor_model_accumulator_profile.maximum_x_degree=
         std::max(g_taylor_model_accumulator_profile.maximum_x_degree,x_degree);
     g_taylor_model_accumulator_profile.maximum_y_degree=

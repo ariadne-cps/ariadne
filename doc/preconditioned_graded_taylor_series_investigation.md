@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `cb02a284e61a811b7668736f3a53cfe1f492018f`
+**Latest analysed investigation HEAD:** `89de11ecb1067693976e8ff642c21c54e62a2a65`
 
 ## Purpose of this document
 
@@ -2022,6 +2022,23 @@ Temporary carried-state attribution logging is removed before this benchmark so 
 ---
 
 
+
+### 9.50 Spatial-order test rejects the simple "natural order-5 floor" explanation (2026-09-24)
+
+At fixed horizon [0,5], max_step=0.0025 and temporal order 5, varying only spatial order gave:
+
+| spatial order | runtime | achieved final error | sets |
+|---:|---:|---:|---:|
+| 4 | 26.992 s | 3.58278e-6 | 2000 |
+| 5 | 32.110 s | 3.88849e-6 | 2000 |
+| 6 | 36.652 s | 3.89376e-6 | 2000 |
+
+The floor did not decrease with spatial order. Orders 5 and 6 were essentially identical, while order 4 was slightly better. This rejected the simple hypothesis that the observed floor was set directly by the configured spatial degree.
+
+Combined with the composition probe, this pointed to representation simplification rather than the degree ceiling: small coefficients were likely being swept into the uniform error before the extra degree could matter.
+
+---
+
 ### 9.51 Sweeper threshold is the dominant small-step accuracy floor (2026-09-24)
 
 At fixed horizon [0,5], max_step=0.0025, spatial order 5, temporal order 5 and loose local tolerance 1e-2, varying only the ThresholdSweeper cutoff gives:
@@ -2042,6 +2059,26 @@ The cost tradeoff is equally strong: retaining these small coefficients makes th
 Architectural implication: the remaining accuracy/performance problem is now sharply identified as **representation management**. We need to preserve the coefficients that matter to long-horizon dependency without paying the full cost of a globally tiny threshold. Candidate directions include graded/adaptive sweeping, scale-aware sweeping, and retaining terms based on their propagated impact rather than instantaneous coefficient magnitude.
 
 This also strengthens the interpretation of the earlier equal-error benchmark: the current 1e-12 configuration is not a hard mathematical accuracy limit. Its floor is a tunable simplification/cost tradeoff.
+
+---
+
+
+### 9.52 Preserve low-degree small coefficients: sweeper-policy benchmark (2026-09-24)
+
+The threshold sweep established that coefficient sweeping controls the observed accuracy floor, but globally lowering the threshold is too expensive. The next test asks whether a **degree-based policy** can preserve the symbolic information that matters without retaining every small high-degree term.
+
+At fixed horizon [0,5], max_step=0.0025, spatial order 5, temporal order 5 and loose local tolerance 1e-2, compare:
+
+1. `ThresholdSweeper(1e-12)`: current baseline;
+2. `ThresholdSweeper(1e-14)`: high-accuracy/high-cost reference;
+3. `GradedSweeper(degree=5)`: keep every coefficient of degree <=5, regardless of magnitude, discard only terms above degree 5;
+4. `GradedThresholdSweeper(degree=5, threshold=1e-14)`: explicit degree ceiling plus tight magnitude threshold.
+
+The most informative comparison is (2) versus (3). If `GradedSweeper(5)` approaches the 1e-14 error with runtime much closer to the 1e-12 baseline, then the problem is specifically that absolute threshold sweeping destroys small but structurally useful low-degree coefficients. That would give us a strong production direction without inventing a new sweeper yet.
+
+If `GradedSweeper(5)` is both expensive and not substantially more accurate, then coefficient magnitude alone is not enough to decide what to retain and a more selective propagated-impact/adaptive policy is needed.
+
+Output marker: `[IntegratorSweeperPolicyBenchmark]`.
 
 ---
 

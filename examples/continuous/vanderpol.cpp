@@ -37,63 +37,75 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Sweeper-threshold diagnostic at the observed small-step floor.
-    // Keep horizon, maximum step, spatial/temporal order and tolerance fixed;
-    // vary only the threshold used to sweep small Taylor coefficients.
+    // Sweeper-policy benchmark at the observed small-step floor.
+    // Preserve all terms up to the configured spatial degree with a
+    // GradedSweeper and compare against threshold sweeping.  This tests
+    // whether we can retain long-horizon symbolic dependence without using
+    // a globally tiny coefficient threshold.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_sweeper_probe = [&](double threshold) {
-        ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
-        PreconditionedGradedTaylorSeriesIntegrator gronwall(
-            StepMaximumError(loose_tolerance),probe_sweeper,
-            lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=5,
-            minimum_temporal_order=5,
-            maximum_spacial_order=5,
-            maximum_temporal_order=5);
-        gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
-        gronwall.set_diagnostics(false);
+    auto run_sweeper_policy_probe =
+        [&](String const& policy, Sweeper<FloatDP> const& probe_sweeper) {
+            PreconditionedGradedTaylorSeriesIntegrator gronwall(
+                StepMaximumError(loose_tolerance),probe_sweeper,
+                lipschitz_tolerance=0.5_x,
+                minimum_spacial_order=5,
+                minimum_temporal_order=5,
+                maximum_spacial_order=5,
+                maximum_temporal_order=5);
+            gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
+            gronwall.set_diagnostics(false);
 
-        VectorFieldEvolver evolver(dynamics,gronwall);
-        configure_evolver(evolver,plateau_step);
+            VectorFieldEvolver evolver(dynamics,gronwall);
+            configure_evolver(evolver,plateau_step);
 
-        Stopwatch<Milliseconds> stopwatch;
-        auto orbit=evolver.orbit(
-            initial_set,Real(5.00_dec),Semantics::UPPER);
-        stopwatch.click();
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(
+                initial_set,Real(5.00_dec),Semantics::UPPER);
+            stopwatch.click();
 
-        ARIADNE_ASSERT(!orbit.final().empty());
-        auto achieved_error=
-            orbit.final()[0u].state_function().get(0u).error();
-        for(auto const& enclosure : orbit.final()) {
-            for(SizeType i=0u;
-                i!=enclosure.state_function().result_size(); ++i) {
-                achieved_error=max(
-                    achieved_error,
-                    enclosure.state_function().get(i).error());
+            ARIADNE_ASSERT(!orbit.final().empty());
+            auto achieved_error=
+                orbit.final()[0u].state_function().get(0u).error();
+            for(auto const& enclosure : orbit.final()) {
+                for(SizeType i=0u;
+                    i!=enclosure.state_function().result_size(); ++i) {
+                    achieved_error=max(
+                        achieved_error,
+                        enclosure.state_function().get(i).error());
+                }
             }
-        }
 
-        std::cerr << "[IntegratorSweeperBenchmark]"
-                  << " method=GRONWALL"
-                  << " sweep_threshold=" << threshold
-                  << " spatial_order=5"
-                  << " temporal_order=5"
-                  << " tolerance=" << loose_tolerance
-                  << " max_step=" << plateau_step
-                  << " horizon=5.0"
-                  << " elapsed_seconds=" << stopwatch.elapsed_seconds()
-                  << " achieved_final_error=" << achieved_error
-                  << " reach_sets=" << orbit.reach().size()
-                  << " intermediate_sets=" << orbit.intermediate().size()
-                  << " final_sets=" << orbit.final().size()
-                  << std::endl;
-    };
+            std::cerr << "[IntegratorSweeperPolicyBenchmark]"
+                      << " method=GRONWALL"
+                      << " policy=" << policy
+                      << " spatial_order=5"
+                      << " temporal_order=5"
+                      << " tolerance=" << loose_tolerance
+                      << " max_step=" << plateau_step
+                      << " horizon=5.0"
+                      << " elapsed_seconds=" << stopwatch.elapsed_seconds()
+                      << " achieved_final_error=" << achieved_error
+                      << " reach_sets=" << orbit.reach().size()
+                      << " intermediate_sets=" << orbit.intermediate().size()
+                      << " final_sets=" << orbit.final().size()
+                      << std::endl;
+        };
 
-    run_sweeper_probe(1e-10);
-    run_sweeper_probe(1e-12);
-    run_sweeper_probe(1e-14);
-    run_sweeper_probe(1e-16);
+    run_sweeper_policy_probe(
+        "threshold_1e-12",
+        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
+    run_sweeper_policy_probe(
+        "threshold_1e-14",
+        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
+    run_sweeper_policy_probe(
+        "graded_degree_5",
+        Sweeper<FloatDP>(GradedSweeper<FloatDP>(DoublePrecision(),5u)));
+    run_sweeper_policy_probe(
+        "graded_threshold_degree_5_1e-14",
+        Sweeper<FloatDP>(
+            GradedThresholdSweeper<FloatDP>(
+                DoublePrecision(),5u,FloatDP(1e-14,DoublePrecision()))));
 
 }

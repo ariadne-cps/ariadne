@@ -46,8 +46,8 @@ void ariadne_main()
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_sweep_semantics_probe =
-        [&](String const& policy, double threshold, Bool incremental_sweep) {
+    auto run_product_accumulator_probe =
+        [&](String const& policy, double threshold, Bool accumulator) {
             ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
                 StepMaximumError(loose_tolerance),probe_sweeper,
@@ -63,11 +63,13 @@ void ariadne_main()
 
             set_taylor_model_product_profile_enabled(false);
             set_taylor_model_early_discard_enabled(false);
-            set_taylor_model_incremental_sweep_enabled(incremental_sweep);
+            set_taylor_model_incremental_sweep_enabled(false);
+            set_taylor_model_product_accumulator_enabled(accumulator);
             Stopwatch<Milliseconds> stopwatch;
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
+            set_taylor_model_product_accumulator_enabled(false);
             set_taylor_model_incremental_sweep_enabled(true);
 
             ARIADNE_ASSERT(!orbit.final().empty());
@@ -82,22 +84,20 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorSweepSemanticsBenchmark]"
+            std::cerr << "[IntegratorProductAccumulatorBenchmark]"
                       << " policy=" << policy
-                      << " incremental_sweep=" << incremental_sweep
+                      << " accumulator=" << accumulator
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
         };
 
-    // Map the final-sweep accuracy/runtime frontier. The 3e-14 point has
-    // already shown a substantial accuracy gain over incremental sweeping;
-    // these additional cutoffs test whether that gain can be traded for a
-    // looser threshold and a better Pareto point.
-    run_sweep_semantics_probe("final_1e-12",1e-12,false);
-    run_sweep_semantics_probe("final_3e-13",3e-13,false);
-    run_sweep_semantics_probe("final_1e-13",1e-13,false);
-    run_sweep_semantics_probe("final_3e-14",3e-14,false);
+    // Compare the existing repeated-merge final-sweep kernel against a
+    // direct product accumulator at the two most informative cutoffs.
+    run_product_accumulator_probe("final_merge_1e-13",1e-13,false);
+    run_product_accumulator_probe("accumulator_1e-13",1e-13,true);
+    run_product_accumulator_probe("final_merge_3e-14",3e-14,false);
+    run_product_accumulator_probe("accumulator_3e-14",3e-14,true);
 
 }

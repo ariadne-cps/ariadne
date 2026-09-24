@@ -1082,6 +1082,61 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     const bool incremental_sweep=taylor_model_incremental_sweep_enabled();
     bool processed_source_term=false;
 
+    // Experimental direct product accumulator.  Materialise the unsummed
+    // coefficient products once, sort by multi-index, combine equal indices
+    // rigorously, and apply the sweeper only to the fully aggregated
+    // coefficients.  This preserves final-sweep semantics while avoiding the
+    // repeated full-expansion merge/swap performed by the legacy kernel.
+    if(taylor_model_product_accumulator_enabled()) {
+        TaylorModel<P,F> accumulated(as,r.sweeper());
+        const SizeType product_terms=
+            x.number_of_terms()*y.number_of_terms();
+        accumulated.expansion().reserve(
+            r.number_of_terms()+product_terms);
+
+        for(auto riter=r.begin(); riter!=r.end(); ++riter) {
+            accumulated._append(
+                riter->index(),riter->coefficient());
+        }
+
+        ErrorType product_roundoff=nul(r.error());
+        MultiIndex product_index(as);
+        for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            UniformConstReference<MultiIndex> xa=xiter->index();
+            UniformConstReference<CoefficientType> xv=xiter->coefficient();
+            for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+                UniformConstReference<MultiIndex> ya=yiter->index();
+                UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                product_index=xa+ya;
+                CoefficientType product=
+                    mul_err(xv,yv,product_roundoff);
+                accumulated._append(product_index,product);
+            }
+        }
+
+        accumulated.error()=r.error()+product_roundoff;
+        accumulated.sort();
+        accumulated.unique();
+        accumulated.sweep();
+        r.expansion().swap(accumulated.expansion());
+        r.error()=accumulated.error();
+
+        ErrorType xs=nul(r.error());
+        for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            xs+=mag(xiter->coefficient());
+        }
+        ErrorType ys=nul(r.error());
+        for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            ys+=mag(yiter->coefficient());
+        }
+        ErrorType& re=r.error();
+        const ErrorType& xe=x.error();
+        const ErrorType& ye=y.error();
+        re+=xe*ye;
+        re+=xs*ye+ys*xe;
+        return;
+    }
+
     const ThresholdSweeper<FloatDP>* early_threshold_sweeper=nullptr;
     if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
         if(taylor_model_early_discard_enabled()) {

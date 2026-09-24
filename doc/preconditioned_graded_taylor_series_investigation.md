@@ -2561,3 +2561,81 @@ Output marker remains:
 ```
 [IntegratorSweepSemanticsBenchmark]
 ```
+
+
+### 9.69 Final-sweep frontier result (2026-09-24)
+
+The four-point final-sweep frontier completed as follows:
+
+```
+cutoff   elapsed_s   final_error
+1e-12    34.6421     2.1585938662392414e-6
+3e-13    40.8661     7.4109181449436055e-7
+1e-13    46.6021     2.5932372140202589e-7
+3e-14    55.4641     8.5378288508794491e-8
+```
+
+Final sweeping consistently improves accuracy at a fixed cutoff, but the naive
+implementation does not dominate the established incremental-sweep frontier. The curves
+interlace: delaying the sweep preserves more polynomial structure but carrying the
+unswept expansion through the legacy repeated merge/swap kernel costs enough runtime to
+consume the numerical advantage.
+
+The conclusion is therefore not to return to incremental semantics, but to change the
+multiplication algorithm so that complete coefficients are accumulated by multi-index
+without repeatedly rebuilding the whole expansion.
+
+### 9.70 Prototype a direct full-product accumulator (2026-09-24)
+
+Inspection of `Expansion<MultiIndex,Coefficient>` shows that Ariadne already provides
+the operations needed for a first accumulator prototype:
+
+- reserve sparse storage;
+- append index/coefficient pairs;
+- sort by multi-index;
+- `TaylorModel::unique()`, which combines adjacent equal multi-indices using
+  `add_err` and transfers addition roundoff to the model error;
+- a final `sweep()`.
+
+The experimental product path therefore constructs one temporary expansion containing:
+
+```
+existing r terms
++
+all x_alpha * y_beta coefficient products
+```
+
+Each coefficient product is still computed with `mul_err`, so multiplication roundoff
+is rigorously accumulated. The temporary expansion is then sorted once, equal
+multi-indices are combined once, and the configured sweeper is applied once to the fully
+aggregated coefficients.
+
+This is deliberately a first structural prototype rather than the final data structure.
+It can temporarily hold `|r| + |x||y|` entries before sorting, but avoids the legacy
+algorithm's repeated merge/copy/swap of the entire accumulated expansion after every
+source monomial. It also implements the intended final-coefficient cutoff semantics.
+
+The benchmark compares legacy final-sweep merging against the accumulator at the two
+most informative cutoffs:
+
+```
+final_merge_1e-13
+accumulator_1e-13
+final_merge_3e-14
+accumulator_3e-14
+```
+
+All runs disable early discard and product profiling. Output marker:
+
+```
+[IntegratorProductAccumulatorBenchmark]
+```
+
+Acceptance criteria are:
+- rigorously completed runs;
+- final errors consistent with final-sweep semantics at the same cutoff;
+- a material runtime reduction versus the repeated-merge final-sweep kernel.
+
+If this succeeds, the next refinement should replace append-all-plus-sort with a true
+multi-index keyed accumulator or a degree/index-addressed workspace, depending on the
+observed temporary product sizes and MultiIndex structure.

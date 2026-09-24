@@ -1774,20 +1774,21 @@ The investigation must be judged against **three distinct objectives**, not only
 2. **Permit larger validated integration steps.**
    The new method should obtain a useful validated flow enclosure at larger `h` than the current GradedTaylorSeriesIntegrator for comparable approximation quality. The present Gronwall-based prototype already shows evidence in this direction through substantially fewer accepted sets at tight tolerances.
 
-3. **Improve total execution time at equal over-approximation error.**
-   Raw cost per step is not the right final metric. The comparison must fix the achieved over-approximation error and compare total runtime over the same simulated horizon. A method that takes fewer/larger steps but has more expensive individual steps is only successful if the end-to-end runtime at equal final error is lower.
+3. **Improve total execution time at equal over-approximation error and equal simulated time horizon.**
+   Raw cost per step is not the right final metric. The comparison must fix both the achieved over-approximation error and the simulated time interval (same initial time and same final time) and then compare total runtime. A method that reaches the same error only by simulating a shorter time interval has not achieved a fair performance improvement. A method that takes fewer/larger steps but has more expensive individual steps is successful only if the end-to-end runtime is lower for the same simulated horizon and the same achieved over-approximation error.
 
 These objectives are coupled but must be measured separately. In particular:
 - fewer steps alone does not prove better accuracy scaling;
 - a lower local residual alone does not prove better end-to-end runtime;
 - a faster step alone is irrelevant if the method reaches the same approximation-error plateau;
-- wall-clock comparisons at different achieved errors are not fair.
+- wall-clock comparisons at different achieved errors are not fair;
+- wall-clock comparisons over different simulated time horizons are not fair.
 
 The benchmark protocol should therefore retain, for each method and tolerance/step regime:
-- simulated horizon;
+- identical simulated horizon (same initial and final time) across methods;
 - accepted/rejected step count and effective step sizes;
 - final or maximum over-approximation error using the same metric;
-- total runtime;
+- total runtime over that identical horizon;
 - runtime versus achieved error curve;
 - error versus step-size curve.
 

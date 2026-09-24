@@ -317,8 +317,6 @@ TheoryAtomTruth classify_theory_atom(
     ExactBoxType const& domain,
     ContinuousPredicate const& atom);
 
-OutputStream& operator<<(OutputStream& os, TheoryAtomTruth truth);
-
 struct TheoryResultInterpretation {
     Bool consistent = false;
     Bool unknown = false;

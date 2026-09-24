@@ -515,39 +515,71 @@ class TestSmtSolver {
             RealVariable tx("classify_x");
             RealExpression etx=tx;
             RealSpace tspace({tx});
+            ExactBoxType zero({ExactIntervalType(0,0)});
             ExactBoxType positive({ExactIntervalType(1,2)});
             ExactBoxType negative({ExactIntervalType(-2,-1)});
             ExactBoxType crossing({ExactIntervalType(-1,1)});
             using Truth=SmtSolverTestSupport::TheoryAtomTruth;
 
-            ARIADNE_TEST_EQUAL(
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,positive,(etx==0)),
-                Truth::FALSE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,zero,(etx==0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,positive,(etx!=0)),
-                Truth::TRUE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,positive,(etx==0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,positive,(etx>=0)),
-                Truth::TRUE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,crossing,(etx==0))==Truth::UNKNOWN);
+
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,positive,(etx>0)),
-                Truth::TRUE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,positive,(etx!=0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,negative,(etx<=0)),
-                Truth::TRUE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,zero,(etx!=0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,negative,(etx<0)),
-                Truth::TRUE_VALUE);
-            ARIADNE_TEST_EQUAL(
+                    tspace,crossing,(etx!=0))==Truth::UNKNOWN);
+
+            ARIADNE_TEST_ASSERT(
                 SmtSolverTestSupport::classify_theory_atom(
-                    tspace,crossing,(etx>=0)),
-                Truth::UNKNOWN);
+                    tspace,positive,(etx>=0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,negative,(etx>=0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,crossing,(etx>=0))==Truth::UNKNOWN);
+
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,negative,(etx<=0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,positive,(etx<=0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,crossing,(etx<=0))==Truth::UNKNOWN);
+
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,positive,(etx>0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,zero,(etx>0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,crossing,(etx>0))==Truth::UNKNOWN);
+
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,negative,(etx<0))==Truth::TRUE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,zero,(etx<0))==Truth::FALSE_VALUE);
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::classify_theory_atom(
+                    tspace,crossing,(etx<0))==Truth::UNKNOWN);
         }
 
         std::vector<Bool> theory_flags({false,true});

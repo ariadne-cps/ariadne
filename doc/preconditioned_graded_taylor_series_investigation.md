@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `46398d4d3c984d12e06a2fe336a88acbf2cb8f1a`
+**Latest analysed investigation HEAD:** `da737ad829292e1e9769d1bc07ce11034a99d829`
 
 ## Purpose of this document
 
@@ -1490,6 +1490,40 @@ Acceptance gates:
 1. its range must safely contain or match the current recurrence defect range on the identical step;
 2. the cost must be materially below the current `flow_function` materialisation;
 3. production remains unchanged until those checks pass.
+
+---
+
+
+### 9.33 Differential-level defect ranging passes first gate and is much cheaper; switch production range source (2026-09-24)
+
+The direct Differential-level defect experiment is successful on the identical first step:
+
+```
+generic defect:
+  x [-1.3388421e-7, 1.7941606e-7]
+  y [-9.8547251e-7, 1.3952296e-6]
+
+recurrence-patch defect:
+  x [-1.3388421e-7, 1.7941606e-7]
+  y [-9.6209909e-7, 1.3814724e-6]
+
+direct Differential defect range:
+  x [-1e-9, 1.76e-7]
+  y [-1e-8, 1.39e-6]
+```
+
+The direct range is not a superset of the generic patch range; it is a different, substantially tighter enclosure obtained by forming the algebraic defect before Taylor-model materialisation and evaluating the resulting validated model directly on the forward half-box. Because all operations remain validated, this is a candidate rigorous enclosure of the same defect, but it must be validated operationally by checking acceptance behaviour and long-run set counts.
+
+Cost is strongly favourable. At 700 calls:
+
+```
+current recurrence-field flow_function: 2.482 s
+direct Differential defect path:        0.588 s
+```
+
+roughly a 4.2x reduction for this subphase. The direct path itself still includes `make_taylor_function_model`; the expensive `restriction` is absent.
+
+The next production experiment uses `direct_defect_range` as the Gronwall forcing bound while retaining the old recurrence-field patch solely for diagnostics/profiling comparison. This deliberately isolates the semantic/step-size effect before deleting the old path. If accepted-step counts improve or remain stable and no enclosure failures appear, the old recurrence-field `flow_function` can then be removed entirely, recovering its ~2.5 s/700-call cost.
 
 ---
 

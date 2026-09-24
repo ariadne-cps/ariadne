@@ -2331,3 +2331,30 @@ These counters are reported separately for the existing `general` and `compose` 
 The classification uses ordinary double values only for diagnostics and does not affect the Taylor arithmetic, sweep decisions, error term, or certification.
 
 The decisive question is whether a large majority of generated products are already individually below the active cutoff. If so, a rigorous early-discard product kernel becomes worth prototyping; if not, the main opportunity lies elsewhere in merge/sweep implementation rather than product generation.
+
+
+### 9.62 Fix individual-product diagnostic double counting (2026-09-24)
+
+The first individual-product classification run exposed a diagnostic bug: the reported
+`individual_below_threshold + individual_above_threshold` count exceeded
+`product_pairs`.
+
+The cause was that the classification occurred at the top of the merge loop, before
+knowing whether the current `yiter` product was actually consumed. In the
+`ra < ta` branch only `riter` advances, so the same `x_i*y_j` pair could be
+classified repeatedly on successive merge iterations.
+
+The diagnostic now classifies `x_i*y_j` only in branches that consume `yiter`:
+
+- `ra == ta`, where the product is fused into an existing coefficient;
+- `ta < ra`, where the product creates a new coefficient;
+- the trailing `while(yiter!=y.end())`, once per remaining product.
+
+The Van der Pol reporting path also asserts the invariant
+
+```
+individual_below_threshold + individual_above_threshold == product_pairs
+```
+
+for both `general` and `compose` contexts. The arithmetic and certification remain
+unchanged; this commit only repairs the profiler.

@@ -92,6 +92,10 @@ void ariadne_main()
             auto print_product_profile =
                 [&](String const& context,
                     TaylorModelProductProfileCounters const& profile) {
+                    ARIADNE_ASSERT(
+                        profile.individual_products_below_threshold
+                        + profile.individual_products_above_threshold
+                        == profile.product_pairs);
                     std::cerr << "[TaylorProductGenerationProfile]"
                               << " policy=" << policy
                               << " context=" << context

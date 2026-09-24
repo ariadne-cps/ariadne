@@ -1091,21 +1091,21 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             auto rv=riter->coefficient();
             auto ya=yiter->index();
             auto yv=yiter->coefficient();
-            if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                if(profile) {
-                    const double product_magnitude=
-                        std::abs(xv.get_d()*yv.get_d());
-                    if(product_magnitude<profile_threshold) {
-                        ++profile_individual_products_below_threshold;
-                        profile_individual_products_below_threshold_abs_mass+=product_magnitude;
-                    } else {
-                        ++profile_individual_products_above_threshold;
-                        profile_individual_products_above_threshold_abs_mass+=product_magnitude;
-                    }
-                }
-            }
             ta = xa + ya;
             if (ra == ta) {
+                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
+                    if(profile) {
+                        const double product_magnitude=
+                            std::abs(xv.get_d()*yv.get_d());
+                        if(product_magnitude<profile_threshold) {
+                            ++profile_individual_products_below_threshold;
+                            profile_individual_products_below_threshold_abs_mass+=product_magnitude;
+                        } else {
+                            ++profile_individual_products_above_threshold;
+                            profile_individual_products_above_threshold_abs_mass+=product_magnitude;
+                        }
+                    }
+                }
                 tv=fma_err(xv,yv,rv,te);
                 t._append(ta,tv);
                 ++riter; ++yiter;
@@ -1113,6 +1113,19 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 t._append(ra,rv);
                 ++riter;
             } else { // ta<ra
+                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
+                    if(profile) {
+                        const double product_magnitude=
+                            std::abs(xv.get_d()*yv.get_d());
+                        if(product_magnitude<profile_threshold) {
+                            ++profile_individual_products_below_threshold;
+                            profile_individual_products_below_threshold_abs_mass+=product_magnitude;
+                        } else {
+                            ++profile_individual_products_above_threshold;
+                            profile_individual_products_above_threshold_abs_mass+=product_magnitude;
+                        }
+                    }
+                }
                 tv=mul_err(xv,yv,te);
                 t._append(ta,tv);
                 ++yiter;

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `d4cf037e0af439d51c412a40533c32fb5d3c890e`
+**Latest analysed investigation HEAD:** `ab2d86dd8b7c25f6c17c3de56955fd680cbc5fa0`
 
 ## Purpose of this document
 
@@ -1876,6 +1876,37 @@ Interpretation rule:
 - if either integrator takes materially more sets than 5/max_step, its curve at that point is not a clean fixed-step point and must be labelled as adaptivity/bounder-limited.
 
 The key test is whether the Graded error curve flattens as max_step decreases while the Gronwall/preconditioned curve continues decreasing. Runtime is still recorded, but this sweep is primarily a plateau/scaling experiment, not the objective-3 benchmark.
+
+---
+
+
+### 9.46 Fixed-step scaling result: strong early gain, then a new carried-state floor (2026-09-24)
+
+The max-step sweep is clean: set counts are essentially exactly 5/h for both methods, so the requested max step controls the integration rather than the loose StepMaximumError threshold.
+
+| max h | Gronwall time | Gronwall final error | sets | Graded time | Graded final error | sets |
+|---|---:|---:|---:|---:|---:|---:|
+| 0.04 | 3.968 s | 5.3598e-4 | 125 | 2.397 s | 1.3749e-2 | 125 |
+| 0.02 | 6.467 s | 1.4429e-5 | 251 | 3.473 s | 8.6237e-4 | 251 |
+| 0.01 | 10.622 s | 1.8470e-6 | 500 | 5.241 s | 5.6970e-5 | 500 |
+| 0.005 | 18.081 s | 2.4749e-6 | 1000 | 8.027 s | 7.6255e-6 | 1000 |
+| 0.0025 | 31.193 s | 3.8885e-6 | 2000 | 12.966 s | 6.9174e-6 | 2000 |
+
+This is a crucial result.
+
+1. Gronwall/preconditioned improves dramatically from h=0.04 to h=0.01: roughly 290x lower final model error for a 4x smaller step. Over the same range Graded improves about 241x. The new method is also much more accurate at identical h: about 26x at 0.04, 60x at 0.02, and 31x at 0.01.
+
+2. However, the Gronwall curve reaches its minimum around h=0.01 and then **gets worse** as h is reduced further:
+1.847e-6 -> 2.475e-6 -> 3.888e-6.
+Therefore objective 1 is not solved end-to-end yet. The new local flow certificate is much tighter, but another error source accumulates with the number of steps and dominates for small h.
+
+3. Graded shows the expected flattening: 5.697e-5 -> 7.626e-6 -> 6.917e-6. It still improves at h=0.005 but essentially plateaus by h=0.0025. The Gronwall floor is lower in this experiment, but its upward turn is especially diagnostic.
+
+4. Because both methods take exactly the intended number of steps, the worsening Gronwall error cannot be blamed on adaptive step selection. The likely culprit is per-step carried-state representation/composition/sweeping error. Halving h doubles the number of endpoint/flowpipe compositions and preconditionings. This matches the earlier observation that the flow certificate itself becomes extremely small at small h while carried-state operations remain nonzero.
+
+5. This redirects the next investigation: do not spend the next effort tightening the local residual. At h <= 0.01 the local residual is no longer the visible limiting factor. Instrument the final state-function error immediately before and after endpoint composition, preconditioning, state composition and sweeping, and determine which carried-state operation injects the approximately per-step floor.
+
+This result also explains why a Flow*-like integrator cannot be obtained solely by improving the one-step flow polynomial/certificate. The representation of the propagated set between steps must preserve the tighter local accuracy.
 
 ---
 

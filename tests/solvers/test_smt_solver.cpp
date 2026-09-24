@@ -274,11 +274,9 @@ class TestSmtSolver {
             candidates,3u,1u);
         ARIADNE_TEST_EQUAL(pruned,0u);
 
-        std::vector<Bool> already_bounded(entries.size(),true);
         SizeType none=SmtSolverTestSupport::apply_learned_clause_pruning(
-            already_bounded,candidates,1u,1u);
+            candidates,1u,1u);
         ARIADNE_TEST_EQUAL(none,0u);
-        ARIADNE_TEST_ASSERT(already_bounded[9u]);
     }
 
     Void test_statistics_aggregation() {

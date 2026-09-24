@@ -87,7 +87,12 @@ void ariadne_main()
                       << std::endl;
 
             for(SizeType i=0u; i!=final_state.result_size(); ++i) {
-                auto const& expansion=final_state.get(i).expansion();
+                auto taylor_model=
+                    std::dynamic_pointer_cast<
+                        const ValidatedScalarMultivariateTaylorFunctionModelDP>(
+                            final_state.get(i).managed_pointer());
+                ARIADNE_ASSERT(taylor_model!=nullptr);
+                auto const& expansion=taylor_model->model().expansion();
                 SizeType max_degree=0u;
                 for(auto const& term : expansion) {
                     max_degree=max(max_degree,term.index().degree());

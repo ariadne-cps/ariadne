@@ -11,6 +11,55 @@
 #include "dynamics/enclosure.hpp"
 #include "ariadne_main.hpp"
 
+#include <array>
+#include <memory>
+
+namespace {
+
+struct SweepDegreeProfile {
+    static constexpr std::size_t degree_slots=32u;
+    std::array<unsigned long long,degree_slots> discarded_count{};
+    std::array<unsigned long long,degree_slots> retained_count{};
+    std::array<double,degree_slots> discarded_abs_mass{};
+};
+
+class ProfiledThresholdSweeperDP
+    : public SweeperMixin<ProfiledThresholdSweeperDP,FloatDP> {
+    DoublePrecision _precision;
+    FloatDP _threshold;
+    std::shared_ptr<SweepDegreeProfile> _profile;
+  public:
+    ProfiledThresholdSweeperDP(DoublePrecision precision, ExactDouble threshold,
+                               std::shared_ptr<SweepDegreeProfile> profile)
+        : _precision(precision),
+          _threshold(threshold,precision),
+          _profile(std::move(profile)) { }
+
+    DoublePrecision precision() const { return _precision; }
+
+    Bool discard(const MultiIndex& a, const FloatDP& x) const {
+        auto degree=static_cast<std::size_t>(a.degree());
+        if(degree>=SweepDegreeProfile::degree_slots) {
+            degree=SweepDegreeProfile::degree_slots-1u;
+        }
+        const bool do_discard=abs(x)<_threshold;
+        if(do_discard) {
+            ++_profile->discarded_count[degree];
+            _profile->discarded_abs_mass[degree]+=std::abs(x.get_d());
+        } else {
+            ++_profile->retained_count[degree];
+        }
+        return do_discard;
+    }
+
+  private:
+    virtual Void _write(OutputStream& os) const {
+        os << "ProfiledThresholdSweeperDP( threshold=" << _threshold << " )";
+    }
+};
+
+} // namespace
+
 void ariadne_main()
 {
     CONCLOG_PRINTLN("van der Pol oscillator");
@@ -37,47 +86,74 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Causal test of the sparse high-degree-tail hypothesis.
+    // Instrument actual sweeping decisions over the whole integration.
+    // This measures where each absolute-threshold policy transfers symbolic
+    // coefficients into the uniform remainder.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_selective_probe =
-        [&](String const& policy, Sweeper<FloatDP> const& probe_sweeper) {
+    auto run_sweep_profile =
+        [&](String const& policy, ExactDouble threshold) {
+            auto profile=std::make_shared<SweepDegreeProfile>();
+            ProfiledThresholdSweeperDP profiled_sweeper(
+                DoublePrecision(),threshold,profile);
+
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
-                StepMaximumError(loose_tolerance),probe_sweeper,
+                StepMaximumError(loose_tolerance),
+                Sweeper<FloatDP>(profiled_sweeper),
                 lipschitz_tolerance=0.5_x,
                 minimum_spacial_order=5,minimum_temporal_order=5,
                 maximum_spacial_order=5,maximum_temporal_order=5);
             gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
             gronwall.set_diagnostics(false);
+
             VectorFieldEvolver evolver(dynamics,gronwall);
             configure_evolver(evolver,plateau_step);
+
             Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(initial_set,Real(5.00_dec),Semantics::UPPER);
+            auto orbit=evolver.orbit(
+                initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
+
             ARIADNE_ASSERT(!orbit.final().empty());
-            auto achieved_error=orbit.final()[0u].state_function().get(0u).error();
+            auto achieved_error=
+                orbit.final()[0u].state_function().get(0u).error();
             for(auto const& enclosure : orbit.final()) {
-                for(SizeType i=0u;i!=enclosure.state_function().result_size();++i) {
-                    achieved_error=max(achieved_error,enclosure.state_function().get(i).error());
+                for(SizeType i=0u;
+                    i!=enclosure.state_function().result_size(); ++i) {
+                    achieved_error=max(
+                        achieved_error,
+                        enclosure.state_function().get(i).error());
                 }
             }
-            std::cerr << "[IntegratorSelectiveSweeperBenchmark]"
+
+            std::cerr << "[IntegratorSweepProfileBenchmark]"
                       << " policy=" << policy
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
+
+            for(std::size_t degree=0u;
+                degree!=SweepDegreeProfile::degree_slots; ++degree) {
+                if(profile->discarded_count[degree]==0u
+                    && profile->retained_count[degree]==0u) {
+                    continue;
+                }
+                std::cerr << "[SweepDegreeProfile]"
+                          << " policy=" << policy
+                          << " degree=" << degree
+                          << " discarded_count="
+                          << profile->discarded_count[degree]
+                          << " retained_count="
+                          << profile->retained_count[degree]
+                          << " discarded_abs_mass="
+                          << profile->discarded_abs_mass[degree]
+                          << std::endl;
+            }
         };
 
-    run_selective_probe("absolute_1e-12",
-        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
-    run_selective_probe("absolute_1e-14",
-        Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
-    run_selective_probe("degree7_1e-12_1e-14",
-        Sweeper<FloatDP>(DegreeThresholdSweeper<FloatDP>(
-            DoublePrecision(),7u,
-            FloatDP(1e-12_x,DoublePrecision()),
-            FloatDP(1e-14_x,DoublePrecision()))));
+    run_sweep_profile("absolute_1e-12",1e-12_x);
+    run_sweep_profile("absolute_1e-14",1e-14_x);
 
 }

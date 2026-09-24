@@ -261,6 +261,9 @@ structural issues while pursuing complete coverage:
   expresses the invariant directly; coverage helpers must not create extra state-space
   branches of their own;
 - public precondition failure paths are tested explicitly.
+- exhaustive enum switches retain a `default` defensive branch and tests exercise
+  that branch with an explicitly invalid enum value; defaults are not removed merely
+  to satisfy branch coverage.
 
 Coverage is therefore being used as an audit of the state space, not only as a
 test-count metric.

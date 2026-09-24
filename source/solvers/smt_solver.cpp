@@ -1196,16 +1196,10 @@ Bool assignment_locks_clause(
         & static_cast<unsigned>(matching_reason);
 }
 
-TheoryAtomTruth classify_theory_atom(
-    RealSpace const& space,
-    ExactBoxType const& domain,
-    ContinuousPredicate const& atom)
+TheoryAtomTruth classify_theory_relation(
+    SmtTheoryRelation relation,
+    UpperIntervalType const& image)
 {
-    SmtTheoryLiteral literal=make_smt_theory_literal(atom);
-    RealExpression difference=simplify(literal.lhs()-literal.rhs());
-    ValidatedScalarMultivariateFunction function(space,difference);
-    UpperIntervalType image=apply(function,UpperBoxType(domain));
-
     Bool const definitely_negative=definitely(image.upper_bound()<0);
     Bool const definitely_positive=definitely(image.lower_bound()>0);
     Bool const definitely_nonnegative=definitely(image.lower_bound()>=0);
@@ -1217,7 +1211,7 @@ TheoryAtomTruth classify_theory_atom(
         static_cast<unsigned>(definitely_negative)
         | static_cast<unsigned>(definitely_positive);
 
-    switch(literal.relation()) {
+    switch(relation) {
         case SmtTheoryRelation::EQ:
             if(definitely_zero) { return TheoryAtomTruth::TRUE_VALUE; }
             if(definitely_nonzero) { return TheoryAtomTruth::FALSE_VALUE; }
@@ -1242,8 +1236,21 @@ TheoryAtomTruth classify_theory_atom(
             if(definitely_negative) { return TheoryAtomTruth::TRUE_VALUE; }
             if(definitely_nonnegative) { return TheoryAtomTruth::FALSE_VALUE; }
             return TheoryAtomTruth::UNKNOWN;
+        default:
+            throw std::runtime_error("Unknown SMT theory relation");
     }
-    ARIADNE_UNREACHABLE;
+}
+
+TheoryAtomTruth classify_theory_atom(
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    ContinuousPredicate const& atom)
+{
+    SmtTheoryLiteral literal=make_smt_theory_literal(atom);
+    RealExpression difference=simplify(literal.lhs()-literal.rhs());
+    ValidatedScalarMultivariateFunction function(space,difference);
+    UpperIntervalType image=apply(function,UpperBoxType(domain));
+    return classify_theory_relation(literal.relation(),image);
 
 }
 

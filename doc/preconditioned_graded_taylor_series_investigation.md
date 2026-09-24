@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `5fe6c5cf3e511cf9d5996d7ae00e11af4808581e`
+**Latest analysed investigation HEAD:** `7b72810258e020c935a8b675044b9d8a3a89a28f`
 
 ## Purpose of this document
 
@@ -1630,6 +1630,35 @@ Immediate next investigation:
 4. then test on at least one genuinely non-polynomial continuous example before considering the residual kernel successful.
 
 This supersedes the polynomial-tail-only production direction suggested at the end of section 9.36.
+
+---
+
+
+### 9.38 General TaylorModel residual experiment: no polynomial assumption (2026-09-24)
+
+The next residual experiment deliberately removes the polynomial specialisation.
+
+The candidate P is defined as the polynomial part of the already-built centre Taylor patch. Its uniform enclosure error is clobbered **only to define the differentiable candidate polynomial itself**; that error is not treated as a differentiable function.
+
+The unrestricted vector field `g` is then evaluated directly on the underlying `Vector<ValidatedTaylorModelDP>`:
+
+```
+P_models = polynomial models of centre_polynomial
+G_models = g(P_models)
+R_i      = derivative(P_i,t) - G_models[i]
+```
+
+This is a general path: `Function` dispatches TaylorModel arguments through Ariadne's validated TaylorModel elementary algebra. Operations such as multiplication and elementary transcendental functions carry validated remainder/truncation information in the TaylorModel error term. No algebraic degree of `g` is assumed.
+
+This also avoids the expensive generic FunctionPatch `compose(g,P)` and avoids materialising a separate field patch followed by `restriction`.
+
+The experiment is diagnostic-only for now. It reports:
+- `general_tm_defect_range` beside the existing defect diagnostics;
+- `[GeneralTaylorModelResidualProfile]` cumulative cost every 100 calls.
+
+Correctness gate: for the same candidate polynomial, the resulting TaylorModel must be a validated enclosure of `dP/dt-g(P)`. Before production use we still need to check that the Function/TaylorModel call path indeed preserves the expected validated remainder semantics for all supported elementary operations and that the candidate used for the final flow is exactly the same polynomial whose defect is certified.
+
+The polynomial degree-30 path remains only an optional oracle and is no longer part of the architectural direction.
 
 ---
 

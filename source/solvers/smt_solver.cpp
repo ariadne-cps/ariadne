@@ -360,13 +360,15 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.monotone_rounds;
                 for(SizeType i=0; i!=constraints.size(); ++i) {
                     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        auto derivative=constraints[i].function().derivative(variable);
                         if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                                constraints[i].function(),domain,variable)) {
+                                derivative,domain)) {
                             continue;
                         }
                         contractor.monotone_reduce(
                             domain,
                             constraints[i].function(),
+                            derivative,
                             this->_original_bounds(constraints[i]),
                             variable);
                     }
@@ -415,8 +417,15 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
         if(is_constant(expression,Real(0))) {
             continue;
         }
+        ValidatedScalarMultivariateFunction function(space,expression);
+        std::vector<ValidatedScalarMultivariateFunction> derivatives;
+        derivatives.reserve(space.dimension());
+        for(SizeType variable=0u; variable!=space.dimension(); ++variable) {
+            derivatives.push_back(function.derivative(variable));
+        }
         result.push_back({
-            ValidatedScalarMultivariateFunction(space,expression),
+            function,
+            std::move(derivatives),
             literals[i].relation()
         });
     }
@@ -481,13 +490,15 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.monotone_rounds;
                 for(auto const& literal:literals) {
                     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        auto const& derivative=literal.derivatives[variable];
                         if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                                literal.function,domain,variable)) {
+                                derivative,domain)) {
                             continue;
                         }
                         contractor.monotone_reduce(
                             domain,
                             literal.function,
+                            derivative,
                             this->_original_bounds(literal.relation),
                             variable);
                     }
@@ -1140,13 +1151,20 @@ SensitivitySplitSelection sensitivity_split_selection(
 }
 
 Bool monotone_coordinate_is_safe(
+    ValidatedScalarMultivariateFunction const& derivative,
+    UpperBoxType const& domain)
+{
+    UpperIntervalType derivative_image=apply(derivative,domain);
+    return definitely(derivative_image.lower_bound()>0)
+        || definitely(derivative_image.upper_bound()<0);
+}
+
+Bool monotone_coordinate_is_safe(
     ValidatedScalarMultivariateFunction const& function,
     UpperBoxType const& domain,
     SizeType variable)
 {
-    UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
-    return definitely(derivative_image.lower_bound()>0)
-        || definitely(derivative_image.upper_bound()<0);
+    return monotone_coordinate_is_safe(function.derivative(variable),domain);
 }
 
 SearchOutcome SearchOutcome::exhausted()

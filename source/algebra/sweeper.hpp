@@ -200,6 +200,34 @@ template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<
 };
 
 //! \brief A sweeper class which does not discard any terms at all.
+template<class F> class DegreeThresholdSweeper : public SweeperMixin<DegreeThresholdSweeper<F>,F> {
+    typedef PrecisionType<F> PR;
+    PR _coefficient_precision;
+    DegreeType _degree_cutoff;
+    F _low_degree_threshold;
+    F _high_degree_threshold;
+  public:
+    DegreeThresholdSweeper(PR precision, DegreeType degree_cutoff,
+                           F low_degree_threshold, F high_degree_threshold)
+        : _coefficient_precision(precision),
+          _degree_cutoff(degree_cutoff),
+          _low_degree_threshold(low_degree_threshold),
+          _high_degree_threshold(high_degree_threshold) {
+        ARIADNE_ASSERT(low_degree_threshold>=0);
+        ARIADNE_ASSERT(high_degree_threshold>=0);
+    }
+    inline PR precision() const { return _coefficient_precision; }
+    inline Bool discard(const MultiIndex& a, const F& x) const {
+        return abs(x) < (a.degree()<_degree_cutoff ? _low_degree_threshold : _high_degree_threshold);
+    }
+  private:
+    virtual Void _write(OutputStream& os) const {
+        os << "DegreeThresholdSweeper( degree_cutoff=" << _degree_cutoff
+           << ", low_degree_threshold=" << _low_degree_threshold
+           << ", high_degree_threshold=" << _high_degree_threshold << " )";
+    }
+};
+
 template<class F> class RelativeThresholdSweeper : public RelativeSweeperMixin<RelativeThresholdSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;

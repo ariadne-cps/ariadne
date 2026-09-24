@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `14b6846f73c5d40093832a2be11468d10791a0cf`
+**Latest analysed investigation HEAD:** `80796d35c064f698fe1c32eccbd0de91de5f977d`
 
 ## Purpose of this document
 
@@ -1298,6 +1298,33 @@ The field ranges themselves are identical at printed precision. The small differ
 This passes the practical correctness gate for an experiment using the recurrence-evaluated field in production Gronwall certification. The generic `compose(g,P)` is now removed from the production path and retained only in diagnostics mode for comparison.
 
 Important: the current degree-by-degree recurrence evaluation still replays the Procedure after centre-polynomial construction. Therefore this commit tests the end-to-end benefit of replacing generic composition, not the final intended optimisation. If performance improves but remains insufficient, the next step is to retain the final incremental Procedure state from centre construction so that `g(P)` does not require a replay.
+
+---
+
+
+### 9.26 Production recurrence field yields a substantial end-to-end speedup (2026-09-24)
+
+Replacing generic `compose(g,P)` in production certification with the recurrence-evaluated field preserves essentially the same integration behaviour and substantially reduces runtime.
+
+At t=5, max_step=0.04:
+
+```
+tolerance 1e-6:
+  previous Gronwall baseline: ~5.8 s, 134 sets
+  recurrence production:      4.903 s, 135 sets
+  graded:                     3.432 s, 169 sets
+
+tolerance 1e-8:
+  previous Gronwall baseline: ~14.6 s, 215 sets
+  recurrence production:      11.680 s, 215 sets
+  graded:                      8.728 s, 401 sets
+```
+
+The one-set change at 1e-6 is consistent with the slightly different/narrower recurrence defect enclosure seen in the same-step comparison; the tight-tolerance count is unchanged. The local first-step Gronwall error also changes only slightly, from about 3.51e-8 to 3.48e-8.
+
+The generic residual-composition timer is now zero in production, confirming that the intended bottleneck has been removed. The remaining recurrence-field replay itself costs about 4.66 s cumulatively at 700 calls, and centre-polynomial construction about 8.51 s. Flowpipe composition remains the next independent large cost.
+
+The next optimisation removes the replay. At exit from the centre Taylor recurrence, `dphic` is the final P_m while `fdphic/tmpdphic` retain the incremental Procedure state used to generate P_m from the previous degree. Because `compute_procedure` is incremental, one additional update on the retained state should append the missing final degree of `g(P_m)`. This should replace the current full degree-by-degree replay with a single incremental Procedure update. Correctness must again be checked against the generic field/defect diagnostic before trusting the timing.
 
 ---
 

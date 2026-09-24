@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `89de11ecb1067693976e8ff642c21c54e62a2a65`
+**Latest analysed investigation HEAD:** `fe87e9b121f8ca03ed2b02aaf2e8bfa753dea7e2`
 
 ## Purpose of this document
 
@@ -2079,6 +2079,25 @@ The most informative comparison is (2) versus (3). If `GradedSweeper(5)` approac
 If `GradedSweeper(5)` is both expensive and not substantially more accurate, then coefficient magnitude alone is not enough to decide what to retain and a more selective propagated-impact/adaptive policy is needed.
 
 Output marker: `[IntegratorSweeperPolicyBenchmark]`.
+
+---
+
+
+### 9.54 RelativeThresholdSweeper(1e-12) is computationally explosive (partial run, 2026-09-24)
+
+The relative-threshold benchmark was interrupted during the third run, `relative_1e-12`, after about 1900 of the intended 2000 steps. The two absolute baselines completed normally:
+
+| policy | runtime | achieved final error | sets |
+|---|---:|---:|---:|
+| absolute 1e-12 | 33.079 s | 3.88849e-6 | 2000 |
+| absolute 1e-14 | 59.523 s | 6.67444e-8 | 2000 |
+
+The relative 1e-12 run did not finish. By global profile step 5900 (approximately 1900 steps into that run), cumulative carried-state costs imply enormous incremental cost compared with the preceding absolute runs. In particular, cumulative flowpipe composition grew from about 30.0 s at the end of the absolute 1e-14 run to 173.4 s, state composition from about 12.1 s to 52.6 s, and endpoint composition from about 11.0 s to 44.3 s.
+
+This means the relative policy is retaining far more structure than the absolute 1e-12 baseline in this problem. Since its cutoff is
+`relative_threshold * (radius(polynomial) + uniform_error)`, the current model scale can make the effective threshold substantially smaller than 1e-12. Repeated composition then grows the retained expansion and causes a severe cost explosion.
+
+Conclusion: `RelativeThresholdSweeper(1e-12)` does not provide the desired accuracy/cost compromise on this benchmark. The concept of scale-aware sweeping remains relevant, but the raw existing relative policy is too permissive at this parameter value. The next useful test should first measure the effective norm/cutoff or use substantially larger relative thresholds (for example 1e-10 and 1e-8) rather than attempting `relative_1e-14`, which would almost certainly be even more expensive.
 
 ---
 

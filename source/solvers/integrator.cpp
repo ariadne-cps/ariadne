@@ -515,7 +515,6 @@ Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
 
 #include "algebra/graded.hpp"
 #include "function/procedure.hpp"
-#include "function/procedure.tpl.hpp"
 
 namespace Ariadne {
 
@@ -976,10 +975,10 @@ Bool polynomial_procedure_degree(
                 degrees[j]=2u*degrees[ins.arg()];
                 break;
             case OperatorCode::POW:
-                if(ins.num()<0) { return false; }
-                degrees[j]=static_cast<DegreeType>(
-                    static_cast<Nat>(ins.num())*degrees[ins.arg()]);
-                break;
+                // Keep the first rigorous prototype deliberately narrow.
+                // Van der Pol only needs SQR; general integer powers can be
+                // added once their Differential evaluation path is tested.
+                return false;
             default:
                 return false;
         }
@@ -987,6 +986,61 @@ Bool polynomial_procedure_degree(
     result_degree=0u;
     for(SizeType i=0u; i!=p.result_size(); ++i) {
         result_degree=std::max(result_degree,degrees[p._results[i]]);
+    }
+    return true;
+}
+
+
+Bool evaluate_polynomial_procedure(
+        const Vector<ValidatedProcedure>& p,
+        const Vector<ValidatedDifferential>& x,
+        Vector<ValidatedDifferential>& result)
+{
+    ValidatedDifferential const zero_differential=x.zero_element();
+    List<ValidatedDifferential> values(
+        p.temporaries_size(),zero_differential);
+
+    for(SizeType j=0u; j!=p._instructions.size(); ++j) {
+        ProcedureInstruction const& ins=p._instructions[j];
+        switch(ins.op().code()) {
+            case OperatorCode::CNST:
+                values[j]=zero_differential.create_constant(
+                    p._constants[ins.val()].get(dp));
+                break;
+            case OperatorCode::VAR:
+                values[j]=x[ins.ind()];
+                break;
+            case OperatorCode::ADD:
+                values[j]=values[ins.arg1()]+values[ins.arg2()];
+                break;
+            case OperatorCode::SUB:
+                values[j]=values[ins.arg1()]-values[ins.arg2()];
+                break;
+            case OperatorCode::MUL:
+                values[j]=values[ins.arg1()]*values[ins.arg2()];
+                break;
+            case OperatorCode::DIV:
+                values[j]=values[ins.arg1()]/values[ins.arg2()];
+                break;
+            case OperatorCode::POS:
+                values[j]=+values[ins.arg()];
+                break;
+            case OperatorCode::NEG:
+                values[j]=-values[ins.arg()];
+                break;
+            case OperatorCode::HLF:
+                values[j]=hlf(values[ins.arg()]);
+                break;
+            case OperatorCode::SQR:
+                values[j]=sqr(values[ins.arg()]);
+                break;
+            default:
+                return false;
+        }
+    }
+
+    for(SizeType i=0u; i!=result.size(); ++i) {
+        result[i]=values[p._results[i]];
     }
     return true;
 }
@@ -1110,32 +1164,30 @@ graded_series_centre_polynomial_step(
                 return ValidatedDifferential(
                     dphi[i].expansion(),exact_polynomial_degree);
             });
-        List<ValidatedDifferential> exact_tmp(
-            p.temporaries_size(),padded_dphi.zero_element());
-        execute(exact_tmp,p,padded_dphi);
         Vector<ValidatedDifferential> exact_field(
             p.result_size(),padded_dphi.zero_element());
-        for(SizeType i=0u; i!=exact_field.size(); ++i) {
-            exact_field[i]=exact_tmp[p._results[i]];
-        }
+        exact_polynomial_available=
+            evaluate_polynomial_procedure(p,padded_dphi,exact_field);
 
-        Vector<ValidatedDifferential> derivative_dphi_exact=
-            derivative(dphi,n);
-        Vector<ValidatedDifferential> padded_derivative(
-            n,[&](SizeType i) {
-                return ValidatedDifferential(
-                    derivative_dphi_exact[i].expansion(),
-                    exact_polynomial_degree);
-            });
-        Vector<ValidatedDifferential> exact_defect=
-            padded_derivative-exact_field;
+        if(exact_polynomial_available) {
+            Vector<ValidatedDifferential> derivative_dphi_exact=
+                derivative(dphi,n);
+            Vector<ValidatedDifferential> padded_derivative(
+                n,[&](SizeType i) {
+                    return ValidatedDifferential(
+                        derivative_dphi_exact[i].expansion(),
+                        exact_polynomial_degree);
+                });
+            Vector<ValidatedDifferential> exact_defect=
+                padded_derivative-exact_field;
 
-        FlowStepTaylorModelType exact_wide_defect=
-            make_taylor_function_model(
-                exact_defect,join(domx,widt,doma),sweeper);
-        for(SizeType i=0u; i!=n; ++i) {
-            exact_polynomial_defect_range[i]=evaluate(
-                exact_wide_defect.model(i),forward_half_box);
+            FlowStepTaylorModelType exact_wide_defect=
+                make_taylor_function_model(
+                    exact_defect,join(domx,widt,doma),sweeper);
+            for(SizeType i=0u; i!=n; ++i) {
+                exact_polynomial_defect_range[i]=evaluate(
+                    exact_wide_defect.model(i),forward_half_box);
+            }
         }
     }
     exact_polynomial_defect_stopwatch.click();

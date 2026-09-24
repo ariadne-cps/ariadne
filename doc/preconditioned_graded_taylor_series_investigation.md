@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `c96d82d91c7e2b919116f96433826eb2c11ff9bf`
+**Latest analysed investigation HEAD:** `5fe6c5cf3e511cf9d5996d7ae00e11af4808581e`
 
 ## Purpose of this document
 
@@ -1601,6 +1601,35 @@ The next promising rigorous direction is **not** to materialise all degree-30 co
 - a scalar/interval tail magnitude for degrees > d.
 
 Addition/subtraction combine tails additively. Multiplication combines retained-retained overflow plus retained-tail and tail-tail bounds. This is analogous to a Taylor-model algebra and can provide the missing rigorous correction to the cheap direct defect without constructing the full high-degree expansion.
+
+---
+
+
+### 9.37 Course correction: the integrator must remain general, not polynomial-specialised (2026-09-24)
+
+The degree-complete Van der Pol experiment was a **diagnostic oracle only**. It answered one narrow question: whether the cheap truncated Differential residual was missing a non-zero composition tail. It did; the omitted tail was small but non-zero. The degree-30 construction is therefore useful evidence, but it is **not** the intended production architecture.
+
+The integrator target remains general validated ODE dynamics, including non-polynomial vector fields. Van der Pol is only the current benchmark. We should not introduce an algorithmic dependency on polynomial degree or a polynomial-only residual certificate.
+
+The actual problem to solve is more general:
+
+> Given a validated centre polynomial/Taylor representation P and a general Procedure g, compute a rigorous and cheap enclosure of the defect dP/dt - g(P), including the effect of all truncation/remainder terms, without paying for a full generic FunctionPatch composition plus restriction.
+
+The promising direction is therefore a **general validated truncated algebra** for Procedure evaluation, not a polynomial-tail algebra. Conceptually each intermediate Procedure value should carry:
+- a retained polynomial/Differential part up to the chosen degree/order;
+- an explicit validated remainder enclosure for everything not represented in that retained part.
+
+For algebraic operations, the remainder is propagated by standard Taylor-model rules. For general elementary operations (reciprocal, exp, log, sin, cos, etc.), the remainder must be obtained from validated range/derivative bounds or the same elementary-function remainder machinery already used by Ariadne's Taylor models. This is the general analogue of what Flow*-style Taylor-model evaluation needs: truncate aggressively, but account rigorously for the discarded part.
+
+The polynomial degree-30 diagnostic should remain optional and diagnostic-only as a reference check on polynomial examples. It must not drive API design, step selection, or the production residual algorithm.
+
+Immediate next investigation:
+1. inspect Ariadne's existing TaylorModel elementary-operation implementation and Procedure execution machinery to identify reusable validated remainder propagation;
+2. prototype a lightweight Procedure evaluator whose value type is a retained Differential plus a scalar/vector validated remainder;
+3. compare its defect enclosure and cost against the current recurrence-field Taylor-patch path on Van der Pol;
+4. then test on at least one genuinely non-polynomial continuous example before considering the residual kernel successful.
+
+This supersedes the polynomial-tail-only production direction suggested at the end of section 9.36.
 
 ---
 

@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `44d7dadad31d2a6861b02aea01427652793cfdeb`
+**Latest analysed investigation HEAD:** `820e01cec78610f123ba891e42dc6b5f2b17af68`
 
 ## Purpose of this document
 
@@ -1354,6 +1354,33 @@ The next measurement splits those two costs:
 - graded-differential -> Taylor-function conversion.
 
 This matters because if conversion dominates, further optimising `compute_procedure` is the wrong target. In that case the defect/remainder should remain in graded/coefficient form longer and avoid materialising a full field Taylor patch.
+
+---
+
+
+### 9.28 Conversion, not the retained Procedure update, dominates recurrence-field cost (2026-09-24)
+
+The split profile at 700 candidate calls is:
+
+```
+retained compute_procedure update: 0.824 s
+graded -> Taylor conversion total:  2.587 s
+```
+
+Thus about 76% of the remaining recurrence-field materialisation cost is conversion, not vector-field evaluation. The end-to-end benchmark remains stable:
+
+```
+1e-6: GRONWALL 4.645 s / 135 sets; GRADED 3.409 s / 169 sets
+1e-8: GRONWALL 10.715 s / 215 sets; GRADED 8.907 s / 401 sets
+```
+
+This rules out further optimisation of `compute_procedure` as the immediate priority. The next measurement splits conversion into:
+- `differential(final_f,n,so,to)`;
+- `flow_function(...)` materialisation/sweeping.
+
+If `flow_function` dominates, a promising design is to form/range the defect directly from graded differentials and only materialise the final physical flow polynomial. If `differential` dominates, the graded-to-multivariate coefficient extraction itself needs a specialised residual path.
+
+Flowpipe composition (~3.95 s cumulatively at 350 propagated steps) is now comparable to or larger than any single local-certification subphase and remains the other major optimisation target.
 
 ---
 

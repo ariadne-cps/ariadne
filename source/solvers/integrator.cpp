@@ -919,7 +919,8 @@ struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
     FlowStepTaylorModelType recurrence_field;
     double residual_seconds;
-    double conversion_seconds;
+    double differential_seconds;
+    double flow_function_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -972,18 +973,22 @@ graded_series_centre_polynomial_step(
     Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
     recurrence_residual_stopwatch.click();
 
-    Stopwatch<Microseconds> recurrence_conversion_stopwatch;
+    Stopwatch<Microseconds> recurrence_differential_stopwatch;
     Vector<ValidatedDifferential> recurrence_field_differential=
         differential(final_f,n,so,to);
+    recurrence_differential_stopwatch.click();
+
+    Stopwatch<Microseconds> recurrence_flow_function_stopwatch;
     FlowStepTaylorModelType recurrence_field=
         flow_function(
             recurrence_field_differential,domx,domt,doma,sweeper);
-    recurrence_conversion_stopwatch.click();
+    recurrence_flow_function_stopwatch.click();
 
     return CentrePolynomialRecurrenceResult{
         std::move(polynomial),std::move(recurrence_field),
         recurrence_residual_stopwatch.elapsed_seconds(),
-        recurrence_conversion_stopwatch.elapsed_seconds()};
+        recurrence_differential_stopwatch.elapsed_seconds(),
+        recurrence_flow_function_stopwatch.elapsed_seconds()};
 }
 
 
@@ -1887,15 +1892,18 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
 
             static SizeType recurrence_residual_calls=0u;
             static double recurrence_residual_seconds=0.0;
-            static double recurrence_conversion_seconds=0.0;
+            static double recurrence_differential_seconds=0.0;
+            static double recurrence_flow_function_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
-            recurrence_conversion_seconds+=centre_result.conversion_seconds;
+            recurrence_differential_seconds+=centre_result.differential_seconds;
+            recurrence_flow_function_seconds+=centre_result.flow_function_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
                           << " procedure_seconds=" << recurrence_residual_seconds
-                          << " conversion_seconds=" << recurrence_conversion_seconds
+                          << " differential_seconds=" << recurrence_differential_seconds
+                          << " flow_function_seconds=" << recurrence_flow_function_seconds
                           << " field_range=" << recurrence_field.range()
                           << std::endl;
             }

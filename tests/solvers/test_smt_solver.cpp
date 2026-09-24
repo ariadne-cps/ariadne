@@ -105,6 +105,16 @@ class TestSmtSolver {
             std::numeric_limits<SizeType>::max(),
             false);
         ARIADNE_TEST_ASSERT(not no_candidate_configuration.candidate_search_enabled());
+        ARIADNE_TEST_ASSERT(not configuration.monotone_reduction_enabled());
+        std::cout << "[smt-config] enable monotone reduction" << std::endl;
+        SmtSolverConfiguration monotone_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            true,
+            true);
+        ARIADNE_TEST_ASSERT(monotone_configuration.monotone_reduction_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -1105,7 +1115,14 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> mliterals;
             mliterals.append(alternatives[0][0]);
-            SmtResult monotone_result=solver.solve(
+            SmtSolver monotone_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                true,
+                true));
+            SmtResult monotone_result=monotone_solver.solve(
                 mspace,ExactBoxType({ExactIntervalType(0,2)}),mliterals);
             ARIADNE_TEST_ASSERT(not monotone_result.is_unknown());
             ARIADNE_TEST_EQUAL(

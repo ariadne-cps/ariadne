@@ -60,7 +60,8 @@ class SmtSolverConfiguration {
         SizeType theory_minimization_budget=std::numeric_limits<SizeType>::max(),
         SizeType learned_clause_limit=std::numeric_limits<SizeType>::max(),
         SizeType box_processing_limit=std::numeric_limits<SizeType>::max(),
-        Bool candidate_search_enabled=true);
+        Bool candidate_search_enabled=true,
+        Bool monotone_reduction_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -78,12 +79,16 @@ class SmtSolverConfiguration {
     //! \brief Whether heuristic interior-point witness candidate generation is enabled.
     Bool candidate_search_enabled() const { return _candidate_search_enabled; }
 
+    //! \brief Whether validated monotone/Newton contraction is enabled.
+    Bool monotone_reduction_enabled() const { return _monotone_reduction_enabled; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
     SizeType _learned_clause_limit;
     SizeType _box_processing_limit;
     Bool _candidate_search_enabled;
+    Bool _monotone_reduction_enabled;
 };
 
 //! \ingroup Solvers

@@ -32,10 +32,12 @@ The solver roadmap therefore prioritizes, in this order:
    coordinate only when validated derivative range analysis proves that interval
    strictly positive or strictly negative on the current box; coordinates whose
    derivative interval contains zero are skipped. Each box-reduction call performs
-   at most one monotone sweep. If that sweep contracts the box, hull and shaving
-   are rerun once on the contracted box, but a second monotone sweep is not
-   scheduled in the same call; this prevents asymptotic Newton contractions from
-   keeping the contractor fixed-point loop alive indefinitely;
+   at most one monotone sweep. The monotone/Newton phase is disabled by default:
+   experiments on the established transcendental regression `sin(x)=0` over
+   `[3,4]` showed that even a bounded monotone sweep can substantially perturb
+   the normal witness/search path. It is therefore opt-in through solver
+   configuration and intended first for measured smooth-network workloads such as
+   FOSSIL/CARe;
 3. efficient handling of large shared expression DAGs produced by feed-forward
    networks and their derivatives;
 4. robust support for polynomial and transcendental activations and dynamics;

@@ -1596,7 +1596,8 @@ class SmtDpllSearch {
         analysis.learned_clause.assign(conflict_clause.begin(),conflict_clause.end());
 
         while(this->_current_level_literal_count(analysis.learned_clause)>1u) {
-            for(auto iter=_trail.rbegin(); iter!=_trail.rend(); ++iter) {
+            auto iter=_trail.rbegin();
+            while(true) {
                 SizeType pivot_variable=*iter;
                 AssignmentInfo const& assignment=_assignment[pivot_variable];
                 Bool const current_level=
@@ -1617,6 +1618,7 @@ class SmtDpllSearch {
                         pivot_variable);
                     break;
                 }
+                ++iter;
             }
         }
 
@@ -1810,15 +1812,12 @@ class SmtDpllSearch {
         for(Int nogood_literal:clause) {
             SizeType variable=variable_from_literal(nogood_literal);
 
-            std::optional<SizeType> atom_index;
-            for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
-                if(_encoding.atom_variable(i)==variable) {
-                    atom_index=i;
-                    break;
-                }
+            SizeType atom_index=0u;
+            while(_encoding.atom_variable(atom_index)!=variable) {
+                ++atom_index;
             }
 
-            SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(*atom_index));
+            SmtTheoryLiteral literal=make_smt_theory_literal(_encoding.atom(atom_index));
             Bool assignment_value=nogood_literal<0;
             if(not assignment_value) {
                 literal=literal.negated();

@@ -2435,3 +2435,21 @@ Output marker:
 The first acceptance criterion is that the early path remains rigorous and preserves
 essentially the same final accuracy while reducing runtime. If successful, a second
 stage can investigate a rigorous pre-product cutoff test that avoids `mul_err` itself.
+
+
+### 9.65 Fix early-discard benchmark cleanup error (2026-09-24)
+
+The first build of the early-discard benchmark failed because the transition from the
+previous product-profiling benchmark left three stale lines in
+`examples/continuous/vanderpol.cpp`: two calls to `print_product_profile(...)` referring
+to the now-removed `product_profile` variable, plus an extra lambda terminator.
+
+This was a benchmark-cleanup mistake only. The stale lines are removed; the intended
+two-run comparison remains:
+
+```
+absolute_3e-14_baseline   early_discard=false
+absolute_3e-14_early      early_discard=true
+```
+
+No Taylor arithmetic or early-discard logic is changed by this fix.

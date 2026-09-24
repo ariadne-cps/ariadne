@@ -89,9 +89,6 @@ void ariadne_main()
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
         };
-            print_product_profile("general",product_profile.general);
-            print_product_profile("compose",product_profile.compose);
-        };
 
     run_early_discard_probe("absolute_3e-14_baseline",3e-14,false);
     run_early_discard_probe("absolute_3e-14_early",3e-14,true);

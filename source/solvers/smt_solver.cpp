@@ -1429,7 +1429,6 @@ class SmtDpllSearch {
         if(_domain.is_empty()) {
             return SmtResult::unsat(_statistics);
         }
-        this->_add_domain_theory_implications();
         SmtSolverTestSupport::SearchOutcome outcome=this->_search_boolean();
         return SmtSolverTestSupport::finalize_search_outcome(
             outcome,_theory_unknown_seen,_statistics);
@@ -1533,21 +1532,28 @@ class SmtDpllSearch {
             index-this->_original_clause_count()];
     }
 
-    Void _add_domain_theory_implications()
+    Bool _add_domain_theory_implications()
     {
+        Bool added=false;
         for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
+            SizeType variable=_encoding.atom_variable(i);
+            if(_assignment[variable].value>=0) {
+                continue;
+            }
             auto implication=SmtSolverTestSupport::domain_theory_implication(
                 _solver,_space,_domain,_encoding.atom(i));
-            SizeType variable=_encoding.atom_variable(i);
             if(implication.force_true) {
                 this->_add_learned_clause(
                     {static_cast<Int>(variable)},true,true);
+                added=true;
             }
             if(implication.force_false) {
                 this->_add_learned_clause(
                     {-static_cast<Int>(variable)},true,true);
+                added=true;
             }
         }
+        return added;
     }
 
     SizeType _active_non_theory_learned_clause_count() const
@@ -1864,6 +1870,10 @@ class SmtDpllSearch {
             ++_statistics.boolean_backtracks;
             this->_maybe_prune_learned_clauses(learned_index);
             return SearchOutcome::backjump(analysis.backjump_level);
+        }
+
+        if(this->_add_domain_theory_implications()) {
+            return this->_search_boolean();
         }
 
         ++_statistics.boolean_decisions;

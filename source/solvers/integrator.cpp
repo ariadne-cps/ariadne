@@ -957,7 +957,7 @@ Bool polynomial_procedure_degree(
                 break;
             case OperatorCode::ADD:
             case OperatorCode::SUB:
-                degrees[j]=max(degrees[ins.arg1()],degrees[ins.arg2()]);
+                degrees[j]=std::max(degrees[ins.arg1()],degrees[ins.arg2()]);
                 break;
             case OperatorCode::MUL:
                 degrees[j]=degrees[ins.arg1()]+degrees[ins.arg2()];
@@ -985,7 +985,7 @@ Bool polynomial_procedure_degree(
     }
     result_degree=0u;
     for(SizeType i=0u; i!=p.result_size(); ++i) {
-        result_degree=max(result_degree,degrees[p._results[i]]);
+        result_degree=std::max(result_degree,degrees[p._results[i]]);
     }
     return true;
 }
@@ -1109,8 +1109,14 @@ graded_series_centre_polynomial_step(
                 return ValidatedDifferential(
                     dphi[i].expansion(),exact_polynomial_degree);
             });
-        Vector<ValidatedDifferential> exact_field=
-            evaluate(p,padded_dphi);
+        List<ValidatedDifferential> exact_tmp(
+            p.temporaries_size(),padded_dphi.zero_element());
+        execute(exact_tmp,p,padded_dphi);
+        Vector<ValidatedDifferential> exact_field(
+            p.result_size(),padded_dphi.zero_element());
+        for(SizeType i=0u; i!=exact_field.size(); ++i) {
+            exact_field[i]=exact_tmp[p._results[i]];
+        }
 
         Vector<ValidatedDifferential> derivative_dphi_exact=
             derivative(dphi,n);

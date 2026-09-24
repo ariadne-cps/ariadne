@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `14eab3e34e8301d44d3ff79ab43196d5eb1d5e2b`
+**Latest analysed investigation HEAD:** `14b6846f73c5d40093832a2be11468d10791a0cf`
 
 ## Purpose of this document
 
@@ -1275,6 +1275,29 @@ recurrence_defect = derivative(P) - recurrence_field
 using the ordinary Taylor-model derivative but the recurrence-evaluated field, and compares its range directly with the existing generic defect on the same step. If these agree, the generic `compose(g,P)` can be replaced without changing the mathematical certification architecture.
 
 After correctness is established, optimise the recurrence field evaluation by retaining/reusing the incremental Procedure state already generated while constructing the centre polynomial, rather than replaying all degrees in a second pass. That is the route expected to recover most of the potential speedup.
+
+---
+
+
+### 9.25 Recurrence field passes the defect-level correctness gate; switch production certification (2026-09-24)
+
+On the identical first step, using the same Taylor-model derivative, the generic and recurrence-based defects are nearly identical:
+
+```
+generic defect:
+  x: [-1.3388421e-7,  1.7941606e-7]
+  y: [-9.8547251e-7,  1.3952296e-6]
+
+recurrence defect:
+  x: [-1.3388421e-7,  1.7941606e-7]
+  y: [-9.6209909e-7,  1.3814724e-6]
+```
+
+The field ranges themselves are identical at printed precision. The small difference in the second defect component comes from the different Taylor-model construction/sweeping route, not from a macroscopic semantic mismatch. It is tiny relative to the failed earlier order-one recurrence defect and is slightly narrower in this sample.
+
+This passes the practical correctness gate for an experiment using the recurrence-evaluated field in production Gronwall certification. The generic `compose(g,P)` is now removed from the production path and retained only in diagnostics mode for comparison.
+
+Important: the current degree-by-degree recurrence evaluation still replays the Procedure after centre-polynomial construction. Therefore this commit tests the end-to-end benefit of replacing generic composition, not the final intended optimisation. If performance improves but remains insufficient, the next step is to retain the final incremental Procedure state from centre construction so that `g(P)` does not require a replay.
 
 ---
 

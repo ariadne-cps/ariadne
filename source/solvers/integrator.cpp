@@ -1916,31 +1916,36 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
 
             Stopwatch<Microseconds> residual_stopwatch;
             Stopwatch<Microseconds> residual_compose_stopwatch;
-            // Compute the ODE defect R(y,t)=dP/dt-g(P) of the centre-only
-            // Taylor polynomial.  If this is already small, the remaining
-            // challenge is to validate a separate remainder around P rather
-            // than to propagate a full interval-valued graded recurrence.
-            ValidatedVectorMultivariateFunctionPatch field_on_polynomial=
-                compose(g,centre_polynomial);
+            // Production defect uses the Procedure evaluated directly on the
+            // graded centre polynomial.  This has been checked against the
+            // generic compose(g,P) path on the same step.
             residual_compose_stopwatch.click();
 
             Stopwatch<Microseconds> residual_assembly_stopwatch;
             ValidatedVectorMultivariateFunctionPatch defect=
                 factory.create_zeros(n,centre_polynomial.domain());
-            ValidatedVectorMultivariateFunctionPatch recurrence_defect=
-                factory.create_zeros(n,centre_polynomial.domain());
             SizeType const time_index=centre_polynomial.argument_size()-1u;
             for(SizeType i=0u; i!=n; ++i) {
                 ValidatedScalarMultivariateFunctionPatch dpoly =
                     derivative(centre_polynomial.get(i),time_index);
-                ValidatedScalarMultivariateFunctionPatch fpoly =
-                    field_on_polynomial.get(i);
                 ValidatedScalarMultivariateFunctionPatch recurrence_fpoly =
                     recurrence_field.get(i);
-                defect[i]=dpoly-fpoly;
-                recurrence_defect[i]=dpoly-recurrence_fpoly;
+                defect[i]=dpoly-recurrence_fpoly;
             }
             residual_assembly_stopwatch.click();
+
+            ValidatedVectorMultivariateFunctionPatch generic_field;
+            ValidatedVectorMultivariateFunctionPatch generic_defect;
+            if(this->diagnostics()) {
+                generic_field=compose(g,centre_polynomial);
+                generic_defect=factory.create_zeros(
+                    n,centre_polynomial.domain());
+                for(SizeType i=0u; i!=n; ++i) {
+                    ValidatedScalarMultivariateFunctionPatch dpoly =
+                        derivative(centre_polynomial.get(i),time_index);
+                    generic_defect[i]=dpoly-generic_field.get(i);
+                }
+            }
 
             Stopwatch<Microseconds> initial_defect_stopwatch;
             ValidatedVectorMultivariateFunctionPatch initial_polynomial=
@@ -2012,9 +2017,9 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " h=" << h
                           << " polynomial_errors=" << centre_polynomial.errors()
                           << " polynomial_range=" << centre_polynomial.range()
-                          << " defect_range=" << defect.range()
-                          << " recurrence_defect_range=" << recurrence_defect.range()
-                          << " generic_field_range=" << field_on_polynomial.range()
+                          << " defect_range=" << generic_defect.range()
+                          << " recurrence_defect_range=" << defect.range()
+                          << " generic_field_range=" << generic_field.range()
                           << " recurrence_field_range=" << recurrence_field.range()
                           << " initial_defect_range=" << initial_defect.range()
                           << " lipschitz_inf=" << lipschitz_inf

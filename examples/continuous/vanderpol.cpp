@@ -65,6 +65,9 @@ void ariadne_main()
             set_taylor_model_early_discard_enabled(false);
             set_taylor_model_incremental_sweep_enabled(false);
             set_taylor_model_product_accumulator_enabled(accumulator);
+            if(accumulator) {
+                reset_taylor_model_accumulator_profile();
+            }
             Stopwatch<Milliseconds> stopwatch;
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
@@ -91,13 +94,30 @@ void ariadne_main()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
+            if(accumulator) {
+                auto const ap=taylor_model_accumulator_profile();
+                const double duplication_ratio=
+                    ap.unique_entries
+                        ? static_cast<double>(ap.temporary_entries)
+                            / static_cast<double>(ap.unique_entries)
+                        : 0.0;
+                std::cerr << "[TaylorProductAccumulatorProfile]"
+                          << " policy=" << policy
+                          << " calls=" << ap.calls
+                          << " product_pairs=" << ap.product_pairs
+                          << " temporary_entries=" << ap.temporary_entries
+                          << " unique_entries=" << ap.unique_entries
+                          << " duplication_ratio=" << duplication_ratio
+                          << " max_temporary_entries="
+                          << ap.maximum_temporary_entries
+                          << " max_unique_entries="
+                          << ap.maximum_unique_entries
+                          << std::endl;
+            }
         };
 
-    // Compare the existing repeated-merge final-sweep kernel against a
-    // direct product accumulator at the two most informative cutoffs.
-    run_product_accumulator_probe("final_merge_1e-13",1e-13,false);
-    run_product_accumulator_probe("accumulator_1e-13",1e-13,true);
-    run_product_accumulator_probe("final_merge_3e-14",3e-14,false);
-    run_product_accumulator_probe("accumulator_3e-14",3e-14,true);
+    // Profile accumulator compression at the tighter cutoff, where
+    // product volume is largest and the next data-structure choice matters most.
+    run_product_accumulator_probe("accumulator_profile_3e-14",3e-14,true);
 
 }

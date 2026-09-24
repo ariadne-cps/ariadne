@@ -105,6 +105,22 @@ Bool taylor_model_incremental_sweep_enabled();
 Void set_taylor_model_incremental_sweep_enabled(Bool);
 Bool taylor_model_product_accumulator_enabled();
 Void set_taylor_model_product_accumulator_enabled(Bool);
+
+struct TaylorModelAccumulatorProfile {
+    unsigned long long calls=0u;
+    unsigned long long product_pairs=0u;
+    unsigned long long temporary_entries=0u;
+    unsigned long long unique_entries=0u;
+    unsigned long long maximum_temporary_entries=0u;
+    unsigned long long maximum_unique_entries=0u;
+};
+
+Void reset_taylor_model_accumulator_profile();
+TaylorModelAccumulatorProfile taylor_model_accumulator_profile();
+Void record_taylor_model_accumulator_profile(
+    unsigned long long product_pairs,
+    unsigned long long temporary_entries,
+    unsigned long long unique_entries);
 Void reset_taylor_model_product_profile();
 TaylorModelProductProfileSnapshot taylor_model_product_profile_snapshot();
 TaylorModelProductProfileContext taylor_model_product_profile_context();

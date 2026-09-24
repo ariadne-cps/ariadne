@@ -1115,8 +1115,16 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         }
 
         accumulated.error()=r.error()+product_roundoff;
+        const auto temporary_entries=
+            static_cast<unsigned long long>(accumulated.number_of_terms());
         accumulated.sort();
         accumulated.unique();
+        const auto unique_entries=
+            static_cast<unsigned long long>(accumulated.number_of_terms());
+        record_taylor_model_accumulator_profile(
+            static_cast<unsigned long long>(product_terms),
+            temporary_entries,
+            unique_entries);
         accumulated.sweep();
         r.expansion().swap(accumulated.expansion());
         r.error()=accumulated.error();

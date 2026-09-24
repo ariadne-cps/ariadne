@@ -2639,3 +2639,49 @@ Acceptance criteria are:
 If this succeeds, the next refinement should replace append-all-plus-sort with a true
 multi-index keyed accumulator or a degree/index-addressed workspace, depending on the
 observed temporary product sizes and MultiIndex structure.
+
+
+### 9.71 Direct accumulator result and compression profiling (2026-09-24)
+
+The append-all/sort/unique accumulator prototype completed successfully and preserved
+final-sweep accuracy while reducing runtime:
+
+```
+cutoff   legacy final-merge   accumulator   final error (accumulator)
+1e-13    46.9231 s            43.8901 s     2.5932365467959273e-7
+3e-14    ~55.5 s              53.0491 s     8.5378293221320844e-8
+```
+
+At `1e-13` the prototype saves about 6.5% versus the repeated-merge final-sweep
+implementation, despite deliberately materialising every coefficient product before
+sorting. The final error differs only at the level expected from a different floating-point
+summation order, while the validated enclosure is preserved.
+
+This is strong evidence that repeated full-expansion merge/copy/swap is a real algorithmic
+cost. The next decision is which accumulator structure should replace append-all-plus-sort.
+
+A dedicated accumulator profile now records, for each direct-product call:
+
+- `product_pairs = |x||y|`;
+- `temporary_entries = |r| + |x||y|` before sorting;
+- `unique_entries` immediately after `sort()+unique()`;
+- cumulative and maximum temporary/unique sizes;
+- the overall compression ratio `temporary_entries / unique_entries`.
+
+The Van der Pol benchmark is temporarily reduced to one accumulator run at `3e-14`,
+where product volume is highest:
+
+```
+accumulator_profile_3e-14
+```
+
+Output marker:
+
+```
+[TaylorProductAccumulatorProfile]
+```
+
+Interpretation:
+- a large compression ratio favours a keyed or degree-addressed accumulator;
+- a ratio near one suggests that contiguous append/sort may already be close to optimal,
+  and effort should focus on sorting/allocation rather than hashing/tree structures.

@@ -32,6 +32,7 @@ Bool g_taylor_model_product_profile_enabled=false;
 Bool g_taylor_model_early_discard_enabled=false;
 Bool g_taylor_model_incremental_sweep_enabled=true;
 Bool g_taylor_model_product_accumulator_enabled=false;
+TaylorModelAccumulatorProfile g_taylor_model_accumulator_profile;
 TaylorModelProductProfileContext g_taylor_model_product_profile_context=
     TaylorModelProductProfileContext::GENERAL;
 TaylorModelProductProfileSnapshot g_taylor_model_product_profile;
@@ -111,6 +112,31 @@ Bool taylor_model_product_accumulator_enabled() {
 
 Void set_taylor_model_product_accumulator_enabled(Bool enabled) {
     g_taylor_model_product_accumulator_enabled=enabled;
+}
+
+Void reset_taylor_model_accumulator_profile() {
+    g_taylor_model_accumulator_profile=TaylorModelAccumulatorProfile();
+}
+
+TaylorModelAccumulatorProfile taylor_model_accumulator_profile() {
+    return g_taylor_model_accumulator_profile;
+}
+
+Void record_taylor_model_accumulator_profile(
+    unsigned long long product_pairs,
+    unsigned long long temporary_entries,
+    unsigned long long unique_entries)
+{
+    ++g_taylor_model_accumulator_profile.calls;
+    g_taylor_model_accumulator_profile.product_pairs+=product_pairs;
+    g_taylor_model_accumulator_profile.temporary_entries+=temporary_entries;
+    g_taylor_model_accumulator_profile.unique_entries+=unique_entries;
+    g_taylor_model_accumulator_profile.maximum_temporary_entries=
+        std::max(g_taylor_model_accumulator_profile.maximum_temporary_entries,
+                 temporary_entries);
+    g_taylor_model_accumulator_profile.maximum_unique_entries=
+        std::max(g_taylor_model_accumulator_profile.maximum_unique_entries,
+                 unique_entries);
 }
 
 Void reset_taylor_model_product_profile() {

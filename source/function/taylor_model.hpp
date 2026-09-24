@@ -71,6 +71,53 @@ template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
 
+enum class TaylorModelProductProfileContext { GENERAL, COMPOSE };
+
+struct TaylorModelProductProfileCounters {
+    unsigned long long calls=0u;
+    unsigned long long product_pairs=0u;
+    unsigned long long sweep_passes=0u;
+    unsigned long long sweep_input_terms=0u;
+    unsigned long long sweep_output_terms=0u;
+    unsigned long long swept_terms=0u;
+    unsigned long long maximum_sweep_input_terms=0u;
+    unsigned long long maximum_sweep_output_terms=0u;
+    double elapsed_seconds=0.0;
+};
+
+struct TaylorModelProductProfileSnapshot {
+    TaylorModelProductProfileCounters general;
+    TaylorModelProductProfileCounters compose;
+};
+
+Bool taylor_model_product_profile_enabled();
+Void set_taylor_model_product_profile_enabled(Bool);
+Void reset_taylor_model_product_profile();
+TaylorModelProductProfileSnapshot taylor_model_product_profile_snapshot();
+TaylorModelProductProfileContext taylor_model_product_profile_context();
+Void set_taylor_model_product_profile_context(TaylorModelProductProfileContext);
+Void record_taylor_model_product_profile(
+    TaylorModelProductProfileContext,
+    unsigned long long product_pairs,
+    unsigned long long sweep_passes,
+    unsigned long long sweep_input_terms,
+    unsigned long long sweep_output_terms,
+    unsigned long long maximum_sweep_input_terms,
+    unsigned long long maximum_sweep_output_terms,
+    double elapsed_seconds);
+
+class TaylorModelProductProfileScope {
+    TaylorModelProductProfileContext _previous;
+  public:
+    explicit TaylorModelProductProfileScope(TaylorModelProductProfileContext context)
+        : _previous(taylor_model_product_profile_context()) {
+        set_taylor_model_product_profile_context(context);
+    }
+    ~TaylorModelProductProfileScope() {
+        set_taylor_model_product_profile_context(_previous);
+    }
+};
+
 //! \relates TaylorModel
 //! \name Template shorthands and type synonyms for Taylor models
 //!@{

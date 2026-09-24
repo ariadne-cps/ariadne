@@ -61,10 +61,14 @@ void ariadne_main()
             VectorFieldEvolver evolver(dynamics,gronwall);
             configure_evolver(evolver,plateau_step);
 
+            reset_taylor_model_product_profile();
+            set_taylor_model_product_profile_enabled(true);
             Stopwatch<Milliseconds> stopwatch;
             auto orbit=evolver.orbit(
                 initial_set,Real(5.00_dec),Semantics::UPPER);
             stopwatch.click();
+            set_taylor_model_product_profile_enabled(false);
+            auto const product_profile=taylor_model_product_profile_snapshot();
 
             ARIADNE_ASSERT(!orbit.final().empty());
             auto achieved_error=
@@ -84,6 +88,28 @@ void ariadne_main()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
+
+            auto print_product_profile =
+                [&](String const& context,
+                    TaylorModelProductProfileCounters const& profile) {
+                    std::cerr << "[TaylorProductGenerationProfile]"
+                              << " policy=" << policy
+                              << " context=" << context
+                              << " calls=" << profile.calls
+                              << " product_pairs=" << profile.product_pairs
+                              << " sweep_passes=" << profile.sweep_passes
+                              << " sweep_input_terms=" << profile.sweep_input_terms
+                              << " sweep_output_terms=" << profile.sweep_output_terms
+                              << " swept_terms=" << profile.swept_terms
+                              << " max_sweep_input_terms="
+                              << profile.maximum_sweep_input_terms
+                              << " max_sweep_output_terms="
+                              << profile.maximum_sweep_output_terms
+                              << " elapsed_seconds=" << profile.elapsed_seconds
+                              << std::endl;
+                };
+            print_product_profile("general",product_profile.general);
+            print_product_profile("compose",product_profile.compose);
         };
 
     run_carried_expansion_probe("absolute_1e-12",1e-12);

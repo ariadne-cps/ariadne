@@ -2278,3 +2278,35 @@ carried_expansion_diagnostics = true
 ```
 
 The evolver therefore emits only the requested `[CarriedExpansionSnapshot]` records at steps 500, 1000, 1500 and 2000, while all pre-existing verbose diagnostics remain disabled. The numerical algorithm and certification rules are unchanged.
+
+
+### 9.60 Profile temporary Taylor-product generation (2026-09-24)
+
+The carried-expansion snapshots rule out resident representation size as the main explanation for the cutoff/runtime trade-off. The `3e-14` run carries only tens of additional resident coefficients at the sampled late steps, while the earlier cumulative sweeper experiment observed millions of sweep events.
+
+The next diagnostic therefore instruments the Taylor-model product kernel `_ifma`, where multiplication is performed monomial-by-monomial and the intermediate result is swept after every source monomial.
+
+A diagnostic-only global profile is enabled only around the two Van der Pol benchmark runs. It records:
+
+- number of Taylor-model product calls;
+- exact number of coefficient product pairs `|x|*|y|` processed by those calls;
+- number of intermediate sweep passes;
+- total number of materialised terms immediately before and after those sweeps;
+- total number of terms removed by the sweeps;
+- maximum intermediate sweep input/output size;
+- wall-clock time spent inside the profiled product kernel.
+
+Products executed from `TaylorModel::_compose(x,y)` are tagged separately from all other Taylor-model products, yielding two contexts:
+
+```
+general
+compose
+```
+
+Output marker:
+
+```
+[TaylorProductGenerationProfile]
+```
+
+This experiment does not change sweeping or certification. Its purpose is to determine whether the tighter cutoff primarily increases (a) the number of coefficient products generated, (b) the size of intermediate merged expansions, or (c) both, and how much of the additional product-kernel time is specifically attributable to composition.

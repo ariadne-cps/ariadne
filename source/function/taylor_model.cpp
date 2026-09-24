@@ -27,6 +27,81 @@
 
 namespace Ariadne {
 
+namespace {
+Bool g_taylor_model_product_profile_enabled=false;
+TaylorModelProductProfileContext g_taylor_model_product_profile_context=
+    TaylorModelProductProfileContext::GENERAL;
+TaylorModelProductProfileSnapshot g_taylor_model_product_profile;
+
+Void accumulate_product_profile(
+    TaylorModelProductProfileCounters& counters,
+    unsigned long long product_pairs,
+    unsigned long long sweep_passes,
+    unsigned long long sweep_input_terms,
+    unsigned long long sweep_output_terms,
+    unsigned long long maximum_sweep_input_terms,
+    unsigned long long maximum_sweep_output_terms,
+    double elapsed_seconds)
+{
+    ++counters.calls;
+    counters.product_pairs+=product_pairs;
+    counters.sweep_passes+=sweep_passes;
+    counters.sweep_input_terms+=sweep_input_terms;
+    counters.sweep_output_terms+=sweep_output_terms;
+    counters.swept_terms+=sweep_input_terms-sweep_output_terms;
+    counters.maximum_sweep_input_terms=
+        std::max(counters.maximum_sweep_input_terms,maximum_sweep_input_terms);
+    counters.maximum_sweep_output_terms=
+        std::max(counters.maximum_sweep_output_terms,maximum_sweep_output_terms);
+    counters.elapsed_seconds+=elapsed_seconds;
+}
+} // namespace
+
+Bool taylor_model_product_profile_enabled() {
+    return g_taylor_model_product_profile_enabled;
+}
+
+Void set_taylor_model_product_profile_enabled(Bool enabled) {
+    g_taylor_model_product_profile_enabled=enabled;
+}
+
+Void reset_taylor_model_product_profile() {
+    g_taylor_model_product_profile=TaylorModelProductProfileSnapshot();
+    g_taylor_model_product_profile_context=TaylorModelProductProfileContext::GENERAL;
+}
+
+TaylorModelProductProfileSnapshot taylor_model_product_profile_snapshot() {
+    return g_taylor_model_product_profile;
+}
+
+TaylorModelProductProfileContext taylor_model_product_profile_context() {
+    return g_taylor_model_product_profile_context;
+}
+
+Void set_taylor_model_product_profile_context(TaylorModelProductProfileContext context) {
+    g_taylor_model_product_profile_context=context;
+}
+
+Void record_taylor_model_product_profile(
+    TaylorModelProductProfileContext context,
+    unsigned long long product_pairs,
+    unsigned long long sweep_passes,
+    unsigned long long sweep_input_terms,
+    unsigned long long sweep_output_terms,
+    unsigned long long maximum_sweep_input_terms,
+    unsigned long long maximum_sweep_output_terms,
+    double elapsed_seconds)
+{
+    auto& counters=(context==TaylorModelProductProfileContext::COMPOSE)
+        ? g_taylor_model_product_profile.compose
+        : g_taylor_model_product_profile.general;
+    accumulate_product_profile(
+        counters,product_pairs,sweep_passes,
+        sweep_input_terms,sweep_output_terms,
+        maximum_sweep_input_terms,maximum_sweep_output_terms,
+        elapsed_seconds);
+}
+
 template<> String class_name<UnknownError<FloatDP>>() { return "UnknownError<FloatDP>"; }
 template<> String class_name<UnknownError<FloatMP>>() { return "UnknownError<FloatMP>"; }
 

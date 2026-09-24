@@ -25,6 +25,7 @@
 #include "numeric/numeric.hpp"
 
 #include <iomanip>
+#include <chrono>
 #include <limits>
 
 #include "numeric/rounding.hpp"
@@ -1058,6 +1059,15 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
+    const bool profile=taylor_model_product_profile_enabled();
+    const auto profile_start=profile ? std::chrono::steady_clock::now()
+                                     : std::chrono::steady_clock::time_point();
+    unsigned long long profile_sweep_passes=0u;
+    unsigned long long profile_sweep_input_terms=0u;
+    unsigned long long profile_sweep_output_terms=0u;
+    unsigned long long profile_maximum_sweep_input_terms=0u;
+    unsigned long long profile_maximum_sweep_output_terms=0u;
+
     const SizeType as=r.argument_size();
     TaylorModel<P,F> t(as,r.sweeper());
     MultiIndex ta(as);
@@ -1106,7 +1116,22 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         t.error()=r.error()+te;
         te = 0u;
 
+        if(profile) {
+            const auto n=static_cast<unsigned long long>(t.number_of_terms());
+            ++profile_sweep_passes;
+            profile_sweep_input_terms+=n;
+            if(n>profile_maximum_sweep_input_terms) {
+                profile_maximum_sweep_input_terms=n;
+            }
+        }
         t.sweep();
+        if(profile) {
+            const auto n=static_cast<unsigned long long>(t.number_of_terms());
+            profile_sweep_output_terms+=n;
+            if(n>profile_maximum_sweep_output_terms) {
+                profile_maximum_sweep_output_terms=n;
+            }
+        }
         r.expansion().swap(t.expansion());
         r.error()=t.error();
         t.clear();
@@ -1128,6 +1153,21 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     re+=xe*ye;
     re+=xs*ye+ys*xe;
 
+    if(profile) {
+        const auto profile_end=std::chrono::steady_clock::now();
+        const double elapsed_seconds=
+            std::chrono::duration<double>(profile_end-profile_start).count();
+        record_taylor_model_product_profile(
+            taylor_model_product_profile_context(),
+            static_cast<unsigned long long>(x.number_of_terms())
+                * static_cast<unsigned long long>(y.number_of_terms()),
+            profile_sweep_passes,
+            profile_sweep_input_terms,
+            profile_sweep_output_terms,
+            profile_maximum_sweep_input_terms,
+            profile_maximum_sweep_output_terms,
+            elapsed_seconds);
+    }
 }
 
 template<class P, class F> inline TaylorModel<P,F> _fma(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y, TaylorModel<P,F> z) {
@@ -1739,6 +1779,7 @@ template<class P, class F> auto TaylorModel<P,F>::_gradient(const TaylorModel<P,
 
 template<class P, class F> TaylorModel<P,F>
 TaylorModel<P,F>::_compose(TaylorModel<P,F> const& x, Vector<TaylorModel<P,F>> const& y) {
+    TaylorModelProductProfileScope profile_scope(TaylorModelProductProfileContext::COMPOSE);
     return horner_evaluate(x.expansion(),y)+pm(x.error());
 }
 

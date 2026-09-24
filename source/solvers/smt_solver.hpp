@@ -253,6 +253,10 @@ SensitivitySplitSelection sensitivity_split_selection(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
+std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
+    ValidatedScalarMultivariateFunction const& function,
+    SizeType variable);
+
 Bool monotone_coordinate_is_safe(
     ValidatedScalarMultivariateFunction const& derivative,
     UpperBoxType const& domain);
@@ -465,7 +469,7 @@ class SmtSolver {
 
     struct CompiledTheoryLiteral {
         ValidatedScalarMultivariateFunction function;
-        std::vector<ValidatedScalarMultivariateFunction> derivatives;
+        std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
         SmtTheoryPrimitiveRelation relation;
     };
     using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;

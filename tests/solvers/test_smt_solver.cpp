@@ -475,10 +475,16 @@ class TestSmtSolver {
         UpperBoxType monotone_sine_domain({UpperIntervalType(ExactIntervalType(3,4))});
         UpperBoxType nonmonotone_sine_domain({UpperIntervalType(ExactIntervalType(0,4))});
 
-        auto positive_derivative=(exp(x[0])+x[0]).derivative(0u);
+        auto positive_derivative=SmtSolverTestSupport::optional_derivative(
+            exp(x[0])+x[0],0u);
+        ARIADNE_TEST_ASSERT(positive_derivative.has_value());
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
-                positive_derivative,positive_domain));
+                *positive_derivative,positive_domain));
+
+        auto nonsmooth_derivative=SmtSolverTestSupport::optional_derivative(
+            max(x[0],ValidatedScalarMultivariateFunction::constant(1,0.0_x)),0u);
+        ARIADNE_TEST_ASSERT(not nonsmooth_derivative.has_value());
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
                 exp(x[0])+x[0],positive_domain,0u));
@@ -1181,6 +1187,30 @@ class TestSmtSolver {
                 monotone_result.statistics().monotone_reduction_rounds,1u);
             ARIADNE_TEST_EQUAL(
                 monotone_result.statistics().monotone_effective_reductions,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] monotone opt-in preserves non-smooth max theory literal" << std::endl;
+            RealVariable nx("nonsmooth_x");
+            RealExpression enx=nx;
+            RealSpace nspace({nx});
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(max(enx,RealExpression(0))==0));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals;
+            literals.append(alternatives[0][0]);
+            SmtSolver monotone_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                true,
+                true));
+            SmtResult solve_result=monotone_solver.solve(
+                nspace,ExactBoxType({ExactIntervalType(-1,-1)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
 
         {

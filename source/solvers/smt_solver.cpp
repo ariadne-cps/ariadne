@@ -215,12 +215,13 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 SmtSolverConfiguration::SmtSolverConfiguration(
     ExactDouble epsilon, SizeType theory_minimization_budget,
     SizeType learned_clause_limit, SizeType box_processing_limit,
-    Bool candidate_search_enabled)
+    Bool candidate_search_enabled, Bool monotone_reduction_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
       _box_processing_limit(box_processing_limit),
-      _candidate_search_enabled(candidate_search_enabled)
+      _candidate_search_enabled(candidate_search_enabled),
+      _monotone_reduction_enabled(monotone_reduction_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -348,6 +349,9 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                if(not _configuration.monotone_reduction_enabled()) {
+                    return false;
+                }
                 if(monotone_attempted) {
                     return false;
                 }
@@ -468,6 +472,9 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.shaving_effective;
             }
             if(same_box(domain,before_shaving)) {
+                if(not _configuration.monotone_reduction_enabled()) {
+                    return false;
+                }
                 if(monotone_attempted) {
                     return false;
                 }

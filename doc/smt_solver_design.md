@@ -105,7 +105,8 @@ The current implementation includes:
 - learned-clause activity;
 - conservative learned-clause pruning with unit clauses retained permanently and
   older eligible binary-or-longer clauses removable when the configured active
-  non-theory learned-clause limit is exceeded;
+  non-theory learned-clause limit is exceeded; activity ranks eligible clauses
+  for retention but does not make a clause permanently immune to pruning;
 - theory-nogood minimization with a configurable budget.
 
 Theory results are interpreted centrally: `EPSILON_SAT` is consistent and

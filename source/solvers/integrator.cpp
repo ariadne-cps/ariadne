@@ -1046,21 +1046,21 @@ Bool evaluate_polynomial_procedure(
 }
 
 
-FloatDPUpperBound differential_l1_bound(ValidatedDifferential const& a)
+FloatDPError differential_l1_bound(ValidatedDifferential const& a)
 {
-    FloatDPUpperBound r(0,dp);
+    FloatDPError r(0u,dp);
     for(auto iter=a.begin(); iter!=a.end(); ++iter) {
         r+=mag(iter->coefficient());
     }
     return r;
 }
 
-FloatDPUpperBound differential_product_tail_bound(
+FloatDPError differential_product_tail_bound(
         ValidatedDifferential const& a,
         ValidatedDifferential const& b,
         DegreeType retained_degree)
 {
-    FloatDPUpperBound r(0,dp);
+    FloatDPError r(0u,dp);
     for(auto ia=a.begin(); ia!=a.end(); ++ia) {
         for(auto ib=b.begin(); ib!=b.end(); ++ib) {
             if(ia->index().degree()+ib->index().degree()>retained_degree) {
@@ -1075,14 +1075,14 @@ Bool evaluate_lightweight_validated_procedure(
         const Vector<ValidatedProcedure>& p,
         const Vector<ValidatedDifferential>& x,
         Vector<ValidatedDifferential>& result,
-        Vector<FloatDPUpperBound>& result_errors)
+        Vector<FloatDPError>& result_errors)
 {
     const DegreeType retained_degree=x[0u].degree();
     ValidatedDifferential const zero_differential=x.zero_element();
     List<ValidatedDifferential> values(
         p.temporaries_size(),zero_differential);
-    List<FloatDPUpperBound> errors(
-        p.temporaries_size(),FloatDPUpperBound(0,dp));
+    List<FloatDPError> errors(
+        p.temporaries_size(),FloatDPError(0u,dp));
 
     for(SizeType j=0u; j!=p._instructions.size(); ++j) {
         ProcedureInstruction const& ins=p._instructions[j];
@@ -1090,11 +1090,11 @@ Bool evaluate_lightweight_validated_procedure(
             case OperatorCode::CNST:
                 values[j]=zero_differential.create_constant(
                     p._constants[ins.val()].get(dp));
-                errors[j]=FloatDPUpperBound(0,dp);
+                errors[j]=FloatDPError(0u,dp);
                 break;
             case OperatorCode::VAR:
                 values[j]=x[ins.ind()];
-                errors[j]=FloatDPUpperBound(0,dp);
+                errors[j]=FloatDPError(0u,dp);
                 break;
             case OperatorCode::ADD:
                 values[j]=values[ins.arg1()]+values[ins.arg2()];
@@ -1119,11 +1119,11 @@ Bool evaluate_lightweight_validated_procedure(
             case OperatorCode::MUL: {
                 SizeType const a1=ins.arg1();
                 SizeType const a2=ins.arg2();
-                FloatDPUpperBound const n1=differential_l1_bound(values[a1]);
-                FloatDPUpperBound const n2=differential_l1_bound(values[a2]);
-                FloatDPUpperBound const e1=errors[a1];
-                FloatDPUpperBound const e2=errors[a2];
-                FloatDPUpperBound const overflow=
+                FloatDPError const n1=differential_l1_bound(values[a1]);
+                FloatDPError const n2=differential_l1_bound(values[a2]);
+                FloatDPError const e1=errors[a1];
+                FloatDPError const e2=errors[a2];
+                FloatDPError const overflow=
                     differential_product_tail_bound(
                         values[a1],values[a2],retained_degree);
                 values[j]=values[a1]*values[a2];
@@ -1132,9 +1132,9 @@ Bool evaluate_lightweight_validated_procedure(
             }
             case OperatorCode::SQR: {
                 SizeType const a=ins.arg();
-                FloatDPUpperBound const n=differential_l1_bound(values[a]);
-                FloatDPUpperBound const e=errors[a];
-                FloatDPUpperBound const overflow=
+                FloatDPError const n=differential_l1_bound(values[a]);
+                FloatDPError const e=errors[a];
+                FloatDPError const overflow=
                     differential_product_tail_bound(
                         values[a],values[a],retained_degree);
                 values[j]=sqr(values[a]);
@@ -1265,8 +1265,8 @@ graded_series_centre_polynomial_step(
     Stopwatch<Microseconds> lightweight_defect_stopwatch;
     Vector<ValidatedDifferential> lightweight_field(
         n,dphi.zero_element());
-    Vector<FloatDPUpperBound> lightweight_field_errors(
-        n,FloatDPUpperBound(0,dp));
+    Vector<FloatDPError> lightweight_field_errors(
+        n,FloatDPError(0u,dp));
     Bool lightweight_remainder_available=
         evaluate_lightweight_validated_procedure(
             p,dphi,lightweight_field,lightweight_field_errors);
@@ -1281,7 +1281,7 @@ graded_series_centre_polynomial_step(
         for(SizeType i=0u; i!=n; ++i) {
             FloatDPBounds base=evaluate(
                 lightweight_wide_defect.model(i),forward_half_box);
-            FloatDPUpperBound const e=lightweight_field_errors[i];
+            FloatDPError const e=lightweight_field_errors[i];
             lightweight_defect_range[i]=base+FloatDPBounds(-e,e);
         }
     }

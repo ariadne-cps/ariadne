@@ -3003,3 +3003,46 @@ in `taylor_model.hpp` and implemented in `taylor_model.cpp` now update the stati
 one for workspace preparation/growth and one for maximum touched count. This fixes linkage
 and keeps the profiling state encapsulated in the implementation unit. Dense arithmetic
 and workspace reuse are otherwise unchanged.
+
+
+### 9.82 Pre-rank dense operand slots (2026-09-24)
+
+The reusable-workspace experiment completed at:
+
+```
+elapsed_s   44.7151
+final_error 8.5378297219108396e-8
+calls       1,256,468
+slot_resizes 32
+capacity_grows 144
+max_slot_count 29,791
+max_touched_count 325
+```
+
+This is indistinguishable from the prior ~44.74--45.05 s baseline. Workspace allocation
+and growth are therefore not a material bottleneck.
+
+The next dense-kernel optimisation removes redundant multi-index work from the hot
+coefficient-product loop. Previously each pair performed:
+
+```
+product_index = alpha + beta
+slot = rank(product_index)
+```
+
+which constructs the summed `MultiIndex` and then traverses its coordinates again to
+compute the mixed-radix slot.
+
+Because the mixed-radix ranking is linear in the exponent vector,
+
+```
+rank(alpha + beta) = rank(alpha) + rank(beta)
+```
+
+the dense kernel now precomputes one slot per source term of `x` and `y`. The inner
+pair loop then computes the destination slot with a single integer addition and updates
+the dense accumulator directly. `mul_err`, `add_err`, full coefficient aggregation,
+and final sweeping are unchanged.
+
+This targets the ~208 million product-pair iterations observed in the preconditioned
+workload rather than per-call allocation overhead.

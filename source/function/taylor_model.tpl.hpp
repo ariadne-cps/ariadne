@@ -1193,17 +1193,37 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 accumulate(riter->index(),riter->coefficient());
             }
 
-            MultiIndex product_index(as);
+            std::vector<SizeType> x_slots;
+            std::vector<SizeType> y_slots;
+            x_slots.reserve(x.number_of_terms());
+            y_slots.reserve(y.number_of_terms());
+
             for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-                UniformConstReference<MultiIndex> xa=xiter->index();
+                x_slots.push_back(rank_index(xiter->index()));
+            }
+            for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+                y_slots.push_back(rank_index(yiter->index()));
+            }
+
+            SizeType xi=0u;
+            for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
                 UniformConstReference<CoefficientType> xv=xiter->coefficient();
-                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
-                    UniformConstReference<MultiIndex> ya=yiter->index();
+                SizeType yi=0u;
+                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
                     UniformConstReference<CoefficientType> yv=yiter->coefficient();
-                    product_index=xa+ya;
+                    const SizeType slot=x_slots[xi]+y_slots[yi];
                     CoefficientType product=
                         mul_err(xv,yv,product_roundoff);
-                    accumulate(product_index,product);
+
+                    SizeType& touched=slot_to_touched[slot];
+                    if(touched==unused) {
+                        touched=touched_slots.size();
+                        touched_slots.push_back(slot);
+                        touched_coefficients.emplace_back(product);
+                    } else {
+                        touched_coefficients[touched]=add_err(
+                            touched_coefficients[touched],product,product_roundoff);
+                    }
                 }
             }
 

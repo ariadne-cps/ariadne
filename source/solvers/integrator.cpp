@@ -919,6 +919,7 @@ struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
     FlowStepTaylorModelType recurrence_field;
     double residual_seconds;
+    double conversion_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -969,17 +970,20 @@ graded_series_centre_polynomial_step(
     Vector<GradedValidatedDifferential> final_f=fdphic;
     List<GradedValidatedDifferential> final_tmp=tmpdphic;
     Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
+    recurrence_residual_stopwatch.click();
 
+    Stopwatch<Microseconds> recurrence_conversion_stopwatch;
     Vector<ValidatedDifferential> recurrence_field_differential=
         differential(final_f,n,so,to);
     FlowStepTaylorModelType recurrence_field=
         flow_function(
             recurrence_field_differential,domx,domt,doma,sweeper);
-    recurrence_residual_stopwatch.click();
+    recurrence_conversion_stopwatch.click();
 
     return CentrePolynomialRecurrenceResult{
         std::move(polynomial),std::move(recurrence_field),
-        recurrence_residual_stopwatch.elapsed_seconds()};
+        recurrence_residual_stopwatch.elapsed_seconds(),
+        recurrence_conversion_stopwatch.elapsed_seconds()};
 }
 
 
@@ -1883,12 +1887,15 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
 
             static SizeType recurrence_residual_calls=0u;
             static double recurrence_residual_seconds=0.0;
+            static double recurrence_conversion_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
+            recurrence_conversion_seconds+=centre_result.conversion_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
-                          << " residual_seconds=" << recurrence_residual_seconds
+                          << " procedure_seconds=" << recurrence_residual_seconds
+                          << " conversion_seconds=" << recurrence_conversion_seconds
                           << " field_range=" << recurrence_field.range()
                           << std::endl;
             }

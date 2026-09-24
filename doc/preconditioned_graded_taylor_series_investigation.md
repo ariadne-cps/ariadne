@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `80796d35c064f698fe1c32eccbd0de91de5f977d`
+**Latest analysed investigation HEAD:** `44d7dadad31d2a6861b02aea01427652793cfdeb`
 
 ## Purpose of this document
 
@@ -1325,6 +1325,35 @@ The one-set change at 1e-6 is consistent with the slightly different/narrower re
 The generic residual-composition timer is now zero in production, confirming that the intended bottleneck has been removed. The remaining recurrence-field replay itself costs about 4.66 s cumulatively at 700 calls, and centre-polynomial construction about 8.51 s. Flowpipe composition remains the next independent large cost.
 
 The next optimisation removes the replay. At exit from the centre Taylor recurrence, `dphic` is the final P_m while `fdphic/tmpdphic` retain the incremental Procedure state used to generate P_m from the previous degree. Because `compute_procedure` is incremental, one additional update on the retained state should append the missing final degree of `g(P_m)`. This should replace the current full degree-by-degree replay with a single incremental Procedure update. Correctness must again be checked against the generic field/defect diagnostic before trusting the timing.
+
+---
+
+
+### 9.27 Retaining Procedure state is correct and improves runtime further (2026-09-24)
+
+The retained-state optimisation passes the same-step semantic check: generic and recurrence field ranges remain identical at printed precision, and the defect ranges are unchanged from the validated recurrence-production experiment.
+
+End-to-end at t=5:
+
+```
+tolerance 1e-6:
+  retained-state Gronwall: 4.734 s, 135 sets
+  previous recurrence:     4.903 s, 135 sets
+  graded:                  3.472 s, 169 sets
+
+tolerance 1e-8:
+  retained-state Gronwall: 10.891 s, 215 sets
+  previous recurrence:     11.680 s, 215 sets
+  graded:                   8.792 s, 401 sets
+```
+
+The optimisation is therefore valid and useful, though smaller than initially hoped. The existing `RecurrenceResidualProfile` still reports ~3.47 s at 700 calls, which means that timer includes not only the single incremental `compute_procedure` update but also conversion of the resulting graded field through `differential(...)` and `flow_function(...)` into a Taylor function patch.
+
+The next measurement splits those two costs:
+- retained incremental Procedure update;
+- graded-differential -> Taylor-function conversion.
+
+This matters because if conversion dominates, further optimising `compute_procedure` is the wrong target. In that case the defect/remainder should remain in graded/coefficient form longer and avoid materialising a full field Taylor patch.
 
 ---
 

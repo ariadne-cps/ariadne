@@ -1022,6 +1022,7 @@ std::vector<SizeType> learned_clause_pruning_candidates(
             | entry.theory
             | entry.recent
             | entry.short_clause
+            | entry.useful
             | entry.protected_clause
             | entry.locked;
         if(excluded) {
@@ -1485,7 +1486,7 @@ class SmtDpllSearch {
                 _learned_clause_active[i],
                 _learned_clause_is_theory[i],
                 current_generation<=clause_generation+2u,
-                _learned_clauses[i].size()<=1u,
+                _learned_clauses[i].size()<=2u,
                 _learned_clause_activity[i]>1u,
                 clause_index==protected_clause,
                 this->_learned_clause_locked(clause_index),

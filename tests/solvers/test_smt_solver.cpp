@@ -472,7 +472,8 @@ class TestSmtSolver {
         std::cout << "[smt-icp] validated monotone coordinate gating" << std::endl;
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         UpperBoxType positive_domain({UpperIntervalType(ExactIntervalType(0,2))});
-        UpperBoxType crossing_domain({UpperIntervalType(ExactIntervalType(3,4))});
+        UpperBoxType monotone_sine_domain({UpperIntervalType(ExactIntervalType(3,4))});
+        UpperBoxType nonmonotone_sine_domain({UpperIntervalType(ExactIntervalType(0,4))});
 
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
@@ -481,8 +482,11 @@ class TestSmtSolver {
             SmtSolverTestSupport::monotone_coordinate_is_safe(
                 -exp(x[0])-x[0],positive_domain,0u));
         ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::monotone_coordinate_is_safe(
+                sin(x[0]),monotone_sine_domain,0u));
+        ARIADNE_TEST_ASSERT(
             not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                sin(x[0]),crossing_domain,0u));
+                sin(x[0]),nonmonotone_sine_domain,0u));
     }
 
     Void test_search_outcome() {

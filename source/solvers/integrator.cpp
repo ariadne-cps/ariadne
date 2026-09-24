@@ -2569,6 +2569,33 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     carried_state_compose_seconds+=state_compose_stopwatch.elapsed_seconds();
     carried_state_range_seconds+=state_range_stopwatch.elapsed_seconds();
 
+    if(!this->diagnostics() && carried_profile_steps%100u==0u) {
+        ValidatedVectorMultivariateFunctionPatch clean_transition=
+            local_transition.normalised_mapping();
+        ValidatedVectorMultivariateFunctionPatch clean_state=
+            state.normalised_mapping();
+        for(SizeType i=0u; i!=clean_transition.result_size(); ++i) {
+            clean_transition[i].clobber();
+        }
+        for(SizeType i=0u; i!=clean_state.result_size(); ++i) {
+            clean_state[i].clobber();
+        }
+        ValidatedVectorMultivariateFunctionPatch clean_composition=
+            compose(clean_transition,clean_state);
+        std::cerr << "[CarriedStateCompositionProbe]"
+                  << " step=" << carried_profile_steps
+                  << " h=" << h
+                  << " transition_input_errors="
+                  << local_transition.normalised_mapping().errors()
+                  << " state_input_errors="
+                  << state.normalised_mapping().errors()
+                  << " actual_composition_errors="
+                  << next_normalised_mapping.errors()
+                  << " clean_composition_errors="
+                  << clean_composition.errors()
+                  << std::endl;
+    }
+
     if(!this->diagnostics()
         && (carried_profile_steps<=5u || carried_profile_steps%100u==0u)) {
         std::cerr << "[CarriedStateErrorProfile]"

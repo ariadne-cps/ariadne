@@ -1248,6 +1248,16 @@ TheoryAtomTruth classify_theory_atom(
     }
 }
 
+OutputStream& operator<<(OutputStream& os, TheoryAtomTruth truth)
+{
+    switch(truth) {
+        case TheoryAtomTruth::FALSE_VALUE: return os << "FALSE";
+        case TheoryAtomTruth::UNKNOWN: return os << "UNKNOWN";
+        case TheoryAtomTruth::TRUE_VALUE: return os << "TRUE";
+        default: return os << "INVALID";
+    }
+}
+
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
 {
     if(result.is_epsilon_sat()) {

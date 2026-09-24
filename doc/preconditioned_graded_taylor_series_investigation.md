@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `7b72810258e020c935a8b675044b9d8a3a89a28f`
+**Latest analysed investigation HEAD:** `2538eb857c62f88b3e2090ef70007d8e28702dcf`
 
 ## Purpose of this document
 
@@ -1659,6 +1659,38 @@ The experiment is diagnostic-only for now. It reports:
 Correctness gate: for the same candidate polynomial, the resulting TaylorModel must be a validated enclosure of `dP/dt-g(P)`. Before production use we still need to check that the Function/TaylorModel call path indeed preserves the expected validated remainder semantics for all supported elementary operations and that the candidate used for the final flow is exactly the same polynomial whose defect is certified.
 
 The polynomial degree-30 path remains only an optional oracle and is no longer part of the architectural direction.
+
+---
+
+
+### 9.39 Direct general TaylorModel evaluation is rigorous-looking but too slow as implemented (2026-09-24)
+
+The same-step diagnostic is encouraging:
+
+```
+generic patch defect:
+  x [-1.3388421e-7, 1.7941606e-7]
+  y [-9.8547251e-7, 1.3952296e-6]
+
+general TaylorModel defect:
+  x [-1.34e-7, 1.80e-7]
+  y [-9.9e-7, 1.40e-6]
+```
+
+The ranges agree at the displayed precision. Unlike the Differential-only experiment, this path evaluates the unrestricted general vector field directly in Ariadne's validated TaylorModel algebra, so non-polynomial elementary operations can carry Taylor-model remainder information.
+
+However, performance is unacceptable in its naive form. At 700 candidate calls the general TaylorModel residual costs 8.56 s cumulatively, versus:
+- retained Procedure update: 0.85 s;
+- recurrence field flow_function: 2.51 s;
+- cheap truncated Differential defect: 0.60 s.
+
+The extra experiment raises the 1e-8 Gronwall benchmark to 18.4 s while preserving the same 215 sets. Therefore evaluating `g(candidate_polynomial.models())` from scratch as a full TaylorModel expression on every candidate is not the desired Flow*-like kernel.
+
+This result refines the architectural target. We need the **remainder semantics of TaylorModel**, but the **incremental coefficient evaluation of compute_procedure**. The likely useful design is to augment the existing graded Procedure recurrence with a lightweight validated remainder propagated alongside the retained coefficients, reusing already-computed Procedure temporaries instead of re-evaluating the full function in TaylorModel algebra.
+
+The full general-TaylorModel residual is now diagnostics-only, like the degree-30 polynomial oracle. It remains a useful reference enclosure for future lightweight remainder implementations, including non-polynomial test systems.
+
+Next step: inspect the internal TaylorModel arithmetic, especially multiplication and elementary-series composition, and identify the minimal scalar error state required to reproduce its rigorous truncation bounds alongside the existing Graded<Differential> Procedure evaluation.
 
 ---
 

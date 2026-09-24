@@ -2169,34 +2169,26 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             // Taylor models.  TaylorModel elementary operations propagate their
             // own validated truncation/remainder, so this path is not restricted
             // to polynomial dynamics and avoids FunctionPatch composition.
-            Stopwatch<Microseconds> general_tm_defect_stopwatch;
-            FlowStepTaylorModelType candidate_polynomial=centre_polynomial;
-            for(SizeType i=0u; i!=n; ++i) {
-                candidate_polynomial.model(i).clobber();
-            }
-            Vector<ValidatedTaylorModelDP> general_field_models=
-                g(candidate_polynomial.models());
             Vector<FloatDPBounds> general_tm_defect_range(
                 n,FloatDPBounds(0,dp));
-            for(SizeType i=0u; i!=n; ++i) {
-                ValidatedTaylorModelDP dmodel=
-                    derivative(candidate_polynomial.get(i),time_index).model();
-                ValidatedTaylorModelDP rmodel=
-                    dmodel-general_field_models[i];
-                general_tm_defect_range[i]=cast_singleton(rmodel.range());
-            }
-            general_tm_defect_stopwatch.click();
-            static SizeType general_tm_defect_calls=0u;
-            static double general_tm_defect_seconds=0.0;
-            ++general_tm_defect_calls;
-            general_tm_defect_seconds+=
-                general_tm_defect_stopwatch.elapsed_seconds();
-            if(!this->diagnostics() && general_tm_defect_calls%100u==0u) {
-                std::cerr << "[GeneralTaylorModelResidualProfile]"
-                          << " calls=" << general_tm_defect_calls
-                          << " seconds=" << general_tm_defect_seconds
-                          << " defect_range=" << general_tm_defect_range
-                          << std::endl;
+            if(this->diagnostics()) {
+                Stopwatch<Microseconds> general_tm_defect_stopwatch;
+                FlowStepTaylorModelType candidate_polynomial=centre_polynomial;
+                for(SizeType i=0u; i!=n; ++i) {
+                    candidate_polynomial.model(i).clobber();
+                }
+                Vector<ValidatedTaylorModelDP> general_field_models=
+                    g(candidate_polynomial.models());
+                    for(SizeType i=0u; i!=n; ++i) {
+                    ValidatedTaylorModelDP dmodel=
+                        derivative(candidate_polynomial.get(i),time_index).model();
+                    ValidatedTaylorModelDP rmodel=
+                        dmodel-general_field_models[i];
+                    general_tm_defect_range[i]=cast_singleton(rmodel.range());
+                }
+                general_tm_defect_stopwatch.click();
+    
+    
             }
 
             ValidatedVectorMultivariateFunctionPatch generic_field;

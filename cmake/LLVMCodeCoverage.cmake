@@ -95,6 +95,7 @@ endif()
                 "$<TARGET_FILE:${Coverage_TARGET}>"
                 "-instr-profile=${PROFDATA_FILE}"
                 "-format=html"
+                "-show-branches=count"
                 "-output-dir=${HTML_DIR}"
                 ${LLVM_COV_FILTER_ARGS}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"

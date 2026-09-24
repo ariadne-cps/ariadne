@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `70d5de324bb8556b3e6bb1294b77c5bc9dd883fb`
+**Latest analysed investigation HEAD:** `c96d82d91c7e2b919116f96433826eb2c11ff9bf`
 
 ## Purpose of this document
 
@@ -1563,6 +1563,44 @@ is formed at that full degree, converted once on the correct widened time domain
 For Van der Pol the Procedure is cubic, so with the current centre polynomial degree 10 the exact composition degree is 30. This path is diagnostic only until its output and cost are measured.
 
 This is materially different from the previous cheap truncated Differential path: for an accepted polynomial Procedure there is no unrepresented algebraic tail of `g(P)`. The remaining rigour question is then only whether the polynomial candidate represented by `dphi` is exactly the candidate around which the final Taylor patch/remainder certificate is constructed; its conversion/sweeping error is already carried by the output Taylor model and must not be differentiated as though it were a smooth error function.
+
+---
+
+
+### 9.36 Full exact polynomial composition is rigorous-looking but computationally non-competitive (2026-09-24)
+
+The degree-complete polynomial diagnostic works and confirms that Van der Pol is recognised as polynomial:
+
+```
+exact_polynomial_available=true
+exact_polynomial_degree=30
+```
+
+On the identical first step:
+
+```
+cheap truncated Differential defect:
+  x [-1e-9, 1.76e-7]
+  y [-1e-8, 1.39e-6]
+
+full degree-30 polynomial defect:
+  x [-1e-9, 1.77e-7]
+  y [-2e-8, 1.42e-6]
+```
+
+So the omitted algebraic tail is small on this example, but non-zero. This confirms that the cheap truncated path cannot simply be declared exact.
+
+Performance is unacceptable for production. At 100 candidate calls the full exact-polynomial diagnostic already costs 10.75 s; at 600 calls it costs 66.93 s. It also inflates the enclosing centre-polynomial timer because the diagnostic currently executes inside the centre helper. This explains the runaway benchmark (23.56 s already for the 1e-6 run, versus ~4.6 s before the exact diagnostic).
+
+Conclusion: full dense degree-q*d expansion is a useful rigour oracle, not a viable integrator kernel. It should not be computed in normal runs.
+
+The implementation is therefore changed so the degree-complete exact-polynomial path runs only with diagnostics enabled. Production returns to the previously measured cost.
+
+The next promising rigorous direction is **not** to materialise all degree-30 coefficients, but to bound only the omitted tail beyond the retained Differential degree. For a polynomial Procedure this can be done instruction-by-instruction using a split representation:
+- retained polynomial coefficients up to degree d;
+- a scalar/interval tail magnitude for degrees > d.
+
+Addition/subtraction combine tails additively. Multiplication combines retained-retained overflow plus retained-tail and tail-tail bounds. This is analogous to a Taylor-model algebra and can provide the missing rigorous correction to the cheap direct defect without constructing the full high-degree expansion.
 
 ---
 

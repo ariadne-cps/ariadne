@@ -1066,7 +1066,8 @@ graded_series_centre_polynomial_step(
         const ExactIntervalType& domt,
         Sweeper<FloatDP> const& sweeper,
         DegreeType so,
-        DegreeType to)
+        DegreeType to,
+        Bool compute_exact_polynomial_diagnostic)
 {
     const SizeType n=domx.dimension();
     ExactBoxType doma;
@@ -1156,7 +1157,7 @@ graded_series_centre_polynomial_step(
     DegreeType exact_polynomial_degree=0u;
     Vector<FloatDPBounds> exact_polynomial_defect_range(
         n,FloatDPBounds(0,dp));
-    if(exact_polynomial_available) {
+    if(exact_polynomial_available && compute_exact_polynomial_diagnostic) {
         exact_polynomial_degree=static_cast<DegreeType>(
             vector_field_degree*dphi.degree());
         Vector<ValidatedDifferential> padded_dphi(
@@ -1189,6 +1190,9 @@ graded_series_centre_polynomial_step(
                     exact_wide_defect.model(i),forward_half_box);
             }
         }
+    }
+    if(!compute_exact_polynomial_diagnostic) {
+        exact_polynomial_available=false;
     }
     exact_polynomial_defect_stopwatch.click();
 
@@ -2097,7 +2101,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 graded_series_centre_polynomial_step(
                     p,domy,domt,this->sweeper(),
                     this->minimum_spacial_order(),
-                    this->minimum_temporal_order());
+                    this->minimum_temporal_order(),
+                    this->diagnostics());
             FlowStepTaylorModelType centre_polynomial=
                 std::move(centre_result.polynomial);
             FlowStepTaylorModelType recurrence_field=

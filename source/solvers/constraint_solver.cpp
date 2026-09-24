@@ -370,10 +370,10 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
     static const Int MAX_STEPS=3;
     const FloatDP threshold = div(near, lower.width().raw(), FloatDP(pow(two,MAX_STEPS),dp));
-    do {
+    for(Int step=0; step!=MAX_STEPS; ++step) {
         FloatDPUpperBound ub(dp); FloatDPUpperInterval ivl(-ub,+ub); FloatDP val(dp); ub=val;
 
-        // Apply Newton contractor on lower and upper strips
+        // Apply Newton contractor on lower and upper strips.
         if(lower.width().raw()>threshold) {
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
@@ -389,7 +389,10 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=UpperIntervalType(lower.lower_bound(),upper.upper_bound());
-    } while(lower.width().raw()>threshold && upper.width().raw()>threshold);
+        if(not (lower.width().raw()>threshold && upper.width().raw()>threshold)) {
+            break;
+        }
+    }
     domain=subdomain;
 
     return definitely(domain.is_empty());

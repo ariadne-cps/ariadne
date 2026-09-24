@@ -332,16 +332,32 @@ class TestConstraintSolver
     }
 
     Void test_monotone_reduce() {
-        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
-        EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
-
         ConstraintSolver propagator;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
 
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,2.0_x}}));
-        ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,1.25_x}}));
+        UpperBoxType linear_domain=ExactBoxType{{0.0_x,2.0_x}};
+        UpperBoxType linear_original=linear_domain;
+        Bool linear_empty=propagator.monotone_reduce(
+            linear_domain,
+            2*x[0]+1,
+            ExactIntervalType(3.0_x,3.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(not linear_empty);
+        ARIADNE_TEST_ASSERT(refines(linear_domain,linear_original));
+        ARIADNE_TEST_ASSERT(
+            possibly(contains(linear_domain[0],ExactDouble(1.0_x))));
+
+        UpperBoxType smooth_domain=ExactBoxType{{0.0_x,2.0_x}};
+        UpperBoxType smooth_original=smooth_domain;
+        Bool smooth_empty=propagator.monotone_reduce(
+            smooth_domain,
+            exp(x[0])+x[0],
+            ExactIntervalType(3.0_x,3.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(not smooth_empty);
+        ARIADNE_TEST_ASSERT(refines(smooth_domain,smooth_original));
+        ARIADNE_TEST_ASSERT(
+            smooth_domain[0].width().raw()<=smooth_original[0].width().raw());
     }
 
     Void test_split() {

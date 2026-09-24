@@ -2221,3 +2221,44 @@ Interpretation:
 - if it is broad both in degree and count, the gain from the tighter threshold likely comes from a long tail of dependencies, and a new sweeper heuristic alone may not reduce cost substantially.
 
 Do not design another production sweeper before inspecting this profile.
+
+
+### 9.58 Snapshot the actually carried expansion (2026-09-24)
+
+The cumulative sweep-band profile showed that the coefficients between `3e-14` and `1e-12` are not confined to low degree. The tighter run encounters a broad bridge population through approximately degrees 0--16, with especially large counts around degrees 4--8. This explains why the previous degree-selective policy could not beat the plain absolute `3e-14` point.
+
+However, those counts are cumulative sweeper events, not unique coefficients resident in the carried state. They may count the same persistent structure many times during repeated arithmetic and composition.
+
+The next diagnostic therefore removes the profiled sweeper and restores ordinary `ThresholdSweeper` instances for the two decisive policies:
+
+```
+absolute 1e-12
+absolute 3e-14
+```
+
+At carried-state steps 500, 1000, 1500 and 2000, the evolver directly inspects `state.normalised_mapping()` immediately before the local step and `local_step.final_state().normalised_mapping()` immediately after it. For every total degree it records the resident coefficient count and absolute mass in the same three bands:
+
+```
+|c| < 3e-14
+3e-14 <= |c| < 1e-12
+|c| >= 1e-12
+```
+
+Output marker:
+
+```
+[CarriedExpansionSnapshot]
+```
+
+The benchmark summary marker is:
+
+```
+[IntegratorCarriedExpansionBenchmark]
+```
+
+Interpretation:
+- a small, stable resident bridge population together with millions of cumulative sweep events would point to repeated processing of persistent structure as the main cost opportunity;
+- substantial resident growth under `3e-14` would instead show that the tighter policy genuinely carries a much larger state representation;
+- comparing input/output snapshots at the same milestone reveals how much one local transition changes the resident structure.
+
+No certification rule is changed by this diagnostic.

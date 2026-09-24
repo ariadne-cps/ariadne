@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
+
 #include "function/functional.hpp"
 #include "config.hpp"
 
@@ -65,6 +67,73 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
     result.append(split.first);
     result.append(split.second);
     return result;
+}
+
+struct CarriedExpansionSnapshot {
+    static constexpr std::size_t degree_slots=32u;
+    std::array<unsigned long long,degree_slots> below_tight_count{};
+    std::array<unsigned long long,degree_slots> bridge_count{};
+    std::array<unsigned long long,degree_slots> above_loose_count{};
+    std::array<double,degree_slots> below_tight_abs_mass{};
+    std::array<double,degree_slots> bridge_abs_mass{};
+    std::array<double,degree_slots> above_loose_abs_mass{};
+};
+
+CarriedExpansionSnapshot
+carried_expansion_snapshot(ValidatedVectorMultivariateFunctionPatch const& mapping)
+{
+    CarriedExpansionSnapshot profile;
+    for(SizeType component=0u; component!=mapping.result_size(); ++component) {
+        auto const& expansion=mapping.get(component).expansion();
+        for(auto const& term : expansion) {
+            auto degree=static_cast<std::size_t>(term.index().degree());
+            if(degree>=CarriedExpansionSnapshot::degree_slots) {
+                degree=CarriedExpansionSnapshot::degree_slots-1u;
+            }
+            const double magnitude=std::abs(term.coefficient().get_d());
+            if(magnitude<3e-14) {
+                ++profile.below_tight_count[degree];
+                profile.below_tight_abs_mass[degree]+=magnitude;
+            } else if(magnitude<1e-12) {
+                ++profile.bridge_count[degree];
+                profile.bridge_abs_mass[degree]+=magnitude;
+            } else {
+                ++profile.above_loose_count[degree];
+                profile.above_loose_abs_mass[degree]+=magnitude;
+            }
+        }
+    }
+    return profile;
+}
+
+Void
+print_carried_expansion_snapshot(
+    String const& stage,
+    SizeType step,
+    ValidatedVectorMultivariateFunctionPatch const& mapping,
+    Sweeper<FloatDP> const& sweeper)
+{
+    auto const profile=carried_expansion_snapshot(mapping);
+    for(std::size_t degree=0u;
+        degree!=CarriedExpansionSnapshot::degree_slots; ++degree) {
+        const auto total_count=
+            profile.below_tight_count[degree]
+            +profile.bridge_count[degree]
+            +profile.above_loose_count[degree];
+        if(total_count==0u) { continue; }
+        std::cerr << "[CarriedExpansionSnapshot]"
+                  << " sweeper=" << sweeper
+                  << " stage=" << stage
+                  << " step=" << step
+                  << " degree=" << degree
+                  << " below_3e-14_count=" << profile.below_tight_count[degree]
+                  << " bridge_3e-14_to_1e-12_count=" << profile.bridge_count[degree]
+                  << " above_1e-12_count=" << profile.above_loose_count[degree]
+                  << " below_3e-14_abs_mass=" << profile.below_tight_abs_mass[degree]
+                  << " bridge_3e-14_to_1e-12_abs_mass=" << profile.bridge_abs_mass[degree]
+                  << " above_1e-12_abs_mass=" << profile.above_loose_abs_mass[degree]
+                  << std::endl;
+    }
 }
 
 } // namespace
@@ -260,9 +329,28 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
             carried_preconditioned_state
                 ? *carried_preconditioned_state
                 : preconditioned_integrator->precondition(current_set.state_function());
+
+        const SizeType diagnostic_step=result->reach_size()+1u;
+        const bool carried_snapshot_step=
+            diagnostic_step==500u || diagnostic_step==1000u
+            || diagnostic_step==1500u || diagnostic_step==2000u;
+        if(preconditioned_integrator->diagnostics() && carried_snapshot_step) {
+            print_carried_expansion_snapshot(
+                "input",diagnostic_step,
+                local_state.normalised_mapping(),
+                preconditioned_integrator->sweeper());
+        }
+
         PreconditionedTaylorSeriesStep local_step=
             preconditioned_integrator->step(
                 dynamic,local_state,suggest(maximum_step_size));
+
+        if(preconditioned_integrator->diagnostics() && carried_snapshot_step) {
+            print_carried_expansion_snapshot(
+                "output",diagnostic_step,
+                local_step.final_state().normalised_mapping(),
+                preconditioned_integrator->sweeper());
+        }
 
         step_size=local_step.time_step();
 

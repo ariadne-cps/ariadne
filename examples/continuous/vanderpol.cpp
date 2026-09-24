@@ -37,11 +37,11 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Sweeper-policy benchmark at the observed small-step floor.
-    // Preserve all terms up to the configured spatial degree with a
-    // GradedSweeper and compare against threshold sweeping.  This tests
-    // whether we can retain long-horizon symbolic dependence without using
-    // a globally tiny coefficient threshold.
+    // Relative-threshold sweeper benchmark.
+    // RelativeThresholdSweeper discards a coefficient c only when
+    // |c| < relative_threshold * (radius(polynomial) + uniform_error).
+    // This makes the cutoff scale with the current Taylor model instead of
+    // imposing one global absolute coefficient magnitude.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
@@ -77,7 +77,7 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorSweeperPolicyBenchmark]"
+            std::cerr << "[IntegratorRelativeSweeperBenchmark]"
                       << " method=GRONWALL"
                       << " policy=" << policy
                       << " spatial_order=5"
@@ -94,18 +94,20 @@ void ariadne_main()
         };
 
     run_sweeper_policy_probe(
-        "threshold_1e-12",
+        "absolute_1e-12",
         Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
     run_sweeper_policy_probe(
-        "threshold_1e-14",
+        "absolute_1e-14",
         Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
     run_sweeper_policy_probe(
-        "graded_degree_5",
-        Sweeper<FloatDP>(GradedSweeper<FloatDP>(DoublePrecision(),5u)));
-    run_sweeper_policy_probe(
-        "graded_threshold_degree_5_1e-14",
+        "relative_1e-12",
         Sweeper<FloatDP>(
-            GradedThresholdSweeper<FloatDP>(
-                DoublePrecision(),5u,FloatDP(1e-14_x,DoublePrecision()))));
+            RelativeThresholdSweeper<FloatDP>(
+                DoublePrecision(),FloatDP(1e-12_x,DoublePrecision()))));
+    run_sweeper_policy_probe(
+        "relative_1e-14",
+        Sweeper<FloatDP>(
+            RelativeThresholdSweeper<FloatDP>(
+                DoublePrecision(),FloatDP(1e-14_x,DoublePrecision()))));
 
 }

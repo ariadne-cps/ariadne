@@ -62,7 +62,7 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorAccuracyBenchmark]"
+            std::cerr << "[IntegratorStepScalingBenchmark]"
                       << " method=" << method
                       << " tolerance=" << tolerance
                       << " max_step=" << max_step
@@ -75,27 +75,35 @@ void ariadne_main()
                       << std::endl;
         };
 
-    auto run_pair = [&](ExactDouble tolerance) {
+    // Fixed-max-step sweep for the error-vs-h investigation.
+    // Use a deliberately loose local-error threshold so that, whenever the
+    // enclosure/bounder permits it, the configured maximum step rather than
+    // StepMaximumError controls the integration step.
+    const ExactDouble loose_tolerance=1e-2_x;
+
+    auto run_fixed_step_pair = [&](ExactDouble max_step) {
         PreconditionedGradedTaylorSeriesIntegrator gronwall(
-            StepMaximumError(tolerance),sweeper,lipschitz_tolerance=0.5_x,
+            StepMaximumError(loose_tolerance),sweeper,
+            lipschitz_tolerance=0.5_x,
             minimum_spacial_order=5,minimum_temporal_order=5,
             maximum_spacial_order=5,maximum_temporal_order=5);
         gronwall.set_preconditioning(TaylorSeriesPreconditioning::QR);
         gronwall.set_diagnostics(false);
 
         GradedTaylorSeriesIntegrator graded(
-            StepMaximumError(tolerance),sweeper,lipschitz_tolerance=0.5_x,
+            StepMaximumError(loose_tolerance),sweeper,
+            lipschitz_tolerance=0.5_x,
             minimum_spacial_order=5,minimum_temporal_order=5,
             maximum_spacial_order=5,maximum_temporal_order=5);
 
-        run_long_benchmark("GRONWALL",gronwall,tolerance,0.04_x);
-        run_long_benchmark("GRADED",graded,tolerance,0.04_x);
+        run_long_benchmark("GRONWALL",gronwall,loose_tolerance,max_step);
+        run_long_benchmark("GRADED",graded,loose_tolerance,max_step);
     };
 
-    run_pair(1e-5_x);
-    run_pair(1e-6_x);
-    run_pair(1e-7_x);
-    run_pair(1e-8_x);
-    run_pair(1e-9_x);
+    run_fixed_step_pair(0.04_x);
+    run_fixed_step_pair(0.02_x);
+    run_fixed_step_pair(0.01_x);
+    run_fixed_step_pair(0.005_x);
+    run_fixed_step_pair(0.0025_x);
 
 }

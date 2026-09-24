@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `49db11a9f7536d69199ecdae68b845049eb133da`
+**Latest analysed investigation HEAD:** `d4cf037e0af439d51c412a40533c32fb5d3c890e`
 
 ## Purpose of this document
 
@@ -1850,6 +1850,32 @@ There is no plateau visible down to the current 1e-9 tolerance in this final-Tay
 5. Larger-step capability is strongly supported by set counts. The advantage grows with accuracy: 125 vs 133 sets at 1e-5, reaching 327 vs 675 at 1e-9. Since both runs cover exactly [0,5], these counts imply materially larger average accepted steps for Gronwall.
 
 This is the first evidence that the current prototype meets objective 3 at two directly overlapping achieved-error levels, despite being slower at equal nominal tolerance. The next benchmark should target objective 1 explicitly: disable tolerance-driven ambiguity as much as possible and sweep maximum/fixed step size while measuring achieved over-approximation, so that an error plateau as h decreases can be observed directly.
+
+---
+
+
+### 9.45 Fixed-horizon error-vs-step benchmark for plateau detection (2026-09-24)
+
+The next benchmark targets objective 1 directly. Both integrators cover the identical interval [0,5] and use the same order-5 configuration and sweeper. Instead of sweeping the nominal error tolerance, the local `StepMaximumError` is deliberately loosened to 1e-2 and the configured maximum step is swept through:
+
+```
+0.04, 0.02, 0.01, 0.005, 0.0025
+```
+
+The purpose is to make `max_step`, rather than the local error threshold, control the effective step whenever the validated flow bound permits it.
+
+Each run reports the existing common final Taylor-model error plus set counts under the marker:
+
+```
+[IntegratorStepScalingBenchmark]
+```
+
+Interpretation rule:
+- first verify from the set count that the actual average step tracks the requested maximum step (for horizon 5, ideal counts are approximately 125, 250, 500, 1000, 2000);
+- only then use the resulting `achieved_final_error` as an error-vs-h curve;
+- if either integrator takes materially more sets than 5/max_step, its curve at that point is not a clean fixed-step point and must be labelled as adaptivity/bounder-limited.
+
+The key test is whether the Graded error curve flattens as max_step decreases while the Gronwall/preconditioned curve continues decreasing. Runtime is still recorded, but this sweep is primarily a plateau/scaling experiment, not the objective-3 benchmark.
 
 ---
 

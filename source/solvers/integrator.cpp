@@ -2183,7 +2183,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     derivative(candidate_polynomial.get(i),time_index).model();
                 ValidatedTaylorModelDP rmodel=
                     dmodel-general_field_models[i];
-                general_tm_defect_range[i]=rmodel.range();
+                general_tm_defect_range[i]=cast_singleton(rmodel.range());
             }
             general_tm_defect_stopwatch.click();
             static SizeType general_tm_defect_calls=0u;

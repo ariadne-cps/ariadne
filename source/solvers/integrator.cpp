@@ -515,6 +515,7 @@ Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
 
 #include "algebra/graded.hpp"
 #include "function/procedure.hpp"
+#include "function/procedure.tpl.hpp"
 
 namespace Ariadne {
 

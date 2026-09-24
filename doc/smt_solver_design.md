@@ -12,6 +12,36 @@ capabilities comparable in purpose to dReal: Boolean reasoning over nonlinear
 real theory atoms, validated numerical pruning and certification, controlled
 epsilon relaxation, and parallel box search.
 
+### Primary application target: neural certificate verification
+
+The near-term development target is formal certification of neural-network
+bounds in workflows such as FOSSIL-style Lyapunov/barrier verification and
+CARe-style residual certification. These workflows translate a trained smooth
+network and its symbolic derivatives into bounded quantifier-free nonlinear
+real arithmetic queries over compact domains.
+
+The solver roadmap therefore prioritizes, in this order:
+
+1. epsilon-safe SAT/theory interaction with explained theory propagation;
+2. strong validated ICP for large smooth composed expressions, including
+   monotonicity/Newton-style contraction where applicable;
+3. efficient handling of large shared expression DAGs produced by feed-forward
+   networks and their derivatives;
+4. robust support for polynomial and transcendental activations and dynamics;
+5. fast counterexample/witness discovery for CEGIS loops;
+6. elimination of algorithmic UNKNOWN outcomes on the declared bounded QF_NRA
+   fragment, establishing the intended delta-complete decision behavior;
+7. only after those goals, broader language features such as richer SMT-LIB
+   integration, quantifiers, or dedicated ODE solving.
+
+For this target, ODE trajectories are normally not integrated by the SMT core.
+FOSSIL-like verification supplies the Lie derivative as the symbolic real
+expression grad(C)(x) dot f(x), while CARe-like verification supplies symbolic
+time/state derivatives and Hamiltonian residual expressions. The SMT task is
+therefore primarily bounded QF_NRA with nonlinear/transcendental terms, Boolean
+structure, and large composed expression graphs.
+
+
 The solver currently exposes three outcomes:
 
 - `UNSAT`: the bounded query has been rigorously excluded.

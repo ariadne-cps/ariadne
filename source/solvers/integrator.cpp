@@ -1114,7 +1114,7 @@ Bool evaluate_lightweight_validated_procedure(
                 break;
             case OperatorCode::HLF:
                 values[j]=hlf(values[ins.arg()]);
-                errors[j]=hlf(errors[ins.arg()]);
+                errors[j]=errors[ins.arg()]/Nat(2);
                 break;
             case OperatorCode::MUL: {
                 SizeType const a1=ins.arg1();

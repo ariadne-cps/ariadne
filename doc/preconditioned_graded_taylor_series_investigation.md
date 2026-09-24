@@ -2883,3 +2883,53 @@ reach_sets
 The key comparison for architectural competitiveness is
 `graded_dense_3e-14` versus `preconditioned_dense_3e-14`; the legacy point is retained
 to quantify how much of the improvement comes purely from the Taylor-product kernel.
+
+
+### 9.77 Graded-dense equal-accuracy frontier (2026-09-24)
+
+The completed apples-to-apples architecture benchmark gave:
+
+```
+method                         elapsed_s   final_error              final_radius  reach_sets
+graded_legacy_3e-14            23.2251     5.5511748688431288e-7   0.0403        2000
+graded_dense_3e-14             21.0271     3.3536682299918048e-7   0.0403        2000
+preconditioned_dense_3e-14     44.7441     8.5378297219108396e-8   0.0403        2000
+```
+
+The dense full-coefficient product kernel therefore improves the original
+`GradedTaylorSeriesIntegrator` as well as the preconditioned integrator. At the same
+`3e-14` cutoff, graded+dense is about 9.5% faster than the legacy graded kernel and
+reduces final error by about 40%.
+
+The remaining architectural question is now an equal-accuracy comparison. At `3e-14`,
+the preconditioned+dense integrator is about 2.1x slower than graded+dense, but its final
+Taylor-model error is about 3.9x smaller. The final enclosure radius is identical in the
+reported run, so the observed benefit is primarily in the carried Taylor-model remainder.
+
+The next experiment therefore maps only the `GradedTaylorSeriesIntegrator + dense
+accumulator` frontier below `3e-14`:
+
+```
+3e-14
+1e-14
+3e-15
+1e-15
+```
+
+All other benchmark parameters remain unchanged. The target is the established
+preconditioned+dense error:
+
+```
+8.5378297219108396e-8
+```
+
+If graded+dense reaches this error in less than 44.7441 s, the QR-preconditioned
+architecture is still not competitive at equal final Taylor-model error on this workload.
+If it requires more time, then the preconditioned architecture has produced a genuine
+accuracy/runtime advantage rather than only an accuracy improvement at fixed cutoff.
+
+Output marker remains:
+
+```
+[IntegratorArchitectureBenchmark]
+```

@@ -87,8 +87,8 @@ void ariadne_main()
     };
 
     auto run_graded =
-        [&](String const& method, Bool dense) {
-            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
+        [&](String const& method, double threshold, Bool dense) {
+            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
             GradedTaylorSeriesIntegrator integrator(
                 StepMaximumError(loose_tolerance),probe_sweeper,
                 lipschitz_tolerance=0.5_x,
@@ -129,10 +129,12 @@ void ariadne_main()
             report_orbit("preconditioned_dense_3e-14",stopwatch,orbit);
         };
 
-    // Separate the effect of the Taylor-product kernel from the effect of
-    // preconditioning itself.
-    run_graded("graded_legacy_3e-14",false);
-    run_graded("graded_dense_3e-14",true);
-    run_preconditioned_dense();
+    // Map the graded+dense accuracy/runtime frontier below 3e-14 and
+    // compare against the established preconditioned+dense 3e-14 target
+    // error (~8.54e-8). The 3e-14 graded point is retained as an anchor.
+    run_graded("graded_dense_3e-14",3e-14,true);
+    run_graded("graded_dense_1e-14",1e-14,true);
+    run_graded("graded_dense_3e-15",3e-15,true);
+    run_graded("graded_dense_1e-15",1e-15,true);
 
 }

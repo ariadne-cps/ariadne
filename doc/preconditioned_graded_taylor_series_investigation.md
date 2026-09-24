@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `a264ea94a2f80d2f7ee2e62061d8d6ca8fe1e885`
+**Latest analysed investigation HEAD:** `334af826e7466788a7c2376387234c955e441bc5`
 
 ## Purpose of this document
 
@@ -1404,6 +1404,31 @@ This strongly supports keeping the residual in coefficient/graded form rather th
 If model construction dominates, the direct graded-defect route is the right target. If restriction dominates, a cheaper domain construction or direct creation on the final domain may recover much of the cost with less architectural change.
 
 The long-run timing fluctuates between runs (this run: 11.196 s vs 9.008 s at 1e-8), so optimisation decisions should be based primarily on cumulative internal timers and set counts, not sub-second wall-clock differences between individual runs.
+
+---
+
+
+### 9.30 restriction dominates flow_function; test direct final-domain materialisation (2026-09-24)
+
+The `flow_function` profile is decisive. Across all calls, restriction dominates model construction by roughly 4--5x. For example at 2000 calls:
+
+```
+make_taylor_function_model: 1.017 s
+restriction:                4.671 s
+```
+
+and at 3500 calls:
+
+```
+make_taylor_function_model: 1.483 s
+restriction:                7.210 s
+```
+
+For the recurrence-field path specifically, `flow_function` costs about 2.42 s at 700 candidate calls, while the retained Procedure update costs only 0.82 s.
+
+The standard `flow_function` deliberately builds on a widened time domain `[t-h,t+h]` and then restricts to the actual step domain `[t,t+h]`. That construction is appropriate for the original flow-model path, but for the auxiliary residual field it may be unnecessary: the field is used only to form/range the defect on the actual step domain.
+
+The next experiment therefore leaves centre-polynomial construction unchanged but materialises the recurrence field directly on `join(domx,domt,doma)`, bypassing `restriction`. This is a semantic experiment, not yet an assumed-safe optimisation. The existing diagnostics compare its field and defect ranges with the generic path on the identical first step. If those remain valid enclosures and the accepted-step counts remain stable, this cheaper final-domain construction can replace the widened-domain route for residual certification.
 
 ---
 

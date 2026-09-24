@@ -103,10 +103,11 @@ The current implementation includes:
 - theory-generated nogoods;
 - nonchronological backjump accounting;
 - learned-clause activity;
-- conservative learned-clause pruning with unit clauses retained permanently and
-  older eligible binary-or-longer clauses removable when the configured active
-  non-theory learned-clause limit is exceeded; activity ranks eligible clauses
-  for retention but does not make a clause permanently immune to pruning;
+- conservative learned-clause pruning;
+  The current policy deliberately protects recent, short, useful, protected and
+  locked clauses. This is a soft retention policy rather than a hard bounded
+  database guarantee; making pruning more aggressive requires an explicit
+  progress argument to avoid rediscovering the same conflicts indefinitely.
 - theory-nogood minimization with a configurable budget.
 
 Theory results are interpreted centrally: `EPSILON_SAT` is consistent and

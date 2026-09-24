@@ -265,11 +265,10 @@ class TestSmtSolver {
         });
         std::vector<SizeType> candidates=
             SmtSolverTestSupport::learned_clause_pruning_candidates(entries);
-        ARIADNE_TEST_EQUAL(candidates.size(),4u);
+        ARIADNE_TEST_EQUAL(candidates.size(),3u);
         ARIADNE_TEST_EQUAL(candidates[0],9u);
         ARIADNE_TEST_EQUAL(candidates[1],8u);
-        ARIADNE_TEST_EQUAL(candidates[2],4u);
-        ARIADNE_TEST_EQUAL(candidates[3],7u);
+        ARIADNE_TEST_EQUAL(candidates[2],7u);
 
         std::vector<Bool> active(entries.size(),true);
         SizeType pruned=SmtSolverTestSupport::apply_learned_clause_pruning(
@@ -2143,7 +2142,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] bounded learned database prunes eligible clauses" << std::endl;
+            std::cout << "[smt-dpll] conservative pruning preserves protected learned clauses" << std::endl;
             SmtSolver pruning_solver(SmtSolverConfiguration(
                 0.125_x,std::numeric_limits<SizeType>::max(),1u));
             ContinuousPredicate a=(ex>=-0.75_x);
@@ -2182,7 +2181,7 @@ class TestSmtSolver {
                       << std::endl;
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=4u);
             ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().learned_clauses_pruned,0u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().peak_active_non_theory_learned_clauses>=2u);
         }

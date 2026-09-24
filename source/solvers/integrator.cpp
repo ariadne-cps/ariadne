@@ -1927,13 +1927,18 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             Stopwatch<Microseconds> residual_assembly_stopwatch;
             ValidatedVectorMultivariateFunctionPatch defect=
                 factory.create_zeros(n,centre_polynomial.domain());
+            ValidatedVectorMultivariateFunctionPatch recurrence_defect=
+                factory.create_zeros(n,centre_polynomial.domain());
             SizeType const time_index=centre_polynomial.argument_size()-1u;
             for(SizeType i=0u; i!=n; ++i) {
                 ValidatedScalarMultivariateFunctionPatch dpoly =
                     derivative(centre_polynomial.get(i),time_index);
                 ValidatedScalarMultivariateFunctionPatch fpoly =
                     field_on_polynomial.get(i);
+                ValidatedScalarMultivariateFunctionPatch recurrence_fpoly =
+                    recurrence_field.get(i);
                 defect[i]=dpoly-fpoly;
+                recurrence_defect[i]=dpoly-recurrence_fpoly;
             }
             residual_assembly_stopwatch.click();
 
@@ -2008,6 +2013,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " polynomial_errors=" << centre_polynomial.errors()
                           << " polynomial_range=" << centre_polynomial.range()
                           << " defect_range=" << defect.range()
+                          << " recurrence_defect_range=" << recurrence_defect.range()
                           << " generic_field_range=" << field_on_polynomial.range()
                           << " recurrence_field_range=" << recurrence_field.range()
                           << " initial_defect_range=" << initial_defect.range()

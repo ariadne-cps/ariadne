@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `4dccb20bc6207674b7d7ae4ebb5e8b5278038832`
+**Latest analysed investigation HEAD:** `14eab3e34e8301d44d3ff79ab43196d5eb1d5e2b`
 
 ## Purpose of this document
 
@@ -1249,6 +1249,32 @@ The marker `[RecurrenceResidualProfile]` reports cumulative construction time an
 Two gates must be passed before replacing the generic path:
 1. numerical/enclosure agreement must be understood and justified;
 2. the recurrence path must be substantially cheaper than generic `compose(g,P)`.
+
+---
+
+
+### 9.24 Degree-by-degree procedure evaluation reproduces g(P), but is not yet faster enough (2026-09-24)
+
+The same-step probe now shows exact agreement at printed precision:
+
+```
+generic_field_range    = [{2.1514581:2.3727625},{-5.1240475:-2.4433552}]
+recurrence_field_range = [{2.1514581:2.3727625},{-5.1240475:-2.4433552}]
+```
+
+Thus evaluating the vector-field Procedure degree-by-degree on the graded centre state is semantically consistent with generic `compose(g,P)` at the range level.
+
+However, the straightforward implementation is only moderately cheaper: by 700 calls it costs about 4.85 s versus 8.18 s for generic composition (~1.7x), and because both are currently executed in parallel the benchmark becomes slower. This cost is expected because the prototype rebuilds argument prefixes and calls `compute_procedure` once per degree.
+
+The next correctness gate constructs
+
+```
+recurrence_defect = derivative(P) - recurrence_field
+```
+
+using the ordinary Taylor-model derivative but the recurrence-evaluated field, and compares its range directly with the existing generic defect on the same step. If these agree, the generic `compose(g,P)` can be replaced without changing the mathematical certification architecture.
+
+After correctness is established, optimise the recurrence field evaluation by retaining/reusing the incremental Procedure state already generated while constructing the centre polynomial, rather than replaying all degrees in a second pass. That is the route expected to recover most of the potential speedup.
 
 ---
 

@@ -1120,14 +1120,15 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
 
             const SizeType unused=std::numeric_limits<SizeType>::max();
             std::vector<SizeType> slot_to_touched(slot_count,unused);
-            std::vector<MultiIndex> touched_indices;
+            std::vector<SizeType> touched_slots;
             std::vector<CoefficientType> touched_coefficients;
-            touched_indices.reserve(
+            const SizeType expected_occupied=
                 static_cast<SizeType>(std::min<unsigned long long>(
                     slot_count,
                     static_cast<unsigned long long>(
-                        r.number_of_terms()+x.number_of_terms()*y.number_of_terms()))));
-            touched_coefficients.reserve(touched_indices.capacity());
+                        r.number_of_terms()+x.number_of_terms()*y.number_of_terms())));
+            touched_slots.reserve(expected_occupied);
+            touched_coefficients.reserve(expected_occupied);
 
             auto rank_index=[&](MultiIndexData const& index) {
                 SizeType slot=0u;
@@ -1144,8 +1145,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 const SizeType slot=rank_index(index);
                 SizeType& touched=slot_to_touched[slot];
                 if(touched==unused) {
-                    touched=touched_indices.size();
-                    touched_indices.emplace_back(as,index.begin());
+                    touched=touched_slots.size();
+                    touched_slots.push_back(slot);
                     touched_coefficients.emplace_back(value);
                 } else {
                     touched_coefficients[touched]=add_err(
@@ -1171,19 +1172,25 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 }
             }
 
-            std::vector<SizeType> order(touched_indices.size());
-            for(SizeType i=0u; i!=order.size(); ++i) { order[i]=i; }
-            std::sort(order.begin(),order.end(),
-                [&](SizeType i, SizeType j) {
-                    return reverse_lexicographic_less(
-                        touched_indices[i],touched_indices[j]);
-                });
+            // The mixed-radix rank is order-compatible with Ariadne's
+            // reverse lexicographic order: the highest variable index is the
+            // most significant digit, and larger exponents come first.
+            // Sorting integer slots therefore replaces MultiIndex comparison.
+            std::sort(touched_slots.begin(),touched_slots.end(),
+                      std::greater<SizeType>());
 
             TaylorModel<P,F> accumulated(as,r.sweeper());
-            accumulated.expansion().reserve(order.size());
-            for(SizeType i : order) {
+            accumulated.expansion().reserve(touched_slots.size());
+            MultiIndex output_index(as);
+            for(SizeType slot : touched_slots) {
+                SizeType encoded=slot;
+                for(SizeType j=0u; j!=as; ++j) {
+                    output_index[j]=static_cast<DegreeType>(encoded%base);
+                    encoded/=base;
+                }
                 accumulated._append(
-                    touched_indices[i],touched_coefficients[i]);
+                    output_index,
+                    touched_coefficients[slot_to_touched[slot]]);
             }
             accumulated.error()=r.error()+product_roundoff;
             accumulated.sweep();

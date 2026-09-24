@@ -97,7 +97,7 @@ void ariadne_main()
                       << " achieved_final_error=" << achieved_error
                       << " reach_sets=" << orbit.reach().size()
                       << std::endl;
-            if(accumulator) {
+            if(accumulator && policy!="dense_3e-14") {
                 auto const ap=taylor_model_accumulator_profile();
                 const double duplication_ratio=
                     ap.unique_entries
@@ -129,8 +129,8 @@ void ariadne_main()
             }
         };
 
-    // Compare append/sort/unique with the keyed dense-slot accumulator.
-    run_product_accumulator_probe("sort_unique_3e-14",3e-14,true);
+    // Re-run the refined dense accumulator. The previous sort/unique
+    // and first dense measurements are recorded in the investigation log.
     run_product_accumulator_probe("dense_3e-14",3e-14,true);
 
 }

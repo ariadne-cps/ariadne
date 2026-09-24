@@ -2792,3 +2792,42 @@ MultiIndex(as, index.begin())
 via `emplace_back(as,index.begin())`, which creates an owning copy of the current
 multi-index. This is a construction/API fix only; the ranking, accumulation, roundoff
 accounting and final-sweep semantics are unchanged.
+
+
+### 9.75 Dense accumulator removes per-index MultiIndex allocation (2026-09-24)
+
+The first keyed dense accumulator produced the first clear Pareto improvement:
+
+```
+kernel                 elapsed_s   final_error
+sort+unique 3e-14      52.2391     8.5378293221320844e-8
+dense keyed 3e-14      45.4911     8.5378297219108396e-8
+```
+
+Compared with the established incremental-sweep `3e-14` point (about 49.1 s and
+`1.75e-7` final error), the dense final-sweep kernel is both faster and about twice as
+accurate.
+
+Inspection of the first dense prototype exposed another avoidable cost: every newly
+occupied slot stored an owning `MultiIndex`. Since `MultiIndex` owns a dynamically
+allocated degree array, this caused one allocation/copy for every distinct coefficient
+encountered across all products.
+
+The mixed-radix slot number already contains the full multi-index and, importantly, its
+numeric descending order is exactly Ariadne's reverse lexicographic order because the
+last variable is the most significant radix digit. The refined kernel therefore stores
+only:
+
+- the dense `slot -> touched-position` map;
+- a vector of touched integer slots;
+- a vector of coefficients.
+
+Touched slots are sorted as integers in descending order. The corresponding
+`MultiIndex` is reconstructed from radix digits only when the final `Expansion` is
+emitted. This removes the per-distinct-index `MultiIndex` allocation and replaces
+MultiIndex comparisons during sorting with integer comparisons.
+
+The benchmark is reduced to a single `dense_3e-14` run. The previous
+`TaylorProductAccumulatorProfile` output is suppressed for the dense branch because
+those counters instrument only the append/sort/unique path and would otherwise print
+misleading zeros.

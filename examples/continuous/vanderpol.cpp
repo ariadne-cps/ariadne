@@ -37,15 +37,15 @@ void ariadne_main()
         evolver.configuration().set_enable_reconditioning(false);
     };
 
-    // Relative-threshold sweeper benchmark.
-    // RelativeThresholdSweeper discards a coefficient c only when
-    // |c| < relative_threshold * (radius(polynomial) + uniform_error).
-    // This makes the cutoff scale with the current Taylor model instead of
-    // imposing one global absolute coefficient magnitude.
+    // Carried-expansion structure probe.
+    // Compare the two useful absolute-threshold configurations and sample the
+    // carried state expansion late in the run.  We need to understand which
+    // degrees and coefficient magnitudes account for the accuracy gain of
+    // 1e-14 over 1e-12 before designing a new selective sweeper.
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto run_sweeper_policy_probe =
+    auto run_structure_probe =
         [&](String const& policy, Sweeper<FloatDP> const& probe_sweeper) {
             PreconditionedGradedTaylorSeriesIntegrator gronwall(
                 StepMaximumError(loose_tolerance),probe_sweeper,
@@ -77,37 +77,63 @@ void ariadne_main()
                 }
             }
 
-            std::cerr << "[IntegratorRelativeSweeperBenchmark]"
+            auto const& final_state=orbit.final()[0u].state_function();
+            std::cerr << "[IntegratorExpansionStructureBenchmark]"
                       << " method=GRONWALL"
                       << " policy=" << policy
-                      << " spatial_order=5"
-                      << " temporal_order=5"
-                      << " tolerance=" << loose_tolerance
-                      << " max_step=" << plateau_step
-                      << " horizon=5.0"
                       << " elapsed_seconds=" << stopwatch.elapsed_seconds()
                       << " achieved_final_error=" << achieved_error
-                      << " reach_sets=" << orbit.reach().size()
-                      << " intermediate_sets=" << orbit.intermediate().size()
-                      << " final_sets=" << orbit.final().size()
+                      << " final_errors=" << final_state.errors()
                       << std::endl;
+
+            for(SizeType i=0u; i!=final_state.result_size(); ++i) {
+                auto const& expansion=final_state.get(i).expansion();
+                SizeType max_degree=0u;
+                for(auto const& term : expansion) {
+                    max_degree=max(max_degree,term.index().degree());
+                }
+                for(SizeType degree=0u; degree<=max_degree; ++degree) {
+                    SizeType count=0u;
+                    ApproximateDouble max_abs=0.0;
+                    ApproximateDouble sum_abs=0.0;
+                    SizeType band_lt_1e14=0u;
+                    SizeType band_1e14_1e12=0u;
+                    SizeType band_1e12_1e10=0u;
+                    SizeType band_ge_1e10=0u;
+                    for(auto const& term : expansion) {
+                        if(term.index().degree()!=degree) { continue; }
+                        auto a=cast_exact(abs(term.coefficient())).get_d();
+                        ++count;
+                        sum_abs+=a;
+                        if(a>max_abs) { max_abs=a; }
+                        if(a<1e-14) { ++band_lt_1e14; }
+                        else if(a<1e-12) { ++band_1e14_1e12; }
+                        else if(a<1e-10) { ++band_1e12_1e10; }
+                        else { ++band_ge_1e10; }
+                    }
+                    if(count!=0u) {
+                        std::cerr << "[CarriedExpansionDegreeProfile]"
+                                  << " policy=" << policy
+                                  << " component=" << i
+                                  << " degree=" << degree
+                                  << " count=" << count
+                                  << " max_abs=" << max_abs
+                                  << " sum_abs=" << sum_abs
+                                  << " lt_1e14=" << band_lt_1e14
+                                  << " ge_1e14_lt_1e12=" << band_1e14_1e12
+                                  << " ge_1e12_lt_1e10=" << band_1e12_1e10
+                                  << " ge_1e10=" << band_ge_1e10
+                                  << std::endl;
+                    }
+                }
+            }
         };
 
-    run_sweeper_policy_probe(
+    run_structure_probe(
         "absolute_1e-12",
         Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-12)));
-    run_sweeper_policy_probe(
+    run_structure_probe(
         "absolute_1e-14",
         Sweeper<FloatDP>(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-14)));
-    run_sweeper_policy_probe(
-        "relative_1e-8",
-        Sweeper<FloatDP>(
-            RelativeThresholdSweeper<FloatDP>(
-                DoublePrecision(),FloatDP(1e-8_x,DoublePrecision()))));
-    run_sweeper_policy_probe(
-        "relative_1e-10",
-        Sweeper<FloatDP>(
-            RelativeThresholdSweeper<FloatDP>(
-                DoublePrecision(),FloatDP(1e-10_x,DoublePrecision()))));
 
 }

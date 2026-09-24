@@ -1045,6 +1045,116 @@ Bool evaluate_polynomial_procedure(
     return true;
 }
 
+
+FloatDPUpperBound differential_l1_bound(ValidatedDifferential const& a)
+{
+    FloatDPUpperBound r(0,dp);
+    for(auto iter=a.begin(); iter!=a.end(); ++iter) {
+        r+=mag(iter->coefficient());
+    }
+    return r;
+}
+
+FloatDPUpperBound differential_product_tail_bound(
+        ValidatedDifferential const& a,
+        ValidatedDifferential const& b,
+        DegreeType retained_degree)
+{
+    FloatDPUpperBound r(0,dp);
+    for(auto ia=a.begin(); ia!=a.end(); ++ia) {
+        for(auto ib=b.begin(); ib!=b.end(); ++ib) {
+            if(ia->index().degree()+ib->index().degree()>retained_degree) {
+                r+=mag(ia->coefficient()*ib->coefficient());
+            }
+        }
+    }
+    return r;
+}
+
+Bool evaluate_lightweight_validated_procedure(
+        const Vector<ValidatedProcedure>& p,
+        const Vector<ValidatedDifferential>& x,
+        Vector<ValidatedDifferential>& result,
+        Vector<FloatDPUpperBound>& result_errors)
+{
+    const DegreeType retained_degree=x[0u].degree();
+    ValidatedDifferential const zero_differential=x.zero_element();
+    List<ValidatedDifferential> values(
+        p.temporaries_size(),zero_differential);
+    List<FloatDPUpperBound> errors(
+        p.temporaries_size(),FloatDPUpperBound(0,dp));
+
+    for(SizeType j=0u; j!=p._instructions.size(); ++j) {
+        ProcedureInstruction const& ins=p._instructions[j];
+        switch(ins.op().code()) {
+            case OperatorCode::CNST:
+                values[j]=zero_differential.create_constant(
+                    p._constants[ins.val()].get(dp));
+                errors[j]=FloatDPUpperBound(0,dp);
+                break;
+            case OperatorCode::VAR:
+                values[j]=x[ins.ind()];
+                errors[j]=FloatDPUpperBound(0,dp);
+                break;
+            case OperatorCode::ADD:
+                values[j]=values[ins.arg1()]+values[ins.arg2()];
+                errors[j]=errors[ins.arg1()]+errors[ins.arg2()];
+                break;
+            case OperatorCode::SUB:
+                values[j]=values[ins.arg1()]-values[ins.arg2()];
+                errors[j]=errors[ins.arg1()]+errors[ins.arg2()];
+                break;
+            case OperatorCode::NEG:
+                values[j]=-values[ins.arg()];
+                errors[j]=errors[ins.arg()];
+                break;
+            case OperatorCode::POS:
+                values[j]=+values[ins.arg()];
+                errors[j]=errors[ins.arg()];
+                break;
+            case OperatorCode::HLF:
+                values[j]=hlf(values[ins.arg()]);
+                errors[j]=errors[ins.arg()]/2;
+                break;
+            case OperatorCode::MUL: {
+                SizeType const a1=ins.arg1();
+                SizeType const a2=ins.arg2();
+                FloatDPUpperBound const n1=differential_l1_bound(values[a1]);
+                FloatDPUpperBound const n2=differential_l1_bound(values[a2]);
+                FloatDPUpperBound const e1=errors[a1];
+                FloatDPUpperBound const e2=errors[a2];
+                FloatDPUpperBound const overflow=
+                    differential_product_tail_bound(
+                        values[a1],values[a2],retained_degree);
+                values[j]=values[a1]*values[a2];
+                errors[j]=overflow+n1*e2+n2*e1+e1*e2;
+                break;
+            }
+            case OperatorCode::SQR: {
+                SizeType const a=ins.arg();
+                FloatDPUpperBound const n=differential_l1_bound(values[a]);
+                FloatDPUpperBound const e=errors[a];
+                FloatDPUpperBound const overflow=
+                    differential_product_tail_bound(
+                        values[a],values[a],retained_degree);
+                values[j]=sqr(values[a]);
+                errors[j]=overflow+2*n*e+e*e;
+                break;
+            }
+            default:
+                // General elementary operations will be added using the same
+                // Taylor-series remainder logic as ValidatedTaylorModel.
+                return false;
+        }
+    }
+
+    for(SizeType i=0u; i!=result.size(); ++i) {
+        result[i]=values[p._results[i]];
+        result_errors[i]=errors[p._results[i]];
+    }
+    return true;
+}
+
 struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
     FlowStepTaylorModelType recurrence_field;
@@ -1057,6 +1167,9 @@ struct CentrePolynomialRecurrenceResult {
     DegreeType exact_polynomial_degree;
     Vector<FloatDPBounds> exact_polynomial_defect_range;
     double exact_polynomial_defect_seconds;
+    Bool lightweight_remainder_available;
+    Vector<FloatDPBounds> lightweight_defect_range;
+    double lightweight_defect_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -1144,6 +1257,36 @@ graded_series_centre_polynomial_step(
     }
     direct_defect_stopwatch.click();
 
+    // First lightweight rigorous-remainder prototype.  It reuses Differential
+    // arithmetic and carries only a scalar uniform tail bound alongside each
+    // Procedure temporary.  Multiplication uses the same error structure as
+    // TaylorModel: discarded retained-retained products plus the two
+    // retained-error cross terms and error-error term.
+    Stopwatch<Microseconds> lightweight_defect_stopwatch;
+    Vector<ValidatedDifferential> lightweight_field(
+        n,dphi.zero_element());
+    Vector<FloatDPUpperBound> lightweight_field_errors(
+        n,FloatDPUpperBound(0,dp));
+    Bool lightweight_remainder_available=
+        evaluate_lightweight_validated_procedure(
+            p,dphi,lightweight_field,lightweight_field_errors);
+    Vector<FloatDPBounds> lightweight_defect_range(
+        n,FloatDPBounds(0,dp));
+    if(lightweight_remainder_available) {
+        Vector<ValidatedDifferential> lightweight_defect=
+            derivative_dphi-lightweight_field;
+        FlowStepTaylorModelType lightweight_wide_defect=
+            make_taylor_function_model(
+                lightweight_defect,join(domx,widt,doma),sweeper);
+        for(SizeType i=0u; i!=n; ++i) {
+            FloatDPBounds base=evaluate(
+                lightweight_wide_defect.model(i),forward_half_box);
+            FloatDPUpperBound const e=lightweight_field_errors[i];
+            lightweight_defect_range[i]=base+FloatDPBounds(-e,e);
+        }
+    }
+    lightweight_defect_stopwatch.click();
+
     // For polynomial vector fields we can remove the unresolved truncation
     // question entirely: determine the algebraic degree of the Procedure,
     // pad P with structural zero coefficients to the full composition degree,
@@ -1206,7 +1349,10 @@ graded_series_centre_polynomial_step(
         exact_polynomial_available,
         exact_polynomial_degree,
         std::move(exact_polynomial_defect_range),
-        exact_polynomial_defect_stopwatch.elapsed_seconds()};
+        exact_polynomial_defect_stopwatch.elapsed_seconds(),
+        lightweight_remainder_available,
+        std::move(lightweight_defect_range),
+        lightweight_defect_stopwatch.elapsed_seconds()};
 }
 
 
@@ -2115,6 +2261,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             static double recurrence_flow_function_seconds=0.0;
             static double direct_defect_seconds=0.0;
             static double exact_polynomial_defect_seconds=0.0;
+            static double lightweight_defect_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
             recurrence_differential_seconds+=centre_result.differential_seconds;
@@ -2122,6 +2269,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             direct_defect_seconds+=centre_result.direct_defect_seconds;
             exact_polynomial_defect_seconds+=
                 centre_result.exact_polynomial_defect_seconds;
+            lightweight_defect_seconds+=
+                centre_result.lightweight_defect_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
@@ -2138,6 +2287,12 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << exact_polynomial_defect_seconds
                           << " exact_polynomial_defect_range="
                           << centre_result.exact_polynomial_defect_range
+                          << " lightweight_available="
+                          << centre_result.lightweight_remainder_available
+                          << " lightweight_defect_seconds="
+                          << lightweight_defect_seconds
+                          << " lightweight_defect_range="
+                          << centre_result.lightweight_defect_range
                           << " field_range=" << recurrence_field.range()
                           << std::endl;
             }
@@ -2278,6 +2433,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " recurrence_defect_range=" << defect.range()
                           << " general_tm_defect_range="
                           << general_tm_defect_range
+                          << " lightweight_available="
+                          << centre_result.lightweight_remainder_available
+                          << " lightweight_defect_range="
+                          << centre_result.lightweight_defect_range
                           << " direct_differential_defect_range="
                           << centre_result.direct_defect_range
                           << " exact_polynomial_available="

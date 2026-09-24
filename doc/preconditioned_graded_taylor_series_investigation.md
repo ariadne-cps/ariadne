@@ -3,7 +3,7 @@
 **Branch:** `solvers-integrator#357`  
 **Last updated:** 2026-09-23  
 **Current HEAD when this log was created:** `cb1496eb436a1d4ed226554a4f18eaa4da39f29a`  
-**Latest analysed investigation HEAD:** `2538eb857c62f88b3e2090ef70007d8e28702dcf`
+**Latest analysed investigation HEAD:** `2484c8818a5466fb3d75a772ebb6908a5c048e13`
 
 ## Purpose of this document
 
@@ -1691,6 +1691,41 @@ This result refines the architectural target. We need the **remainder semantics 
 The full general-TaylorModel residual is now diagnostics-only, like the degree-30 polynomial oracle. It remains a useful reference enclosure for future lightweight remainder implementations, including non-polynomial test systems.
 
 Next step: inspect the internal TaylorModel arithmetic, especially multiplication and elementary-series composition, and identify the minimal scalar error state required to reproduce its rigorous truncation bounds alongside the existing Graded<Differential> Procedure evaluation.
+
+---
+
+
+### 9.40 Lightweight validated remainder prototype: start from generic multiplication semantics (2026-09-24)
+
+Inspection of Ariadne's `TaylorModel` arithmetic shows the key multiplication error identity used after multiplying retained polynomial parts:
+
+```
+re += xe*ye + xs*ye + ys*xe
+```
+
+where `xe,ye` are uniform input errors and `xs,ys` are l1 coefficient norms. Sweeping additionally moves discarded coefficients into the uniform error. This is precisely the semantic ingredient missing from the cheap Differential residual.
+
+A first lightweight evaluator has therefore been added. Each Procedure temporary carries:
+
+```
+(retained Differential, uniform FloatDPUpperBound remainder)
+```
+
+It currently implements the generic arithmetic primitives needed by Van der Pol without using polynomial degree information:
+- constants and variables;
+- +, -, unary +/- and half;
+- multiplication;
+- square.
+
+For multiplication, the remainder contains:
+1. the l1 magnitude of retained-retained coefficient products whose total degree exceeds the retained Differential degree;
+2. `||p1|| e2 + ||p2|| e1 + e1 e2`.
+
+Thus this is not the previous "assume truncated terms are zero" Differential path. It explicitly encloses the discarded multiplication tail on the normalised unit box.
+
+Unsupported Procedure operations currently make the lightweight path unavailable rather than silently losing rigour. The next stages will add reciprocal/division and analytic unary operations using the same validated Taylor-series truncation logic already present in `TaylorModel::compose(AnalyticFunction,...)`.
+
+The experiment reports `lightweight_defect_range` and cumulative `lightweight_defect_seconds`. Production certification is unchanged. The important first gate on Van der Pol is whether this cheap enclosure contains/agrees with the full general-TaylorModel oracle and the degree-complete polynomial oracle while costing materially less.
 
 ---
 

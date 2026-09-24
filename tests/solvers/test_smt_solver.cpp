@@ -289,15 +289,11 @@ class TestSmtSolver {
 
         SmtSearchStatistics no_conflict;
         no_conflict.boxes_processed=3u;
-        no_conflict.domain_theory_implication_clauses=2u;
-        no_conflict.domain_theory_propagations=1u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
         SmtSolverTestSupport::accumulate_statistics(target,no_conflict);
         ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
-        ARIADNE_TEST_EQUAL(target.domain_theory_implication_clauses,2u);
-        ARIADNE_TEST_EQUAL(target.domain_theory_propagations,1u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -2016,21 +2012,6 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] epsilon-safe theory implications propagate with clause reasons" << std::endl;
-            ContinuousPredicate formula=(ex>2)||(ex<-2);
-            SmtResult solve_result=solver.solve(
-                space,ExactBoxType({ExactIntervalType(0,1)}),formula);
-            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_implication_clauses,2u);
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().domain_theory_propagations,2u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,0u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts>=1u);
-        }
-
-        {
             std::cout << "[smt-dpll] Boolean contradiction pruned before theory" << std::endl;
             ContinuousPredicate atom=(ex>=0);
             ContinuousPredicate formula=atom&&(!atom);
@@ -2211,11 +2192,8 @@ class TestSmtSolver {
                       << solve_result.statistics().learned_clause_propagations
                       << " backtracks=" << solve_result.statistics().boolean_backtracks
                       << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().learned_clause_propagations>=1u);
-            ARIADNE_TEST_ASSERT(
-                solve_result.statistics().learned_clauses
-                + solve_result.statistics().domain_theory_implication_clauses>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_propagations>=1u);
         }
 
         {

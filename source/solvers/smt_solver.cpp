@@ -660,20 +660,19 @@ SmtSolver::_process_box(
     }
 
     if(not splittable) {
-        if(auto witness=this->_terminal_epsilon_witness(domain,conjunction);
-           witness.has_value()) {
-            BoxProcessingResult result{
-                BoxProcessingStatus::EPSILON_SAT,
-                *witness,
-                std::nullopt,
-                reductions};
-            result.epsilon_box_certification=true;
-            return result;
-        }
+        auto terminal=SmtSolverTestSupport::classify_terminal_box(
+            this->_terminal_epsilon_witness(domain,conjunction));
         BoxProcessingResult result{
-            BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
-        result.candidate_witness_search=false;
-        result.non_splittable_epsilon_overlap=true;
+            terminal.status,
+            terminal.witness,
+            std::nullopt,
+            reductions};
+        if(terminal.status==BoxProcessingStatus::EPSILON_SAT) {
+            result.epsilon_box_certification=true;
+        } else {
+            result.candidate_witness_search=false;
+            result.non_splittable_epsilon_overlap=true;
+        }
         return result;
     }
 
@@ -1554,6 +1553,15 @@ Bool epsilon_satisfied(
 {
     auto compiled=solver._compile_theory_literals(space,literals);
     return solver._epsilon_satisfied(domain,compiled);
+}
+
+TerminalBoxOutcome classify_terminal_box(
+    std::optional<UpperBoxType> const& witness)
+{
+    if(witness.has_value()) {
+        return {BoxProcessingStatus::EPSILON_SAT,witness};
+    }
+    return {BoxProcessingStatus::UNKNOWN,std::nullopt};
 }
 
 Void accumulate_box_processing_statistics(

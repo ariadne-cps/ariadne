@@ -4443,3 +4443,48 @@ The next run is a clean production benchmark. Acceptance gates:
 4. wall time improves against the 22.7361 s clean baseline.
 
 The 23.7251 s A/B wall time is diagnostic only and is not a baseline.
+
+
+### 9.123 Production diagonal materialisation result and profiler cleanup (2026-09-25)
+
+The production run with direct diagonal materialisation completes all 2000 Van der Pol
+reach sets and preserves the numerical result exactly:
+
+```
+elapsed_seconds       23.1211
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+The widened field materialisation itself drops dramatically:
+
+```
+field_materialise_seconds = 0.243934
+```
+
+versus about 1.45--1.57 s for the generic-compose production/diagnostic path. This is a
+local saving of roughly 1.2--1.3 s over 2000 calls and confirms that the specialised
+diagonal substitution removes the intended bottleneck while preserving the exact
+Taylor-model result established by the A/B in 9.122.
+
+The single-run wall time of 23.1211 s is nevertheless 0.385 s above the earlier 22.7361 s
+clean reference. The profile does not support attributing that increase to the new field
+materialiser: its measured local cost is much lower and the final numerical result is
+unchanged. Other cumulative timings in this run are higher, notably carried-state
+composition and several centre-path components, so the wall-time difference is treated
+as run-to-run/system variation rather than evidence against the local optimisation.
+
+The production optimisation is retained. The obsolete
+`make_taylor_function_model_profiled` helper is removed because it is no longer called
+and caused the compiler warning:
+
+```
+warning: unused function 'make_taylor_function_model_profiled'
+```
+
+The next clean run should verify both that the warning is gone and whether the end-to-end
+wall time settles below the previous reference. If timing remains noisy, use repeated
+clean runs (at least three) and compare the median before selecting a new end-to-end
+baseline. The local field-materialisation improvement is already established
+independently by its cumulative timer.

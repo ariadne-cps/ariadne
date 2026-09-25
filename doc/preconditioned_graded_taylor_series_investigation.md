@@ -3649,3 +3649,29 @@ If the direct residual tracks the clobbered polynomial core while the production
 residual is much larger, the excess is attributable to patch materialisation/sweeping
 Errors rather than to a different polynomial defect. That would identify the exact
 piece that must be certified directly before patch-level materialisation can be removed.
+
+
+### 9.102 Fix defect-error decomposition build (2026-09-25)
+
+The first defect-error decomposition build failed because `defect.get(i)` is exposed as
+a type-erased `ValidatedScalarMultivariateFunctionPatch`, which has no direct
+`.model()` accessor.
+
+The diagnostic already has the two underlying Taylor models used to construct that
+component:
+
+```
+derivative_model
+field_model
+```
+
+so the model-level residual is now formed directly as
+
+```
+materialised_defect_model = derivative_model - field_model
+```
+
+and its attached Error is inspected from that object.
+
+This changes only diagnostic bookkeeping. The production `defect` FunctionPatch and the
+Gronwall residual range remain untouched.

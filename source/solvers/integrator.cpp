@@ -2408,8 +2408,12 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     const double core_mag_d=
                         mag(core_defect.range()).raw().get_d();
 
+                    // 'defect' is type-erased at FunctionPatch level here,
+                    // so there is no direct .model() accessor.  The model-level
+                    // residual we need for this diagnostic is exactly the
+                    // subtraction of the already recovered source models.
                     ValidatedTaylorModelDP materialised_defect_model=
-                        defect.get(i).model();
+                        derivative_model-field_model;
                     maximum_defect_model_error=std::max(
                         maximum_defect_model_error,
                         materialised_defect_model.error().raw().get_d());

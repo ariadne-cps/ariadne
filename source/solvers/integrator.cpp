@@ -2789,16 +2789,27 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         factory.create_coordinate(flowpipe_domain,flowpipe_domain.size()-1u);
     ValidatedVectorMultivariateFunctionPatch arguments=
         join(embedded_mapping,time_coordinate);
+    static Bool carried_product_profile_initialised=false;
+    if(!carried_product_profile_initialised) {
+        set_taylor_model_product_profile_enabled(true);
+        carried_product_profile_initialised=true;
+    }
+    TaylorModelProductProfileSnapshot const flowpipe_product_before=
+        taylor_model_product_profile_snapshot();
     Stopwatch<Microseconds> flowpipe_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch flowpipe_mapping=
         compose(physical_local_flow,arguments);
     flowpipe_compose_stopwatch.click();
+    TaylorModelProductProfileSnapshot const flowpipe_product_after=
+        taylor_model_product_profile_snapshot();
 
     // For the evolved set, evaluate time before composing with the local
     // initial Taylor model.  Composing the complete space-time flowpipe first
     // and only then evaluating t=h introduces unnecessary mixed space/time
     // terms and substantially larger sweep/remainder errors.  This also
     // matches the TM-integration update X_{l+1}=p_l(X_l,delta_l)+I_l.
+    TaylorModelProductProfileSnapshot const endpoint_product_before=
+        taylor_model_product_profile_snapshot();
     Stopwatch<Microseconds> endpoint_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch local_endpoint=
         partial_evaluate(
@@ -2807,6 +2818,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     ValidatedVectorMultivariateFunctionPatch evolved_mapping=
         compose(local_endpoint,state.normalised_mapping());
     endpoint_compose_stopwatch.click();
+    TaylorModelProductProfileSnapshot const endpoint_product_after=
+        taylor_model_product_profile_snapshot();
 
     // Preserve the two-layer TM representation across steps.  Precondition
     // the fresh local endpoint Phi_l(y,h) first, while its remainder is still
@@ -2819,12 +2832,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         this->precondition(local_endpoint);
     precondition_stopwatch.click();
 
+    TaylorModelProductProfileSnapshot const state_product_before=
+        taylor_model_product_profile_snapshot();
     Stopwatch<Microseconds> state_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch next_normalised_mapping=
         compose(
             local_transition.normalised_mapping(),
             state.normalised_mapping());
     state_compose_stopwatch.click();
+    TaylorModelProductProfileSnapshot const state_product_after=
+        taylor_model_product_profile_snapshot();
 
     Stopwatch<Microseconds> state_range_stopwatch;
     ExactBoxType next_local_domain=
@@ -2848,7 +2865,19 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     static double carried_precondition_seconds=0.0;
     static double carried_state_compose_seconds=0.0;
     static double carried_state_range_seconds=0.0;
+    static unsigned long long carried_flowpipe_product_pairs=0u;
+    static unsigned long long carried_endpoint_product_pairs=0u;
+    static unsigned long long carried_state_product_pairs=0u;
     ++carried_profile_steps;
+    carried_flowpipe_product_pairs+=
+        flowpipe_product_after.compose.product_pairs
+        -flowpipe_product_before.compose.product_pairs;
+    carried_endpoint_product_pairs+=
+        endpoint_product_after.compose.product_pairs
+        -endpoint_product_before.compose.product_pairs;
+    carried_state_product_pairs+=
+        state_product_after.compose.product_pairs
+        -state_product_before.compose.product_pairs;
     carried_flowpipe_compose_seconds+=flowpipe_compose_stopwatch.elapsed_seconds();
     carried_endpoint_compose_seconds+=endpoint_compose_stopwatch.elapsed_seconds();
     carried_precondition_seconds+=precondition_stopwatch.elapsed_seconds();
@@ -2875,6 +2904,15 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                   << " local_transition_nnz="
                   << patch_nnz(local_transition.normalised_mapping())
                   << " next_state_nnz=" << patch_nnz(next_normalised_mapping)
+                  << std::endl;
+        std::cerr << "[CarriedCompositionProductProfile]"
+                  << " steps=" << carried_profile_steps
+                  << " flowpipe_product_pairs="
+                  << carried_flowpipe_product_pairs
+                  << " endpoint_product_pairs="
+                  << carried_endpoint_product_pairs
+                  << " state_product_pairs="
+                  << carried_state_product_pairs
                   << std::endl;
     }
 

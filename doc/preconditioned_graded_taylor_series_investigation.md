@@ -5047,3 +5047,39 @@ against the current generic composition path.
 
 The 23.3461 s wall time is diagnostic only. The established production reference remains
 the 21.6201 s three-run median.
+
+
+### 9.139 Attribute carried composition cost to Taylor-model product work (2026-09-25)
+
+Before implementing a specialised space/time composer, the existing Taylor-model product
+profiling infrastructure is reused to measure how much polynomial multiplication each of
+the three carried composition call sites actually triggers.
+
+For each call, the cumulative COMPOSE-context product-pair counter is sampled before and
+after:
+
+```
+flowpipe: compose(physical_local_flow, arguments)
+endpoint: compose(local_endpoint, state.normalised_mapping())
+state:    compose(local_transition.normalised_mapping(), state.normalised_mapping())
+```
+
+The new cumulative marker is:
+
+```
+[CarriedCompositionProductProfile]
+steps=...
+flowpipe_product_pairs=...
+endpoint_product_pairs=...
+state_product_pairs=...
+```
+
+This diagnostic does not change composition arithmetic. It answers whether the 5.15 s
+flowpipe cost is explained primarily by Horner Taylor-model multiplications or by
+unscaling / patch-level setup. If product pairs dominate and are much larger for the
+flowpipe path, the next A/B can target the special identity-time structure inside Horner
+composition. If pair counts are comparable despite the time gap, optimise patch
+construction/unscale instead.
+
+The run is diagnostic because Taylor-model product profiling is enabled to collect these
+counters. The production median reference remains 21.6201 s.

@@ -60,7 +60,8 @@ The solver roadmap therefore prioritizes, in this order:
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
 6. elimination of algorithmic UNKNOWN outcomes on the declared bounded QF_NRA
-   fragment, establishing the intended delta-complete decision behavior;
+   fragment within the solver's double-precision numerical contract, establishing
+   the intended epsilon-complete decision behavior for that contract;
 7. only after those goals, broader language features such as richer SMT-LIB
    integration, quantifiers, or dedicated ODE solving.
 
@@ -80,91 +81,36 @@ The solver currently exposes three outcomes:
   used deliberately for exhausted box budgets and terminal boxes that cannot be
   certified; it must never be silently promoted to `EPSILON_SAT`.
 
-### Precision-independent search geometry
+### Double-precision numerical contract
 
-The current bounded search is structurally tied to double precision. This is
-deeper than a terminal-evaluation issue:
+The SMT solver is intentionally a double-precision validated solver. Search
+geometry, interval evaluation, contractors, deterministic witness candidates,
+sensitivity analysis, sequential/parallel queues and the public witness all use
+the existing DP Ariadne types.
 
-- `ExactIntervalType` / `ExactBoxType` are aliases of
-  `FloatDPExactInterval` / `FloatDPExactBox`;
-- the sequential and parallel work queues store `UpperBoxType` directly;
-- splitting uses `UpperBoxType::split`, so progress stops when the midpoint
-  rounds to an existing DP endpoint;
-- deterministic witness candidates, midpoint selection and corner generation
-  are built from DP box endpoints;
-- sensitivity-guided splitting measures DP widths and derivative images;
-- hull, shaving and monotone contractors operate on `UpperBoxType`;
-- the public `SmtResult` witness is also an `UpperBoxType`.
+Multiple-precision evaluation and an unbounded exact search-cell representation
+are not part of the architecture of `solvers-smt#830`. They must not be used as
+a fallback for terminal boxes or as a prerequisite for completeness. The solver
+must instead make its completeness claim relative to an explicit DP numerical
+contract.
 
-Consequently, replacing individual terminal evaluations with multiple precision
-cannot by itself establish delta-completeness: the *search topology* can still
-run out of representable DP subdivisions before the mathematical cell is small
-enough for the requested epsilon.
+This has one important consequence. DP bisection is finite: eventually a box
+may contain adjacent representable endpoints and `Box::split` can no longer
+produce distinct children. Reaching that representation boundary is not by
+itself a proof of epsilon satisfiability. Until a validated DP terminal rule
+proves either original infeasibility or epsilon satisfaction, such a box remains
+`UNKNOWN`.
 
-The intended architecture is to separate **search geometry** from **validated
-evaluation geometry**.
+The next completeness argument must therefore identify a supported epsilon
+regime and function/relation fragment for which validated ICP progress plus a
+terminal DP decision rule excludes algorithmic `UNKNOWN`. Epsilon overlap alone
+is insufficient. If a query requests a tolerance below what the declared DP
+contract can decide rigorously, returning `UNKNOWN` is correct.
 
-1. Introduce an SMT-local search-cell type with exact dyadic endpoints. A cell
-   represents the logical branch-and-prune region and is the object stored in
-   sequential/parallel queues. Bisection is exact in this representation, so
-   every non-singleton mathematical interval has a strictly finer dyadic split.
-2. Materialize a validated enclosure of a search cell only when invoking the
-   numerical machinery. Initially this should be a DP `UpperBoxType` for the
-   existing `ConstraintSolver`; later the same interface can select MP
-   enclosures when DP is insufficient.
-3. Treat contractor output as a validated refinement of the search cell rather
-   than as the authoritative search geometry. DP contraction may tighten a cell
-   by replacing dyadic bounds with exact outward dyadic bounds derived from the
-   validated enclosure; it must never collapse search progress merely because
-   adjacent DP numbers were reached.
-4. Splitting belongs to the search-cell abstraction, not to
-   `UpperBoxType::split`. Sensitivity analysis may still choose the coordinate
-   using DP derivatives/width estimates, but the actual split point is the exact
-   dyadic midpoint of that coordinate.
-5. Witness generation also belongs to the search geometry. Midpoints/endpoints
-   are exact dyadic points; certification remains validated and may use DP first
-   and MP escalation as needed.
-6. Parallelism is precision-agnostic once the workload payload changes from
-   `UpperBoxType` to the search-cell type. No parallel-search policy redesign
-   is required.
-7. The public API may continue to accept the existing `ExactBoxType` initially:
-   its DP endpoints are exactly representable dyadics and can be lifted without
-   loss into the new search cell. A later API can accept genuinely arbitrary
-   dyadic/rational bounds without changing the internal search algorithm.
-8. The public witness type should not be changed in the first migration step.
-   Internally retain an exact dyadic witness and convert it to the current
-   `UpperBoxType` result only at the boundary. A future API can expose the exact
-   witness directly.
-
-This separation deliberately leaves the existing contractors in DP at first.
-The functional goal is not to rewrite all numerical solvers in MP, but to ensure
-that DP is an acceleration/evaluation layer rather than the finite state space
-of the SMT search.
-
-#### Migration sequence
-
-The redesign should be staged so every commit preserves green tests and full
-coverage of introduced behavior:
-
-1. add a small exact-dyadic search interval/box abstraction plus deterministic
-   split/equality/midpoint tests, without wiring it into SMT search;
-2. change sequential queue and geometric splitting to operate on search cells,
-   materializing `UpperBoxType` only for `_process_box`;
-3. adapt sensitivity-guided splitting so it selects a coordinate from the
-   materialized enclosure but bisects the exact search cell;
-4. lift deterministic witness candidates to exact dyadic points and certify
-   them through the existing DP/MP validation path;
-5. migrate the parallel workload payload to search cells;
-6. propagate validated contractor refinements back into search cells with
-   outward-safe exact dyadic bounds;
-7. remove `non-splittable due to DP adjacency` as an algorithmic terminal
-   condition; at that point remaining `UNKNOWN` must be attributable to an
-   explicit resource limit or to a function class outside the declared
-   delta-complete fragment.
-
-A full MP replacement of `ConstraintSolver`, per-box caches and derivative/DAG
-optimizations remain separate performance work and are not prerequisites for
-this migration.
+This choice keeps the numerical model uniform: DP is both the search geometry
+and the validated evaluation geometry. Performance work such as derivative/DAG
+reuse and stronger contractors can be added without introducing a second
+precision model.
 
 ### Completeness audit and UNKNOWN taxonomy
 
@@ -199,35 +145,18 @@ therefore to eliminate the **terminal uncertified box** as an algorithmic
 outcome for the supported function/relation fragment. Resource-limited
 `UNKNOWN` remains valid by contract.
 
-The first terminal-completeness step is implemented for compiled symbolic SMT
-theory literals. When DP splitting is no longer possible, deterministic witness
-points are re-evaluated with validated multiple-precision bounds. The MP
-precision is chosen from epsilon (approximately `-log2(epsilon)+128` bits,
-with a 128-bit floor), so this is not a fixed-precision heuristic. A witness is
-returned only if the MP enclosure satisfies the epsilon-relaxed primitive
-relation, including the strict bound for `GT_ZERO`. This resolves terminal
-uncertainty caused purely by DP enclosure error, such as
-`sin(x)^2+cos(x)^2-1=0` at a singleton with epsilon much smaller than DP
-roundoff. The same improvement propagates through CDCL: a Boolean branch that
-previously inherited numerical `UNKNOWN` may now terminate immediately with a
-certified epsilon witness, so tests must assert the improved semantic result
-rather than preserve obsolete backtracking counts from the incomplete solver.
+The previous terminal multiple-precision fallback for compiled symbolic theory
+literals has been removed. Compiled theory literals and generic
+`ValidatedConstraint` inputs now have the same terminal DP semantics: when
+ordinary validated checks cannot certify a witness and DP splitting cannot make
+progress, the box remains `UNKNOWN`.
 
-The terminal MP decision is factored into deterministic candidate and witness
-helpers shared by production code and tests. Coverage therefore exercises the
-actual decision procedure directly: rejected candidate, certified candidate,
-later-candidate success, and no-candidate-certified, without constructing
-fragile ICP scenarios merely to reach those branches. The final terminal
-classification is likewise shared: a present validated witness maps to
-`EPSILON_SAT`, while absence maps to `UNKNOWN`; `_process_box` only attaches
-the appropriate statistics flags to that semantic outcome.
-
-This does **not** yet establish delta-completeness for all terminal boxes.
-Generic `ValidatedConstraint` functions remain black-box inputs, and a
-non-singleton DP box whose real witness is not one of the representable
-deterministic points may still require a search representation finer than DP.
-That remaining case is an architectural completeness issue rather than an
-evaluation-cache optimization.
+This is deliberate rather than a regression to be hidden by a heuristic.
+Terminal completeness must be obtained by a rigorously justified DP decision
+rule and a clearly stated epsilon regime, not by precision escalation. The
+existing terminal classification helper remains useful: a present validated
+witness maps to `EPSILON_SAT`, while absence maps to `UNKNOWN`;
+`_process_box` attaches the corresponding statistics flags.
 
 The terminal state must not be repaired by treating epsilon overlap as
 satisfaction. A sound replacement needs a validated terminal decision rule:
@@ -517,8 +446,8 @@ The following approaches were tried or considered and deliberately rejected:
   certification;
 - running the interior-point optimizer on terminal singleton boxes: it cannot
   discover a different in-domain point and can introduce numerical failures;
-- high-precision terminal fallback without a clearly justified validated
-  semantics;
+- multiple-precision terminal fallback or unbounded exact search geometry:
+  the solver architecture is deliberately DP-only;
 - coverage tests based on unstable optimizer degeneracies;
 - unbounded/nonterminating DPLL constructions created solely to hit a rare
   branch;
@@ -543,10 +472,10 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. eliminate algorithmic `UNKNOWN` from non-splittable uncertified boxes on
-   the declared bounded QF_NRA fragment, while retaining explicit resource-limit
-   `UNKNOWN`; then strengthen pruning/propagation as required to establish the
-   corresponding delta-complete progress argument;
+1. define the supported DP epsilon regime and a validated terminal decision
+   rule for non-splittable boxes, then eliminate algorithmic `UNKNOWN` on the
+   corresponding bounded QF_NRA fragment while retaining explicit resource-limit
+   and out-of-contract `UNKNOWN`;
 2. preserve deterministic, nontrivial tests for every introduced behavior;
 3. after every green functional test run, regenerate coverage and restore 100%
    function and branch coverage before starting the next feature tranche;

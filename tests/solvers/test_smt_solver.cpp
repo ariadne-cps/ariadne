@@ -736,75 +736,9 @@ class TestSmtSolver {
                 FloatDP(0.125_x,dp)),
             std::runtime_error);
 
-        MultiplePrecision mp_precision(192);
-        FloatMP mp_epsilon(0.125_x,mp_precision);
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                SmtTheoryPrimitiveRelation::EQ_ZERO,
-                FloatMPBounds(
-                    FloatMP(-0.1_x,mp_precision),
-                    FloatMP(0.1_x,mp_precision)),
-                mp_epsilon));
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                SmtTheoryPrimitiveRelation::GEQ_ZERO,
-                FloatMPBounds(FloatMP(-0.1_x,mp_precision)),
-                mp_epsilon));
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                SmtTheoryPrimitiveRelation::GT_ZERO,
-                FloatMPBounds(FloatMP(0.0_x,mp_precision)),
-                mp_epsilon));
-        ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                SmtTheoryPrimitiveRelation::EQ_ZERO,
-                FloatMPBounds(FloatMP(1.0_x,mp_precision)),
-                mp_epsilon));
-        ARIADNE_TEST_THROWS(
-            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                invalid,
-                FloatMPBounds(FloatMP(0.0_x,mp_precision)),
-                mp_epsilon),
-            std::runtime_error);
-        ARIADNE_TEST_EQUAL(
-            SmtSolverTestSupport::terminal_mp_precision_bits(0.125_x),131u);
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::terminal_mp_precision_bits(1e-30_x)>200u);
-
-        std::cout << "[smt-terminal-mp] deterministic candidate outcomes" << std::endl;
-        auto tx=ValidatedScalarMultivariateFunction::coordinates(1);
-        std::vector<SmtSolverTestSupport::TerminalMpLiteral> endpoint_literals({
-            {tx[0]-1,SmtTheoryPrimitiveRelation::EQ_ZERO}
-        });
-        UpperBoxType midpoint_candidate({
-            UpperIntervalType(ExactIntervalType(0.5_x,0.5_x))
-        });
         UpperBoxType endpoint_candidate({
             UpperIntervalType(ExactIntervalType(1,1))
         });
-        ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::terminal_mp_candidate_satisfied(
-                midpoint_candidate,endpoint_literals,1e-30_x));
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::terminal_mp_candidate_satisfied(
-                endpoint_candidate,endpoint_literals,1e-30_x));
-
-        UpperBoxType endpoint_domain({
-            UpperIntervalType(ExactIntervalType(0,1))
-        });
-        auto endpoint_witness=SmtSolverTestSupport::terminal_mp_witness(
-            endpoint_domain,endpoint_literals,1e-30_x);
-        ARIADNE_TEST_ASSERT(endpoint_witness.has_value());
-        ARIADNE_TEST_ASSERT(
-            endpoint_witness->operator[](0).lower_bound().raw()
-                ==endpoint_domain[0].upper_bound().raw());
-
-        std::vector<SmtSolverTestSupport::TerminalMpLiteral> impossible_literals({
-            {tx[0]-2,SmtTheoryPrimitiveRelation::EQ_ZERO}
-        });
-        ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::terminal_mp_witness(
-                endpoint_domain,impossible_literals,1e-30_x).has_value());
 
         std::cout << "[smt-terminal] deterministic terminal box classification" << std::endl;
         auto terminal_sat=SmtSolverTestSupport::classify_terminal_box(
@@ -1576,20 +1510,22 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-theory-solve] terminal MP certification proves epsilon witness" << std::endl;
+            std::cout << "[smt-theory-solve] DP terminal precision limit remains UNKNOWN" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 space,ExactBoxType({ExactIntervalType(1,1)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_uncertified_boxes,0u);
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().epsilon_box_certifications,1u);
+                solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().epsilon_box_certifications,0u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().candidate_witness_searches,0u);
         }
@@ -2641,29 +2577,6 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] terminal MP certification resolves formerly unknown Boolean branch" << std::endl;
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                false));
-            ContinuousPredicate uncertain=
-                (sqr(sin(ex))+sqr(cos(ex))-1==0);
-            SmtResult solve_result=tiny_epsilon_solver.solve(
-                space,
-                ExactBoxType({ExactIntervalType(1,1)}),
-                uncertain||(!uncertain));
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_decisions>=1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
-            ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_uncertified_boxes,0u);
-        }
-
-        {
             std::cout << "[smt-dpll] global box budget stops further Boolean search" << std::endl;
             SmtSolver bounded_solver(SmtSolverConfiguration(
                 0.125_x,
@@ -2956,7 +2869,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-parallel] theory terminal MP certification" << std::endl;
+            std::cout << "[smt-parallel] theory DP terminal precision limit remains UNKNOWN" << std::endl;
             RealVariable x("x");
             RealExpression ex=x;
             RealSpace space({x});
@@ -2976,15 +2889,15 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_uncertified_boxes,0u);
+                solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_epsilon_overlap_boxes,0u);
+                solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().epsilon_box_certifications,1u);
+                solve_result.statistics().epsilon_box_certifications,0u);
         }
 
         {

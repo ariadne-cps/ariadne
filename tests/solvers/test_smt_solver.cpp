@@ -800,7 +800,7 @@ class TestSmtSolver {
 
         SmtSearchStatistics statistics;
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::PRUNED,1u,1u,2u,1u,3u,1u,true,true,true,true,true});
+            statistics,Input{Status::PRUNED,1u,1u,2u,1u,3u,1u,true,true,true,false,true,true});
         ARIADNE_TEST_EQUAL(statistics.boxes_pruned,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_reduction_rounds,1u);
         ARIADNE_TEST_EQUAL(statistics.hull_effective_reductions,1u);
@@ -821,6 +821,12 @@ class TestSmtSolver {
         SmtSolverTestSupport::accumulate_box_processing_statistics(
             statistics,Input{Status::UNKNOWN});
         ARIADNE_TEST_EQUAL(statistics.boxes_unknown,1u);
+        ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,0u);
+        ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,0u);
+
+        SmtSolverTestSupport::accumulate_box_processing_statistics(
+            statistics,Input{Status::EPSILON_SAT,0u,0u,0u,0u,0u,0u,false,false,false,true});
+        ARIADNE_TEST_EQUAL(statistics.dp_resolution_fallback_boxes,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,1u);
 
@@ -895,7 +901,7 @@ class TestSmtSolver {
 
 
         {
-            std::cout << "[smt-solve] classify non-splittable uncertified singleton" << std::endl;
+            std::cout << "[smt-solve] classify non-splittable DP fallback singleton" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -909,9 +915,11 @@ class TestSmtSolver {
                 ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
@@ -1270,8 +1278,10 @@ class TestSmtSolver {
                     ValidatedNumber(0.3_x))
             });
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
@@ -1364,7 +1374,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-solve] non-splittable uncertified singleton returns UNKNOWN" << std::endl;
+            std::cout << "[smt-solve] non-splittable uncertified singleton uses dReal-style fallback" << std::endl;
             auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -1379,9 +1389,12 @@ class TestSmtSolver {
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 ExactBoxType({ExactIntervalType(1,1)}),constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
         }

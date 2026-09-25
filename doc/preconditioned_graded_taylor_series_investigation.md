@@ -3154,3 +3154,46 @@ separate validated addition on the 172.2 million collision updates.
 The temporary phase timers/counters inserted for diagnosis are disabled in the benchmark
 path so the next runtime is directly comparable with the uninstrumented 39.6101 s
 pre-ranked baseline.
+
+
+### 9.86 Validated fused collision update result (2026-09-25)
+
+Replacing the dense collision path's separate `mul_err` plus `add_err` with Ariadne's
+validated `fma_err` produced another large speedup:
+
+```
+pre-ranked mul_err+add_err   39.6101 s   8.5378297219108396e-8
+pre-ranked fma_err           34.7261 s   8.5378288508794491e-8
+```
+
+Runtime improves by about 12.3% relative to the pre-ranked baseline, while the reported
+final error changes only at the 1e-14 absolute scale and is slightly smaller. The run
+completes all 2000 reach sets with final radius 0.0403.
+
+The final composition profiles are `flowpipe_compose_seconds=10.2579`,
+`endpoint_compose_seconds=4.01251`, and `state_compose_seconds=4.67633`, consistent
+with removing one validated arithmetic primitive from the 172.2 million collision
+updates measured previously.
+
+The fused path remains rigorous: new slots use `mul_err`, while repeated contributions
+use `fma_err`.
+
+
+### 9.87 Re-profile the dense pair loop after validated fma (2026-09-25)
+
+The previous 22.2758 s pair-loop measurement predates the switch to `fma_err`. To decide
+whether further optimisation should remain inside `_ifma`, the benchmark now measures
+only the coefficient-pair loop around the fused implementation. This keeps instrumentation
+lighter than the earlier four-phase profile and reports:
+
+```
+[TaylorDenseFmaPairProfile]
+calls
+product_pairs
+new_slots
+collision_slots
+pair_loop_seconds
+```
+
+The uninstrumented performance baseline remains 34.7261 s. The profiled runtime is used
+only to localise the remaining cost, not as the new performance baseline.

@@ -1205,6 +1205,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 y_slots.push_back(rank_index(yiter->index()));
             }
 
+            const auto dense_pair_start=std::chrono::steady_clock::now();
+            unsigned long long dense_new_slots=0u;
+            unsigned long long dense_collision_slots=0u;
             SizeType xi=0u;
             for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
                 UniformConstReference<CoefficientType> xv=xiter->coefficient();
@@ -1214,17 +1217,31 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                     const SizeType slot=x_slots[xi]+y_slots[yi];
                     SizeType& touched=slot_to_touched[slot];
                     if(touched==unused) {
+                        ++dense_new_slots;
                         CoefficientType product=
                             mul_err(xv,yv,product_roundoff);
                         touched=touched_slots.size();
                         touched_slots.push_back(slot);
                         touched_coefficients.emplace_back(product);
                     } else {
+                        ++dense_collision_slots;
                         touched_coefficients[touched]=fma_err(
                             xv,yv,touched_coefficients[touched],product_roundoff);
                     }
                 }
             }
+
+            const auto dense_pair_end=std::chrono::steady_clock::now();
+            record_taylor_model_dense_hot_loop_profile(
+                static_cast<unsigned long long>(x.number_of_terms())
+                    * static_cast<unsigned long long>(y.number_of_terms()),
+                dense_new_slots,
+                dense_collision_slots,
+                0.0,
+                0.0,
+                std::chrono::duration<double>(
+                    dense_pair_end-dense_pair_start).count(),
+                0.0);
 
             // The mixed-radix rank is order-compatible with Ariadne's
             // reverse lexicographic order: the highest variable index is the

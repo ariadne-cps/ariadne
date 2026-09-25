@@ -1155,7 +1155,9 @@ graded_series_centre_polynomial_step(
     static SizeType widened_derivative_total_components=0u;
     static double widened_derivative_candidate_seconds=0.0;
     static double widened_derivative_max_error_difference=0.0;
-    if(compute_exact_polynomial_diagnostic) {
+    if(compute_exact_polynomial_diagnostic
+        || widened_derivative_equivalence_calls<100u)
+    {
         Stopwatch<Microseconds> widened_derivative_candidate_stopwatch;
         FlowStepTaylorModelType diagnostic_wide_centre=
             make_taylor_function_model(dphi,wide_domain,sweeper);

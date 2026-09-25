@@ -4259,3 +4259,35 @@ match exactly.  If expansions match but Errors do not, the derivative of the alr
 materialised centre model cannot simply replace the current operand; the Error semantics
 must first be reconstructed explicitly.  If even the expansions differ, abandon this
 reuse route and move to optimising field materialisation.
+
+
+### 9.117 Force the widened-derivative A/B for the first 100 clean calls (2026-09-25)
+
+The first run after 9.116 did not emit `[WidenedDerivativeEquivalence]` because the
+Van der Pol benchmark runs with integrator diagnostics disabled.  Its 23.3531 s wall time
+therefore does not answer the derivative-reuse question and is not promoted over the
+22.7361 s clean baseline.
+
+To avoid enabling the full diagnostics suite (which would also re-enable several old and
+expensive experiments), the widened-derivative equivalence check is now forced only for
+the first 100 recurrence calls in an otherwise normal benchmark run.  After call 100 the
+production path returns to the usual code.
+
+The experiment still compares, component by component:
+
+```
+reference =
+    make_taylor_function_model(dP/dt, widened_domain)
+
+candidate =
+    derivative(
+        make_taylor_function_model(P, widened_domain),
+        time_index)
+```
+
+At call 100 it emits one cumulative `[WidenedDerivativeEquivalence]` record.  The
+acceptance criterion remains exact identity of both polynomial expansion and uniform
+Error for every compared component.
+
+The wall time of this run is diagnostic only because the first 100 calls perform extra
+work.  The clean production reference remains 22.7361 s.

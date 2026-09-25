@@ -4046,3 +4046,45 @@ The historical behaviour-preserving baseline remains 24.0561 s at
 8.5378288508794491e-8 final error.  The immediate objective is runtime: first recover
 the known ~2 s diagnostic cost, then continue profiling the widened-domain residual
 construction if the cleaned result is still slower than 24.0561 s.
+
+
+### 9.112 Clean widened-domain benchmark: near parity with tighter error (2026-09-25)
+
+After moving the direct-defect diagnostic behind the diagnostics switch, the clean
+Van der Pol run completes with:
+
+```
+elapsed_seconds       24.6201
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+dense_calls           985603
+```
+
+Compared with the previous widened-domain run (27.3231 s), this recovers 2.703 s
+(~9.9%) while leaving the final error exactly unchanged.  Compared with the historical
+bit-equivalent 24.0561 s baseline, the tightened variant is only 0.564 s (~2.35%) slower
+while its final Taylor-model error is about 44.7% smaller.
+
+The profile now reports the principal centre costs at 2000 calls as:
+
+```
+graded_flow_iterate              5.68528 s
+final Procedure g(P)             2.49065 s
+validated widened defect         2.67860 s
+centre polynomial flow_function  1.72418 s
+centre total                    14.5972 s
+```
+
+The log still reports `direct_defect_seconds=1.85034`, despite the direct-defect
+calculation being guarded by the diagnostics flag.  Inspection shows that the stopwatch
+itself was left outside the guard, so this number is timing/accounting overhead rather
+than the removed diagnostic computation.  The stopwatch is now moved inside the
+diagnostic branch and clean runs return zero direct-defect time.
+
+Performance remains the first objective.  The widened-domain variant is retained because
+it is now close to the 24.0561 s baseline and materially tighter.  The next optimisation
+target, after obtaining a clean profile with corrected timing, is the 2.68 s validated
+widened-defect construction, especially avoiding redundant materialisation of the
+derivative operand if the already materialised centre polynomial can provide equivalent
+validated data without reintroducing separate restriction.

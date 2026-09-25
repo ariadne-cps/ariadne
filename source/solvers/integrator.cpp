@@ -1154,13 +1154,14 @@ graded_series_centre_polynomial_step(
     recurrence_flow_function_stopwatch.click();
 
     // Keep the cheaper materialise-after-subtraction construction only
-    // when diagnostics are explicitly enabled.  It is not used by the
-    // production Gronwall certificate, so computing it in clean benchmark
-    // runs is pure overhead.
-    Stopwatch<Microseconds> direct_defect_stopwatch;
+    // when diagnostics are explicitly enabled.  Do not even instantiate a
+    // stopwatch in clean runs: this block is not part of production
+    // certification.
     Vector<FloatDPBounds> direct_defect_range(
         n,FloatDPBounds(0,dp));
+    double direct_defect_seconds=0.0;
     if(compute_exact_polynomial_diagnostic) {
+        Stopwatch<Microseconds> direct_defect_stopwatch;
         Vector<ValidatedDifferential> direct_defect_differential=
             derivative_dphi-recurrence_field_differential;
         FlowStepTaylorModelType direct_wide_defect=
@@ -1173,8 +1174,9 @@ graded_series_centre_polynomial_step(
             direct_defect_range[i]=evaluate(
                 direct_wide_defect.model(i),forward_half_box);
         }
+        direct_defect_stopwatch.click();
+        direct_defect_seconds=direct_defect_stopwatch.elapsed_seconds();
     }
-    direct_defect_stopwatch.click();
 
     // For polynomial vector fields we can remove the unresolved truncation
     // question entirely: determine the algebraic degree of the Procedure,
@@ -1241,7 +1243,7 @@ graded_series_centre_polynomial_step(
         centre_flow_differential_stopwatch.elapsed_seconds(),
         centre_flow_function_stopwatch.elapsed_seconds(),
         std::move(direct_defect_range),
-        direct_defect_stopwatch.elapsed_seconds(),
+        direct_defect_seconds,
         exact_polynomial_available,
         exact_polynomial_degree,
         std::move(exact_polynomial_defect_range),

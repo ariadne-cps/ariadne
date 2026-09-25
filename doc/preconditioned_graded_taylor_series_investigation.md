@@ -4408,3 +4408,38 @@ Acceptance is strict exact equality of both expansion and Error for every compon
 it passes, the next commit may replace the generic compose path for this materialisation
 and benchmark the clean production runtime. If it fails, inspect whether the mismatch is
 only operation ordering/rounding before abandoning the specialised route.
+
+
+### 9.122 Direct diagonal materialisation passes exact A/B; promote to production (2026-09-25)
+
+The first-100-call A/B for the specialised diagonal scaling materialiser passes the
+strict acceptance gate:
+
+```
+calls                       100
+components                  200
+equal_expansion_components  200
+equal_error_components      200
+max_error_difference        0
+candidate_seconds           0.011794
+```
+
+The specialised path reproduces the generic field materialisation exactly at both
+Taylor-model expansion and uniform Error level for every sampled component.
+
+For the same first 100 calls, the generic field path spends about 0.0651 s in generic
+composition plus about 0.0053 s in conversion. The complete candidate takes about
+0.0118 s including scaling, direct coefficient transformation, conversion, and cleanup.
+
+The widened recurrence-field production path is therefore switched to
+`make_taylor_function_model_diagonal_scaling`. The generic profiled helper remains
+available for reference but is no longer on the production hot path.
+
+The next run is a clean production benchmark. Acceptance gates:
+
+1. final error remains exactly 4.7221144502652554e-8;
+2. final radius remains 0.0403;
+3. all 2000 reach sets complete;
+4. wall time improves against the 22.7361 s clean baseline.
+
+The 23.7251 s A/B wall time is diagnostic only and is not a baseline.

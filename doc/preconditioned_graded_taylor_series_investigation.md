@@ -4854,3 +4854,29 @@ If all 5000 expansions match and the candidate is faster, extend the A/B sample 
 production use. If exact equality fails, inspect the mismatch before considering any
 non-bit-equivalent optimisation. If the map candidate is slower, retain the result as
 evidence that avoiding cleanup alone is insufficient with an ordered-tree accumulator.
+
+
+### 9.134 Direct std::map accumulation fails both exactness and speed (2026-09-25)
+
+The first 5000-product A/B rejects the ordered-map direct accumulator:
+
+```
+calls             5000
+equal_expansions  1984
+candidate_seconds 0.034180
+reference_seconds 0.033181
+```
+
+Only 39.7% of candidate expansions are bit-identical to the existing append+sort+combine
+implementation, confirming that direct accumulation changes FloatDPBounds summation order
+often enough to alter the representation. It is also about 3.0% slower on this sample.
+
+Therefore direct accumulation through an ordered map is rejected for production. The
+temporary-expansion amplification measured in 9.132 is still real, but removing sort and
+merge by changing coefficient accumulation order is not a semantics-preserving shortcut.
+
+The next route is to preserve the reference summation order while reducing sorting cost.
+Since product terms are generated as rows induced by each left operand term, investigate
+whether those rows are individually ordered and can be merged structurally, replacing a
+global sort without changing the order in which equal-key coefficients are combined.
+Any replacement must first pass an exact Expansion equality A/B test.

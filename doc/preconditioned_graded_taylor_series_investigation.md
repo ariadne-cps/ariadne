@@ -3496,3 +3496,48 @@ match the trusted per-pair path exactly for the regression suite.
 The next required measurement is the Van der Pol benchmark with this corrected,
 bit-equivalent batching. The previous 22.4231 s result cannot be retained as the final
 batched baseline because it also benefited from the accidental fused arithmetic.
+
+
+### 9.97 Performance of the bit-equivalent batched-rounding kernel (2026-09-25)
+
+The corrected batched implementation, which is bit-identical to the trusted per-pair
+arithmetic in the dedicated FloatDP/FloatMP regression suite, completes the Van der Pol
+benchmark at:
+
+```
+elapsed_seconds       24.0561
+achieved_final_error  8.5378288508794491e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+The final error is exactly the same reported value as the 34.7--34.8 s per-pair
+`mul_err/fma_err` reference. This is consistent with the dedicated exact-equivalence
+tests and confirms that the previous 22.4231 s result also included an additional
+benefit from accidentally fused collision arithmetic.
+
+Against the clean 34.7261 s per-pair baseline, pure rounding-mode batching saves
+10.6700 s, about 30.7%. Against the roughly 55.5 s first final-sweep implementation, the
+total dense-kernel work has reduced runtime by about 56.6%.
+
+Final cumulative composition costs are:
+
+```
+flowpipe_compose_seconds  4.61170
+endpoint_compose_seconds  1.95459
+state_compose_seconds     1.90666
+```
+
+The workspace profile remains:
+1,256,468 dense calls, 32 slot-map resizes, 144 coefficient-capacity growth events,
+maximum slot count 29,791, and maximum touched count 325.
+
+The remaining global profile is now qualitatively different from the earlier dense
+kernel. Gronwall centre construction is the largest named cumulative component at
+13.9638 s. Recurrence residual procedure time is 2.4839 s, while the flow-function
+profile reports 2.4645 s in model construction and 1.3425 s in restriction. These
+profiles may have nested scopes and must not be summed directly against wall time.
+
+The next optimisation phase should therefore re-profile the architecture rather than
+continue assuming `_ifma` is dominant. In particular, the 13.9638 s Gronwall centre
+path should be decomposed before further dense-kernel micro-optimisation.

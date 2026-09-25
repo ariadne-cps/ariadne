@@ -4736,3 +4736,48 @@ Next experiment: inspect/profile Differential multiplication itself, separating 
 pair generation/accumulation from coefficient interval arithmetic and truncation. The
 goal is to determine whether the dominant cost is combinatorial monomial accumulation or
 validated coefficient arithmetic before attempting a production optimisation.
+
+
+### 9.131 Profile ValidatedDifferential multiplication internals (2026-09-25)
+
+The graded multiplication profile in 9.130 shows that expensive convolution work is
+concentrated in interior products, where both temporal coefficients contain substantial
+Differential expansions.  The next diagnostic therefore moves one level down.
+
+For the diagnostic graded Procedure path only, each
+`ValidatedDifferential * ValidatedDifferential` now mirrors the generic
+`Differential` multiplication implementation while measuring two coarse phases:
+
+```
+generation:
+    nested expansion-pair traversal
+    MultiIndex addition
+    validated coefficient multiplication
+    append of raw product terms
+
+cleanup:
+    sort/merge/remove of the raw expansion
+```
+
+The profiler also counts the number of generated expansion pairs and final nonzero terms
+by temporal degree.  Marker:
+
+```
+[ValidatedDifferentialMulProfile]
+degreeD_generation_seconds=...
+degreeD_cleanup_seconds=...
+degreeD_generated_pairs=...
+degreeD_result_nonzeros=...
+```
+
+The arithmetic and operation order inside each product match the current generic
+`AlgebraOperations<Differential<X>>::apply(Mul,...)` implementation.  This is a
+diagnostic-only run.
+
+Interpretation:
+- if cleanup dominates, optimise expansion sorting/merging or accumulate equal
+  MultiIndices directly;
+- if generation dominates, the next split is index/append overhead versus
+  FloatDPBounds coefficient multiplication;
+- the pair/nonzero ratio quantifies how much temporary duplication the current
+  append-then-cleanup strategy creates.

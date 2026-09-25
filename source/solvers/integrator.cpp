@@ -634,6 +634,87 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 }
 
 
+ValidatedDifferential profiled_validated_differential_mul(
+        const ValidatedDifferential& x,
+        const ValidatedDifferential& y,
+        DegreeType temporal_degree)
+{
+    typedef ValidatedDifferential::ConstIterator ConstIterator;
+
+    static double generation_seconds[64]={};
+    static double cleanup_seconds[64]={};
+    static SizeType generated_pairs[64]={};
+    static SizeType result_nonzeros[64]={};
+    static SizeType calls[64]={};
+    static SizeType total_calls=0u;
+
+    ARIADNE_ASSERT_MSG(
+        x.argument_size()==y.argument_size(),
+        "x="<<x<<" y="<<y);
+
+    ValidatedDifferential r(
+        x.argument_size(),
+        min(x.degree(),y.degree()),
+        mul(x.zero_coefficient(),y.zero_coefficient()));
+
+    MultiIndex a(x.argument_size());
+    FloatDPBounds coef(x.zero_coefficient()*y.zero_coefficient());
+
+    SizeType pairs=0u;
+    Stopwatch<Microseconds> generation_stopwatch;
+    for(ConstIterator xiter=x.expansion().begin();
+        xiter!=x.expansion().end(); ++xiter)
+    {
+        if(xiter->index().degree()>r.degree()) { break; }
+        for(ConstIterator yiter=y.expansion().begin();
+            yiter!=y.expansion().end(); ++yiter)
+        {
+            if(xiter->index().degree()+yiter->index().degree()>r.degree()) {
+                break;
+            }
+            a=xiter->index()+yiter->index();
+            coef=xiter->coefficient()*yiter->coefficient();
+            r.expansion().append(a,coef);
+            ++pairs;
+        }
+    }
+    generation_stopwatch.click();
+
+    Stopwatch<Microseconds> cleanup_stopwatch;
+    r.cleanup();
+    cleanup_stopwatch.click();
+
+    SizeType const d=temporal_degree<64u ? temporal_degree : 0u;
+    generation_seconds[d]+=generation_stopwatch.elapsed_seconds();
+    cleanup_seconds[d]+=cleanup_stopwatch.elapsed_seconds();
+    generated_pairs[d]+=pairs;
+    result_nonzeros[d]+=r.expansion().number_of_nonzeros();
+    ++calls[d];
+    ++total_calls;
+
+    if(total_calls%50000u==0u) {
+        std::cerr << "[ValidatedDifferentialMulProfile]"
+                  << " calls=" << total_calls;
+        for(SizeType k=1u; k!=64u; ++k) {
+            if(calls[k]==0u) { continue; }
+            std::cerr << " degree" << k
+                      << "_calls=" << calls[k]
+                      << " degree" << k
+                      << "_generation_seconds=" << generation_seconds[k]
+                      << " degree" << k
+                      << "_cleanup_seconds=" << cleanup_seconds[k]
+                      << " degree" << k
+                      << "_generated_pairs=" << generated_pairs[k]
+                      << " degree" << k
+                      << "_result_nonzeros=" << result_nonzeros[k];
+        }
+        std::cerr << std::endl;
+    }
+
+    return r;
+}
+
+
 Void profiled_compute_graded_procedure(
         const Vector<ValidatedProcedure>& p,
         Vector<GradedValidatedDifferential>& r,
@@ -701,7 +782,8 @@ Void profiled_compute_graded_procedure(
                     DegreeType const d=out.degree();
                     for(DegreeType i=0u; i<=d; ++i) {
                         Stopwatch<Microseconds> term_stopwatch;
-                        out[d]+=a1[i]*a2[cast_sign<DegreeType>(d-i)];
+                        out[d]+=profiled_validated_differential_mul(
+                            a1[i],a2[cast_sign<DegreeType>(d-i)],d);
                         term_stopwatch.click();
                         if(d<64u && i<64u) {
                             mul_term_seconds[d][i]+=

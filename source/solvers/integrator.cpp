@@ -1217,9 +1217,12 @@ graded_series_centre_polynomial_step(
             FlowStepTaylorModelType exact_wide_defect=
                 make_taylor_function_model(
                     exact_defect,join(domx,widt,doma),sweeper);
+            Vector<FloatDPBounds> exact_forward_half_box(
+                exact_wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
+            exact_forward_half_box[n]=FloatDPBounds(0,1,dp);
             for(SizeType i=0u; i!=n; ++i) {
                 exact_polynomial_defect_range[i]=evaluate(
-                    exact_wide_defect.model(i),forward_half_box);
+                    exact_wide_defect.model(i),exact_forward_half_box);
             }
         }
     }

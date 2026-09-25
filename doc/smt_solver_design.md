@@ -59,9 +59,9 @@ The solver roadmap therefore prioritizes, in this order:
    the optimization is currently restricted to compiled SMT theory literals;
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
-6. elimination of algorithmic UNKNOWN outcomes on the declared bounded QF_NRA
-   fragment within the solver's double-precision numerical contract, establishing
-   the intended epsilon-complete decision behavior for that contract;
+6. characterize and minimize DP-resolution UNKNOWN outcomes on the declared
+   bounded QF_NRA fragment, establishing two-outcome epsilon-complete behavior
+   only for queries whose validated DP evaluation is demonstrably sufficient;
 7. only after those goals, broader language features such as richer SMT-LIB
    integration, quantifiers, or dedicated ODE solving.
 
@@ -90,84 +90,129 @@ the existing DP Ariadne types.
 
 Multiple-precision evaluation and an unbounded exact search-cell representation
 are not part of the architecture of `solvers-smt#830`. They must not be used as
-a fallback for terminal boxes or as a prerequisite for completeness. The solver
-must instead make its completeness claim relative to an explicit DP numerical
-contract.
+a fallback for terminal boxes or as a prerequisite for completeness.
 
-This has one important consequence. DP bisection is finite: eventually a box
-may contain adjacent representable endpoints and `Box::split` can no longer
-produce distinct children. Reaching that representation boundary is not by
-itself a proof of epsilon satisfiability. Until a validated DP terminal rule
-proves either original infeasibility or epsilon satisfaction, such a box remains
-`UNKNOWN`.
+#### Completeness audit
 
-The next completeness argument must therefore identify a supported epsilon
-regime and function/relation fragment for which validated ICP progress plus a
-terminal DP decision rule excludes algorithmic `UNKNOWN`. Epsilon overlap alone
-is insufficient. If a query requests a tolerance below what the declared DP
-contract can decide rigorously, returning `UNKNOWN` is correct.
+The delta-completeness argument for DPLL(ICP) in Gao, Avigad and Clarke relies
+on two ingredients that must be kept distinct:
 
-This choice keeps the numerical model uniform: DP is both the search geometry
-and the validated evaluation geometry. Performance work such as derivative/DAG
-reuse and stronger contractors can be added without introducing a second
-precision model.
+1. pruning is well-defined: it contracts boxes, does not retain a box that is
+   already proved inconsistent by the interval extension, and never removes a
+   real solution;
+2. interval extensions become sufficiently narrow when the search box becomes
+   sufficiently small. In the paper this is captured by delta-regular interval
+   extensions and by choosing a geometric ICP stopping precision from a uniform
+   modulus of continuity.
 
-### Completeness audit and UNKNOWN taxonomy
+The current SMT reduction is compatible in spirit with the first ingredient:
+hull/shaving contraction is followed by validated range rejection, and UNSAT is
+reported only after validated exclusion. The second ingredient does not hold
+uniformly for arbitrarily small epsilon under a fixed DP arithmetic model.
+Validated DP evaluation has a nonzero representation/rounding floor for some
+expressions even on a singleton box, while DP bisection itself eventually
+reaches adjacent representable endpoints.
 
-Functional completeness now takes priority over further performance work.
-Optimizations already identified (per-box evaluation reuse, broader DAG reuse,
-adaptive contractor scheduling) remain backlog items unless they require an
-architectural decision that would otherwise force a later redesign.
+The regression
+`sqr(sin(x))+sqr(cos(x))-1 == 0` at the singleton `x=1` with
+`epsilon=1e-30` is the concrete witness of this limitation. The exact real
+expression is zero, but the validated DP enclosure cannot be made narrow enough
+to certify that epsilon. No further DP split exists. Returning
+`EPSILON_SAT` would therefore require information not supplied by the DP
+interval evaluator, while returning `UNSAT` would be incorrect.
 
-The current implementation has exactly two numerical sources of `UNKNOWN`
-that propagate to the public result:
+Consequently there is no sound general terminal rule, using only the current
+fixed-precision interval oracle, that can eliminate terminal `UNKNOWN` for
+every positive epsilon and every supported transcendental expression. Doing so
+would require at least one of: precision escalation, stronger symbolic
+identities/exact reasoning, or a restriction of the numerical contract. The
+first option is explicitly rejected for this solver.
+
+This is also consistent with the practical ICP shape used by dReal: its public
+dReal4 evaluator documentation accepts a box as delta-satisfying when a formula
+is already valid on the box or when the interval evaluation is narrow enough
+relative to the requested precision. Such a width criterion is sound only when
+the numerical evaluator can actually reach the requested scale; it does not
+remove a fixed-precision floor.
+
+The Ariadne SMT contract is therefore:
+
+- `UNSAT` is exact: validated pruning/range exclusion has ruled out the
+  original query.
+- `EPSILON_SAT` is certified: the returned DP witness box is validated against
+  the epsilon-relaxed constraints.
+- `UNKNOWN` is permitted for explicit resource exhaustion and for
+  **DP-resolution exhaustion**, where search has reached the representable DP
+  boundary without either proof.
+- A two-outcome epsilon-completeness claim may only be made for a query class for
+  which the DP evaluator is known to provide enough resolution before the
+  representable search boundary. There is currently no formula-independent
+  positive lower bound on epsilon that establishes this for the full supported
+  nonlinear/transcendental language: rounding error also depends on expression
+  structure, scale and intermediate values.
+
+A global rule such as `epsilon >= 1e-12` is therefore not a rigorous
+completeness contract. Expressions with large intermediate magnitudes,
+cancellation or poorly conditioned compositions can have a larger DP enclosure
+floor even when their final real value is small. Any future admissibility test
+must be derived from validated information about the actual compiled
+expressions and domain, not from a universal magic constant.
+
+#### Relation to the current implementation
+
+After original-domain reduction, `_process_box` currently tries a validated
+midpoint witness, deterministic point candidates and, for splittable boxes, an
+optional interior-point candidate. The function named `_epsilon_satisfied`
+certifies a **point box** obtained from `midpoint_box(domain)`; it is not a
+whole-box stopping rule. The design documentation must not describe this as
+whole-box epsilon certification.
+
+If all point certifications fail and `Box::split` produces identical children,
+the only sound current outcome is `UNKNOWN`. This is not an implementation
+branch waiting for a generic SAT rule; it is the observable DP-resolution
+boundary.
+
+A dReal-style interval-width stopping test remains a valid optional optimization:
+if a validated image of the whole reduced box is contained in the epsilon-relaxed
+target, the box itself is an epsilon witness. More generally, after a
+well-defined prune step, sufficiently narrow interval images can justify the same
+conclusion. However, this cannot solve the hard terminal case in which even
+singleton DP evaluation is wider than epsilon. It should therefore be treated as
+an early certification optimization, not as the missing completeness theorem.
+
+### UNKNOWN taxonomy
+
+The current implementation has two numerical sources of `UNKNOWN` that
+propagate to the public result:
 
 1. **Explicit resource exhaustion.** Sequential and parallel conjunction search
    return `UNKNOWN` when the configured global box-processing limit is reached.
-   This is intentional and is not an algorithmic completeness defect.
-2. **Terminal uncertified box.** After original-domain reduction, whole-box
-   epsilon certification, deterministic witness candidates and optional
-   candidate search have all failed, `_process_box` returns `UNKNOWN` when
-   `Box::split` cannot produce distinct children. This is the primary
-   algorithmic completeness gap. The statistics
-   `non_splittable_uncertified_boxes` /
-   `non_splittable_epsilon_overlap_boxes` identify this state.
+2. **DP-resolution exhaustion.** After validated original-domain reduction and
+   all available epsilon witness checks have failed, `_process_box` returns
+   `UNKNOWN` when `Box::split` cannot produce distinct children.
 
-Boolean/DPLL theory search does not introduce an independent third source:
-an `UNKNOWN` returned by a conjunction theory solve is recorded in
-`_theory_unknown_seen`; Boolean search may continue through other assignments,
-and the final Boolean result is `UNKNOWN` only if no witness is found and at
-least one explored theory branch inherited one of the two numerical causes
-above.
+The statistics currently named `non_splittable_uncertified_boxes` and
+`non_splittable_epsilon_overlap_boxes` identify the second state. The latter
+name is historical: the important semantic fact is failure of certification at
+the DP representation boundary, not mere epsilon overlap.
 
-For the declared bounded QF_NRA target, the next completeness milestone is
-therefore to eliminate the **terminal uncertified box** as an algorithmic
-outcome for the supported function/relation fragment. Resource-limited
-`UNKNOWN` remains valid by contract.
+Boolean/CDCL search does not create a third numerical cause. A theory
+`UNKNOWN` is remembered while Boolean search may continue through other
+assignments; the final Boolean result is `UNKNOWN` only if no certified witness
+or global UNSAT proof is obtained and at least one explored theory branch was
+numerically unresolved.
 
-The previous terminal multiple-precision fallback for compiled symbolic theory
-literals has been removed. Compiled theory literals and generic
-`ValidatedConstraint` inputs now have the same terminal DP semantics: when
-ordinary validated checks cannot certify a witness and DP splitting cannot make
-progress, the box remains `UNKNOWN`.
+The next implementation step should improve this taxonomy before attempting new
+completeness claims: add an explicit DP-resolution statistic/reason and preserve
+separate resource-exhaustion accounting. Tests should cover sequential,
+parallel and Boolean propagation of this reason using nontrivial formulas.
 
-This is deliberate rather than a regression to be hidden by a heuristic.
-Terminal completeness must be obtained by a rigorously justified DP decision
-rule and a clearly stated epsilon regime, not by precision escalation. There is
-no separate terminal-certification helper in the current DP-only implementation.
-If the ordinary validated whole-box and deterministic-candidate checks fail and
-DP splitting cannot make progress, `_process_box` returns `UNKNOWN` directly
-and records the non-splittable terminal statistics. A future DP terminal rule
-must replace that direct outcome only when it has a rigorous certification
-argument.
-
-The terminal state must not be repaired by treating epsilon overlap as
-satisfaction. A sound replacement needs a validated terminal decision rule:
-either prove original infeasibility (`UNSAT` for that box) or construct and
-validate an epsilon witness. If neither is possible for a function class, that
-class is not yet part of the delta-complete fragment and must be documented as
-such rather than silently certified.
-
+The longer-term route to a larger two-outcome fragment is to reduce the DP
+resolution floor rather than hide it. Relevant work includes stronger symbolic
+simplification, shared-expression evaluation, validated correlation-preserving
+evaluation and stronger contractors. Each improvement can enlarge the class of
+queries decided before DP exhaustion while keeping the same sound three-result
+public contract.
 
 ## Main implementation
 
@@ -209,7 +254,7 @@ semantics.
 A box is processed in this order:
 
 1. validated reduction using the original (non-epsilon) constraints;
-2. epsilon certification of the whole reduced box;
+2. validated midpoint witness certification;
 3. deterministic witness candidates;
 4. sensitivity-guided splitting;
 5. optional nonlinear interior-point candidate search for splittable boxes;
@@ -475,16 +520,20 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. define the supported DP epsilon regime and a validated terminal decision
-   rule for non-splittable boxes, then eliminate algorithmic `UNKNOWN` on the
-   corresponding bounded QF_NRA fragment while retaining explicit resource-limit
-   and out-of-contract `UNKNOWN`;
-2. preserve deterministic, nontrivial tests for every introduced behavior;
-3. after every green functional test run, regenerate coverage and restore 100%
+1. distinguish DP-resolution exhaustion explicitly from resource exhaustion in
+   statistics/result diagnostics, with sequential, parallel and Boolean tests;
+2. investigate validated expression/domain-specific resolution certificates that
+   could identify a larger two-outcome DP fragment; do not introduce a universal
+   epsilon floor without a proof;
+3. improve DP decision power through stronger symbolic simplification,
+   correlation-preserving/shared expression evaluation and contractors before
+   reconsidering any stronger completeness claim;
+4. preserve deterministic, nontrivial tests for every introduced behavior;
+5. after every green functional test run, regenerate coverage and restore 100%
    function and branch coverage before starting the next feature tranche;
-4. retain the audited single compiler-mapped line anomaly unless a semantic
-   source change resolves it naturally;
-5. later add CI coverage gates so regressions in functions, lines or branches
+6. retain the audited compiler-mapped line anomaly unless a semantic source
+   change resolves it naturally;
+7. later add CI coverage gates so regressions in functions, lines or branches
    fail automatically.
 
 The current development workflow intentionally uses local compilation and test

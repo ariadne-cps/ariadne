@@ -4991,3 +4991,59 @@ It is not necessarily the final possible optimisation: derivative materialisatio
 centre flow-function conversion, and lower-level allocation/sort costs still leave
 smaller opportunities, but they are expected to have lower return or higher semantic
 risk than carried-state composition.
+
+
+### 9.138 Carried composition shape profile: flowpipe composition is the dominant remaining composition (2026-09-25)
+
+The cleaned composition-shape run completes all 2000 Van der Pol reach sets with the
+same numerical result:
+
+```
+elapsed_seconds       23.3461
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+At 2000 steps the cumulative carried-state costs are:
+
+```
+flowpipe_compose   5.14685 s
+endpoint_compose   2.07489 s
+state_compose      2.06319 s
+precondition       0.11726 s
+state_range        0.01011 s
+```
+
+Composition work alone is therefore about 9.28 s cumulatively, with the full flowpipe
+composition the largest single call site.
+
+At the final step the shape profile reports:
+
+```
+local_flow_nnz        73
+arguments_nnz         180
+flowpipe_nnz          349
+local_endpoint_nnz    20
+incoming_state_nnz    178
+evolved_nnz           192
+local_transition_nnz  19
+next_state_nnz        178
+```
+
+The accumulated carried state does not grow without bound, whereas the full space-time
+flowpipe becomes substantially larger. This explains why
+`compose(physical_local_flow,arguments)` is the first composition target.
+
+The argument vector has special block structure:
+
+```
+join(embed(state.normalised_mapping(),domt), time_coordinate)
+```
+
+The spatial arguments are independent of local time and the last argument is exactly the
+time coordinate. The next experiment should exploit this structure with an exact A/B
+against the current generic composition path.
+
+The 23.3461 s wall time is diagnostic only. The established production reference remains
+the 21.6201 s three-run median.

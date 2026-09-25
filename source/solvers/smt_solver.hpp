@@ -253,6 +253,8 @@ SensitivitySplitSelection sensitivity_split_selection(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 
+Void validate_differentiable_expression_kind(OperatorKind kind);
+
 Bool expression_is_differentiable(RealExpression const& expression);
 
 std::optional<ValidatedScalarMultivariateFunction> optional_derivative(

@@ -497,6 +497,13 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(
             not SmtSolverTestSupport::expression_is_differentiable(
                 abs(nonsmooth_expression)));
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::expression_is_differentiable(
+                RealExpression(sx)+max(RealExpression(sx),RealExpression(0))));
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::validate_differentiable_expression_kind(
+                static_cast<OperatorKind>(255)),
+            std::runtime_error);
         auto negative_derivative=(-exp(x[0])-x[0]).derivative(0u);
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(

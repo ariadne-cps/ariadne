@@ -1126,6 +1126,20 @@ SensitivitySplitSelection sensitivity_split_selection(
     };
 }
 
+Void validate_differentiable_expression_kind(OperatorKind kind)
+{
+    switch(kind) {
+        case OperatorKind::NULLARY:
+        case OperatorKind::VARIABLE:
+        case OperatorKind::UNARY:
+        case OperatorKind::GRADED:
+        case OperatorKind::BINARY:
+            return;
+        default:
+            throw std::runtime_error("Unsupported real expression operator kind");
+    }
+}
+
 Bool expression_is_differentiable(RealExpression const& expression)
 {
     OperatorCode code=expression.code();
@@ -1135,19 +1149,16 @@ Bool expression_is_differentiable(RealExpression const& expression)
         return false;
     }
 
-    switch(expression.kind()) {
-        case OperatorKind::NULLARY:
-        case OperatorKind::VARIABLE:
-            return true;
-        case OperatorKind::UNARY:
-        case OperatorKind::GRADED:
-            return expression_is_differentiable(expression.arg());
-        case OperatorKind::BINARY:
-            return expression_is_differentiable(expression.arg1())
-                && expression_is_differentiable(expression.arg2());
-        default:
-            return true;
+    OperatorKind kind=expression.kind();
+    validate_differentiable_expression_kind(kind);
+    if(kind==OperatorKind::NULLARY || kind==OperatorKind::VARIABLE) {
+        return true;
     }
+    if(kind==OperatorKind::UNARY || kind==OperatorKind::GRADED) {
+        return expression_is_differentiable(expression.arg());
+    }
+    return expression_is_differentiable(expression.arg1())
+        && expression_is_differentiable(expression.arg2());
 }
 
 std::optional<ValidatedScalarMultivariateFunction> optional_derivative(

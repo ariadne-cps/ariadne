@@ -4781,3 +4781,47 @@ Interpretation:
   FloatDPBounds coefficient multiplication;
 - the pair/nonzero ratio quantifies how much temporary duplication the current
   append-then-cleanup strategy creates.
+
+
+### 9.132 Differential multiplication: generation dominates, with substantial duplicate cleanup (2026-09-25)
+
+The internal ValidatedDifferential multiplication diagnostic completes all 2000 Van der
+Pol reach sets with unchanged numerical result. Its 23.8461 s wall time is diagnostic
+only.
+
+At the final sampled point (550,000 profiled Differential products), cumulative costs by
+temporal degree are approximately:
+
+```
+degree 1: generation 0.161 s, cleanup 0.055 s
+degree 2: generation 0.466 s, cleanup 0.295 s
+degree 3: generation 0.763 s, cleanup 0.479 s
+degree 4: generation 1.109 s, cleanup 0.673 s
+```
+
+For degrees 2--4, generation is about 61--62% of the measured product cost and cleanup
+about 38--39%. Cleanup is therefore significant but not the sole bottleneck.
+
+The temporary-expansion amplification is large. At degree 4:
+
+```
+generated pairs  9,207,597
+result nonzeros  2,309,416
+ratio             ~3.99
+```
+
+Degree 3 is ~3.38x and degree 2 ~2.48x. The current append-then-cleanup multiplication
+therefore creates several raw product entries for each final monomial, increasingly so at
+higher degree.
+
+This suggests a promising algorithmic experiment: accumulate products directly by
+MultiIndex instead of appending every pair and sorting/merging afterward. Such a path
+could remove most cleanup work and reduce temporary expansion traffic, but it must not be
+promoted merely from this profile because changing accumulation order can change
+FloatDPBounds rounding and hence representation.
+
+Next step: build an A/B diagnostic direct-accumulation Differential product for the
+graded Procedure path. Compare the resulting Differential expansions coefficient by
+coefficient against the current append+cleanup implementation, and measure its cost.
+If exact equality fails only because of accumulation order, quantify the enclosure
+difference before deciding whether a semantics-preserving ordering strategy is possible.

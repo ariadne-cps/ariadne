@@ -127,6 +127,12 @@ previously inherited numerical `UNKNOWN` may now terminate immediately with a
 certified epsilon witness, so tests must assert the improved semantic result
 rather than preserve obsolete backtracking counts from the incomplete solver.
 
+The terminal MP decision is factored into deterministic candidate and witness
+helpers shared by production code and tests. Coverage therefore exercises the
+actual decision procedure directly: rejected candidate, certified candidate,
+later-candidate success, and no-candidate-certified, without constructing
+fragile ICP scenarios merely to reach those branches.
+
 This does **not** yet establish delta-completeness for all terminal boxes.
 Generic `ValidatedConstraint` functions remain black-box inputs, and a
 non-singleton DP box whose real witness is not one of the representable

@@ -564,33 +564,13 @@ SmtSolver::_terminal_epsilon_witness(
     UpperBoxType const& domain,
     CompiledTheoryLiterals const& literals) const
 {
-    MultiplePrecision precision(
-        static_cast<mpfr_prec_t>(
-            SmtSolverTestSupport::terminal_mp_precision_bits(
-                _configuration.epsilon())));
-    FloatMP epsilon(_configuration.epsilon(),precision);
-
-    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
-        Vector<FloatMPBounds> point(candidate.dimension(),[&](SizeType i) {
-            FloatMP lower(candidate[i].lower_bound().raw(),down,precision);
-            FloatMP upper(candidate[i].upper_bound().raw(),up,precision);
-            return FloatMPBounds(lower,upper);
-        });
-
-        Bool satisfied=true;
-        for(auto const& literal:literals) {
-            FloatMPBounds image=literal.function(point);
-            if(not SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
-                    literal.relation,image,epsilon)) {
-                satisfied=false;
-                break;
-            }
-        }
-        if(satisfied) {
-            return candidate;
-        }
+    std::vector<SmtSolverTestSupport::TerminalMpLiteral> terminal_literals;
+    terminal_literals.reserve(literals.size());
+    for(auto const& literal:literals) {
+        terminal_literals.push_back({literal.function,literal.relation});
     }
-    return std::nullopt;
+    return SmtSolverTestSupport::terminal_mp_witness(
+        domain,terminal_literals,_configuration.epsilon());
 }
 
 template<class Conjunction>
@@ -1449,6 +1429,43 @@ SizeType terminal_mp_precision_bits(ExactDouble epsilon)
     double const epsilon_value=epsilon.get_d();
     double const required=-std::log2(epsilon_value)+128.0;
     return static_cast<SizeType>(std::max(128.0,std::ceil(required)));
+}
+
+Bool terminal_mp_candidate_satisfied(
+    UpperBoxType const& candidate,
+    std::vector<TerminalMpLiteral> const& literals,
+    ExactDouble epsilon_value)
+{
+    MultiplePrecision precision(
+        static_cast<mpfr_prec_t>(terminal_mp_precision_bits(epsilon_value)));
+    FloatMP epsilon(epsilon_value,precision);
+    Vector<FloatMPBounds> point(candidate.dimension(),[&](SizeType i) {
+        FloatMP lower(candidate[i].lower_bound().raw(),down,precision);
+        FloatMP upper(candidate[i].upper_bound().raw(),up,precision);
+        return FloatMPBounds(lower,upper);
+    });
+
+    for(auto const& literal:literals) {
+        FloatMPBounds image=literal.function(point);
+        if(not mp_epsilon_primitive_image_satisfied(
+                literal.relation,image,epsilon)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::optional<UpperBoxType> terminal_mp_witness(
+    UpperBoxType const& domain,
+    std::vector<TerminalMpLiteral> const& literals,
+    ExactDouble epsilon)
+{
+    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
+        if(terminal_mp_candidate_satisfied(candidate,literals,epsilon)) {
+            return candidate;
+        }
+    }
+    return std::nullopt;
 }
 
 Bool epsilon_theory_literal_infeasible(

@@ -105,7 +105,6 @@ void ariadne_main()
 
         configure_taylor_kernel(true);
         reset_taylor_model_dense_workspace_stats();
-        reset_taylor_model_dense_hot_loop_profile();
         Stopwatch<Milliseconds> stopwatch;
         auto orbit=evolver.orbit(
             initial_set,Real(5.00_dec),Semantics::UPPER);
@@ -119,17 +118,6 @@ void ariadne_main()
                   << " coefficient_capacity_grows=" << ws.coefficient_capacity_grows
                   << " max_slot_count=" << ws.maximum_slot_count
                   << " max_touched_count=" << ws.maximum_touched_count
-                  << std::endl;
-        auto const hp=taylor_model_dense_hot_loop_profile();
-        std::cerr << "[TaylorDenseHotLoopProfile]"
-                  << " calls=" << hp.calls
-                  << " product_pairs=" << hp.product_pairs
-                  << " new_slots=" << hp.new_slots
-                  << " collision_slots=" << hp.collision_slots
-                  << " prepare_seconds=" << hp.prepare_seconds
-                  << " prerank_seconds=" << hp.prerank_seconds
-                  << " pair_loop_seconds=" << hp.pair_loop_seconds
-                  << " emit_sweep_seconds=" << hp.emit_sweep_seconds
                   << std::endl;
     }
 

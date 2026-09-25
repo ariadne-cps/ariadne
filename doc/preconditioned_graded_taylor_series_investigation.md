@@ -3115,3 +3115,42 @@ loop rather than workspace allocation, ranking, sorting, or sweeping.
 The benchmark driver also still contained the no-longer-used local `run_graded` lambda
 after development focus returned to the preconditioned integrator. It has been removed
 to eliminate the `-Wunused-variable` warning; this does not alter the benchmark.
+
+
+### 9.85 Fuse collision multiply-and-add with validated fma (2026-09-25)
+
+The dense hot-loop profile showed:
+
+```
+product_pairs       208,224,840
+new_slots            36,018,650
+collision_slots     172,206,190
+pair_loop_seconds        22.2758
+```
+
+Thus 82.7% of coefficient products hit an already occupied destination slot. The previous
+collision path performed two validated arithmetic primitives:
+
+```
+product = mul_err(x,y,error)
+accumulator = add_err(accumulator,product,error)
+```
+
+Inspection of `model_utilities.hpp` found Ariadne already provides a validated
+`fma_err(x,y,z,error)` primitive. It computes the nearest `x*y+z` result and
+accumulates an outward-rounded error contribution while managing the rounding mode only
+once for the fused operation.
+
+The dense collision path now uses:
+
+```
+accumulator = fma_err(x,y,accumulator,error)
+```
+
+New destination slots still use `mul_err`, since there is no prior coefficient to add.
+This preserves validated arithmetic while removing the intermediate product and one
+separate validated addition on the 172.2 million collision updates.
+
+The temporary phase timers/counters inserted for diagnosis are disabled in the benchmark
+path so the next runtime is directly comparable with the uninstrumented 39.6101 s
+pre-ranked baseline.

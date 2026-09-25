@@ -4088,3 +4088,56 @@ target, after obtaining a clean profile with corrected timing, is the 2.68 s val
 widened-defect construction, especially avoiding redundant materialisation of the
 derivative operand if the already materialised centre polynomial can provide equivalent
 validated data without reintroducing separate restriction.
+
+
+### 9.113 Clean profile establishes a new best production baseline (2026-09-25)
+
+With the direct-defect diagnostic and its stopwatch completely absent from clean runs, the
+widened-domain subtract-before-restrict variant completes the Van der Pol benchmark at:
+
+```
+elapsed_seconds       22.7361
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+dense_calls           985603
+```
+
+This is the best measured production point so far. Relative to the previous
+behaviour-preserving bit-equivalent baseline (24.0561 s,
+8.5378288508794491e-8), runtime improves by about 5.49% while final Taylor-model error
+improves by about 44.7%. Relative to the first roughly 55.5 s final-sweep implementation,
+the runtime reduction is about 59.0%.
+
+The corrected clean profile confirms `direct_defect_seconds=0`. At 2000 recurrence
+calls the main centre-polynomial costs are:
+
+```
+graded_flow_iterate              5.70563 s
+validated widened defect         2.68550 s
+final Procedure g(P)             2.47454 s
+centre polynomial flow_function  1.75418 s
+centre total                    12.7763 s
+```
+
+Carried-state cumulative composition costs are:
+
+```
+flowpipe_compose_seconds  4.59934
+endpoint_compose_seconds  1.93101
+state_compose_seconds     1.90520
+```
+
+The widened-domain construction is therefore retained as the new baseline. Performance
+remains the first objective.
+
+Next optimisation target: decompose the 2.6855 s validated widened-defect construction
+into the following phase costs before changing its algorithm:
+
+1. materialising the widened derivative model;
+2. materialising the widened recurrence-field model;
+3. subtracting the two model vectors;
+4. restricting the combined residual once.
+
+Instrument only phase boundaries. The 22.7361 s clean run remains the performance
+reference; any instrumented wall time is diagnostic only.

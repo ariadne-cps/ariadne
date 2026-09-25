@@ -35,6 +35,7 @@
 #include <functional>
 #include <set>
 #include <thread>
+#include <cmath>
 
 #include "betterthreads/workload.hpp"
 
@@ -550,6 +551,48 @@ SmtSolver::_epsilon_witness(
     return std::nullopt;
 }
 
+std::optional<UpperBoxType>
+SmtSolver::_terminal_epsilon_witness(
+    UpperBoxType const&,
+    List<ValidatedConstraint> const&) const
+{
+    return std::nullopt;
+}
+
+std::optional<UpperBoxType>
+SmtSolver::_terminal_epsilon_witness(
+    UpperBoxType const& domain,
+    CompiledTheoryLiterals const& literals) const
+{
+    MultiplePrecision precision(
+        static_cast<mpfr_prec_t>(
+            SmtSolverTestSupport::terminal_mp_precision_bits(
+                _configuration.epsilon())));
+    FloatMP epsilon(_configuration.epsilon(),precision);
+
+    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
+        Vector<FloatMPBounds> point(candidate.dimension(),[&](SizeType i) {
+            FloatMP lower(candidate[i].lower_bound().raw(),down,precision);
+            FloatMP upper(candidate[i].upper_bound().raw(),up,precision);
+            return FloatMPBounds(lower,upper);
+        });
+
+        Bool satisfied=true;
+        for(auto const& literal:literals) {
+            FloatMPBounds image=literal.function(point);
+            if(not SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                    literal.relation,image,epsilon)) {
+                satisfied=false;
+                break;
+            }
+        }
+        if(satisfied) {
+            return candidate;
+        }
+    }
+    return std::nullopt;
+}
+
 template<class Conjunction>
 UpperBoxType
 SmtSolver::_epsilon_candidate_witness(
@@ -637,6 +680,16 @@ SmtSolver::_process_box(
     }
 
     if(not splittable) {
+        if(auto witness=this->_terminal_epsilon_witness(domain,conjunction);
+           witness.has_value()) {
+            BoxProcessingResult result{
+                BoxProcessingStatus::EPSILON_SAT,
+                *witness,
+                std::nullopt,
+                reductions};
+            result.epsilon_box_certification=true;
+            return result;
+        }
         BoxProcessingResult result{
             BoxProcessingStatus::UNKNOWN,std::nullopt,std::nullopt,reductions};
         result.candidate_witness_search=false;
@@ -1372,6 +1425,30 @@ Bool epsilon_primitive_image_infeasible(
         default:
             throw std::runtime_error("Unknown SMT primitive theory relation");
     }
+}
+
+Bool mp_epsilon_primitive_image_satisfied(
+    SmtTheoryPrimitiveRelation relation,
+    FloatMPBounds const& image,
+    FloatMP const& epsilon)
+{
+    switch(relation) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO:
+            return image.lower_raw()>=-epsilon && image.upper_raw()<=epsilon;
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+            return image.lower_raw()>=-epsilon;
+        case SmtTheoryPrimitiveRelation::GT_ZERO:
+            return image.lower_raw()>-epsilon;
+        default:
+            throw std::runtime_error("Unknown SMT primitive theory relation");
+    }
+}
+
+SizeType terminal_mp_precision_bits(ExactDouble epsilon)
+{
+    double const epsilon_value=epsilon.get_d();
+    double const required=-std::log2(epsilon_value)+128.0;
+    return static_cast<SizeType>(std::max(128.0,std::ceil(required)));
 }
 
 Bool epsilon_theory_literal_infeasible(

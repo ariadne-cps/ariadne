@@ -735,6 +735,41 @@ class TestSmtSolver {
                 UpperIntervalType(ExactIntervalType(0,0)),
                 FloatDP(0.125_x,dp)),
             std::runtime_error);
+
+        MultiplePrecision mp_precision(192);
+        FloatMP mp_epsilon(0.125_x,mp_precision);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                SmtTheoryPrimitiveRelation::EQ_ZERO,
+                FloatMPBounds(
+                    FloatMP(-0.1_x,mp_precision),
+                    FloatMP(0.1_x,mp_precision)),
+                mp_epsilon));
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                SmtTheoryPrimitiveRelation::GEQ_ZERO,
+                FloatMPBounds(FloatMP(-0.1_x,mp_precision)),
+                mp_epsilon));
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                SmtTheoryPrimitiveRelation::GT_ZERO,
+                FloatMPBounds(FloatMP(0.0_x,mp_precision)),
+                mp_epsilon));
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                SmtTheoryPrimitiveRelation::EQ_ZERO,
+                FloatMPBounds(FloatMP(1.0_x,mp_precision)),
+                mp_epsilon));
+        ARIADNE_TEST_THROWS(
+            SmtSolverTestSupport::mp_epsilon_primitive_image_satisfied(
+                invalid,
+                FloatMPBounds(FloatMP(0.0_x,mp_precision)),
+                mp_epsilon),
+            std::runtime_error);
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::terminal_mp_precision_bits(0.125_x),131u);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::terminal_mp_precision_bits(1e-30_x)>200u);
         SmtTheoryRelation invalid_theory_relation=
             static_cast<SmtTheoryRelation>(999);
         ARIADNE_TEST_THROWS(
@@ -1491,17 +1526,20 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-theory-solve] sequential terminal uncertainty propagates UNKNOWN" << std::endl;
+            std::cout << "[smt-theory-solve] terminal MP certification proves epsilon witness" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 space,ExactBoxType({ExactIntervalType(1,1)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+                solve_result.statistics().non_splittable_uncertified_boxes,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().epsilon_box_certifications,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().candidate_witness_searches,0u);
         }
@@ -2865,7 +2903,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-parallel] theory epsilon-overlap counted once" << std::endl;
+            std::cout << "[smt-parallel] theory terminal MP certification" << std::endl;
             RealVariable x("x");
             RealExpression ex=x;
             RealSpace space({x});
@@ -2885,12 +2923,15 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_uncertified_boxes,1u);
+                solve_result.statistics().non_splittable_uncertified_boxes,0u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
+                solve_result.statistics().non_splittable_epsilon_overlap_boxes,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().epsilon_box_certifications,1u);
         }
 
         {

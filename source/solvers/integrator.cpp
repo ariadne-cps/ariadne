@@ -1198,10 +1198,10 @@ graded_series_centre_polynomial_step(
         for(auto const& term : direct_core.expansion()) {
             FloatDP const dc=term.coefficient();
             FloatDP const sc=separate_core[term.index()];
-            const double da=std::abs(dc.get_d());
-            const double sa=std::abs(sc.get_d());
-            direct_l1_component+=da;
-            if(sc==FloatDP(0)) {
+            const double direct_abs=std::abs(dc.get_d());
+            const double separate_abs=std::abs(sc.get_d());
+            direct_l1_component+=direct_abs;
+            if(sc==FloatDP(0u,dp)) {
                 ++direct_only_coefficients;
             }
             if(dc!=sc) {
@@ -1215,7 +1215,7 @@ graded_series_centre_polynomial_step(
             FloatDP const sc=term.coefficient();
             FloatDP const dc=direct_core[term.index()];
             separate_l1_component+=std::abs(sc.get_d());
-            if(dc==FloatDP(0)) {
+            if(dc==FloatDP(0u,dp)) {
                 ++separate_only_coefficients;
             }
         }

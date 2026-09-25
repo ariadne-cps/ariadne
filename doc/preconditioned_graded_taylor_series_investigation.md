@@ -3747,3 +3747,16 @@ The cumulative `[DefectSweepCoefficientAudit]` reports coefficient differences,
 coefficients present only on either side, cumulative coefficient L1 magnitudes, maximum
 L1 ratios, maximum coefficient difference, and the respective materialisation Error
 budgets. The production path remains unchanged.
+
+
+### 9.105 Fix coefficient-audit build warning and zero construction (2026-09-25)
+
+The widened-domain coefficient audit initially failed to compile because `FloatDP(0)`
+selects a private raw-double constructor in this context. Zero comparisons now use the
+public integral-plus-precision constructor `FloatDP(0u,dp)`.
+
+The local diagnostic variable `da` also shadowed the existing parameter vector
+`da`; it has been renamed to `direct_abs` (and the paired value to
+`separate_abs`) to keep the build warning-free.
+
+These changes affect only the diagnostic audit.

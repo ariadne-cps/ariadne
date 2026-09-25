@@ -35,7 +35,6 @@
 #include <functional>
 #include <set>
 #include <thread>
-#include <cmath>
 
 #include "betterthreads/workload.hpp"
 
@@ -561,16 +560,10 @@ SmtSolver::_terminal_epsilon_witness(
 
 std::optional<UpperBoxType>
 SmtSolver::_terminal_epsilon_witness(
-    UpperBoxType const& domain,
-    CompiledTheoryLiterals const& literals) const
+    UpperBoxType const&,
+    CompiledTheoryLiterals const&) const
 {
-    std::vector<SmtSolverTestSupport::TerminalMpLiteral> terminal_literals;
-    terminal_literals.reserve(literals.size());
-    for(auto const& literal:literals) {
-        terminal_literals.push_back({literal.function,literal.relation});
-    }
-    return SmtSolverTestSupport::terminal_mp_witness(
-        domain,terminal_literals,_configuration.epsilon());
+    return std::nullopt;
 }
 
 template<class Conjunction>
@@ -1404,67 +1397,6 @@ Bool epsilon_primitive_image_infeasible(
         default:
             throw std::runtime_error("Unknown SMT primitive theory relation");
     }
-}
-
-Bool mp_epsilon_primitive_image_satisfied(
-    SmtTheoryPrimitiveRelation relation,
-    FloatMPBounds const& image,
-    FloatMP const& epsilon)
-{
-    switch(relation) {
-        case SmtTheoryPrimitiveRelation::EQ_ZERO:
-            return image.lower_raw()>=-epsilon && image.upper_raw()<=epsilon;
-        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
-            return image.lower_raw()>=-epsilon;
-        case SmtTheoryPrimitiveRelation::GT_ZERO:
-            return image.lower_raw()>-epsilon;
-        default:
-            throw std::runtime_error("Unknown SMT primitive theory relation");
-    }
-}
-
-SizeType terminal_mp_precision_bits(ExactDouble epsilon)
-{
-    double const epsilon_value=epsilon.get_d();
-    double const required=-std::log2(epsilon_value)+128.0;
-    return static_cast<SizeType>(std::max(128.0,std::ceil(required)));
-}
-
-Bool terminal_mp_candidate_satisfied(
-    UpperBoxType const& candidate,
-    std::vector<TerminalMpLiteral> const& literals,
-    ExactDouble epsilon_value)
-{
-    MultiplePrecision precision(
-        static_cast<mpfr_prec_t>(terminal_mp_precision_bits(epsilon_value)));
-    FloatMP epsilon(epsilon_value,precision);
-    Vector<FloatMPBounds> point(candidate.dimension(),[&](SizeType i) {
-        FloatMP lower(candidate[i].lower_bound().raw(),down,precision);
-        FloatMP upper(candidate[i].upper_bound().raw(),up,precision);
-        return FloatMPBounds(lower,upper);
-    });
-
-    for(auto const& literal:literals) {
-        FloatMPBounds image=literal.function(point);
-        if(not mp_epsilon_primitive_image_satisfied(
-                literal.relation,image,epsilon)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::optional<UpperBoxType> terminal_mp_witness(
-    UpperBoxType const& domain,
-    std::vector<TerminalMpLiteral> const& literals,
-    ExactDouble epsilon)
-{
-    for(UpperBoxType const& candidate:epsilon_witness_candidates(domain)) {
-        if(terminal_mp_candidate_satisfied(candidate,literals,epsilon)) {
-            return candidate;
-        }
-    }
-    return std::nullopt;
 }
 
 Bool epsilon_theory_literal_infeasible(

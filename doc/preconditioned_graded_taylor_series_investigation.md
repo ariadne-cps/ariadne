@@ -3611,3 +3611,13 @@ reports:
 No Gronwall remainder uses the direct range yet. The purpose of this run is only to
 establish whether replacing the patch-level residual range would be semantically safe,
 and how much extra conservatism that replacement would introduce.
+
+
+### 9.100 Fix direct-defect comparison build (2026-09-25)
+
+The first direct-defect comparison build failed because `mag(Bounds<FloatDP>)`
+returns `Error<FloatDP>`, not a raw `FloatDP`. The diagnostic conversion now uses
+`Error::raw().get_d()` for both production and direct magnitudes.
+
+This affects diagnostic reporting only; the production Gronwall path and all validated
+arithmetic remain unchanged.

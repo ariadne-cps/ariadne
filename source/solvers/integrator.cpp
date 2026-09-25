@@ -2373,8 +2373,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 for(SizeType i=0u; i!=n; ++i) {
                     auto recurrence_mag=mag(defect_ranges[i]);
                     auto direct_mag=mag(centre_result.direct_defect_range[i]);
-                    const double recurrence_mag_d=recurrence_mag.get_d();
-                    const double direct_mag_d=direct_mag.get_d();
+                    const double recurrence_mag_d=
+                        recurrence_mag.raw().get_d();
+                    const double direct_mag_d=
+                        direct_mag.raw().get_d();
                     ++direct_defect_components;
                     if(direct_mag_d>=recurrence_mag_d) {
                         ++direct_defect_conservative_components;

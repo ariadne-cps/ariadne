@@ -3046,3 +3046,39 @@ and final sweeping are unchanged.
 
 This targets the ~208 million product-pair iterations observed in the preconditioned
 workload rather than per-call allocation overhead.
+
+
+### 9.83 Dense hot-loop phase profile after operand pre-ranking (2026-09-25)
+
+Pre-ranking the operand multi-indices produced a material improvement:
+
+```
+before pre-ranking: 44.7151 s
+after pre-ranking:  39.6101 s
+final error:        8.5378297219108396e-8 (unchanged)
+```
+
+The improvement is about 11.4%, confirming that repeated multi-index construction and
+ranking inside the ~208 million coefficient-product iterations was a significant cost.
+
+The next diagnostic instruments the dense kernel at phase granularity, deliberately
+avoiding clock reads inside the coefficient-pair loop so the measurement does not
+substantially perturb the hot path. It records cumulative time for:
+
+- degree/workspace preparation;
+- operand-slot pre-ranking;
+- the complete coefficient-pair loop;
+- final touched-slot sort, Expansion emission, and sweep.
+
+It also counts product pairs, newly occupied destination slots, and collision updates.
+Because every product pair necessarily executes one `mul_err` and every collision
+executes one `add_err`, these counters quantify the arithmetic call volumes without
+timing every arithmetic operation individually.
+
+Output marker:
+
+```
+[TaylorDenseHotLoopProfile]
+```
+
+The benchmark remains the single QR-preconditioned dense `3e-14` run.

@@ -118,6 +118,28 @@ struct TaylorModelDenseWorkspaceStats {
 
 Void reset_taylor_model_dense_workspace_stats();
 TaylorModelDenseWorkspaceStats taylor_model_dense_workspace_stats();
+
+struct TaylorModelDenseHotLoopProfile {
+    unsigned long long calls=0u;
+    unsigned long long product_pairs=0u;
+    unsigned long long new_slots=0u;
+    unsigned long long collision_slots=0u;
+    double prepare_seconds=0.0;
+    double prerank_seconds=0.0;
+    double pair_loop_seconds=0.0;
+    double emit_sweep_seconds=0.0;
+};
+
+Void reset_taylor_model_dense_hot_loop_profile();
+TaylorModelDenseHotLoopProfile taylor_model_dense_hot_loop_profile();
+Void record_taylor_model_dense_hot_loop_profile(
+    unsigned long long product_pairs,
+    unsigned long long new_slots,
+    unsigned long long collision_slots,
+    double prepare_seconds,
+    double prerank_seconds,
+    double pair_loop_seconds,
+    double emit_sweep_seconds);
 Void record_taylor_model_dense_workspace_prepare(
     Bool slot_resize,
     Bool capacity_grow,

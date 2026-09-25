@@ -646,7 +646,10 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
     const SizeType n=p.result_size();
 
     ValidatedDifferential z=nul(yta[0][0]);
+
+    Stopwatch<Microseconds> graded_iterate_procedure_stopwatch;
     Ariadne::compute_procedure(p,fy,tmp,yta);
+    graded_iterate_procedure_stopwatch.click();
 
     // Temporary diagnostic for the same-state second-step comparison.
     // Calls 1 and 2 are respectively the IDENTITY and QR probes.  Expose the
@@ -682,16 +685,68 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
         }
     }
 
+    Stopwatch<Microseconds> graded_iterate_antidifferential_stopwatch;
     for(SizeType i=0; i!=n; ++i) {
         yta[i]=antidifferential(fy[i]);
     }
+    graded_iterate_antidifferential_stopwatch.click();
 
+    Stopwatch<Microseconds> graded_iterate_tail_stopwatch;
     if (is_autonomous) {
         for(SizeType i=n; i!=yta.size(); ++i) { yta[i].append(z); }
     } else {
         GradedValidatedDifferential& t=yta[n];
         if(t.degree()==0 && not is_autonomous) { t.append(z+1); } else { t.append(z); }
         for(SizeType i=n+1u; i!=yta.size(); ++i) { yta[i].append(z); }
+    }
+    graded_iterate_tail_stopwatch.click();
+
+    static SizeType graded_iterate_profile_calls=0u;
+    static double graded_iterate_procedure_seconds=0.0;
+    static double graded_iterate_antidifferential_seconds=0.0;
+    static double graded_iterate_tail_seconds=0.0;
+    static double graded_iterate_degree_procedure_seconds[64]={};
+    static double graded_iterate_degree_antidifferential_seconds[64]={};
+    static SizeType graded_iterate_degree_calls[64]={};
+
+    ++graded_iterate_profile_calls;
+    graded_iterate_procedure_seconds+=
+        graded_iterate_procedure_stopwatch.elapsed_seconds();
+    graded_iterate_antidifferential_seconds+=
+        graded_iterate_antidifferential_stopwatch.elapsed_seconds();
+    graded_iterate_tail_seconds+=
+        graded_iterate_tail_stopwatch.elapsed_seconds();
+
+    if(diagnostic_iteration<64u && diagnostic_iteration!=0u) {
+        graded_iterate_degree_procedure_seconds[diagnostic_iteration]+=
+            graded_iterate_procedure_stopwatch.elapsed_seconds();
+        graded_iterate_degree_antidifferential_seconds[diagnostic_iteration]+=
+            graded_iterate_antidifferential_stopwatch.elapsed_seconds();
+        ++graded_iterate_degree_calls[diagnostic_iteration];
+    }
+
+    if(graded_iterate_profile_calls%1000u==0u) {
+        std::cerr << "[GradedFlowIterateCostProfile]"
+                  << " calls=" << graded_iterate_profile_calls
+                  << " procedure_seconds="
+                  << graded_iterate_procedure_seconds
+                  << " antidifferential_seconds="
+                  << graded_iterate_antidifferential_seconds
+                  << " tail_seconds="
+                  << graded_iterate_tail_seconds;
+        for(SizeType d=1u; d!=64u; ++d) {
+            if(graded_iterate_degree_calls[d]!=0u) {
+                std::cerr << " degree" << d
+                          << "_calls=" << graded_iterate_degree_calls[d]
+                          << " degree" << d
+                          << "_procedure_seconds="
+                          << graded_iterate_degree_procedure_seconds[d]
+                          << " degree" << d
+                          << "_antidifferential_seconds="
+                          << graded_iterate_degree_antidifferential_seconds[d];
+            }
+        }
+        std::cerr << std::endl;
     }
 }
 
@@ -1153,7 +1208,9 @@ graded_series_centre_polynomial_step(
 
     Stopwatch<Microseconds> centre_iterate_stopwatch;
     for(DegreeType i=0u; i!=to; ++i) {
-        graded_flow_iterate(p,fdphic,tmpdphic,dphic);
+        graded_flow_iterate(
+            p,fdphic,tmpdphic,dphic,
+            std::numeric_limits<SizeType>::max(),"centre-polynomial",i+1u);
     }
     centre_iterate_stopwatch.click();
 

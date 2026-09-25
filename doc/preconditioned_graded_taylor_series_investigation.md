@@ -4529,3 +4529,41 @@ machine/run protocol.  Performance remains the primary objective.  The next targ
 should move away from the now-small widened field materialisation and profile/optimise
 the larger remaining blocks, beginning with `graded_flow_iterate` and carried-state
 composition.
+
+
+### 9.125 Decompose graded_flow_iterate before optimisation (2026-09-25)
+
+The new median production baseline after diagonal field materialisation is 21.6201 s.
+The next large centre-path block is `graded_flow_iterate`, around 5.6--5.9 s over the
+2000-step Van der Pol run.
+
+Before changing its arithmetic, the iterator is instrumented at three phase boundaries:
+
+```
+Ariadne::compute_procedure(...)
+antidifferential(fy[i])
+time/parameter tail append
+```
+
+The cumulative marker is:
+
+```
+[GradedFlowIterateCostProfile]
+calls=...
+procedure_seconds=...
+antidifferential_seconds=...
+tail_seconds=...
+degree1_calls=...
+degree1_procedure_seconds=...
+degree1_antidifferential_seconds=...
+...
+```
+
+The centre-polynomial recurrence now passes its temporal iteration index to the profiler,
+without enabling the legacy IDENTITY/QR diagnostic (its diagnostic call id remains the
+sentinel value). This permits the cost to be split by temporal degree as well as by
+operation.
+
+No numerical or enclosure semantics are changed. The wall time of this run is diagnostic;
+the production median reference remains 21.6201 s, with final error
+4.7221144502652554e-8, radius 0.0403, and 2000 reach sets.

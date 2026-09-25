@@ -643,6 +643,8 @@ Void profiled_compute_graded_procedure(
 {
     static double operator_seconds[64][6] = {};
     static SizeType operator_calls[64][6] = {};
+    static double mul_term_seconds[64][64] = {};
+    static SizeType mul_term_calls[64][64] = {};
     static SizeType profiled_calls = 0u;
 
     const List<ValidatedNumber>& constants=p._constants;
@@ -671,6 +673,8 @@ Void profiled_compute_graded_procedure(
             List<GradedValidatedDifferential>& v;
             const List<ValidatedNumber>& constants;
             const Vector<GradedValidatedDifferential>& x;
+            double (*mul_term_seconds)[64];
+            SizeType (*mul_term_calls)[64];
 
             Void operator()(const ConstantProcedureInstruction& pri) {
                 v[j]=constants[pri._val];
@@ -682,9 +686,34 @@ Void profiled_compute_graded_procedure(
                 pri._op.accept([&](auto op){ v[j]=op(v[pri._arg]); });
             }
             Void operator()(const BinaryProcedureInstruction& pri) {
-                pri._op.accept([&](auto op){
-                    v[j]=op(v[pri._arg1],v[pri._arg2]);
-                });
+                if(pri._op.code()==OperatorCode::MUL) {
+                    GradedValidatedDifferential& out=v[j];
+                    GradedValidatedDifferential const& a1=v[pri._arg1];
+                    GradedValidatedDifferential const& a2=v[pri._arg2];
+                    ARIADNE_ASSERT_MSG(
+                        out.size()+1u==a1.size(),
+                        "out="<<out<<", a1="<<a1<<", a2="<<a2);
+                    ARIADNE_ASSERT_MSG(
+                        out.size()+1u==a2.size(),
+                        "out="<<out<<", a1="<<a1<<", a2="<<a2);
+                    ARIADNE_ASSERT(compatible(a1[0],a2[0]));
+                    out.append(create(a1[0]));
+                    DegreeType const d=out.degree();
+                    for(DegreeType i=0u; i<=d; ++i) {
+                        Stopwatch<Microseconds> term_stopwatch;
+                        out[d]+=a1[i]*a2[cast_sign<DegreeType>(d-i)];
+                        term_stopwatch.click();
+                        if(d<64u && i<64u) {
+                            mul_term_seconds[d][i]+=
+                                term_stopwatch.elapsed_seconds();
+                            ++mul_term_calls[d][i];
+                        }
+                    }
+                } else {
+                    pri._op.accept([&](auto op){
+                        v[j]=op(v[pri._arg1],v[pri._arg2]);
+                    });
+                }
             }
             Void operator()(const GradedProcedureInstruction& pri) {
                 pri._op.accept([&](auto op){
@@ -697,7 +726,8 @@ Void profiled_compute_graded_procedure(
                 });
             }
         };
-        p._instructions[j].accept(Visitor{j,v,constants,x});
+        p._instructions[j].accept(
+            Visitor{j,v,constants,x,mul_term_seconds,mul_term_calls});
         instruction_stopwatch.click();
 
         const SizeType d=degree<64u ? degree : 0u;
@@ -730,6 +760,21 @@ Void profiled_compute_graded_procedure(
                           << "_calls=" << operator_calls[d][cat]
                           << " degree" << d << "_" << names[cat]
                           << "_seconds=" << operator_seconds[d][cat];
+            }
+        }
+        std::cerr << std::endl;
+
+        std::cerr << "[GradedMulConvolutionProfile]"
+                  << " calls=" << profiled_calls;
+        for(SizeType d=1u; d!=64u; ++d) {
+            for(SizeType i=0u; i<=d && i<64u; ++i) {
+                if(mul_term_calls[d][i]==0u) { continue; }
+                std::cerr << " degree" << d
+                          << "_term" << i
+                          << "_calls=" << mul_term_calls[d][i]
+                          << " degree" << d
+                          << "_term" << i
+                          << "_seconds=" << mul_term_seconds[d][i];
             }
         }
         std::cerr << std::endl;

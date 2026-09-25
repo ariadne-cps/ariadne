@@ -4663,3 +4663,40 @@ previous convolution terms are recomputed on every appended degree. If the curre
 assignment recomputes the full graded product while only one new temporal coefficient is
 needed, introduce an append-only/incremental multiplication path and verify exact
 coefficient equality against the current evaluator before production use.
+
+
+### 9.129 Graded multiplication is already append-only; profile convolution terms (2026-09-25)
+
+Inspection of `source/algebra/graded.hpp` rejects the previous suspicion that every
+graded multiplication recomputes all earlier temporal coefficients.  The existing
+`mul(Graded<A>& r,...)` is already incremental:
+
+```
+r.append(create(a1[0]));
+d = r.degree();
+for(i=0; i<=d; ++i) {
+    r[d] += a1[i] * a2[d-i];
+}
+```
+
+Only the newly appended temporal coefficient `r[d]` is formed on each recurrence
+iteration.  Therefore there is no full-history graded convolution to eliminate.
+
+The remaining cost is the convolution needed for that new coefficient, dominated by the
+underlying `ValidatedDifferential` products.  The diagnostic Procedure evaluator now
+mirrors the same MUL implementation and times each convolution term separately by
+temporal degree and convolution index.
+
+New marker:
+
+```
+[GradedMulConvolutionProfile]
+degreeD_termI_calls=...
+degreeD_termI_seconds=...
+```
+
+The arithmetic order is kept identical to the existing graded MUL loop.  This run is
+diagnostic only.  The objective is to determine whether cost is concentrated in central
+products (where both operands have substantial graded degree/density) or is broadly
+uniform.  That result will decide whether the next optimisation belongs in
+`Differential` multiplication or in a special-case graded product path.

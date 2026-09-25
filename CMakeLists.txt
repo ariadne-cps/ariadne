@@ -21,44 +21,12 @@ else()
     message(WARNING "You are using an unidentified compiler! Compilation has only been tested with Clang and GCC.")
 endif()
 
-set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
-                  init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
-set(ANY_TARGET_DONT_WARN strict-aliasing unused-parameter)
-set(LIBRARY_EXCLUSIVE_WARN shadow)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     "${CMAKE_SOURCE_DIR}/cmake/"
     "${CMAKE_SOURCE_DIR}/submodules/configuration/cmake")
-set(CMAKE_MACOSX_RPATH 1)
-set(BUILD_SHARED_LIBS ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
-
-foreach(WARN ${ANY_TARGET_WARN})
-    add_compile_options(-W${WARN})
-endforeach()
-foreach(WARN ${ANY_TARGET_DONT_WARN})
-    add_compile_options(-Wno-${WARN})
-endforeach()
-if(WARNINGS_AS_ERRORS)
-    add_compile_options(-Werror)
-endif()
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-Wno-non-template-friend)
-endif()
-if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (NOT APPLE))
-    add_compile_options(-frounding-math)
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-fdiagnostics-color=always)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-fcolor-diagnostics)
-endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
+
 
 enable_testing()
 include(CTest)
@@ -137,70 +105,44 @@ endif()
 endif()
 
 
-if(COVERAGE)
-    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-        include(LLVMCodeCoverage)
-        append_llvm_coverage_compiler_flags()
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        include(GCCCodeCoverage)
-        append_gcc_coverage_compiler_flags()
-    else()
-        message(FATAL_ERROR "Coverage is supported only with GCC or macOS AppleClang/Clang.")
-    endif()
+include(ProjectOptions)
+include(CoverageSupport)
+include(DependencyChecks)
+
+enable_project_options()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    add_compile_options(-Wno-non-template-friend)
+endif()
+if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (NOT APPLE))
+    add_compile_options(-frounding-math)
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    add_compile_options(-fdiagnostics-color=always)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-fcolor-diagnostics)
 endif()
 
+enable_project_coverage()
+
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    function(ariadne_gitlink_commit REPOSITORY SUBMODULE_PATH OUTPUT_VARIABLE)
-        execute_process(
-            COMMAND "${GIT_EXECUTABLE}" -C "${REPOSITORY}" rev-parse "HEAD:${SUBMODULE_PATH}"
-            OUTPUT_VARIABLE COMMIT
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_VARIABLE ERROR_TEXT
-            RESULT_VARIABLE RESULT
-        )
-        if(NOT RESULT EQUAL 0 OR COMMIT STREQUAL "")
-            message(FATAL_ERROR
-                "Cannot determine gitlink for ${REPOSITORY}/${SUBMODULE_PATH}: ${ERROR_TEXT}")
-        endif()
-        set(${OUTPUT_VARIABLE} "${COMMIT}" PARENT_SCOPE)
-    endfunction()
-
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/helper" ARIADNE_HELPER_COMMIT)
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/logging" ARIADNE_LOGGING_COMMIT)
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/configuration" ARIADNE_CONFIGURATION_COMMIT)
-
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/helper" THREADING_HELPER_COMMIT)
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/logging" THREADING_LOGGING_COMMIT)
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/configuration" THREADING_CONFIGURATION_COMMIT)
-
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/helper" "submodules/configuration" HELPER_CONFIGURATION_COMMIT)
-    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/logging" "submodules/configuration" LOGGING_CONFIGURATION_COMMIT)
-
-    if(NOT ARIADNE_HELPER_COMMIT STREQUAL THREADING_HELPER_COMMIT)
-        message(FATAL_ERROR
-            "Helper dependency mismatch:\n"
-            "  Ariadne:   ${ARIADNE_HELPER_COMMIT}\n"
-            "  Threading: ${THREADING_HELPER_COMMIT}")
-    endif()
-    if(NOT ARIADNE_LOGGING_COMMIT STREQUAL THREADING_LOGGING_COMMIT)
-        message(FATAL_ERROR
-            "Logging dependency mismatch:\n"
-            "  Ariadne:   ${ARIADNE_LOGGING_COMMIT}\n"
-            "  Threading: ${THREADING_LOGGING_COMMIT}")
-    endif()
-    if(NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL THREADING_CONFIGURATION_COMMIT OR
-       NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL HELPER_CONFIGURATION_COMMIT OR
-       NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL LOGGING_CONFIGURATION_COMMIT)
-        message(FATAL_ERROR
-            "Configuration dependency mismatch:\n"
-            "  Ariadne:   ${ARIADNE_CONFIGURATION_COMMIT}\n"
-            "  Threading: ${THREADING_CONFIGURATION_COMMIT}\n"
-            "  Helper:    ${HELPER_CONFIGURATION_COMMIT}\n"
-            "  Logging:   ${LOGGING_CONFIGURATION_COMMIT}")
-    endif()
-    message(STATUS "Verified Helper commit: ${ARIADNE_HELPER_COMMIT}")
-    message(STATUS "Verified Logging commit: ${ARIADNE_LOGGING_COMMIT}")
-    message(STATUS "Verified shared Configuration commit: ${ARIADNE_CONFIGURATION_COMMIT}")
+    require_same_dependency_commit(Helper
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/helper"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/helper"
+    )
+    require_same_dependency_commit(Logging
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/logging"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/logging"
+    )
+    require_same_dependency_commit(Configuration
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/helper|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/logging|submodules/configuration"
+    )
 endif()
 
 find_package(Threads)

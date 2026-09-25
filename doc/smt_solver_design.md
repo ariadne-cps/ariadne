@@ -153,10 +153,13 @@ progress, the box remains `UNKNOWN`.
 
 This is deliberate rather than a regression to be hidden by a heuristic.
 Terminal completeness must be obtained by a rigorously justified DP decision
-rule and a clearly stated epsilon regime, not by precision escalation. The
-existing terminal classification helper remains useful: a present validated
-witness maps to `EPSILON_SAT`, while absence maps to `UNKNOWN`;
-`_process_box` attaches the corresponding statistics flags.
+rule and a clearly stated epsilon regime, not by precision escalation. There is
+no separate terminal-certification helper in the current DP-only implementation.
+If the ordinary validated whole-box and deterministic-candidate checks fail and
+DP splitting cannot make progress, `_process_box` returns `UNKNOWN` directly
+and records the non-splittable terminal statistics. A future DP terminal rule
+must replace that direct outcome only when it has a rigorous certification
+argument.
 
 The terminal state must not be repaired by treating epsilon overlap as
 satisfaction. A sound replacement needs a validated terminal decision rule:

@@ -1236,8 +1236,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         } else {
                             collision_flags.push_back(1u);
                             collision_priors.push_back(touched_coefficients[touched]);
-                            touched_coefficients[touched]=fma(
-                                rounded,xv,yv,touched_coefficients[touched]);
+                            touched_coefficients[touched]=add(
+                                rounded,mul(rounded,xv,yv),
+                                touched_coefficients[touched]);
                         }
                     }
                 }
@@ -1265,8 +1266,10 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                                 collision_priors[collision_index++];
                             CoefficientType myv=-yv;
                             CoefficientType mprior=-prior;
-                            CoefficientType u=fma(rounded,xv,yv,prior);
-                            CoefficientType ml=fma(rounded,xv,myv,mprior);
+                            CoefficientType u=add(
+                                rounded,mul(rounded,xv,yv),prior);
+                            CoefficientType ml=add(
+                                rounded,mul(rounded,xv,myv),mprior);
                             product_roundoff.raw()=add(
                                 rounded,product_roundoff.raw(),
                                 hlf(add(rounded,ml,u)));

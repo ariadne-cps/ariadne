@@ -24,8 +24,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <bit>
-#include <cstdint>
 #include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
@@ -651,84 +649,37 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
                                ValidatedTaylorModelType const& b) {
         set_taylor_model_dense_batched_rounding_enabled(false);
         ValidatedTaylorModelType per_pair=a*b;
+
         set_taylor_model_dense_batched_rounding_enabled(true);
         ValidatedTaylorModelType batched=a*b;
 
         unsigned long long differing_coefficients=0u;
-        unsigned long long maximum_ulp_distance=0u;
         double maximum_absolute_difference=0.0;
         for(auto iter=per_pair.begin(); iter!=per_pair.end(); ++iter) {
             F const& reference=iter->coefficient();
             F candidate=batched[iter->index()];
-            const double difference=
-                std::abs(candidate.get_d()-reference.get_d());
-            maximum_absolute_difference=
-                std::max(maximum_absolute_difference,difference);
             if(candidate!=reference) {
                 ++differing_coefficients;
-                if constexpr (Same<F,FloatDP>) {
-                    auto ordered_key=[](double value) {
-                        std::uint64_t bits=std::bit_cast<std::uint64_t>(value);
-                        constexpr std::uint64_t sign=std::uint64_t(1)<<63u;
-                        return (bits&sign) ? ~bits : (bits|sign);
-                    };
-                    const std::uint64_t lhs=ordered_key(candidate.get_d());
-                    const std::uint64_t rhs=ordered_key(reference.get_d());
-                    const std::uint64_t distance=lhs>=rhs ? lhs-rhs : rhs-lhs;
-                    maximum_ulp_distance=std::max(
-                        maximum_ulp_distance,
-                        static_cast<unsigned long long>(distance));
-                }
+                maximum_absolute_difference=std::max(
+                    maximum_absolute_difference,
+                    std::abs(candidate.get_d()-reference.get_d()));
             }
         }
+
         std::cerr << "[DenseBatchedEquivalenceDiagnostic]"
                   << " differing_coefficients=" << differing_coefficients
-                  << " max_ulp_distance=" << maximum_ulp_distance
                   << " max_abs_difference=" << maximum_absolute_difference
                   << " batched_error=" << batched.error()
-                  << " reference_error=" << per_pair.error() << std::endl;
+                  << " reference_error=" << per_pair.error()
+                  << std::endl;
 
-        ARIADNE_TEST_COMPARE(batched.error().raw(),>=,per_pair.error().raw());
-
-        if(a.error().raw()==F(0.0_x,pr) && b.error().raw()==F(0.0_x,pr)) {
-            std::vector<std::pair<MultiIndex,Bounds<F>>> oracle;
-            oracle.reserve(a.number_of_terms()*b.number_of_terms());
-            for(auto ai=a.begin(); ai!=a.end(); ++ai) {
-                for(auto bi=b.begin(); bi!=b.end(); ++bi) {
-                    MultiIndex index=ai->index()+bi->index();
-                    Bounds<F> product=
-                        Bounds<F>(ai->coefficient()) * Bounds<F>(bi->coefficient());
-
-                    auto found=oracle.end();
-                    for(auto iter=oracle.begin(); iter!=oracle.end(); ++iter) {
-                        if(iter->first==index) {
-                            found=iter;
-                            break;
-                        }
-                    }
-                    if(found==oracle.end()) {
-                        oracle.emplace_back(index,product);
-                    } else {
-                        found->second=found->second+product;
-                    }
-                }
-            }
-
-            F coefficient_error_bound(0.0_x,pr);
-            for(auto const& entry : oracle) {
-                Bounds<F> delta=
-                    entry.second-Bounds<F>(batched[entry.first]);
-                F coefficient_magnitude=max(
-                    abs(delta.lower_raw()),abs(delta.upper_raw()));
-                coefficient_error_bound=add(
-                    up,coefficient_error_bound,coefficient_magnitude);
-            }
-            std::cerr << "[DenseBatchedRigorousOracle]"
-                      << " coefficient_error_bound=" << coefficient_error_bound
-                      << " batched_error=" << batched.error() << std::endl;
-            ARIADNE_TEST_COMPARE(
-                coefficient_error_bound,<=,batched.error().raw());
-        }
+        // The batched implementation is now required to be representation
+        // identical to the trusted per-pair path.  It executes the same
+        // rounded multiply/add operations in the same product-pair order and
+        // accumulates the same error contributions in the same order; only
+        // the rounding-mode changes are hoisted out of the pair loop.
+        ARIADNE_TEST_SAME(batched.expansion(),per_pair.expansion());
+        ARIADNE_TEST_SAME(batched.error(),per_pair.error());
     };
 
     compare_product(

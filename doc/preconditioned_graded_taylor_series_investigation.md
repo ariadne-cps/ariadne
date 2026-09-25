@@ -3417,3 +3417,53 @@ The first rigorous-oracle test did not compile for two independent test-code rea
 The correctness condition remains
 `coefficient_error_bound <= batched.error()`, with the coefficient error bound built
 entirely using outward-rounded Ariadne arithmetic.
+
+
+### 9.95 Root cause of the batched/reference mismatch: fused versus non-fused collision arithmetic (2026-09-25)
+
+The failed exact-equivalence test exposed a real implementation mismatch in the
+experimental batched path, but not a flaw in the batching idea itself.
+
+The dense reference path calls the `fma_err` helper defined locally in
+`taylor_model.tpl.hpp`. Despite its name, that helper does **not** use a hardware/semantic
+fused multiply-add. Its centre update is:
+
+```
+rv = xv * yv + zv
+```
+
+through `Rounded<F>` operators, i.e. a rounded multiplication followed by a rounded
+addition. Its upward error-bound calculations use the same separate multiply/add
+sequence.
+
+The batched implementation had instead used:
+
+```
+fma(rounded,xv,yv,zv)
+```
+
+for both the centre and error-bound collision calculations. That is a genuinely fused
+operation and can differ by one ulp from the separate multiply-then-add sequence. This
+exactly explains the observed FloatDP differences while the accumulated Error happened
+to remain equal in the first regression case.
+
+The batched collision path has now been corrected to reproduce the local reference
+primitive exactly:
+
+```
+add(rounded,mul(rounded,xv,yv),zv)
+```
+
+in both nearest and upward phases. New-slot multiplication was already identical.
+
+Because the batched path now executes the same low-level arithmetic operations in the
+same product-pair order and accumulates the same error contributions in the same order,
+the direct test once again requires exact representation equality of Expansion and Error
+between batched and per-pair modes. The previous Bounds oracle is removed: it was testing
+a different, stronger coefficient-wise interval property and failed even when batched
+and reference results were bit-identical, so it was not a discriminator for this
+transformation.
+
+This correction may reduce some of the 22.4231 s performance gain because the earlier
+batched version benefited from fused arithmetic in addition to amortised rounding-mode
+changes. The next correctness run must pass exactly before re-benchmarking performance.

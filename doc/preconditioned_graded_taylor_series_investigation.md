@@ -4951,3 +4951,43 @@ changes to its accumulation strategy. The next performance work should either:
 Given the limited ceiling of cleanup alone and the representation-order constraint, the
 recommended next target is carried-state/flowpipe composition rather than further
 redesigning Differential multiplication.
+
+
+### 9.137 Close Differential redesign and move to carried composition (2026-09-25)
+
+The direct-accumulation and stable-order experiments are rejected.  The temporary
+per-instruction / per-convolution / Differential-multiplication profilers are removed and
+`graded_flow_iterate` is restored to the normal
+`Ariadne::compute_procedure(...)` evaluator.
+
+This closes the current Differential-multiplication redesign track: the bottleneck is
+real, but exact representation preservation is strongly coupled to the existing
+append + non-stable sort + combine ordering.  Further work there should be limited to
+low-risk implementation details unless a stronger reason appears.
+
+The next major target is the carried-state composition block.  Existing cumulative
+timings show that flowpipe/endpoint/state composition together consume several seconds
+per 2000-step Van der Pol run.  A lightweight shape profiler is added at the existing
+50-step reporting cadence:
+
+```
+[CarriedCompositionShapeProfile]
+local_flow_nnz=...
+arguments_nnz=...
+flowpipe_nnz=...
+local_endpoint_nnz=...
+incoming_state_nnz=...
+evolved_nnz=...
+local_transition_nnz=...
+next_state_nnz=...
+```
+
+The purpose is to correlate composition time with Taylor-model size growth and identify
+which of the three compositions is structurally responsible for the cost.  No arithmetic
+or enclosure path is changed.
+
+This is the last remaining *major, clean* optimisation block currently identified.
+It is not necessarily the final possible optimisation: derivative materialisation,
+centre flow-function conversion, and lower-level allocation/sort costs still leave
+smaller opportunities, but they are expected to have lower return or higher semantic
+risk than carried-state composition.

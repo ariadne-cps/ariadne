@@ -26,7 +26,6 @@
 #include "config.hpp"
 
 #include <iomanip>
-#include <map>
 
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
@@ -635,383 +634,8 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 }
 
 
-ValidatedDifferential row_merge_validated_differential_mul(
-        const ValidatedDifferential& x,
-        const ValidatedDifferential& y)
-{
-    typedef ValidatedDifferential::ConstIterator ConstIterator;
-    ARIADNE_ASSERT_MSG(
-        x.argument_size()==y.argument_size(),
-        "x="<<x<<" y="<<y);
-
-    DegreeType const degree=
-        x.degree()<y.degree() ? x.degree() : y.degree();
-
-    struct Term {
-        MultiIndex index;
-        FloatDPBounds coefficient;
-        SizeType sequence;
-        Term(MultiIndex const& a, FloatDPBounds const& c, SizeType s)
-            : index(a), coefficient(c), sequence(s) {}
-    };
-
-    std::vector<Term> terms;
-    SizeType sequence=0u;
-    for(ConstIterator xiter=x.expansion().begin();
-        xiter!=x.expansion().end(); ++xiter)
-    {
-        if(xiter->index().degree()>degree) { break; }
-        for(ConstIterator yiter=y.expansion().begin();
-            yiter!=y.expansion().end(); ++yiter)
-        {
-            if(xiter->index().degree()+yiter->index().degree()>degree) {
-                break;
-            }
-            terms.emplace_back(
-                xiter->index()+yiter->index(),
-                xiter->coefficient()*yiter->coefficient(),
-                sequence++);
-        }
-    }
-
-    // Preserve the original append order for equal MultiIndices. This is the
-    // order a stable graded sort would expose to combine_terms().
-    std::stable_sort(
-        terms.begin(),terms.end(),
-        [](Term const& a, Term const& b) {
-            return graded_less(a.index,b.index);
-        });
-
-    ValidatedDifferential r(
-        x.argument_size(),degree,
-        mul(x.zero_coefficient(),y.zero_coefficient()));
-    r.expansion().reserve(terms.size());
-    for(auto const& term : terms) {
-        r.expansion().append(term.index,term.coefficient);
-    }
-    r.expansion().combine_terms();
-    return r;
-}
 
 
-ValidatedDifferential direct_accumulated_validated_differential_mul(
-        const ValidatedDifferential& x,
-        const ValidatedDifferential& y)
-{
-    typedef ValidatedDifferential::ConstIterator ConstIterator;
-    ARIADNE_ASSERT_MSG(
-        x.argument_size()==y.argument_size(),
-        "x="<<x<<" y="<<y);
-
-    DegreeType const degree=
-        x.degree()<y.degree() ? x.degree() : y.degree();
-
-    std::map<MultiIndex,FloatDPBounds,GradedLess> accumulated;
-    for(ConstIterator xiter=x.expansion().begin();
-        xiter!=x.expansion().end(); ++xiter)
-    {
-        if(xiter->index().degree()>degree) { break; }
-        for(ConstIterator yiter=y.expansion().begin();
-            yiter!=y.expansion().end(); ++yiter)
-        {
-            if(xiter->index().degree()+yiter->index().degree()>degree) {
-                break;
-            }
-            MultiIndex const a=xiter->index()+yiter->index();
-            FloatDPBounds const coef=
-                xiter->coefficient()*yiter->coefficient();
-            auto const inserted=accumulated.emplace(a,coef);
-            if(!inserted.second) {
-                inserted.first->second+=coef;
-            }
-        }
-    }
-
-    ValidatedDifferential r(
-        x.argument_size(),degree,
-        mul(x.zero_coefficient(),y.zero_coefficient()));
-    r.expansion().reserve(accumulated.size());
-    for(auto const& term : accumulated) {
-        r.expansion().append(term.first,term.second);
-    }
-    return r;
-}
-
-
-ValidatedDifferential profiled_validated_differential_mul(
-        const ValidatedDifferential& x,
-        const ValidatedDifferential& y,
-        DegreeType temporal_degree)
-{
-    typedef ValidatedDifferential::ConstIterator ConstIterator;
-
-    static double generation_seconds[64]={};
-    static double cleanup_seconds[64]={};
-    static SizeType generated_pairs[64]={};
-    static SizeType result_nonzeros[64]={};
-    static SizeType calls[64]={};
-    static SizeType total_calls=0u;
-
-    ARIADNE_ASSERT_MSG(
-        x.argument_size()==y.argument_size(),
-        "x="<<x<<" y="<<y);
-
-    ValidatedDifferential r(
-        x.argument_size(),
-        x.degree()<y.degree() ? x.degree() : y.degree(),
-        mul(x.zero_coefficient(),y.zero_coefficient()));
-
-    MultiIndex a(x.argument_size());
-    FloatDPBounds coef(x.zero_coefficient()*y.zero_coefficient());
-
-    SizeType pairs=0u;
-    Stopwatch<Microseconds> generation_stopwatch;
-    for(ConstIterator xiter=x.expansion().begin();
-        xiter!=x.expansion().end(); ++xiter)
-    {
-        if(xiter->index().degree()>r.degree()) { break; }
-        for(ConstIterator yiter=y.expansion().begin();
-            yiter!=y.expansion().end(); ++yiter)
-        {
-            if(xiter->index().degree()+yiter->index().degree()>r.degree()) {
-                break;
-            }
-            a=xiter->index()+yiter->index();
-            coef=xiter->coefficient()*yiter->coefficient();
-            r.expansion().append(a,coef);
-            ++pairs;
-        }
-    }
-    generation_stopwatch.click();
-
-    Stopwatch<Microseconds> cleanup_stopwatch;
-    r.cleanup();
-    cleanup_stopwatch.click();
-
-    static SizeType direct_accumulation_ab_calls=0u;
-    static SizeType direct_accumulation_ab_equal=0u;
-    static double direct_accumulation_ab_seconds=0.0;
-    static double reference_generation_cleanup_seconds=0.0;
-    static SizeType stable_order_ab_equal=0u;
-    static double stable_order_ab_seconds=0.0;
-    if(direct_accumulation_ab_calls<5000u) {
-        Stopwatch<Microseconds> direct_accumulation_stopwatch;
-        ValidatedDifferential candidate=
-            direct_accumulated_validated_differential_mul(x,y);
-        direct_accumulation_stopwatch.click();
-        if(same(candidate.expansion(),r.expansion())) {
-            ++direct_accumulation_ab_equal;
-        }
-
-        Stopwatch<Microseconds> stable_order_stopwatch;
-        ValidatedDifferential stable_candidate=
-            row_merge_validated_differential_mul(x,y);
-        stable_order_stopwatch.click();
-        if(same(stable_candidate.expansion(),r.expansion())) {
-            ++stable_order_ab_equal;
-        }
-        stable_order_ab_seconds+=stable_order_stopwatch.elapsed_seconds();
-        direct_accumulation_ab_seconds+=
-            direct_accumulation_stopwatch.elapsed_seconds();
-        reference_generation_cleanup_seconds+=
-            generation_stopwatch.elapsed_seconds()
-            +cleanup_stopwatch.elapsed_seconds();
-        ++direct_accumulation_ab_calls;
-        if(direct_accumulation_ab_calls==5000u) {
-            std::cerr << "[DirectAccumulationDifferentialAB]"
-                      << " calls=" << direct_accumulation_ab_calls
-                      << " equal_expansions="
-                      << direct_accumulation_ab_equal
-                      << " candidate_seconds="
-                      << direct_accumulation_ab_seconds
-                      << " reference_seconds="
-                      << reference_generation_cleanup_seconds
-                      << " stable_order_equal_expansions="
-                      << stable_order_ab_equal
-                      << " stable_order_seconds="
-                      << stable_order_ab_seconds
-                      << std::endl;
-        }
-    }
-
-    SizeType const d=temporal_degree<64u ? temporal_degree : 0u;
-    generation_seconds[d]+=generation_stopwatch.elapsed_seconds();
-    cleanup_seconds[d]+=cleanup_stopwatch.elapsed_seconds();
-    generated_pairs[d]+=pairs;
-    result_nonzeros[d]+=r.expansion().number_of_nonzeros();
-    ++calls[d];
-    ++total_calls;
-
-    if(total_calls%50000u==0u) {
-        std::cerr << "[ValidatedDifferentialMulProfile]"
-                  << " calls=" << total_calls;
-        for(SizeType k=1u; k!=64u; ++k) {
-            if(calls[k]==0u) { continue; }
-            std::cerr << " degree" << k
-                      << "_calls=" << calls[k]
-                      << " degree" << k
-                      << "_generation_seconds=" << generation_seconds[k]
-                      << " degree" << k
-                      << "_cleanup_seconds=" << cleanup_seconds[k]
-                      << " degree" << k
-                      << "_generated_pairs=" << generated_pairs[k]
-                      << " degree" << k
-                      << "_result_nonzeros=" << result_nonzeros[k];
-        }
-        std::cerr << std::endl;
-    }
-
-    return r;
-}
-
-
-Void profiled_compute_graded_procedure(
-        const Vector<ValidatedProcedure>& p,
-        Vector<GradedValidatedDifferential>& r,
-        List<GradedValidatedDifferential>& v,
-        const Vector<GradedValidatedDifferential>& x,
-        DegreeType degree)
-{
-    static double operator_seconds[64][6] = {};
-    static SizeType operator_calls[64][6] = {};
-    static double mul_term_seconds[64][64] = {};
-    static SizeType mul_term_calls[64][64] = {};
-    static SizeType profiled_calls = 0u;
-
-    const List<ValidatedNumber>& constants=p._constants;
-    ARIADNE_ASSERT(v.size()==p._instructions.size());
-
-    auto category = [](OperatorCode code) -> SizeType {
-        switch(code) {
-            case OperatorCode::CNST: return 0u;
-            case OperatorCode::VAR: return 1u;
-            case OperatorCode::ADD:
-            case OperatorCode::SUB:
-            case OperatorCode::POS:
-            case OperatorCode::NEG:
-            case OperatorCode::HLF:
-                return 2u;
-            case OperatorCode::MUL: return 3u;
-            case OperatorCode::SQR: return 4u;
-            default: return 5u;
-        }
-    };
-
-    for(SizeType j=0u; j!=p._instructions.size(); ++j) {
-        Stopwatch<Microseconds> instruction_stopwatch;
-        struct Visitor {
-            SizeType j;
-            List<GradedValidatedDifferential>& v;
-            const List<ValidatedNumber>& constants;
-            const Vector<GradedValidatedDifferential>& x;
-            double (*mul_term_seconds)[64];
-            SizeType (*mul_term_calls)[64];
-
-            Void operator()(const ConstantProcedureInstruction& pri) {
-                v[j]=constants[pri._val];
-            }
-            Void operator()(const IndexProcedureInstruction& pri) {
-                v[j]=x[pri._ind];
-            }
-            Void operator()(const UnaryProcedureInstruction& pri) {
-                pri._op.accept([&](auto op){ v[j]=op(v[pri._arg]); });
-            }
-            Void operator()(const BinaryProcedureInstruction& pri) {
-                if(pri._op.code()==OperatorCode::MUL) {
-                    GradedValidatedDifferential& out=v[j];
-                    GradedValidatedDifferential const& a1=v[pri._arg1];
-                    GradedValidatedDifferential const& a2=v[pri._arg2];
-                    ARIADNE_ASSERT_MSG(
-                        out.size()+1u==a1.size(),
-                        "out="<<out<<", a1="<<a1<<", a2="<<a2);
-                    ARIADNE_ASSERT_MSG(
-                        out.size()+1u==a2.size(),
-                        "out="<<out<<", a1="<<a1<<", a2="<<a2);
-                    ARIADNE_ASSERT(compatible(a1[0],a2[0]));
-                    out.append(create(a1[0]));
-                    DegreeType const d=out.degree();
-                    for(DegreeType i=0u; i<=d; ++i) {
-                        Stopwatch<Microseconds> term_stopwatch;
-                        out[d]+=profiled_validated_differential_mul(
-                            a1[i],a2[cast_sign<DegreeType>(d-i)],d);
-                        term_stopwatch.click();
-                        if(d<64u && i<64u) {
-                            mul_term_seconds[d][i]+=
-                                term_stopwatch.elapsed_seconds();
-                            ++mul_term_calls[d][i];
-                        }
-                    }
-                } else {
-                    pri._op.accept([&](auto op){
-                        v[j]=op(v[pri._arg1],v[pri._arg2]);
-                    });
-                }
-            }
-            Void operator()(const GradedProcedureInstruction& pri) {
-                pri._op.accept([&](auto op){
-                    v[j]=op(v[pri._arg],pri._num);
-                });
-            }
-            Void operator()(const ScalarProcedureInstruction& pri) {
-                pri._op.accept([&](auto op){
-                    v[j]=op(constants[pri._arg1],v[pri._arg2]);
-                });
-            }
-        };
-        p._instructions[j].accept(
-            Visitor{j,v,constants,x,mul_term_seconds,mul_term_calls});
-        instruction_stopwatch.click();
-
-        const SizeType d=degree<64u ? degree : 0u;
-        const SizeType cat=category(p._instructions[j].op().code());
-        operator_seconds[d][cat]+=instruction_stopwatch.elapsed_seconds();
-        ++operator_calls[d][cat];
-    }
-
-    r=Vector<GradedValidatedDifferential>(
-        p._results.size(),
-        [&v,&p](SizeType i){return v[p._results[i]];},
-        x.element_characteristics());
-
-    ++profiled_calls;
-    if(profiled_calls%1000u==0u) {
-        static const char* names[6]={
-            "const","var","linear","mul","sqr","other"
-        };
-        std::cerr << "[GradedProcedureOperatorProfile]"
-                  << " calls=" << profiled_calls;
-        for(SizeType d=1u; d!=64u; ++d) {
-            bool any=false;
-            for(SizeType cat=0u; cat!=6u; ++cat) {
-                any=any || operator_calls[d][cat]!=0u;
-            }
-            if(!any) { continue; }
-            for(SizeType cat=0u; cat!=6u; ++cat) {
-                if(operator_calls[d][cat]==0u) { continue; }
-                std::cerr << " degree" << d << "_" << names[cat]
-                          << "_calls=" << operator_calls[d][cat]
-                          << " degree" << d << "_" << names[cat]
-                          << "_seconds=" << operator_seconds[d][cat];
-            }
-        }
-        std::cerr << std::endl;
-
-        std::cerr << "[GradedMulConvolutionProfile]"
-                  << " calls=" << profiled_calls;
-        for(SizeType d=1u; d!=64u; ++d) {
-            for(SizeType i=0u; i<=d && i<64u; ++i) {
-                if(mul_term_calls[d][i]==0u) { continue; }
-                std::cerr << " degree" << d
-                          << "_term" << i
-                          << "_calls=" << mul_term_calls[d][i]
-                          << " degree" << d
-                          << "_term" << i
-                          << "_seconds=" << mul_term_seconds[d][i];
-            }
-        }
-        std::cerr << std::endl;
-    }
-}
 
 
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
@@ -1028,8 +652,7 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
     ValidatedDifferential z=nul(yta[0][0]);
 
     Stopwatch<Microseconds> graded_iterate_procedure_stopwatch;
-    profiled_compute_graded_procedure(
-        p,fy,tmp,yta,diagnostic_iteration);
+    Ariadne::compute_procedure(p,fy,tmp,yta);
     graded_iterate_procedure_stopwatch.click();
 
     // Temporary diagnostic for the same-state second-step comparison.
@@ -3208,6 +2831,17 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         cast_exact_box(widen(next_normalised_mapping.range()));
     state_range_stopwatch.click();
 
+    auto patch_nnz=[](ValidatedVectorMultivariateFunctionPatch const& patch) {
+        auto const& concrete=
+            dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(
+                patch.reference());
+        SizeType nnz=0u;
+        for(SizeType i=0u; i!=concrete.size(); ++i) {
+            nnz+=concrete[i].number_of_nonzeros();
+        }
+        return nnz;
+    };
+
     static SizeType carried_profile_steps=0u;
     static double carried_flowpipe_compose_seconds=0.0;
     static double carried_endpoint_compose_seconds=0.0;
@@ -3229,6 +2863,18 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                   << " precondition_seconds=" << carried_precondition_seconds
                   << " state_compose_seconds=" << carried_state_compose_seconds
                   << " state_range_seconds=" << carried_state_range_seconds
+                  << std::endl;
+        std::cerr << "[CarriedCompositionShapeProfile]"
+                  << " steps=" << carried_profile_steps
+                  << " local_flow_nnz=" << patch_nnz(physical_local_flow)
+                  << " arguments_nnz=" << patch_nnz(arguments)
+                  << " flowpipe_nnz=" << patch_nnz(flowpipe_mapping)
+                  << " local_endpoint_nnz=" << patch_nnz(local_endpoint)
+                  << " incoming_state_nnz=" << patch_nnz(state.normalised_mapping())
+                  << " evolved_nnz=" << patch_nnz(evolved_mapping)
+                  << " local_transition_nnz="
+                  << patch_nnz(local_transition.normalised_mapping())
+                  << " next_state_nnz=" << patch_nnz(next_normalised_mapping)
                   << std::endl;
     }
 

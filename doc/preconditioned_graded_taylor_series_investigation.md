@@ -3296,3 +3296,45 @@ error = add(rounded,error,hlf(add(rounded,ml,u)))
 This is applied in both the new-slot and collision branches of the second (upward)
 pass. No arithmetic formula or ordering has changed; this commit only removes the
 invalid dependency on an implementation-local helper.
+
+
+### 9.91 Batched-rounding dense result (2026-09-25)
+
+The two-pass raw-float batched-rounding implementation produced the largest dense-kernel
+speedup so far:
+
+```
+per-pair validated fma baseline   34.7261--34.8241 s
+batched nearest/upward passes     22.4231 s
+final error before                8.5378288508794491e-8
+final error after                 8.5378223539938479e-8
+final radius                      0.0403
+reach sets                        2000
+```
+
+This is approximately a 35.5% runtime reduction relative to the 34.7261 s fused baseline,
+and about a 59.6% reduction relative to the ~55.5 s first final-sweep implementation.
+The reported final error is slightly smaller by about 6.50e-14 absolute; there is no
+accuracy regression in this benchmark.
+
+The composition timings collapse correspondingly:
+`flowpipe_compose_seconds=3.98765`,
+`endpoint_compose_seconds=1.69752`, and
+`state_compose_seconds=1.60962`.
+
+The improvement is substantially larger than the ~6.25 s estimate from the isolated
+`fesetround` probe. The batched implementation therefore benefits not only from reducing
+rounding-mode switches from O(product-pairs) to O(_ifma calls), but also from separating
+the centre and error-bound arithmetic into uniform rounding phases. This likely improves
+the generated hot loops and avoids repeated helper/rounding-control overhead.
+
+Correctness rationale remains the one established in section 9.89: the nearest centre
+coefficient recurrence is preserved in pair order; every collision stores its exact
+pre-update centre value; the upward pass reconstructs the same `u` and `ml` inputs
+used by `mul_err`/`fma_err`; and roundoff contributions are accumulated in the same
+pair order. The small final-error difference is consistent with changed execution
+context/rounding boundaries but should still be covered by dedicated equivalence tests
+before this optimisation is considered production-ready.
+
+The new performance baseline for the experimental QR-preconditioned dense integrator at
+cutoff `3e-14` is 22.4231 s.

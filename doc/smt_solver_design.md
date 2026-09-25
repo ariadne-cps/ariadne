@@ -80,6 +80,47 @@ The solver currently exposes three outcomes:
   used deliberately for exhausted box budgets and terminal boxes that cannot be
   certified; it must never be silently promoted to `EPSILON_SAT`.
 
+### Completeness audit and UNKNOWN taxonomy
+
+Functional completeness now takes priority over further performance work.
+Optimizations already identified (per-box evaluation reuse, broader DAG reuse,
+adaptive contractor scheduling) remain backlog items unless they require an
+architectural decision that would otherwise force a later redesign.
+
+The current implementation has exactly two numerical sources of `UNKNOWN`
+that propagate to the public result:
+
+1. **Explicit resource exhaustion.** Sequential and parallel conjunction search
+   return `UNKNOWN` when the configured global box-processing limit is reached.
+   This is intentional and is not an algorithmic completeness defect.
+2. **Terminal uncertified box.** After original-domain reduction, whole-box
+   epsilon certification, deterministic witness candidates and optional
+   candidate search have all failed, `_process_box` returns `UNKNOWN` when
+   `Box::split` cannot produce distinct children. This is the primary
+   algorithmic completeness gap. The statistics
+   `non_splittable_uncertified_boxes` /
+   `non_splittable_epsilon_overlap_boxes` identify this state.
+
+Boolean/DPLL theory search does not introduce an independent third source:
+an `UNKNOWN` returned by a conjunction theory solve is recorded in
+`_theory_unknown_seen`; Boolean search may continue through other assignments,
+and the final Boolean result is `UNKNOWN` only if no witness is found and at
+least one explored theory branch inherited one of the two numerical causes
+above.
+
+For the declared bounded QF_NRA target, the next completeness milestone is
+therefore to eliminate the **terminal uncertified box** as an algorithmic
+outcome for the supported function/relation fragment. Resource-limited
+`UNKNOWN` remains valid by contract.
+
+The terminal state must not be repaired by treating epsilon overlap as
+satisfaction. A sound replacement needs a validated terminal decision rule:
+either prove original infeasibility (`UNSAT` for that box) or construct and
+validate an epsilon witness. If neither is possible for a function class, that
+class is not yet part of the delta-complete fragment and must be documented as
+such rather than silently certified.
+
+
 ## Main implementation
 
 The implementation is split across:
@@ -386,8 +427,10 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. improve epsilon-SMT completeness and pruning/propagation strength toward the
-   long-term dReal-like goal;
+1. eliminate algorithmic `UNKNOWN` from non-splittable uncertified boxes on
+   the declared bounded QF_NRA fragment, while retaining explicit resource-limit
+   `UNKNOWN`; then strengthen pruning/propagation as required to establish the
+   corresponding delta-complete progress argument;
 2. preserve deterministic, nontrivial tests for every introduced behavior;
 3. after every green functional test run, regenerate coverage and restore 100%
    function and branch coverage before starting the next feature tranche;

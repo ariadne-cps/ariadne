@@ -4700,3 +4700,39 @@ diagnostic only.  The objective is to determine whether cost is concentrated in 
 products (where both operands have substantial graded degree/density) or is broadly
 uniform.  That result will decide whether the next optimisation belongs in
 `Differential` multiplication or in a special-case graded product path.
+
+
+### 9.130 Graded MUL convolution cost is concentrated in interior Differential products (2026-09-25)
+
+The convolution-term diagnostic completes all 2000 Van der Pol reach sets with unchanged
+final error, radius, and reach-set count. Its wall time is 20.9221 s and remains
+diagnostic.
+
+At 10,000 Procedure calls the degree-4 convolution terms cost:
+
+```
+i=0  0.252261 s
+i=1  0.541796 s
+i=2  0.611675 s
+i=3  0.478549 s
+i=4  0.176883 s
+```
+
+The interior terms i=1..3 account for about 79% of the measured degree-4 convolution
+work. The same pattern is already visible at degree 3: the two interior products cost
+about 1.042 s versus about 0.433 s for the two edge products.
+
+This rules out a simple edge-term specialisation as the main optimisation. The expensive
+work occurs when both temporal coefficients carry substantial Differential expansions.
+The next target therefore moves below Graded convolution into multiplication of
+ValidatedDifferential objects.
+
+The per-term stopwatch totals are intentionally larger than the outer MUL timer because
+the diagnostic inserts a stopwatch around every convolution product; only their relative
+distribution is used. The existing graded MUL remains append-only and its arithmetic
+order is unchanged.
+
+Next experiment: inspect/profile Differential multiplication itself, separating expansion
+pair generation/accumulation from coefficient interval arithmetic and truncation. The
+goal is to determine whether the dominant cost is combinatorial monomial accumulation or
+validated coefficient arithmetic before attempting a production optimisation.

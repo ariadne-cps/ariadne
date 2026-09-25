@@ -2370,6 +2370,12 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 static double direct_defect_max_mag_ratio=0.0;
                 static double direct_defect_max_abs_mag_difference=0.0;
                 ++direct_defect_compare_calls;
+                static double defect_core_max_mag_ratio=0.0;
+                static double direct_to_core_max_mag_ratio=0.0;
+                static double defect_error_sum_seconds=0.0;
+                static double maximum_source_error_sum=0.0;
+                static double maximum_defect_model_error=0.0;
+                Stopwatch<Microseconds> defect_error_decomposition_stopwatch;
                 for(SizeType i=0u; i!=n; ++i) {
                     auto recurrence_mag=mag(defect_ranges[i]);
                     auto direct_mag=mag(centre_result.direct_defect_range[i]);
@@ -2377,6 +2383,46 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                         recurrence_mag.raw().get_d();
                     const double direct_mag_d=
                         direct_mag.raw().get_d();
+
+                    // Strip only the Taylor-model Error terms while retaining
+                    // exactly the stored polynomial coefficients.  This
+                    // isolates the polynomial-core contribution to the range
+                    // of dP/dt-g(P) from the remainder attached independently
+                    // to the two materialised patches.
+                    ValidatedTaylorModelDP derivative_model=
+                        derivative(centre_polynomial.get(i),time_index).model();
+                    ValidatedTaylorModelDP field_model=
+                        recurrence_field.get(i).model();
+                    const double source_error_sum=
+                        derivative_model.error().raw().get_d()
+                        +field_model.error().raw().get_d();
+                    maximum_source_error_sum=std::max(
+                        maximum_source_error_sum,source_error_sum);
+
+                    ValidatedTaylorModelDP derivative_core=derivative_model;
+                    ValidatedTaylorModelDP field_core=field_model;
+                    derivative_core.clobber();
+                    field_core.clobber();
+                    ValidatedTaylorModelDP core_defect=
+                        derivative_core-field_core;
+                    const double core_mag_d=
+                        mag(core_defect.range()).raw().get_d();
+
+                    ValidatedTaylorModelDP materialised_defect_model=
+                        defect.get(i).model();
+                    maximum_defect_model_error=std::max(
+                        maximum_defect_model_error,
+                        materialised_defect_model.error().raw().get_d());
+
+                    if(core_mag_d>0.0) {
+                        defect_core_max_mag_ratio=std::max(
+                            defect_core_max_mag_ratio,
+                            recurrence_mag_d/core_mag_d);
+                        direct_to_core_max_mag_ratio=std::max(
+                            direct_to_core_max_mag_ratio,
+                            direct_mag_d/core_mag_d);
+                    }
+
                     ++direct_defect_components;
                     if(direct_mag_d>=recurrence_mag_d) {
                         ++direct_defect_conservative_components;
@@ -2395,6 +2441,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                         direct_defect_max_abs_mag_difference,
                         std::abs(direct_mag_d-recurrence_mag_d));
                 }
+                defect_error_decomposition_stopwatch.click();
+                defect_error_sum_seconds+=
+                    defect_error_decomposition_stopwatch.elapsed_seconds();
+
                 if(!this->diagnostics()
                     && direct_defect_compare_calls%100u==0u)
                 {
@@ -2411,6 +2461,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                               << direct_defect_max_mag_ratio
                               << " max_abs_mag_difference="
                               << direct_defect_max_abs_mag_difference
+                              << " defect_core_max_mag_ratio="
+                              << defect_core_max_mag_ratio
+                              << " direct_to_core_max_mag_ratio="
+                              << direct_to_core_max_mag_ratio
+                              << " max_source_error_sum="
+                              << maximum_source_error_sum
+                              << " max_defect_model_error="
+                              << maximum_defect_model_error
+                              << " decomposition_seconds="
+                              << defect_error_sum_seconds
                               << std::endl;
                 }
 

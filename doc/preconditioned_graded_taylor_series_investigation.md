@@ -3621,3 +3621,31 @@ returns `Error<FloatDP>`, not a raw `FloatDP`. The diagnostic conversion now use
 
 This affects diagnostic reporting only; the production Gronwall path and all validated
 arithmetic remain unchanged.
+
+
+### 9.101 Decompose the patch residual into polynomial core and Taylor-model Error (2026-09-25)
+
+The direct Differential residual is systematically much smaller than the production
+patch residual: all 4000 compared components were smaller, with a maximum observed
+direct/production magnitude ratio of about 0.0696. This means it cannot simply replace
+the production range without a separate correctness argument.
+
+The next diagnostic isolates where the gap is introduced. For each residual component
+the code now materialises the same derivative and recurrence-field Taylor models used by
+the production path, records their attached Errors, copies them, calls `clobber()` on
+the copies to remove only those Error terms, and subtracts the resulting polynomial
+cores. It then records:
+
+- the ratio between the production residual magnitude and the error-free core residual;
+- the ratio between the direct Differential residual and that same core residual;
+- the maximum sum of the two source Taylor-model Errors;
+- the maximum Error attached to the materialised defect model itself;
+- the cumulative cost of this diagnostic decomposition.
+
+The production Gronwall remainder is still computed from the original
+`defect.range()`; this instrumentation does not alter integration semantics.
+
+If the direct residual tracks the clobbered polynomial core while the production
+residual is much larger, the excess is attributable to patch materialisation/sweeping
+Errors rather than to a different polynomial defect. That would identify the exact
+piece that must be certified directly before patch-level materialisation can be removed.

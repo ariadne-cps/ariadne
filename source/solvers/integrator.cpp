@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include <iomanip>
+#include <map>
 
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
@@ -634,6 +635,50 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 }
 
 
+ValidatedDifferential direct_accumulated_validated_differential_mul(
+        const ValidatedDifferential& x,
+        const ValidatedDifferential& y)
+{
+    typedef ValidatedDifferential::ConstIterator ConstIterator;
+    ARIADNE_ASSERT_MSG(
+        x.argument_size()==y.argument_size(),
+        "x="<<x<<" y="<<y);
+
+    DegreeType const degree=
+        x.degree()<y.degree() ? x.degree() : y.degree();
+
+    std::map<MultiIndex,FloatDPBounds,GradedLess> accumulated;
+    for(ConstIterator xiter=x.expansion().begin();
+        xiter!=x.expansion().end(); ++xiter)
+    {
+        if(xiter->index().degree()>degree) { break; }
+        for(ConstIterator yiter=y.expansion().begin();
+            yiter!=y.expansion().end(); ++yiter)
+        {
+            if(xiter->index().degree()+yiter->index().degree()>degree) {
+                break;
+            }
+            MultiIndex const a=xiter->index()+yiter->index();
+            FloatDPBounds const coef=
+                xiter->coefficient()*yiter->coefficient();
+            auto const inserted=accumulated.emplace(a,coef);
+            if(!inserted.second) {
+                inserted.first->second+=coef;
+            }
+        }
+    }
+
+    ValidatedDifferential r(
+        x.argument_size(),degree,
+        mul(x.zero_coefficient(),y.zero_coefficient()));
+    r.expansion().reserve(accumulated.size());
+    for(auto const& term : accumulated) {
+        r.expansion().append(term.first,term.second);
+    }
+    return r;
+}
+
+
 ValidatedDifferential profiled_validated_differential_mul(
         const ValidatedDifferential& x,
         const ValidatedDifferential& y,
@@ -683,6 +728,37 @@ ValidatedDifferential profiled_validated_differential_mul(
     Stopwatch<Microseconds> cleanup_stopwatch;
     r.cleanup();
     cleanup_stopwatch.click();
+
+    static SizeType direct_accumulation_ab_calls=0u;
+    static SizeType direct_accumulation_ab_equal=0u;
+    static double direct_accumulation_ab_seconds=0.0;
+    static double reference_generation_cleanup_seconds=0.0;
+    if(direct_accumulation_ab_calls<5000u) {
+        Stopwatch<Microseconds> direct_accumulation_stopwatch;
+        ValidatedDifferential candidate=
+            direct_accumulated_validated_differential_mul(x,y);
+        direct_accumulation_stopwatch.click();
+        if(same(candidate.expansion(),r.expansion())) {
+            ++direct_accumulation_ab_equal;
+        }
+        direct_accumulation_ab_seconds+=
+            direct_accumulation_stopwatch.elapsed_seconds();
+        reference_generation_cleanup_seconds+=
+            generation_stopwatch.elapsed_seconds()
+            +cleanup_stopwatch.elapsed_seconds();
+        ++direct_accumulation_ab_calls;
+        if(direct_accumulation_ab_calls==5000u) {
+            std::cerr << "[DirectAccumulationDifferentialAB]"
+                      << " calls=" << direct_accumulation_ab_calls
+                      << " equal_expansions="
+                      << direct_accumulation_ab_equal
+                      << " candidate_seconds="
+                      << direct_accumulation_ab_seconds
+                      << " reference_seconds="
+                      << reference_generation_cleanup_seconds
+                      << std::endl;
+        }
+    }
 
     SizeType const d=temporal_degree<64u ? temporal_degree : 0u;
     generation_seconds[d]+=generation_stopwatch.elapsed_seconds();

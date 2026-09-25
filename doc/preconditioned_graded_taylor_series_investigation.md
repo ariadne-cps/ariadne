@@ -4825,3 +4825,32 @@ graded Procedure path. Compare the resulting Differential expansions coefficient
 coefficient against the current append+cleanup implementation, and measure its cost.
 If exact equality fails only because of accumulation order, quantify the enclosure
 difference before deciding whether a semantics-preserving ordering strategy is possible.
+
+
+### 9.133 A/B direct accumulation for Differential multiplication (2026-09-25)
+
+The 9.132 profile shows a growing temporary-expansion amplification (about 4x at
+temporal degree 4) and a material cleanup cost. A first A/B prototype now replaces the
+append-all-then-sort/merge strategy with direct accumulation by MultiIndex in a
+`std::map<MultiIndex,FloatDPBounds,GradedLess>`.
+
+For the first 5000 profiled Differential products, the production/reference result is
+still computed by the existing append + cleanup path. The candidate is computed in
+parallel and compared by exact `Expansion::same_as` semantics.
+
+Marker:
+
+```
+[DirectAccumulationDifferentialAB]
+calls=5000
+equal_expansions=...
+candidate_seconds=...
+reference_seconds=...
+```
+
+This is intentionally only a feasibility test. Direct map accumulation changes the order
+in which equal-index coefficient products are summed, so exact equality is not assumed.
+If all 5000 expansions match and the candidate is faster, extend the A/B sample before
+production use. If exact equality fails, inspect the mismatch before considering any
+non-bit-equivalent optimisation. If the map candidate is slower, retain the result as
+evidence that avoiding cleanup alone is insufficient with an ordered-tree accumulator.

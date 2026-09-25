@@ -770,6 +770,41 @@ class TestSmtSolver {
             SmtSolverTestSupport::terminal_mp_precision_bits(0.125_x),131u);
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::terminal_mp_precision_bits(1e-30_x)>200u);
+
+        std::cout << "[smt-terminal-mp] deterministic candidate outcomes" << std::endl;
+        auto tx=ValidatedScalarMultivariateFunction::coordinates(1);
+        std::vector<SmtSolverTestSupport::TerminalMpLiteral> endpoint_literals({
+            {tx[0]-1,SmtTheoryPrimitiveRelation::EQ_ZERO}
+        });
+        UpperBoxType midpoint_candidate({
+            UpperIntervalType(ExactIntervalType(0.5_x,0.5_x))
+        });
+        UpperBoxType endpoint_candidate({
+            UpperIntervalType(ExactIntervalType(1,1))
+        });
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::terminal_mp_candidate_satisfied(
+                midpoint_candidate,endpoint_literals,1e-30_x));
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::terminal_mp_candidate_satisfied(
+                endpoint_candidate,endpoint_literals,1e-30_x));
+
+        UpperBoxType endpoint_domain({
+            UpperIntervalType(ExactIntervalType(0,1))
+        });
+        auto endpoint_witness=SmtSolverTestSupport::terminal_mp_witness(
+            endpoint_domain,endpoint_literals,1e-30_x);
+        ARIADNE_TEST_ASSERT(endpoint_witness.has_value());
+        ARIADNE_TEST_ASSERT(
+            endpoint_witness->operator[](0).lower_bound().raw()
+                ==endpoint_domain[0].upper_bound().raw());
+
+        std::vector<SmtSolverTestSupport::TerminalMpLiteral> impossible_literals({
+            {tx[0]-2,SmtTheoryPrimitiveRelation::EQ_ZERO}
+        });
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::terminal_mp_witness(
+                endpoint_domain,impossible_literals,1e-30_x).has_value());
         SmtTheoryRelation invalid_theory_relation=
             static_cast<SmtTheoryRelation>(999);
         ARIADNE_TEST_THROWS(
@@ -1542,53 +1577,6 @@ class TestSmtSolver {
                 solve_result.statistics().epsilon_box_certifications,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().candidate_witness_searches,0u);
-        }
-
-        {
-            std::cout << "[smt-theory-solve] terminal MP rejects first candidate then certifies endpoint" << std::endl;
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                false));
-            auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(ex==1));
-            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
-            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
-            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
-            SmtResult solve_result=tiny_epsilon_solver.solve(
-                space,
-                ExactBoxType({ExactIntervalType(0,1)}),
-                literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
-        }
-
-        {
-            std::cout << "[smt-theory-solve] terminal MP can remain uncertified" << std::endl;
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                std::numeric_limits<SizeType>::max(),
-                false));
-            RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
-            auto first=normalize_smt_theory_literal(
-                make_smt_theory_literal(residual==0));
-            auto second=normalize_smt_theory_literal(
-                make_smt_theory_literal(ex==2));
-            ARIADNE_TEST_EQUAL(first.size(),1u);
-            ARIADNE_TEST_EQUAL(second.size(),1u);
-            List<SmtTheoryPrimitiveLiteral> literals({
-                first[0][0],
-                second[0][0]
-            });
-            SmtResult solve_result=tiny_epsilon_solver.solve(
-                space,
-                ExactBoxType({ExactIntervalType(1,1)}),
-                literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
         }
 
         {

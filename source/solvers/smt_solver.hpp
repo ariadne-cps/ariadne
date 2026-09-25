@@ -360,6 +360,21 @@ Bool mp_epsilon_primitive_image_satisfied(
 
 SizeType terminal_mp_precision_bits(ExactDouble epsilon);
 
+struct TerminalMpLiteral {
+    ValidatedScalarMultivariateFunction function;
+    SmtTheoryPrimitiveRelation relation;
+};
+
+Bool terminal_mp_candidate_satisfied(
+    UpperBoxType const& candidate,
+    std::vector<TerminalMpLiteral> const& literals,
+    ExactDouble epsilon);
+
+std::optional<UpperBoxType> terminal_mp_witness(
+    UpperBoxType const& domain,
+    std::vector<TerminalMpLiteral> const& literals,
+    ExactDouble epsilon);
+
 Bool epsilon_theory_literal_infeasible(
     SmtSolver const& solver,
     RealSpace const& space,

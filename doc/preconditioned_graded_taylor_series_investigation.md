@@ -4141,3 +4141,36 @@ into the following phase costs before changing its algorithm:
 
 Instrument only phase boundaries. The 22.7361 s clean run remains the performance
 reference; any instrumented wall time is diagnostic only.
+
+
+### 9.114 Phase profile for the validated widened defect (2026-09-25)
+
+The 22.7361 s clean baseline leaves 2.6855 s in the validated widened-defect construction.
+Before changing that algorithm, the production path is instrumented only at phase
+boundaries.  The new cumulative marker is:
+
+```
+[WidenedDefectCostProfile]
+```
+
+It reports four mutually sequential phases:
+
+```
+derivative_materialise_seconds
+field_materialise_seconds
+subtract_seconds
+restrict_seconds
+```
+
+corresponding to:
+
+```
+make_taylor_function_model(dP/dt, widened_domain)
+make_taylor_function_model(g(P), widened_domain)
+wide_derivative - wide_field
+restriction(wide_defect, forward_domain)
+```
+
+No arithmetic, enclosure, cutoff, or step-selection semantics are changed.  The
+instrumented wall time is diagnostic only; the clean performance reference remains
+22.7361 s with final error 4.7221144502652554e-8.

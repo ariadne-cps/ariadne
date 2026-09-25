@@ -1139,19 +1139,59 @@ graded_series_centre_polynomial_step(
     Vector<ValidatedDifferential> derivative_dphi=derivative(dphi,n);
     ExactBoxType const wide_domain=join(domx,widt,doma);
     ExactBoxType const forward_domain=join(domx,domt,doma);
+
+    Stopwatch<Microseconds> defect_derivative_materialise_stopwatch;
     FlowStepTaylorModelType wide_derivative=
         make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
+    defect_derivative_materialise_stopwatch.click();
+
+    Stopwatch<Microseconds> defect_field_materialise_stopwatch;
     FlowStepTaylorModelType wide_field=
         make_taylor_function_model(
             recurrence_field_differential,wide_domain,sweeper);
+    defect_field_materialise_stopwatch.click();
+
+    Stopwatch<Microseconds> defect_subtract_stopwatch;
     FlowStepTaylorModelType wide_validated_defect=wide_derivative;
     for(SizeType i=0u; i!=n; ++i) {
         wide_validated_defect.model(i)=
             wide_derivative.model(i)-wide_field.model(i);
     }
+    defect_subtract_stopwatch.click();
+
+    Stopwatch<Microseconds> defect_restrict_stopwatch;
     FlowStepTaylorModelType defect=
         restriction(wide_validated_defect,forward_domain);
+    defect_restrict_stopwatch.click();
     recurrence_flow_function_stopwatch.click();
+
+    static SizeType widened_defect_profile_calls=0u;
+    static double widened_defect_derivative_materialise_seconds=0.0;
+    static double widened_defect_field_materialise_seconds=0.0;
+    static double widened_defect_subtract_seconds=0.0;
+    static double widened_defect_restrict_seconds=0.0;
+    ++widened_defect_profile_calls;
+    widened_defect_derivative_materialise_seconds+=
+        defect_derivative_materialise_stopwatch.elapsed_seconds();
+    widened_defect_field_materialise_seconds+=
+        defect_field_materialise_stopwatch.elapsed_seconds();
+    widened_defect_subtract_seconds+=
+        defect_subtract_stopwatch.elapsed_seconds();
+    widened_defect_restrict_seconds+=
+        defect_restrict_stopwatch.elapsed_seconds();
+    if(widened_defect_profile_calls%100u==0u) {
+        std::cerr << "[WidenedDefectCostProfile]"
+                  << " calls=" << widened_defect_profile_calls
+                  << " derivative_materialise_seconds="
+                  << widened_defect_derivative_materialise_seconds
+                  << " field_materialise_seconds="
+                  << widened_defect_field_materialise_seconds
+                  << " subtract_seconds="
+                  << widened_defect_subtract_seconds
+                  << " restrict_seconds="
+                  << widened_defect_restrict_seconds
+                  << std::endl;
+    }
 
     // Keep the cheaper materialise-after-subtraction construction only
     // when diagnostics are explicitly enabled.  Do not even instantiate a

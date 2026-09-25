@@ -1052,6 +1052,10 @@ struct CentrePolynomialRecurrenceResult {
     double residual_seconds;
     double differential_seconds;
     double flow_function_seconds;
+    double init_seconds;
+    double iterate_seconds;
+    double flow_differential_seconds;
+    double polynomial_flow_function_seconds;
     Vector<FloatDPBounds> direct_defect_range;
     double direct_defect_seconds;
     Bool exact_polynomial_available;
@@ -1085,20 +1089,30 @@ graded_series_centre_polynomial_step(
     Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null);
     List<GradedValidatedDifferential> tmpdphic;
 
+    Stopwatch<Microseconds> centre_init_stopwatch;
     Ariadne::graded_flow_init(
         p,fdphic,tmpdphic,dphic,mdx,mdt,da,so,to);
+    centre_init_stopwatch.click();
+
+    Stopwatch<Microseconds> centre_iterate_stopwatch;
     for(DegreeType i=0u; i!=to; ++i) {
         graded_flow_iterate(p,fdphic,tmpdphic,dphic);
     }
+    centre_iterate_stopwatch.click();
 
     // Use the centre branch for every retained coefficient, including the
     // highest temporal/spatial terms.  This is intentionally not a validated
     // flow enclosure; it is the polynomial candidate whose residual we want
     // to measure before attaching a separate validated remainder.
+    Stopwatch<Microseconds> centre_flow_differential_stopwatch;
     Vector<ValidatedDifferential> dphi=
         flow_differential(dphic,dphic,so,to);
+    centre_flow_differential_stopwatch.click();
+
+    Stopwatch<Microseconds> centre_flow_function_stopwatch;
     FlowStepTaylorModelType polynomial=
         flow_function(dphi,domx,domt,doma,sweeper);
+    centre_flow_function_stopwatch.click();
 
     Stopwatch<Microseconds> recurrence_residual_stopwatch;
 
@@ -1202,6 +1216,10 @@ graded_series_centre_polynomial_step(
         recurrence_residual_stopwatch.elapsed_seconds(),
         recurrence_differential_stopwatch.elapsed_seconds(),
         recurrence_flow_function_stopwatch.elapsed_seconds(),
+        centre_init_stopwatch.elapsed_seconds(),
+        centre_iterate_stopwatch.elapsed_seconds(),
+        centre_flow_differential_stopwatch.elapsed_seconds(),
+        centre_flow_function_stopwatch.elapsed_seconds(),
         std::move(direct_defect_range),
         direct_defect_stopwatch.elapsed_seconds(),
         exact_polynomial_available,
@@ -2116,6 +2134,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             static double recurrence_flow_function_seconds=0.0;
             static double direct_defect_seconds=0.0;
             static double exact_polynomial_defect_seconds=0.0;
+            static double centre_init_seconds=0.0;
+            static double centre_iterate_seconds=0.0;
+            static double centre_flow_differential_seconds=0.0;
+            static double centre_flow_function_seconds=0.0;
             ++recurrence_residual_calls;
             recurrence_residual_seconds+=centre_result.residual_seconds;
             recurrence_differential_seconds+=centre_result.differential_seconds;
@@ -2123,6 +2145,12 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             direct_defect_seconds+=centre_result.direct_defect_seconds;
             exact_polynomial_defect_seconds+=
                 centre_result.exact_polynomial_defect_seconds;
+            centre_init_seconds+=centre_result.init_seconds;
+            centre_iterate_seconds+=centre_result.iterate_seconds;
+            centre_flow_differential_seconds+=
+                centre_result.flow_differential_seconds;
+            centre_flow_function_seconds+=
+                centre_result.polynomial_flow_function_seconds;
             if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
                 std::cerr << "[RecurrenceResidualProfile]"
                           << " calls=" << recurrence_residual_calls
@@ -2140,6 +2168,23 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " exact_polynomial_defect_range="
                           << centre_result.exact_polynomial_defect_range
                           << " field_range=" << recurrence_field.range()
+                          << std::endl;
+                std::cerr << "[CentreRecurrenceCostProfile]"
+                          << " calls=" << recurrence_residual_calls
+                          << " init_seconds=" << centre_init_seconds
+                          << " iterate_seconds=" << centre_iterate_seconds
+                          << " flow_differential_seconds="
+                          << centre_flow_differential_seconds
+                          << " polynomial_flow_function_seconds="
+                          << centre_flow_function_seconds
+                          << " final_procedure_seconds="
+                          << recurrence_residual_seconds
+                          << " recurrence_differential_seconds="
+                          << recurrence_differential_seconds
+                          << " recurrence_flow_function_seconds="
+                          << recurrence_flow_function_seconds
+                          << " direct_defect_seconds="
+                          << direct_defect_seconds
                           << std::endl;
             }
 

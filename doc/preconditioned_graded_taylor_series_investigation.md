@@ -3541,3 +3541,33 @@ profiles may have nested scopes and must not be summed directly against wall tim
 The next optimisation phase should therefore re-profile the architecture rather than
 continue assuming `_ifma` is dominant. In particular, the 13.9638 s Gronwall centre
 path should be decomposed before further dense-kernel micro-optimisation.
+
+
+### 9.98 Decompose the centre-polynomial recurrence cost (2026-09-25)
+
+With the bit-equivalent batched dense kernel, the Van der Pol baseline is 24.0561 s and
+the existing Gronwall profile reports 13.9638 s in centre-polynomial construction. That
+outer timer includes the entire `graded_series_centre_polynomial_step`, so it is too
+coarse to identify the next optimisation target.
+
+The recurrence helper is now instrumented at phase granularity, with clock reads only at
+phase boundaries:
+
+- `graded_flow_init`;
+- all temporal `graded_flow_iterate` calls;
+- `flow_differential` for the centre polynomial;
+- `flow_function` materialisation of the centre polynomial;
+- the retained-state final Procedure evaluation used for `g(P_m)`;
+- conversion of that result to a Differential;
+- `flow_function` materialisation of the recurrence field;
+- the existing direct-defect path.
+
+The new cumulative marker is:
+
+```
+[CentreRecurrenceCostProfile]
+```
+
+This profile should explain most of the 13.96 s outer centre timer and distinguish
+recurrence arithmetic from Taylor-patch materialisation. The 24.0561 s run remains the
+performance baseline; the instrumented run is diagnostic only.

@@ -1205,23 +1205,88 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 y_slots.push_back(rank_index(yiter->index()));
             }
 
-            SizeType xi=0u;
-            for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
-                UniformConstReference<CoefficientType> xv=xiter->coefficient();
-                SizeType yi=0u;
-                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
-                    UniformConstReference<CoefficientType> yv=yiter->coefficient();
-                    const SizeType slot=x_slots[xi]+y_slots[yi];
-                    SizeType& touched=slot_to_touched[slot];
-                    if(touched==unused) {
-                        CoefficientType product=
-                            mul_err(xv,yv,product_roundoff);
-                        touched=touched_slots.size();
-                        touched_slots.push_back(slot);
-                        touched_coefficients.emplace_back(product);
-                    } else {
-                        touched_coefficients[touched]=fma_err(
-                            xv,yv,touched_coefficients[touched],product_roundoff);
+            if constexpr (ARawFloat<CoefficientType>) {
+                // Batch rounding-mode changes across the whole dense product.
+                // The nearest pass computes exactly the same centre coefficients
+                // as mul_err/fma_err.  For collision updates we retain the
+                // pre-update accumulator value needed by fma_err's error bound.
+                const SizeType product_pairs=
+                    x.number_of_terms()*y.number_of_terms();
+                std::vector<unsigned char> collision_flags;
+                std::vector<CoefficientType> collision_priors;
+                collision_flags.reserve(product_pairs);
+                collision_priors.reserve(product_pairs);
+
+                CoefficientType::set_rounding_to_nearest();
+                SizeType xi=0u;
+                for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
+                    UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                    SizeType yi=0u;
+                    for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
+                        UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                        const SizeType slot=x_slots[xi]+y_slots[yi];
+                        SizeType& touched=slot_to_touched[slot];
+                        if(touched==unused) {
+                            collision_flags.push_back(0u);
+                            CoefficientType product=mul(rounded,xv,yv);
+                            touched=touched_slots.size();
+                            touched_slots.push_back(slot);
+                            touched_coefficients.emplace_back(product);
+                        } else {
+                            collision_flags.push_back(1u);
+                            collision_priors.push_back(touched_coefficients[touched]);
+                            touched_coefficients[touched]=fma(
+                                rounded,xv,yv,touched_coefficients[touched]);
+                        }
+                    }
+                }
+
+                CoefficientType::set_rounding_upward();
+                SizeType pair_index=0u;
+                SizeType collision_index=0u;
+                xi=0u;
+                for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
+                    UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                    SizeType yi=0u;
+                    for(auto yiter=y.begin(); yiter!=y.end();
+                        ++yiter,++yi,++pair_index)
+                    {
+                        UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                        if(collision_flags[pair_index]==0u) {
+                            CoefficientType mxv=-xv;
+                            CoefficientType u=mul(rounded,xv,yv);
+                            CoefficientType ml=mul(rounded,mxv,yv);
+                            acc_err(ml,u,product_roundoff.raw());
+                        } else {
+                            CoefficientType const& prior=
+                                collision_priors[collision_index++];
+                            CoefficientType myv=-yv;
+                            CoefficientType mprior=-prior;
+                            CoefficientType u=fma(rounded,xv,yv,prior);
+                            CoefficientType ml=fma(rounded,xv,myv,mprior);
+                            acc_err(ml,u,product_roundoff.raw());
+                        }
+                    }
+                }
+            } else {
+                SizeType xi=0u;
+                for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
+                    UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                    SizeType yi=0u;
+                    for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
+                        UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                        const SizeType slot=x_slots[xi]+y_slots[yi];
+                        SizeType& touched=slot_to_touched[slot];
+                        if(touched==unused) {
+                            CoefficientType product=
+                                mul_err(xv,yv,product_roundoff);
+                            touched=touched_slots.size();
+                            touched_slots.push_back(slot);
+                            touched_coefficients.emplace_back(product);
+                        } else {
+                            touched_coefficients[touched]=fma_err(
+                                xv,yv,touched_coefficients[touched],product_roundoff);
+                        }
                     }
                 }
             }

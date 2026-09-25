@@ -120,21 +120,6 @@ void ariadne_main()
                   << " max_touched_count=" << ws.maximum_touched_count
                   << std::endl;
 
-        const unsigned long long rounding_probe_pairs=10000000ull;
-        Stopwatch<Milliseconds> rounding_stopwatch;
-        for(unsigned long long i=0u; i!=rounding_probe_pairs; ++i) {
-            FloatDP::set_rounding_to_nearest();
-            FloatDP::set_rounding_upward();
-        }
-        rounding_stopwatch.click();
-        std::cerr << "[TaylorRoundingModeProbe]"
-                  << " pairs=" << rounding_probe_pairs
-                  << " switches=" << (2u*rounding_probe_pairs)
-                  << " elapsed_seconds=" << rounding_stopwatch.elapsed_seconds()
-                  << " seconds_per_switch="
-                  << (rounding_stopwatch.elapsed_seconds()
-                      / static_cast<double>(2u*rounding_probe_pairs))
-                  << std::endl;
     }
 
 }

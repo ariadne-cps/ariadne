@@ -3230,3 +3230,51 @@ seconds_per_switch
 The result will quantify how much of the remaining 16 s dense pair loop can plausibly be
 attributed to repeated `fesetround` calls and whether a batched-rounding redesign is
 worth the additional numerical complexity.
+
+
+### 9.89 Two-pass batched rounding for the dense raw-float product (2026-09-25)
+
+The isolated rounding probe measured:
+
+```
+20,000,000 rounding-mode switches = 0.300001 s
+15.0 ns per switch
+```
+
+At 208,224,840 product pairs, the current `mul_err`/`fma_err` implementation performs
+about 416.45 million nearest/upward mode changes, corresponding to roughly 6.25 s at the
+measured switch cost. This is large enough to justify an experimental batched-rounding
+implementation.
+
+For raw floating-point coefficients only, the dense product now performs two passes.
+
+**Pass 1: centre coefficients under one nearest-rounding phase**
+
+- set rounding to nearest once;
+- new slots compute `mul(rounded,x,y)`;
+- collisions compute `fma(rounded,x,y,z)`;
+- for each collision, save the exact pre-update centre coefficient `z`;
+- save one byte per pair identifying new-slot versus collision.
+
+These centre updates are the same operations used internally by `mul_err` and
+`fma_err`, in the same pair order.
+
+**Pass 2: rigorous roundoff accounting under one upward-rounding phase**
+
+- set rounding upward once;
+- replay the same product-pair order;
+- new slots compute the same upward `u` and `ml` values used by `mul_err`;
+- collisions use the saved pre-update `z` to compute the same upward `u` and `ml`
+  values used by `fma_err`;
+- call `acc_err` in the original pair order.
+
+The key correctness point is that `product_roundoff` does not feed back into the centre
+coefficient recurrence. Delaying its updates until the second pass therefore preserves
+the centre sequence, while saving the pre-update collision coefficient preserves the
+inputs needed for the original per-operation error bound. Error contributions are then
+accumulated in the same order as before.
+
+Non-raw coefficient types retain the existing per-operation `mul_err`/`fma_err`
+fallback. The post-run synthetic rounding probe has been removed so the next runtime is
+a clean integrator measurement. The reference fused baseline is about 34.7--34.8 s with
+final error `8.5378288508794491e-8`.

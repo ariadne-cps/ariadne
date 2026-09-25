@@ -131,7 +131,10 @@ The terminal MP decision is factored into deterministic candidate and witness
 helpers shared by production code and tests. Coverage therefore exercises the
 actual decision procedure directly: rejected candidate, certified candidate,
 later-candidate success, and no-candidate-certified, without constructing
-fragile ICP scenarios merely to reach those branches.
+fragile ICP scenarios merely to reach those branches. The final terminal
+classification is likewise shared: a present validated witness maps to
+`EPSILON_SAT`, while absence maps to `UNKNOWN`; `_process_box` only attaches
+the appropriate statistics flags to that semantic outcome.
 
 This does **not** yet establish delta-completeness for all terminal boxes.
 Generic `ValidatedConstraint` functions remain black-box inputs, and a

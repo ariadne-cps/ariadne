@@ -287,6 +287,14 @@ enum class BoxProcessingStatus {
     UNKNOWN
 };
 
+struct TerminalBoxOutcome {
+    BoxProcessingStatus status = BoxProcessingStatus::UNKNOWN;
+    std::optional<UpperBoxType> witness;
+};
+
+TerminalBoxOutcome classify_terminal_box(
+    std::optional<UpperBoxType> const& witness);
+
 struct BoxProcessingStatisticsInput {
     BoxProcessingStatus status;
     SizeType hull_rounds = 0u;

@@ -3278,3 +3278,21 @@ Non-raw coefficient types retain the existing per-operation `mul_err`/`fma_err`
 fallback. The post-run synthetic rounding probe has been removed so the next runtime is
 a clean integrator measurement. The reference fused baseline is about 34.7--34.8 s with
 final error `8.5378288508794491e-8`.
+
+
+### 9.90 Fix batched-rounding build: local error accumulation (2026-09-25)
+
+The first batched-rounding build failed because `acc_err` is not part of the public
+Taylor-model template interface. It is a helper defined in the anonymous namespace of
+`model_utilities.hpp`, so `taylor_model.tpl.hpp` cannot name it directly.
+
+The batched path now spells out exactly the same upward-rounded accumulation performed
+by `acc_err`:
+
+```
+error = add(rounded,error,hlf(add(rounded,ml,u)))
+```
+
+This is applied in both the new-slot and collision branches of the second (upward)
+pass. No arithmetic formula or ordering has changed; this commit only removes the
+invalid dependency on an implementation-local helper.

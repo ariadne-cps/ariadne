@@ -4880,3 +4880,32 @@ Since product terms are generated as rows induced by each left operand term, inv
 whether those rows are individually ordered and can be merged structurally, replacing a
 global sort without changing the order in which equal-key coefficients are combined.
 Any replacement must first pass an exact Expansion equality A/B test.
+
+
+### 9.135 Test whether preserving equal-key generation order restores exactness (2026-09-25)
+
+The failed map accumulator in 9.134 establishes that changing the order of coefficient
+addition changes many FloatDPBounds results. Before implementing a custom structured
+merge, the next diagnostic isolates the ordering requirement.
+
+A second candidate generates the same raw pair products in the same nested-loop order as
+the reference, then applies a stable graded ordering before `combine_terms`. Stability
+preserves the original generation order among products with identical MultiIndex keys.
+
+This is deliberately not yet the intended optimisation: `std::stable_sort` plus a
+temporary Term vector may be slower than the existing Expansion sort. Its purpose is to
+answer one question first: is preserving equal-key generation order sufficient to recover
+bit-identical Differential expansions?
+
+The existing 5000-call A/B marker is extended with:
+
+```
+stable_order_equal_expansions=...
+stable_order_seconds=...
+```
+
+If exact equality reaches 5000/5000, the next implementation can focus on replacing the
+stable global sort with a structured stable merge of already ordered product rows while
+retaining this equal-key ordering. If equality still fails, inspect the actual ordering
+performed by the reference `std::sort`; a semantics-preserving sort replacement becomes
+substantially harder.

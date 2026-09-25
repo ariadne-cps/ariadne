@@ -635,6 +635,65 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 }
 
 
+ValidatedDifferential row_merge_validated_differential_mul(
+        const ValidatedDifferential& x,
+        const ValidatedDifferential& y)
+{
+    typedef ValidatedDifferential::ConstIterator ConstIterator;
+    ARIADNE_ASSERT_MSG(
+        x.argument_size()==y.argument_size(),
+        "x="<<x<<" y="<<y);
+
+    DegreeType const degree=
+        x.degree()<y.degree() ? x.degree() : y.degree();
+
+    struct Term {
+        MultiIndex index;
+        FloatDPBounds coefficient;
+        SizeType sequence;
+        Term(MultiIndex const& a, FloatDPBounds const& c, SizeType s)
+            : index(a), coefficient(c), sequence(s) {}
+    };
+
+    std::vector<Term> terms;
+    SizeType sequence=0u;
+    for(ConstIterator xiter=x.expansion().begin();
+        xiter!=x.expansion().end(); ++xiter)
+    {
+        if(xiter->index().degree()>degree) { break; }
+        for(ConstIterator yiter=y.expansion().begin();
+            yiter!=y.expansion().end(); ++yiter)
+        {
+            if(xiter->index().degree()+yiter->index().degree()>degree) {
+                break;
+            }
+            terms.emplace_back(
+                xiter->index()+yiter->index(),
+                xiter->coefficient()*yiter->coefficient(),
+                sequence++);
+        }
+    }
+
+    // Preserve the original append order for equal MultiIndices. This is the
+    // order a stable graded sort would expose to combine_terms().
+    std::stable_sort(
+        terms.begin(),terms.end(),
+        [](Term const& a, Term const& b) {
+            return graded_less(a.index,b.index);
+        });
+
+    ValidatedDifferential r(
+        x.argument_size(),degree,
+        mul(x.zero_coefficient(),y.zero_coefficient()));
+    r.expansion().reserve(terms.size());
+    for(auto const& term : terms) {
+        r.expansion().append(term.index,term.coefficient);
+    }
+    r.expansion().combine_terms();
+    return r;
+}
+
+
 ValidatedDifferential direct_accumulated_validated_differential_mul(
         const ValidatedDifferential& x,
         const ValidatedDifferential& y)
@@ -733,6 +792,8 @@ ValidatedDifferential profiled_validated_differential_mul(
     static SizeType direct_accumulation_ab_equal=0u;
     static double direct_accumulation_ab_seconds=0.0;
     static double reference_generation_cleanup_seconds=0.0;
+    static SizeType stable_order_ab_equal=0u;
+    static double stable_order_ab_seconds=0.0;
     if(direct_accumulation_ab_calls<5000u) {
         Stopwatch<Microseconds> direct_accumulation_stopwatch;
         ValidatedDifferential candidate=
@@ -741,6 +802,15 @@ ValidatedDifferential profiled_validated_differential_mul(
         if(same(candidate.expansion(),r.expansion())) {
             ++direct_accumulation_ab_equal;
         }
+
+        Stopwatch<Microseconds> stable_order_stopwatch;
+        ValidatedDifferential stable_candidate=
+            row_merge_validated_differential_mul(x,y);
+        stable_order_stopwatch.click();
+        if(same(stable_candidate.expansion(),r.expansion())) {
+            ++stable_order_ab_equal;
+        }
+        stable_order_ab_seconds+=stable_order_stopwatch.elapsed_seconds();
         direct_accumulation_ab_seconds+=
             direct_accumulation_stopwatch.elapsed_seconds();
         reference_generation_cleanup_seconds+=
@@ -756,6 +826,10 @@ ValidatedDifferential profiled_validated_differential_mul(
                       << direct_accumulation_ab_seconds
                       << " reference_seconds="
                       << reference_generation_cleanup_seconds
+                      << " stable_order_equal_expansions="
+                      << stable_order_ab_equal
+                      << " stable_order_seconds="
+                      << stable_order_ab_seconds
                       << std::endl;
         }
     }

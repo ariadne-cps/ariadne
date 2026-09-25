@@ -86,26 +86,6 @@ void ariadne_main()
         set_taylor_model_incremental_sweep_enabled(true);
     };
 
-    auto run_graded =
-        [&](String const& method, double threshold, Bool dense) {
-            ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),threshold);
-            GradedTaylorSeriesIntegrator integrator(
-                StepMaximumError(loose_tolerance),probe_sweeper,
-                lipschitz_tolerance=0.5_x,
-                minimum_spacial_order=5,minimum_temporal_order=5,
-                maximum_spacial_order=5,maximum_temporal_order=5);
-            VectorFieldEvolver evolver(dynamics,integrator);
-            configure_evolver(evolver,plateau_step);
-
-            configure_taylor_kernel(dense);
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(
-                initial_set,Real(5.00_dec),Semantics::UPPER);
-            stopwatch.click();
-            reset_taylor_kernel();
-            report_orbit(method,stopwatch,orbit);
-        };
-
     // Return focus to the preconditioned integrator and the dense kernel.
     // Use a single stable benchmark point at 3e-14 while dense-kernel
     // optimisations are developed.

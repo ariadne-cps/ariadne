@@ -3082,3 +3082,36 @@ Output marker:
 ```
 
 The benchmark remains the single QR-preconditioned dense `3e-14` run.
+
+
+### 9.84 Dense hot-loop profile result (2026-09-25)
+
+The phase-profiled preconditioned+dense `3e-14` run completed with unchanged final
+error and reported:
+
+```
+elapsed_s          40.6941
+product_pairs      208,224,840
+new_slots           36,018,650
+collision_slots    172,206,190
+prepare_seconds          0.130099
+prerank_seconds          0.162433
+pair_loop_seconds       22.2758
+emit_sweep_seconds       1.03001
+```
+
+The profiler adds about 1.08 s versus the immediately preceding unprofiled 39.6101 s run,
+so its absolute runtime should not replace the uninstrumented performance baseline.
+
+The result nevertheless localises the dense-kernel cost very clearly. Preparation and
+operand pre-ranking are negligible, and final sort/emission/sweep is only about one
+second. The coefficient-pair loop accounts for about 22.3 seconds. Of 208.2 million
+products, 172.2 million (82.7%) update an already occupied slot and therefore execute
+both `mul_err` and `add_err`; only 36.0 million create a new slot.
+
+This confirms that further work should target the arithmetic/update path inside the pair
+loop rather than workspace allocation, ranking, sorting, or sweeping.
+
+The benchmark driver also still contained the no-longer-used local `run_graded` lambda
+after development focus returned to the preconditioned integrator. It has been removed
+to eliminate the `-Wunused-variable` warning; this does not alter the benchmark.

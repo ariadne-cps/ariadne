@@ -4174,3 +4174,42 @@ restriction(wide_defect, forward_domain)
 No arithmetic, enclosure, cutoff, or step-selection semantics are changed.  The
 instrumented wall time is diagnostic only; the clean performance reference remains
 22.7361 s with final error 4.7221144502652554e-8.
+
+
+### 9.115 Widened-defect phase profile: materialisation dominates (2026-09-25)
+
+The four-phase profile completes all 2000 Van der Pol reach sets with unchanged final
+error and radius.  The instrumented wall time is 21.7731 s, but the clean reference
+remains 22.7361 s because timing noise and instrumentation make this run unsuitable as a
+new performance baseline.
+
+Cumulative widened-defect costs at 2000 calls are:
+
+```
+derivative materialisation  0.987009 s
+field materialisation       1.39446 s
+model subtraction           0.0242431 s
+combined restriction        0.0853471 s
+total measured phases       2.49106 s
+outer defect timer          2.56990 s
+```
+
+Thus about 95.6% of the measured phase cost is in the two
+`make_taylor_function_model` calls.  Field materialisation is the largest individual
+phase (about 56.0% of the four-phase total), derivative materialisation is second (about
+39.6%), while subtraction and the single final restriction together are only about
+4.4%.
+
+This rejects further optimisation of the final restriction as the immediate target.
+The next experiment should target derivative materialisation first because an already
+materialised centre polynomial exists, making that operand the one with the clearest
+potential redundancy.  However, replacing the widened derivative by differentiating the
+already restricted centre polynomial would reintroduce the restriction-order problem and
+is not equivalent.
+
+Before changing production semantics, add a diagnostic equivalence/cost experiment that
+constructs the derivative Taylor model directly from the already materialised widened
+centre model, before its forward restriction.  If coefficient and Error semantics match
+the current `make_taylor_function_model(derivative_dphi, wide_domain)` operand, retain
+the derived model and eliminate the redundant ~0.99 s materialisation.  If they do not
+match, keep the current validated path and move to field-materialisation optimisation.

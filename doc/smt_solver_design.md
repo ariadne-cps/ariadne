@@ -189,9 +189,25 @@ epsilon-relaxed target; strict positivity keeps its strict lower-bound test.
 The certified reduced box itself is returned as the witness.
 
 This follows the same validated-box stopping principle as dReal's documented
-`EvaluateBox` procedure: interval evaluation may terminate search once the
-requested relaxation is certified on the box. Ariadne uses direct containment
-in the explicit epsilon-relaxed target rather than a separate width threshold.
+`EvaluateBox` procedure, but the exact predicates differ. dReal classifies an
+original relational atom as VALID/UNSAT/UNKNOWN and, for an UNKNOWN atom, stops
+branching when the diameter of its interval evaluation is at most the requested
+precision. Ariadne instead tests direct containment of the validated image in
+the explicit epsilon-relaxed target.
+
+For the normalized primitive relations currently used by the SMT solver,
+Ariadne's containment test subsumes dReal's generic diameter test after original
+consistency has been established. For equality, an UNKNOWN interval contains
+zero, so diameter at most epsilon implies containment in [-epsilon,+epsilon].
+For non-strict positivity, UNKNOWN implies that the interval reaches zero, so
+diameter at most epsilon implies lower bound at least -epsilon. For strict
+positivity, UNKNOWN additionally has a strictly positive upper bound, hence the
+same diameter bound implies lower bound strictly greater than -epsilon.
+Containment can certify more boxes than the generic diameter rule while
+remaining sound; for example equality may certify [-epsilon,+epsilon], whose
+diameter is 2*epsilon, and a one-sided inequality may certify a much wider image
+whose lower bound already lies above -epsilon.
+
 If whole-box certification and point-candidate certification both fail, normal
 splitting continues. A non-splittable uncertified DP box remains `UNKNOWN`.
 

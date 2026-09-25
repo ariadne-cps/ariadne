@@ -1583,6 +1583,12 @@ class TestSmtSolver {
                     space,
                     UpperBoxType({UpperIntervalType(ExactIntervalType(0,0.25_x))}),
                     equality));
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(-0.125_x,0.125_x))}),
+                    equality));
 
             List<SmtTheoryPrimitiveLiteral> nonstrict({primitive(ex>=0)});
             ARIADNE_TEST_ASSERT(

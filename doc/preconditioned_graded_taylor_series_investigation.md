@@ -4628,3 +4628,38 @@ The purpose is to determine whether the degree-4/5 cost identified in 9.126 is d
 by nonlinear MUL/SQR operations or by generic Procedure dispatch / linear operations.
 After this measurement the per-instruction profiler must be removed before production
 benchmarking.
+
+
+### 9.128 Graded Procedure operator profile: MUL dominates (2026-09-25)
+
+The per-instruction diagnostic completes all 2000 Van der Pol reach sets with unchanged
+final error, radius, and reach-set count.
+
+At 10,000 graded Procedure calls the measured instruction-class times are:
+
+```
+degree 1: MUL 0.042906 s, linear 0.001072 s
+degree 2: MUL 0.336358 s, linear 0.014754 s
+degree 3: MUL 1.019810 s, linear 0.029435 s
+degree 4: MUL 1.680300 s, linear 0.021225 s
+degree 5: MUL 2.360700 s, linear 0.057455 s
+```
+
+Constants and variables are negligible. No SQR instructions appear in this Procedure
+stream: the polynomial has been lowered to MUL operations.
+
+Total measured MUL time is about 5.4401 s, versus about 5.8861 s for the complete
+profiled Procedure evaluator. Thus roughly 92.4% of Procedure time is directly inside
+graded multiplication. At degrees 4 and 5, MUL accounts for about 95.3% and 94.7% of
+their respective Procedure times.
+
+This establishes graded multiplication as the next optimisation target. Dispatcher and
+linear-operation optimisation are rejected as first priorities.
+
+The next experiment should profile the implementation of `compute(...,Mul,...)` for
+`Graded<ValidatedDifferential>`: separate the convolution over temporal coefficients
+from the underlying `ValidatedDifferential` multiplications, and determine whether
+previous convolution terms are recomputed on every appended degree. If the current
+assignment recomputes the full graded product while only one new temporal coefficient is
+needed, introduce an append-only/incremental multiplication path and verify exact
+coefficient equality against the current evaluator before production use.

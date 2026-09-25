@@ -3950,3 +3950,65 @@ Acceptance gates:
 
 If the new path is slower despite the tighter residual, profile the two widened
 materialisations separately before changing the recurrence architecture again.
+
+
+### 9.110 Widened-domain subtract-before-restrict benchmark result (2026-09-25)
+
+The production experiment from 9.109 completed all 2000 Van der Pol reach sets.
+
+Measured result:
+
+```
+method                preconditioned_dense_3e-14
+elapsed_seconds       27.3231
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+Reference bit-equivalent batched baseline:
+
+```
+elapsed_seconds       24.0561
+achieved_final_error  8.5378288508794491e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+Thus subtracting the two validated operands on the widened domain and restricting the
+combined residual once improves the final Taylor-model error by about 44.7%, while
+preserving the final radius and reach-set count.  It is, however, about 13.6% slower
+(+3.267 s) than the 24.0561 s reference.  This is therefore a real accuracy improvement,
+but not yet a runtime optimisation.
+
+The run also changes the dense workload materially:
+
+```
+Taylor dense calls: 985,603
+```
+
+versus 1,256,468 calls in the 24.0561 s reference profile.  Despite fewer dense calls,
+the centre-polynomial path grows to 15.9423 s.  Its final cumulative decomposition is:
+
+```
+graded_flow_iterate              6.15741 s
+final Procedure g(P)             2.81835 s
+validated defect materialisation 2.88531 s
+centre polynomial flow_function  1.84397 s
+cheap direct defect diagnostic   2.03148 s
+```
+
+The 2.03148 s cheap direct-defect path is still diagnostic-only and is not used by the
+production Gronwall certificate.  It is therefore now pure benchmark overhead and should
+be removed from non-diagnostic runs before judging the widened-domain production design.
+Likewise, exact-polynomial diagnostic bookkeeping remains negligible when disabled.
+
+**Conclusion:** keep the subtract-before-restrict construction for the next experiment
+because it produces a substantially tighter certified result.  First remove the
+non-production direct-defect calculation from clean runs and re-benchmark.  Do not
+revert solely from the 27.3231 s timing: roughly two seconds of that run are explicitly
+known diagnostic work.
+
+If the cleaned run remains slower than 24.0561 s, decompose the two widened Taylor-model
+materialisations and investigate whether the already available centre-polynomial model
+can supply the derivative operand without rematerialising it.

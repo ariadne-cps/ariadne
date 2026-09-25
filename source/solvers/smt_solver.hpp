@@ -353,6 +353,13 @@ Bool epsilon_primitive_image_infeasible(
     UpperIntervalType const& image,
     FloatDP const& epsilon);
 
+Bool mp_epsilon_primitive_image_satisfied(
+    SmtTheoryPrimitiveRelation relation,
+    FloatMPBounds const& image,
+    FloatMP const& epsilon);
+
+SizeType terminal_mp_precision_bits(ExactDouble epsilon);
+
 Bool epsilon_theory_literal_infeasible(
     SmtSolver const& solver,
     RealSpace const& space,
@@ -530,6 +537,13 @@ class SmtSolver {
     std::optional<UpperBoxType> _epsilon_witness(
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
+
+    std::optional<UpperBoxType> _terminal_epsilon_witness(
+        UpperBoxType const& domain,
+        List<ValidatedConstraint> const& constraints) const;
+    std::optional<UpperBoxType> _terminal_epsilon_witness(
+        UpperBoxType const& domain,
+        CompiledTheoryLiterals const& literals) const;
     template<class Conjunction>
     UpperBoxType _epsilon_candidate_witness(
         UpperBoxType const& domain,

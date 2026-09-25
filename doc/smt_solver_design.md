@@ -113,6 +113,24 @@ therefore to eliminate the **terminal uncertified box** as an algorithmic
 outcome for the supported function/relation fragment. Resource-limited
 `UNKNOWN` remains valid by contract.
 
+The first terminal-completeness step is implemented for compiled symbolic SMT
+theory literals. When DP splitting is no longer possible, deterministic witness
+points are re-evaluated with validated multiple-precision bounds. The MP
+precision is chosen from epsilon (approximately `-log2(epsilon)+128` bits,
+with a 128-bit floor), so this is not a fixed-precision heuristic. A witness is
+returned only if the MP enclosure satisfies the epsilon-relaxed primitive
+relation, including the strict bound for `GT_ZERO`. This resolves terminal
+uncertainty caused purely by DP enclosure error, such as
+`sin(x)^2+cos(x)^2-1=0` at a singleton with epsilon much smaller than DP
+roundoff.
+
+This does **not** yet establish delta-completeness for all terminal boxes.
+Generic `ValidatedConstraint` functions remain black-box inputs, and a
+non-singleton DP box whose real witness is not one of the representable
+deterministic points may still require a search representation finer than DP.
+That remaining case is an architectural completeness issue rather than an
+evaluation-cache optimization.
+
 The terminal state must not be repaired by treating epsilon overlap as
 satisfaction. A sound replacement needs a validated terminal decision rule:
 either prove original infeasibility (`UNSAT` for that box) or construct and

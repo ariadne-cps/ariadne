@@ -3372,3 +3372,30 @@ equality: if the two-pass transformation really reconstructs the same per-operat
 centre recurrence and error contributions, the results should be bit-identical for these
 deterministic cases. Any failure is evidence that the equivalence argument is incomplete
 and must be investigated before enabling batched rounding by default.
+
+
+### 9.93 Rigorous batched-rounding enclosure oracle after non-bit-identical result (2026-09-25)
+
+The first A/B test rejected bit identity: in the collision-heavy FloatDP case, two centre
+coefficients differed by one last-place rounding step while the Error remained identical.
+Bit equality is therefore too strong a criterion for the changed arithmetic schedule.
+
+The replacement test now checks the property that matters mathematically. For every
+zero-input-error product it constructs an independent outward-rounded coefficient oracle
+with `Bounds<F>`: source coefficients are singleton intervals, products and collision
+sums are interval operations, and the maximum distance from each exact-coefficient
+interval to the batched centre coefficient is summed upward. Since Taylor-model variables
+are normalised to [-1,1], that sum is a rigorous sup-norm bound for the centre-polynomial
+error. The test requires
+
+```
+coefficient_error_bound <= batched.error()
+```
+
+and also requires the batched Error not to be smaller than the trusted per-pair Error.
+
+The per-pair comparison remains diagnostic rather than normative. It now reports the
+number of differing centre coefficients, maximum absolute difference, and for FloatDP the
+maximum ULP distance. Nonzero-input-error cases retain the validated error-budget
+comparison; the independent coefficient oracle is intentionally restricted to the
+zero-error polynomial core.

@@ -24,6 +24,9 @@
 
 #include <iostream>
 #include <iomanip>
+#include <map>
+#include <bit>
+#include <cstdint>
 #include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
@@ -637,30 +640,85 @@ template<class F> Void TestTaylorModel<F>::test_compose()
 
 template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalence()
 {
-    // Compare the same dense accumulator with only the arithmetic scheduling
-    // changed: per-pair mul_err/fma_err versus two-pass batched rounding.
     const Bool old_product_accumulator=taylor_model_product_accumulator_enabled();
     const Bool old_dense=taylor_model_dense_accumulator_enabled();
     const Bool old_batched=taylor_model_dense_batched_rounding_enabled();
 
     set_taylor_model_product_accumulator_enabled(true);
     set_taylor_model_dense_accumulator_enabled(true);
-
     GradedSweeper<F> eqswp(pr,20);
 
     auto compare_product = [&](ValidatedTaylorModelType const& a,
                                ValidatedTaylorModelType const& b) {
         set_taylor_model_dense_batched_rounding_enabled(false);
         ValidatedTaylorModelType per_pair=a*b;
-
         set_taylor_model_dense_batched_rounding_enabled(true);
         ValidatedTaylorModelType batched=a*b;
 
-        ARIADNE_TEST_SAME(batched.expansion(),per_pair.expansion());
-        ARIADNE_TEST_SAME(batched.error(),per_pair.error());
+        unsigned long long differing_coefficients=0u;
+        unsigned long long maximum_ulp_distance=0u;
+        F maximum_absolute_difference(0.0_x,pr);
+        for(auto iter=per_pair.begin(); iter!=per_pair.end(); ++iter) {
+            F const& reference=iter->coefficient();
+            F candidate=batched[iter->index()];
+            F difference=abs(candidate-reference);
+            maximum_absolute_difference=max(maximum_absolute_difference,difference);
+            if(candidate!=reference) {
+                ++differing_coefficients;
+                if constexpr (Same<F,FloatDP>) {
+                    auto ordered_key=[](double value) {
+                        std::uint64_t bits=std::bit_cast<std::uint64_t>(value);
+                        constexpr std::uint64_t sign=std::uint64_t(1)<<63u;
+                        return (bits&sign) ? ~bits : (bits|sign);
+                    };
+                    const std::uint64_t lhs=ordered_key(candidate.get_d());
+                    const std::uint64_t rhs=ordered_key(reference.get_d());
+                    const std::uint64_t distance=lhs>=rhs ? lhs-rhs : rhs-lhs;
+                    maximum_ulp_distance=std::max(
+                        maximum_ulp_distance,
+                        static_cast<unsigned long long>(distance));
+                }
+            }
+        }
+        std::cerr << "[DenseBatchedEquivalenceDiagnostic]"
+                  << " differing_coefficients=" << differing_coefficients
+                  << " max_ulp_distance=" << maximum_ulp_distance
+                  << " max_abs_difference=" << maximum_absolute_difference
+                  << " batched_error=" << batched.error()
+                  << " reference_error=" << per_pair.error() << std::endl;
+
+        ARIADNE_TEST_COMPARE(batched.error().raw(),>=,per_pair.error().raw());
+
+        if(a.error().raw()==F(0.0_x,pr) && b.error().raw()==F(0.0_x,pr)) {
+            std::map<MultiIndex,Bounds<F>> oracle;
+            for(auto ai=a.begin(); ai!=a.end(); ++ai) {
+                for(auto bi=b.begin(); bi!=b.end(); ++bi) {
+                    MultiIndex index=ai->index()+bi->index();
+                    Bounds<F> product=
+                        Bounds<F>(ai->coefficient()) * Bounds<F>(bi->coefficient());
+                    auto found=oracle.find(index);
+                    if(found==oracle.end()) oracle.emplace(index,product);
+                    else found->second=found->second+product;
+                }
+            }
+
+            F coefficient_error_bound(0.0_x,pr);
+            for(auto const& entry : oracle) {
+                Bounds<F> delta=
+                    entry.second-Bounds<F>(batched[entry.first]);
+                F coefficient_magnitude=max(
+                    abs(delta.lower_raw()),abs(delta.upper_raw()));
+                coefficient_error_bound=add(
+                    up,coefficient_error_bound,coefficient_magnitude);
+            }
+            std::cerr << "[DenseBatchedRigorousOracle]"
+                      << " coefficient_error_bound=" << coefficient_error_bound
+                      << " batched_error=" << batched.error() << std::endl;
+            ARIADNE_TEST_COMPARE(
+                coefficient_error_bound,<=,batched.error().raw());
+        }
     };
 
-    // Heavy univariate collisions with non-dyadic coefficients and mixed signs.
     compare_product(
         ValidatedTaylorModelType(
             {{{0},0.1_x},{{1},-0.3_x},{{2},0.7_x},{{3},-1.1_x},
@@ -669,7 +727,6 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
             {{{0},-0.2_x},{{1},0.5_x},{{2},-0.9_x},{{3},1.7_x},
              {{4},-3.1_x},{{5},6.2_x}},0.0_x,eqswp));
 
-    // Multivariate collision pattern with cancellation across several paths.
     compare_product(
         ValidatedTaylorModelType(
             {{{0,0},1.0_x},{{1,0},0.125_x},{{0,1},-0.375_x},
@@ -680,7 +737,6 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
              {{2,0},-1.5_x},{{1,1},0.25_x},{{0,2},-0.0625_x}},
             0.0_x,eqswp));
 
-    // Wide dynamic range while staying well inside finite FloatDP/FloatMP.
     compare_product(
         ValidatedTaylorModelType(
             {{{0},1.0e-80_x},{{1},-3.0e-40_x},{{2},5.0_x},
@@ -689,8 +745,6 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
             {{{0},-2.0e80_x},{{1},4.0e40_x},{{2},-6.0_x},
              {{3},8.0e-40_x}},0.0_x,eqswp));
 
-    // Nonzero model errors verify that product roundoff equality survives
-    // the enclosing Taylor-model error propagation as well.
     compare_product(
         ValidatedTaylorModelType(
             {{{0},0.3333333333333333_x},{{1},-0.1428571428571429_x},

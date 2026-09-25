@@ -796,6 +796,61 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
 }
 
 
+FlowStepTaylorModelType make_taylor_function_model_diagonal_scaling(
+        const Vector<Differential<FloatBounds<DP>>>& df,
+        const ExactBoxType& dom,
+        Sweeper<FloatDP> swp)
+{
+    ARIADNE_ASSERT(df.argument_size()==dom.dimension());
+    const SizeType rs=df.size();
+    const SizeType as=dom.dimension();
+    const DegreeType deg=df.degree();
+    FlowStepTaylorModelType tf(rs,dom,swp);
+
+    Vector<Differential<FloatBounds<DP>>> ds=
+        scale(
+            Differential<FloatBounds<DP>>::variables(
+                deg,Vector<FloatBounds<DP>>(as,dp)),
+            dom);
+
+    Array<Array<FloatDPBounds>> powers(
+        as,Array<FloatDPBounds>(deg+1u,FloatDPBounds(0,dp)));
+    for(SizeType k=0u; k!=as; ++k) {
+        powers[k][0u]=FloatDPBounds(1,dp);
+        if(deg!=0u) {
+            powers[k][1u]=ds[k].gradient(k);
+            for(DegreeType j=2u; j<=deg; ++j) {
+                powers[k][j]=powers[k][j-1u]*powers[k][1u];
+            }
+        }
+    }
+
+    for(SizeType i=0u; i!=rs; ++i) {
+        ValidatedTaylorModelDP& model=tf.model(i);
+        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
+        FloatDPError& error=model.error();
+        error=0u;
+        expansion.reserve(df[i].expansion().number_of_nonzeros());
+
+        typename Differential<FloatDPBounds>::ConstIterator iter=df[i].begin();
+        while(iter!=df[i].end()) {
+            MultiIndex const a=iter->index();
+            FloatDPBounds coef(1,dp);
+            for(SizeType k=0u; k!=as; ++k) {
+                coef=coef*powers[k][a[k]];
+            }
+            coef=coef*iter->coefficient();
+            FloatDP x=coef.value();
+            error+=coef.error();
+            expansion.append(a,x);
+            ++iter;
+        }
+        model.cleanup();
+    }
+    return tf;
+}
+
+
 FlowStepTaylorModelType make_taylor_function_model_profiled(
         const Vector<Differential<FloatBounds<DP>>>& df,
         const ExactBoxType& dom,
@@ -839,6 +894,50 @@ FlowStepTaylorModelType make_taylor_function_model_profiled(
         model.cleanup();
     }
     conversion_stopwatch.click();
+
+    static SizeType diagonal_scaling_ab_calls=0u;
+    static SizeType diagonal_scaling_ab_components=0u;
+    static SizeType diagonal_scaling_ab_equal_expansion_components=0u;
+    static SizeType diagonal_scaling_ab_equal_error_components=0u;
+    static double diagonal_scaling_ab_candidate_seconds=0.0;
+    static double diagonal_scaling_ab_max_error_difference=0.0;
+    if(diagonal_scaling_ab_calls<100u) {
+        Stopwatch<Microseconds> diagonal_scaling_candidate_stopwatch;
+        FlowStepTaylorModelType candidate=
+            make_taylor_function_model_diagonal_scaling(df,dom,swp);
+        diagonal_scaling_candidate_stopwatch.click();
+        for(SizeType i=0u; i!=rs; ++i) {
+            ++diagonal_scaling_ab_components;
+            if(same(candidate.model(i).expansion(),tf.model(i).expansion())) {
+                ++diagonal_scaling_ab_equal_expansion_components;
+            }
+            if(same(candidate.model(i).error(),tf.model(i).error())) {
+                ++diagonal_scaling_ab_equal_error_components;
+            }
+            diagonal_scaling_ab_max_error_difference=std::max(
+                diagonal_scaling_ab_max_error_difference,
+                std::abs(
+                    candidate.model(i).error().raw().get_d()
+                    -tf.model(i).error().raw().get_d()));
+        }
+        ++diagonal_scaling_ab_calls;
+        diagonal_scaling_ab_candidate_seconds+=
+            diagonal_scaling_candidate_stopwatch.elapsed_seconds();
+        if(diagonal_scaling_ab_calls==100u) {
+            std::cerr << "[DiagonalScalingMaterialisationAB]"
+                      << " calls=" << diagonal_scaling_ab_calls
+                      << " components=" << diagonal_scaling_ab_components
+                      << " equal_expansion_components="
+                      << diagonal_scaling_ab_equal_expansion_components
+                      << " equal_error_components="
+                      << diagonal_scaling_ab_equal_error_components
+                      << " max_error_difference="
+                      << diagonal_scaling_ab_max_error_difference
+                      << " candidate_seconds="
+                      << diagonal_scaling_ab_candidate_seconds
+                      << std::endl;
+        }
+    }
 
     static SizeType field_materialisation_profile_calls=0u;
     static double field_scale_seconds=0.0;

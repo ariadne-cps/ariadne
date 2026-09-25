@@ -4349,3 +4349,62 @@ scaling/substitution path for Differential-to-TaylorModel conversion and require
 coefficient/Error equivalence before production use. If conversion/cleanup dominates,
 optimise that loop instead. If scale is significant, cache or specialise the normalised
 variable scaling.
+
+
+### 9.120 Widened field materialisation is compose-dominated (2026-09-25)
+
+The internal profile of the widened recurrence-field materialisation completes all 2000
+Van der Pol reach sets with unchanged final error and radius. The instrumented wall time
+is 24.2281 s and is diagnostic only; the clean production reference remains 22.7361 s.
+
+At 2000 calls:
+
+```
+scale_seconds       0.010387
+compose_seconds     1.44418
+conversion_seconds  0.108504
+field total         1.56721
+```
+
+Generic `compose(df, scaled_variables)` therefore accounts for about 92.1% of the
+widened field materialisation. Conversion/cleanup is about 6.9%, and scaling the
+normalised variables is below 1%. The next target is the generic Differential
+composition, not conversion or scale caching.
+
+
+### 9.121 A/B prototype: direct diagonal scaling instead of generic compose (2026-09-25)
+
+Inspection of `Differential::_compose` shows that composition with the scaled variables
+first clears their constant values and then evaluates the source Differential on their
+zero-centred polynomial parts. For the box scaling used by
+`make_taylor_function_model`, those polynomial parts are diagonal linear monomials.
+Therefore every source monomial keeps the same MultiIndex; only its coefficient is
+multiplied by the corresponding per-variable scaling powers.
+
+A specialised candidate now bypasses generic Differential composition by:
+
+1. constructing the same scaled Differential variables as the reference;
+2. precomputing each diagonal linear scaling coefficient to powers 0..degree;
+3. multiplying every source coefficient by the matching product of powers, in variable
+   order;
+4. converting the resulting Bounds coefficient directly into the same Taylor-model
+   coefficient and Error representation;
+5. running the same model cleanup.
+
+This candidate is A/B only for the first 100 widened-field materialisations. The
+production reference path remains unchanged. The marker is:
+
+```
+[DiagonalScalingMaterialisationAB]
+calls=100
+components=...
+equal_expansion_components=...
+equal_error_components=...
+max_error_difference=...
+candidate_seconds=...
+```
+
+Acceptance is strict exact equality of both expansion and Error for every component. If
+it passes, the next commit may replace the generic compose path for this materialisation
+and benchmark the clean production runtime. If it fails, inspect whether the mismatch is
+only operation ordering/rounding before abandoning the specialised route.

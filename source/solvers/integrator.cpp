@@ -1048,7 +1048,7 @@ Bool evaluate_polynomial_procedure(
 
 struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
-    FlowStepTaylorModelType recurrence_field;
+    FlowStepTaylorModelType defect;
     double residual_seconds;
     double differential_seconds;
     double flow_function_seconds;
@@ -1130,148 +1130,47 @@ graded_series_centre_polynomial_step(
         differential(final_f,n,so,to);
     recurrence_differential_stopwatch.click();
 
+    // Build the validated residual on the widened Taylor domain and restrict
+    // only after subtraction.  Both operands are materialised separately, so
+    // their existing Taylor-model Error budgets are preserved; only the order
+    // of subtraction and restriction changes.  The preceding restriction
+    // audit showed that separate restriction inhibits cancellation.
     Stopwatch<Microseconds> recurrence_flow_function_stopwatch;
-    FlowStepTaylorModelType recurrence_field=
-        flow_function(
-            recurrence_field_differential,domx,domt,doma,sweeper);
-    recurrence_flow_function_stopwatch.click();
-
-    // Experimental coefficient-level defect path.  Build dP/dt-g(P) before
-    // creating any Taylor patch, materialise it once on the same widened time
-    // domain used by flow_function, then evaluate the model directly on the
-    // forward half of the normalised time coordinate.  This avoids the costly
-    // restriction() while preserving the widened-domain coefficient scaling.
-    Stopwatch<Microseconds> direct_defect_stopwatch;
     Vector<ValidatedDifferential> derivative_dphi=derivative(dphi,n);
-    Vector<ValidatedDifferential> direct_defect_differential=
-        derivative_dphi-recurrence_field_differential;
-    FlowStepTaylorModelType wide_defect=
-        make_taylor_function_model(
-            direct_defect_differential,join(domx,widt,doma),sweeper);
-
-    // Restriction audit: compare restricting the already combined
-    // defect with restricting the two operands separately before subtraction.
-    static SizeType defect_restriction_audit_calls=0u;
-    static unsigned long long restriction_differing_coefficients=0u;
-    static unsigned long long restriction_direct_only_coefficients=0u;
-    static unsigned long long restriction_separate_only_coefficients=0u;
-    static double restriction_max_coefficient_difference=0.0;
-    static double restriction_max_direct_error=0.0;
-    static double restriction_max_separate_error=0.0;
-    static double restriction_max_direct_range_mag=0.0;
-    static double restriction_max_separate_range_mag=0.0;
-    static double restriction_max_separate_to_direct_range_ratio=0.0;
-    static double restriction_audit_seconds=0.0;
-
-    Stopwatch<Microseconds> restriction_audit_stopwatch;
-    ++defect_restriction_audit_calls;
-
-    ExactBoxType const audit_wide_domain=join(domx,widt,doma);
-    ExactBoxType const audit_forward_domain=join(domx,domt,doma);
-
-    FlowStepTaylorModelType restricted_direct=
-        restriction(wide_defect,audit_forward_domain);
-
+    ExactBoxType const wide_domain=join(domx,widt,doma);
+    ExactBoxType const forward_domain=join(domx,domt,doma);
     FlowStepTaylorModelType wide_derivative=
-        make_taylor_function_model(
-            derivative_dphi,audit_wide_domain,sweeper);
+        make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
     FlowStepTaylorModelType wide_field=
         make_taylor_function_model(
-            recurrence_field_differential,audit_wide_domain,sweeper);
-    FlowStepTaylorModelType restricted_derivative=
-        restriction(wide_derivative,audit_forward_domain);
-    FlowStepTaylorModelType restricted_field=
-        restriction(wide_field,audit_forward_domain);
-
+            recurrence_field_differential,wide_domain,sweeper);
+    FlowStepTaylorModelType wide_validated_defect=wide_derivative;
     for(SizeType i=0u; i!=n; ++i) {
-        ValidatedTaylorModelDP direct_model=restricted_direct.model(i);
-        ValidatedTaylorModelDP separate_model=
-            restricted_derivative.model(i)-restricted_field.model(i);
-
-        restriction_max_direct_error=std::max(
-            restriction_max_direct_error,
-            direct_model.error().raw().get_d());
-        restriction_max_separate_error=std::max(
-            restriction_max_separate_error,
-            separate_model.error().raw().get_d());
-
-        const double direct_range_mag=
-            mag(direct_model.range()).raw().get_d();
-        const double separate_range_mag=
-            mag(separate_model.range()).raw().get_d();
-        restriction_max_direct_range_mag=std::max(
-            restriction_max_direct_range_mag,direct_range_mag);
-        restriction_max_separate_range_mag=std::max(
-            restriction_max_separate_range_mag,separate_range_mag);
-        if(direct_range_mag>0.0) {
-            restriction_max_separate_to_direct_range_ratio=std::max(
-                restriction_max_separate_to_direct_range_ratio,
-                separate_range_mag/direct_range_mag);
-        }
-
-        ValidatedTaylorModelDP direct_core=direct_model;
-        ValidatedTaylorModelDP separate_core=separate_model;
-        direct_core.clobber();
-        separate_core.clobber();
-
-        for(auto const& term : direct_core.expansion()) {
-            FloatDP const dc=term.coefficient();
-            FloatDP const sc=separate_core[term.index()];
-            if(sc==FloatDP(0u,dp) && dc!=FloatDP(0u,dp)) {
-                ++restriction_direct_only_coefficients;
-            }
-            if(dc!=sc) {
-                ++restriction_differing_coefficients;
-                restriction_max_coefficient_difference=std::max(
-                    restriction_max_coefficient_difference,
-                    std::abs(dc.get_d()-sc.get_d()));
-            }
-        }
-        for(auto const& term : separate_core.expansion()) {
-            FloatDP const sc=term.coefficient();
-            FloatDP const dc=direct_core[term.index()];
-            if(dc==FloatDP(0u,dp) && sc!=FloatDP(0u,dp)) {
-                ++restriction_separate_only_coefficients;
-            }
-        }
+        wide_validated_defect.model(i)=
+            wide_derivative.model(i)-wide_field.model(i);
     }
+    FlowStepTaylorModelType defect=
+        restriction(wide_validated_defect,forward_domain);
+    recurrence_flow_function_stopwatch.click();
 
-    restriction_audit_stopwatch.click();
-    restriction_audit_seconds+=restriction_audit_stopwatch.elapsed_seconds();
-    if(defect_restriction_audit_calls%100u==0u) {
-        std::cerr << "[DefectRestrictionAudit]"
-                  << " calls=" << defect_restriction_audit_calls
-                  << " differing_coefficients="
-                  << restriction_differing_coefficients
-                  << " direct_only_coefficients="
-                  << restriction_direct_only_coefficients
-                  << " separate_only_coefficients="
-                  << restriction_separate_only_coefficients
-                  << " max_coefficient_difference="
-                  << restriction_max_coefficient_difference
-                  << " max_direct_error="
-                  << restriction_max_direct_error
-                  << " max_separate_error="
-                  << restriction_max_separate_error
-                  << " max_direct_range_mag="
-                  << restriction_max_direct_range_mag
-                  << " max_separate_range_mag="
-                  << restriction_max_separate_range_mag
-                  << " max_separate_to_direct_range_ratio="
-                  << restriction_max_separate_to_direct_range_ratio
-                  << " audit_seconds="
-                  << restriction_audit_seconds
-                  << std::endl;
-    }
+    // Keep the cheaper materialise-after-subtraction construction as a
+    // diagnostic comparator.  It is not used for production certification
+    // because its separately propagated truncation semantics are not generic.
+    Stopwatch<Microseconds> direct_defect_stopwatch;
+    Vector<ValidatedDifferential> direct_defect_differential=
+        derivative_dphi-recurrence_field_differential;
+    FlowStepTaylorModelType direct_wide_defect=
+        make_taylor_function_model(
+            direct_defect_differential,wide_domain,sweeper);
 
     Vector<FloatDPBounds> forward_half_box(
-        wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
+        direct_wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
     forward_half_box[n]=FloatDPBounds(0,1,dp);
     Vector<FloatDPBounds> direct_defect_range(
         n,FloatDPBounds(0,dp));
     for(SizeType i=0u; i!=n; ++i) {
         direct_defect_range[i]=evaluate(
-            wide_defect.model(i),forward_half_box);
+            direct_wide_defect.model(i),forward_half_box);
     }
     direct_defect_stopwatch.click();
 
@@ -1318,7 +1217,7 @@ graded_series_centre_polynomial_step(
                     exact_defect,join(domx,widt,doma),sweeper);
             for(SizeType i=0u; i!=n; ++i) {
                 exact_polynomial_defect_range[i]=evaluate(
-                    exact_wide_defect.model(i),forward_half_box);
+                    exact_direct_wide_defect.model(i),forward_half_box);
             }
         }
     }
@@ -1328,7 +1227,7 @@ graded_series_centre_polynomial_step(
     exact_polynomial_defect_stopwatch.click();
 
     return CentrePolynomialRecurrenceResult{
-        std::move(polynomial),std::move(recurrence_field),
+        std::move(polynomial),std::move(defect),
         recurrence_residual_stopwatch.elapsed_seconds(),
         recurrence_differential_stopwatch.elapsed_seconds(),
         recurrence_flow_function_stopwatch.elapsed_seconds(),
@@ -2240,8 +2139,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     this->diagnostics());
             FlowStepTaylorModelType centre_polynomial=
                 std::move(centre_result.polynomial);
-            FlowStepTaylorModelType recurrence_field=
-                std::move(centre_result.recurrence_field);
+            FlowStepTaylorModelType defect=
+                std::move(centre_result.defect);
             centre_polynomial_stopwatch.click();
 
             static SizeType recurrence_residual_calls=0u;
@@ -2283,7 +2182,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << exact_polynomial_defect_seconds
                           << " exact_polynomial_defect_range="
                           << centre_result.exact_polynomial_defect_range
-                          << " field_range=" << recurrence_field.range()
+                          << " validated_defect_range=" << defect.range()
                           << std::endl;
                 std::cerr << "[CentreRecurrenceCostProfile]"
                           << " calls=" << recurrence_residual_calls
@@ -2312,16 +2211,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             residual_compose_stopwatch.click();
 
             Stopwatch<Microseconds> residual_assembly_stopwatch;
-            ValidatedVectorMultivariateFunctionPatch defect=
-                factory.create_zeros(n,centre_polynomial.domain());
+            // The validated defect is already assembled on the widened domain
+            // inside graded_series_centre_polynomial_step and restricted once
+            // after subtraction.
             SizeType const time_index=centre_polynomial.argument_size()-1u;
-            for(SizeType i=0u; i!=n; ++i) {
-                ValidatedScalarMultivariateFunctionPatch dpoly =
-                    derivative(centre_polynomial.get(i),time_index);
-                ValidatedScalarMultivariateFunctionPatch recurrence_fpoly =
-                    recurrence_field.get(i);
-                defect[i]=dpoly-recurrence_fpoly;
-            }
             residual_assembly_stopwatch.click();
 
             // General Taylor-model residual experiment.  Define the candidate
@@ -2449,7 +2342,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                           << " exact_polynomial_defect_range="
                           << centre_result.exact_polynomial_defect_range
                           << " generic_field_range=" << generic_field.range()
-                          << " recurrence_field_range=" << recurrence_field.range()
+                          << " validated_defect_range=" << defect.range()
                           << " initial_defect_range=" << initial_defect.range()
                           << " lipschitz_inf=" << lipschitz_inf
                           << std::endl;
@@ -2475,125 +2368,9 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 auto defect_ranges=defect.range();
                 auto initial_defect_ranges=initial_defect.range();
 
-                // Diagnostic comparison: can the coefficient-level direct
-                // defect range replace the materialised patch-level defect
-                // range without weakening the Gronwall certificate?
-                static SizeType direct_defect_compare_calls=0u;
-                static SizeType direct_defect_components=0u;
-                static SizeType direct_defect_conservative_components=0u;
-                static SizeType direct_defect_strictly_larger_components=0u;
-                static SizeType direct_defect_strictly_smaller_components=0u;
-                static double direct_defect_max_mag_ratio=0.0;
-                static double direct_defect_max_abs_mag_difference=0.0;
-                ++direct_defect_compare_calls;
-                static double defect_core_max_mag_ratio=0.0;
-                static double direct_to_core_max_mag_ratio=0.0;
-                static double defect_error_sum_seconds=0.0;
-                static double maximum_source_error_sum=0.0;
-                static double maximum_defect_model_error=0.0;
-                Stopwatch<Microseconds> defect_error_decomposition_stopwatch;
-                for(SizeType i=0u; i!=n; ++i) {
-                    auto recurrence_mag=mag(defect_ranges[i]);
-                    auto direct_mag=mag(centre_result.direct_defect_range[i]);
-                    const double recurrence_mag_d=
-                        recurrence_mag.raw().get_d();
-                    const double direct_mag_d=
-                        direct_mag.raw().get_d();
-
-                    // Strip only the Taylor-model Error terms while retaining
-                    // exactly the stored polynomial coefficients.  This
-                    // isolates the polynomial-core contribution to the range
-                    // of dP/dt-g(P) from the remainder attached independently
-                    // to the two materialised patches.
-                    ValidatedTaylorModelDP derivative_model=
-                        derivative(centre_polynomial.get(i),time_index).model();
-                    ValidatedTaylorModelDP field_model=
-                        recurrence_field.get(i).model();
-                    const double source_error_sum=
-                        derivative_model.error().raw().get_d()
-                        +field_model.error().raw().get_d();
-                    maximum_source_error_sum=std::max(
-                        maximum_source_error_sum,source_error_sum);
-
-                    ValidatedTaylorModelDP derivative_core=derivative_model;
-                    ValidatedTaylorModelDP field_core=field_model;
-                    derivative_core.clobber();
-                    field_core.clobber();
-                    ValidatedTaylorModelDP core_defect=
-                        derivative_core-field_core;
-                    const double core_mag_d=
-                        mag(core_defect.range()).raw().get_d();
-
-                    // 'defect' is type-erased at FunctionPatch level here,
-                    // so there is no direct .model() accessor.  The model-level
-                    // residual we need for this diagnostic is exactly the
-                    // subtraction of the already recovered source models.
-                    ValidatedTaylorModelDP materialised_defect_model=
-                        derivative_model-field_model;
-                    maximum_defect_model_error=std::max(
-                        maximum_defect_model_error,
-                        materialised_defect_model.error().raw().get_d());
-
-                    if(core_mag_d>0.0) {
-                        defect_core_max_mag_ratio=std::max(
-                            defect_core_max_mag_ratio,
-                            recurrence_mag_d/core_mag_d);
-                        direct_to_core_max_mag_ratio=std::max(
-                            direct_to_core_max_mag_ratio,
-                            direct_mag_d/core_mag_d);
-                    }
-
-                    ++direct_defect_components;
-                    if(direct_mag_d>=recurrence_mag_d) {
-                        ++direct_defect_conservative_components;
-                        if(direct_mag_d>recurrence_mag_d) {
-                            ++direct_defect_strictly_larger_components;
-                        }
-                    } else {
-                        ++direct_defect_strictly_smaller_components;
-                    }
-                    if(recurrence_mag_d>0.0) {
-                        direct_defect_max_mag_ratio=std::max(
-                            direct_defect_max_mag_ratio,
-                            direct_mag_d/recurrence_mag_d);
-                    }
-                    direct_defect_max_abs_mag_difference=std::max(
-                        direct_defect_max_abs_mag_difference,
-                        std::abs(direct_mag_d-recurrence_mag_d));
-                }
-                defect_error_decomposition_stopwatch.click();
-                defect_error_sum_seconds+=
-                    defect_error_decomposition_stopwatch.elapsed_seconds();
-
-                if(!this->diagnostics()
-                    && direct_defect_compare_calls%100u==0u)
-                {
-                    std::cerr << "[DirectDefectRangeComparison]"
-                              << " calls=" << direct_defect_compare_calls
-                              << " components=" << direct_defect_components
-                              << " conservative_components="
-                              << direct_defect_conservative_components
-                              << " strictly_larger_components="
-                              << direct_defect_strictly_larger_components
-                              << " strictly_smaller_components="
-                              << direct_defect_strictly_smaller_components
-                              << " max_mag_ratio="
-                              << direct_defect_max_mag_ratio
-                              << " max_abs_mag_difference="
-                              << direct_defect_max_abs_mag_difference
-                              << " defect_core_max_mag_ratio="
-                              << defect_core_max_mag_ratio
-                              << " direct_to_core_max_mag_ratio="
-                              << direct_to_core_max_mag_ratio
-                              << " max_source_error_sum="
-                              << maximum_source_error_sum
-                              << " max_defect_model_error="
-                              << maximum_defect_model_error
-                              << " decomposition_seconds="
-                              << defect_error_sum_seconds
-                              << std::endl;
-                }
-
+                // Obsolete defect-decomposition diagnostics removed: the
+                // restriction-order audit has already localised the loss of
+                // cancellation to separate restriction of the two operands.
                 range_stopwatch.click();
                 production_range_seconds+=range_stopwatch.elapsed_seconds();
 

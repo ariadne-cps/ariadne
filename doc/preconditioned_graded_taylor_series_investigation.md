@@ -3886,3 +3886,67 @@ recurrence field. A production optimisation must not simply substitute the small
 range: the next step is to establish a rigorous validated argument for forming the
 residual on the widened domain and restricting the residual once, including the
 Taylor-model Error semantics of restriction.
+
+
+### 9.109 Production experiment: subtract on the widened domain, restrict once (2026-09-25)
+
+The restriction audit in 9.108 identified the first non-commuting transformation: the
+validated derivative and recurrence-field operands are coefficient-identical before
+restriction, but restricting them separately introduces thousands of coefficient
+differences and a larger Taylor-model Error budget before the residual subtraction.
+
+The production path is now changed in the narrowest way that preserves the existing
+validated operand semantics:
+
+```
+wide_derivative = materialise(dP/dt, widened_domain)
+wide_field      = materialise(g(P), widened_domain)
+wide_defect     = wide_derivative - wide_field
+defect          = restriction(wide_defect, forward_domain)
+```
+
+This is deliberately **not** the cheaper `materialise(dP/dt-g(P))` shortcut.  The two
+operands are still materialised separately with the existing Taylor-model Error
+propagation, so no new assumption is made about omitted Procedure terms or generic
+non-polynomial dynamics.  The only semantic change is to subtract the two validated
+Taylor models before the already-validated restriction operation.
+
+The old production sequence,
+
+```
+restriction(materialise(dP/dt))
+    - restriction(materialise(g(P)))
+```
+
+and its now-obsolete defect decomposition/restriction diagnostics have been removed from
+the hot path.  The cheap combined-Differential residual remains diagnostic only.
+
+**Expected effect:** preserve more polynomial cancellation, reduce the residual range and
+remove one restriction of a large operand.  This may both tighten the Gronwall remainder
+and reduce runtime.  The clean reference remains:
+
+```
+elapsed_seconds       24.0561
+achieved_final_error  8.5378288508794491e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+This commit has not yet been benchmarked in the connected environment.  Required next
+step:
+
+```bash
+ninja vanderpol
+./examples/continuous/vanderpol > widened_defect.txt 2>&1
+```
+
+Acceptance gates:
+1. build and regression tests remain valid;
+2. all 2000 reach sets complete;
+3. final radius does not regress;
+4. final Taylor-model error is no worse than the 24.0561 s reference path;
+5. wall time improves materially, or the tighter residual produces a measurable accuracy
+   benefit that justifies its cost.
+
+If the new path is slower despite the tighter residual, profile the two widened
+materialisations separately before changing the recurrence architecture again.

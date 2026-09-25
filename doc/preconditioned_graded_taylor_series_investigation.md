@@ -3197,3 +3197,36 @@ pair_loop_seconds
 
 The uninstrumented performance baseline remains 34.7261 s. The profiled runtime is used
 only to localise the remaining cost, not as the new performance baseline.
+
+
+### 9.88 Rounding-mode switch cost probe (2026-09-25)
+
+The fused dense pair-loop profile reports 16.0404 s for 208,224,840 coefficient pairs,
+down from 22.2758 s before `fma_err`. The uninstrumented fused baseline remains about
+34.7 s.
+
+Inspection of Ariadne's rounding implementation is especially relevant on the current
+Apple arm64 build. The x86-specific SSE/GCC branches do not apply there, so
+`set_builtin_rounding_to_nearest()` and `set_builtin_rounding_upward()` use the C99
+`fesetround` path. Both `mul_err` and `fma_err` switch to nearest for the central
+coefficient and back to upward for the rigorous error bound. Consequently every one of
+the ~208 million product pairs performs two rounding-mode changes.
+
+Before redesigning validated arithmetic, the benchmark now restores the uninstrumented
+integration path and runs a separate post-orbit calibration of ten million
+nearest/upward pairs. Because this probe runs after the integration stopwatch has
+stopped, it does not contaminate the reported integrator runtime.
+
+Output marker:
+
+```
+[TaylorRoundingModeProbe]
+pairs
+switches
+elapsed_seconds
+seconds_per_switch
+```
+
+The result will quantify how much of the remaining 16 s dense pair loop can plausibly be
+attributed to repeated `fesetround` calls and whether a batched-rounding redesign is
+worth the additional numerical complexity.

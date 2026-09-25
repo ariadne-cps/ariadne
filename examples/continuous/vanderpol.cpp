@@ -105,7 +105,6 @@ void ariadne_main()
 
         configure_taylor_kernel(true);
         reset_taylor_model_dense_workspace_stats();
-        reset_taylor_model_dense_hot_loop_profile();
         Stopwatch<Milliseconds> stopwatch;
         auto orbit=evolver.orbit(
             initial_set,Real(5.00_dec),Semantics::UPPER);
@@ -120,13 +119,21 @@ void ariadne_main()
                   << " max_slot_count=" << ws.maximum_slot_count
                   << " max_touched_count=" << ws.maximum_touched_count
                   << std::endl;
-        auto const hp=taylor_model_dense_hot_loop_profile();
-        std::cerr << "[TaylorDenseFmaPairProfile]"
-                  << " calls=" << hp.calls
-                  << " product_pairs=" << hp.product_pairs
-                  << " new_slots=" << hp.new_slots
-                  << " collision_slots=" << hp.collision_slots
-                  << " pair_loop_seconds=" << hp.pair_loop_seconds
+
+        const unsigned long long rounding_probe_pairs=10000000ull;
+        Stopwatch<Milliseconds> rounding_stopwatch;
+        for(unsigned long long i=0u; i!=rounding_probe_pairs; ++i) {
+            FloatDP::set_rounding_to_nearest();
+            FloatDP::set_rounding_upward();
+        }
+        rounding_stopwatch.click();
+        std::cerr << "[TaylorRoundingModeProbe]"
+                  << " pairs=" << rounding_probe_pairs
+                  << " switches=" << (2u*rounding_probe_pairs)
+                  << " elapsed_seconds=" << rounding_stopwatch.elapsed_seconds()
+                  << " seconds_per_switch="
+                  << (rounding_stopwatch.elapsed_seconds()
+                      / static_cast<double>(2u*rounding_probe_pairs))
                   << std::endl;
     }
 

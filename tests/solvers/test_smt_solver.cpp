@@ -497,15 +497,18 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(
             not SmtSolverTestSupport::expression_is_differentiable(
                 abs(nonsmooth_expression)));
+        auto negative_derivative=(-exp(x[0])-x[0]).derivative(0u);
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
-                -exp(x[0])-x[0],positive_domain,0u));
+                negative_derivative,positive_domain));
+
+        auto sine_derivative=sin(x[0]).derivative(0u);
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::monotone_coordinate_is_safe(
-                sin(x[0]),monotone_sine_domain,0u));
+                sine_derivative,monotone_sine_domain));
         ARIADNE_TEST_ASSERT(
             not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                sin(x[0]),nonmonotone_sine_domain,0u));
+                sine_derivative,nonmonotone_sine_domain));
     }
 
     Void test_search_outcome() {

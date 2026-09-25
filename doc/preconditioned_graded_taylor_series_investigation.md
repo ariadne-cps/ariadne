@@ -3399,3 +3399,21 @@ number of differing centre coefficients, maximum absolute difference, and for Fl
 maximum ULP distance. Nonzero-input-error cases retain the validated error-budget
 comparison; the independent coefficient oracle is intentionally restricted to the
 zero-error polynomial core.
+
+
+### 9.94 Fix rigorous-oracle test compilation (2026-09-25)
+
+The first rigorous-oracle test did not compile for two independent test-code reasons:
+
+1. `abs(Float)` resolves to validated arithmetic and therefore returns `Bounds<Float>`,
+   so it cannot be assigned to a raw `Float`. The maximum absolute centre difference is
+   diagnostic only, so it is now computed as a `double` from `get_d()`; it is not used
+   in any rigorous assertion.
+2. `MultiIndex` has equality but no ordering relation suitable for `std::map`. The
+   small deterministic oracle now uses a vector of `(MultiIndex, Bounds<F>)` pairs and
+   a linear equality lookup. This affects test bookkeeping only; the rigorous Bounds
+   arithmetic and the enclosure assertion are unchanged.
+
+The correctness condition remains
+`coefficient_error_bound <= batched.error()`, with the coefficient error bound built
+entirely using outward-rounded Ariadne arithmetic.

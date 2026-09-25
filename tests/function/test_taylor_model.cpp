@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <map>
 #include <bit>
 #include <cstdint>
 #include "config.hpp"
@@ -657,12 +656,14 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
 
         unsigned long long differing_coefficients=0u;
         unsigned long long maximum_ulp_distance=0u;
-        F maximum_absolute_difference(0.0_x,pr);
+        double maximum_absolute_difference=0.0;
         for(auto iter=per_pair.begin(); iter!=per_pair.end(); ++iter) {
             F const& reference=iter->coefficient();
             F candidate=batched[iter->index()];
-            F difference=abs(candidate-reference);
-            maximum_absolute_difference=max(maximum_absolute_difference,difference);
+            const double difference=
+                std::abs(candidate.get_d()-reference.get_d());
+            maximum_absolute_difference=
+                std::max(maximum_absolute_difference,difference);
             if(candidate!=reference) {
                 ++differing_coefficients;
                 if constexpr (Same<F,FloatDP>) {
@@ -690,15 +691,26 @@ template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalen
         ARIADNE_TEST_COMPARE(batched.error().raw(),>=,per_pair.error().raw());
 
         if(a.error().raw()==F(0.0_x,pr) && b.error().raw()==F(0.0_x,pr)) {
-            std::map<MultiIndex,Bounds<F>> oracle;
+            std::vector<std::pair<MultiIndex,Bounds<F>>> oracle;
+            oracle.reserve(a.number_of_terms()*b.number_of_terms());
             for(auto ai=a.begin(); ai!=a.end(); ++ai) {
                 for(auto bi=b.begin(); bi!=b.end(); ++bi) {
                     MultiIndex index=ai->index()+bi->index();
                     Bounds<F> product=
                         Bounds<F>(ai->coefficient()) * Bounds<F>(bi->coefficient());
-                    auto found=oracle.find(index);
-                    if(found==oracle.end()) oracle.emplace(index,product);
-                    else found->second=found->second+product;
+
+                    auto found=oracle.end();
+                    for(auto iter=oracle.begin(); iter!=oracle.end(); ++iter) {
+                        if(iter->first==index) {
+                            found=iter;
+                            break;
+                        }
+                    }
+                    if(found==oracle.end()) {
+                        oracle.emplace_back(index,product);
+                    } else {
+                        found->second=found->second+product;
+                    }
                 }
             }
 

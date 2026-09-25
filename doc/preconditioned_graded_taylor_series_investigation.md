@@ -4909,3 +4909,45 @@ stable global sort with a structured stable merge of already ordered product row
 retaining this equal-key ordering. If equality still fails, inspect the actual ordering
 performed by the reference `std::sort`; a semantics-preserving sort replacement becomes
 substantially harder.
+
+
+### 9.136 Stable equal-key order does not reproduce reference std::sort (2026-09-25)
+
+The stable-order A/B gives:
+
+```
+calls                           5000
+reference exact matches         -
+map equal_expansions            1984
+stable_order_equal_expansions   1984
+map candidate_seconds           0.035335
+reference_seconds               0.034860
+stable_order_seconds            0.052086
+```
+
+Preserving original generation order among equal MultiIndices does not improve exactness
+at all: the stable candidate matches exactly the same 1984/5000 products as the direct
+map accumulator. It is also substantially slower than the reference.
+
+This reveals that the existing reference `std::sort` does not preserve append order for
+equal keys, and its implementation-dependent permutation of equal-key terms affects
+FloatDPBounds accumulation. Therefore an alternative stable merge cannot be expected to
+be bit-identical merely by preserving mathematical key order.
+
+The exact-sort-replacement route is rejected as a near-term optimisation. Reproducing
+the current non-stable equal-key permutation would couple the algorithm to details of
+`std::sort` and would be brittle and non-portable.
+
+The 9.132 diagnosis remains useful: Differential multiplication is expensive and creates
+many duplicate raw terms, but exact representation preservation sharply constrains
+changes to its accumulation strategy. The next performance work should either:
+
+1. optimise the existing append/sort/combine implementation without changing its ordering
+   semantics (allocation/reserve, MultiIndex construction/copying, comparator overhead),
+   or
+2. move to another large hot block where a cleaner behaviour-preserving optimisation is
+   available.
+
+Given the limited ceiling of cleanup alone and the representation-order constraint, the
+recommended next target is carried-state/flowpipe composition rather than further
+redesigning Differential multiplication.

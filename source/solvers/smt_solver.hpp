@@ -52,6 +52,15 @@ enum class SmtResultStatus {
 };
 
 //! \ingroup Solvers
+//! \brief Reason why an SMT search returned UNKNOWN.
+enum class SmtUnknownReason {
+    NONE,
+    RESOURCE_EXHAUSTED,
+    DP_RESOLUTION_EXHAUSTED,
+    MIXED
+};
+
+//! \ingroup Solvers
 //! \brief Configuration shared by bounded real epsilon-SMT solvers.
 class SmtSolverConfiguration {
   public:
@@ -97,8 +106,9 @@ struct SmtSearchStatistics {
     SizeType boxes_processed = 0u;
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
+    SizeType boxes_unknown = 0u;
     SizeType box_budget_exhaustions = 0u;
-    SizeType dp_resolution_fallback_boxes = 0u;
+    SizeType dp_resolution_exhaustions = 0u;
     SizeType non_splittable_uncertified_boxes = 0u;
     SizeType non_splittable_epsilon_overlap_boxes = 0u;
     SizeType hull_reduction_rounds = 0u;
@@ -150,20 +160,22 @@ class SmtResult {
     //! \brief Construct an UNSAT result.
     static SmtResult unsat(SmtSearchStatistics statistics = {});
 
-    //! \brief Construct an operational EPSILON_SAT result with a witness box.
-    //! \details Unless dp_resolution_fallback_boxes is nonzero, the witness is
-    //! validated against the requested epsilon. A nonzero fallback count records
-    //! the same fixed-precision terminal condition used by dReal-style ICP.
+    //! \brief Construct an EPSILON_SAT result with a validated witness box.
     static SmtResult epsilon_sat(UpperBoxType const& witness,
                                  SmtSearchStatistics statistics = {});
 
-    //! \brief Construct an inconclusive result.
-    static SmtResult unknown(SmtSearchStatistics statistics = {});
+    //! \brief Construct an inconclusive result with an explicit cause.
+    static SmtResult unknown(
+        SmtUnknownReason reason,
+        SmtSearchStatistics statistics = {});
 
     SmtResultStatus status() const { return _status; }
     Bool is_unsat() const { return _status==SmtResultStatus::UNSAT; }
     Bool is_epsilon_sat() const { return _status==SmtResultStatus::EPSILON_SAT; }
     Bool is_unknown() const { return _status==SmtResultStatus::UNKNOWN; }
+
+    //! \brief Cause of UNKNOWN; NONE for conclusive results.
+    SmtUnknownReason unknown_reason() const { return _unknown_reason; }
 
     //! \brief True iff the result contains a witness box.
     Bool has_witness() const { return _witness.has_value(); }
@@ -180,11 +192,13 @@ class SmtResult {
               SmtSearchStatistics statistics);
 
     SmtResultStatus _status;
+    SmtUnknownReason _unknown_reason = SmtUnknownReason::NONE;
     std::optional<UpperBoxType> _witness;
     SmtSearchStatistics _statistics;
 };
 
 OutputStream& operator<<(OutputStream& os, SmtResultStatus status);
+OutputStream& operator<<(OutputStream& os, SmtUnknownReason reason);
 
 class SmtSolver;
 
@@ -278,15 +292,20 @@ struct SearchOutcome {
     static SearchOutcome backjump(SizeType level);
 };
 
+SmtUnknownReason combine_unknown_reasons(
+    SmtUnknownReason first,
+    SmtUnknownReason second);
+
 SmtResult finalize_search_outcome(
     SearchOutcome const& outcome,
-    Bool theory_unknown_seen,
+    SmtUnknownReason theory_unknown_reason,
     SmtSearchStatistics const& statistics);
 
 enum class BoxProcessingStatus {
     PRUNED,
     EPSILON_SAT,
-    SPLIT
+    SPLIT,
+    UNKNOWN
 };
 
 struct BoxProcessingStatisticsInput {
@@ -300,7 +319,7 @@ struct BoxProcessingStatisticsInput {
     Bool sensitivity_guided_split = false;
     Bool sensitivity_overrode_geometric_split = false;
     Bool epsilon_box_certification = false;
-    Bool dp_resolution_fallback = false;
+    Bool dp_resolution_exhausted = false;
     Bool candidate_witness_search = false;
     Bool candidate_witness_success = false;
 };
@@ -370,7 +389,7 @@ TheoryAtomImplication domain_theory_implication(
 
 struct TheoryResultInterpretation {
     Bool consistent = false;
-    Bool unknown = false;
+    SmtUnknownReason unknown_reason = SmtUnknownReason::NONE;
     std::optional<UpperBoxType> witness;
 };
 
@@ -465,7 +484,7 @@ class SmtSolver {
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
         Bool epsilon_box_certification = false;
-        Bool dp_resolution_fallback = false;
+        Bool dp_resolution_exhausted = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
         Bool non_splittable_epsilon_overlap = false;

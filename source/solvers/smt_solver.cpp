@@ -248,9 +248,14 @@ SmtResult SmtResult::epsilon_sat(UpperBoxType const& witness,
     return SmtResult(SmtResultStatus::EPSILON_SAT,witness,statistics);
 }
 
-SmtResult SmtResult::unknown(SmtSearchStatistics statistics)
+SmtResult SmtResult::unknown(
+    SmtUnknownReason reason,
+    SmtSearchStatistics statistics)
 {
-    return SmtResult(SmtResultStatus::UNKNOWN,statistics);
+    ARIADNE_PRECONDITION(reason!=SmtUnknownReason::NONE);
+    SmtResult result(SmtResultStatus::UNKNOWN,statistics);
+    result._unknown_reason=reason;
+    return result;
 }
 
 UpperBoxType const& SmtResult::witness() const
@@ -266,6 +271,17 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
         case SmtResultStatus::EPSILON_SAT: return os << "EPSILON_SAT";
         case SmtResultStatus::UNKNOWN: return os << "UNKNOWN";
         default: throw std::runtime_error("Unknown SmtResultStatus");
+    }
+}
+
+OutputStream& operator<<(OutputStream& os, SmtUnknownReason reason)
+{
+    switch(reason) {
+        case SmtUnknownReason::NONE: return os << "NONE";
+        case SmtUnknownReason::RESOURCE_EXHAUSTED: return os << "RESOURCE_EXHAUSTED";
+        case SmtUnknownReason::DP_RESOLUTION_EXHAUSTED: return os << "DP_RESOLUTION_EXHAUSTED";
+        case SmtUnknownReason::MIXED: return os << "MIXED";
+        default: throw std::runtime_error("Unknown SmtUnknownReason");
     }
 }
 
@@ -633,11 +649,11 @@ SmtSolver::_process_box(
 
     if(not splittable) {
         BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,
-            domain,
+            BoxProcessingStatus::UNKNOWN,
+            std::nullopt,
             std::nullopt,
             reductions};
-        result.dp_resolution_fallback=true;
+        result.dp_resolution_exhausted=true;
         result.candidate_witness_search=false;
         result.non_splittable_epsilon_overlap=true;
         return result;
@@ -685,7 +701,7 @@ SmtSolver::_accumulate_box_processing_statistics(
             processing.sensitivity_guided_split,
             processing.sensitivity_overrode_geometric_split,
             processing.epsilon_box_certification,
-            processing.dp_resolution_fallback,
+            processing.dp_resolution_exhausted,
             processing.candidate_witness_search,
             processing.candidate_witness_success
         });
@@ -699,10 +715,13 @@ SmtSolver::_solve_sequential_conjunction(
     SmtSearchStatistics statistics;
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
+    SmtUnknownReason unknown_reason=SmtUnknownReason::NONE;
     while(not pending.empty()) {
         if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
             ++statistics.box_budget_exhaustions;
-            return SmtResult::unknown(statistics);
+            unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+                unknown_reason,SmtUnknownReason::RESOURCE_EXHAUSTED);
+            break;
         }
         UpperBoxType current=pending.pop();
         ++statistics.boxes_processed;
@@ -717,10 +736,15 @@ SmtSolver::_solve_sequential_conjunction(
         if(processing.status==BoxProcessingStatus::SPLIT) {
             pending.push(std::move(processing.children->second));
             pending.push(std::move(processing.children->first));
+        } else if(processing.status==BoxProcessingStatus::UNKNOWN) {
+            unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+                unknown_reason,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
         }
     }
 
-    return SmtResult::unsat(statistics);
+    return unknown_reason==SmtUnknownReason::NONE
+        ? SmtResult::unsat(statistics)
+        : SmtResult::unknown(unknown_reason,statistics);
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -775,6 +799,7 @@ struct ParallelSmtSearchState {
     std::mutex mutex;
     SmtSearchStatistics statistics;
     std::optional<UpperBoxType> witness;
+    SmtUnknownReason unknown_reason = SmtUnknownReason::NONE;
     std::atomic<bool> found{false};
     std::atomic<bool> limit_reached{false};
 };
@@ -822,6 +847,8 @@ struct SmtParallelTask {
             if(state->statistics.boxes_processed>=
                     solver._configuration.box_processing_limit()) {
                 ++state->statistics.box_budget_exhaustions;
+                state->unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+                    state->unknown_reason,SmtUnknownReason::RESOURCE_EXHAUSTED);
                 state->limit_reached.store(true);
                 return;
             }
@@ -842,11 +869,17 @@ struct SmtParallelTask {
             claim_parallel_witness(*state,*processing.witness);
             return;
         }
-        auto children=SmtSolverTestSupport::parallel_children_to_append(
-            state->found.load(),*processing.children);
-        for(auto const& child:children) {
-            access.append(child);
+        if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
+            auto children=SmtSolverTestSupport::parallel_children_to_append(
+                state->found.load(),*processing.children);
+            for(auto const& child:children) {
+                access.append(child);
+            }
+            return;
         }
+        std::lock_guard<std::mutex> lock(state->mutex);
+        state->unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+            state->unknown_reason,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
     }
 };
 
@@ -867,8 +900,8 @@ SmtSolver::_solve_parallel_conjunction(
     if(state->found.load()) {
         return SmtResult::epsilon_sat(*state->witness,state->statistics);
     }
-    if(state->limit_reached.load()) {
-        return SmtResult::unknown(state->statistics);
+    if(state->unknown_reason!=SmtUnknownReason::NONE) {
+        return SmtResult::unknown(state->unknown_reason,state->statistics);
     }
     return SmtResult::unsat(state->statistics);
 }
@@ -989,8 +1022,9 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.boxes_processed+=source.boxes_processed;
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
+    target.boxes_unknown+=source.boxes_unknown;
     target.box_budget_exhaustions+=source.box_budget_exhaustions;
-    target.dp_resolution_fallback_boxes+=source.dp_resolution_fallback_boxes;
+    target.dp_resolution_exhaustions+=source.dp_resolution_exhaustions;
     target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
     target.non_splittable_epsilon_overlap_boxes+=source.non_splittable_epsilon_overlap_boxes;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
@@ -1187,16 +1221,32 @@ SearchOutcome SearchOutcome::backjump(SizeType level)
     return result;
 }
 
+SmtUnknownReason combine_unknown_reasons(
+    SmtUnknownReason first,
+    SmtUnknownReason second)
+{
+    if(first==SmtUnknownReason::NONE) {
+        return second;
+    }
+    if(second==SmtUnknownReason::NONE) {
+        return first;
+    }
+    if(first==second) {
+        return first;
+    }
+    return SmtUnknownReason::MIXED;
+}
+
 SmtResult finalize_search_outcome(
     SearchOutcome const& outcome,
-    Bool theory_unknown_seen,
+    SmtUnknownReason theory_unknown_reason,
     SmtSearchStatistics const& statistics)
 {
     if(outcome.witness.has_value()) {
         return SmtResult::epsilon_sat(*outcome.witness,statistics);
     }
-    if(theory_unknown_seen) {
-        return SmtResult::unknown(statistics);
+    if(theory_unknown_reason!=SmtUnknownReason::NONE) {
+        return SmtResult::unknown(theory_unknown_reason,statistics);
     }
     return SmtResult::unsat(statistics);
 }
@@ -1409,12 +1459,12 @@ TheoryAtomImplication domain_theory_implication(
 TheoryResultInterpretation interpret_theory_result(SmtResult const& result)
 {
     if(result.is_epsilon_sat()) {
-        return {true,false,result.witness()};
+        return {true,SmtUnknownReason::NONE,result.witness()};
     }
     if(result.is_unknown()) {
-        return {true,true,std::nullopt};
+        return {true,result.unknown_reason(),std::nullopt};
     }
-    return {false,false,std::nullopt};
+    return {false,SmtUnknownReason::NONE,std::nullopt};
 }
 
 ExactIntervalType original_bounds(
@@ -1469,8 +1519,8 @@ Void accumulate_box_processing_statistics(
     if(input.epsilon_box_certification) {
         ++statistics.epsilon_box_certifications;
     }
-    if(input.dp_resolution_fallback) {
-        ++statistics.dp_resolution_fallback_boxes;
+    if(input.dp_resolution_exhausted) {
+        ++statistics.dp_resolution_exhaustions;
         ++statistics.non_splittable_uncertified_boxes;
         ++statistics.non_splittable_epsilon_overlap_boxes;
     }
@@ -1487,6 +1537,9 @@ Void accumulate_box_processing_statistics(
             break;
         case BoxProcessingStatus::SPLIT:
             ++statistics.boxes_split;
+            break;
+        case BoxProcessingStatus::UNKNOWN:
+            ++statistics.boxes_unknown;
             break;
         case BoxProcessingStatus::EPSILON_SAT:
             break;
@@ -1525,7 +1578,7 @@ class SmtDpllSearch {
         }
         SmtSolverTestSupport::SearchOutcome outcome=this->_search_boolean();
         return SmtSolverTestSupport::finalize_search_outcome(
-            outcome,_theory_unknown_seen,_statistics);
+            outcome,_theory_unknown_reason,_statistics);
     }
 
   private:
@@ -2125,7 +2178,8 @@ class SmtDpllSearch {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
-            _theory_unknown_seen|=interpretation.unknown;
+            _theory_unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+                _theory_unknown_reason,interpretation.unknown_reason);
             return interpretation.consistent;
         }
 
@@ -2182,7 +2236,8 @@ class SmtDpllSearch {
             SmtResult result=this->_solve_theory_literals(literals);
             SmtSolverTestSupport::accumulate_statistics(_statistics,result.statistics());
             auto interpretation=SmtSolverTestSupport::interpret_theory_result(result);
-            _theory_unknown_seen|=interpretation.unknown;
+            _theory_unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
+                _theory_unknown_reason,interpretation.unknown_reason);
             return interpretation.witness;
         }
 
@@ -2216,7 +2271,7 @@ class SmtDpllSearch {
     std::vector<SizeType> _learned_clause_generation;
     std::optional<SizeType> _last_boolean_conflict_clause;
     std::optional<SizeType> _last_theory_conflict_clause;
-    Bool _theory_unknown_seen=false;
+    SmtUnknownReason _theory_unknown_reason = SmtUnknownReason::NONE;
     SmtSearchStatistics _statistics;
 };
 } // namespace

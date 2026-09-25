@@ -239,17 +239,38 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_searches,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_successes,0u);
 
-        std::cout << "[smt-result] construct UNKNOWN result" << std::endl;
-        SmtResult unknown=SmtResult::unknown();
+        std::cout << "[smt-result] construct UNKNOWN result with explicit reason" << std::endl;
+        SmtResult unknown=SmtResult::unknown(SmtUnknownReason::RESOURCE_EXHAUSTED);
         ARIADNE_TEST_ASSERT(unknown.is_unknown());
         ARIADNE_TEST_ASSERT(not unknown.is_unsat());
         ARIADNE_TEST_ASSERT(not unknown.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(not unknown.has_witness());
+        ARIADNE_TEST_ASSERT(
+            unknown.unknown_reason!=SmtUnknownReason::NONE_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
+        ARIADNE_TEST_ASSERT(
+            unsat.unknown_reason()==SmtUnknownReason::NONE);
+        ARIADNE_TEST_THROWS(
+            SmtResult::unknown(SmtUnknownReason::NONE),std::runtime_error);
 
         std::cout << "[smt-result] stream statuses" << std::endl;
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status() << " " << unknown.status();
         ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT UNKNOWN"));
+
+        std::ostringstream reason_stream;
+        reason_stream
+            << SmtUnknownReason::NONE << " "
+            << SmtUnknownReason::RESOURCE_EXHAUSTED << " "
+            << SmtUnknownReason::DP_RESOLUTION_EXHAUSTED << " "
+            << SmtUnknownReason::MIXED;
+        ARIADNE_TEST_EQUAL(
+            reason_stream.str(),
+            String("NONE RESOURCE_EXHAUSTED DP_RESOLUTION_EXHAUSTED MIXED"));
+        ARIADNE_TEST_THROWS(
+            static_cast<Void>(
+                static_cast<OutputStream&>(std::cout)
+                << static_cast<SmtUnknownReason>(999)),
+            std::runtime_error);
 
         std::cout << "[smt-result] reject invalid status" << std::endl;
         auto invalid_status=static_cast<SmtResultStatus>(999);
@@ -540,16 +561,34 @@ class TestSmtSolver {
 
         SmtSearchStatistics statistics;
         SmtResult sat=SmtSolverTestSupport::finalize_search_outcome(
-            found,false,statistics);
+            found,SmtUnknownReason::NONE,statistics);
         ARIADNE_TEST_ASSERT(sat.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(sat.has_witness());
 
         SmtResult unknown=SmtSolverTestSupport::finalize_search_outcome(
-            exhausted,true,statistics);
+            exhausted,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED,statistics);
         ARIADNE_TEST_ASSERT(unknown.is_unknown());
+        ARIADNE_TEST_ASSERT(
+            unknown.unknown_reason!=SmtUnknownReason::NONE_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::combine_unknown_reasons(
+                SmtUnknownReason::NONE,SmtUnknownReason::RESOURCE_EXHAUSTED)
+            ==SmtUnknownReason::RESOURCE_EXHAUSTED);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::combine_unknown_reasons(
+                SmtUnknownReason::DP_RESOLUTION_EXHAUSTED,SmtUnknownReason::NONE)
+            ==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::combine_unknown_reasons(
+                SmtUnknownReason::RESOURCE_EXHAUSTED,SmtUnknownReason::RESOURCE_EXHAUSTED)
+            ==SmtUnknownReason::RESOURCE_EXHAUSTED);
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::combine_unknown_reasons(
+                SmtUnknownReason::RESOURCE_EXHAUSTED,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED)
+            ==SmtUnknownReason::MIXED);
 
         SmtResult unsat=SmtSolverTestSupport::finalize_search_outcome(
-            exhausted,false,statistics);
+            exhausted,SmtUnknownReason::NONE,statistics);
         ARIADNE_TEST_ASSERT(unsat.is_unsat());
     }
 
@@ -703,19 +742,19 @@ class TestSmtSolver {
         auto sat=SmtSolverTestSupport::interpret_theory_result(
             SmtResult::epsilon_sat(witness));
         ARIADNE_TEST_ASSERT(sat.consistent);
-        ARIADNE_TEST_ASSERT(not sat.unknown);
+        ARIADNE_TEST_ASSERT(sat.unknown_reason==SmtUnknownReason::NONE);
         ARIADNE_TEST_ASSERT(sat.witness.has_value());
 
         auto unknown=SmtSolverTestSupport::interpret_theory_result(
             SmtResult::unknown());
         ARIADNE_TEST_ASSERT(unknown.consistent);
-        ARIADNE_TEST_ASSERT(unknown.unknown);
+        ARIADNE_TEST_ASSERT(unknown.unknown_reason!=SmtUnknownReason::NONE);
         ARIADNE_TEST_ASSERT(not unknown.witness.has_value());
 
         auto unsat=SmtSolverTestSupport::interpret_theory_result(
             SmtResult::unsat());
         ARIADNE_TEST_ASSERT(not unsat.consistent);
-        ARIADNE_TEST_ASSERT(not unsat.unknown);
+        ARIADNE_TEST_ASSERT(unsat.unknown_reason==SmtUnknownReason::NONE);
         ARIADNE_TEST_ASSERT(not unsat.witness.has_value());
     }
 
@@ -819,8 +858,9 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(statistics.boxes_split,1u);
 
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::EPSILON_SAT,0u,0u,0u,0u,0u,0u,false,false,false,true});
-        ARIADNE_TEST_EQUAL(statistics.dp_resolution_fallback_boxes,1u);
+            statistics,Input{Status::UNKNOWN,0u,0u,0u,0u,0u,0u,false,false,false,true});
+        ARIADNE_TEST_EQUAL(statistics.boxes_unknown,1u);
+        ARIADNE_TEST_EQUAL(statistics.dp_resolution_exhaustions,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,1u);
 
@@ -888,6 +928,8 @@ class TestSmtSolver {
             });
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
@@ -913,7 +955,7 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_fallback_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_epsilon_overlap_boxes,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
@@ -1275,7 +1317,7 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_fallback_boxes,0u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_exhaustions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
@@ -1368,7 +1410,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-solve] non-splittable uncertified singleton uses dReal-style fallback" << std::endl;
+            std::cout << "[smt-solve] non-splittable uncertified singleton returns precision UNKNOWN" << std::endl;
             auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -1383,11 +1425,13 @@ class TestSmtSolver {
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 ExactBoxType({ExactIntervalType(1,1)}),constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().dp_resolution_fallback_boxes,1u);
+                solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
         }
@@ -1403,10 +1447,12 @@ class TestSmtSolver {
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 ExactBoxType({ExactIntervalType(1,1)}),constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_fallback_boxes,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
             ARIADNE_TEST_EQUAL(
@@ -1512,23 +1558,27 @@ class TestSmtSolver {
                 ExactBoxType({ExactIntervalType(0,1)}),
                 literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         {
-            std::cout << "[smt-theory-solve] DP terminal precision limit uses dReal-style fallback" << std::endl;
+            std::cout << "[smt-theory-solve] DP terminal precision limit returns precision UNKNOWN" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 space,ExactBoxType({ExactIntervalType(1,1)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().dp_resolution_fallback_boxes,1u);
+                solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -2629,7 +2679,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] DP terminal fallback propagates through Boolean theory search" << std::endl;
+            std::cout << "[smt-dpll] DP resolution UNKNOWN propagates through Boolean theory search" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
                 std::numeric_limits<SizeType>::max(),
@@ -2642,10 +2692,12 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 uncertain||(!uncertain));
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_ASSERT(
-                solve_result.statistics().dp_resolution_fallback_boxes>=1u);
+                solve_result.statistics().dp_resolution_exhaustions>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
         }
 
         {
@@ -2909,13 +2961,15 @@ class TestSmtSolver {
             });
             SmtResult solve_result=bounded_solver.solve_parallel(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         {
-            std::cout << "[smt-parallel] non-splittable DP fallback counted once" << std::endl;
+            std::cout << "[smt-parallel] non-splittable DP resolution exhaustion counted once" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -2932,11 +2986,13 @@ class TestSmtSolver {
                     ValidatedNumber(0))
             });
             SmtResult solve_result=tiny_epsilon_solver.solve_parallel(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().dp_resolution_fallback_boxes,1u);
+                solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -2944,7 +3000,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-parallel] theory DP terminal precision limit uses dReal-style fallback" << std::endl;
+            std::cout << "[smt-parallel] theory DP terminal precision limit returns precision UNKNOWN" << std::endl;
             RealVariable x("x");
             RealExpression ex=x;
             RealSpace space({x});
@@ -2964,11 +3020,13 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(
-                solve_result.statistics().dp_resolution_fallback_boxes,1u);
+                solve_result.statistics().dp_resolution_exhaustions,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -3021,6 +3079,8 @@ class TestSmtSolver {
             SmtResult solve_result=bounded_solver.solve_parallel(
                 space,ExactBoxType({ExactIntervalType(0,1)}),literals);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().non_splittable_uncertified_boxes,0u);

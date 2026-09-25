@@ -59,9 +59,9 @@ The solver roadmap therefore prioritizes, in this order:
    the optimization is currently restricted to compiled SMT theory literals;
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
-6. maintain dReal-style two-outcome numerical behavior on the declared bounded
-   QF_NRA fragment, with public UNKNOWN reserved for explicit resource limits
-   rather than DP terminal resolution;
+6. preserve rigorous answer semantics in DP: UNSAT and EPSILON_SAT are
+   certified, while UNKNOWN distinguishes explicit resource exhaustion from
+   fixed-precision DP-resolution exhaustion;
 7. only after those goals, broader language features such as richer SMT-LIB
    integration, quantifiers, or dedicated ODE solving.
 
@@ -76,13 +76,10 @@ structure, and large composed expression graphs.
 The solver currently exposes three outcomes:
 
 - `UNSAT`: the bounded query has been rigorously excluded.
-- `EPSILON_SAT`: the search has found an epsilon witness under the operational
-  dReal-style DP contract. Normally the witness box is validated directly
-  against the epsilon-relaxed query; a nonzero
-  `dp_resolution_fallback_boxes` records the fixed-precision non-bisectable
-  fallback instead.
-- `UNKNOWN`: an explicit search resource limit was exhausted before either
-  `UNSAT` or `EPSILON_SAT` was established.
+- `EPSILON_SAT`: a validated witness box satisfies the epsilon-relaxed query.
+- `UNKNOWN`: neither proof is available. `unknown_reason()` distinguishes
+  `RESOURCE_EXHAUSTED` from `DP_RESOLUTION_EXHAUSTED`; `MIXED` records that
+  both causes occurred along different explored branches.
 
 ### Double-precision numerical contract
 
@@ -142,19 +139,22 @@ The Ariadne SMT contract is therefore:
 
 - `UNSAT` is exact: validated pruning/range exclusion has ruled out the
   original query.
-- `EPSILON_SAT` normally carries a box validated against the epsilon-relaxed
-  constraints. At the DP representation boundary, the explicit dReal-style
-  non-bisectable fallback may instead return operational `EPSILON_SAT`; this is
-  recorded by `dp_resolution_fallback_boxes`.
-- `UNKNOWN` is reserved for explicit resource exhaustion. DP-resolution
-  exhaustion is not a public UNKNOWN condition.
+- `EPSILON_SAT` is certified: the returned witness box is validated against
+  the epsilon-relaxed constraints.
+- `UNKNOWN(RESOURCE_EXHAUSTED)` means the configured search budget stopped a
+  search that could otherwise have continued.
+- `UNKNOWN(DP_RESOLUTION_EXHAUSTED)` means a box still required refinement but
+  no distinct DP children could be produced and no epsilon witness had been
+  certified.
+- `UNKNOWN(MIXED)` can arise in Boolean/parallel exploration when unresolved
+  branches encountered both causes.
 
-A global rule such as `epsilon >= 1e-12` is therefore not a rigorous
-completeness contract. Expressions with large intermediate magnitudes,
-cancellation or poorly conditioned compositions can have a larger DP enclosure
-floor even when their final real value is small. Any future admissibility test
-must be derived from validated information about the actual compiled
-expressions and domain, not from a universal magic constant.
+This deliberately differs from dReal4's pragmatic sequential escape hatch,
+which returns true when the delta condition is unmet but no active dimension is
+bisectable. Ariadne does not promote that implementation limit to
+`EPSILON_SAT`: fixed-precision exhaustion remains explicit `UNKNOWN`. The
+solver follows the delta-complete branch-and-prune ideas where they are sound in
+DP, while preserving a stronger result contract.
 
 #### Relation to the current implementation
 
@@ -178,74 +178,43 @@ conclusion. However, this cannot solve the hard terminal case in which even
 singleton DP evaluation is wider than epsilon. It should therefore be treated as
 an early certification optimization, not as the missing completeness theorem.
 
-### dReal-style whole-box epsilon stopping
+### Whole-box epsilon stopping and DP exhaustion
 
-The production solver now applies epsilon certification to the validated image
-of the whole reduced box, rather than only to a midpoint point-box. For each
-normalized constraint the complete interval image must satisfy the
-epsilon-relaxed target; strict positivity keeps its strict lower-bound test.
-The certified reduced box itself is returned as the witness.
+The production solver applies epsilon certification to the validated image of
+the whole reduced box. For each normalized constraint the complete interval
+image must satisfy the epsilon-relaxed target; strict positivity keeps its
+strict lower-bound test. The certified reduced box itself is returned as the
+witness.
 
-This follows the same validated-box stopping principle as dReal's documented
-`EvaluateBox` procedure, but the exact predicates differ. dReal classifies an
-original relational atom as VALID/UNSAT/UNKNOWN and, for an UNKNOWN atom, stops
-branching when the diameter of its interval evaluation is at most the requested
-precision. Ariadne instead tests direct containment of the validated image in
-the explicit epsilon-relaxed target.
+This uses the same interval branch-and-prune principle as dReal, but Ariadne's
+answer contract is intentionally stricter. Direct containment in the explicit
+epsilon-relaxed target is a sound stopping condition and can be stronger than a
+generic diameter threshold. If containment and point-candidate certification
+both fail, splitting continues.
 
-For the normalized primitive relations currently used by the SMT solver,
-Ariadne's containment test subsumes dReal's generic diameter test after original
-consistency has been established. For equality, an UNKNOWN interval contains
-zero, so diameter at most epsilon implies containment in [-epsilon,+epsilon].
-For non-strict positivity, UNKNOWN implies that the interval reaches zero, so
-diameter at most epsilon implies lower bound at least -epsilon. For strict
-positivity, UNKNOWN additionally has a strictly positive upper bound, hence the
-same diameter bound implies lower bound strictly greater than -epsilon.
-Containment can certify more boxes than the generic diameter rule while
-remaining sound; for example equality may certify [-epsilon,+epsilon], whose
-diameter is 2*epsilon, and a one-sided inequality may certify a much wider image
-whose lower bound already lies above -epsilon.
-
-If whole-box certification and point-candidate certification both fail, normal
-splitting continues. dReal4's sequential ICP contains one explicit
-fixed-precision escape hatch: if the requested delta condition is still not met
-but the box is no longer bisectable, `CheckSat` returns true. Ariadne now adopts
-the same operational rule. A non-splittable uncertified DP box therefore returns
-`EPSILON_SAT` with the terminal box as witness and increments
-`dp_resolution_fallback_boxes`.
-
-This fallback is intentionally distinguishable from a validated epsilon
-certificate. When `dp_resolution_fallback_boxes==0`, an `EPSILON_SAT` witness
-has been validated against the requested epsilon. A nonzero value records the
-machine-resolution case where, like dReal4, the implementation cannot enforce
-the requested precision any further. This is the only deliberate weakening of
-the witness-certification contract.
+If no distinct DP children can be produced, Ariadne returns
+`UNKNOWN(DP_RESOLUTION_EXHAUSTED)`, never `EPSILON_SAT` without a validated
+witness. The statistics counter `dp_resolution_exhaustions` records these
+events. Resource limits instead produce `UNKNOWN(RESOURCE_EXHAUSTED)`.
 
 ### UNKNOWN taxonomy
 
-After adopting the dReal4 non-bisectable fallback, fixed-precision resolution
-exhaustion is no longer a source of public `UNKNOWN`. It produces operational
-`EPSILON_SAT` and is explicitly visible through
-`dp_resolution_fallback_boxes`.
+There are two independent inconclusive mechanisms:
 
-The only current public `UNKNOWN` source is explicit box-processing resource
-exhaustion. Sequential and parallel conjunction search return `UNKNOWN` when
-the configured global box-processing limit is reached. Boolean/CDCL search may
-continue after a resource-limited theory branch, but the final Boolean result is
-`UNKNOWN` if no other branch establishes epsilon satisfiability or UNSAT.
+1. **Resource exhaustion.** The configured box-processing limit is reached while
+   pending search remains.
+2. **DP-resolution exhaustion.** A surviving box is not epsilon-certified and
+   cannot be refined into distinct DP children.
 
-Accordingly, per-box processing has only three internal outcomes:
-`PRUNED`, `EPSILON_SAT`, and `SPLIT`. There is no per-box `UNKNOWN` state.
+Sequential and parallel conjunction search accumulate these causes separately.
+Boolean/CDCL theory search propagates the reason from unresolved theory
+branches. If both causes contribute before the overall query terminates,
+`SmtUnknownReason::MIXED` is returned.
 
-The older counters `non_splittable_uncertified_boxes` and
-`non_splittable_epsilon_overlap_boxes` are retained for diagnostic continuity
-and are incremented together with the new fallback counter. They no longer imply
-that the public result is `UNKNOWN`.
-
-The next branch-and-prune improvement is to make splitting focus on constraints
-whose box evaluation has not yet met the epsilon stopping condition, mirroring
-dReal's branching-candidate set. This is a performance/progress refinement, not
-a change to the terminal precision contract.
+This distinction is semantic, not cosmetic: increasing a box budget can address
+resource exhaustion but cannot repair DP-resolution exhaustion. Conversely,
+loosening epsilon or improving validated expression evaluation/contractors can
+reduce DP-resolution exhaustion without changing the resource budget.
 
 ## Main implementation
 
@@ -291,7 +260,8 @@ A box is processed in this order:
 3. deterministic witness candidates;
 4. sensitivity-guided splitting;
 5. optional nonlinear interior-point candidate search for splittable boxes;
-6. `UNKNOWN` for a non-splittable box that remains uncertified.
+6. `UNKNOWN(DP_RESOLUTION_EXHAUSTED)` for a non-splittable box that remains
+   uncertified.
 
 The interior-point candidate is only a candidate. It is never trusted without
 validated epsilon certification.
@@ -553,17 +523,20 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. make splitting focus on constraints whose validated box evaluation has not
-   yet met the epsilon stopping condition, mirroring dReal's branching-candidate
-   set while retaining Ariadne's sensitivity guidance within that active set;
-2. preserve deterministic, nontrivial tests for sequential, parallel and Boolean
-   search behavior introduced by each branch-and-prune refinement;
-3. after every green functional test run, regenerate coverage and restore 100%
-   function and branch coverage for newly introduced functionality before
-   starting the next feature tranche;
-4. improve DP decision power through stronger symbolic simplification,
-   correlation-preserving/shared expression evaluation and contractors;
-5. retain the audited compiler-mapped line anomaly unless a semantic source
+1. validate the explicit UNKNOWN-reason plumbing across sequential, parallel and
+   Boolean search and restore full coverage for the new branches;
+2. make splitting focus on constraints whose validated box evaluation has not
+   yet met the epsilon stopping condition, mirroring the active-formula idea in
+   dReal while retaining Ariadne's sensitivity guidance;
+3. investigate rigorous DP stopping certificates based on validated continuity
+   or derivative information that can reduce `DP_RESOLUTION_EXHAUSTED` without
+   arbitrary-precision arithmetic;
+4. preserve deterministic, nontrivial tests for every introduced behavior;
+5. after every green functional test run, regenerate coverage and restore 100%
+   function and branch coverage for newly introduced functionality;
+6. improve DP decision power through symbolic simplification,
+   correlation-preserving/shared expression evaluation and stronger contractors;
+7. retain the audited compiler-mapped line anomaly unless a semantic source
    change resolves it naturally;
-6. later add CI coverage gates so regressions in functions, lines or branches
+8. later add CI coverage gates so regressions in functions, lines or branches
    fail automatically.

@@ -3843,3 +3843,46 @@ the maximum separate/direct range-magnitude ratio.
 
 The production Gronwall path is unchanged. This isolates whether restriction is the first
 operation at which the two residual constructions cease to agree.
+
+
+### 9.108 Restriction is the first non-commuting transformation (2026-09-25)
+
+The restriction-order audit identifies the first concrete transformation at which the
+direct and separately materialised residual constructions diverge.
+
+Before restriction, the widened-domain audit found exact coefficient identity. After
+restriction, by 2000 recurrence calls the cumulative diagnostic reports:
+
+```
+differing_coefficients                  33626
+direct_only_coefficients                    3
+separate_only_coefficients               2737
+max_coefficient_difference          5.25375e-14
+max_direct_error                    6.94198e-13
+max_separate_error                  1.18291e-12
+max_direct_range_mag                4.22746e-11
+max_separate_range_mag              4.26437e-11
+max_separate_to_direct_range_ratio  104.674
+```
+
+Thus restriction does not commute with subtraction in the current Taylor-model
+implementation. Restricting the two operands separately introduces thousands of
+coefficients absent from the restricted combined defect and changes many shared
+coefficients. The separate path also carries a larger Error budget.
+
+This explains the qualitative source of the large direct/production residual gap:
+the two paths are identical before restriction and diverge at restriction. The very large
+maximum range ratio occurs on components or steps where the direct residual is extremely
+small, so it should not be interpreted as a typical factor; nevertheless it establishes
+that separate restriction can strongly inhibit cancellation.
+
+The audit is expensive: it adds extra restriction/materialisation work, accumulates
+4.45028 s of diagnostic time, raises dense calls from 1,256,468 to 1,866,748, and
+increases wall time to 28.9991 s. This run is diagnostic only; the clean performance
+baseline remains 24.0561 s.
+
+The production Gronwall path still uses the separately restricted centre polynomial and
+recurrence field. A production optimisation must not simply substitute the smaller direct
+range: the next step is to establish a rigorous validated argument for forming the
+residual on the widened domain and restricting the residual once, including the
+Taylor-model Error semantics of restriction.

@@ -1145,6 +1145,58 @@ graded_series_centre_polynomial_step(
         make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
     defect_derivative_materialise_stopwatch.click();
 
+    // Diagnostic A/B: test whether differentiating an already materialised
+    // widened centre model reproduces the current derivative operand exactly.
+    // This is intentionally diagnostics-only because TaylorModel
+    // differentiation has its own Error semantics.
+    static SizeType widened_derivative_equivalence_calls=0u;
+    static SizeType widened_derivative_equal_expansion_components=0u;
+    static SizeType widened_derivative_equal_error_components=0u;
+    static SizeType widened_derivative_total_components=0u;
+    static double widened_derivative_candidate_seconds=0.0;
+    static double widened_derivative_max_error_difference=0.0;
+    if(compute_exact_polynomial_diagnostic) {
+        Stopwatch<Microseconds> widened_derivative_candidate_stopwatch;
+        FlowStepTaylorModelType diagnostic_wide_centre=
+            make_taylor_function_model(dphi,wide_domain,sweeper);
+        for(SizeType i=0u; i!=n; ++i) {
+            ValidatedTaylorModelDP derived_model=
+                derivative(diagnostic_wide_centre.get(i),n).model();
+            ValidatedTaylorModelDP const& reference_model=
+                wide_derivative.model(i);
+            ++widened_derivative_total_components;
+            if(same(derived_model.expansion(),reference_model.expansion())) {
+                ++widened_derivative_equal_expansion_components;
+            }
+            if(same(derived_model.error(),reference_model.error())) {
+                ++widened_derivative_equal_error_components;
+            }
+            widened_derivative_max_error_difference=std::max(
+                widened_derivative_max_error_difference,
+                std::abs(
+                    derived_model.error().raw().get_d()
+                    -reference_model.error().raw().get_d()));
+        }
+        widened_derivative_candidate_stopwatch.click();
+        ++widened_derivative_equivalence_calls;
+        widened_derivative_candidate_seconds+=
+            widened_derivative_candidate_stopwatch.elapsed_seconds();
+        if(widened_derivative_equivalence_calls%100u==0u) {
+            std::cerr << "[WidenedDerivativeEquivalence]"
+                      << " calls=" << widened_derivative_equivalence_calls
+                      << " components=" << widened_derivative_total_components
+                      << " equal_expansion_components="
+                      << widened_derivative_equal_expansion_components
+                      << " equal_error_components="
+                      << widened_derivative_equal_error_components
+                      << " max_error_difference="
+                      << widened_derivative_max_error_difference
+                      << " candidate_seconds="
+                      << widened_derivative_candidate_seconds
+                      << std::endl;
+        }
+    }
+
     Stopwatch<Microseconds> defect_field_materialise_stopwatch;
     FlowStepTaylorModelType wide_field=
         make_taylor_function_model(

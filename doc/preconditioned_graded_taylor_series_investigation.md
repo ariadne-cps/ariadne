@@ -4213,3 +4213,49 @@ centre model, before its forward restriction.  If coefficient and Error semantic
 the current `make_taylor_function_model(derivative_dphi, wide_domain)` operand, retain
 the derived model and eliminate the redundant ~0.99 s materialisation.  If they do not
 match, keep the current validated path and move to field-materialisation optimisation.
+
+
+### 9.116 Diagnostic A/B for reusing the widened centre model derivative (2026-09-25)
+
+The phase profile in 9.115 shows that the two widened Taylor-model materialisations
+account for about 95.6% of the validated-defect phase cost.  The derivative operand alone
+costs about 0.987 s over 2000 calls.
+
+Before replacing it, a diagnostics-only A/B path now checks whether differentiating an
+already materialised widened centre model reproduces the current reference operand:
+
+```
+reference =
+    make_taylor_function_model(dP/dt, widened_domain)
+
+candidate =
+    derivative(
+        make_taylor_function_model(P, widened_domain),
+        time_index)
+```
+
+The comparison is deliberately exact at representation level.  For every component it
+records separately whether the Taylor-model polynomial expansion and uniform Error are
+identical.  It also reports the maximum absolute Error difference and cumulative
+candidate construction time.
+
+Marker:
+
+```
+[WidenedDerivativeEquivalence]
+calls=...
+components=...
+equal_expansion_components=...
+equal_error_components=...
+max_error_difference=...
+candidate_seconds=...
+```
+
+This experiment is diagnostic-only and runs only with integrator diagnostics enabled.
+Production semantics and the clean 22.7361 s reference path are unchanged.
+
+Acceptance criterion for direct reuse is strict: all compared expansions and Errors must
+match exactly.  If expansions match but Errors do not, the derivative of the already
+materialised centre model cannot simply replace the current operand; the Error semantics
+must first be reconstructed explicitly.  If even the expansions differ, abandon this
+reuse route and move to optimising field materialisation.

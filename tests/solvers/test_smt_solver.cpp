@@ -937,7 +937,7 @@ class TestSmtSolver {
 
 
         {
-            std::cout << "[smt-solve] classify non-splittable DP fallback singleton" << std::endl;
+            std::cout << "[smt-solve] classify non-splittable DP resolution exhaustion" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -951,8 +951,10 @@ class TestSmtSolver {
                 ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
             });
             SmtResult solve_result=tiny_epsilon_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
-            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().dp_resolution_exhaustions,1u);

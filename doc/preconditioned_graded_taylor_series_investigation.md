@@ -3811,3 +3811,35 @@ wall time to 27.3211 s. That runtime is not a performance baseline.
 
 The remaining local variable shadow warning in the audit has also been removed by
 renaming `separate_abs` to `separate_coeff_abs`.
+
+
+### 9.107 Restriction-order audit for the centre defect (2026-09-25)
+
+The widened-domain coefficient audit established exact polynomial identity between
+`materialise(A-B)` and `materialise(A)-materialise(B)` on all 2000 calls, so the
+direct/production residual gap does not arise from pre-restriction sweeping or lost
+cancellation.
+
+That expensive audit has now been removed. The remaining structural difference is
+restriction from the widened time domain to the forward time interval. The new diagnostic
+therefore compares, on identical widened and forward domains,
+
+```
+restriction(materialise(A-B))
+```
+
+with
+
+```
+restriction(materialise(A)) - restriction(materialise(B))
+```
+
+where `A=derivative(dphi)` and `B=recurrence_field_differential`.
+
+The cumulative marker `[DefectRestrictionAudit]` reports coefficient differences after
+clobbering attached Errors, coefficients present only on either side, maximum coefficient
+difference, direct and separate Error budgets, direct and separate range magnitudes, and
+the maximum separate/direct range-magnitude ratio.
+
+The production Gronwall path is unchanged. This isolates whether restriction is the first
+operation at which the two residual constructions cease to agree.

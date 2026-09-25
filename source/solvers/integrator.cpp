@@ -1149,109 +1149,118 @@ graded_series_centre_polynomial_step(
         make_taylor_function_model(
             direct_defect_differential,join(domx,widt,doma),sweeper);
 
-    // Audit the exact operation ordering responsible for the direct/production
-    // gap on the same widened domain.  Materialise the two operands
-    // independently, remove only their attached Errors, subtract their stored
-    // polynomials, and compare against materialising the Differential
-    // subtraction once.
-    static SizeType defect_sweep_audit_calls=0u;
-    static unsigned long long differing_coefficients=0u;
-    static unsigned long long direct_only_coefficients=0u;
-    static unsigned long long separate_only_coefficients=0u;
-    static double direct_coefficient_l1=0.0;
-    static double separate_coefficient_l1=0.0;
-    static double max_direct_to_separate_l1_ratio=0.0;
-    static double max_separate_to_direct_l1_ratio=0.0;
-    static double maximum_coefficient_difference=0.0;
-    static double maximum_direct_error=0.0;
-    static double maximum_separate_source_error=0.0;
-    static double coefficient_audit_seconds=0.0;
+    // Restriction audit: compare restricting the already combined
+    // defect with restricting the two operands separately before subtraction.
+    static SizeType defect_restriction_audit_calls=0u;
+    static unsigned long long restriction_differing_coefficients=0u;
+    static unsigned long long restriction_direct_only_coefficients=0u;
+    static unsigned long long restriction_separate_only_coefficients=0u;
+    static double restriction_max_coefficient_difference=0.0;
+    static double restriction_max_direct_error=0.0;
+    static double restriction_max_separate_error=0.0;
+    static double restriction_max_direct_range_mag=0.0;
+    static double restriction_max_separate_range_mag=0.0;
+    static double restriction_max_separate_to_direct_range_ratio=0.0;
+    static double restriction_audit_seconds=0.0;
 
-    Stopwatch<Microseconds> coefficient_audit_stopwatch;
-    ++defect_sweep_audit_calls;
-    ExactBoxType const wide_domain=join(domx,widt,doma);
+    Stopwatch<Microseconds> restriction_audit_stopwatch;
+    ++defect_restriction_audit_calls;
+
+    ExactBoxType const audit_wide_domain=join(domx,widt,doma);
+    ExactBoxType const audit_forward_domain=join(domx,domt,doma);
+
+    FlowStepTaylorModelType restricted_direct=
+        restriction(wide_defect,audit_forward_domain);
+
     FlowStepTaylorModelType wide_derivative=
-        make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
+        make_taylor_function_model(
+            derivative_dphi,audit_wide_domain,sweeper);
     FlowStepTaylorModelType wide_field=
         make_taylor_function_model(
-            recurrence_field_differential,wide_domain,sweeper);
+            recurrence_field_differential,audit_wide_domain,sweeper);
+    FlowStepTaylorModelType restricted_derivative=
+        restriction(wide_derivative,audit_forward_domain);
+    FlowStepTaylorModelType restricted_field=
+        restriction(wide_field,audit_forward_domain);
 
     for(SizeType i=0u; i!=n; ++i) {
-        ValidatedTaylorModelDP derivative_core=wide_derivative.model(i);
-        ValidatedTaylorModelDP field_core=wide_field.model(i);
-        maximum_separate_source_error=std::max(
-            maximum_separate_source_error,
-            derivative_core.error().raw().get_d()
-            +field_core.error().raw().get_d());
-        derivative_core.clobber();
-        field_core.clobber();
-        ValidatedTaylorModelDP separate_core=derivative_core-field_core;
+        ValidatedTaylorModelDP direct_model=restricted_direct.model(i);
+        ValidatedTaylorModelDP separate_model=
+            restricted_derivative.model(i)-restricted_field.model(i);
+
+        restriction_max_direct_error=std::max(
+            restriction_max_direct_error,
+            direct_model.error().raw().get_d());
+        restriction_max_separate_error=std::max(
+            restriction_max_separate_error,
+            separate_model.error().raw().get_d());
+
+        const double direct_range_mag=
+            mag(direct_model.range()).raw().get_d();
+        const double separate_range_mag=
+            mag(separate_model.range()).raw().get_d();
+        restriction_max_direct_range_mag=std::max(
+            restriction_max_direct_range_mag,direct_range_mag);
+        restriction_max_separate_range_mag=std::max(
+            restriction_max_separate_range_mag,separate_range_mag);
+        if(direct_range_mag>0.0) {
+            restriction_max_separate_to_direct_range_ratio=std::max(
+                restriction_max_separate_to_direct_range_ratio,
+                separate_range_mag/direct_range_mag);
+        }
+
+        ValidatedTaylorModelDP direct_core=direct_model;
+        ValidatedTaylorModelDP separate_core=separate_model;
+        direct_core.clobber();
         separate_core.clobber();
 
-        ValidatedTaylorModelDP direct_core=wide_defect.model(i);
-        maximum_direct_error=std::max(
-            maximum_direct_error,direct_core.error().raw().get_d());
-        direct_core.clobber();
-
-        double direct_l1_component=0.0;
-        double separate_l1_component=0.0;
         for(auto const& term : direct_core.expansion()) {
             FloatDP const dc=term.coefficient();
             FloatDP const sc=separate_core[term.index()];
-            const double direct_abs=std::abs(dc.get_d());
-            const double separate_coeff_abs=std::abs(sc.get_d());
-            direct_l1_component+=direct_abs;
-            if(sc==FloatDP(0u,dp)) {
-                ++direct_only_coefficients;
+            if(sc==FloatDP(0u,dp) && dc!=FloatDP(0u,dp)) {
+                ++restriction_direct_only_coefficients;
             }
             if(dc!=sc) {
-                ++differing_coefficients;
-                maximum_coefficient_difference=std::max(
-                    maximum_coefficient_difference,
+                ++restriction_differing_coefficients;
+                restriction_max_coefficient_difference=std::max(
+                    restriction_max_coefficient_difference,
                     std::abs(dc.get_d()-sc.get_d()));
             }
         }
         for(auto const& term : separate_core.expansion()) {
             FloatDP const sc=term.coefficient();
             FloatDP const dc=direct_core[term.index()];
-            separate_l1_component+=std::abs(sc.get_d());
-            if(dc==FloatDP(0u,dp)) {
-                ++separate_only_coefficients;
+            if(dc==FloatDP(0u,dp) && sc!=FloatDP(0u,dp)) {
+                ++restriction_separate_only_coefficients;
             }
         }
-        direct_coefficient_l1+=direct_l1_component;
-        separate_coefficient_l1+=separate_l1_component;
-        if(separate_l1_component>0.0) {
-            max_direct_to_separate_l1_ratio=std::max(
-                max_direct_to_separate_l1_ratio,
-                direct_l1_component/separate_l1_component);
-        }
-        if(direct_l1_component>0.0) {
-            max_separate_to_direct_l1_ratio=std::max(
-                max_separate_to_direct_l1_ratio,
-                separate_l1_component/direct_l1_component);
-        }
     }
-    coefficient_audit_stopwatch.click();
-    coefficient_audit_seconds+=coefficient_audit_stopwatch.elapsed_seconds();
-    if(defect_sweep_audit_calls%100u==0u) {
-        std::cerr << "[DefectSweepCoefficientAudit]"
-                  << " calls=" << defect_sweep_audit_calls
-                  << " differing_coefficients=" << differing_coefficients
-                  << " direct_only_coefficients=" << direct_only_coefficients
-                  << " separate_only_coefficients=" << separate_only_coefficients
-                  << " direct_coefficient_l1=" << direct_coefficient_l1
-                  << " separate_coefficient_l1=" << separate_coefficient_l1
-                  << " max_direct_to_separate_l1_ratio="
-                  << max_direct_to_separate_l1_ratio
-                  << " max_separate_to_direct_l1_ratio="
-                  << max_separate_to_direct_l1_ratio
+
+    restriction_audit_stopwatch.click();
+    restriction_audit_seconds+=restriction_audit_stopwatch.elapsed_seconds();
+    if(defect_restriction_audit_calls%100u==0u) {
+        std::cerr << "[DefectRestrictionAudit]"
+                  << " calls=" << defect_restriction_audit_calls
+                  << " differing_coefficients="
+                  << restriction_differing_coefficients
+                  << " direct_only_coefficients="
+                  << restriction_direct_only_coefficients
+                  << " separate_only_coefficients="
+                  << restriction_separate_only_coefficients
                   << " max_coefficient_difference="
-                  << maximum_coefficient_difference
-                  << " max_direct_error=" << maximum_direct_error
-                  << " max_separate_source_error="
-                  << maximum_separate_source_error
-                  << " audit_seconds=" << coefficient_audit_seconds
+                  << restriction_max_coefficient_difference
+                  << " max_direct_error="
+                  << restriction_max_direct_error
+                  << " max_separate_error="
+                  << restriction_max_separate_error
+                  << " max_direct_range_mag="
+                  << restriction_max_direct_range_mag
+                  << " max_separate_range_mag="
+                  << restriction_max_separate_range_mag
+                  << " max_separate_to_direct_range_ratio="
+                  << restriction_max_separate_to_direct_range_ratio
+                  << " audit_seconds="
+                  << restriction_audit_seconds
                   << std::endl;
     }
 

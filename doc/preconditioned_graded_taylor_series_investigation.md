@@ -4488,3 +4488,44 @@ wall time settles below the previous reference. If timing remains noisy, use rep
 clean runs (at least three) and compare the median before selecting a new end-to-end
 baseline. The local field-materialisation improvement is already established
 independently by its cumulative timer.
+
+
+### 9.124 Three-run clean timing confirms end-to-end speedup (2026-09-25)
+
+After removing the obsolete profiled helper and its compiler warning, three consecutive
+clean Van der Pol runs with production diagonal field materialisation give:
+
+```
+run 1  20.9181 s
+run 2  21.6201 s
+run 3  22.3001 s
+median 21.6201 s
+```
+
+All three runs preserve exactly:
+
+```
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+The median is 1.116 s (about 4.91%) faster than the previous 22.7361 s clean reference.
+The best observed run is 20.9181 s.  The spread also confirms that single-run wall times
+on this machine can vary by well over one second, so future small end-to-end improvements
+should be judged from repeated clean runs rather than isolated measurements.
+
+The specialised widened field materialisation remains stable at about 0.23--0.24 s over
+2000 calls:
+
+```
+run 1  0.231202 s
+run 2  0.239326 s
+run 3  0.241785 s
+```
+
+This establishes 21.6201 s as the new median production timing reference for the current
+machine/run protocol.  Performance remains the primary objective.  The next target
+should move away from the now-small widened field materialisation and profile/optimise
+the larger remaining blocks, beginning with `graded_flow_iterate` and carried-state
+composition.

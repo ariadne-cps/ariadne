@@ -1148,6 +1148,113 @@ graded_series_centre_polynomial_step(
     FlowStepTaylorModelType wide_defect=
         make_taylor_function_model(
             direct_defect_differential,join(domx,widt,doma),sweeper);
+
+    // Audit the exact operation ordering responsible for the direct/production
+    // gap on the same widened domain.  Materialise the two operands
+    // independently, remove only their attached Errors, subtract their stored
+    // polynomials, and compare against materialising the Differential
+    // subtraction once.
+    static SizeType defect_sweep_audit_calls=0u;
+    static unsigned long long differing_coefficients=0u;
+    static unsigned long long direct_only_coefficients=0u;
+    static unsigned long long separate_only_coefficients=0u;
+    static double direct_coefficient_l1=0.0;
+    static double separate_coefficient_l1=0.0;
+    static double max_direct_to_separate_l1_ratio=0.0;
+    static double max_separate_to_direct_l1_ratio=0.0;
+    static double maximum_coefficient_difference=0.0;
+    static double maximum_direct_error=0.0;
+    static double maximum_separate_source_error=0.0;
+    static double coefficient_audit_seconds=0.0;
+
+    Stopwatch<Microseconds> coefficient_audit_stopwatch;
+    ++defect_sweep_audit_calls;
+    ExactBoxType const wide_domain=join(domx,widt,doma);
+    FlowStepTaylorModelType wide_derivative=
+        make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
+    FlowStepTaylorModelType wide_field=
+        make_taylor_function_model(
+            recurrence_field_differential,wide_domain,sweeper);
+
+    for(SizeType i=0u; i!=n; ++i) {
+        ValidatedTaylorModelDP derivative_core=wide_derivative.model(i);
+        ValidatedTaylorModelDP field_core=wide_field.model(i);
+        maximum_separate_source_error=std::max(
+            maximum_separate_source_error,
+            derivative_core.error().raw().get_d()
+            +field_core.error().raw().get_d());
+        derivative_core.clobber();
+        field_core.clobber();
+        ValidatedTaylorModelDP separate_core=derivative_core-field_core;
+        separate_core.clobber();
+
+        ValidatedTaylorModelDP direct_core=wide_defect.model(i);
+        maximum_direct_error=std::max(
+            maximum_direct_error,direct_core.error().raw().get_d());
+        direct_core.clobber();
+
+        double direct_l1_component=0.0;
+        double separate_l1_component=0.0;
+        for(auto const& term : direct_core.expansion()) {
+            FloatDP const dc=term.coefficient();
+            FloatDP const sc=separate_core[term.index()];
+            const double da=std::abs(dc.get_d());
+            const double sa=std::abs(sc.get_d());
+            direct_l1_component+=da;
+            if(sc==FloatDP(0)) {
+                ++direct_only_coefficients;
+            }
+            if(dc!=sc) {
+                ++differing_coefficients;
+                maximum_coefficient_difference=std::max(
+                    maximum_coefficient_difference,
+                    std::abs(dc.get_d()-sc.get_d()));
+            }
+        }
+        for(auto const& term : separate_core.expansion()) {
+            FloatDP const sc=term.coefficient();
+            FloatDP const dc=direct_core[term.index()];
+            separate_l1_component+=std::abs(sc.get_d());
+            if(dc==FloatDP(0)) {
+                ++separate_only_coefficients;
+            }
+        }
+        direct_coefficient_l1+=direct_l1_component;
+        separate_coefficient_l1+=separate_l1_component;
+        if(separate_l1_component>0.0) {
+            max_direct_to_separate_l1_ratio=std::max(
+                max_direct_to_separate_l1_ratio,
+                direct_l1_component/separate_l1_component);
+        }
+        if(direct_l1_component>0.0) {
+            max_separate_to_direct_l1_ratio=std::max(
+                max_separate_to_direct_l1_ratio,
+                separate_l1_component/direct_l1_component);
+        }
+    }
+    coefficient_audit_stopwatch.click();
+    coefficient_audit_seconds+=coefficient_audit_stopwatch.elapsed_seconds();
+    if(defect_sweep_audit_calls%100u==0u) {
+        std::cerr << "[DefectSweepCoefficientAudit]"
+                  << " calls=" << defect_sweep_audit_calls
+                  << " differing_coefficients=" << differing_coefficients
+                  << " direct_only_coefficients=" << direct_only_coefficients
+                  << " separate_only_coefficients=" << separate_only_coefficients
+                  << " direct_coefficient_l1=" << direct_coefficient_l1
+                  << " separate_coefficient_l1=" << separate_coefficient_l1
+                  << " max_direct_to_separate_l1_ratio="
+                  << max_direct_to_separate_l1_ratio
+                  << " max_separate_to_direct_l1_ratio="
+                  << max_separate_to_direct_l1_ratio
+                  << " max_coefficient_difference="
+                  << maximum_coefficient_difference
+                  << " max_direct_error=" << maximum_direct_error
+                  << " max_separate_source_error="
+                  << maximum_separate_source_error
+                  << " audit_seconds=" << coefficient_audit_seconds
+                  << std::endl;
+    }
+
     Vector<FloatDPBounds> forward_half_box(
         wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
     forward_half_box[n]=FloatDPBounds(0,1,dp);
@@ -2194,126 +2301,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             // graded centre polynomial.  This has been checked against the
             // generic compose(g,P) path on the same step.
             residual_compose_stopwatch.click();
-
-            // Diagnostic audit of coefficient changes introduced by
-            // Differential->TaylorModel materialisation before the two
-            // residual operands are subtracted.
-            static SizeType defect_sweep_audit_calls=0u;
-            static unsigned long long derivative_missing_terms=0u;
-            static unsigned long long field_missing_terms=0u;
-            static unsigned long long derivative_changed_terms=0u;
-            static unsigned long long field_changed_terms=0u;
-            static double derivative_missing_magnitude_sum=0.0;
-            static double field_missing_magnitude_sum=0.0;
-            static double derivative_changed_magnitude_sum=0.0;
-            static double field_changed_magnitude_sum=0.0;
-            static double pre_subtract_magnitude_sum=0.0;
-            static double post_subtract_magnitude_sum=0.0;
-            static double coefficient_audit_seconds=0.0;
-
-            Stopwatch<Microseconds> coefficient_audit_stopwatch;
-            ++defect_sweep_audit_calls;
-            Vector<ValidatedDifferential> audit_derivative_dphi=
-                derivative(dphi,n);
-            for(SizeType i=0u; i!=n; ++i) {
-                ValidatedTaylorModelDP derivative_model=
-                    derivative(centre_polynomial.get(i),
-                               centre_polynomial.argument_size()-1u).model();
-                ValidatedTaylorModelDP field_model=
-                    recurrence_field.get(i).model();
-
-                auto audit_one =
-                    [&](ValidatedDifferential const& source,
-                        ValidatedTaylorModelDP const& model,
-                        unsigned long long& missing_terms,
-                        unsigned long long& changed_terms,
-                        double& missing_magnitude_sum,
-                        double& changed_magnitude_sum)
-                    {
-                        for(auto const& term : source.expansion()) {
-                            MultiIndex const& index=term.index();
-                            FloatDP const source_coeff=term.coefficient().raw();
-                            FloatDP model_coeff=model[index];
-                            const double source_abs=
-                                std::abs(source_coeff.get_d());
-                            const double diff_abs=
-                                std::abs(
-                                    source_coeff.get_d()-model_coeff.get_d());
-                            if(model_coeff==FloatDP(0.0,dp)
-                               && source_coeff!=FloatDP(0.0,dp))
-                            {
-                                ++missing_terms;
-                                missing_magnitude_sum+=source_abs;
-                            } else if(model_coeff!=source_coeff) {
-                                ++changed_terms;
-                                changed_magnitude_sum+=diff_abs;
-                            }
-                        }
-                    };
-
-                audit_one(
-                    audit_derivative_dphi[i],derivative_model,
-                    derivative_missing_terms,derivative_changed_terms,
-                    derivative_missing_magnitude_sum,
-                    derivative_changed_magnitude_sum);
-                audit_one(
-                    recurrence_field_differential[i],field_model,
-                    field_missing_terms,field_changed_terms,
-                    field_missing_magnitude_sum,
-                    field_changed_magnitude_sum);
-
-                ValidatedDifferential const direct_diff=
-                    audit_derivative_dphi[i]-recurrence_field_differential[i];
-                double pre_component=0.0;
-                for(auto const& term : direct_diff.expansion()) {
-                    pre_component+=std::abs(term.coefficient().raw().get_d());
-                }
-                pre_subtract_magnitude_sum+=pre_component;
-
-                ValidatedTaylorModelDP derivative_core=derivative_model;
-                ValidatedTaylorModelDP field_core=field_model;
-                derivative_core.clobber();
-                field_core.clobber();
-                ValidatedTaylorModelDP post_core=
-                    derivative_core-field_core;
-                double post_component=0.0;
-                for(auto const& term : post_core.expansion()) {
-                    post_component+=std::abs(
-                        term.coefficient().raw().get_d());
-                }
-                post_subtract_magnitude_sum+=post_component;
-            }
-            coefficient_audit_stopwatch.click();
-            coefficient_audit_seconds+=
-                coefficient_audit_stopwatch.elapsed_seconds();
-
-            if(!this->diagnostics() && defect_sweep_audit_calls%100u==0u) {
-                std::cerr << "[DefectSweepCoefficientAudit]"
-                          << " calls=" << defect_sweep_audit_calls
-                          << " derivative_missing_terms="
-                          << derivative_missing_terms
-                          << " field_missing_terms="
-                          << field_missing_terms
-                          << " derivative_changed_terms="
-                          << derivative_changed_terms
-                          << " field_changed_terms="
-                          << field_changed_terms
-                          << " derivative_missing_magnitude_sum="
-                          << derivative_missing_magnitude_sum
-                          << " field_missing_magnitude_sum="
-                          << field_missing_magnitude_sum
-                          << " derivative_changed_magnitude_sum="
-                          << derivative_changed_magnitude_sum
-                          << " field_changed_magnitude_sum="
-                          << field_changed_magnitude_sum
-                          << " pre_subtract_magnitude_sum="
-                          << pre_subtract_magnitude_sum
-                          << " post_subtract_magnitude_sum="
-                          << post_subtract_magnitude_sum
-                          << " audit_seconds="
-                          << coefficient_audit_seconds
-                          << std::endl;
-            }
 
             Stopwatch<Microseconds> residual_assembly_stopwatch;
             ValidatedVectorMultivariateFunctionPatch defect=

@@ -3709,3 +3709,41 @@ with fields for missing/changed term counts and magnitude sums for both operands
 The production Gronwall path is unchanged. The purpose is to determine whether the large
 direct/production residual gap is explained by coefficients being dropped or modified
 before cancellation can occur.
+
+
+### 9.104 Fix coefficient audit scope and compare on the widened Taylor domain (2026-09-25)
+
+The first coefficient audit did not compile because it was inserted in the outer
+preconditioned-step routine, while the source `dphi` and
+`recurrence_field_differential` objects exist only inside
+`graded_series_centre_polynomial_step`. It also incorrectly treated Differential
+coefficients, which are `Bounds<FloatDP>`, as raw FloatDP values.
+
+The invalid outer-scope audit has been removed. The replacement diagnostic is placed
+inside the recurrence helper, where both source Differentials are available, and avoids
+comparing differently scaled representations.
+
+On the exact same widened domain used by the direct defect, it now constructs:
+
+```
+wide_derivative = make_taylor_function_model(derivative_dphi)
+wide_field      = make_taylor_function_model(recurrence_field_differential)
+wide_defect     = make_taylor_function_model(
+                      derivative_dphi-recurrence_field_differential)
+```
+
+It then clobbers only the attached Errors of the two separately materialised operands,
+subtracts their stored polynomial cores, and compares that polynomial with the clobbered
+directly materialised defect. This directly tests the order-of-operations hypothesis:
+
+```
+materialise(A-B)   versus   materialise(A)-materialise(B)
+```
+
+without mixing source Differential coordinates with restricted Taylor-patch
+coordinates.
+
+The cumulative `[DefectSweepCoefficientAudit]` reports coefficient differences,
+coefficients present only on either side, cumulative coefficient L1 magnitudes, maximum
+L1 ratios, maximum coefficient difference, and the respective materialisation Error
+budgets. The production path remains unchanged.

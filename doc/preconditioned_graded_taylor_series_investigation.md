@@ -3467,3 +3467,32 @@ transformation.
 This correction may reduce some of the 22.4231 s performance gain because the earlier
 batched version benefited from fused arithmetic in addition to amortised rounding-mode
 changes. The next correctness run must pass exactly before re-benchmarking performance.
+
+
+### 9.96 Exact batched/reference equivalence confirmed (2026-09-25)
+
+After replacing the accidental fused collision arithmetic with the exact
+multiply-then-add sequence used by the local `fma_err`, the dedicated A/B suite passes
+exactly for all four deterministic products in both FloatDP and FloatMP.
+
+For every case:
+
+```
+differing_coefficients = 0
+max_abs_difference     = 0
+same(batched.expansion(), per_pair.expansion()) = true
+same(batched.error(),     per_pair.error())     = true
+```
+
+This includes the collision-heavy non-dyadic case that previously exposed two one-ulp
+differences, the multivariate cancellation case, the wide-dynamic-range case, and the
+nonzero-input-error case.
+
+The experiment therefore isolates the optimisation cleanly: the batched implementation
+now changes only the placement/frequency of rounding-mode switches. The coefficient
+operations, their order, the error-bound operations, and the order of Error accumulation
+match the trusted per-pair path exactly for the regression suite.
+
+The next required measurement is the Van der Pol benchmark with this corrected,
+bit-equivalent batching. The previous 22.4231 s result cannot be retained as the final
+batched baseline because it also benefited from the accidental fused arithmetic.

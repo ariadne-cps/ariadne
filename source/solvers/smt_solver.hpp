@@ -99,6 +99,7 @@ struct SmtSearchStatistics {
     SizeType boxes_split = 0u;
     SizeType boxes_unknown = 0u;
     SizeType box_budget_exhaustions = 0u;
+    SizeType dp_resolution_fallback_boxes = 0u;
     SizeType non_splittable_uncertified_boxes = 0u;
     SizeType non_splittable_epsilon_overlap_boxes = 0u;
     SizeType hull_reduction_rounds = 0u;
@@ -150,7 +151,10 @@ class SmtResult {
     //! \brief Construct an UNSAT result.
     static SmtResult unsat(SmtSearchStatistics statistics = {});
 
-    //! \brief Construct an EPSILON_SAT result with a validated witness box.
+    //! \brief Construct an operational EPSILON_SAT result with a witness box.
+    //! \details Unless dp_resolution_fallback_boxes is nonzero, the witness is
+    //! validated against the requested epsilon. A nonzero fallback count records
+    //! the same fixed-precision terminal condition used by dReal-style ICP.
     static SmtResult epsilon_sat(UpperBoxType const& witness,
                                  SmtSearchStatistics statistics = {});
 
@@ -298,6 +302,7 @@ struct BoxProcessingStatisticsInput {
     Bool sensitivity_guided_split = false;
     Bool sensitivity_overrode_geometric_split = false;
     Bool epsilon_box_certification = false;
+    Bool dp_resolution_fallback = false;
     Bool candidate_witness_search = false;
     Bool candidate_witness_success = false;
 };
@@ -462,6 +467,7 @@ class SmtSolver {
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
         Bool epsilon_box_certification = false;
+        Bool dp_resolution_fallback = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
         Bool non_splittable_epsilon_overlap = false;

@@ -1510,16 +1510,18 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-theory-solve] DP terminal precision limit remains UNKNOWN" << std::endl;
+            std::cout << "[smt-theory-solve] DP terminal precision limit uses dReal-style fallback" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
                 space,ExactBoxType({ExactIntervalType(1,1)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
-            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -2622,6 +2624,27 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] DP terminal fallback propagates through Boolean theory search" << std::endl;
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            ContinuousPredicate uncertain=
+                (sqr(sin(ex))+sqr(cos(ex))-1==0);
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                uncertain||(!uncertain));
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().dp_resolution_fallback_boxes>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+        }
+
+        {
             std::cout << "[smt-dpll] global box budget stops further Boolean search" << std::endl;
             SmtSolver bounded_solver(SmtSolverConfiguration(
                 0.125_x,
@@ -2888,7 +2911,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-parallel] non-splittable epsilon-overlap counted once" << std::endl;
+            std::cout << "[smt-parallel] non-splittable DP fallback counted once" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
@@ -2905,8 +2928,11 @@ class TestSmtSolver {
                     ValidatedNumber(0))
             });
             SmtResult solve_result=tiny_epsilon_solver.solve_parallel(domain,constraints);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -2914,7 +2940,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-parallel] theory DP terminal precision limit remains UNKNOWN" << std::endl;
+            std::cout << "[smt-parallel] theory DP terminal precision limit uses dReal-style fallback" << std::endl;
             RealVariable x("x");
             RealExpression ex=x;
             RealSpace space({x});
@@ -2934,9 +2960,11 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
-            ARIADNE_TEST_ASSERT(not solve_result.has_witness());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().non_splittable_uncertified_boxes,1u);
             ARIADNE_TEST_EQUAL(

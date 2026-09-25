@@ -633,10 +633,11 @@ SmtSolver::_process_box(
 
     if(not splittable) {
         BoxProcessingResult result{
-            BoxProcessingStatus::UNKNOWN,
-            std::nullopt,
+            BoxProcessingStatus::EPSILON_SAT,
+            domain,
             std::nullopt,
             reductions};
+        result.dp_resolution_fallback=true;
         result.candidate_witness_search=false;
         result.non_splittable_epsilon_overlap=true;
         return result;
@@ -684,6 +685,7 @@ SmtSolver::_accumulate_box_processing_statistics(
             processing.sensitivity_guided_split,
             processing.sensitivity_overrode_geometric_split,
             processing.epsilon_box_certification,
+            processing.dp_resolution_fallback,
             processing.candidate_witness_search,
             processing.candidate_witness_success
         });
@@ -1002,6 +1004,7 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.boxes_split+=source.boxes_split;
     target.boxes_unknown+=source.boxes_unknown;
     target.box_budget_exhaustions+=source.box_budget_exhaustions;
+    target.dp_resolution_fallback_boxes+=source.dp_resolution_fallback_boxes;
     target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
     target.non_splittable_epsilon_overlap_boxes+=source.non_splittable_epsilon_overlap_boxes;
     target.hull_reduction_rounds+=source.hull_reduction_rounds;
@@ -1480,6 +1483,11 @@ Void accumulate_box_processing_statistics(
     if(input.epsilon_box_certification) {
         ++statistics.epsilon_box_certifications;
     }
+    if(input.dp_resolution_fallback) {
+        ++statistics.dp_resolution_fallback_boxes;
+        ++statistics.non_splittable_uncertified_boxes;
+        ++statistics.non_splittable_epsilon_overlap_boxes;
+    }
     if(input.candidate_witness_search) {
         ++statistics.candidate_witness_searches;
     }
@@ -1496,8 +1504,6 @@ Void accumulate_box_processing_statistics(
             break;
         case BoxProcessingStatus::UNKNOWN:
             ++statistics.boxes_unknown;
-            ++statistics.non_splittable_uncertified_boxes;
-            ++statistics.non_splittable_epsilon_overlap_boxes;
             break;
         case BoxProcessingStatus::EPSILON_SAT:
             break;

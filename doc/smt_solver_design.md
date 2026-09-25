@@ -209,41 +209,42 @@ diameter is 2*epsilon, and a one-sided inequality may certify a much wider image
 whose lower bound already lies above -epsilon.
 
 If whole-box certification and point-candidate certification both fail, normal
-splitting continues. A non-splittable uncertified DP box remains `UNKNOWN`.
+splitting continues. dReal4's sequential ICP contains one explicit
+fixed-precision escape hatch: if the requested delta condition is still not met
+but the box is no longer bisectable, `CheckSat` returns true. Ariadne now adopts
+the same operational rule. A non-splittable uncertified DP box therefore returns
+`EPSILON_SAT` with the terminal box as witness and increments
+`dp_resolution_fallback_boxes`.
+
+This fallback is intentionally distinguishable from a validated epsilon
+certificate. When `dp_resolution_fallback_boxes==0`, an `EPSILON_SAT` witness
+has been validated against the requested epsilon. A nonzero value records the
+machine-resolution case where, like dReal4, the implementation cannot enforce
+the requested precision any further. This is the only deliberate weakening of
+the witness-certification contract.
 
 ### UNKNOWN taxonomy
 
-The current implementation has two numerical sources of `UNKNOWN` that
-propagate to the public result:
+After adopting the dReal4 non-bisectable fallback, fixed-precision resolution
+exhaustion is no longer a source of public `UNKNOWN`. It produces operational
+`EPSILON_SAT` and is explicitly visible through
+`dp_resolution_fallback_boxes`.
 
-1. **Explicit resource exhaustion.** Sequential and parallel conjunction search
-   return `UNKNOWN` when the configured global box-processing limit is reached.
-2. **DP-resolution exhaustion.** After validated original-domain reduction and
-   all available epsilon witness checks have failed, `_process_box` returns
-   `UNKNOWN` when `Box::split` cannot produce distinct children.
+The remaining numerical `UNKNOWN` source is explicit resource exhaustion:
+sequential and parallel conjunction search return `UNKNOWN` when the configured
+global box-processing limit is reached. Boolean/CDCL search may continue after a
+resource-limited theory branch, but the final Boolean result is `UNKNOWN` if no
+other branch establishes epsilon satisfiability or UNSAT.
 
-The statistics currently named `non_splittable_uncertified_boxes` and
-`non_splittable_epsilon_overlap_boxes` identify the second state. The latter
-name is historical: the important semantic fact is failure of certification at
-the DP representation boundary, not mere epsilon overlap.
+The older counters `non_splittable_uncertified_boxes` and
+`non_splittable_epsilon_overlap_boxes` are retained for diagnostic continuity
+and are incremented together with the new fallback counter. They no longer imply
+that the public result is `UNKNOWN`.
 
-Boolean/CDCL search does not create a third numerical cause. A theory
-`UNKNOWN` is remembered while Boolean search may continue through other
-assignments; the final Boolean result is `UNKNOWN` only if no certified witness
-or global UNSAT proof is obtained and at least one explored theory branch was
-numerically unresolved.
-
-The next implementation step should improve this taxonomy before attempting new
-completeness claims: add an explicit DP-resolution statistic/reason and preserve
-separate resource-exhaustion accounting. Tests should cover sequential,
-parallel and Boolean propagation of this reason using nontrivial formulas.
-
-The longer-term route to a larger two-outcome fragment is to reduce the DP
-resolution floor rather than hide it. Relevant work includes stronger symbolic
-simplification, shared-expression evaluation, validated correlation-preserving
-evaluation and stronger contractors. Each improvement can enlarge the class of
-queries decided before DP exhaustion while keeping the same sound three-result
-public contract.
+The next branch-and-prune improvement is to make splitting focus on constraints
+whose box evaluation has not yet met the epsilon stopping condition, mirroring
+dReal's branching-candidate set. This is a performance/progress refinement, not
+a change to the terminal precision contract.
 
 ## Main implementation
 

@@ -80,6 +80,92 @@ The solver currently exposes three outcomes:
   used deliberately for exhausted box budgets and terminal boxes that cannot be
   certified; it must never be silently promoted to `EPSILON_SAT`.
 
+### Precision-independent search geometry
+
+The current bounded search is structurally tied to double precision. This is
+deeper than a terminal-evaluation issue:
+
+- `ExactIntervalType` / `ExactBoxType` are aliases of
+  `FloatDPExactInterval` / `FloatDPExactBox`;
+- the sequential and parallel work queues store `UpperBoxType` directly;
+- splitting uses `UpperBoxType::split`, so progress stops when the midpoint
+  rounds to an existing DP endpoint;
+- deterministic witness candidates, midpoint selection and corner generation
+  are built from DP box endpoints;
+- sensitivity-guided splitting measures DP widths and derivative images;
+- hull, shaving and monotone contractors operate on `UpperBoxType`;
+- the public `SmtResult` witness is also an `UpperBoxType`.
+
+Consequently, replacing individual terminal evaluations with multiple precision
+cannot by itself establish delta-completeness: the *search topology* can still
+run out of representable DP subdivisions before the mathematical cell is small
+enough for the requested epsilon.
+
+The intended architecture is to separate **search geometry** from **validated
+evaluation geometry**.
+
+1. Introduce an SMT-local search-cell type with exact dyadic endpoints. A cell
+   represents the logical branch-and-prune region and is the object stored in
+   sequential/parallel queues. Bisection is exact in this representation, so
+   every non-singleton mathematical interval has a strictly finer dyadic split.
+2. Materialize a validated enclosure of a search cell only when invoking the
+   numerical machinery. Initially this should be a DP `UpperBoxType` for the
+   existing `ConstraintSolver`; later the same interface can select MP
+   enclosures when DP is insufficient.
+3. Treat contractor output as a validated refinement of the search cell rather
+   than as the authoritative search geometry. DP contraction may tighten a cell
+   by replacing dyadic bounds with exact outward dyadic bounds derived from the
+   validated enclosure; it must never collapse search progress merely because
+   adjacent DP numbers were reached.
+4. Splitting belongs to the search-cell abstraction, not to
+   `UpperBoxType::split`. Sensitivity analysis may still choose the coordinate
+   using DP derivatives/width estimates, but the actual split point is the exact
+   dyadic midpoint of that coordinate.
+5. Witness generation also belongs to the search geometry. Midpoints/endpoints
+   are exact dyadic points; certification remains validated and may use DP first
+   and MP escalation as needed.
+6. Parallelism is precision-agnostic once the workload payload changes from
+   `UpperBoxType` to the search-cell type. No parallel-search policy redesign
+   is required.
+7. The public API may continue to accept the existing `ExactBoxType` initially:
+   its DP endpoints are exactly representable dyadics and can be lifted without
+   loss into the new search cell. A later API can accept genuinely arbitrary
+   dyadic/rational bounds without changing the internal search algorithm.
+8. The public witness type should not be changed in the first migration step.
+   Internally retain an exact dyadic witness and convert it to the current
+   `UpperBoxType` result only at the boundary. A future API can expose the exact
+   witness directly.
+
+This separation deliberately leaves the existing contractors in DP at first.
+The functional goal is not to rewrite all numerical solvers in MP, but to ensure
+that DP is an acceleration/evaluation layer rather than the finite state space
+of the SMT search.
+
+#### Migration sequence
+
+The redesign should be staged so every commit preserves green tests and full
+coverage of introduced behavior:
+
+1. add a small exact-dyadic search interval/box abstraction plus deterministic
+   split/equality/midpoint tests, without wiring it into SMT search;
+2. change sequential queue and geometric splitting to operate on search cells,
+   materializing `UpperBoxType` only for `_process_box`;
+3. adapt sensitivity-guided splitting so it selects a coordinate from the
+   materialized enclosure but bisects the exact search cell;
+4. lift deterministic witness candidates to exact dyadic points and certify
+   them through the existing DP/MP validation path;
+5. migrate the parallel workload payload to search cells;
+6. propagate validated contractor refinements back into search cells with
+   outward-safe exact dyadic bounds;
+7. remove `non-splittable due to DP adjacency` as an algorithmic terminal
+   condition; at that point remaining `UNKNOWN` must be attributable to an
+   explicit resource limit or to a function class outside the declared
+   delta-complete fragment.
+
+A full MP replacement of `ConstraintSolver`, per-box caches and derivative/DAG
+optimizations remain separate performance work and are not prerequisites for
+this migration.
+
 ### Completeness audit and UNKNOWN taxonomy
 
 Functional completeness now takes priority over further performance work.

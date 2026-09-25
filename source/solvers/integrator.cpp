@@ -1364,7 +1364,7 @@ graded_series_centre_polynomial_step(
 
     Stopwatch<Microseconds> defect_field_materialise_stopwatch;
     FlowStepTaylorModelType wide_field=
-        make_taylor_function_model_profiled(
+        make_taylor_function_model_diagonal_scaling(
             recurrence_field_differential,wide_domain,sweeper);
     defect_field_materialise_stopwatch.click();
 

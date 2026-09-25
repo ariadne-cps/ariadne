@@ -2358,6 +2358,60 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             if(polynomial_in_certification_box) {
                 auto defect_ranges=defect.range();
                 auto initial_defect_ranges=initial_defect.range();
+
+                // Diagnostic comparison: can the coefficient-level direct
+                // defect range replace the materialised patch-level defect
+                // range without weakening the Gronwall certificate?
+                static SizeType direct_defect_compare_calls=0u;
+                static SizeType direct_defect_components=0u;
+                static SizeType direct_defect_conservative_components=0u;
+                static SizeType direct_defect_strictly_larger_components=0u;
+                static SizeType direct_defect_strictly_smaller_components=0u;
+                static double direct_defect_max_mag_ratio=0.0;
+                static double direct_defect_max_abs_mag_difference=0.0;
+                ++direct_defect_compare_calls;
+                for(SizeType i=0u; i!=n; ++i) {
+                    auto recurrence_mag=mag(defect_ranges[i]);
+                    auto direct_mag=mag(centre_result.direct_defect_range[i]);
+                    const double recurrence_mag_d=recurrence_mag.get_d();
+                    const double direct_mag_d=direct_mag.get_d();
+                    ++direct_defect_components;
+                    if(direct_mag_d>=recurrence_mag_d) {
+                        ++direct_defect_conservative_components;
+                        if(direct_mag_d>recurrence_mag_d) {
+                            ++direct_defect_strictly_larger_components;
+                        }
+                    } else {
+                        ++direct_defect_strictly_smaller_components;
+                    }
+                    if(recurrence_mag_d>0.0) {
+                        direct_defect_max_mag_ratio=std::max(
+                            direct_defect_max_mag_ratio,
+                            direct_mag_d/recurrence_mag_d);
+                    }
+                    direct_defect_max_abs_mag_difference=std::max(
+                        direct_defect_max_abs_mag_difference,
+                        std::abs(direct_mag_d-recurrence_mag_d));
+                }
+                if(!this->diagnostics()
+                    && direct_defect_compare_calls%100u==0u)
+                {
+                    std::cerr << "[DirectDefectRangeComparison]"
+                              << " calls=" << direct_defect_compare_calls
+                              << " components=" << direct_defect_components
+                              << " conservative_components="
+                              << direct_defect_conservative_components
+                              << " strictly_larger_components="
+                              << direct_defect_strictly_larger_components
+                              << " strictly_smaller_components="
+                              << direct_defect_strictly_smaller_components
+                              << " max_mag_ratio="
+                              << direct_defect_max_mag_ratio
+                              << " max_abs_mag_difference="
+                              << direct_defect_max_abs_mag_difference
+                              << std::endl;
+                }
+
                 range_stopwatch.click();
                 production_range_seconds+=range_stopwatch.elapsed_seconds();
 

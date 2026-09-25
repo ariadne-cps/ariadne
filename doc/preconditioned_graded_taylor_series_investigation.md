@@ -3571,3 +3571,43 @@ The new cumulative marker is:
 This profile should explain most of the 13.96 s outer centre timer and distinguish
 recurrence arithmetic from Taylor-patch materialisation. The 24.0561 s run remains the
 performance baseline; the instrumented run is diagnostic only.
+
+
+### 9.99 Compare direct Differential defect against production patch defect (2026-09-25)
+
+The centre-recurrence profile attributes about 6.54 s cumulatively to the final
+`g(P_m)` Procedure evaluation, recurrence-field Taylor-patch materialisation, and the
+coefficient-level direct-defect path. Before removing any patch-level work, the direct
+defect must be shown to be at least as conservative as the range currently used by the
+production Gronwall bound.
+
+The production semantics are unchanged. Whenever the centre polynomial lies inside the
+certification box, the code now compares, component by component,
+
+```
+mag(centre_result.direct_defect_range[i])
+```
+
+against
+
+```
+mag(defect.range()[i])
+```
+
+where the latter is the current production residual bound. The cumulative diagnostic
+
+```
+[DirectDefectRangeComparison]
+```
+
+reports:
+
+- number of calls and compared components;
+- components for which the direct range magnitude is at least the production magnitude;
+- counts of strictly larger and strictly smaller direct magnitudes;
+- maximum direct/production magnitude ratio;
+- maximum absolute magnitude difference.
+
+No Gronwall remainder uses the direct range yet. The purpose of this run is only to
+establish whether replacing the patch-level residual range would be semantically safe,
+and how much extra conservatism that replacement would introduce.

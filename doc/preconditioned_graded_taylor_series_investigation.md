@@ -4012,3 +4012,37 @@ known diagnostic work.
 If the cleaned run remains slower than 24.0561 s, decompose the two widened Taylor-model
 materialisations and investigate whether the already available centre-polynomial model
 can supply the derivative operand without rematerialising it.
+
+
+### 9.111 Remove direct-defect diagnostic work from clean production runs (2026-09-25)
+
+The widened-domain subtract-before-restrict benchmark in 9.110 completed at 27.3231 s,
+but its centre-recurrence profile showed 2.03148 s spent in the cheap
+materialise-after-subtraction direct-defect path.  That path is diagnostic only and does
+not contribute to the production Gronwall certificate.
+
+It is now executed only when integrator diagnostics are enabled.  Clean benchmark runs
+retain the validated widened-domain production defect from 9.109 but skip:
+
+```
+direct_defect_differential = dP/dt - g(P)
+make_taylor_function_model(direct_defect_differential, ...)
+evaluate(..., forward_half_box)
+```
+
+No production enclosure semantics are changed by this commit; it only removes known
+diagnostic overhead from the benchmark path.
+
+Reference to beat for the tightened widened-domain variant:
+
+```
+elapsed_seconds       27.3231
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+The historical behaviour-preserving baseline remains 24.0561 s at
+8.5378288508794491e-8 final error.  The immediate objective is runtime: first recover
+the known ~2 s diagnostic cost, then continue profiling the widened-domain residual
+construction if the cleaned result is still slower than 24.0561 s.

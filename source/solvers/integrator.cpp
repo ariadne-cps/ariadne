@@ -1153,24 +1153,26 @@ graded_series_centre_polynomial_step(
         restriction(wide_validated_defect,forward_domain);
     recurrence_flow_function_stopwatch.click();
 
-    // Keep the cheaper materialise-after-subtraction construction as a
-    // diagnostic comparator.  It is not used for production certification
-    // because its separately propagated truncation semantics are not generic.
+    // Keep the cheaper materialise-after-subtraction construction only
+    // when diagnostics are explicitly enabled.  It is not used by the
+    // production Gronwall certificate, so computing it in clean benchmark
+    // runs is pure overhead.
     Stopwatch<Microseconds> direct_defect_stopwatch;
-    Vector<ValidatedDifferential> direct_defect_differential=
-        derivative_dphi-recurrence_field_differential;
-    FlowStepTaylorModelType direct_wide_defect=
-        make_taylor_function_model(
-            direct_defect_differential,wide_domain,sweeper);
-
-    Vector<FloatDPBounds> forward_half_box(
-        direct_wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
-    forward_half_box[n]=FloatDPBounds(0,1,dp);
     Vector<FloatDPBounds> direct_defect_range(
         n,FloatDPBounds(0,dp));
-    for(SizeType i=0u; i!=n; ++i) {
-        direct_defect_range[i]=evaluate(
-            direct_wide_defect.model(i),forward_half_box);
+    if(compute_exact_polynomial_diagnostic) {
+        Vector<ValidatedDifferential> direct_defect_differential=
+            derivative_dphi-recurrence_field_differential;
+        FlowStepTaylorModelType direct_wide_defect=
+            make_taylor_function_model(
+                direct_defect_differential,wide_domain,sweeper);
+        Vector<FloatDPBounds> forward_half_box(
+            direct_wide_defect.argument_size(),FloatDPBounds(-1,1,dp));
+        forward_half_box[n]=FloatDPBounds(0,1,dp);
+        for(SizeType i=0u; i!=n; ++i) {
+            direct_defect_range[i]=evaluate(
+                direct_wide_defect.model(i),forward_half_box);
+        }
     }
     direct_defect_stopwatch.click();
 

@@ -634,6 +634,109 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 }
 
 
+Void profiled_compute_graded_procedure(
+        const Vector<ValidatedProcedure>& p,
+        Vector<GradedValidatedDifferential>& r,
+        List<GradedValidatedDifferential>& v,
+        const Vector<GradedValidatedDifferential>& x,
+        DegreeType degree)
+{
+    static double operator_seconds[64][6] = {};
+    static SizeType operator_calls[64][6] = {};
+    static SizeType profiled_calls = 0u;
+
+    const List<ValidatedNumber>& constants=p._constants;
+    ARIADNE_ASSERT(v.size()==p._instructions.size());
+
+    auto category = [](OperatorCode code) -> SizeType {
+        switch(code) {
+            case OperatorCode::CNST: return 0u;
+            case OperatorCode::VAR: return 1u;
+            case OperatorCode::ADD:
+            case OperatorCode::SUB:
+            case OperatorCode::POS:
+            case OperatorCode::NEG:
+            case OperatorCode::HLF:
+                return 2u;
+            case OperatorCode::MUL: return 3u;
+            case OperatorCode::SQR: return 4u;
+            default: return 5u;
+        }
+    };
+
+    for(SizeType j=0u; j!=p._instructions.size(); ++j) {
+        Stopwatch<Microseconds> instruction_stopwatch;
+        struct Visitor {
+            SizeType j;
+            List<GradedValidatedDifferential>& v;
+            const List<ValidatedNumber>& constants;
+            const Vector<GradedValidatedDifferential>& x;
+
+            Void operator()(const ConstantProcedureInstruction& pri) {
+                v[j]=constants[pri._val];
+            }
+            Void operator()(const IndexProcedureInstruction& pri) {
+                v[j]=x[pri._ind];
+            }
+            Void operator()(const UnaryProcedureInstruction& pri) {
+                pri._op.accept([&](auto op){ v[j]=op(v[pri._arg]); });
+            }
+            Void operator()(const BinaryProcedureInstruction& pri) {
+                pri._op.accept([&](auto op){
+                    v[j]=op(v[pri._arg1],v[pri._arg2]);
+                });
+            }
+            Void operator()(const GradedProcedureInstruction& pri) {
+                pri._op.accept([&](auto op){
+                    v[j]=op(v[pri._arg],pri._num);
+                });
+            }
+            Void operator()(const ScalarProcedureInstruction& pri) {
+                pri._op.accept([&](auto op){
+                    v[j]=op(constants[pri._arg1],v[pri._arg2]);
+                });
+            }
+        };
+        p._instructions[j].accept(Visitor{j,v,constants,x});
+        instruction_stopwatch.click();
+
+        const SizeType d=degree<64u ? degree : 0u;
+        const SizeType cat=category(p._instructions[j].op().code());
+        operator_seconds[d][cat]+=instruction_stopwatch.elapsed_seconds();
+        ++operator_calls[d][cat];
+    }
+
+    r=Vector<GradedValidatedDifferential>(
+        p._results.size(),
+        [&v,&p](SizeType i){return v[p._results[i]];},
+        x.element_characteristics());
+
+    ++profiled_calls;
+    if(profiled_calls%1000u==0u) {
+        static const char* names[6]={
+            "const","var","linear","mul","sqr","other"
+        };
+        std::cerr << "[GradedProcedureOperatorProfile]"
+                  << " calls=" << profiled_calls;
+        for(SizeType d=1u; d!=64u; ++d) {
+            bool any=false;
+            for(SizeType cat=0u; cat!=6u; ++cat) {
+                any=any || operator_calls[d][cat]!=0u;
+            }
+            if(!any) { continue; }
+            for(SizeType cat=0u; cat!=6u; ++cat) {
+                if(operator_calls[d][cat]==0u) { continue; }
+                std::cerr << " degree" << d << "_" << names[cat]
+                          << "_calls=" << operator_calls[d][cat]
+                          << " degree" << d << "_" << names[cat]
+                          << "_seconds=" << operator_seconds[d][cat];
+            }
+        }
+        std::cerr << std::endl;
+    }
+}
+
+
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
                          Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta,
                          SizeType diagnostic_call=std::numeric_limits<SizeType>::max(),
@@ -648,7 +751,8 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
     ValidatedDifferential z=nul(yta[0][0]);
 
     Stopwatch<Microseconds> graded_iterate_procedure_stopwatch;
-    Ariadne::compute_procedure(p,fy,tmp,yta);
+    profiled_compute_graded_procedure(
+        p,fy,tmp,yta,diagnostic_iteration);
     graded_iterate_procedure_stopwatch.click();
 
     // Temporary diagnostic for the same-state second-step comparison.

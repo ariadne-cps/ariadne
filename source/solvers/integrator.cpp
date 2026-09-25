@@ -654,7 +654,7 @@ ValidatedDifferential profiled_validated_differential_mul(
 
     ValidatedDifferential r(
         x.argument_size(),
-        min(x.degree(),y.degree()),
+        x.degree()<y.degree() ? x.degree() : y.degree(),
         mul(x.zero_coefficient(),y.zero_coefficient()));
 
     MultiIndex a(x.argument_size());

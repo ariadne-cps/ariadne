@@ -777,6 +777,20 @@ class TestSmtSolver {
             SmtSolverTestSupport::epsilon_satisfied(
                 solver,point,inside));
 
+        UpperBoxType narrow_box({
+            UpperIntervalType(ExactIntervalType(0,0.0625_x))
+        });
+        ARIADNE_TEST_ASSERT(
+            SmtSolverTestSupport::epsilon_satisfied(
+                solver,narrow_box,inside));
+
+        UpperBoxType wide_box({
+            UpperIntervalType(ExactIntervalType(-0.25_x,0.25_x))
+        });
+        ARIADNE_TEST_ASSERT(
+            not SmtSolverTestSupport::epsilon_satisfied(
+                solver,wide_box,inside));
+
     }
 
     Void test_box_processing_statistics() {
@@ -1552,6 +1566,45 @@ class TestSmtSolver {
                     space,
                     UpperBoxType({UpperIntervalType(ExactIntervalType(-0.25_x,-0.25_x))}),
                     literals));
+        }
+
+        {
+            std::cout << "[smt-theory-solve] whole-box epsilon relation semantics" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> equality({primitive(ex==0)});
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(0,0.0625_x))}),
+                    equality));
+            ARIADNE_TEST_ASSERT(
+                not SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(0,0.25_x))}),
+                    equality));
+
+            List<SmtTheoryPrimitiveLiteral> nonstrict({primitive(ex>=0)});
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(-0.0625_x,1))}),
+                    nonstrict));
+
+            List<SmtTheoryPrimitiveLiteral> strict({primitive(ex>0)});
+            ARIADNE_TEST_ASSERT(
+                SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(-0.0625_x,1))}),
+                    strict));
+            ARIADNE_TEST_ASSERT(
+                not SmtSolverTestSupport::epsilon_satisfied(
+                    solver,
+                    space,
+                    UpperBoxType({UpperIntervalType(ExactIntervalType(-0.125_x,1))}),
+                    strict));
         }
 
 

@@ -365,11 +365,9 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    List<ValidatedConstraint> const& constraints) const
 {
-    UpperBoxType point=midpoint_box(domain);
-
     for(SizeType i=0; i!=constraints.size(); ++i) {
         auto const& constraint=constraints[i];
-        UpperIntervalType image=apply(constraint.function(),point);
+        UpperIntervalType image=apply(constraint.function(),domain);
         if(not definitely(subset(image,this->_epsilon_bounds(constraint)))) {
             return false;
         }
@@ -506,11 +504,9 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    CompiledTheoryLiterals const& literals) const
 {
-    UpperBoxType point=midpoint_box(domain);
-
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
-        UpperIntervalType image=apply(literal.function,point);
+        UpperIntervalType image=apply(literal.function,domain);
         SmtSolverTestSupport::validate_primitive_relation(literal.relation);
         if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
             if(not definitely(image.lower_bound()>-epsilon)) {
@@ -598,9 +594,8 @@ SmtSolver::_process_box(
     }
 
     if(this->_epsilon_satisfied(domain,conjunction)) {
-        UpperBoxType witness=midpoint_box(domain);
         BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,witness,std::nullopt,reductions};
+            BoxProcessingStatus::EPSILON_SAT,domain,std::nullopt,reductions};
         result.epsilon_box_certification=true;
         return result;
     }

@@ -180,6 +180,21 @@ conclusion. However, this cannot solve the hard terminal case in which even
 singleton DP evaluation is wider than epsilon. It should therefore be treated as
 an early certification optimization, not as the missing completeness theorem.
 
+### dReal-style whole-box epsilon stopping
+
+The production solver now applies epsilon certification to the validated image
+of the whole reduced box, rather than only to a midpoint point-box. For each
+normalized constraint the complete interval image must satisfy the
+epsilon-relaxed target; strict positivity keeps its strict lower-bound test.
+The certified reduced box itself is returned as the witness.
+
+This follows the same validated-box stopping principle as dReal's documented
+`EvaluateBox` procedure: interval evaluation may terminate search once the
+requested relaxation is certified on the box. Ariadne uses direct containment
+in the explicit epsilon-relaxed target rather than a separate width threshold.
+If whole-box certification and point-candidate certification both fail, normal
+splitting continues. A non-splittable uncertified DP box remains `UNKNOWN`.
+
 ### UNKNOWN taxonomy
 
 The current implementation has two numerical sources of `UNKNOWN` that
@@ -254,7 +269,7 @@ semantics.
 A box is processed in this order:
 
 1. validated reduction using the original (non-epsilon) constraints;
-2. validated midpoint witness certification;
+2. validated epsilon certification of the whole reduced box;
 3. deterministic witness candidates;
 4. sensitivity-guided splitting;
 5. optional nonlinear interior-point candidate search for splittable boxes;

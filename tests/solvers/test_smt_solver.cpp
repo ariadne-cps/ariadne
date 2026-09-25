@@ -740,20 +740,6 @@ class TestSmtSolver {
             UpperIntervalType(ExactIntervalType(1,1))
         });
 
-        std::cout << "[smt-terminal] deterministic terminal box classification" << std::endl;
-        auto terminal_sat=SmtSolverTestSupport::classify_terminal_box(
-            std::optional<UpperBoxType>(endpoint_candidate));
-        ARIADNE_TEST_ASSERT(
-            terminal_sat.status
-            ==SmtSolverTestSupport::BoxProcessingStatus::EPSILON_SAT);
-        ARIADNE_TEST_ASSERT(terminal_sat.witness.has_value());
-
-        auto terminal_unknown=SmtSolverTestSupport::classify_terminal_box(
-            std::nullopt);
-        ARIADNE_TEST_ASSERT(
-            terminal_unknown.status
-            ==SmtSolverTestSupport::BoxProcessingStatus::UNKNOWN);
-        ARIADNE_TEST_ASSERT(not terminal_unknown.witness.has_value());
         SmtTheoryRelation invalid_theory_relation=
             static_cast<SmtTheoryRelation>(999);
         ARIADNE_TEST_THROWS(

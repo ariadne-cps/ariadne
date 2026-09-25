@@ -287,14 +287,6 @@ enum class BoxProcessingStatus {
     UNKNOWN
 };
 
-struct TerminalBoxOutcome {
-    BoxProcessingStatus status = BoxProcessingStatus::UNKNOWN;
-    std::optional<UpperBoxType> witness;
-};
-
-TerminalBoxOutcome classify_terminal_box(
-    std::optional<UpperBoxType> const& witness);
-
 struct BoxProcessingStatisticsInput {
     BoxProcessingStatus status;
     SizeType hull_rounds = 0u;
@@ -539,12 +531,6 @@ class SmtSolver {
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
 
-    std::optional<UpperBoxType> _terminal_epsilon_witness(
-        UpperBoxType const& domain,
-        List<ValidatedConstraint> const& constraints) const;
-    std::optional<UpperBoxType> _terminal_epsilon_witness(
-        UpperBoxType const& domain,
-        CompiledTheoryLiterals const& literals) const;
     template<class Conjunction>
     UpperBoxType _epsilon_candidate_witness(
         UpperBoxType const& domain,

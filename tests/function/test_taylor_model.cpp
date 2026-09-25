@@ -140,6 +140,7 @@ template<class F> class TestTaylorModel
     Void test_antiderivative();
     Void test_compose();
     Void test_recondition();
+    Void test_dense_batched_rounding_equivalence();
 };
 
 
@@ -177,6 +178,7 @@ template<class F> Void TestTaylorModel<F>::test()
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
     ARIADNE_TEST_CALL(test_recondition());
+    ARIADNE_TEST_CALL(test_dense_batched_rounding_equivalence());
 }
 
 
@@ -632,6 +634,76 @@ template<class F> Void TestTaylorModel<F>::test_compose()
         ARIADNE_TEST_COMPARE(compose(x,y).error().raw(),<=,1e-8_pr);
     }
 }
+
+template<class F> Void TestTaylorModel<F>::test_dense_batched_rounding_equivalence()
+{
+    // Compare the same dense accumulator with only the arithmetic scheduling
+    // changed: per-pair mul_err/fma_err versus two-pass batched rounding.
+    const Bool old_product_accumulator=taylor_model_product_accumulator_enabled();
+    const Bool old_dense=taylor_model_dense_accumulator_enabled();
+    const Bool old_batched=taylor_model_dense_batched_rounding_enabled();
+
+    set_taylor_model_product_accumulator_enabled(true);
+    set_taylor_model_dense_accumulator_enabled(true);
+
+    GradedSweeper<F> eqswp(pr,20);
+
+    auto compare_product = [&](ValidatedTaylorModelType const& a,
+                               ValidatedTaylorModelType const& b) {
+        set_taylor_model_dense_batched_rounding_enabled(false);
+        ValidatedTaylorModelType per_pair=a*b;
+
+        set_taylor_model_dense_batched_rounding_enabled(true);
+        ValidatedTaylorModelType batched=a*b;
+
+        ARIADNE_TEST_SAME(batched.expansion(),per_pair.expansion());
+        ARIADNE_TEST_SAME(batched.error(),per_pair.error());
+    };
+
+    // Heavy univariate collisions with non-dyadic coefficients and mixed signs.
+    compare_product(
+        ValidatedTaylorModelType(
+            {{{0},0.1_x},{{1},-0.3_x},{{2},0.7_x},{{3},-1.1_x},
+             {{4},2.3_x},{{5},-4.7_x}},0.0_x,eqswp),
+        ValidatedTaylorModelType(
+            {{{0},-0.2_x},{{1},0.5_x},{{2},-0.9_x},{{3},1.7_x},
+             {{4},-3.1_x},{{5},6.2_x}},0.0_x,eqswp));
+
+    // Multivariate collision pattern with cancellation across several paths.
+    compare_product(
+        ValidatedTaylorModelType(
+            {{{0,0},1.0_x},{{1,0},0.125_x},{{0,1},-0.375_x},
+             {{2,0},0.625_x},{{1,1},-0.875_x},{{0,2},1.125_x}},
+            0.0_x,eqswp),
+        ValidatedTaylorModelType(
+            {{{0,0},-0.75_x},{{1,0},1.25_x},{{0,1},0.5_x},
+             {{2,0},-1.5_x},{{1,1},0.25_x},{{0,2},-0.0625_x}},
+            0.0_x,eqswp));
+
+    // Wide dynamic range while staying well inside finite FloatDP/FloatMP.
+    compare_product(
+        ValidatedTaylorModelType(
+            {{{0},1.0e-80_x},{{1},-3.0e-40_x},{{2},5.0_x},
+             {{3},-7.0e40_x}},0.0_x,eqswp),
+        ValidatedTaylorModelType(
+            {{{0},-2.0e80_x},{{1},4.0e40_x},{{2},-6.0_x},
+             {{3},8.0e-40_x}},0.0_x,eqswp));
+
+    // Nonzero model errors verify that product roundoff equality survives
+    // the enclosing Taylor-model error propagation as well.
+    compare_product(
+        ValidatedTaylorModelType(
+            {{{0},0.3333333333333333_x},{{1},-0.1428571428571429_x},
+             {{2},0.0909090909090909_x}},1.0e-12_x,eqswp),
+        ValidatedTaylorModelType(
+            {{{0},-0.4545454545454545_x},{{1},0.0769230769230769_x},
+             {{2},-0.0588235294117647_x}},2.0e-12_x,eqswp));
+
+    set_taylor_model_dense_batched_rounding_enabled(old_batched);
+    set_taylor_model_dense_accumulator_enabled(old_dense);
+    set_taylor_model_product_accumulator_enabled(old_product_accumulator);
+}
+
 
 template<class F> Void TestTaylorModel<F>::test_recondition()
 {

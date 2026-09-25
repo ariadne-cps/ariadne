@@ -3338,3 +3338,37 @@ before this optimisation is considered production-ready.
 
 The new performance baseline for the experimental QR-preconditioned dense integrator at
 cutoff `3e-14` is 22.4231 s.
+
+
+### 9.92 Dense batched-rounding equivalence test harness (2026-09-25)
+
+Before treating the 22.4231 s batched kernel as production-ready, a direct A/B correctness
+path has been added to the Taylor-model tests.
+
+A new runtime switch,
+`taylor_model_dense_batched_rounding_enabled()`, selects between two implementations
+inside the same dense pre-ranked accumulator:
+
+- **off:** the validated per-pair reference path using `mul_err` for first contributions
+  and `fma_err` for collisions;
+- **on:** the two-pass nearest/upward batched-rounding path.
+
+This isolates arithmetic scheduling from indexing, sweeping, and accumulator structure.
+
+`tests/function/test_taylor_model.cpp` now multiplies deterministic Taylor models under
+both settings and requires exact equality of both the resulting Expansion and Error. The
+cases cover:
+
+- dense univariate collision chains with mixed signs and non-dyadic values;
+- multivariate collisions and cancellation;
+- a wide finite dynamic range;
+- nonzero input-model errors.
+
+The test is instantiated by the existing Taylor-model suite for both FloatDP and FloatMP.
+The previous global toggle state is restored after the comparison.
+
+This is intentionally stronger than merely checking enclosure overlap or approximate
+equality: if the two-pass transformation really reconstructs the same per-operation
+centre recurrence and error contributions, the results should be bit-identical for these
+deterministic cases. Any failure is evidence that the equivalence argument is incomplete
+and must be investigated before enabling batched rounding by default.

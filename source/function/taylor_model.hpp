@@ -107,6 +107,8 @@ Bool taylor_model_product_accumulator_enabled();
 Void set_taylor_model_product_accumulator_enabled(Bool);
 Bool taylor_model_dense_accumulator_enabled();
 Void set_taylor_model_dense_accumulator_enabled(Bool);
+Bool taylor_model_dense_batched_rounding_enabled();
+Void set_taylor_model_dense_batched_rounding_enabled(Bool);
 
 struct TaylorModelDenseWorkspaceStats {
     unsigned long long calls=0u;

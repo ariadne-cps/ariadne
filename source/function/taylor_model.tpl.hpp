@@ -1206,6 +1206,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             }
 
             if constexpr (ARawFloat<CoefficientType>) {
+                if(taylor_model_dense_batched_rounding_enabled()) {
                 // Batch rounding-mode changes across the whole dense product.
                 // The nearest pass computes exactly the same centre coefficients
                 // as mul_err/fma_err.  For collision updates we retain the
@@ -1269,6 +1270,28 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                             product_roundoff.raw()=add(
                                 rounded,product_roundoff.raw(),
                                 hlf(add(rounded,ml,u)));
+                        }
+                    }
+                }
+                } else {
+                    SizeType xi=0u;
+                    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
+                        UniformConstReference<CoefficientType> xv=xiter->coefficient();
+                        SizeType yi=0u;
+                        for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
+                            UniformConstReference<CoefficientType> yv=yiter->coefficient();
+                            const SizeType slot=x_slots[xi]+y_slots[yi];
+                            SizeType& touched=slot_to_touched[slot];
+                            if(touched==unused) {
+                                CoefficientType product=
+                                    mul_err(xv,yv,product_roundoff);
+                                touched=touched_slots.size();
+                                touched_slots.push_back(slot);
+                                touched_coefficients.emplace_back(product);
+                            } else {
+                                touched_coefficients[touched]=fma_err(
+                                    xv,yv,touched_coefficients[touched],product_roundoff);
+                            }
                         }
                     }
                 }

@@ -246,7 +246,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not unknown.is_epsilon_sat());
         ARIADNE_TEST_ASSERT(not unknown.has_witness());
         ARIADNE_TEST_ASSERT(
-            unknown.unknown_reason!=SmtUnknownReason::NONE_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
+            unknown.unknown_reason()==SmtUnknownReason::RESOURCE_EXHAUSTED);
         ARIADNE_TEST_ASSERT(
             unsat.unknown_reason()==SmtUnknownReason::NONE);
         ARIADNE_TEST_THROWS(
@@ -569,7 +569,7 @@ class TestSmtSolver {
             exhausted,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED,statistics);
         ARIADNE_TEST_ASSERT(unknown.is_unknown());
         ARIADNE_TEST_ASSERT(
-            unknown.unknown_reason!=SmtUnknownReason::NONE_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
+            unknown.unknown_reason()==SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
         ARIADNE_TEST_ASSERT(
             SmtSolverTestSupport::combine_unknown_reasons(
                 SmtUnknownReason::NONE,SmtUnknownReason::RESOURCE_EXHAUSTED)
@@ -746,7 +746,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(sat.witness.has_value());
 
         auto unknown=SmtSolverTestSupport::interpret_theory_result(
-            SmtResult::unknown());
+            SmtResult::unknown(SmtUnknownReason::RESOURCE_EXHAUSTED));
         ARIADNE_TEST_ASSERT(unknown.consistent);
         ARIADNE_TEST_ASSERT(unknown.unknown_reason!=SmtUnknownReason::NONE);
         ARIADNE_TEST_ASSERT(not unknown.witness.has_value());

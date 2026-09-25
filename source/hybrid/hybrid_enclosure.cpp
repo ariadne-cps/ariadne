@@ -52,11 +52,11 @@
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
 namespace Ariadne {
 
-using BetterThreads::StaticWorkload;
+using Threading::StaticWorkload;
 
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
@@ -655,7 +655,7 @@ ListSet<HybridEnclosure>::draw(CanvasInterface& cnvs, const Set<DiscreteLocation
 VariablesUpperBoxType
 ListSet<HybridEnclosure>::bounding_box() const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     auto iter=this->begin();
     auto box = iter->state_auxiliary_set().euclidean_set().bounding_box();
     RealSpace space = join(iter->state_space(),iter->auxiliary_space());

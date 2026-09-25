@@ -23,15 +23,15 @@
  */
 
 #include "io/command_line_interface.hpp"
-#include "conclog/logging.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "logging/logging.hpp"
+#include "threading/thread_manager.hpp"
 #include "../test.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 using namespace Ariadne;
 
-using BetterThreads::ThreadManager;
+using Threading::ThreadManager;
 
 class TestCommandLineInterface {
   public:

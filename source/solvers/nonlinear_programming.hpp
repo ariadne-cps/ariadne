@@ -31,11 +31,11 @@
 
 #include "utility/declarations.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 
-    using namespace ConcLog;
+    using namespace Logging;
 
 namespace Ariadne {
 

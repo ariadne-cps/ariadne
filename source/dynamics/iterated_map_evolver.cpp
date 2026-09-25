@@ -36,12 +36,12 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -113,17 +113,17 @@ _evolution(EnclosureListType& final_sets,
            const TerminationType& maximum_time,
            Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     List< TimedEnclosureType > working_sets;
 
     {
         // Set up initial timed set models
-        CONCLOG_PRINTLN_AT(1,"initial_set = "<<initial_set);
+        LOGGING_PRINTLN_AT(1,"initial_set = "<<initial_set);
         EnclosureType initial_enclosure(initial_set);
-        CONCLOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
+        LOGGING_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
         TimeType initial_time = 0;
-        CONCLOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
+        LOGGING_PRINTLN_AT(1,"initial_time = "<<initial_time);
         working_sets.push_back(make_pair(initial_time,initial_enclosure));
     }
 
@@ -163,19 +163,19 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 const TimeType& maximum_time,
                 Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     EnclosureType initial_enclosure;
     TimeType initial_time;
 
-    CONCLOG_PRINTLN_AT(1,"working_set = "<<current_set);
+    LOGGING_PRINTLN_AT(1,"working_set = "<<current_set);
     make_lpair(initial_time,initial_enclosure)=current_set;
 
-    CONCLOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
-    CONCLOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
+    LOGGING_PRINTLN_AT(1,"initial_time = "<<initial_time);
+    LOGGING_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
 
-    CONCLOG_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
-    CONCLOG_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
+    LOGGING_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
+    LOGGING_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
 
     /////////////// Main Evolution ////////////////////////////////
 
@@ -183,7 +183,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     EnclosureType& final_enclosure=initial_enclosure;
     final_enclosure.apply_discrete_time_map_step(_system->function());
     TimeType final_time=initial_time+1;
-    CONCLOG_PRINTLN("final_enclosure = "<<final_enclosure);
+    LOGGING_PRINTLN("final_enclosure = "<<final_enclosure);
 
     reach_sets.adjoin(final_enclosure);
 

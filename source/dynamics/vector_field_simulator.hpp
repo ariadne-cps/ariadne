@@ -29,7 +29,7 @@
 #ifndef ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 #define ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
@@ -37,10 +37,10 @@
 #include "dynamics/vector_field.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "betterthreads/workload.hpp"
-#include "betterthreads/using.hpp"
+#include "threading/workload.hpp"
+#include "threading/using.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -90,7 +90,7 @@ class VectorFieldSimulator
       private:
         std::mutex _mux;
     };
-    typedef BetterThreads::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef Threading::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.

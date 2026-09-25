@@ -34,7 +34,7 @@
 #include "dynamics/evolver_interface.hpp"
 #include "dynamics/reachability_analyser_interface.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 namespace Ariadne {
 

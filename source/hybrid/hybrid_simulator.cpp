@@ -44,14 +44,14 @@
 
 #include "solvers/runge_kutta_integrator.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -199,7 +199,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     HybridAutomatonInterface const& system=*_sys_ptr;
 
@@ -226,7 +226,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
-        CONCLOG_PRINTLN_AT(1,
+        LOGGING_PRINTLN_AT(1,
                 "t=" << std::setw(4) << std::left << t.continuous_time().compute_get(Effort(0u),double_precision)
                 << " #e=" << std::left << t.discrete_time()
                 << " p=" << point
@@ -235,7 +235,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
                 << std::setprecision(old_precision));
 
         if (not _satisfies_invariants(location, point)) {
-            CONCLOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
+            LOGGING_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
             break;
         }
 
@@ -260,7 +260,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
             next_point=reset(point);
             event_trace.push_back(event);
 
-            CONCLOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
+            LOGGING_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
 
             dynamic=system.dynamic_function(location);
             guards=_guard_functions(location);
@@ -331,7 +331,7 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximateListPointType>
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     HybridAutomatonInterface const& system=*_sys_ptr;
 
@@ -375,7 +375,7 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
             RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
             Int old_precision = std::clog.precision();
-            CONCLOG_PRINTLN_AT(1,
+            LOGGING_PRINTLN_AT(1,
                 "t=" << std::setw(4) << std::left << t[i].continuous_time().compute_get(Effort(0u),double_precision)
                 << " #e=" << std::left << t[i].discrete_time()
                 << " p=" << point_list[i]
@@ -385,7 +385,7 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
 
             if (not _satisfies_invariants(location[i], point_list[i])) 
             {
-                CONCLOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
+                LOGGING_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
                 break;
             }
 
@@ -415,7 +415,7 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
                 next_point[i]=reset(point_list[i]);
                 event_trace[i].push_back(event);
 
-                CONCLOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point[i] << ", on location " << target);
+                LOGGING_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point[i] << ", on location " << target);
 
                 dynamic=system.dynamic_function(location[i]);
                 guards=_guard_functions(location[i]);

@@ -233,11 +233,11 @@ orbit(const HybridExactBoxType& initial_box,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"initial_box="<<initial_box);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    CONCLOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
+    LOGGING_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -247,11 +247,11 @@ orbit(const HybridBoxSet& initial_box,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"initial_box="<<initial_box);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    CONCLOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
+    LOGGING_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -261,11 +261,11 @@ orbit(const HybridBoundedConstraintSet& initial_set,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"initial_set="<<initial_set);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"initial_set="<<initial_set);
     HybridEnclosure initial_enclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    CONCLOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
+    LOGGING_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -391,7 +391,7 @@ _log_summary(HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbi
     UpperIntervalType starting_time_range=starting_set.time_range();
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
-    CONCLOG_PRINTLN(
+    LOGGING_PRINTLN(
             "#r="<<std::setw(5)<<std::left<<result->reach_size()
             <<" #f="<<std::setw(4)<<std::left<<result->final_size()
             <<" #e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
@@ -413,7 +413,7 @@ Map<DiscreteEvent,TransitionData>
 HybridEvolverBase::
 _extract_transitions(DiscreteLocation const& location) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     const EffectiveVectorMultivariateFunction& dynamic=this->system().dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
@@ -423,14 +423,14 @@ _extract_transitions(DiscreteLocation const& location) const
     {
         DiscreteEvent event=*event_iter;
         EventKind event_kind=this->system().event_kind(location,event);
-        CONCLOG_PRINTLN_AT(1,"event="<<event<<", kind="<<event_kind);
+        LOGGING_PRINTLN_AT(1,"event="<<event<<", kind="<<event_kind);
         EffectiveScalarMultivariateFunction constraint_function;
         if(is_activating(event_kind)) {
             constraint_function=this->system().guard_function(location,event);
         } else {
             constraint_function=this->system().invariant_function(location,event);
         }
-        CONCLOG_PRINTLN_AT(1,"constraint_function="<<constraint_function);
+        LOGGING_PRINTLN_AT(1,"constraint_function="<<constraint_function);
         EffectiveScalarMultivariateFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
         EffectiveVectorMultivariateFunction reset_function; DiscreteLocation target; RealSpace target_space;
         EffectiveVectorMultivariateFunction target_auxiliary_function; RealSpace target_auxiliary_space;
@@ -444,7 +444,7 @@ _extract_transitions(DiscreteLocation const& location) const
         TransitionData transition_data={event,event_kind,constraint_function,constraint_flow_derivative_function,target,reset_function,target_space,target_auxiliary_function,target_auxiliary_space};
         transitions.insert(event,transition_data);
     }
-    CONCLOG_PRINTLN("transitions="<<transitions);
+    LOGGING_PRINTLN("transitions="<<transitions);
     return transitions;
 }
 
@@ -453,17 +453,17 @@ HybridEvolverBase::
 _apply_invariants(HybridEnclosure& initial_set,
                   Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     HybridEnclosure& invariant_set=initial_set;
-    CONCLOG_PRINTLN("initial_set="<<initial_set);
-    CONCLOG_PRINTLN("transitions="<<transitions);
+    LOGGING_PRINTLN("initial_set="<<initial_set);
+    LOGGING_PRINTLN("transitions="<<transitions);
 
     // Apply restrictions due to invariants
     for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         DiscreteEvent event=transition_iter->first;
-        CONCLOG_PRINTLN_AT(1,"event="<<event);
+        LOGGING_PRINTLN_AT(1,"event="<<event);
         TransitionData const & transition=transition_iter->second;
         if(transition.event_kind==EventKind::INVARIANT) {
             if (possibly(initial_set.satisfies(transition.guard_function>=0))) {
@@ -480,7 +480,7 @@ _process_starting_events(WorkloadType::Access& workload,
                          Map<DiscreteEvent,TransitionData> const& transitions,
                          SharedPointer<SynchronisedOrbit> result) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     HybridEnclosure invariant_set=initial_set;
 
     // Apply restrictions due to invariants
@@ -510,10 +510,10 @@ _process_starting_events(WorkloadType::Access& workload,
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.is_empty())) {
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
-                        CONCLOG_PRINTLN_AT(1,event<<": "<<transition.event_kind<<", immediate");
+                        LOGGING_PRINTLN_AT(1,event<<": "<<transition.event_kind<<", immediate");
                         result->adjoin_reach(immediate_jump_set);
                         immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
-                        CONCLOG_PRINTLN_AT(2,"immediate_jump_set="<<immediate_jump_set);
+                        LOGGING_PRINTLN_AT(2,"immediate_jump_set="<<immediate_jump_set);
                         result->adjoin_intermediate(immediate_jump_set);
                         workload.append({immediate_jump_set,true});
                     }
@@ -537,7 +537,7 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
               ExactBoxType const& initial_box,
               const StepSizeType& maximum_step_size) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     IntegratorInterface& integrator=*this->_integrator_ptr;
 
@@ -549,15 +549,15 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
     ValidatedVectorMultivariateFunctionPatch flow_model=integrator.flow_step(dynamic,initial_box,suggest(maximum_step_size));
-    CONCLOG_PRINTLN_AT(1,"twosided_flow_model="<<flow_model);
+    LOGGING_PRINTLN_AT(1,"twosided_flow_model="<<flow_model);
     ExactBoxType flow_domain=flow_model.domain();
     StepSizeType step_size=static_cast<StepSizeType>(flow_domain[flow_domain.size()-1u].upper_bound());
     ARIADNE_ASSERT(step_size<=maximum_step_size);
     flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
     flow_model=restriction(flow_model,flow_domain);
-    CONCLOG_PRINTLN_AT(1,"flow_model="<<flow_model);
-    CONCLOG_PRINTLN_AT(1,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range());
-    CONCLOG_PRINTLN("flow_model="<<flow_model);
+    LOGGING_PRINTLN_AT(1,"flow_model="<<flow_model);
+    LOGGING_PRINTLN_AT(1,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range());
+    LOGGING_PRINTLN("flow_model="<<flow_model);
     return flow_model;
 }
 
@@ -568,24 +568,24 @@ _compute_active_events(EffectiveVectorMultivariateFunction const& dynamic,
                        ValidatedVectorMultivariateFunctionPatch const& flow,
                        HybridEnclosure const& starting_set) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     Set<DiscreteEvent> events=guards.keys();
     Set<DiscreteEvent> active_events;
     HybridEnclosure reach_set=starting_set;
     UpperBoxType flow_bounds=flow.range();
-    CONCLOG_PRINTLN("flow_bounds="<<flow_bounds);
+    LOGGING_PRINTLN("flow_bounds="<<flow_bounds);
     reach_set.apply_full_reach_step(flow);
-    CONCLOG_PRINTLN("reach_set="<<reach_set);
+    LOGGING_PRINTLN("reach_set="<<reach_set);
     for(Set<DiscreteEvent>::Iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
         const EffectiveScalarMultivariateFunction& guard_function=guards[event];
         EffectiveScalarMultivariateFunction flow_derivative = lie_derivative(guard_function,dynamic);
-        CONCLOG_PRINTLN_AT(1,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<flow_derivative);
+        LOGGING_PRINTLN_AT(1,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<flow_derivative);
         // First try a simple test based on the bounding box
         UpperIntervalType guard_range=apply(guard_function,reach_set.state_bounding_box());
         // For IMPACT events, also look at flow direction
         UpperIntervalType flow_derivative_range=apply(flow_derivative,reach_set.state_bounding_box());
-        CONCLOG_PRINTLN_AT(1,"guard_range="<<guard_range<<", flow_derivative_range="<<flow_derivative_range);
+        LOGGING_PRINTLN_AT(1,"guard_range="<<guard_range<<", flow_derivative_range="<<flow_derivative_range);
         if(possibly(guard_range.upper_bound()>=zero)) {
             // Now make a set containing the complement of the constraint,
             // and test for emptiness. If the set is empty, then the guard is
@@ -609,7 +609,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                    FlowFunctionModel const& flow,
                    HybridEnclosure const& initial_set) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     const SolverInterface& solver=*this->_solver_ptr;
 
@@ -623,18 +623,18 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
-        CONCLOG_PRINTLN_AT(1,"event="<<event);
+        LOGGING_PRINTLN_AT(1,"event="<<event);
         EffectiveScalarMultivariateFunction const& guard=guards[event];
-        CONCLOG_PRINTLN_AT(2,"guard="<<guard);
+        LOGGING_PRINTLN_AT(2,"guard="<<guard);
 
         // Compute the value of the guard function g over the flow of $\dot(x)=f(x)$
         UpperIntervalType guard_range=apply(guard,flow_bounds);
-        CONCLOG_PRINTLN_AT(2,"guard_range="<<guard_range);
+        LOGGING_PRINTLN_AT(2,"guard_range="<<guard_range);
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarMultivariateFunction guard_derivative=lie_derivative(guard,dynamic);
         UpperIntervalType guard_derivative_range=apply(guard_derivative,flow_bounds);
-        CONCLOG_PRINTLN_AT(2,"guard_derivative_range="<<guard_derivative_range);
+        LOGGING_PRINTLN_AT(2,"guard_derivative_range="<<guard_derivative_range);
         if(definitely(guard_derivative_range.lower_bound()>zero)) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
@@ -645,24 +645,24 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             ValidatedScalarMultivariateFunctionPatch crossing_time;
             try {
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
-                if (possibly(crossing_time.error()>1e-8_pr)) { CONCLOG_PRINTLN_AT(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()); }
+                if (possibly(crossing_time.error()>1e-8_pr)) { LOGGING_PRINTLN_AT(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()); }
                 crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
-                CONCLOG_PRINTLN_AT(2,"crossing_time="<<crossing_time);
+                LOGGING_PRINTLN_AT(2,"crossing_time="<<crossing_time);
             }
             catch(const UnknownSolutionException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                CONCLOG_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<":"<<e.what());
+                LOGGING_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<":"<<e.what());
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const SolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                CONCLOG_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<": "<<e.what());
+                LOGGING_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<": "<<e.what());
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const std::runtime_error& e) {
-                CONCLOG_PRINTLN_AT(2,"Unexpected error in computing crossing time for event "<<*event_iter<<": "<<e.what());
+                LOGGING_PRINTLN_AT(2,"Unexpected error in computing crossing time for event "<<*event_iter<<": "<<e.what());
                 ARIADNE_FAIL_MSG("ERROR!!");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
@@ -681,7 +681,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             UpperIntervalType guard_second_derivative_flow_range=compose(guard_second_derivative,flow).range();
             UpperIntervalType guard_second_derivative_range
                 =intersection(guard_second_derivative_bounds_range,guard_second_derivative_flow_range);
-            CONCLOG_PRINTLN_AT(2,"guard_second_derivative_range="<<guard_second_derivative_range);
+            LOGGING_PRINTLN_AT(2,"guard_second_derivative_range="<<guard_second_derivative_range);
             if(definitely(guard_second_derivative_range.lower_bound()>zero)) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active
@@ -727,9 +727,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 try {
                     ValidatedScalarMultivariateFunctionPatch critical_time=solver.implicit(compose(guard_derivative,flow),flow_spacial_domain,flow_time_domain);
                     UpperIntervalType critical_time_range=critical_time.range();
-                    CONCLOG_PRINTLN_AT(2,"critical_time_range="<<critical_time_range);
+                    LOGGING_PRINTLN_AT(2,"critical_time_range="<<critical_time_range);
                     if (possibly(critical_time.error()>1e-8_x)) {
-                        CONCLOG_PRINTLN_AT(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()); }
+                        LOGGING_PRINTLN_AT(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()); }
 
                     HybridEnclosure evolve_set_at_critical_time=initial_set;
                     evolve_set_at_critical_time.apply_space_evolve_step(flow,critical_time);
@@ -739,13 +739,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     UpperIntervalType guard_range_at_critical_time
                         =intersection(apply(guard,evolve_bounds_at_critical_time),evolve_set_at_critical_time.range_of(guard));
                     // Less accurate version: guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
-                    CONCLOG_PRINTLN_AT(2,"evolve_bounds_at_critical_time="<<evolve_bounds_at_critical_time);
-                    CONCLOG_PRINTLN_AT(2,"guard_range_at_critical_time="<<guard_range_at_critical_time);
+                    LOGGING_PRINTLN_AT(2,"evolve_bounds_at_critical_time="<<evolve_bounds_at_critical_time);
+                    LOGGING_PRINTLN_AT(2,"guard_range_at_critical_time="<<guard_range_at_critical_time);
                     if(definitely(guard_range_at_critical_time.upper_bound()<0)) {
                         // No crossing
                         const_cast<Set<DiscreteEvent>&>(active_events).erase(event); // WARNING: Maybe removing event is unsafe
                     } else if(definitely(guard_range_at_critical_time.lower_bound()>0)) {
-                        CONCLOG_PRINTLN_AT(2,"guard range eventually positive");
+                        LOGGING_PRINTLN_AT(2,"guard range eventually positive");
                         // Transverse crossing
                         // FIXME: Find a more reliable way of solving the implicit equation for the crossing time
                         //   which takes into account the fact that the derivative over the domain goes negative
@@ -755,24 +755,24 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                         evolve_set_at_reduced_critical_time.apply_space_evolve_step(flow,reduced_critical_time);
                         HybridEnclosure evolve_set_at_upper_reduced_critical_time=initial_set;
                         evolve_set_at_upper_reduced_critical_time.apply_fixed_evolve_step(flow,static_cast<StepSizeType>(cast_exact(reduced_critical_time.range().upper_bound())));
-                        CONCLOG_PRINTLN_AT(2,"guard_range_at_initial_time="<<initial_set.range_of(guard));
-                        CONCLOG_PRINTLN_AT(2,"guard_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard));
-                        CONCLOG_PRINTLN_AT(2,"guard_derivative_range_at_initial_time="<<initial_set.range_of(guard_derivative));
-                        CONCLOG_PRINTLN_AT(2,"guard_derivative_range_at_upper_reduced_critical_time="<<evolve_set_at_upper_reduced_critical_time.range_of(guard_derivative));
-                        CONCLOG_PRINTLN_AT(2,"guard_derivative_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard_derivative));
+                        LOGGING_PRINTLN_AT(2,"guard_range_at_initial_time="<<initial_set.range_of(guard));
+                        LOGGING_PRINTLN_AT(2,"guard_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard));
+                        LOGGING_PRINTLN_AT(2,"guard_derivative_range_at_initial_time="<<initial_set.range_of(guard_derivative));
+                        LOGGING_PRINTLN_AT(2,"guard_derivative_range_at_upper_reduced_critical_time="<<evolve_set_at_upper_reduced_critical_time.range_of(guard_derivative));
+                        LOGGING_PRINTLN_AT(2,"guard_derivative_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard_derivative));
                         UpperIntervalType crossing_flow_time_range(0, critical_time_range.upper_bound());
-                        CONCLOG_PRINTLN_AT(2,"crossing_flow_time_range="<<crossing_flow_time_range);
+                        LOGGING_PRINTLN_AT(2,"crossing_flow_time_range="<<crossing_flow_time_range);
                         ExactIntervalType crossing_flow_time_domain = cast_exact_interval(INTERVAL_REDUCTION_FACTOR*UpperIntervalType(0, critical_time_range.upper_bound()));
-                        CONCLOG_PRINTLN_AT(2,"crossing_flow_time_domain="<<crossing_flow_time_domain);
+                        LOGGING_PRINTLN_AT(2,"crossing_flow_time_domain="<<crossing_flow_time_domain);
                         try {
                             //KrawczykSolver solver=KrawczykSolver(1e-10,20);
                             //solver.verbosity=9;//this->verbosity;
                             ValidatedScalarMultivariateFunctionPatch crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,crossing_flow_time_domain);
                             UpperIntervalType crossing_time_range=crossing_time.range();
-                            CONCLOG_PRINTLN_AT(2,"crossing_time_range="<<crossing_time_range);
+                            LOGGING_PRINTLN_AT(2,"crossing_time_range="<<crossing_time_range);
                             crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
                         } catch(const SolverException& e) {
-                            CONCLOG_PRINTLN_AT(2,"Error in computing crossing time over reduced time interval for event "<<*event_iter<<": " <<e.what());
+                            LOGGING_PRINTLN_AT(2,"Error in computing crossing time over reduced time interval for event "<<*event_iter<<": " <<e.what());
                             // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
                             crossings[event]=CrossingData(CrossingKind::GRAZING);
                             crossings[event].critical_time=critical_time;
@@ -787,11 +787,11 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     }
                 }
                 catch(const SolverException& e) {
-                    CONCLOG_PRINTLN_AT(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what());
+                    LOGGING_PRINTLN_AT(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what());
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
                 catch(const std::runtime_error& e) {
-                    CONCLOG_PRINTLN_AT(2,"Unexpected error in computing critical time for event "<<*event_iter<<":\n  "<<e.what());
+                    LOGGING_PRINTLN_AT(2,"Unexpected error in computing critical time for event "<<*event_iter<<":\n  "<<e.what());
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
             } else {
@@ -803,7 +803,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         }
     }
     if(!crossings.empty()) {
-        CONCLOG_PRINTLN("crossings: "<<log_output(crossings));
+        LOGGING_PRINTLN("crossings: "<<log_output(crossings));
     }
     return crossings;
 }
@@ -866,7 +866,7 @@ _apply_guard_step(HybridEnclosure& set,
                   CrossingData const& crossing_data,
                   const Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     // Compute flow to guard set up to evolution time.
     HybridEnclosure& jump_set=set;
     const DiscreteEvent event=transition_data.event;
@@ -875,7 +875,7 @@ _apply_guard_step(HybridEnclosure& set,
     ValidatedScalarMultivariateFunctionPatch reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
     ValidatedScalarMultivariateFunctionPatch step_time, step_critical_time;
 
-    CONCLOG_PRINTLN("transition_data.event_kind="<<transition_data.event_kind);
+    LOGGING_PRINTLN("transition_data.event_kind="<<transition_data.event_kind);
     switch(transition_data.event_kind) {
         case EventKind::PERMISSIVE:
             // The continuous evolution is just the same as a reachability step,
@@ -884,11 +884,11 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.new_activation(event,transition_data.guard_function);
             break;
         case EventKind::URGENT: case EventKind::IMPACT:
-            CONCLOG_PRINTLN("crossing_data.crossing_kind="<<crossing_data.crossing_kind);
+            LOGGING_PRINTLN("crossing_data.crossing_kind="<<crossing_data.crossing_kind);
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
                     // The jump set is given by \f$\xi'(s)=\phi(\xi(s),\gamma(s)),\ \tau'(s)=\tau(s)+\gamma(s)\f$ where \f$\gamma(s)\f$ is the crossing time.
-                    CONCLOG_PRINTLN_AT(1,"crossing_time="<<crossing_data.crossing_time);
+                    LOGGING_PRINTLN_AT(1,"crossing_time="<<crossing_data.crossing_time);
                     step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
                     // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
                     if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && possibly((step_time-timing_data.parameter_dependent_evolution_time).range().upper_bound()>zero)) {
@@ -902,7 +902,7 @@ _apply_guard_step(HybridEnclosure& set,
                     jump_set.new_guard(event,transition_data.guard_function);
                     break;
                 case CrossingKind::GRAZING:
-                    CONCLOG_PRINTLN_AT(1,"critical_time="<<crossing_data.critical_time);
+                    LOGGING_PRINTLN_AT(1,"critical_time="<<crossing_data.critical_time);
                     // Fallthrough
                 case CrossingKind::CONCAVE:
                     // The jump set is given by \f$\xi'(s,t)=\phi(\xi(s),t),\ \tau'(s)=\tau(s)+t\f$ where \f$t\in[0,h]\f$, \f$g(\xi'(s,t))=0\f$
@@ -914,8 +914,8 @@ _apply_guard_step(HybridEnclosure& set,
                     break;
 /*
                 case CrossingKind::GRAZING:
-                    CONCLOG(6,"critical_time="<<crossing_data.critical_time);
-                    CONCLOG(9,"jump_set.domain()="<<jump_set.domain());
+                    LOGGING(6,"critical_time="<<crossing_data.critical_time);
+                    LOGGING(9,"jump_set.domain()="<<jump_set.domain());
                     IntervalDomainType evolution_time_domain=timing_data.evolution_time_domain;
                     ValidatedScalarMultivariateFunctionPatch embedded_space_function=embed(set.space_function(),timing_data.evolution_time_domain);
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
@@ -948,14 +948,14 @@ _apply_guard_step(HybridEnclosure& set,
             if (transition_data.event_kind==EventKind::IMPACT) {
                 // For an IMPACT event, also impose that the flow derivative is positive at the crossing.
                 EffectiveScalarMultivariateFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
-                CONCLOG_PRINTLN_AT(1,"flow_derivative_function="<<flow_derivative_function);
-                CONCLOG_PRINTLN_AT(1,"jump_set.state_bounding_box()="<<jump_set.state_bounding_box());
+                LOGGING_PRINTLN_AT(1,"flow_derivative_function="<<flow_derivative_function);
+                LOGGING_PRINTLN_AT(1,"jump_set.state_bounding_box()="<<jump_set.state_bounding_box());
                 UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
-                CONCLOG_PRINTLN_AT(1,"flow_derivative_range="<<flow_derivative_range);
+                LOGGING_PRINTLN_AT(1,"flow_derivative_range="<<flow_derivative_range);
                 if(possibly(flow_derivative_range.lower_bound()<=0)) {
                     jump_set.new_activation(event,flow_derivative_function);
                 }
-                CONCLOG_PRINTLN_AT(1,"jump_set="<<jump_set);
+                LOGGING_PRINTLN_AT(1,"jump_set="<<jump_set);
                 if(definitely(jump_set.is_empty())) { return; }
             }
             break;
@@ -981,8 +981,8 @@ _apply_guard(List<HybridEnclosure>& sets,
              const CrossingData guard_crossing_data,
              const Semantics semantics) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("guard_crossing_data="<<log_output(guard_crossing_data));
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN("guard_crossing_data="<<log_output(guard_crossing_data));
     // Multiple sets may be input, but they must all have the parametrised elapsed time function
     static const Nat SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
@@ -997,7 +997,7 @@ _apply_guard(List<HybridEnclosure>& sets,
     List<HybridEnclosure>::Iterator end=sets.end(); // Store current end set since we may adjoin new sets at end
     for(List<HybridEnclosure>::Iterator iter=sets.begin(); iter!=end; ++iter) {
         HybridEnclosure& set=*iter;
-        CONCLOG_PRINTLN_AT(1,"set.parameter_domain()="<<set.parameter_domain());
+        LOGGING_PRINTLN_AT(1,"set.parameter_domain()="<<set.parameter_domain());
         ARIADNE_ASSERT(set.parameter_domain()==elapsed_time_function.domain());
         switch(guard_crossing_data.crossing_kind) {
             case CrossingKind::TRANSVERSE:
@@ -1032,7 +1032,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 HybridEnclosure eventually_hitting_set=set;
                 eventually_hitting_set.new_parameter_constraint( event, elapsed_time_function <= critical_time_function );
                 eventually_hitting_set.new_parameter_constraint( event, maximal_guard_function >= zero);
-                CONCLOG_PRINTLN_AT(1,"eventually_hitting_set.is_empty()="<<eventually_hitting_set.is_empty());
+                LOGGING_PRINTLN_AT(1,"eventually_hitting_set.is_empty()="<<eventually_hitting_set.is_empty());
                 if(definitely(eventually_hitting_set.is_empty())) {
                     // NOTE: Constraint below should always be satisfied
                     // set.new_parameter_constraint(event, maximal_guard_function <= zero);
@@ -1044,7 +1044,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 returning_set.new_parameter_constraint( event, elapsed_time_function >= critical_time_function );
                 returning_set.new_parameter_constraint( event, final_guard_function <= zero );
                 ValidatedLowerKleenean returning_set_empty=returning_set.is_empty();
-                CONCLOG_PRINTLN_AT(1,"returning_set.is_empty()="<<returning_set_empty);
+                LOGGING_PRINTLN_AT(1,"returning_set.is_empty()="<<returning_set_empty);
                 if(definitely(returning_set_empty)) {
                     set.new_parameter_constraint( event, final_guard_function <= zero );
                     break;
@@ -1066,13 +1066,13 @@ _apply_guard(List<HybridEnclosure>& sets,
                 hitting_set.reduce();
                 missing_set.reduce();
                 past_set.reduce();
-                CONCLOG_PRINTLN_AT(1,"final_guard_range="<<final_guard_function.range());
-                CONCLOG_PRINTLN_AT(1,"maximal_guard_function="<<maximal_guard_function);
-                CONCLOG_PRINTLN_AT(1,"final_guard_function="<<final_guard_function);
-                CONCLOG_PRINTLN_AT(1,"elapsed_time_function="<<elapsed_time_function);
-                CONCLOG_PRINTLN_AT(1,"critical_time_function="<<critical_time_function);
-                CONCLOG_PRINTLN_AT(1,"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty());
-                CONCLOG_PRINTLN_AT(1,"hitting_set="<<hitting_set);
+                LOGGING_PRINTLN_AT(1,"final_guard_range="<<final_guard_function.range());
+                LOGGING_PRINTLN_AT(1,"maximal_guard_function="<<maximal_guard_function);
+                LOGGING_PRINTLN_AT(1,"final_guard_function="<<final_guard_function);
+                LOGGING_PRINTLN_AT(1,"elapsed_time_function="<<elapsed_time_function);
+                LOGGING_PRINTLN_AT(1,"critical_time_function="<<critical_time_function);
+                LOGGING_PRINTLN_AT(1,"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty());
+                LOGGING_PRINTLN_AT(1,"hitting_set="<<hitting_set);
                 // FIXME: The guard range at the critical time may provide a stronger guarantee of emptiness than maximal_guard_function > zero, but we should ideally not rely on this
                 if(definitely(guard_range_at_critical_time > 0 || missing_set.is_empty())) {
                     // swap out missing set
@@ -1135,9 +1135,9 @@ _process_jumped_set(WorkloadType::Access& workload,
     const Set<DiscreteEvent>& terminating_events=termination.terminating_events();
 
     HybridEnclosure initial_set=jumped_set;
-    CONCLOG_PRINTLN_AT(2,"initial_set="<<initial_set);
+    LOGGING_PRINTLN_AT(2,"initial_set="<<initial_set);
 
-    CONCLOG_RUN_MUTED(auto time_range = initial_set.time_range());
+    LOGGING_RUN_MUTED(auto time_range = initial_set.time_range());
     if(definitely(time_range.lower_bound()>=final_time)) {
         ARIADNE_WARN("initial_set.time_range()="<<time_range<<" which exceeds final time="<<final_time);
         return;
@@ -1148,33 +1148,33 @@ _process_jumped_set(WorkloadType::Access& workload,
 
     // Cache dynamic and constraint functions
     EffectiveVectorMultivariateFunction dynamic=this->system().dynamic_function(location);
-    CONCLOG_RUN_AT(1,auto transitions = this->_extract_transitions(location));
+    LOGGING_RUN_AT(1,auto transitions = this->_extract_transitions(location));
     Set<DiscreteEvent> events = transitions.keys();
 
-    CONCLOG_PRINTLN_AT(2,"dynamic="<<dynamic);
-    CONCLOG_PRINTLN_AT(2,"initial_set "<<initial_set);
-    CONCLOG_PRINTLN_AT(2,"transitions="<<transitions);
+    LOGGING_PRINTLN_AT(2,"dynamic="<<dynamic);
+    LOGGING_PRINTLN_AT(2,"initial_set "<<initial_set);
+    LOGGING_PRINTLN_AT(2,"transitions="<<transitions);
 
     // Test if maximum number of steps has been exceeded; if so, the set should be discarded.
     // NOTE: We could also place a test for the maximum number of steps being reaches which computing jump sets
     // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
     if(initial_set.previous_events().size()>=maximum_steps) {
-        CONCLOG_PRINTLN_AT(2,"initial_set has undergone more than the maximum number of events ("<<maximum_steps<<")");
-        CONCLOG_RUN_AT(1,this->_apply_invariants(initial_set,transitions));
+        LOGGING_PRINTLN_AT(2,"initial_set has undergone more than the maximum number of events ("<<maximum_steps<<")");
+        LOGGING_RUN_AT(1,this->_apply_invariants(initial_set,transitions));
         result->adjoin_final(initial_set);
         return;
     }
 
     // Test if a terminating event has been reached.
     if(initial_set.previous_events().size()>=1 && terminating_events.contains(initial_set.previous_events().back())) {
-        CONCLOG_PRINTLN_AT(2,"initial_set has undergone event "<<initial_set.previous_events().back());
-        CONCLOG_RUN_AT(1,this->_apply_invariants(initial_set,transitions));
+        LOGGING_PRINTLN_AT(2,"initial_set has undergone event "<<initial_set.previous_events().back());
+        LOGGING_RUN_AT(1,this->_apply_invariants(initial_set,transitions));
         result->adjoin_final(initial_set);
         return;
     }
 
     // Process the initially active events; cut out active points to leave initial flowable set.
-    CONCLOG_PRINTLN_AT(2,"initial_set has not reached the discrete termination condition");
+    LOGGING_PRINTLN_AT(2,"initial_set has not reached the discrete termination condition");
 
     this->_process_starting_events(workload, initial_set,transitions,result);
 }
@@ -1187,7 +1187,7 @@ _process_working_set(WorkloadType::Access& workload,
                      Semantics const& semantics,
                      SharedPointer<SynchronisedOrbit> result) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     if (working_set.second) {
         this->_process_jumped_set(workload, working_set.first, termination,result);
@@ -1209,16 +1209,16 @@ _evolution_step(WorkloadType::Access& workload,
 
     DiscreteLocation const& location=starting_set.location();
     EffectiveVectorMultivariateFunction dynamic=this->system().dynamic_function(location);
-    CONCLOG_RUN_AT(1,auto transitions = this->_extract_transitions(location));
+    LOGGING_RUN_AT(1,auto transitions = this->_extract_transitions(location));
 
-    CONCLOG_PRINTLN_AT(2,"dynamic="<<dynamic);
+    LOGGING_PRINTLN_AT(2,"dynamic="<<dynamic);
 
     _log_summary(starting_set,result);
 
-    CONCLOG_PRINTLN_AT(2,"starting_set="<<starting_set);
-    CONCLOG_PRINTLN_AT(2,"starting_time="<<starting_set.time_function());
+    LOGGING_PRINTLN_AT(2,"starting_set="<<starting_set);
+    LOGGING_PRINTLN_AT(2,"starting_time="<<starting_set.time_function());
     if(definitely(starting_set.is_empty())) {
-        CONCLOG_PRINTLN_AT(1,"Empty starting_set "<<starting_set);
+        LOGGING_PRINTLN_AT(1,"Empty starting_set "<<starting_set);
         return;
     }
 
@@ -1229,12 +1229,12 @@ _evolution_step(WorkloadType::Access& workload,
 
     // Compute the bounding box of the enclosure
     const ExactBoxType starting_bounding_box=cast_exact_box(starting_set.state_bounding_box());
-    CONCLOG_PRINTLN_AT(2,"starting_bounding_box="<<starting_bounding_box);
+    LOGGING_PRINTLN_AT(2,"starting_bounding_box="<<starting_bounding_box);
 
     // Test to see if set requires reconditioning
     if(this->_configuration_ptr->enable_reconditioning() &&
             possibly(norm(starting_set.state_function().errors()) > this->_configuration_ptr->maximum_spacial_error())) {
-        CONCLOG_PRINTLN_AT(1,"reconditioning: errors "<<starting_set.state_function().errors());
+        LOGGING_PRINTLN_AT(1,"reconditioning: errors "<<starting_set.state_function().errors());
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
         workload.append({reconditioned_set,false});
@@ -1244,10 +1244,10 @@ _evolution_step(WorkloadType::Access& workload,
     // Handle a set that is too large, based on semantics
     if (possibly(starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius())) {
         if (semantics == Semantics::LOWER) {
-            CONCLOG_PRINTLN_AT(1,"Set too large, discarding");
+            LOGGING_PRINTLN_AT(1,"Set too large, discarding");
             return;
         } else if (this->_configuration_ptr->enable_subdivisions()) {
-            CONCLOG_PRINTLN_AT(1,"Set too large, splitting");
+            LOGGING_PRINTLN_AT(1,"Set too large, splitting");
             List<HybridEnclosure> split_sets = starting_set.split();
             for(SizeType i=0; i!=split_sets.size(); ++i) {
                 if(!definitely(split_sets[i].is_empty())) { workload.append({split_sets[i],false}); }
@@ -1262,11 +1262,11 @@ _evolution_step(WorkloadType::Access& workload,
     {
         guard_functions.insert(transition_iter->first,transition_iter->second.guard_function);
     }
-    CONCLOG_PRINTLN_AT(1,"guards="<<guard_functions);
+    LOGGING_PRINTLN_AT(1,"guards="<<guard_functions);
 
     // Compute flow and actual time step size used
     const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->configuration().maximum_step_size());
-    CONCLOG_PRINTLN_AT(1,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range());
+    LOGGING_PRINTLN_AT(1,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range());
 
     // Compute possibly active events
     Set<DiscreteEvent> active_events =
@@ -1276,17 +1276,17 @@ _evolution_step(WorkloadType::Access& workload,
         for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin(); event_iter!=active_events.end(); ++event_iter) {
             active_events_log_data.insert(*event_iter,transitions[*event_iter].event_kind);
         }
-        CONCLOG_PRINTLN_AT(1,"active_events: "<<active_events_log_data);
+        LOGGING_PRINTLN_AT(1,"active_events: "<<active_events_log_data);
     }
 
     // Compute the kind of crossing (increasing, convex, etc);
     Map<DiscreteEvent,CrossingData> crossings =
         this->_compute_crossings(active_events,dynamic,guard_functions,flow_model,starting_set);
-    CONCLOG_PRINTLN_AT(1,"crossings="<<crossings);
+    LOGGING_PRINTLN_AT(1,"crossings="<<crossings);
 
     // Compute end conditions for flow
     TimingData timing_data = this->_estimate_timing(active_events,Real(final_time),flow_model,crossings,transitions,starting_set);
-    CONCLOG_PRINTLN_AT(1,"timing_data: "<<timing_data);
+    LOGGING_PRINTLN_AT(1,"timing_data: "<<timing_data);
 
     // Apply the time step
     HybridEnclosure reach_set, evolve_set;
@@ -1305,7 +1305,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
                       Semantics const& semantics,
                       SharedPointer<SynchronisedOrbit> result) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     EvolutionStepData _step_data;
     HybridEnclosure starting_set_copy=starting_set;
@@ -1322,14 +1322,14 @@ _apply_evolution_step(WorkloadType::Access& workload,
     Set<DiscreteEvent> activating_events=intersection(Ariadne::activating_events(transitions),active_events);
     Set<DiscreteEvent> blocking_events=intersection(Ariadne::blocking_events(transitions),active_events);
 
-    CONCLOG_PRINTLN("activating_events="<<activating_events);
-    CONCLOG_PRINTLN("blocking_events="<<blocking_events);
+    LOGGING_PRINTLN("activating_events="<<activating_events);
+    LOGGING_PRINTLN("blocking_events="<<blocking_events);
 
     ValidatedScalarMultivariateFunctionPatch const evolve_step_time=timing_data.parameter_dependent_evolution_time;
     ValidatedScalarMultivariateFunctionPatch const reach_step_time=embed(starting_set.parameter_domain(),timing_data.evolution_time_coordinate);
 
-    CONCLOG_PRINTLN_AT(1,"evolve_step_time="<<evolve_step_time<<"\n")
-    CONCLOG_PRINTLN_AT(1,"reach_step_time="<<reach_step_time<<"\n")
+    LOGGING_PRINTLN_AT(1,"evolve_step_time="<<evolve_step_time<<"\n")
+    LOGGING_PRINTLN_AT(1,"reach_step_time="<<reach_step_time<<"\n")
 
     // Compute the reach and evolve sets, without introducing bounds due to the final time.
     List<HybridEnclosure> reach_sets={starting_set};
@@ -1338,8 +1338,8 @@ _apply_evolution_step(WorkloadType::Access& workload,
     _apply_reach_step(reach_sets.front(),flow,timing_data);
     _apply_evolve_step(evolve_sets.front(),flow,timing_data);
 
-    CONCLOG_PRINTLN_AT(1,"flow_reach_set="<<reach_sets.front()<<"\n")
-    CONCLOG_PRINTLN_AT(1,"flow_evolve_set="<<evolve_sets.front()<<"\n")
+    LOGGING_PRINTLN_AT(1,"flow_reach_set="<<reach_sets.front()<<"\n")
+    LOGGING_PRINTLN_AT(1,"flow_evolve_set="<<evolve_sets.front()<<"\n")
 
     // Apply constraints on reach and evolve sets due to invariants and urgent guards
     for(Set<DiscreteEvent>::ConstIterator event_iter=blocking_events.begin();
@@ -1389,7 +1389,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
         {
             HybridEnclosure const& evolve_set=*evolve_set_iter;
             if(!definitely(evolve_set.is_empty())) {
-                CONCLOG_PRINTLN("final_set="<<evolve_set);
+                LOGGING_PRINTLN("final_set="<<evolve_set);
                 result->adjoin_final(evolve_set);
                 _step_data.finishing = true;
             }
@@ -1413,8 +1413,8 @@ _apply_evolution_step(WorkloadType::Access& workload,
             } else if(definitely(evolve_set_time_range.upper_bound()<=timing_data.final_time)) {
                 // No need to introduce timing constraints
                 if(!definitely(evolve_set.is_empty())) {
-                    CONCLOG_PRINTLN("evolve_set="<<evolve_set);
-                    CONCLOG_PRINTLN("next_working_set="<<next_working_set);
+                    LOGGING_PRINTLN("evolve_set="<<evolve_set);
+                    LOGGING_PRINTLN("next_working_set="<<next_working_set);
                     workload.append({next_working_set,false});
                     result->adjoin_intermediate(evolve_set);
                     _step_data.progress = true;
@@ -1428,8 +1428,8 @@ _apply_evolution_step(WorkloadType::Access& workload,
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
                 if(!definitely(evolve_set.is_empty())) {
-                    CONCLOG_PRINTLN("evolve_set="<<evolve_set);
-                    CONCLOG_PRINTLN("next_working_set="<<next_working_set);
+                    LOGGING_PRINTLN("evolve_set="<<evolve_set);
+                    LOGGING_PRINTLN("next_working_set="<<next_working_set);
                     workload.append({next_working_set,false});
                     result->adjoin_intermediate(evolve_set);
                     _step_data.progress = true;
@@ -1446,7 +1446,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
                 final_set.set_time(timing_data.final_time);
                 if(timing_data.finishing_kind!=FinishingKind::BEFORE_FINAL_TIME && !definitely(final_set.is_empty())) {
                 //if(!definitely(final_set.is_empty())) {
-                    CONCLOG_PRINTLN("final_set="<<final_set);
+                    LOGGING_PRINTLN("final_set="<<final_set);
                     result->adjoin_final(final_set);
                     _step_data.finishing = true;
                 }
@@ -1456,7 +1456,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
         }
     }
 
-    CONCLOG_PRINTLN("Computing jump sets");
+    LOGGING_PRINTLN("Computing jump sets");
 
     // Compute jump sets
     for(Set<DiscreteEvent>::ConstIterator event_iter=activating_events.begin();
@@ -1468,7 +1468,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
         // Compute active set
         List<HybridEnclosure> jump_sets={starting_set};
         HybridEnclosure& jump_set=jump_sets.front();
-        CONCLOG_PRINTLN_AT(1,event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind);
+        LOGGING_PRINTLN_AT(1,event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind);
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
         ValidatedScalarMultivariateFunctionPatch jump_step_time=reach_step_time;
         if(reach_step_time.argument_size()!=jump_set.number_of_parameters()) {
@@ -1498,12 +1498,12 @@ _apply_evolution_step(WorkloadType::Access& workload,
             }
         }
 
-        CONCLOG_PRINTLN_AT(1,"Applying guard to jump sets");
+        LOGGING_PRINTLN_AT(1,"Applying guard to jump sets");
         // Apply blocking conditions for other active events
         for(Set<DiscreteEvent>::ConstIterator other_event_iter=blocking_events.begin();
             other_event_iter!=blocking_events.end(); ++other_event_iter)
         {
-            CONCLOG_PRINTLN_AT(2,"jump_sets.size()="<<jump_sets.size());
+            LOGGING_PRINTLN_AT(2,"jump_sets.size()="<<jump_sets.size());
             DiscreteEvent other_event=*other_event_iter;
             if(other_event!=event) {
                 const TransitionData& other_transition_data=transitions[other_event];
@@ -1513,24 +1513,24 @@ _apply_evolution_step(WorkloadType::Access& workload,
             }
         }
 
-        CONCLOG_PRINTLN_AT(1,event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind);
+        LOGGING_PRINTLN_AT(1,event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind);
         // Apply reset
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& _jump_set=*jump_set_iter;
             if(!definitely(_jump_set.is_empty())) {
                 DiscreteLocation const& target=transitions[event].target;
-                CONCLOG_PRINTLN_AT(2,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target));
+                LOGGING_PRINTLN_AT(2,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target));
                 TransitionData const& transition=transitions[event];
                 _jump_set.apply_reset(event,target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
                workload.append({_jump_set,true});
                 _step_data.events.insert(event);
-                CONCLOG_PRINTLN_AT(2,"jump_set="<<_jump_set);
+                LOGGING_PRINTLN_AT(2,"jump_set="<<_jump_set);
             }
         }
     }
 
     if(_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) {
-        CONCLOG_PRINTLN_AT(2,timing_data.finishing_kind<<" "<<_step_data.events<<(_step_data.progress?" progress":" no progress"));
+        LOGGING_PRINTLN_AT(2,timing_data.finishing_kind<<" "<<_step_data.events<<(_step_data.progress?" progress":" no progress"));
     }
 
 }
@@ -1549,7 +1549,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 HybridEnclosure const& initial_set) const
 {
     // Compute the evolution time for the given step.
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     const StepSizeType step_size=static_cast<StepSizeType>(flow.domain()[flow.domain().size()-1].upper_bound());
     TimingData result;
     result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1559,7 +1559,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.evolution_time_domain=ExactIntervalType(0,step_size);
     result.evolution_time_coordinate=this->function_factory().create_coordinate({result.evolution_time_domain},0u);
     result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),result.step_size);
-    CONCLOG_PRINTLN("timing_data="<<result);
+    LOGGING_PRINTLN("timing_data="<<result);
     return result;
 }
 
@@ -1623,7 +1623,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 HybridEnclosure const& initial_set) const
 {
     // Compute the evolution time for the given step.
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
     const SizeType n = flow.result_size();
     const FloatDP step_size=flow.domain()[flow.domain().size()-1].upper_bound();
@@ -1657,13 +1657,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     UpperIntervalType starting_time_range=initial_set.time_range();
     UpperIntervalType remaining_time_range=final_time_bounds-starting_time_range;
 
-    CONCLOG_PRINTLN(std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time);
+    LOGGING_PRINTLN(std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time);
 
 
     // The time-dependent part of the evolution time
     ValidatedScalarMultivariateFunctionPatch temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVectorType(1u,time_domain));
 
-    CONCLOG_PRINTLN(std::fixed<<"remaining_time_range="<<remaining_time_range);
+    LOGGING_PRINTLN(std::fixed<<"remaining_time_range="<<remaining_time_range);
     if(possibly(remaining_time_range.lower_bound()<zero)) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just do a simple constant time step.
@@ -1712,8 +1712,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         temporal_evolution_time=result.step_size;
     }
 
-    CONCLOG_PRINTLN_AT(1,"finishing_kind="<<result.finishing_kind);
-    CONCLOG_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
+    LOGGING_PRINTLN_AT(1,"finishing_kind="<<result.finishing_kind);
+    LOGGING_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
 
 
     ValidatedScalarMultivariateFunctionPatch spacial_evolution_time=this->function_factory().create_constant(state_domain,FloatDP(step_size));
@@ -1732,7 +1732,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // to "creep" up to the event guard boundary, so that in the next step,
         // all points can be made to cross.
         // Test to see if a creep step is needed
-        CONCLOG_PRINTLN("Possible creep step; h="<<step_size);
+        LOGGING_PRINTLN("Possible creep step; h="<<step_size);
 
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
@@ -1743,7 +1743,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             DiscreteEvent event=crossing_iter->first;
             EventKind event_kind=transitions[event].event_kind;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
-            CONCLOG_PRINTLN_AT(1,"Event "<<event<<": "<<event_kind<<": "<<crossing_kind);
+            LOGGING_PRINTLN_AT(1,"Event "<<event<<": "<<event_kind<<": "<<crossing_kind);
             if(event_kind!=EventKind::PERMISSIVE) {
                 evolve_set.new_invariant(event,transitions[event].guard_function);
             }
@@ -1753,7 +1753,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             if((crossing_kind==CrossingKind::TRANSVERSE ) // || crossing_kind==CrossingKind::INCREASING)
                     && event_kind!=EventKind::PERMISSIVE)
             {
-                CONCLOG_PRINTLN_AT(1,"crossing_time_range="<<crossing_iter->second.crossing_time.range());
+                LOGGING_PRINTLN_AT(1,"crossing_time_range="<<crossing_iter->second.crossing_time.range());
                 const ValidatedScalarMultivariateFunctionPatch& crossing_time=crossing_iter->second.crossing_time;
                 UpperIntervalType crossing_time_range=crossing_time.range();
                 if(Ariadne::is_blocking(event_kind) && definitely(crossing_time_range.upper_bound()<step_size)) {
@@ -1762,39 +1762,39 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                     // to ensure that the evolved set is not propagated
 
                     // This event ensures that the evolve set is empty after a full step, so use this.
-                    CONCLOG_PRINTLN_AT(1,std::setprecision(18)<<"crossing_time_range="<<crossing_time_range<<", crossing_time_range .upper_bound()="<<crossing_time_range.upper_bound()<<", step_size="<<step_size);
+                    LOGGING_PRINTLN_AT(1,std::setprecision(18)<<"crossing_time_range="<<crossing_time_range<<", crossing_time_range .upper_bound()="<<crossing_time_range.upper_bound()<<", step_size="<<step_size);
                     EffectiveScalarMultivariateFunction guard=transitions[event].guard_function;
                     ValidatedVectorMultivariateFunctionPatch identity=this->function_factory().create_identity(crossing_time.domain());
                     // TODO: Remove use of cast
                     ValidatedScalarMultivariateFunctionPatch step_time=crossing_time*0+static_cast<Dyadic>(step_size);
-                    CONCLOG_PRINTLN_AT(1,"full flow="<<compose(flow,join(identity,step_time)));
-                    CONCLOG_PRINTLN_AT(1,"guard range at crossing time="<<compose(guard,compose(flow,join(initial_set.state_function(),compose(crossing_time,initial_set.state_function())))).range());
-                    CONCLOG_PRINTLN_AT(1,"guard range at crossing time="<<compose(guard,compose(flow,join(identity,crossing_time))).range());
-                    CONCLOG_PRINTLN_AT(1,"No creep; event "<<crossing_iter->first<<" completely taken");
+                    LOGGING_PRINTLN_AT(1,"full flow="<<compose(flow,join(identity,step_time)));
+                    LOGGING_PRINTLN_AT(1,"guard range at crossing time="<<compose(guard,compose(flow,join(initial_set.state_function(),compose(crossing_time,initial_set.state_function())))).range());
+                    LOGGING_PRINTLN_AT(1,"guard range at crossing time="<<compose(guard,compose(flow,join(identity,crossing_time))).range());
+                    LOGGING_PRINTLN_AT(1,"No creep; event "<<crossing_iter->first<<" completely taken");
                     creep=false;
                     break;
                 } else if(possibly(crossing_time_range.lower_bound()<=zero)) {
                     // This event is already partially active, so carry on with a full step
-                    CONCLOG_PRINTLN_AT(1,"No creep; event "<<crossing_iter->first<<" already partially active");
+                    LOGGING_PRINTLN_AT(1,"No creep; event "<<crossing_iter->first<<" already partially active");
                     creep=false;
                     break;
                 } else if(definitely(crossing_time_range.lower_bound()>=step_size)) {
-                    CONCLOG_PRINTLN_AT(1,"Event "<<crossing_iter->first<<" is not actually reached");
+                    LOGGING_PRINTLN_AT(1,"Event "<<crossing_iter->first<<" is not actually reached");
                     //crossings.erase(pending_erase_crossing_iter);
                 } else {
-                    CONCLOG_PRINTLN_AT(1,"Event "<<crossing_iter->first<<" can be crept up to.");
+                    LOGGING_PRINTLN_AT(1,"Event "<<crossing_iter->first<<" can be crept up to.");
                     creep=true;
                 }
             }
         }
         // If the evolved set is definitely empty, no creeping occurs
         if(definitely(evolve_set.is_empty())) {
-            CONCLOG_PRINTLN_AT(1,"No creep; evolve set is empty");
+            LOGGING_PRINTLN_AT(1,"No creep; evolve set is empty");
             creep=false;
         }
     }
 
-    if(ALLOW_CREEP && creep==false) { CONCLOG_PRINTLN("No creep"); }
+    if(ALLOW_CREEP && creep==false) { LOGGING_PRINTLN("No creep"); }
 
     if(TIME_CREEP && creep==true) {
         // Compute reduced evolution time; note that for every remaining increasing crossing, we have
@@ -1833,7 +1833,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ++crossing_iter;
             }
         }
-        CONCLOG_PRINTLN("Creep step: spacial_evolution_time="<<spacial_evolution_time);
+        LOGGING_PRINTLN("Creep step: spacial_evolution_time="<<spacial_evolution_time);
         result.step_kind=StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
     }
@@ -1845,8 +1845,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // to "creep" up to the event guard boundary, so that in the next step,
         // all points can be made to cross.
         // Test to see if a creep step is needed
-        CONCLOG_PRINTLN("Possible creep step; h="<<step_size);
-        CONCLOG_PRINTLN("crossings="<<crossings);
+        LOGGING_PRINTLN("Possible creep step; h="<<step_size);
+        LOGGING_PRINTLN("crossings="<<crossings);
 
         const SolverInterface& solver=*this->_solver_ptr;
 
@@ -1872,7 +1872,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             EventKind event_kind=transitions[event].event_kind;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             EffectiveScalarMultivariateFunction guard_function=transitions[event].guard_function;
-            CONCLOG_PRINTLN_AT(1,"Event "<<event<<": "<<event_kind<<": "<<crossing_kind);
+            LOGGING_PRINTLN_AT(1,"Event "<<event<<": "<<event_kind<<": "<<crossing_kind);
             if(event_kind!=EventKind::PERMISSIVE) {
                 UpperIntervalType guard_range = compose(guard_function,flow).range();
                 ARIADNE_ASSERT(decide(guard_range.lower_bound()<zero));
@@ -1881,27 +1881,27 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 FloatDPBounds alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower_bound())/cast_exact(guard_range.lower_bound()));
                 FloatDP alpha=cast_exact(alpha_val);
                 ARIADNE_ASSERT(alpha_val.value()==alpha);
-                CONCLOG_PRINTLN_AT(1,"step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha);
+                LOGGING_PRINTLN_AT(1,"step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha);
                 if(alpha>0 && alpha<=1) {
                     ValidatedScalarMultivariateFunctionPatch guard_creep_time;
                     Bool successfully_computed_guard_creep_time=false;
                     try {
                         guard_creep_time=solver.implicit(compose(guard_function,flow)-static_cast<Dyadic>(alpha)*compose(guard_function,space_projection),
                                                         flow_spacial_domain,flow_time_domain);
-                        CONCLOG_PRINTLN_AT(1,"guard_creep_time= "<<guard_creep_time);
-                        CONCLOG_PRINTLN_AT(1,"guard_creep_time.range()="<<guard_creep_time.range());
+                        LOGGING_PRINTLN_AT(1,"guard_creep_time= "<<guard_creep_time);
+                        LOGGING_PRINTLN_AT(1,"guard_creep_time.range()="<<guard_creep_time.range());
                         successfully_computed_guard_creep_time=true;
-                        CONCLOG_PRINTLN_AT(2,"sucessfully_computed_guard_creep_time="<<successfully_computed_guard_creep_time);
+                        LOGGING_PRINTLN_AT(2,"sucessfully_computed_guard_creep_time="<<successfully_computed_guard_creep_time);
                     }
                     catch(...) {
-                        CONCLOG_PRINTLN_AT(1,"Error in computing guard creep time");
+                        LOGGING_PRINTLN_AT(1,"Error in computing guard creep time");
                     }
                     if(successfully_computed_guard_creep_time) {
                         spacial_evolution_time = spacial_evolution_time * (guard_creep_time/flow.step_size());
-                        CONCLOG_PRINTLN_AT(2,"spacial_evolution_time="<<spacial_evolution_time);
-                        CONCLOG_PRINTLN_AT(2,"crossings before erasing="<<crossings);
+                        LOGGING_PRINTLN_AT(2,"spacial_evolution_time="<<spacial_evolution_time);
+                        LOGGING_PRINTLN_AT(2,"crossings before erasing="<<crossings);
                         crossings.erase(crossing_iter++);
-                        CONCLOG_PRINTLN_AT(2,"crossings after erasing="<<crossings);
+                        LOGGING_PRINTLN_AT(2,"crossings after erasing="<<crossings);
                     } else {
                       ++crossing_iter;
                     }
@@ -1915,9 +1915,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         spacial_evolution_time.clobber();
 
 
-        CONCLOG_PRINTLN_AT(1,"Creep step: spacial_evolution_time="<<spacial_evolution_time);
-        CONCLOG_PRINTLN_AT(1,"spacial_evolution_time.range()="<<spacial_evolution_time.range());
-        CONCLOG_PRINTLN_AT(1,"remaining crossings="<<crossings);
+        LOGGING_PRINTLN_AT(1,"Creep step: spacial_evolution_time="<<spacial_evolution_time);
+        LOGGING_PRINTLN_AT(1,"spacial_evolution_time.range()="<<spacial_evolution_time.range());
+        LOGGING_PRINTLN_AT(1,"remaining crossings="<<crossings);
         result.step_kind=StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
     }
@@ -1926,8 +1926,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ValidatedScalarMultivariateFunctionPatch evolution_time = embed(spacial_evolution_time,time_domain) * embed(state_domain,temporal_evolution_time/static_cast<Dyadic>(step_size));
     ValidatedScalarMultivariateFunctionPatch finishing_time=evolution_time+time_coordinate;
 
-    CONCLOG_PRINTLN_AT(1,"evolution_time="<<(evolution_time));
-    CONCLOG_PRINTLN_AT(1,"finishing_time="<<(finishing_time));
+    LOGGING_PRINTLN_AT(1,"evolution_time="<<(evolution_time));
+    LOGGING_PRINTLN_AT(1,"finishing_time="<<(finishing_time));
     result.spacetime_dependent_evolution_time=evolution_time;
     result.spacetime_dependent_finishing_time=finishing_time;
     result.parameter_dependent_evolution_time=unchecked_compose(evolution_time,join(starting_state_function,starting_time_function));
@@ -1936,7 +1936,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // Test to see if it is possible to unwind crossings
     if(this->ALLOW_UNWIND && crossings.empty() && (starting_time_range.lower_bound().raw()<starting_time_range.upper_bound().raw())
             && result.step_kind==StepKind::CONSTANT_EVOLUTION_TIME && result.finishing_kind==FinishingKind::BEFORE_FINAL_TIME) {
-        CONCLOG_PRINTLN_AT(1,"Possible unwind step; starting_time_range="<<starting_time_range<<", step_size="<<step_size);
+        LOGGING_PRINTLN_AT(1,"Possible unwind step; starting_time_range="<<starting_time_range<<", step_size="<<step_size);
         // Try to unwind the evolution time to a constant
         result.step_kind=StepKind::PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
@@ -1954,13 +1954,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             FloatDPBounds b=h*(tmax-hlf(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;
         }
-        CONCLOG_PRINTLN_AT(1,"Unwinding to time "<<result.parameter_dependent_finishing_time);
+        LOGGING_PRINTLN_AT(1,"Unwinding to time "<<result.parameter_dependent_finishing_time);
         result.parameter_dependent_evolution_time=result.parameter_dependent_finishing_time-starting_time_function;
     }
 
-    CONCLOG_PRINTLN_AT(1,"step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind);
-    CONCLOG_PRINTLN_AT(1,"parameter_dependent_evolution_time="<<result.parameter_dependent_evolution_time);
-    CONCLOG_PRINTLN_AT(1,"parameter_dependent_finishing_time="<<result.parameter_dependent_finishing_time<<"\n");
+    LOGGING_PRINTLN_AT(1,"step_kind="<<result.step_kind<<", finishing_kind="<<result.finishing_kind);
+    LOGGING_PRINTLN_AT(1,"parameter_dependent_evolution_time="<<result.parameter_dependent_evolution_time);
+    LOGGING_PRINTLN_AT(1,"parameter_dependent_finishing_time="<<result.parameter_dependent_finishing_time<<"\n");
     return result;
 }
 

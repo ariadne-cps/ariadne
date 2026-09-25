@@ -37,9 +37,9 @@
 
 #include "hybrid/discrete_event.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

@@ -26,7 +26,7 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "function/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
@@ -45,7 +45,7 @@
 #include "io/graphics_manager.hpp"
 #include "io/drawer.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

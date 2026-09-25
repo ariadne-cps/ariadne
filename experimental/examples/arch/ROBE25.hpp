@@ -33,7 +33,7 @@ void ROBE25() {
     RealVariable x("x"), y("y"), z("z"), s("s");
     RealConstant alpha("alpha",0.4_dec);
 
-    CONCLOG_PRINTLN("Robertson chemical reaction system:");
+    LOGGING_PRINTLN("Robertson chemical reaction system:");
 
     StepMaximumError max_err = 1e-10;
     GradedTaylorSeriesIntegrator integrator(max_err);
@@ -48,7 +48,7 @@ void ROBE25() {
         RealConstant beta("beta",100);
         RealConstant gamma("gamma",1000);
 
-        CONCLOG_PRINTLN("Instance 1:");
+        LOGGING_PRINTLN("Instance 1:");
 
         VectorField dynamics({dot(x) = -alpha*x + beta*y*z, dot(y) = alpha*x - beta*y*z - gamma*sqr(y), dot(z) = gamma*sqr(y)},{let(s)=x+y+z});
 
@@ -56,21 +56,21 @@ void ROBE25() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
+        LOGGING_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(maximum_step_size);
         evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
-        CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
         auto width = bb[s].width().get_d();
-        CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
-        CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
+        LOGGING_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
+        LOGGING_PRINTLN_AT(1,"Final x+y+z width = " << width);
 	
 	    sw.click();
-        CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+        LOGGING_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("1");
         if (width < 1e-5)
@@ -82,7 +82,7 @@ void ROBE25() {
         RealConstant beta("beta",1000);
         RealConstant gamma("gamma",100000);
 
-        CONCLOG_PRINTLN("Instance 2:");
+        LOGGING_PRINTLN("Instance 2:");
 
         VectorField dynamics({dot(x) = -alpha*x + beta*y*z, dot(y) = alpha*x - beta*y*z - gamma*sqr(y), dot(z) = gamma*sqr(y)},{let(s)=x+y+z});
 
@@ -90,21 +90,21 @@ void ROBE25() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
+        LOGGING_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(maximum_step_size);
         evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
-        CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
         auto width = bb[s].width().get_d();
-        CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
-        CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
+        LOGGING_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
+        LOGGING_PRINTLN_AT(1,"Final x+y+z width = " << width);
 
         sw.click();
-        CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+        LOGGING_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("2");
         if (width < 1e-5)
@@ -116,7 +116,7 @@ void ROBE25() {
         RealConstant beta("beta",1000);
         RealConstant gamma("gamma",10000000);
 
-        CONCLOG_PRINTLN("Instance 3:");
+        LOGGING_PRINTLN("Instance 3:");
         
         VectorField dynamics({dot(x) = -alpha*x + beta*y*z, dot(y) = alpha*x - beta*y*z - gamma*sqr(y), dot(z) = gamma*sqr(y)},{let(s)=x+y+z});
 
@@ -124,21 +124,21 @@ void ROBE25() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
+        LOGGING_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(maximum_step_size);
         evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
-        CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
         auto width = bb[s].width().get_d();
-        CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
-        CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
+        LOGGING_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
+        LOGGING_PRINTLN_AT(1,"Final x+y+z width = " << width);
 
         sw.click();
-        CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+        LOGGING_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("3");
         if (width < 1e-5)
@@ -146,7 +146,7 @@ void ROBE25() {
         instance.write();
     }
 
-    CONCLOG_PRINTLN("Plotting...");
+    LOGGING_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=evolution_time,0.9996<=s<=1.0004}));
     fig << line_style(false);
     fig << fill_colour(black);
@@ -155,7 +155,7 @@ void ROBE25() {
     fig.draw(reach1);
     fig << fill_colour(orange);
     fig.draw(reach3);
-    CONCLOG_RUN_AT(2,fig.write(benchmark.name().c_str()))
+    LOGGING_RUN_AT(2,fig.write(benchmark.name().c_str()))
 
-    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.");
+    LOGGING_PRINTLN("File " << benchmark.name() << ".png written.");
 }

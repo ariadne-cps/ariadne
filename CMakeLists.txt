@@ -26,7 +26,9 @@ set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimi
 set(ANY_TARGET_DONT_WARN strict-aliasing unused-parameter)
 set(LIBRARY_EXCLUSIVE_WARN shadow)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+    "${CMAKE_SOURCE_DIR}/cmake/"
+    "${CMAKE_SOURCE_DIR}/submodules/configuration/cmake")
 set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -100,10 +102,12 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 python/pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/helper OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/helper submodules/helper WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/logging OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/logging submodules/logging WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/threading OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/threading submodules/threading WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/configuration OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/configuration submodules/configuration WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all Ariadne submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
@@ -117,39 +121,79 @@ if(GIT_FOUND)
     else()
         message(STATUS "Helper submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/conclog/CMakeLists.txt)
-        message(ERROR "ConcLog download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/logging/CMakeLists.txt)
+        message(ERROR "Logging download failure")
     else()
-        message(STATUS "ConcLog submodule found")
+        message(STATUS "Logging submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/betterthreads/CMakeLists.txt)
-        message(ERROR "BetterThreads download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/threading/CMakeLists.txt)
+        message(ERROR "Threading download failure")
     else()
-        message(STATUS "BetterThreads submodule found")
+        message(STATUS "Threading submodule found")
+    endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/configuration/cmake)
+        message(ERROR "Configuration download failure")
+    else()
+        message(STATUS "Configuration submodule found")
     endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
 endif()
 endif()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
-    execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
-    message(STATUS "Created symbolic links directory for submodules")
-endif()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/helper/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    message(STATUS "Created symbolic link to ConcLog submodule")
-endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    function(ariadne_gitlink_commit REPOSITORY SUBMODULE_PATH OUTPUT_VARIABLE)
+        execute_process(
+            COMMAND "${GIT_EXECUTABLE}" -C "${REPOSITORY}" rev-parse "HEAD:${SUBMODULE_PATH}"
+            OUTPUT_VARIABLE COMMIT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_VARIABLE ERROR_TEXT
+            RESULT_VARIABLE RESULT
+        )
+        if(NOT RESULT EQUAL 0 OR COMMIT STREQUAL "")
+            message(FATAL_ERROR
+                "Cannot determine gitlink for ${REPOSITORY}/${SUBMODULE_PATH}: ${ERROR_TEXT}")
+        endif()
+        set(${OUTPUT_VARIABLE} "${COMMIT}" PARENT_SCOPE)
+    endfunction()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/conclog/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
-    message(STATUS "Created symbolic link to ConcLog submodule")
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/helper" ARIADNE_HELPER_COMMIT)
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/logging" ARIADNE_LOGGING_COMMIT)
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}" "submodules/configuration" ARIADNE_CONFIGURATION_COMMIT)
+
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/helper" THREADING_HELPER_COMMIT)
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/logging" THREADING_LOGGING_COMMIT)
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/threading" "submodules/configuration" THREADING_CONFIGURATION_COMMIT)
+
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/helper" "submodules/configuration" HELPER_CONFIGURATION_COMMIT)
+    ariadne_gitlink_commit("${PROJECT_SOURCE_DIR}/submodules/logging" "submodules/configuration" LOGGING_CONFIGURATION_COMMIT)
+
+    if(NOT ARIADNE_HELPER_COMMIT STREQUAL THREADING_HELPER_COMMIT)
+        message(FATAL_ERROR
+            "Helper dependency mismatch:\n"
+            "  Ariadne:   ${ARIADNE_HELPER_COMMIT}\n"
+            "  Threading: ${THREADING_HELPER_COMMIT}")
     endif()
-
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/betterthreads/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
-    message(STATUS "Created symbolic link to BetterThreads submodule")
+    if(NOT ARIADNE_LOGGING_COMMIT STREQUAL THREADING_LOGGING_COMMIT)
+        message(FATAL_ERROR
+            "Logging dependency mismatch:\n"
+            "  Ariadne:   ${ARIADNE_LOGGING_COMMIT}\n"
+            "  Threading: ${THREADING_LOGGING_COMMIT}")
+    endif()
+    if(NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL THREADING_CONFIGURATION_COMMIT OR
+       NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL HELPER_CONFIGURATION_COMMIT OR
+       NOT ARIADNE_CONFIGURATION_COMMIT STREQUAL LOGGING_CONFIGURATION_COMMIT)
+        message(FATAL_ERROR
+            "Configuration dependency mismatch:\n"
+            "  Ariadne:   ${ARIADNE_CONFIGURATION_COMMIT}\n"
+            "  Threading: ${THREADING_CONFIGURATION_COMMIT}\n"
+            "  Helper:    ${HELPER_CONFIGURATION_COMMIT}\n"
+            "  Logging:   ${LOGGING_CONFIGURATION_COMMIT}")
+    endif()
+    message(STATUS "Verified Helper commit: ${ARIADNE_HELPER_COMMIT}")
+    message(STATUS "Verified Logging commit: ${ARIADNE_LOGGING_COMMIT}")
+    message(STATUS "Verified shared Configuration commit: ${ARIADNE_CONFIGURATION_COMMIT}")
 endif()
 
 find_package(Threads)
@@ -191,7 +235,12 @@ add_custom_target(tests)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/source
+    ${PROJECT_SOURCE_DIR}/submodules/helper/include
+    ${PROJECT_SOURCE_DIR}/submodules/logging/include
+    ${PROJECT_SOURCE_DIR}/submodules/threading/include
+)
 
 add_subdirectory(submodules)
 
@@ -208,8 +257,8 @@ add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-foundations>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:HELPER_SRC>
     source/geometry/interval.cpp
 )
@@ -224,8 +273,8 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:HELPER_SRC>
 )
 
@@ -241,8 +290,8 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:HELPER_SRC>
 )
 
@@ -309,6 +358,6 @@ install(FILES
     DESTINATION lib/cmake/Ariadne
 )
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/helper/include/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/logging/include/logging DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/threading/include/threading DESTINATION include FILES_MATCHING PATTERN "*.hpp")

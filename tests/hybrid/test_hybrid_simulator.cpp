@@ -37,11 +37,11 @@
 #include "hybrid/hybrid_graphics.hpp"
 #include "io/command_line_interface.hpp"
 #include "io/figure.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "../test.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 using namespace Ariadne;
 using namespace std;

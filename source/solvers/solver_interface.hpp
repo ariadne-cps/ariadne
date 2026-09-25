@@ -34,9 +34,9 @@
 #include <string>
 
 #include "utility/declarations.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

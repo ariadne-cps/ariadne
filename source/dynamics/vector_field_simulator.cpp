@@ -198,9 +198,9 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
 }
 
 auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const -> OrbitType {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 
-    CONCLOG_PRINTLN("Simulating from " << initial_points.size() << " initial points")
+    LOGGING_PRINTLN("Simulating from " << initial_points.size() << " initial points")
 
     auto const& auxiliary_function = _system->auxiliary_function();
 
@@ -219,7 +219,7 @@ auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points,
 }
 
 void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointType> indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const {
-    CONCLOG_SCOPE_CREATE
+    LOGGING_SCOPE_CREATE
 
     auto const& curve_number = indexed_initial.first;
     auto const& initial = indexed_initial.second;
@@ -239,13 +239,13 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
     Point<FloatDPApproximation> state_pt = initial;
 
     Int old_precision = std::clog.precision();
-    CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
+    LOGGING_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
     while(decide(t<tmax)) {
         state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
         t += h;
         orbit->insert(cast_exact(t), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
         old_precision = std::clog.precision();
-        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
+        LOGGING_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
     }
 }
 

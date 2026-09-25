@@ -42,11 +42,11 @@
 #include "io/figure.hpp"
 #include "io/drawer.hpp"
 #include "io/graphics_manager.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "../test.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 using namespace Ariadne;
 using namespace std;

@@ -34,7 +34,7 @@
 #include <list>
 #include <iostream>
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "utility/declarations.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
@@ -47,7 +47,7 @@
 #include "geometry/box.hpp"
 #include "dynamics/enclosure.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

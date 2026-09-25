@@ -40,13 +40,13 @@
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
 #include "symbolic/expression_set.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "solvers/integrator_interface.hpp"
 #include "solvers/inclusion_integrator.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "differential_inclusion.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

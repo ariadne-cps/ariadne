@@ -68,7 +68,7 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "function/functional.hpp"
 
@@ -78,13 +78,13 @@
 
 #include "algebra/expansion.inl.hpp"
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
-using BetterThreads::StaticWorkload;
+using Threading::StaticWorkload;
 
 template<class T> inline StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 

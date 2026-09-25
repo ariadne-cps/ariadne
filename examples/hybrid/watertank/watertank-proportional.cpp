@@ -42,7 +42,7 @@ void ariadne_main()
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
 
     // Print the system description on the command line
-    CONCLOG_PRINTLN_VAR(watertank_system)
+    LOGGING_PRINTLN_VAR(watertank_system)
 
     // Compute the system evolution
 
@@ -55,7 +55,7 @@ void ariadne_main()
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    CONCLOG_PRINTLN("Computing evolution...")
+    LOGGING_PRINTLN("Computing evolution...")
 
     // Define the initial set, by supplying the location as a list of locations for each composed automata, and
     // the continuous set as a list of variable assignments for each variable controlled on that location
@@ -65,13 +65,13 @@ void ariadne_main()
     HybridTime evolution_time(80.0_x,5);
     // Compute the orbit using upper semantics
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    CONCLOG_PRINTLN("done.")
+    LOGGING_PRINTLN("done.")
 
     // Plot the trajectory using two different projections
-    CONCLOG_PRINTLN("Plotting trajectory... ")
+    LOGGING_PRINTLN("Plotting trajectory... ")
     Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
     plot("watertank_proportional_t-height",time_height_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
     plot("watertank_proportional_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
-    CONCLOG_PRINTLN("done.")
+    LOGGING_PRINTLN("done.")
 }

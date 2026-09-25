@@ -30,14 +30,14 @@
 #define ARIADNE_CALCULUS_BASE_HPP
 
 #include "utility/tribool.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "function/function_interface.hpp"
 #include "calculus_interface.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 /* \brief Top-level namespace. */
 namespace Ariadne {

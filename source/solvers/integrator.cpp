@@ -30,7 +30,7 @@
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "utility/container.hpp"
 #include "utility/tuple.hpp"
 #include "numeric/numeric.hpp"
@@ -52,7 +52,7 @@
 
 #include "algebra/expansion.inl.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -164,7 +164,7 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
             StepSizeType hnew=hlf(hprev);
             hprev=h;
             h=StepSizeType(hnew.get_d());
-            CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
+            LOGGING_PRINTLN_AT(1,"Reduced h to "<<h);
         }
     }
 }
@@ -203,7 +203,7 @@ BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, 
             StepSizeType hnew=hlf(hprev);
             hprev=h;
             h=StepSizeType(hnew.get_d());
-            CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
+            LOGGING_PRINTLN_AT(1,"Reduced h to "<<h);
         }
     }
 }
@@ -258,9 +258,9 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 FlowStepModelType
 TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("f="<<f);
-    CONCLOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN("f="<<f);
+    LOGGING_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
 
     const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
 
@@ -279,20 +279,20 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ExactBoxType dom=join(D,T,A);
     ExactBoxType wdom=join(D,wT,A);
     UpperBoxType const& bx=B;
-    CONCLOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
+    LOGGING_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
     FlowStepModelType phi0=this->function_factory().create_projection(wdom,range(0,nx));
-    CONCLOG_PRINTLN_AT(1,"phi0="<<phi0);
+    LOGGING_PRINTLN_AT(1,"phi0="<<phi0);
     FlowStepModelType phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
-    CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    LOGGING_PRINTLN_AT(1,"phi="<<phi);
     FlowStepModelType fphi=compose(f,join(phi0,ta));
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool below_maximum_error=definitely(phi.error()<this->step_maximum_error());
         try {
             fphi=compose(f,join(std::move(phi),ta));
-            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+            LOGGING_PRINTLN_AT(2,"fphi="<<fphi);
         } catch(...) {
             ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
         }
@@ -300,7 +300,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
         phi=antiderivative(fphi,nx)+phi0;
-        CONCLOG_PRINTLN_AT(2,"phi="<<phi);
+        LOGGING_PRINTLN_AT(2,"phi="<<phi);
         if(below_maximum_error && k>=this->_minimum_temporal_order) { break; }
     }
     if (possibly(phi.error()>this->step_maximum_error())) {
@@ -346,9 +346,9 @@ GradedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
 FlowStepModelType
 GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("f="<<f);
-    CONCLOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN("f="<<f);
+    LOGGING_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
 
     const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
 
@@ -367,27 +367,27 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     ExactBoxType dom=join(D,T,A);
     ExactBoxType wdom=join(D,wT,A);
     UpperBoxType const& bx=B;
-    CONCLOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
+    LOGGING_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
     FlowStepModelType phi0=this->function_factory().create_projection(wdom,range(0,nx));
-    CONCLOG_PRINTLN_AT(1,"phi0="<<phi0);
+    LOGGING_PRINTLN_AT(1,"phi0="<<phi0);
     FlowStepModelType phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
-    CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    LOGGING_PRINTLN_AT(1,"phi="<<phi);
     FlowStepModelType fphi=compose(f,join(phi0,ta));
     for (DegreeType k=0; k!=this->_order; ++k) {
         try {
             fphi=compose(f,join(std::move(phi),ta));
-            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+            LOGGING_PRINTLN_AT(2,"fphi="<<fphi);
         } catch (...) {
             ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
         }
         phi=antiderivative(fphi,nx)+phi0;
-        CONCLOG_PRINTLN_AT(2,"phi="<<phi);
+        LOGGING_PRINTLN_AT(2,"phi="<<phi);
     }
     auto errors = phi.errors();
-    CONCLOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
+    LOGGING_PRINTLN_AT(2,"initial errors to validate=" << errors);
     fphi=compose(f,join(std::move(phi),ta));
     phi=antiderivative(fphi,nx)+phi0;
     auto new_errors = phi.errors();
@@ -397,7 +397,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         }
     }
     errors = new_errors;
-    CONCLOG_PRINTLN_AT(2,"validated errors=" << errors);
+    LOGGING_PRINTLN_AT(2,"validated errors=" << errors);
     while (true) {
         fphi=compose(f,join(std::move(phi),ta));
         phi=antiderivative(fphi,nx)+phi0;
@@ -414,7 +414,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         }
         if (not has_improved) break;
         errors = new_errors;
-        CONCLOG_PRINTLN_VAR_AT(2,errors);
+        LOGGING_PRINTLN_VAR_AT(2,errors);
     }
 
     if (possibly(phi.error()>this->step_maximum_error())) {
@@ -524,7 +524,7 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
                const Vector<ValidatedNumericType>& x, const ValidatedNumericType& t0, const Vector<ValidatedNumericType>& a,
                DegreeType so, DegreeType to)
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     const SizeType xs=x.size();
     const SizeType as=a.size();
     const SizeType ress=f.result_size();
@@ -553,15 +553,15 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
             yta[xs+1u+i]=GradedValidatedDifferential(ValidatedDifferential::variable(xs+as,so,a[i],xs+i));
         }
     }
-    CONCLOG_PRINTLN_AT(1,"fy="<<fy<<", tmp="<<tmp<<", yta="<<yta);
+    LOGGING_PRINTLN_AT(1,"fy="<<fy<<", tmp="<<tmp<<", yta="<<yta);
 }
 
 
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
                          Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta)
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"degree="<<yta[0].degree());
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"degree="<<yta[0].degree());
     const bool is_autonomous = (p.argument_size()==yta[0][0].argument_size());
     const SizeType n=p.result_size();
 
@@ -606,7 +606,7 @@ graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vecto
             gdphi[i][j].expansion().append(iter->index(),iter->coefficient());
         }
     }
-    CONCLOG_PRINTLN_AT(1,"gdphi="<<gdphi);
+    LOGGING_PRINTLN_AT(1,"gdphi="<<gdphi);
 
     return gdphi;
 }
@@ -633,7 +633,7 @@ differential(Vector<GradedValidatedDifferential> const& gdphi, SizeType gind,
             }
         }
     }
-    CONCLOG_PRINTLN_AT(1,"dphi="<<dphi);
+    LOGGING_PRINTLN_AT(1,"dphi="<<dphi);
     return dphi;
 }
 
@@ -654,7 +654,7 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
     FlowStepTaylorModelType tf(rs,dom,swp);
 
     Vector<Differential<FloatBounds<DP>>> ds=scale(Differential<FloatBounds<DP>>::variables(deg,Vector<FloatBounds<DP>>(as,dp)),dom);
-    CONCLOG_PRINTLN_AT(1,"ds="<<ds<<"\rs");
+    LOGGING_PRINTLN_AT(1,"ds="<<ds<<"\rs");
     Vector<Differential<FloatBounds<DP>>> dfs = compose(df,ds);
 
     for(SizeType i=0; i!=rs; ++i) {
@@ -695,10 +695,10 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
                         const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
                         Sweeper<FloatDP> const& sweeper, DegreeType so, DegreeType to)
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"f="<<f);
-    CONCLOG_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
-    CONCLOG_PRINTLN_AT(1,"sweeper="<<sweeper<<", so="<<so<<", to="<<to);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"f="<<f);
+    LOGGING_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
+    LOGGING_PRINTLN_AT(1,"sweeper="<<sweeper<<", so="<<so<<", to="<<to);
 
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension() || f.argument_size()==domx.dimension()+1u+doma.dimension());
@@ -724,7 +724,7 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     Vector<ValidatedNumericType> db=join(bx,dt,da);
     ExactBoxType domc=join(domx,domt,doma);
 
-    CONCLOG_PRINTLN_AT(2,"dx="<<dx<<", dt="<<dt<<", da="<<da<<", wdt="<<wdt<<", bx="<<bx);
+    LOGGING_PRINTLN_AT(2,"dx="<<dx<<", dt="<<dt<<", da="<<da<<", wdt="<<wdt<<", bx="<<bx);
 
     ValidatedDifferential dzero(domx.dimension()+doma.dimension(),so,dx.element_characteristics());
     GradedValidatedDifferential null(0u,dzero);
@@ -738,20 +738,20 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
         Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic);
         Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib);
     }
-    CONCLOG_PRINTLN_AT(3,"dphic="<<dphic);
-    CONCLOG_PRINTLN_AT(3,"dphib="<<dphib);
+    LOGGING_PRINTLN_AT(3,"dphic="<<dphic);
+    LOGGING_PRINTLN_AT(3,"dphib="<<dphib);
 
     dphic=project(dphic,range(0,nx));
     dphib=project(dphib,range(0,nx));
-    CONCLOG_PRINTLN_AT(3,"dphic="<<dphic);
-    CONCLOG_PRINTLN_AT(3,"dphib="<<dphib);
+    LOGGING_PRINTLN_AT(3,"dphic="<<dphic);
+    LOGGING_PRINTLN_AT(3,"dphib="<<dphib);
 
     Vector<ValidatedDifferential> dphi=Ariadne::flow_differential(dphic,dphib,so,to);
-    CONCLOG_PRINTLN_AT(2,"dphi="<<dphi);
+    LOGGING_PRINTLN_AT(2,"dphi="<<dphi);
 
     FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
 
-    CONCLOG_PRINTLN("phi="<<tphi);
+    LOGGING_PRINTLN("phi="<<tphi);
 
     return tphi;
 }
@@ -762,10 +762,10 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
                         const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
                         ExactDouble max_err, Sweeper<FloatDP> const& sweeper, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to)
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"f="<<f);
-    CONCLOG_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
-    CONCLOG_PRINTLN_AT(1,"max_err="<<max_err<<", sweeper="<<sweeper<<", "<<
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"f="<<f);
+    LOGGING_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
+    LOGGING_PRINTLN_AT(1,"max_err="<<max_err<<", sweeper="<<sweeper<<", "<<
                             "init_so="<<init_so<<", init_to="<<init_to<<", max_so="<<max_so<<", max_to="<<max_to);
 
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
@@ -778,9 +778,9 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     FlowStepTaylorModelType phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
-    CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    LOGGING_PRINTLN_AT(1,"phi="<<phi);
     SizeType nnz=0; for(SizeType i=0; i!=phi.size(); ++i) { nnz+=phi.model(i).number_of_nonzeros(); }
-    CONCLOG_PRINTLN_AT(1,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error());
+    LOGGING_PRINTLN_AT(1,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error());
 
     FloatDPError old_error=phi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*two,dp);
 
@@ -798,9 +798,9 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
         phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
-        CONCLOG_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" err="<<phi.error());
+        LOGGING_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" err="<<phi.error());
     }
-    CONCLOG_PRINTLN("phi="<<phi);
+    LOGGING_PRINTLN("phi="<<phi);
     return static_cast<ValidatedVectorMultivariateFunctionPatch>(phi);
 }
 

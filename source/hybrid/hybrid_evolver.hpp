@@ -37,7 +37,7 @@
 
 #include "utility/tuple.hpp"
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
@@ -48,9 +48,9 @@
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -59,7 +59,7 @@ typedef Dyadic StepSizeType;
 
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
-using BetterThreads::DynamicWorkload;
+using Threading::DynamicWorkload;
 
 class IntegratorInterface;
 class SolverInterface;

@@ -38,14 +38,14 @@
 
 #include "solvers/integrator.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "dynamics/vector_field.hpp"
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 

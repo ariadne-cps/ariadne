@@ -26,8 +26,8 @@
 
 using namespace Ariadne;
 
-void print() { CONCLOG_PRINTLN(""); }
-template<class T> void print(const char* label, T const& expr) { CONCLOG_PRINTLN(label << ": " << (expr)) }
+void print() { LOGGING_PRINTLN(""); }
+template<class T> void print(const char* label, T const& expr) { LOGGING_PRINTLN(label << ": " << (expr)) }
 
 
 void function_demonstration() {

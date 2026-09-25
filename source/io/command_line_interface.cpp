@@ -23,21 +23,21 @@
  */
 
 #include "config.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "threading/thread_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"
 #include "gnuplot.hpp"
 #include "cairo.hpp"
 #include "null_graphics.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "command_line_interface.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
-using BetterThreads::ThreadManager;
+using Threading::ThreadManager;
 
 
 ArgumentStream::ArgumentStream(List<String> const& args) {

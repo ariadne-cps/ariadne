@@ -29,7 +29,7 @@ void LOVO25()
 {
     ArchBenchmark benchmark("LOVO25");
 
-    CONCLOG_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
+    LOGGING_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
 
     RealVariable x("x");
     RealVariable y("y");
@@ -75,10 +75,10 @@ void LOVO25()
     config.set_reconditioning_num_blocks(5);
     auto initial_enclosure = HybridEnclosure(initial_set,RealSpace({x,y}),config);
 
-    CONCLOG_PRINTLN("Computing evolution... ")
+    LOGGING_PRINTLN("Computing evolution... ")
     auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
 
-    CONCLOG_PRINTLN("Checking properties... ")
+    LOGGING_PRINTLN("Checking properties... ")
 
     ListSet<HybridEnclosure> actual_final;
 
@@ -94,19 +94,19 @@ void LOVO25()
         }
     }
 
-    CONCLOG_RUN_AT(2,auto final_bounds = actual_final.bounding_box())
+    LOGGING_RUN_AT(2,auto final_bounds = actual_final.bounding_box())
 
     sw.click();
 
     if (has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
-        CONCLOG_PRINTLN("All final sets have either 2 or 4 transitions.")
-    } else { CONCLOG_PRINTLN("Final set with a different number of transitions have been found!") }
+        LOGGING_PRINTLN("All final sets have either 2 or 4 transitions.")
+    } else { LOGGING_PRINTLN("Final set with a different number of transitions have been found!") }
 
     double final_set_area = (final_bounds[x].width()*final_bounds[y].width()).get_d();
 
-    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
-    CONCLOG_PRINTLN("# of final sets: " << actual_final.size())
-    CONCLOG_PRINTLN("Final set area: " << final_set_area)
+    LOGGING_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
+    LOGGING_PRINTLN("# of final sets: " << actual_final.size())
+    LOGGING_PRINTLN("Final set area: " << final_set_area)
 
     auto instance = benchmark.create_instance();
     if (final_set_area < 1e-2 and has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
@@ -124,9 +124,9 @@ void LOVO25()
     simulator.configuration().set_step_size(0.1);
     HybridRealPoint circle_initial(rotate,{t=0});
     HybridTime circle_time(2*pi,1);
-    CONCLOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time))
+    LOGGING_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time))
 
-    CONCLOG_PRINTLN("Drawing figure... ")
+    LOGGING_PRINTLN("Drawing figure... ")
     plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit);
-    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.")
+    LOGGING_PRINTLN("File " << benchmark.name() << ".png written.")
 }

@@ -43,11 +43,11 @@
 #include "solvers/integrator_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 namespace Ariadne {
 
@@ -56,7 +56,7 @@ template<class ES> class Orbit;
 
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
-using BetterThreads::DynamicWorkload;
+using Threading::DynamicWorkload;
 
 class VectorFieldEvolverConfiguration;
 

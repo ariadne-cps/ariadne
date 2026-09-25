@@ -31,11 +31,11 @@
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
 #include "io/figure.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "../test.hpp"
 
-using namespace ConcLog;
+using namespace Logging;
 
 using namespace Ariadne;
 using namespace std;

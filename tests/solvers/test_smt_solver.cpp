@@ -819,12 +819,6 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(statistics.boxes_split,1u);
 
         SmtSolverTestSupport::accumulate_box_processing_statistics(
-            statistics,Input{Status::UNKNOWN});
-        ARIADNE_TEST_EQUAL(statistics.boxes_unknown,1u);
-        ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,0u);
-        ARIADNE_TEST_EQUAL(statistics.non_splittable_epsilon_overlap_boxes,0u);
-
-        SmtSolverTestSupport::accumulate_box_processing_statistics(
             statistics,Input{Status::EPSILON_SAT,0u,0u,0u,0u,0u,0u,false,false,false,true});
         ARIADNE_TEST_EQUAL(statistics.dp_resolution_fallback_boxes,1u);
         ARIADNE_TEST_EQUAL(statistics.non_splittable_uncertified_boxes,1u);
@@ -1392,7 +1386,6 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -1534,7 +1527,6 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().dp_resolution_fallback_boxes,1u);
             ARIADNE_TEST_EQUAL(
@@ -1657,7 +1649,6 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
         }
 
@@ -2132,7 +2123,6 @@ class TestSmtSolver {
                 residual==0);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
         }
 
         {
@@ -2656,7 +2646,6 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().dp_resolution_fallback_boxes>=1u);
-            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
         }
 
         {

@@ -59,9 +59,9 @@ The solver roadmap therefore prioritizes, in this order:
    the optimization is currently restricted to compiled SMT theory literals;
 4. robust support for polynomial and transcendental activations and dynamics;
 5. fast counterexample/witness discovery for CEGIS loops;
-6. characterize and minimize DP-resolution UNKNOWN outcomes on the declared
-   bounded QF_NRA fragment, establishing two-outcome epsilon-complete behavior
-   only for queries whose validated DP evaluation is demonstrably sufficient;
+6. maintain dReal-style two-outcome numerical behavior on the declared bounded
+   QF_NRA fragment, with public UNKNOWN reserved for explicit resource limits
+   rather than DP terminal resolution;
 7. only after those goals, broader language features such as richer SMT-LIB
    integration, quantifiers, or dedicated ODE solving.
 
@@ -76,10 +76,13 @@ structure, and large composed expression graphs.
 The solver currently exposes three outcomes:
 
 - `UNSAT`: the bounded query has been rigorously excluded.
-- `EPSILON_SAT`: a validated witness box satisfies the epsilon-relaxed query.
-- `UNKNOWN`: the current bounded search cannot certify either result. This is
-  used deliberately for exhausted box budgets and terminal boxes that cannot be
-  certified; it must never be silently promoted to `EPSILON_SAT`.
+- `EPSILON_SAT`: the search has found an epsilon witness under the operational
+  dReal-style DP contract. Normally the witness box is validated directly
+  against the epsilon-relaxed query; a nonzero
+  `dp_resolution_fallback_boxes` records the fixed-precision non-bisectable
+  fallback instead.
+- `UNKNOWN`: an explicit search resource limit was exhausted before either
+  `UNSAT` or `EPSILON_SAT` was established.
 
 ### Double-precision numerical contract
 
@@ -139,17 +142,12 @@ The Ariadne SMT contract is therefore:
 
 - `UNSAT` is exact: validated pruning/range exclusion has ruled out the
   original query.
-- `EPSILON_SAT` is certified: the returned DP witness box is validated against
-  the epsilon-relaxed constraints.
-- `UNKNOWN` is permitted for explicit resource exhaustion and for
-  **DP-resolution exhaustion**, where search has reached the representable DP
-  boundary without either proof.
-- A two-outcome epsilon-completeness claim may only be made for a query class for
-  which the DP evaluator is known to provide enough resolution before the
-  representable search boundary. There is currently no formula-independent
-  positive lower bound on epsilon that establishes this for the full supported
-  nonlinear/transcendental language: rounding error also depends on expression
-  structure, scale and intermediate values.
+- `EPSILON_SAT` normally carries a box validated against the epsilon-relaxed
+  constraints. At the DP representation boundary, the explicit dReal-style
+  non-bisectable fallback may instead return operational `EPSILON_SAT`; this is
+  recorded by `dp_resolution_fallback_boxes`.
+- `UNKNOWN` is reserved for explicit resource exhaustion. DP-resolution
+  exhaustion is not a public UNKNOWN condition.
 
 A global rule such as `epsilon >= 1e-12` is therefore not a rigorous
 completeness contract. Expressions with large intermediate magnitudes,
@@ -230,11 +228,14 @@ exhaustion is no longer a source of public `UNKNOWN`. It produces operational
 `EPSILON_SAT` and is explicitly visible through
 `dp_resolution_fallback_boxes`.
 
-The remaining numerical `UNKNOWN` source is explicit resource exhaustion:
-sequential and parallel conjunction search return `UNKNOWN` when the configured
-global box-processing limit is reached. Boolean/CDCL search may continue after a
-resource-limited theory branch, but the final Boolean result is `UNKNOWN` if no
-other branch establishes epsilon satisfiability or UNSAT.
+The only current public `UNKNOWN` source is explicit box-processing resource
+exhaustion. Sequential and parallel conjunction search return `UNKNOWN` when
+the configured global box-processing limit is reached. Boolean/CDCL search may
+continue after a resource-limited theory branch, but the final Boolean result is
+`UNKNOWN` if no other branch establishes epsilon satisfiability or UNSAT.
+
+Accordingly, per-box processing has only three internal outcomes:
+`PRUNED`, `EPSILON_SAT`, and `SPLIT`. There is no per-box `UNKNOWN` state.
 
 The older counters `non_splittable_uncertified_boxes` and
 `non_splittable_epsilon_overlap_boxes` are retained for diagnostic continuity
@@ -552,29 +553,17 @@ resulting design decisions.
 
 The immediate work on `solvers-smt#830` is:
 
-1. distinguish DP-resolution exhaustion explicitly from resource exhaustion in
-   statistics/result diagnostics, with sequential, parallel and Boolean tests;
-2. investigate validated expression/domain-specific resolution certificates that
-   could identify a larger two-outcome DP fragment; do not introduce a universal
-   epsilon floor without a proof;
-3. improve DP decision power through stronger symbolic simplification,
-   correlation-preserving/shared expression evaluation and contractors before
-   reconsidering any stronger completeness claim;
-4. preserve deterministic, nontrivial tests for every introduced behavior;
-5. after every green functional test run, regenerate coverage and restore 100%
-   function and branch coverage before starting the next feature tranche;
-6. retain the audited compiler-mapped line anomaly unless a semantic source
+1. make splitting focus on constraints whose validated box evaluation has not
+   yet met the epsilon stopping condition, mirroring dReal's branching-candidate
+   set while retaining Ariadne's sensitivity guidance within that active set;
+2. preserve deterministic, nontrivial tests for sequential, parallel and Boolean
+   search behavior introduced by each branch-and-prune refinement;
+3. after every green functional test run, regenerate coverage and restore 100%
+   function and branch coverage for newly introduced functionality before
+   starting the next feature tranche;
+4. improve DP decision power through stronger symbolic simplification,
+   correlation-preserving/shared expression evaluation and contractors;
+5. retain the audited compiler-mapped line anomaly unless a semantic source
    change resolves it naturally;
-7. later add CI coverage gates so regressions in functions, lines or branches
+6. later add CI coverage gates so regressions in functions, lines or branches
    fail automatically.
-
-The current development workflow intentionally uses local compilation and test
-execution; CI integration is deferred until the solver and its coverage
-contract are stable.
-
-## Maintenance rule
-
-When an architectural or semantic decision changes, update this document in the
-same commit as the code change. Do not use this file as a chronological
-changelog; Git already provides that. Keep it as the current design rationale,
-coverage contract, and handoff state for future development.

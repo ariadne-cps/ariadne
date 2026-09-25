@@ -97,7 +97,6 @@ struct SmtSearchStatistics {
     SizeType boxes_processed = 0u;
     SizeType boxes_pruned = 0u;
     SizeType boxes_split = 0u;
-    SizeType boxes_unknown = 0u;
     SizeType box_budget_exhaustions = 0u;
     SizeType dp_resolution_fallback_boxes = 0u;
     SizeType non_splittable_uncertified_boxes = 0u;
@@ -287,8 +286,7 @@ SmtResult finalize_search_outcome(
 enum class BoxProcessingStatus {
     PRUNED,
     EPSILON_SAT,
-    SPLIT,
-    UNKNOWN
+    SPLIT
 };
 
 struct BoxProcessingStatisticsInput {

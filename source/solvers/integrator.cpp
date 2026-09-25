@@ -1217,7 +1217,7 @@ graded_series_centre_polynomial_step(
                     exact_defect,join(domx,widt,doma),sweeper);
             for(SizeType i=0u; i!=n; ++i) {
                 exact_polynomial_defect_range[i]=evaluate(
-                    exact_direct_wide_defect.model(i),forward_half_box);
+                    exact_wide_defect.model(i),forward_half_box);
             }
         }
     }

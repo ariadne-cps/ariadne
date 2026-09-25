@@ -71,5 +71,5 @@ jobs:
       with:
         files: ${{runner.workspace}}/build/coverage.info
         disable_search: true
-        fail_ci_if_error: false
+        fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}

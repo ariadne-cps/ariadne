@@ -699,13 +699,10 @@ SmtSolver::_solve_sequential_conjunction(
     SmtSearchStatistics statistics;
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
-    Bool unknown_seen=false;
-
     while(not pending.empty()) {
         if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
             ++statistics.box_budget_exhaustions;
-            unknown_seen=true;
-            break;
+            return SmtResult::unknown(statistics);
         }
         UpperBoxType current=pending.pop();
         ++statistics.boxes_processed;
@@ -720,14 +717,10 @@ SmtSolver::_solve_sequential_conjunction(
         if(processing.status==BoxProcessingStatus::SPLIT) {
             pending.push(std::move(processing.children->second));
             pending.push(std::move(processing.children->first));
-        } else if(processing.status==BoxProcessingStatus::UNKNOWN) {
-            unknown_seen=true;
         }
     }
 
-    return unknown_seen
-        ? SmtResult::unknown(statistics)
-        : SmtResult::unsat(statistics);
+    return SmtResult::unsat(statistics);
 }
 
 SmtResult SmtSolver::solve(ExactBoxType const& domain,
@@ -783,7 +776,6 @@ struct ParallelSmtSearchState {
     SmtSearchStatistics statistics;
     std::optional<UpperBoxType> witness;
     std::atomic<bool> found{false};
-    std::atomic<bool> unknown{false};
     std::atomic<bool> limit_reached{false};
 };
 
@@ -830,7 +822,6 @@ struct SmtParallelTask {
             if(state->statistics.boxes_processed>=
                     solver._configuration.box_processing_limit()) {
                 ++state->statistics.box_budget_exhaustions;
-                state->unknown.store(true);
                 state->limit_reached.store(true);
                 return;
             }
@@ -851,15 +842,11 @@ struct SmtParallelTask {
             claim_parallel_witness(*state,*processing.witness);
             return;
         }
-        if(processing.status==SmtSolverTestSupport::BoxProcessingStatus::SPLIT) {
-            auto children=SmtSolverTestSupport::parallel_children_to_append(
-                state->found.load(),*processing.children);
-            for(auto const& child:children) {
-                access.append(child);
-            }
-            return;
+        auto children=SmtSolverTestSupport::parallel_children_to_append(
+            state->found.load(),*processing.children);
+        for(auto const& child:children) {
+            access.append(child);
         }
-        state->unknown.store(true);
     }
 };
 
@@ -880,7 +867,7 @@ SmtSolver::_solve_parallel_conjunction(
     if(state->found.load()) {
         return SmtResult::epsilon_sat(*state->witness,state->statistics);
     }
-    if(state->unknown.load()) {
+    if(state->limit_reached.load()) {
         return SmtResult::unknown(state->statistics);
     }
     return SmtResult::unsat(state->statistics);
@@ -1002,7 +989,6 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.boxes_processed+=source.boxes_processed;
     target.boxes_pruned+=source.boxes_pruned;
     target.boxes_split+=source.boxes_split;
-    target.boxes_unknown+=source.boxes_unknown;
     target.box_budget_exhaustions+=source.box_budget_exhaustions;
     target.dp_resolution_fallback_boxes+=source.dp_resolution_fallback_boxes;
     target.non_splittable_uncertified_boxes+=source.non_splittable_uncertified_boxes;
@@ -1501,9 +1487,6 @@ Void accumulate_box_processing_statistics(
             break;
         case BoxProcessingStatus::SPLIT:
             ++statistics.boxes_split;
-            break;
-        case BoxProcessingStatus::UNKNOWN:
-            ++statistics.boxes_unknown;
             break;
         case BoxProcessingStatus::EPSILON_SAT:
             break;

@@ -3675,3 +3675,37 @@ and its attached Error is inspected from that object.
 
 This changes only diagnostic bookkeeping. The production `defect` FunctionPatch and the
 Gronwall residual range remain untouched.
+
+
+### 9.103 Audit coefficient loss before patch-level residual subtraction (2026-09-25)
+
+The previous decomposition showed that removing the attached Taylor-model Errors changes
+the production residual magnitude by only about 0.2%, while the direct Differential
+residual can be about 14 times smaller. The gap therefore arises before the final model
+Error term.
+
+The new diagnostic audits the two residual operands across the
+Differential-to-TaylorModel materialisation boundary:
+
+- `derivative(dphi)` versus the derivative Taylor model obtained from the already
+  materialised centre polynomial;
+- `recurrence_field_differential` versus the materialised recurrence-field Taylor model.
+
+For every source Differential term it counts coefficients that disappear entirely and
+coefficients whose stored value changes, accumulating the magnitudes of the missing and
+changed contributions. It also compares the coefficient L1 magnitude of the residual
+formed before materialisation with the coefficient L1 magnitude of the clobbered
+patch-level residual after separate materialisation and subtraction.
+
+The cumulative marker is:
+
+```
+[DefectSweepCoefficientAudit]
+```
+
+with fields for missing/changed term counts and magnitude sums for both operands,
+`pre_subtract_magnitude_sum`, `post_subtract_magnitude_sum`, and diagnostic runtime.
+
+The production Gronwall path is unchanged. The purpose is to determine whether the large
+direct/production residual gap is explained by coefficients being dropped or modified
+before cancellation can occur.

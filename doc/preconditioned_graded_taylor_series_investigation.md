@@ -4291,3 +4291,61 @@ Error for every compared component.
 
 The wall time of this run is diagnostic only because the first 100 calls perform extra
 work.  The clean production reference remains 22.7361 s.
+
+
+### 9.118 Widened-centre derivative reuse is rejected (2026-09-25)
+
+The forced 100-call A/B from 9.117 executed successfully. Across 200 component
+comparisons it reports:
+
+```
+equal_expansion_components = 0 / 200
+equal_error_components     = 0 / 200
+max_error_difference       = 1.13856e-13
+candidate_seconds          = 0.0618921
+```
+
+Differentiating an already materialised widened centre Taylor model therefore does not
+reproduce the reference operand
+`make_taylor_function_model(dP/dt, widened_domain)`, even at polynomial-expansion
+level. The difference is not merely uniform-Error bookkeeping.
+
+The direct-reuse route is rejected. The forced first-100-call A/B is removed from clean
+runs; it remains available only under diagnostics. The 23.1511 s diagnostic wall time is
+not a new baseline. The clean production reference remains 22.7361 s.
+
+
+### 9.119 Decompose widened field materialisation (2026-09-25)
+
+With derivative-model reuse rejected, the next target is the larger widened
+`g(P)` materialisation, measured around 1.4--1.5 s over 2000 calls.
+
+A diagnostic-only profiled twin of `make_taylor_function_model` is used exclusively for
+the widened recurrence-field operand. It executes the same statements as the production
+helper but times the three internal phases separately:
+
+```
+scale(Differential::variables(...), domain)
+compose(df, scaled_variables)
+Bounds-to-TaylorModel conversion + cleanup
+```
+
+The cumulative marker is:
+
+```
+[WidenedFieldMaterialisationProfile]
+calls=...
+scale_seconds=...
+compose_seconds=...
+conversion_seconds=...
+```
+
+The rejected widened-derivative A/B is no longer forced in normal runs. No enclosure or
+step-selection semantics are changed by this experiment. Its wall time is diagnostic;
+the clean reference remains 22.7361 s with final error 4.7221144502652554e-8.
+
+If `compose` dominates, the next optimisation should prototype a specialised affine
+scaling/substitution path for Differential-to-TaylorModel conversion and require exact
+coefficient/Error equivalence before production use. If conversion/cleanup dominates,
+optimise that loop instead. If scale is significant, cache or specialise the normalised
+variable scaling.

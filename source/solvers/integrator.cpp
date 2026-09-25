@@ -795,6 +795,72 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
     return tf;
 }
 
+
+FlowStepTaylorModelType make_taylor_function_model_profiled(
+        const Vector<Differential<FloatBounds<DP>>>& df,
+        const ExactBoxType& dom,
+        Sweeper<FloatDP> swp)
+{
+    ARIADNE_ASSERT(df.argument_size()==dom.dimension());
+    const SizeType rs=df.size();
+    const SizeType as=dom.dimension();
+    const DegreeType deg=df.degree();
+    FlowStepTaylorModelType tf(rs,dom,swp);
+
+    Stopwatch<Microseconds> scale_stopwatch;
+    Vector<Differential<FloatBounds<DP>>> ds=
+        scale(
+            Differential<FloatBounds<DP>>::variables(
+                deg,Vector<FloatBounds<DP>>(as,dp)),
+            dom);
+    scale_stopwatch.click();
+
+    Stopwatch<Microseconds> compose_stopwatch;
+    Vector<Differential<FloatBounds<DP>>> dfs=compose(df,ds);
+    compose_stopwatch.click();
+
+    Stopwatch<Microseconds> conversion_stopwatch;
+    for(SizeType i=0; i!=rs; ++i) {
+        ValidatedTaylorModelDP& model=tf.model(i);
+        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
+        FloatDPError& error=model.error();
+        error=0u;
+        expansion.reserve(dfs[i].expansion().number_of_nonzeros());
+
+        typename Differential<FloatDPBounds>::ConstIterator iter=dfs[i].begin();
+        while(iter!=dfs[i].end()) {
+            MultiIndex const a=iter->index();
+            FloatDPBounds coef=iter->coefficient();
+            FloatDP x=coef.value();
+            error+=coef.error();
+            expansion.append(a,x);
+            ++iter;
+        }
+        model.cleanup();
+    }
+    conversion_stopwatch.click();
+
+    static SizeType field_materialisation_profile_calls=0u;
+    static double field_scale_seconds=0.0;
+    static double field_compose_seconds=0.0;
+    static double field_conversion_seconds=0.0;
+    ++field_materialisation_profile_calls;
+    field_scale_seconds+=scale_stopwatch.elapsed_seconds();
+    field_compose_seconds+=compose_stopwatch.elapsed_seconds();
+    field_conversion_seconds+=conversion_stopwatch.elapsed_seconds();
+    if(field_materialisation_profile_calls%100u==0u) {
+        std::cerr << "[WidenedFieldMaterialisationProfile]"
+                  << " calls=" << field_materialisation_profile_calls
+                  << " scale_seconds=" << field_scale_seconds
+                  << " compose_seconds=" << field_compose_seconds
+                  << " conversion_seconds=" << field_conversion_seconds
+                  << std::endl;
+    }
+
+    return tf;
+}
+
+
 FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, Sweeper<FloatDP> swp) {
     StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
     StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
@@ -1155,9 +1221,7 @@ graded_series_centre_polynomial_step(
     static SizeType widened_derivative_total_components=0u;
     static double widened_derivative_candidate_seconds=0.0;
     static double widened_derivative_max_error_difference=0.0;
-    if(compute_exact_polynomial_diagnostic
-        || widened_derivative_equivalence_calls<100u)
-    {
+    if(compute_exact_polynomial_diagnostic) {
         Stopwatch<Microseconds> widened_derivative_candidate_stopwatch;
         FlowStepTaylorModelType diagnostic_wide_centre=
             make_taylor_function_model(dphi,wide_domain,sweeper);
@@ -1201,7 +1265,7 @@ graded_series_centre_polynomial_step(
 
     Stopwatch<Microseconds> defect_field_materialise_stopwatch;
     FlowStepTaylorModelType wide_field=
-        make_taylor_function_model(
+        make_taylor_function_model_profiled(
             recurrence_field_differential,wide_domain,sweeper);
     defect_field_materialise_stopwatch.click();
 

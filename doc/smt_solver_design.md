@@ -122,7 +122,10 @@ returned only if the MP enclosure satisfies the epsilon-relaxed primitive
 relation, including the strict bound for `GT_ZERO`. This resolves terminal
 uncertainty caused purely by DP enclosure error, such as
 `sin(x)^2+cos(x)^2-1=0` at a singleton with epsilon much smaller than DP
-roundoff.
+roundoff. The same improvement propagates through CDCL: a Boolean branch that
+previously inherited numerical `UNKNOWN` may now terminate immediately with a
+certified epsilon witness, so tests must assert the improved semantic result
+rather than preserve obsolete backtracking counts from the incomplete solver.
 
 This does **not** yet establish delta-completeness for all terminal boxes.
 Generic `ValidatedConstraint` functions remain black-box inputs, and a

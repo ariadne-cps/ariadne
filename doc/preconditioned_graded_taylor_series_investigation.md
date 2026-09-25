@@ -3760,3 +3760,54 @@ The local diagnostic variable `da` also shadowed the existing parameter vector
 `separate_abs`) to keep the build warning-free.
 
 These changes affect only the diagnostic audit.
+
+
+### 9.106 Widened-domain coefficient audit result: materialisation commutes with subtraction (2026-09-25)
+
+The widened-domain coefficient audit decisively rejects the hypothesis that the
+direct/production residual gap is caused by coefficient sweeping before cancellation.
+
+Across all 2000 recurrence calls:
+
+```
+differing_coefficients        = 0
+direct_only_coefficients      = 0
+separate_only_coefficients    = 0
+direct_coefficient_l1         = 2.27459e-8
+separate_coefficient_l1       = 2.27459e-8
+max_direct_to_separate_ratio  = 1
+max_separate_to_direct_ratio  = 1
+max_coefficient_difference    = 0
+```
+
+Thus, on the widened domain and with attached Errors removed,
+
+```
+poly(materialise(A-B))
+```
+
+is exactly coefficient-identical to
+
+```
+poly(materialise(A)-materialise(B))
+```
+
+for this benchmark. There is no lost polynomial cancellation at this boundary.
+
+The attached Error budgets differ: the directly materialised defect reaches
+`1.26506e-13`, while the sum of separately materialised source Errors reaches
+`4.24978e-13`. This is real but still does not explain the much larger production
+range gap observed after `flow_function` restriction.
+
+The remaining structural difference is therefore the restriction from the widened time
+domain to the forward time interval. The direct diagnostic evaluates the widened defect
+model directly on the forward half of its normalised time coordinate, whereas the
+production path separately restricts the centre polynomial and recurrence field before
+forming the residual. The next investigation should isolate this restriction step.
+
+This audit is intentionally expensive: it adds two extra Taylor-model materialisations
+per recurrence call and accumulates 2.69575 s of diagnostic work, increasing the observed
+wall time to 27.3211 s. That runtime is not a performance baseline.
+
+The remaining local variable shadow warning in the audit has also been removed by
+renaming `separate_abs` to `separate_coeff_abs`.

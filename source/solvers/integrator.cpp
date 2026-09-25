@@ -1199,7 +1199,7 @@ graded_series_centre_polynomial_step(
             FloatDP const dc=term.coefficient();
             FloatDP const sc=separate_core[term.index()];
             const double direct_abs=std::abs(dc.get_d());
-            const double separate_abs=std::abs(sc.get_d());
+            const double separate_coeff_abs=std::abs(sc.get_d());
             direct_l1_component+=direct_abs;
             if(sc==FloatDP(0u,dp)) {
                 ++direct_only_coefficients;

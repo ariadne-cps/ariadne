@@ -4567,3 +4567,64 @@ operation.
 No numerical or enclosure semantics are changed. The wall time of this run is diagnostic;
 the production median reference remains 21.6201 s, with final error
 4.7221144502652554e-8, radius 0.0403, and 2000 reach sets.
+
+
+### 9.126 Graded iterator profile: compute_procedure is the whole cost (2026-09-25)
+
+Across 10,000 graded-iteration calls the phase profile reports:
+
+```
+compute_procedure       5.36619 s
+antidifferential        0.03220 s
+tail append             0.000003 s
+centre iterate timer    5.47423 s
+```
+
+Approximately 99.4% of the explicitly measured iterator work is therefore inside
+`Ariadne::compute_procedure`. The procedure cost by temporal degree is:
+
+```
+degree 1   0.092516 s
+degree 2   0.375718 s
+degree 3   1.023440 s
+degree 4   1.605840 s
+degree 5   2.268680 s
+```
+
+Degrees 4 and 5 account for about 72.2% of procedure time; degrees 3--5 account for about
+91.3%. Antidifferential and tail handling are rejected as optimisation targets. The next
+step is to assign the high-degree Procedure cost to operator classes before changing
+arithmetic.
+
+
+### 9.127 Profile graded Procedure operators by temporal degree (2026-09-25)
+
+The graded Procedure evaluator is now instrumented instruction by instruction for one
+diagnostic run. It executes the same Procedure instruction stream and classifies elapsed
+time into:
+
+```
+const
+var
+linear   (ADD/SUB/POS/NEG/HLF)
+mul
+sqr
+other
+```
+
+with separate cumulative counters for each temporal degree. The marker is:
+
+```
+[GradedProcedureOperatorProfile]
+```
+
+The normal `compute_procedure` call inside `graded_flow_iterate` is temporarily
+replaced by an equivalent local evaluator solely so that each instruction can be timed.
+No intended arithmetic or enclosure semantics change; the final error/radius must still
+match exactly. The run's wall time is diagnostic only because per-instruction stopwatches
+are deliberately expensive.
+
+The purpose is to determine whether the degree-4/5 cost identified in 9.126 is dominated
+by nonlinear MUL/SQR operations or by generic Procedure dispatch / linear operations.
+After this measurement the per-instruction profiler must be removed before production
+benchmarking.

@@ -1545,6 +1545,53 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-theory-solve] terminal MP rejects first candidate then certifies endpoint" << std::endl;
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            auto alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(ex==1));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(0,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-theory-solve] terminal MP can remain uncertified" << std::endl;
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
+                1e-30_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false));
+            RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
+            auto first=normalize_smt_theory_literal(
+                make_smt_theory_literal(residual==0));
+            auto second=normalize_smt_theory_literal(
+                make_smt_theory_literal(ex==2));
+            ARIADNE_TEST_EQUAL(first.size(),1u);
+            ARIADNE_TEST_EQUAL(second.size(),1u);
+            List<SmtTheoryPrimitiveLiteral> literals({
+                first[0][0],
+                second[0][0]
+            });
+            SmtResult solve_result=tiny_epsilon_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
             std::cout << "[smt-theory-solve] shaving proves dependency-hidden strict UNSAT" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({
                 primitive(ex*(1-ex)>0.32_x)

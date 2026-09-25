@@ -2591,7 +2591,7 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-dpll] both Boolean branches exhaust on theory UNKNOWN" << std::endl;
+            std::cout << "[smt-dpll] terminal MP certification resolves formerly unknown Boolean branch" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
                 std::numeric_limits<SizeType>::max(),
@@ -2604,10 +2604,13 @@ class TestSmtSolver {
                 space,
                 ExactBoxType({ExactIntervalType(1,1)}),
                 uncertain||(!uncertain));
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
             ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_decisions>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_backtracks>=2u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=2u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().non_splittable_uncertified_boxes,0u);
         }
 
         {

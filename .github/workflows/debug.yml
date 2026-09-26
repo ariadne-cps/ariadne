@@ -29,9 +29,9 @@ jobs:
             cxx: "clang++-16"
           }
           - {
-            name: "Ubuntu 24.04 GCC 12 [Debug]",
+            name: "Ubuntu 24.04 GCC 13 [Debug]",
             os: ubuntu-24.04,
-            cxx: "g++-12"
+            cxx: "g++-13"
           }
 
     steps:
@@ -61,7 +61,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake ninja-build pkg-config clang-16 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt-get install -y cmake ninja-build pkg-config clang-16 g++-13 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
         python3 -m venv "$GITHUB_WORKSPACE/.venv"
         "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"

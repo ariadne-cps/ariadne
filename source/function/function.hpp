@@ -48,6 +48,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
 #include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
 #include "function/domain.hpp"
 #include "function/formula.hpp"
 

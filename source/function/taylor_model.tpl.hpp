@@ -1063,22 +1063,17 @@ template<class C> struct TaylorDenseAccumulatorWorkspace {
 
     Void prepare(SizeType requested_slots, SizeType expected_occupied) {
         const SizeType unused=std::numeric_limits<SizeType>::max();
-        const Bool slot_resize=slot_to_touched.size()<requested_slots;
-        if(slot_resize) {
+        if(slot_to_touched.size()<requested_slots) {
             slot_to_touched.resize(requested_slots,unused);
         }
         touched_slots.clear();
         touched_coefficients.clear();
-        const Bool capacity_grow=touched_slots.capacity()<expected_occupied;
-        if(capacity_grow) {
+        if(touched_slots.capacity()<expected_occupied) {
             touched_slots.reserve(expected_occupied);
         }
         if(touched_coefficients.capacity()<expected_occupied) {
             touched_coefficients.reserve(expected_occupied);
         }
-        record_taylor_model_dense_workspace_prepare(
-            slot_resize,capacity_grow,
-            static_cast<unsigned long long>(requested_slots));
     }
 
     Void reset_used_slots() {
@@ -1086,8 +1081,6 @@ template<class C> struct TaylorDenseAccumulatorWorkspace {
         for(SizeType slot : touched_slots) {
             slot_to_touched[slot]=unused;
         }
-        record_taylor_model_dense_workspace_touched(
-            static_cast<unsigned long long>(touched_slots.size()));
     }
 };
 
@@ -1095,25 +1088,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
 {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     using ErrorType = typename TaylorModel<P,F>::ErrorType;
-
-    const bool profile=taylor_model_product_profile_enabled();
-    const auto profile_start=profile ? std::chrono::steady_clock::now()
-                                     : std::chrono::steady_clock::time_point();
-    unsigned long long profile_individual_products_below_threshold=0u;
-    unsigned long long profile_individual_products_below_threshold_collision=0u;
-    unsigned long long profile_individual_products_below_threshold_new_term=0u;
-    unsigned long long profile_individual_products_below_threshold_trailing=0u;
-    unsigned long long profile_individual_products_above_threshold=0u;
-    double profile_individual_products_below_threshold_abs_mass=0.0;
-    double profile_individual_products_above_threshold_abs_mass=0.0;
-    const double profile_threshold=
-        (profile && Same<P,ValidatedTag> && Same<F,FloatDP>)
-            ? x.tolerance().get_d() : 0.0;
-    unsigned long long profile_sweep_passes=0u;
-    unsigned long long profile_sweep_input_terms=0u;
-    unsigned long long profile_sweep_output_terms=0u;
-    unsigned long long profile_maximum_sweep_input_terms=0u;
-    unsigned long long profile_maximum_sweep_output_terms=0u;
 
     const SizeType as=r.argument_size();
     ErrorType product_roundoff=nul(r.error());
@@ -1943,7 +1917,6 @@ template<class P, class F> auto TaylorModel<P,F>::_gradient(const TaylorModel<P,
 
 template<class P, class F> TaylorModel<P,F>
 TaylorModel<P,F>::_compose(TaylorModel<P,F> const& x, Vector<TaylorModel<P,F>> const& y) {
-    TaylorModelProductProfileScope profile_scope(TaylorModelProductProfileContext::COMPOSE);
     return horner_evaluate(x.expansion(),y)+pm(x.error());
 }
 

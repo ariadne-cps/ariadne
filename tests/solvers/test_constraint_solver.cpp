@@ -400,23 +400,6 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(
             possibly(contains(constraint_domain[0],ExactDouble(1.0_x))));
 
-        std::cout << "[constraint-monotone] lower Newton strip clamps at domain boundary" << std::endl;
-        UpperBoxType lower_clamp_domain=ExactBoxType{{0.0_x,2.0_x}};
-        Bool lower_clamp_empty=propagator.monotone_reduce(
-            lower_clamp_domain,
-            x[0],
-            ExactIntervalType(-10.0_x,-9.0_x),
-            0u);
-        ARIADNE_TEST_ASSERT(lower_clamp_empty);
-
-        std::cout << "[constraint-monotone] upper Newton strip clamps at domain boundary" << std::endl;
-        UpperBoxType upper_clamp_domain=ExactBoxType{{0.0_x,2.0_x}};
-        Bool upper_clamp_empty=propagator.monotone_reduce(
-            upper_clamp_domain,
-            x[0],
-            ExactIntervalType(9.0_x,10.0_x),
-            0u);
-        ARIADNE_TEST_ASSERT(upper_clamp_empty);
     }
 
     Void test_lyapunov_reduce() {

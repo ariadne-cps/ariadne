@@ -54,29 +54,7 @@ template<class X> inline Approximation<X> affine(Approximation<X> l, Approximati
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
 typedef Vector<FloatDP> ExactFloatVector;
 
-Bool has_nan(const ExactBoxType& domain);
-
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
-
-inline Sign sign(const FloatDP& x) {
-    if(x>0) { return Sign::NEGATIVE; }
-    else if(x<0) {  return Sign::POSITIVE; }
-    else { return Sign::ZERO; }
-}
-
-inline Sign sign(const ExactIntervalType& ivl) {
-    if(ivl.lower_bound()>0) { return Sign::NEGATIVE; }
-    else if(ivl.upper_bound()<0) {  return Sign::POSITIVE; }
-    else { return Sign::ZERO; }
-}
-
-
-inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    if(c.bounds().lower_bound()==c.bounds().upper_bound()) { return os << c.function() << "==" << c.bounds().upper_bound(); }
-    if(c.bounds().upper_bound()==infty) { return os << c.bounds().lower_bound() << "<=" << c.function(); }
-    if(c.bounds().lower_bound()==-infty) { return os << c.function() << "<=" << c.bounds().upper_bound(); }
-    return os << c.bounds().lower_bound() << "<=" << c.function() << "<=" << c.bounds().upper_bound();
-}
 
 
 auto ConstraintSolver::feasible(const ExactBoxType& domain,
@@ -262,17 +240,8 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
     return false;
 }
 
-Bool has_nan(const ExactBoxType& domain) {
-    for(SizeType i=0; i!=domain.size(); ++i) {
-        if(is_nan(domain[i].lower_bound().raw()) || is_nan(domain[i].upper_bound().raw())) { return true; }
-    }
-    return false;
-}
-
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
-    static const Bool USE_BOX_REDUCE = false;
-
     const double MINIMUM_REDUCTION = 0.75;
 
     if(definitely(domain.is_empty())) { return true; }
@@ -288,15 +257,6 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
         if(definitely(domain.is_empty())) { return true; }
-
-        if(USE_BOX_REDUCE) {
-            for(SizeType i=0; i!=constraints.size(); ++i) {
-                for(SizeType j=0; j!=domain.size(); ++j) {
-                    this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
-                    if(definitely(domain[j].is_empty())) { return true; }
-                }
-            }
-        }
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0u;

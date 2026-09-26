@@ -56,6 +56,8 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_composite_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_partial_domain_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_monotone_reduce());
+        ARIADNE_TEST_CALL(test_reduce_edge_cases());
+        ARIADNE_TEST_CALL(test_check_feasibility());
         ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
     }
@@ -384,21 +386,108 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(not upper_boundary_empty);
         ARIADNE_TEST_ASSERT(
             possibly(contains(upper_boundary_domain[0],ExactDouble(2.0_x))));
+
+        UpperBoxType constraint_domain=ExactBoxType{{0.0_x,2.0_x}};
+        ValidatedConstraint constraint(
+            ValidatedNumber(1.0_x),
+            x[0],
+            ValidatedNumber(1.0_x));
+        Bool constraint_empty=propagator.monotone_reduce(
+            constraint_domain,constraint,0u);
+        ARIADNE_TEST_ASSERT(not constraint_empty);
+        ARIADNE_TEST_ASSERT(
+            possibly(contains(constraint_domain[0],ExactDouble(1.0_x))));
+    }
+
+    Void test_reduce_edge_cases() {
+        ConstraintSolver solver;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+
+        std::cout << "[constraint-reduce] already empty vector domain" << std::endl;
+        UpperBoxType empty_domain=ExactBoxType({ExactIntervalType::empty_interval()});
+        ValidatedVectorMultivariateFunction vector_function({x[0]});
+        ExactBoxType vector_codomain({ExactIntervalType(0.0_x,1.0_x)});
+        ARIADNE_TEST_ASSERT(
+            solver.reduce(empty_domain,vector_function,vector_codomain));
+
+        std::cout << "[constraint-reduce] nonempty vector domain reaches fixed point" << std::endl;
+        UpperBoxType stable_domain=ExactBoxType({{0.0_x,1.0_x}});
+        ARIADNE_TEST_ASSERT(
+            not solver.reduce(stable_domain,vector_function,vector_codomain));
+        ARIADNE_TEST_ASSERT(not definitely(stable_domain.is_empty()));
+    }
+
+    Void test_check_feasibility() {
+        ConstraintSolver solver;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+        ValidatedVectorMultivariateFunction function({x[0]});
+        ExactBoxType domain({{0.0_x,2.0_x}});
+        ExactBoxType codomain({{0.0_x,1.0_x}});
+
+        std::cout << "[constraint-feasible] reject point outside domain" << std::endl;
+        ConstraintSolver::ExactPointType outside({FloatDP(-1.0_x,dp)});
+        ARIADNE_TEST_ASSERT(
+            not possibly(solver.check_feasibility(
+                domain,function,codomain,outside)));
+
+        std::cout << "[constraint-feasible] reject image outside codomain" << std::endl;
+        ConstraintSolver::ExactPointType image_outside({FloatDP(2.0_x,dp)});
+        ARIADNE_TEST_ASSERT(
+            not possibly(solver.check_feasibility(
+                domain,function,codomain,image_outside)));
+
+        std::cout << "[constraint-feasible] boundary point is indeterminate" << std::endl;
+        ConstraintSolver::ExactPointType boundary({FloatDP(0.0_x,dp)});
+        ARIADNE_TEST_ASSERT(
+            is_indeterminate(solver.check_feasibility(
+                domain,function,codomain,boundary)));
+
+        std::cout << "[constraint-feasible] strict interior point is validated" << std::endl;
+        ConstraintSolver::ExactPointType interior({FloatDP(0.5_x,dp)});
+        ARIADNE_TEST_ASSERT(
+            definitely(solver.check_feasibility(
+                domain,function,codomain,interior)));
     }
 
     Void test_split() {
-        ARIADNE_TEST_WARN("test_split: Not implemented");
+        ConstraintSolver solver;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        UpperBoxType domain=ExactBoxType({{0.0_x,4.0_x},{0.0_x,1.0_x}});
+        ValidatedVectorMultivariateFunction function({x[0]+x[1]});
+        ExactBoxType codomain({{1.0_x,2.0_x}});
+
+        std::cout << "[constraint-split] delegates to box bisection" << std::endl;
+        auto children=solver.split(domain,function,codomain);
+        ARIADNE_TEST_ASSERT(refines(children.first,domain));
+        ARIADNE_TEST_ASSERT(refines(children.second,domain));
+        ARIADNE_TEST_ASSERT(not same(children.first,children.second));
+        ARIADNE_TEST_ASSERT(
+            children.first[0].upper_bound().raw()
+            ==children.second[0].lower_bound().raw());
     }
 
     Void test_feasible() {
+
+        ConstraintSolver contractor;
+        {
+            std::cout << "[constraint-feasible] empty constraint system" << std::endl;
+            List<ValidatedConstraint> no_constraints;
+            ExactBoxType nonempty_domain({{0.0_x,1.0_x}});
+            auto nonempty=contractor.feasible(nonempty_domain,no_constraints);
+            ARIADNE_TEST_ASSERT(definitely(nonempty.first));
+            ARIADNE_TEST_EQUAL(
+                nonempty.second.dimension(),nonempty_domain.dimension());
+
+            ExactBoxType empty_domain({ExactIntervalType::empty_interval()});
+            auto empty=contractor.feasible(empty_domain,no_constraints);
+            ARIADNE_TEST_ASSERT(not possibly(empty.first));
+        }
 
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(1);
         EffectiveConstraint c = (x[0]-2<=0);
 
         List<ValidatedConstraint> constraints;
         constraints.append(c);
-
-        ConstraintSolver contractor;
 
         ARIADNE_TEST_PRINT(constraints);
 

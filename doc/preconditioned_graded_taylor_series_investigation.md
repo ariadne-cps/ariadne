@@ -5365,3 +5365,51 @@ measures the IEEE nearest-operation residual. Quantify this gap on new-slot and 
 cases separately. If the gap is inherent to the current conservative error semantics,
 the upward pass cannot be removed without changing enclosure behaviour and this
 optimisation track should be closed.
+
+
+### 9.148 Compare residual and reference contribution per pair type (2026-09-26)
+
+The 9.147 residual candidate is below the current roundoff reference on 3913/10000 dense
+products and totals only about 52.3% of the reference error.  Before closing the
+upward-pass track, the diagnostic now compares the candidate and the exact current
+reference contribution *per product pair*.
+
+The existing authoritative upward pass is unchanged.  For every pair in the first 10000
+dense products, the scalar contribution
+
+```
+hlf(add(rounded, ml, u))
+```
+
+computed by the current `mul_err/fma_err` reconstruction is captured before it is added
+to `product_roundoff`, then compared with the FMA/TwoSum residual generated for the same
+pair in the nearest pass.
+
+New-slot and collision cases are accumulated separately:
+
+```
+[DenseRoundoffPairAB]
+new_pairs=...
+new_candidate_ge_reference_pairs=...
+new_candidate_sum=...
+new_reference_sum=...
+new_candidate_over_reference=...
+new_max_ratio=...
+collision_pairs=...
+collision_candidate_ge_reference_pairs=...
+collision_candidate_sum=...
+collision_reference_sum=...
+collision_candidate_over_reference=...
+collision_max_ratio=...
+```
+
+This distinguishes two possible outcomes:
+
+1. If one pair type accounts for most of the approximately 2x gap, investigate a
+   specialised equivalent formula for that case only.
+2. If both pair types show the same systematic gap, the difference is inherent to the
+   current directed-rounding error semantics and the upward pass should not be replaced
+   by nearest-operation residuals without explicitly changing enclosure behaviour.
+
+No coefficient, roundoff bound, operation ordering, or integrator output is changed by
+this diagnostic. The production reference remains the 21.6201 s three-run median.

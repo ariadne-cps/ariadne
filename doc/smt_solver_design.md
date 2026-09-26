@@ -590,10 +590,13 @@ conditional behavior in `constraint_solver.cpp`. They are therefore not to be
 chased with artificial inputs. Any future explicit source branch introduced in
 this component must still be covered in both directions.
 
-The only uncovered function attributed to `constraint_solver.hpp` is the
-defaulted virtual destructor. A direct lifetime test through
-`ConstraintSolverInterface*` is added so that the interface destruction path
-is exercised explicitly rather than being left as a coverage artefact.
+The lifetime audit exposed a real interface defect rather than a coverage
+artefact: `ConstraintSolverInterface` is polymorphic but previously lacked a
+virtual destructor. Deleting `ConstraintSolver` through an interface pointer
+was therefore invalid and correctly triggered
+`-Wdelete-abstract-non-virtual-dtor`. The interface now has a defaulted virtual
+destructor, the derived destructor is marked `override`, and the direct
+lifetime test is retained as a regression test for polymorphic destruction.
 
 ## Current open work
 

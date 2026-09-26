@@ -77,6 +77,7 @@ class ConstraintSolverInterface {
     //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
     virtual Bool reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const = 0;
 
+    virtual ~ConstraintSolverInterface() = default;
 };
 
 
@@ -136,7 +137,7 @@ class ConstraintSolver
     Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
-    virtual ~ConstraintSolver() = default;
+    ~ConstraintSolver() override = default;
 };
 
 

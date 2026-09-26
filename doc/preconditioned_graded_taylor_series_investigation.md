@@ -5269,3 +5269,23 @@ is the validated second pass itself.
 No numerical operation, product ordering, rounding policy, or enclosure semantics are
 changed. This is a diagnostic-only run; the production reference remains the 21.6201 s
 three-run median.
+
+
+### 9.145 Dense pair loop: upward validated-roundoff pass dominates (2026-09-26)
+
+The batched dense pair-loop split completes all 2000 Van der Pol reach sets with unchanged numerical result. At step 2000:
+
+```text
+                         flowpipe      endpoint       state
+pair loop                 2.84453 s     1.07252 s     1.36598 s
+nearest pass              0.81560 s     0.30548 s     0.39175 s
+upward pass               1.99512 s     0.74436 s     0.96486 s
+```
+
+The upward validated-roundoff reconstruction consumes about 70% of each dense pair loop. Across the three carried compositions it totals about 3.704 s, versus about 1.513 s for the nearest accumulation pass. The small remainder is inter-pass overhead.
+
+This rejects collision-vector allocation and push-back as the primary target: those operations are included in the nearest pass, which is much cheaper. The dominant remaining cost is the second arithmetic traversal that reconstructs rigorous roundoff bounds.
+
+The run wall time is 21.8941 s and remains diagnostic. The production reference remains the 21.6201 s three-run median.
+
+Next experiment: build a numeric A/B around the batched dense roundoff reconstruction. Keep the nearest-pass coefficient expansion unchanged, then compare the resulting TaylorModel expansion and error against the current two-pass implementation. If exact error equality cannot be preserved, quantify enclosure widening before considering production use. Do not optimise nearest-pass memory structures first: their measured ceiling is smaller than the upward pass.

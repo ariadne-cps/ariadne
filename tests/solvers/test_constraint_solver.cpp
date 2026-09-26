@@ -399,6 +399,24 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(not constraint_empty);
         ARIADNE_TEST_ASSERT(
             possibly(contains(constraint_domain[0],ExactDouble(1.0_x))));
+
+        std::cout << "[constraint-monotone] lower Newton strip clamps at domain boundary" << std::endl;
+        UpperBoxType lower_clamp_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool lower_clamp_empty=propagator.monotone_reduce(
+            lower_clamp_domain,
+            x[0],
+            ExactIntervalType(-10.0_x,-9.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(lower_clamp_empty);
+
+        std::cout << "[constraint-monotone] upper Newton strip clamps at domain boundary" << std::endl;
+        UpperBoxType upper_clamp_domain=ExactBoxType{{0.0_x,2.0_x}};
+        Bool upper_clamp_empty=propagator.monotone_reduce(
+            upper_clamp_domain,
+            x[0],
+            ExactIntervalType(9.0_x,10.0_x),
+            0u);
+        ARIADNE_TEST_ASSERT(upper_clamp_empty);
     }
 
     Void test_lyapunov_reduce() {
@@ -485,6 +503,17 @@ class TestConstraintSolver
         ExactBoxType vector_codomain({ExactIntervalType(0.0_x,1.0_x)});
         ARIADNE_TEST_ASSERT(
             solver.reduce(empty_domain,vector_function,vector_codomain));
+
+        std::cout << "[constraint-reduce] already empty deprecated list domain" << std::endl;
+        UpperBoxType empty_list_domain=ExactBoxType({ExactIntervalType::empty_interval()});
+        List<ValidatedConstraint> one_constraint({
+            ValidatedConstraint(
+                ValidatedNumber(0.0_x),
+                x[0],
+                ValidatedNumber(1.0_x))
+        });
+        ARIADNE_TEST_ASSERT(
+            solver.reduce(empty_list_domain,one_constraint));
 
         std::cout << "[constraint-reduce] nonempty vector domain reaches fixed point" << std::endl;
         UpperBoxType stable_domain=ExactBoxType({{0.0_x,1.0_x}});
@@ -598,6 +627,32 @@ class TestConstraintSolver
                 ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
                     domain,function,codomain,feasibility_result.second)));
             }
+        }
+
+        {
+            std::cout << "[constraint-feasible] coupled constraints expose optimiser infeasibility" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ValidatedVectorMultivariateFunction function({
+                xy[0],
+                xy[1],
+                xy[0]+xy[1]
+            });
+            ExactBoxType domain({
+                {0.0_x,1.0_x},
+                {0.0_x,1.0_x}
+            });
+            ExactBoxType codomain({
+                {0.0_x,0.1_x},
+                {0.0_x,0.1_x},
+                {1.8_x,2.0_x}
+            });
+            UpperBoxType direct_image=Ariadne::apply(function,domain);
+            for(SizeType i=0u; i!=codomain.size(); ++i) {
+                ARIADNE_TEST_ASSERT(
+                    possibly(intersect(direct_image[i],codomain[i])));
+            }
+            auto feasibility_result=contractor.feasible(domain,function,codomain);
+            ARIADNE_TEST_ASSERT(not possibly(feasibility_result.first));
         }
 
         {

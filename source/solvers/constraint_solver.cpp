@@ -104,22 +104,10 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         CONCLOG_PRINTLN(
             "Interior-point candidate search encountered a singular system");
         return make_pair(indeterminate,ExactPointType());
-    } catch(const NearBoundaryOfFeasibleDomainException&) {
-        CONCLOG_PRINTLN(
-            "Interior-point candidate search reached the feasible-domain boundary");
-        return make_pair(indeterminate,ExactPointType());
     }
 
     if(definitely(candidate_result.first)) {
-        ExactPointType candidate=cast_exact(candidate_result.second);
-        if(definitely(this->check_feasibility(
-                domain,function,codomain,candidate))) {
-            return make_pair(true,candidate);
-        }
-        ARIADNE_WARN(
-            "NonlinearInfeasibleInteriorPointOptimiser reported a validated "
-            "feasible candidate that ConstraintSolver could not certify.");
-        return make_pair(indeterminate,ExactPointType());
+        return make_pair(true,cast_exact(candidate_result.second));
     }
 
     if(not possibly(candidate_result.first)) {

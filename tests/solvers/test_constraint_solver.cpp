@@ -62,6 +62,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_check_feasibility());
         ARIADNE_TEST_CALL(test_feasible());
         ARIADNE_TEST_CALL(test_split());
+        ARIADNE_TEST_CALL(test_virtual_destruction());
     }
 
     Void test_empty_reduce_inequality() {
@@ -535,6 +536,12 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(
             definitely(solver.check_feasibility(
                 domain,function,codomain,interior)));
+    }
+
+    Void test_virtual_destruction() {
+        std::cout << "[constraint-lifetime] destroy ConstraintSolver through interface" << std::endl;
+        ConstraintSolverInterface* solver=new ConstraintSolver();
+        delete solver;
     }
 
     Void test_split() {

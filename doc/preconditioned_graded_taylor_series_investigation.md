@@ -5328,3 +5328,40 @@ path.
 The decisive question is whether the residual candidate stays close to the current
 reference error while avoiding the second multiplication traversal.  Numerical output is
 not changed by this experiment.
+
+
+### 9.147 Residual candidate underestimates current roundoff reference (2026-09-26)
+
+The first 10000-product residual A/B rejects the simple one-pass candidate as a direct
+replacement:
+
+```
+candidate_ge_reference_calls  6087 / 10000
+candidate_error_sum           1.04296e-14
+reference_error_sum           1.99447e-14
+candidate/reference           0.522926
+max_ratio                     1.00001
+```
+
+The candidate is close to the reference on the calls where it is larger, but in aggregate
+it captures only about 52.3% of the current reference error and is below the reference on
+3913/10000 calls. Therefore the diagnostic long-double residual sum is not a safe
+replacement for the existing upward reconstruction.
+
+The experiment is still informative: the centre expansion remains unchanged and the
+difference is entirely in how roundoff is bounded. A generic safety factor of roughly 2
+would cover the aggregate sample but is not justified per call and would widen the
+enclosure; do not promote such a heuristic.
+
+The full diagnostic run completes unchanged in 21.2561 s. At 2000 steps the measured
+upward-pass totals are approximately 1.911 s flowpipe, 0.713 s endpoint, and 0.924 s
+state, i.e. 3.548 s total.
+
+Next step: determine why the residual formula is smaller than the reference rather than
+adding an empirical factor. Compare per-operation residual terms against the exact
+`mul_err/fma_err` formulas. In particular, the reference uses directed upward
+re-evaluation of both positive and negated expressions, while the FMA/TwoSum candidate
+measures the IEEE nearest-operation residual. Quantify this gap on new-slot and collision
+cases separately. If the gap is inherent to the current conservative error semantics,
+the upward pass cannot be removed without changing enclosure behaviour and this
+optimisation track should be closed.

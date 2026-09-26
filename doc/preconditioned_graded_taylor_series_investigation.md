@@ -5185,3 +5185,46 @@ attribute these costs through `[CarriedDenseHotLoopProfile]`.
 
 This run is diagnostic. The production timing reference remains the 21.6201 s three-run
 median.
+
+
+### 9.143 Active dense profile: pair loop dominates carried composition (2026-09-26)
+
+Direct instrumentation of the active dense `_ifma` path finally attributes the carried
+composition cost. At 2000 Van der Pol steps:
+
+```
+                         flowpipe      endpoint       state
+compose total             4.42857 s     1.87124 s     1.83582 s
+dense pair loop           2.69651 s     1.00664 s     1.29862 s
+dense emit+sweep          0.50138 s     0.15961 s     0.14935 s
+dense prepare             0.04932 s     0.01991 s     0.01490 s
+dense prerank             0.05826 s     0.02901 s     0.01682 s
+product pairs            109758961     40179322      52823719
+collisions                90341139     34274160      46390194
+```
+
+The pair loop is therefore the dominant measured dense phase: about 61% of complete
+flowpipe-compose time, 54% of endpoint-compose time, and 71% of state-compose time.
+Preparation and pre-ranking are negligible. Emit/sweep is secondary.
+
+The collision rate is very high: about 82% for flowpipe, 85% for endpoint, and 88% for
+state. Consequently the hot path is repeated accumulation into already-touched dense
+slots, including the validated roundoff work. The next optimisation should target that
+collision-heavy pair loop, not patch setup or mixed-radix ranking.
+
+The run completes with unchanged numerical result in 20.8441 s:
+
+```
+achieved_final_error  4.7221144502652554e-8
+final_radius          0.0403
+reach_sets            2000
+```
+
+This is a diagnostic single run and does not replace the established 21.6201 s production
+median.
+
+Next experiment: within the batched-rounding dense path, profile the nearest accumulation
+pass separately from the upward roundoff pass and from collision-prior bookkeeping.
+This will show whether the remaining opportunity is arithmetic (two-pass validated
+roundoff) or memory traffic from collision_flags/collision_priors. Preserve exact
+arithmetic/order in this diagnostic.

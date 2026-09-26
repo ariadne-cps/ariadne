@@ -1124,6 +1124,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         ErrorType product_roundoff=nul(r.error());
 
         if(taylor_model_dense_accumulator_enabled()) {
+            const auto dense_prepare_start=std::chrono::steady_clock::now();
             // Use a collision-free mixed-radix rank for the observed
             // multi-index range.  Only the slot-to-touched map is dense;
             // coefficients and indices are stored only for occupied slots.
@@ -1164,6 +1165,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             auto& slot_to_touched=workspace.slot_to_touched;
             auto& touched_slots=workspace.touched_slots;
             auto& touched_coefficients=workspace.touched_coefficients;
+            const auto dense_prepare_end=std::chrono::steady_clock::now();
+            const auto dense_prerank_start=dense_prepare_end;
 
             auto rank_index=[&](MultiIndexData const& index) {
                 SizeType slot=0u;
@@ -1205,6 +1208,11 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 y_slots.push_back(rank_index(yiter->index()));
             }
 
+            const auto dense_prerank_end=std::chrono::steady_clock::now();
+            const auto dense_pair_start=dense_prerank_end;
+            unsigned long long dense_new_slots=0u;
+            unsigned long long dense_collision_slots=0u;
+
             if constexpr (ARawFloat<CoefficientType>) {
                 if(taylor_model_dense_batched_rounding_enabled()) {
                 // Batch rounding-mode changes across the whole dense product.
@@ -1242,6 +1250,12 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         }
                     }
                 }
+
+                dense_collision_slots=
+                    static_cast<unsigned long long>(collision_priors.size());
+                dense_new_slots=
+                    static_cast<unsigned long long>(product_pairs)
+                    -dense_collision_slots;
 
                 CoefficientType::set_rounding_upward();
                 SizeType pair_index=0u;
@@ -1286,12 +1300,14 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                             const SizeType slot=x_slots[xi]+y_slots[yi];
                             SizeType& touched=slot_to_touched[slot];
                             if(touched==unused) {
+                                ++dense_new_slots;
                                 CoefficientType product=
                                     mul_err(xv,yv,product_roundoff);
                                 touched=touched_slots.size();
                                 touched_slots.push_back(slot);
                                 touched_coefficients.emplace_back(product);
                             } else {
+                                ++dense_collision_slots;
                                 touched_coefficients[touched]=fma_err(
                                     xv,yv,touched_coefficients[touched],product_roundoff);
                             }
@@ -1308,18 +1324,23 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         const SizeType slot=x_slots[xi]+y_slots[yi];
                         SizeType& touched=slot_to_touched[slot];
                         if(touched==unused) {
+                            ++dense_new_slots;
                             CoefficientType product=
                                 mul_err(xv,yv,product_roundoff);
                             touched=touched_slots.size();
                             touched_slots.push_back(slot);
                             touched_coefficients.emplace_back(product);
                         } else {
+                            ++dense_collision_slots;
                             touched_coefficients[touched]=fma_err(
                                 xv,yv,touched_coefficients[touched],product_roundoff);
                         }
                     }
                 }
             }
+
+            const auto dense_pair_end=std::chrono::steady_clock::now();
+            const auto dense_emit_start=dense_pair_end;
 
             // The mixed-radix rank is order-compatible with Ariadne's
             // reverse lexicographic order: the highest variable index is the
@@ -1346,6 +1367,19 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             r.expansion().swap(accumulated.expansion());
             r.error()=accumulated.error();
             workspace.reset_used_slots();
+            const auto dense_emit_end=std::chrono::steady_clock::now();
+            const auto dense_seconds=[](auto const& a, auto const& b) {
+                return std::chrono::duration<double>(b-a).count();
+            };
+            record_taylor_model_dense_hot_loop_profile(
+                static_cast<unsigned long long>(
+                    x.number_of_terms()*y.number_of_terms()),
+                dense_new_slots,
+                dense_collision_slots,
+                dense_seconds(dense_prepare_start,dense_prepare_end),
+                dense_seconds(dense_prerank_start,dense_prerank_end),
+                dense_seconds(dense_pair_start,dense_pair_end),
+                dense_seconds(dense_emit_start,dense_emit_end));
         } else {
             TaylorModel<P,F> accumulated(as,r.sweeper());
             const SizeType product_terms=

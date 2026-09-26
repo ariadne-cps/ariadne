@@ -5158,3 +5158,30 @@ This should identify whether the dominant flowpipe composition cost is primarily
 
 The next production optimisation should be selected only from that attribution.  The
 production timing reference remains the 21.6201 s three-run median.
+
+
+### 9.142 Instrument the active dense accumulator directly (2026-09-26)
+
+The 9.141 call-site snapshots still report zero dense-hot-loop calls. Inspection shows
+that the dense workspace counters are updated by the active accumulator, while
+`record_taylor_model_dense_hot_loop_profile` was not called from that path.
+
+The profiler is now wired directly into the dense accumulator. Each dense `_ifma`
+records four phases:
+
+```
+prepare      degree scan, mixed-radix sizing, workspace prepare
+prerank      initial-r accumulation and x/y MultiIndex pre-ranking
+pair_loop    product/collision accumulation and validated roundoff pass
+emit_sweep   slot sort, Taylor-model emission, sweep, workspace reset
+```
+
+Product-pair, new-slot, and collision-slot counts are recorded as well. Arithmetic,
+ordering, sweep policy, and enclosure semantics are unchanged; only timers and counters
+are added.
+
+The existing snapshots around flowpipe, endpoint, and state composition can therefore
+attribute these costs through `[CarriedDenseHotLoopProfile]`.
+
+This run is diagnostic. The production timing reference remains the 21.6201 s three-run
+median.

@@ -568,6 +568,16 @@ Coverage from this tranche is used to determine whether the remaining
 dual/Taylor infeasibility path is genuinely reachable with the current
 interior-point implementation or should be treated as legacy architecture.
 
+The two endpoint-clamp branches in `monotone_reduce` were subsequently
+removed after audit. They were unreachable from valid interval states in testing,
+and their semantics were also not contractor-correct: when a Newton image lies
+strictly outside the current strip, the validated intersection is empty, not a
+singleton at the previous endpoint. The implementation now uses the direct
+validated intersection in both lower and upper strip updates. A redundant
+post-`box_reduce` empty-domain check in `reduce(vector)` was also removed,
+because every mutation in the preceding loop is already followed immediately by
+the same empty-domain return.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

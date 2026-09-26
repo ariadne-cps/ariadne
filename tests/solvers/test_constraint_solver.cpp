@@ -608,7 +608,7 @@ class TestConstraintSolver
             });
             ExactBoxType domain({{0.0_x,1.0_x}});
             ExactBoxType codomain({{0.32_x,0.32_x}});
-            UpperBoxType direct_image=function(domain);
+            UpperBoxType direct_image=Ariadne::apply(function,domain);
             ARIADNE_TEST_ASSERT(
                 possibly(intersect(direct_image[0],codomain[0])));
             auto feasibility_result=contractor.feasible(domain,function,codomain);

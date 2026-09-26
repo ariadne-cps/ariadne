@@ -2294,6 +2294,17 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << std::endl;
         }
 
+        if(!have_gronwall_flow && use_gronwall_path && !this->diagnostics()) {
+            // The specialised fixed-order QR path can reject its Gronwall
+            // candidate for the current step.  Build the ordinary validated
+            // graded flow lazily before using it as the safety fallback.
+            local_flow=Ariadne::graded_series_flow_step(
+                p,domy,domt,doma,local_bounding_box,
+                this->step_maximum_error(),this->sweeper(),
+                this->minimum_spacial_order(),this->minimum_temporal_order(),
+                this->maximum_spacial_order(),this->maximum_temporal_order());
+        }
+
         if(this->diagnostics() || !have_gronwall_flow) {
             physical_local_flow=
                 factory.create_zeros(n,local_flow.domain());

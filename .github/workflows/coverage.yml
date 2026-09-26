@@ -55,15 +55,15 @@ jobs:
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
+      run: cmake -E make_directory ${{runner.workspace}}/build -DWARNINGS_AS_ERRORS=ON
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DPython3_EXECUTABLE="$GITHUB_WORKSPACE/.venv/bin/python" -G "Ninja" -DCOVERAGE=ON -DPYTHON_ENFORCE_TESTS=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DPython3_EXECUTABLE="$GITHUB_WORKSPACE/.venv/bin/python" -G "Ninja" -DCOVERAGE=ON -DPYTHON_ENFORCE_TESTS=ON -DWARNINGS_AS_ERRORS=ON
 
     - name: Build, Test and Generate Code Coverage
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --parallel $($NPROC) --target coverage
+      run: cmake --build . --parallel $($NPROC) --target coverage -DWARNINGS_AS_ERRORS=ON
 
     - name: Upload Code Coverage
       if: runner.os == 'macOS'

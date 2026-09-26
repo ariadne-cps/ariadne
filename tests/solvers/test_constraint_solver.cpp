@@ -34,6 +34,7 @@
 #include "function/function.hpp"
 #include "function/constraint.hpp"
 #include "function/procedure.hpp"
+#include "function/taylor_function.hpp"
 #include "solvers/constraint_solver.hpp"
 #include "geometry/box.hpp"
 #include "io/command_line_interface.hpp"
@@ -56,6 +57,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_composite_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_partial_domain_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_monotone_reduce());
+        ARIADNE_TEST_CALL(test_lyapunov_reduce());
         ARIADNE_TEST_CALL(test_reduce_edge_cases());
         ARIADNE_TEST_CALL(test_check_feasibility());
         ARIADNE_TEST_CALL(test_feasible());
@@ -399,6 +401,80 @@ class TestConstraintSolver
             possibly(contains(constraint_domain[0],ExactDouble(1.0_x))));
     }
 
+    Void test_lyapunov_reduce() {
+        ConstraintSolver solver;
+        Sweeper<FloatDP> sweeper;
+
+        {
+            std::cout << "[constraint-lyapunov] exact centre contracts identity to equality" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            ExactBoxType exact_domain({{0.0_x,2.0_x}});
+            ValidatedVectorMultivariateFunction function({x[0]});
+            ValidatedVectorMultivariateTaylorFunctionModelDP model(
+                exact_domain,function,sweeper);
+            UpperBoxType domain=exact_domain;
+            ExactBoxType codomain({{1.0_x,1.0_x}});
+            Vector<FloatDP> centre({FloatDP(1.0_x,dp)});
+            Vector<FloatDP> multipliers({FloatDP(1.0_x,dp)});
+
+            Bool empty=solver.lyapunov_reduce(
+                domain,model,codomain,centre,multipliers);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_ASSERT(
+                possibly(contains(domain[0],ExactDouble(1.0_x))));
+            ARIADNE_TEST_ASSERT(
+                domain[0].width().raw()
+                <=UpperIntervalType(ExactIntervalType(0.0_x,2.0_x)).width().raw());
+        }
+
+        {
+            std::cout << "[constraint-lyapunov] approximate centre overload preserves witness" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType exact_domain({
+                {0.0_x,2.0_x},{1.0_x,3.0_x}
+            });
+            ValidatedVectorMultivariateFunction function({x[0]+x[1]});
+            ValidatedVectorMultivariateTaylorFunctionModelDP model(
+                exact_domain,function,sweeper);
+            UpperBoxType domain=exact_domain;
+            ExactBoxType codomain({{3.0_x,3.0_x}});
+            Vector<FloatDPApproximation> centre({
+                FloatDPApproximation(1.0_x,dp),
+                FloatDPApproximation(2.0_x,dp)
+            });
+            Vector<FloatDPApproximation> multipliers({
+                FloatDPApproximation(1.0_x,dp)
+            });
+
+            Bool empty=solver.lyapunov_reduce(
+                domain,model,codomain,centre,multipliers);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_ASSERT(refines(domain,UpperBoxType(exact_domain)));
+            UpperBoxType witness=ExactBoxType({
+                {1.0_x,1.0_x},{2.0_x,2.0_x}
+            });
+            ARIADNE_TEST_ASSERT(not definitely(disjoint(domain,witness)));
+        }
+
+        {
+            std::cout << "[constraint-lyapunov] impossible equality closes identity domain" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            ExactBoxType exact_domain({{0.0_x,2.0_x}});
+            ValidatedVectorMultivariateFunction function({x[0]});
+            ValidatedVectorMultivariateTaylorFunctionModelDP model(
+                exact_domain,function,sweeper);
+            UpperBoxType domain=exact_domain;
+            ExactBoxType codomain({{3.0_x,3.0_x}});
+            Vector<FloatDP> centre({FloatDP(1.0_x,dp)});
+            Vector<FloatDP> multipliers({FloatDP(1.0_x,dp)});
+
+            ARIADNE_TEST_ASSERT(
+                solver.lyapunov_reduce(
+                    domain,model,codomain,centre,multipliers));
+            ARIADNE_TEST_ASSERT(definitely(domain.is_empty()));
+        }
+    }
+
     Void test_reduce_edge_cases() {
         ConstraintSolver solver;
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
@@ -522,6 +598,21 @@ class TestConstraintSolver
                 ARIADNE_TEST_ASSERT(definitely(contractor.check_feasibility(
                     domain,function,codomain,feasibility_result.second)));
             }
+        }
+
+        {
+            std::cout << "[constraint-feasible] dependency-hidden nonlinear infeasibility" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            ValidatedVectorMultivariateFunction function({
+                x[0]*(1-x[0])
+            });
+            ExactBoxType domain({{0.0_x,1.0_x}});
+            ExactBoxType codomain({{0.32_x,0.32_x}});
+            UpperBoxType direct_image=apply(function,domain);
+            ARIADNE_TEST_ASSERT(
+                possibly(intersects(direct_image[0],codomain[0])));
+            auto result=contractor.feasible(domain,function,codomain);
+            ARIADNE_TEST_ASSERT(not possibly(result.first));
         }
 
         {

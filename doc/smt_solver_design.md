@@ -535,6 +535,14 @@ The architectural rule remains that this audit must not force SMT policy into
 belong there, while epsilon weakening, epsilon-active literal selection and
 SMT result semantics remain in `SmtSolver`.
 
+The second coverage tranche directly exercises both `lyapunov_reduce`
+overloads, including contraction, witness preservation and empty detection, and
+adds a nonlinear infeasibility case whose natural interval image overlaps the
+target so that `feasible` cannot terminate by its initial direct range test.
+Coverage from this tranche is used to determine whether the remaining
+dual/Taylor infeasibility path is genuinely reachable with the current
+interior-point implementation or should be treated as legacy architecture.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

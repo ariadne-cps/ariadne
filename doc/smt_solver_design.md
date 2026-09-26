@@ -539,6 +539,17 @@ The second coverage tranche directly exercises both `lyapunov_reduce`
 overloads, including contraction, witness preservation and empty detection, and
 adds a nonlinear infeasibility case whose natural interval image overlaps the
 target so that `feasible` cannot terminate by its initial direct range test.
+The audit also found that `ConstraintSolver::feasible` still embedded the
+legacy `NonlinearInteriorPointOptimiser` iteration and its old dual/Taylor
+fallback, whereas current solver code and dedicated tests use
+`NonlinearInfeasibleInteriorPointOptimiser`. The constraint solver now delegates
+candidate generation and validated feasibility/infeasibility classification to
+the latter, retaining its cheap direct interval-disjointness rejection and an
+independent `check_feasibility` confirmation before returning a feasible point.
+This removes the obsolete embedded optimiser algorithm rather than attempting to
+cover it artificially. The separate legacy uses in `paver.cpp` are outside this
+refactoring and require their own audit.
+
 Coverage from this tranche is used to determine whether the remaining
 dual/Taylor infeasibility path is genuinely reachable with the current
 interior-point implementation or should be treated as legacy architecture.

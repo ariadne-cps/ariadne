@@ -5116,3 +5116,45 @@ Next step: use the dense hot-loop/workspace profiling already present in the Tay
 implementation, and attribute its pair-loop / emit-sweep / preparation costs separately
 to flowpipe, endpoint, and state composition. Do not implement a specialised composer
 until that attribution is known.
+
+
+### 9.141 Attribute carried compositions with the dense hot-loop profile (2026-09-26)
+
+The generic COMPOSE product-pair counter used in 9.139 is removed from the carried-state
+diagnostic because 9.140 showed that it remains zero on the active dense-accumulator path.
+
+The existing cumulative `TaylorModelDenseHotLoopProfile` is now snapshotted immediately
+before and after each of the three carried composition sites.  Per-call deltas are
+accumulated separately for:
+
+```
+flowpipe = compose(physical_local_flow, arguments)
+endpoint = compose(local_endpoint, state.normalised_mapping())
+state    = compose(local_transition.normalised_mapping(),
+                   state.normalised_mapping())
+```
+
+The new marker is:
+
+```
+[CarriedDenseHotLoopProfile]
+flowpipe_calls=...
+flowpipe_product_pairs=...
+flowpipe_prepare_seconds=...
+flowpipe_prerank_seconds=...
+flowpipe_pair_loop_seconds=...
+flowpipe_emit_sweep_seconds=...
+endpoint_...
+state_...
+```
+
+The profile also records new-slot and collision-slot counts for each call site.  No
+composition arithmetic is changed.
+
+This should identify whether the dominant flowpipe composition cost is primarily:
+- dense pair generation/accumulation,
+- pre-ranking/index preparation, or
+- emission/sweep of the accumulated Taylor model.
+
+The next production optimisation should be selected only from that attribution.  The
+production timing reference remains the 21.6201 s three-run median.

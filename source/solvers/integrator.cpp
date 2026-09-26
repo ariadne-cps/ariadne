@@ -2789,27 +2789,22 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         factory.create_coordinate(flowpipe_domain,flowpipe_domain.size()-1u);
     ValidatedVectorMultivariateFunctionPatch arguments=
         join(embedded_mapping,time_coordinate);
-    static Bool carried_product_profile_initialised=false;
-    if(!carried_product_profile_initialised) {
-        set_taylor_model_product_profile_enabled(true);
-        carried_product_profile_initialised=true;
-    }
-    TaylorModelProductProfileSnapshot const flowpipe_product_before=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const flowpipe_dense_before=
+        taylor_model_dense_hot_loop_profile();
     Stopwatch<Microseconds> flowpipe_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch flowpipe_mapping=
         compose(physical_local_flow,arguments);
     flowpipe_compose_stopwatch.click();
-    TaylorModelProductProfileSnapshot const flowpipe_product_after=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const flowpipe_dense_after=
+        taylor_model_dense_hot_loop_profile();
 
     // For the evolved set, evaluate time before composing with the local
     // initial Taylor model.  Composing the complete space-time flowpipe first
     // and only then evaluating t=h introduces unnecessary mixed space/time
     // terms and substantially larger sweep/remainder errors.  This also
     // matches the TM-integration update X_{l+1}=p_l(X_l,delta_l)+I_l.
-    TaylorModelProductProfileSnapshot const endpoint_product_before=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const endpoint_dense_before=
+        taylor_model_dense_hot_loop_profile();
     Stopwatch<Microseconds> endpoint_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch local_endpoint=
         partial_evaluate(
@@ -2818,8 +2813,8 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     ValidatedVectorMultivariateFunctionPatch evolved_mapping=
         compose(local_endpoint,state.normalised_mapping());
     endpoint_compose_stopwatch.click();
-    TaylorModelProductProfileSnapshot const endpoint_product_after=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const endpoint_dense_after=
+        taylor_model_dense_hot_loop_profile();
 
     // Preserve the two-layer TM representation across steps.  Precondition
     // the fresh local endpoint Phi_l(y,h) first, while its remainder is still
@@ -2832,16 +2827,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         this->precondition(local_endpoint);
     precondition_stopwatch.click();
 
-    TaylorModelProductProfileSnapshot const state_product_before=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const state_dense_before=
+        taylor_model_dense_hot_loop_profile();
     Stopwatch<Microseconds> state_compose_stopwatch;
     ValidatedVectorMultivariateFunctionPatch next_normalised_mapping=
         compose(
             local_transition.normalised_mapping(),
             state.normalised_mapping());
     state_compose_stopwatch.click();
-    TaylorModelProductProfileSnapshot const state_product_after=
-        taylor_model_product_profile_snapshot();
+    TaylorModelDenseHotLoopProfile const state_dense_after=
+        taylor_model_dense_hot_loop_profile();
 
     Stopwatch<Microseconds> state_range_stopwatch;
     ExactBoxType next_local_domain=
@@ -2865,19 +2860,30 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     static double carried_precondition_seconds=0.0;
     static double carried_state_compose_seconds=0.0;
     static double carried_state_range_seconds=0.0;
-    static unsigned long long carried_flowpipe_product_pairs=0u;
-    static unsigned long long carried_endpoint_product_pairs=0u;
-    static unsigned long long carried_state_product_pairs=0u;
+    static TaylorModelDenseHotLoopProfile carried_flowpipe_dense;
+    static TaylorModelDenseHotLoopProfile carried_endpoint_dense;
+    static TaylorModelDenseHotLoopProfile carried_state_dense;
     ++carried_profile_steps;
-    carried_flowpipe_product_pairs+=
-        flowpipe_product_after.compose.product_pairs
-        -flowpipe_product_before.compose.product_pairs;
-    carried_endpoint_product_pairs+=
-        endpoint_product_after.compose.product_pairs
-        -endpoint_product_before.compose.product_pairs;
-    carried_state_product_pairs+=
-        state_product_after.compose.product_pairs
-        -state_product_before.compose.product_pairs;
+
+    auto accumulate_dense_delta=[](
+            TaylorModelDenseHotLoopProfile& total,
+            TaylorModelDenseHotLoopProfile const& before,
+            TaylorModelDenseHotLoopProfile const& after) {
+        total.calls+=after.calls-before.calls;
+        total.product_pairs+=after.product_pairs-before.product_pairs;
+        total.new_slots+=after.new_slots-before.new_slots;
+        total.collision_slots+=after.collision_slots-before.collision_slots;
+        total.prepare_seconds+=after.prepare_seconds-before.prepare_seconds;
+        total.prerank_seconds+=after.prerank_seconds-before.prerank_seconds;
+        total.pair_loop_seconds+=after.pair_loop_seconds-before.pair_loop_seconds;
+        total.emit_sweep_seconds+=after.emit_sweep_seconds-before.emit_sweep_seconds;
+    };
+    accumulate_dense_delta(
+        carried_flowpipe_dense,flowpipe_dense_before,flowpipe_dense_after);
+    accumulate_dense_delta(
+        carried_endpoint_dense,endpoint_dense_before,endpoint_dense_after);
+    accumulate_dense_delta(
+        carried_state_dense,state_dense_before,state_dense_after);
     carried_flowpipe_compose_seconds+=flowpipe_compose_stopwatch.elapsed_seconds();
     carried_endpoint_compose_seconds+=endpoint_compose_stopwatch.elapsed_seconds();
     carried_precondition_seconds+=precondition_stopwatch.elapsed_seconds();
@@ -2905,15 +2911,24 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                   << patch_nnz(local_transition.normalised_mapping())
                   << " next_state_nnz=" << patch_nnz(next_normalised_mapping)
                   << std::endl;
-        std::cerr << "[CarriedCompositionProductProfile]"
-                  << " steps=" << carried_profile_steps
-                  << " flowpipe_product_pairs="
-                  << carried_flowpipe_product_pairs
-                  << " endpoint_product_pairs="
-                  << carried_endpoint_product_pairs
-                  << " state_product_pairs="
-                  << carried_state_product_pairs
-                  << std::endl;
+        auto print_dense=[](
+                const char* name,
+                TaylorModelDenseHotLoopProfile const& p) {
+            std::cerr << " " << name << "_calls=" << p.calls
+                      << " " << name << "_product_pairs=" << p.product_pairs
+                      << " " << name << "_new_slots=" << p.new_slots
+                      << " " << name << "_collision_slots=" << p.collision_slots
+                      << " " << name << "_prepare_seconds=" << p.prepare_seconds
+                      << " " << name << "_prerank_seconds=" << p.prerank_seconds
+                      << " " << name << "_pair_loop_seconds=" << p.pair_loop_seconds
+                      << " " << name << "_emit_sweep_seconds=" << p.emit_sweep_seconds;
+        };
+        std::cerr << "[CarriedDenseHotLoopProfile]"
+                  << " steps=" << carried_profile_steps;
+        print_dense("flowpipe",carried_flowpipe_dense);
+        print_dense("endpoint",carried_endpoint_dense);
+        print_dense("state",carried_state_dense);
+        std::cerr << std::endl;
     }
 
     PreconditionedTaylorSeriesState final_state(

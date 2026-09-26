@@ -10,3 +10,6 @@
 [submodule "submodules/helper"]
 	path = submodules/helper
 	url = https://github.com/ariadne-cps/helper
+[submodule "submodules/configuration"]
+	path = submodules/configuration
+	url = https://github.com/ariadne-cps/configuration

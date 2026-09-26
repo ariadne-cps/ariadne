@@ -1116,14 +1116,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
     unsigned long long profile_maximum_sweep_output_terms=0u;
 
     const SizeType as=r.argument_size();
-    const bool incremental_sweep=taylor_model_incremental_sweep_enabled();
-    bool processed_source_term=false;
+    ErrorType product_roundoff=nul(r.error());
 
-    // Experimental full-product accumulators.
-    if(taylor_model_product_accumulator_enabled()) {
-        ErrorType product_roundoff=nul(r.error());
-
-        if(taylor_model_dense_accumulator_enabled()) {
             // Use a collision-free mixed-radix rank for the observed
             // multi-index range.  Only the slot-to-touched map is dense;
             // coefficients and indices are stored only for occupied slots.
@@ -1206,7 +1200,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             }
 
             if constexpr (ARawFloat<CoefficientType>) {
-                if(taylor_model_dense_batched_rounding_enabled()) {
                 // Batch rounding-mode changes across the whole dense product.
                 // The nearest pass computes exactly the same centre coefficients
                 // as mul_err/fma_err.  For collision updates we retain the
@@ -1276,28 +1269,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         }
                     }
                 }
-                } else {
-                    SizeType xi=0u;
-                    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
-                        UniformConstReference<CoefficientType> xv=xiter->coefficient();
-                        SizeType yi=0u;
-                        for(auto yiter=y.begin(); yiter!=y.end(); ++yiter,++yi) {
-                            UniformConstReference<CoefficientType> yv=yiter->coefficient();
-                            const SizeType slot=x_slots[xi]+y_slots[yi];
-                            SizeType& touched=slot_to_touched[slot];
-                            if(touched==unused) {
-                                CoefficientType product=
-                                    mul_err(xv,yv,product_roundoff);
-                                touched=touched_slots.size();
-                                touched_slots.push_back(slot);
-                                touched_coefficients.emplace_back(product);
-                            } else {
-                                touched_coefficients[touched]=fma_err(
-                                    xv,yv,touched_coefficients[touched],product_roundoff);
-                            }
-                        }
-                    }
-                }
             } else {
                 SizeType xi=0u;
                 for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
@@ -1346,76 +1317,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             r.expansion().swap(accumulated.expansion());
             r.error()=accumulated.error();
             workspace.reset_used_slots();
-        } else {
-            TaylorModel<P,F> accumulated(as,r.sweeper());
-            const SizeType product_terms=
-                x.number_of_terms()*y.number_of_terms();
-            accumulated.expansion().reserve(
-                r.number_of_terms()+product_terms);
-
-            for(auto riter=r.begin(); riter!=r.end(); ++riter) {
-                accumulated._append(
-                    riter->index(),riter->coefficient());
-            }
-
-            MultiIndex product_index(as);
-            for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-                UniformConstReference<MultiIndex> xa=xiter->index();
-                UniformConstReference<CoefficientType> xv=xiter->coefficient();
-                for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
-                    UniformConstReference<MultiIndex> ya=yiter->index();
-                    UniformConstReference<CoefficientType> yv=yiter->coefficient();
-                    product_index=xa+ya;
-                    CoefficientType product=
-                        mul_err(xv,yv,product_roundoff);
-                    accumulated._append(product_index,product);
-                }
-            }
-
-            accumulated.error()=r.error()+product_roundoff;
-            const auto temporary_entries=
-                static_cast<unsigned long long>(accumulated.number_of_terms());
-            accumulated.sort();
-            accumulated.unique();
-            const auto unique_entries=
-                static_cast<unsigned long long>(accumulated.number_of_terms());
-
-            unsigned long long x_degree=0u;
-            for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-                x_degree=std::max(
-                    x_degree,
-                    static_cast<unsigned long long>(iter->index().degree()));
-            }
-            unsigned long long y_degree=0u;
-            for(auto iter=y.begin(); iter!=y.end(); ++iter) {
-                y_degree=std::max(
-                    y_degree,
-                    static_cast<unsigned long long>(iter->index().degree()));
-            }
-            const unsigned long long product_degree=x_degree+y_degree;
-
-            unsigned long long dense_slots=1u;
-            const unsigned long long choose_k=
-                std::min(static_cast<unsigned long long>(as),product_degree);
-            const unsigned long long choose_n=
-                static_cast<unsigned long long>(as)+product_degree;
-            for(unsigned long long k=1u; k<=choose_k; ++k) {
-                dense_slots=(dense_slots*(choose_n-choose_k+k))/k;
-            }
-
-            record_taylor_model_accumulator_profile(
-                static_cast<unsigned long long>(product_terms),
-                temporary_entries,
-                unique_entries,
-                static_cast<unsigned long long>(as),
-                x_degree,
-                y_degree,
-                product_degree,
-                dense_slots);
-            accumulated.sweep();
-            r.expansion().swap(accumulated.expansion());
-            r.error()=accumulated.error();
-        }
 
         ErrorType xs=nul(r.error());
         for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -1431,205 +1332,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         re+=xe*ye;
         re+=xs*ye+ys*xe;
         return;
-    }
-
-    const ThresholdSweeper<FloatDP>* early_threshold_sweeper=nullptr;
-    if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-        if(taylor_model_early_discard_enabled()) {
-            auto const sweeper=r.sweeper();
-            early_threshold_sweeper=
-                dynamic_cast<ThresholdSweeper<FloatDP> const*>(
-                    &static_cast<SweeperInterface<FloatDP> const&>(sweeper));
-        }
-    }
-
-    TaylorModel<P,F> t(as,r.sweeper());
-    MultiIndex ta(as);
-    CoefficientType tv(t.precision());
-    ErrorType te=t.error();
-
-    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        processed_source_term=true;
-        UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformConstReference<CoefficientType> xv=xiter->coefficient();
-
-        auto riter = r.begin(); auto yiter=y.begin();
-        while (riter!=r.end() && yiter!=y.end()) {
-            auto ra=riter->index();
-            auto rv=riter->coefficient();
-            auto ya=yiter->index();
-            auto yv=yiter->coefficient();
-            ta = xa + ya;
-            if (ra == ta) {
-                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                    if(profile) {
-                        const double product_magnitude=
-                            std::abs(xv.get_d()*yv.get_d());
-                        if(product_magnitude<profile_threshold) {
-                            ++profile_individual_products_below_threshold;
-                            ++profile_individual_products_below_threshold_collision;
-                            profile_individual_products_below_threshold_abs_mass+=product_magnitude;
-                        } else {
-                            ++profile_individual_products_above_threshold;
-                            profile_individual_products_above_threshold_abs_mass+=product_magnitude;
-                        }
-                    }
-                }
-                tv=fma_err(xv,yv,rv,te);
-                t._append(ta,tv);
-                ++riter; ++yiter;
-            } else if (ra < ta) {
-                t._append(ra,rv);
-                ++riter;
-            } else { // ta<ra
-                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                    if(profile) {
-                        const double product_magnitude=
-                            std::abs(xv.get_d()*yv.get_d());
-                        if(product_magnitude<profile_threshold) {
-                            ++profile_individual_products_below_threshold;
-                            ++profile_individual_products_below_threshold_new_term;
-                            profile_individual_products_below_threshold_abs_mass+=product_magnitude;
-                        } else {
-                            ++profile_individual_products_above_threshold;
-                            profile_individual_products_above_threshold_abs_mass+=product_magnitude;
-                        }
-                    }
-                }
-                tv=mul_err(xv,yv,te);
-                if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                    if(early_threshold_sweeper
-                       && early_threshold_sweeper->discard(ta,tv)) {
-                        te+=cast_positive(abs(tv));
-                        ++yiter;
-                        continue;
-                    }
-                }
-                t._append(ta,tv);
-                ++yiter;
-            }
-        }
-        while (riter!=r.end()) {
-            auto ra=riter->index();
-            auto rv=riter->coefficient();
-            t._append(ra,rv);
-            ++riter;
-        }
-        while (yiter!=y.end()) {
-            auto ya=yiter->index();
-            auto yv=yiter->coefficient();
-            if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                if(profile) {
-                    const double product_magnitude=
-                        std::abs(xv.get_d()*yv.get_d());
-                    if(product_magnitude<profile_threshold) {
-                        ++profile_individual_products_below_threshold;
-                        ++profile_individual_products_below_threshold_trailing;
-                        profile_individual_products_below_threshold_abs_mass+=product_magnitude;
-                    } else {
-                        ++profile_individual_products_above_threshold;
-                        profile_individual_products_above_threshold_abs_mass+=product_magnitude;
-                    }
-                }
-            }
-            ta = xa + ya;
-            tv=mul_err(xv,yv,te);
-            if constexpr (Same<P,ValidatedTag> && Same<F,FloatDP>) {
-                if(early_threshold_sweeper
-                   && early_threshold_sweeper->discard(ta,tv)) {
-                    te+=cast_positive(abs(tv));
-                    ++yiter;
-                    continue;
-                }
-            }
-            t._append(ta,tv);
-            ++yiter;
-        }
-
-        t.error()=r.error()+te;
-        te = 0u;
-
-        if(incremental_sweep) {
-            if(profile) {
-                const auto n=static_cast<unsigned long long>(t.number_of_terms());
-                ++profile_sweep_passes;
-                profile_sweep_input_terms+=n;
-                if(n>profile_maximum_sweep_input_terms) {
-                    profile_maximum_sweep_input_terms=n;
-                }
-            }
-            t.sweep();
-            if(profile) {
-                const auto n=static_cast<unsigned long long>(t.number_of_terms());
-                profile_sweep_output_terms+=n;
-                if(n>profile_maximum_sweep_output_terms) {
-                    profile_maximum_sweep_output_terms=n;
-                }
-            }
-        }
-        r.expansion().swap(t.expansion());
-        r.error()=t.error();
-        t.clear();
-    }
-
-    if(!incremental_sweep && processed_source_term) {
-        if(profile) {
-            const auto n=static_cast<unsigned long long>(r.number_of_terms());
-            ++profile_sweep_passes;
-            profile_sweep_input_terms+=n;
-            if(n>profile_maximum_sweep_input_terms) {
-                profile_maximum_sweep_input_terms=n;
-            }
-        }
-        r.sweep();
-        if(profile) {
-            const auto n=static_cast<unsigned long long>(r.number_of_terms());
-            profile_sweep_output_terms+=n;
-            if(n>profile_maximum_sweep_output_terms) {
-                profile_maximum_sweep_output_terms=n;
-            }
-        }
-    }
-
-    ErrorType xs=nul(r.error());
-    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        xs+=mag(xiter->coefficient());
-    }
-
-    ErrorType ys=nul(r.error());
-    for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
-        ys+=mag(yiter->coefficient());
-    }
-
-    ErrorType& re=r.error();
-    const ErrorType& xe=x.error();
-    const ErrorType& ye=y.error();
-    re+=xe*ye;
-    re+=xs*ye+ys*xe;
-
-    if(profile) {
-        const auto profile_end=std::chrono::steady_clock::now();
-        const double elapsed_seconds=
-            std::chrono::duration<double>(profile_end-profile_start).count();
-        record_taylor_model_product_profile(
-            taylor_model_product_profile_context(),
-            static_cast<unsigned long long>(x.number_of_terms())
-                * static_cast<unsigned long long>(y.number_of_terms()),
-            profile_individual_products_below_threshold,
-            profile_individual_products_below_threshold_collision,
-            profile_individual_products_below_threshold_new_term,
-            profile_individual_products_below_threshold_trailing,
-            profile_individual_products_above_threshold,
-            profile_individual_products_below_threshold_abs_mass,
-            profile_individual_products_above_threshold_abs_mass,
-            profile_sweep_passes,
-            profile_sweep_input_terms,
-            profile_sweep_output_terms,
-            profile_maximum_sweep_input_terms,
-            profile_maximum_sweep_output_terms,
-            elapsed_seconds);
-    }
-}
 
 template<class P, class F> inline TaylorModel<P,F> _fma(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y, TaylorModel<P,F> z) {
     ARIADNE_PRECONDITION(x.argument_size()==y.argument_size());

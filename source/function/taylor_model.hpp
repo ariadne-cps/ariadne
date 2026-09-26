@@ -101,14 +101,6 @@ Bool taylor_model_product_profile_enabled();
 Void set_taylor_model_product_profile_enabled(Bool);
 Bool taylor_model_early_discard_enabled();
 Void set_taylor_model_early_discard_enabled(Bool);
-Bool taylor_model_incremental_sweep_enabled();
-Void set_taylor_model_incremental_sweep_enabled(Bool);
-Bool taylor_model_product_accumulator_enabled();
-Void set_taylor_model_product_accumulator_enabled(Bool);
-Bool taylor_model_dense_accumulator_enabled();
-Void set_taylor_model_dense_accumulator_enabled(Bool);
-Bool taylor_model_dense_batched_rounding_enabled();
-Void set_taylor_model_dense_batched_rounding_enabled(Bool);
 
 struct TaylorModelDenseWorkspaceStats {
     unsigned long long calls=0u;

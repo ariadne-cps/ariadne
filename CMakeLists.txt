@@ -38,7 +38,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 foreach(WARN ${ANY_TARGET_WARN})
     add_compile_options(-W${WARN})
@@ -62,11 +62,6 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
-
-if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-    include(LLVMCodeCoverage)
-    append_llvm_coverage_compiler_flags()
-endif()
 
 enable_testing()
 include(CTest)
@@ -109,6 +104,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/configuration OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/configuration submodules/configuration WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all Ariadne submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
@@ -132,9 +129,28 @@ if(GIT_FOUND)
     else()
         message(STATUS "BetterThreads submodule found")
     endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/configuration/cmake/CoverageSupport.cmake)
+        message(ERROR "Configuration download failure")
+    else()
+        message(STATUS "Configuration submodule found")
+    endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
 endif()
+endif()
+
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
+include(CoverageSupport)
+
+if(COVERAGE)
+    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+        enable_project_coverage()
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        include(GCCCodeCoverage)
+    else()
+        message(FATAL_ERROR
+            "Coverage is supported only with GCC or macOS AppleClang/Clang.")
+    endif()
 endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
@@ -272,26 +288,19 @@ if(APPLE)
 endif()
 
 if(COVERAGE)
-    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-        setup_target_for_coverage_llvm(
-            NAME coverage
-            TARGET ariadne
-            DEPENDENCIES tests
-            EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
-        )
-    else()
-        # Keep the GCC instrumentation at the same point as the original
-        # Ubuntu coverage configuration. Moving these flags before the
-        # add_subdirectory() calls instruments tests, Python bindings and
-        # submodules as well, changing the gcov dataset.
-        include(CodeCoverage)
-        append_coverage_compiler_flags()
-        include(GCCCodeCoverage)
-        setup_target_for_coverage_gcc(
-            NAME coverage
-            DEPENDENCIES tests
-        )
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        # Ariadne deliberately instruments only the library code on GCC.
+        # Enabling coverage before the subdirectories would also instrument
+        # tests and Python bindings, changing the gcov dataset.
+        append_gcc_coverage_compiler_flags()
     endif()
+
+    setup_project_coverage(
+        TARGET ariadne
+        TEST_TARGET tests
+        SOURCES "${PROJECT_SOURCE_DIR}/source"
+        EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
+    )
 endif()
 
 if(CAIRO_FOUND)

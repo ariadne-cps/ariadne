@@ -141,7 +141,17 @@ endif()
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
 include(CoverageSupport)
-enable_project_coverage()
+
+if(COVERAGE)
+    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+        enable_project_coverage()
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        include(GCCCodeCoverage)
+    else()
+        message(FATAL_ERROR
+            "Coverage is supported only with GCC or macOS AppleClang/Clang.")
+    endif()
+endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
     execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
@@ -278,6 +288,13 @@ if(APPLE)
 endif()
 
 if(COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        # Ariadne deliberately instruments only the library code on GCC.
+        # Enabling coverage before the subdirectories would also instrument
+        # tests and Python bindings, changing the gcov dataset.
+        append_gcc_coverage_compiler_flags()
+    endif()
+
     setup_project_coverage(
         TARGET ariadne
         TEST_TARGET tests

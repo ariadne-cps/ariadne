@@ -290,8 +290,6 @@ orbit(const HybridEnclosure& initial,
     return std::move(*result);
 }
 
-FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory();
-
 HybridEvolverBase::HybridEvolverBase(const SystemType& system)
 {
     this->_create(system,FunctionFactoryType(make_taylor_function_patch_factory()));

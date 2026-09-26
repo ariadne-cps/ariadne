@@ -285,11 +285,6 @@ OutputStream& operator<<(OutputStream& os, SmtUnknownReason reason)
     }
 }
 
-ExactIntervalType SmtSolver::_original_bounds(ValidatedConstraint const& constraint) const
-{
-    return constraint.bounds();
-}
-
 ExactIntervalType SmtSolver::_original_bounds(SmtTheoryPrimitiveRelation relation) const
 {
     SmtSolverTestSupport::validate_primitive_relation(relation);

@@ -329,53 +329,14 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    for(;;) {
-        UpperBoxType previous=domain;
-        ++statistics.hull_rounds;
-        for(SizeType i=0; i!=constraints.size(); ++i) {
-            if(contractor.hull_reduce(
-                    domain,constraints[i].function(),this->_original_bounds(constraints[i]))) {
-                return true;
-            }
-            UpperIntervalType image=apply(constraints[i].function(),domain);
-            if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
-                return true;
-            }
-        }
-        if(not same_box(domain,previous)) {
-            ++statistics.hull_effective;
-        }
-
-        if(same_box(domain,previous)) {
-            UpperBoxType before_shaving=domain;
-            ++statistics.shaving_rounds;
-            for(SizeType i=0; i!=constraints.size(); ++i) {
-                for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-                    if(contractor.box_reduce(
-                            domain,
-                            constraints[i].function(),
-                            this->_original_bounds(constraints[i]),
-                            variable)) {
-                        return true;
-                    }
-                }
-            }
-            if(not same_box(domain,before_shaving)) {
-                ++statistics.shaving_effective;
-            }
-            if(same_box(domain,before_shaving)) {
-                return false;
-            }
-            continue;
-        }
-
-        for(SizeType i=0; i!=constraints.size(); ++i) {
-            UpperIntervalType image=apply(constraints[i].function(),domain);
-            if(definitely(disjoint(image,this->_original_bounds(constraints[i])))) {
-                return true;
-            }
-        }
-    }
+    ConstraintPropagationStatistics propagation_statistics;
+    Bool const empty=contractor.propagate(
+        domain,constraints,propagation_statistics);
+    statistics.hull_rounds+=propagation_statistics.hull_rounds;
+    statistics.hull_effective+=propagation_statistics.hull_effective;
+    statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
+    statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    return empty;
 }
 
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,

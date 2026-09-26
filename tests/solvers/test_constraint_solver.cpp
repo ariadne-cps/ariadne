@@ -58,6 +58,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_partial_domain_pruning_witness_preservation());
         ARIADNE_TEST_CALL(test_monotone_reduce());
         ARIADNE_TEST_CALL(test_lyapunov_reduce());
+        ARIADNE_TEST_CALL(test_propagate());
         ARIADNE_TEST_CALL(test_reduce_edge_cases());
         ARIADNE_TEST_CALL(test_check_feasibility());
         ARIADNE_TEST_CALL(test_feasible());
@@ -474,6 +475,45 @@ class TestConstraintSolver
                 solver.lyapunov_reduce(
                     domain,model,codomain,centre,multipliers));
             ARIADNE_TEST_ASSERT(definitely(domain.is_empty()));
+        }
+    }
+
+    Void test_propagate() {
+        ConstraintSolver solver;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+
+        {
+            std::cout << "[constraint-propagate] hull then shaving reaches fixed point" << std::endl;
+            UpperBoxType domain=ExactBoxType({{-2.0_x,2.0_x}});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0.75_x),
+                    sqr(x[0])+x[0],
+                    ValidatedNumber(0.75_x))
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,statistics);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_ASSERT(statistics.hull_rounds>=1u);
+            ARIADNE_TEST_ASSERT(statistics.shaving_rounds>=1u);
+            ARIADNE_TEST_ASSERT(statistics.hull_effective<=statistics.hull_rounds);
+            ARIADNE_TEST_ASSERT(statistics.shaving_effective<=statistics.shaving_rounds);
+            ARIADNE_TEST_ASSERT(not definitely(domain.is_empty()));
+        }
+
+        {
+            std::cout << "[constraint-propagate] direct validated rejection proves empty" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(2.0_x),
+                    sqr(x[0])-x[0],
+                    ValidatedNumber(2.0_x))
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,statistics);
+            ARIADNE_TEST_ASSERT(empty);
+            ARIADNE_TEST_ASSERT(statistics.hull_rounds>=1u);
         }
     }
 

@@ -639,10 +639,7 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
 
 
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
-                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta,
-                         SizeType diagnostic_call=std::numeric_limits<SizeType>::max(),
-                         const char* diagnostic_branch="",
-                         DegreeType diagnostic_iteration=0u)
+                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta)
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"degree="<<yta[0].degree());
@@ -652,40 +649,6 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
     ValidatedDifferential z=nul(yta[0][0]);
 
     Ariadne::compute_procedure(p,fy,tmp,yta);
-
-    // Temporary diagnostic for the same-state second-step comparison.
-    // Calls 1 and 2 are respectively the IDENTITY and QR probes.  Expose the
-    // magnitude after each Procedure instruction so we can identify which
-    // operation first amplifies the bounding graded differential.
-    if((diagnostic_call==1u || diagnostic_call==2u)
-       && diagnostic_iteration>=1u) {
-        auto differential_coefficient_mag =
-            [](ValidatedDifferential const& d) {
-                auto r=mag(d.value());
-                for(auto const& term : d.expansion()) {
-                    r=max(r,mag(term.coefficient()));
-                }
-                return r;
-            };
-        auto graded_mag =
-            [&](GradedValidatedDifferential const& g) {
-                auto r=mag(z.value());
-                for(SizeType k=0u; k!=g.size(); ++k) {
-                    r=max(r,differential_coefficient_mag(g[k]));
-                }
-                return r;
-            };
-        for(SizeType j=0u; j!=tmp.size(); ++j) {
-            std::cerr << "[GradedProcedureDiagnostic]"
-                      << " call=" << diagnostic_call
-                      << " branch=" << diagnostic_branch
-                      << " iteration=" << diagnostic_iteration
-                      << " instruction=" << j
-                      << " op=" << p._instructions[j]
-                      << " coeff_mag=" << graded_mag(tmp[j])
-                      << std::endl;
-        }
-    }
 
     for(SizeType i=0; i!=n; ++i) {
         yta[i]=antidifferential(fy[i]);
@@ -1097,19 +1060,10 @@ Bool evaluate_polynomial_procedure(
 struct CentrePolynomialRecurrenceResult {
     FlowStepTaylorModelType polynomial;
     FlowStepTaylorModelType defect;
-    double residual_seconds;
-    double differential_seconds;
-    double flow_function_seconds;
-    double init_seconds;
-    double iterate_seconds;
-    double flow_differential_seconds;
-    double polynomial_flow_function_seconds;
     Vector<FloatDPBounds> direct_defect_range;
-    double direct_defect_seconds;
     Bool exact_polynomial_available;
     DegreeType exact_polynomial_degree;
     Vector<FloatDPBounds> exact_polynomial_defect_range;
-    double exact_polynomial_defect_seconds;
 };
 
 CentrePolynomialRecurrenceResult
@@ -1137,34 +1091,23 @@ graded_series_centre_polynomial_step(
     Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null);
     List<GradedValidatedDifferential> tmpdphic;
 
-    Stopwatch<Microseconds> centre_init_stopwatch;
     Ariadne::graded_flow_init(
         p,fdphic,tmpdphic,dphic,mdx,mdt,da,so,to);
-    centre_init_stopwatch.click();
 
-    Stopwatch<Microseconds> centre_iterate_stopwatch;
     for(DegreeType i=0u; i!=to; ++i) {
-        graded_flow_iterate(
-            p,fdphic,tmpdphic,dphic,
-            std::numeric_limits<SizeType>::max(),"centre-polynomial",i+1u);
+        graded_flow_iterate(p,fdphic,tmpdphic,dphic);
     }
-    centre_iterate_stopwatch.click();
 
     // Use the centre branch for every retained coefficient, including the
     // highest temporal/spatial terms.  This is intentionally not a validated
     // flow enclosure; it is the polynomial candidate whose residual we want
     // to measure before attaching a separate validated remainder.
-    Stopwatch<Microseconds> centre_flow_differential_stopwatch;
     Vector<ValidatedDifferential> dphi=
         flow_differential(dphic,dphic,so,to);
-    centre_flow_differential_stopwatch.click();
 
-    Stopwatch<Microseconds> centre_flow_function_stopwatch;
     FlowStepTaylorModelType polynomial=
         flow_function(dphi,domx,domt,doma,sweeper);
-    centre_flow_function_stopwatch.click();
 
-    Stopwatch<Microseconds> recurrence_residual_stopwatch;
 
     // At exit from the centre recurrence, dphic=P_m while fdphic/tmpdphic
     // are exactly the incremental Procedure state for g(P_{m-1}).  Advancing
@@ -1173,127 +1116,34 @@ graded_series_centre_polynomial_step(
     Vector<GradedValidatedDifferential> final_f=fdphic;
     List<GradedValidatedDifferential> final_tmp=tmpdphic;
     Ariadne::compute_procedure(p,final_f,final_tmp,dphic);
-    recurrence_residual_stopwatch.click();
 
-    Stopwatch<Microseconds> recurrence_differential_stopwatch;
     Vector<ValidatedDifferential> recurrence_field_differential=
         differential(final_f,n,so,to);
-    recurrence_differential_stopwatch.click();
 
     // Build the validated residual on the widened Taylor domain and restrict
     // only after subtraction.  Both operands are materialised separately, so
     // their existing Taylor-model Error budgets are preserved; only the order
     // of subtraction and restriction changes.  The preceding restriction
     // audit showed that separate restriction inhibits cancellation.
-    Stopwatch<Microseconds> recurrence_flow_function_stopwatch;
     Vector<ValidatedDifferential> derivative_dphi=derivative(dphi,n);
     ExactBoxType const wide_domain=join(domx,widt,doma);
     ExactBoxType const forward_domain=join(domx,domt,doma);
 
-    Stopwatch<Microseconds> defect_derivative_materialise_stopwatch;
     FlowStepTaylorModelType wide_derivative=
         make_taylor_function_model(derivative_dphi,wide_domain,sweeper);
-    defect_derivative_materialise_stopwatch.click();
 
-    // Diagnostic A/B: test whether differentiating an already materialised
-    // widened centre model reproduces the current derivative operand exactly.
-    // This is intentionally diagnostics-only because TaylorModel
-    // differentiation has its own Error semantics.
-    static SizeType widened_derivative_equivalence_calls=0u;
-    static SizeType widened_derivative_equal_expansion_components=0u;
-    static SizeType widened_derivative_equal_error_components=0u;
-    static SizeType widened_derivative_total_components=0u;
-    static double widened_derivative_candidate_seconds=0.0;
-    static double widened_derivative_max_error_difference=0.0;
-    if(compute_exact_polynomial_diagnostic) {
-        Stopwatch<Microseconds> widened_derivative_candidate_stopwatch;
-        FlowStepTaylorModelType diagnostic_wide_centre=
-            make_taylor_function_model(dphi,wide_domain,sweeper);
-        for(SizeType i=0u; i!=n; ++i) {
-            ValidatedTaylorModelDP derived_model=
-                derivative(diagnostic_wide_centre.get(i),n).model();
-            ValidatedTaylorModelDP const& reference_model=
-                wide_derivative.model(i);
-            ++widened_derivative_total_components;
-            if(same(derived_model.expansion(),reference_model.expansion())) {
-                ++widened_derivative_equal_expansion_components;
-            }
-            if(same(derived_model.error(),reference_model.error())) {
-                ++widened_derivative_equal_error_components;
-            }
-            widened_derivative_max_error_difference=std::max(
-                widened_derivative_max_error_difference,
-                std::abs(
-                    derived_model.error().raw().get_d()
-                    -reference_model.error().raw().get_d()));
-        }
-        widened_derivative_candidate_stopwatch.click();
-        ++widened_derivative_equivalence_calls;
-        widened_derivative_candidate_seconds+=
-            widened_derivative_candidate_stopwatch.elapsed_seconds();
-        if(widened_derivative_equivalence_calls%100u==0u) {
-            std::cerr << "[WidenedDerivativeEquivalence]"
-                      << " calls=" << widened_derivative_equivalence_calls
-                      << " components=" << widened_derivative_total_components
-                      << " equal_expansion_components="
-                      << widened_derivative_equal_expansion_components
-                      << " equal_error_components="
-                      << widened_derivative_equal_error_components
-                      << " max_error_difference="
-                      << widened_derivative_max_error_difference
-                      << " candidate_seconds="
-                      << widened_derivative_candidate_seconds
-                      << std::endl;
-        }
-    }
-
-    Stopwatch<Microseconds> defect_field_materialise_stopwatch;
     FlowStepTaylorModelType wide_field=
         make_taylor_function_model_diagonal_scaling(
             recurrence_field_differential,wide_domain,sweeper);
-    defect_field_materialise_stopwatch.click();
 
-    Stopwatch<Microseconds> defect_subtract_stopwatch;
     FlowStepTaylorModelType wide_validated_defect=wide_derivative;
     for(SizeType i=0u; i!=n; ++i) {
         wide_validated_defect.model(i)=
             wide_derivative.model(i)-wide_field.model(i);
     }
-    defect_subtract_stopwatch.click();
 
-    Stopwatch<Microseconds> defect_restrict_stopwatch;
     FlowStepTaylorModelType defect=
         restriction(wide_validated_defect,forward_domain);
-    defect_restrict_stopwatch.click();
-    recurrence_flow_function_stopwatch.click();
-
-    static SizeType widened_defect_profile_calls=0u;
-    static double widened_defect_derivative_materialise_seconds=0.0;
-    static double widened_defect_field_materialise_seconds=0.0;
-    static double widened_defect_subtract_seconds=0.0;
-    static double widened_defect_restrict_seconds=0.0;
-    ++widened_defect_profile_calls;
-    widened_defect_derivative_materialise_seconds+=
-        defect_derivative_materialise_stopwatch.elapsed_seconds();
-    widened_defect_field_materialise_seconds+=
-        defect_field_materialise_stopwatch.elapsed_seconds();
-    widened_defect_subtract_seconds+=
-        defect_subtract_stopwatch.elapsed_seconds();
-    widened_defect_restrict_seconds+=
-        defect_restrict_stopwatch.elapsed_seconds();
-    if(widened_defect_profile_calls%100u==0u) {
-        std::cerr << "[WidenedDefectCostProfile]"
-                  << " calls=" << widened_defect_profile_calls
-                  << " derivative_materialise_seconds="
-                  << widened_defect_derivative_materialise_seconds
-                  << " field_materialise_seconds="
-                  << widened_defect_field_materialise_seconds
-                  << " subtract_seconds="
-                  << widened_defect_subtract_seconds
-                  << " restrict_seconds="
-                  << widened_defect_restrict_seconds
-                  << std::endl;
-    }
 
     // Keep the cheaper materialise-after-subtraction construction only
     // when diagnostics are explicitly enabled.  Do not even instantiate a
@@ -1301,10 +1151,8 @@ graded_series_centre_polynomial_step(
     // certification.
     Vector<FloatDPBounds> direct_defect_range(
         n,FloatDPBounds(0,dp));
-    double direct_defect_seconds=0.0;
     if(compute_exact_polynomial_diagnostic) {
-        Stopwatch<Microseconds> direct_defect_stopwatch;
-        Vector<ValidatedDifferential> direct_defect_differential=
+            Vector<ValidatedDifferential> direct_defect_differential=
             derivative_dphi-recurrence_field_differential;
         FlowStepTaylorModelType direct_wide_defect=
             make_taylor_function_model(
@@ -1316,9 +1164,7 @@ graded_series_centre_polynomial_step(
             direct_defect_range[i]=evaluate(
                 direct_wide_defect.model(i),forward_half_box);
         }
-        direct_defect_stopwatch.click();
-        direct_defect_seconds=direct_defect_stopwatch.elapsed_seconds();
-    }
+        }
 
     // For polynomial vector fields we can remove the unresolved truncation
     // question entirely: determine the algebraic degree of the Procedure,
@@ -1326,7 +1172,6 @@ graded_series_centre_polynomial_step(
     // and evaluate the Procedure with Differential arithmetic at that degree.
     // Since only polynomial operations are admitted by the degree analyser,
     // no composition terms are then truncated.
-    Stopwatch<Microseconds> exact_polynomial_defect_stopwatch;
     DegreeType vector_field_degree=0u;
     Bool exact_polynomial_available=
         polynomial_procedure_degree(p,vector_field_degree);
@@ -1373,23 +1218,13 @@ graded_series_centre_polynomial_step(
     if(!compute_exact_polynomial_diagnostic) {
         exact_polynomial_available=false;
     }
-    exact_polynomial_defect_stopwatch.click();
 
     return CentrePolynomialRecurrenceResult{
         std::move(polynomial),std::move(defect),
-        recurrence_residual_stopwatch.elapsed_seconds(),
-        recurrence_differential_stopwatch.elapsed_seconds(),
-        recurrence_flow_function_stopwatch.elapsed_seconds(),
-        centre_init_stopwatch.elapsed_seconds(),
-        centre_iterate_stopwatch.elapsed_seconds(),
-        centre_flow_differential_stopwatch.elapsed_seconds(),
-        centre_flow_function_stopwatch.elapsed_seconds(),
         std::move(direct_defect_range),
-        direct_defect_seconds,
         exact_polynomial_available,
         exact_polynomial_degree,
-        std::move(exact_polynomial_defect_range),
-        exact_polynomial_defect_stopwatch.elapsed_seconds()};
+        std::move(exact_polynomial_defect_range)};
 }
 
 
@@ -1534,61 +1369,12 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null),dphib(0u,null),fdphib(0u,null);
     List<GradedValidatedDifferential> tmpdphic,tmpdphib;
 
-    static SizeType graded_internal_diagnostic_count=0u;
-    auto differential_coefficient_mag =
-        [](ValidatedDifferential const& d) {
-            auto r=mag(d.value());
-            for(auto const& term : d.expansion()) {
-                r=max(r,mag(term.coefficient()));
-            }
-            return r;
-        };
-    auto graded_coefficient_mag =
-        [&](Vector<GradedValidatedDifferential> const& v) {
-            // The fy vectors returned by graded_flow_init contain empty
-            // Graded elements until the first graded_flow_iterate evaluates
-            // the vector field.  Start from a genuine zero Differential and
-            // skip empty graded elements instead of dereferencing [0].
-            auto r=mag(dzero.value());
-            for(SizeType i=0u; i!=v.size(); ++i) {
-                for(SizeType k=0u; k!=v[i].size(); ++k) {
-                    r=max(r,differential_coefficient_mag(v[i][k]));
-                }
-            }
-            return r;
-        };
-
     Ariadne::graded_flow_init(f,fdphic,tmpdphic,dphic,mdx,mdt,mda,so,to);
     Ariadne::graded_flow_init(f,fdphib,tmpdphib,dphib,bx,dt,da,so,to);
 
-    if(graded_internal_diagnostic_count<8u) {
-        std::cerr << "[GradedIterationDiagnostic]"
-                  << " call=" << graded_internal_diagnostic_count
-                  << " iteration=init"
-                  << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
-                  << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
-                  << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
-                  << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
-                  << std::endl;
-    }
-
     for(DegreeType i=0; i!=to; ++i) {
-        Ariadne::graded_flow_iterate(
-            f,fdphic,tmpdphic,dphic,
-            graded_internal_diagnostic_count,"centre",i+1u);
-        Ariadne::graded_flow_iterate(
-            f,fdphib,tmpdphib,dphib,
-            graded_internal_diagnostic_count,"bounding",i+1u);
-        if(graded_internal_diagnostic_count<8u) {
-            std::cerr << "[GradedIterationDiagnostic]"
-                      << " call=" << graded_internal_diagnostic_count
-                      << " iteration=" << (i+1u)
-                      << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
-                      << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
-                      << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
-                      << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
-                      << std::endl;
-        }
+        Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic);
+        Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib);
     }
     CONCLOG_PRINTLN_AT(3,"dphic="<<dphic);
     CONCLOG_PRINTLN_AT(3,"dphib="<<dphib);
@@ -1602,31 +1388,6 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     CONCLOG_PRINTLN_AT(2,"dphi="<<dphi);
 
     FlowStepTaylorModelType tphi=flow_function(dphi,domx,domt,doma,sweeper);
-
-    if(graded_internal_diagnostic_count<8u) {
-        auto differential_vector_mag =
-            [&](Vector<ValidatedDifferential> const& v) {
-                auto r=differential_coefficient_mag(v[0u]);
-                for(SizeType i=1u; i!=v.size(); ++i) {
-                    r=max(r,differential_coefficient_mag(v[i]));
-                }
-                return r;
-            };
-
-        std::cerr << "[GradedInternalDiagnostic]"
-                  << " call=" << graded_internal_diagnostic_count
-                  << " domx=" << domx
-                  << " domt=" << domt
-                  << " bndx=" << bndx
-                  << " fdphic_coeff_mag=" << graded_coefficient_mag(fdphic)
-                  << " fdphib_coeff_mag=" << graded_coefficient_mag(fdphib)
-                  << " dphic_coeff_mag=" << graded_coefficient_mag(dphic)
-                  << " dphib_coeff_mag=" << graded_coefficient_mag(dphib)
-                  << " dphi_coeff_mag=" << differential_vector_mag(dphi)
-                  << " tphi_errors=" << tphi.errors()
-                  << std::endl;
-        ++graded_internal_diagnostic_count;
-    }
 
     CONCLOG_PRINTLN("phi="<<tphi);
 
@@ -2279,7 +2040,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         if(this->preconditioning()==TaylorSeriesPreconditioning::QR
             && this->minimum_spacial_order()==this->maximum_spacial_order()
             && this->minimum_temporal_order()==this->maximum_temporal_order()) {
-            Stopwatch<Microseconds> centre_polynomial_stopwatch;
             CentrePolynomialRecurrenceResult centre_result=
                 graded_series_centre_polynomial_step(
                     p,domy,domt,this->sweeper(),
@@ -2290,81 +2050,15 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 std::move(centre_result.polynomial);
             FlowStepTaylorModelType defect=
                 std::move(centre_result.defect);
-            centre_polynomial_stopwatch.click();
 
-            static SizeType recurrence_residual_calls=0u;
-            static double recurrence_residual_seconds=0.0;
-            static double recurrence_differential_seconds=0.0;
-            static double recurrence_flow_function_seconds=0.0;
-            static double direct_defect_seconds=0.0;
-            static double exact_polynomial_defect_seconds=0.0;
-            static double centre_init_seconds=0.0;
-            static double centre_iterate_seconds=0.0;
-            static double centre_flow_differential_seconds=0.0;
-            static double centre_flow_function_seconds=0.0;
-            ++recurrence_residual_calls;
-            recurrence_residual_seconds+=centre_result.residual_seconds;
-            recurrence_differential_seconds+=centre_result.differential_seconds;
-            recurrence_flow_function_seconds+=centre_result.flow_function_seconds;
-            direct_defect_seconds+=centre_result.direct_defect_seconds;
-            exact_polynomial_defect_seconds+=
-                centre_result.exact_polynomial_defect_seconds;
-            centre_init_seconds+=centre_result.init_seconds;
-            centre_iterate_seconds+=centre_result.iterate_seconds;
-            centre_flow_differential_seconds+=
-                centre_result.flow_differential_seconds;
-            centre_flow_function_seconds+=
-                centre_result.polynomial_flow_function_seconds;
-            if(!this->diagnostics() && recurrence_residual_calls%100u==0u) {
-                std::cerr << "[RecurrenceResidualProfile]"
-                          << " calls=" << recurrence_residual_calls
-                          << " procedure_seconds=" << recurrence_residual_seconds
-                          << " differential_seconds=" << recurrence_differential_seconds
-                          << " flow_function_seconds=" << recurrence_flow_function_seconds
-                          << " direct_defect_seconds=" << direct_defect_seconds
-                          << " direct_defect_range=" << centre_result.direct_defect_range
-                          << " exact_polynomial_available="
-                          << centre_result.exact_polynomial_available
-                          << " exact_polynomial_degree="
-                          << centre_result.exact_polynomial_degree
-                          << " exact_polynomial_defect_seconds="
-                          << exact_polynomial_defect_seconds
-                          << " exact_polynomial_defect_range="
-                          << centre_result.exact_polynomial_defect_range
-                          << " validated_defect_range=" << defect.range()
-                          << std::endl;
-                std::cerr << "[CentreRecurrenceCostProfile]"
-                          << " calls=" << recurrence_residual_calls
-                          << " init_seconds=" << centre_init_seconds
-                          << " iterate_seconds=" << centre_iterate_seconds
-                          << " flow_differential_seconds="
-                          << centre_flow_differential_seconds
-                          << " polynomial_flow_function_seconds="
-                          << centre_flow_function_seconds
-                          << " final_procedure_seconds="
-                          << recurrence_residual_seconds
-                          << " recurrence_differential_seconds="
-                          << recurrence_differential_seconds
-                          << " recurrence_flow_function_seconds="
-                          << recurrence_flow_function_seconds
-                          << " direct_defect_seconds="
-                          << direct_defect_seconds
-                          << std::endl;
-            }
-
-            Stopwatch<Microseconds> residual_stopwatch;
-            Stopwatch<Microseconds> residual_compose_stopwatch;
             // Production defect uses the Procedure evaluated directly on the
             // graded centre polynomial.  This has been checked against the
             // generic compose(g,P) path on the same step.
-            residual_compose_stopwatch.click();
 
-            Stopwatch<Microseconds> residual_assembly_stopwatch;
             // The validated defect is already assembled on the widened domain
             // inside graded_series_centre_polynomial_step and restricted once
             // after subtraction.
             SizeType const time_index=centre_polynomial.argument_size()-1u;
-            residual_assembly_stopwatch.click();
 
             // General Taylor-model residual experiment.  Define the candidate
             // P as exactly the polynomial part of centre_polynomial (drop its
@@ -2376,8 +2070,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             Vector<FloatDPBounds> general_tm_defect_range(
                 n,FloatDPBounds(0,dp));
             if(this->diagnostics()) {
-                Stopwatch<Microseconds> general_tm_defect_stopwatch;
-                FlowStepTaylorModelType candidate_polynomial=centre_polynomial;
+                    FlowStepTaylorModelType candidate_polynomial=centre_polynomial;
                 for(SizeType i=0u; i!=n; ++i) {
                     candidate_polynomial.model(i).clobber();
                 }
@@ -2390,8 +2083,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                         dmodel-general_field_models[i];
                     general_tm_defect_range[i]=cast_singleton(rmodel.range());
                 }
-                general_tm_defect_stopwatch.click();
-    
+        
     
             }
 
@@ -2408,17 +2100,13 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 }
             }
 
-            Stopwatch<Microseconds> initial_defect_stopwatch;
             ValidatedVectorMultivariateFunctionPatch initial_polynomial=
                 partial_evaluate(centre_polynomial,time_index,StepSizeType(0.0));
             ValidatedVectorMultivariateFunctionPatch identity_on_domy=
                 factory.create_identity(domy);
             ValidatedVectorMultivariateFunctionPatch initial_defect=
                 initial_polynomial-identity_on_domy;
-            initial_defect_stopwatch.click();
 
-            residual_stopwatch.click();
-            Stopwatch<Microseconds> jacobian_stopwatch;
             // Crude infinity-norm Lipschitz bound on the whole validated
             // local flow box.  Together with the defect range this is enough
             // to form the a-posteriori Gronwall estimate
@@ -2439,38 +2127,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     row_sum+=mag(dg[i].gradient()[j]);
                 }
                 lipschitz_inf=max(lipschitz_inf,row_sum);
-            }
-
-            jacobian_stopwatch.click();
-            static SizeType production_profile_calls=0u;
-            static double production_centre_seconds=0.0;
-            static double production_residual_seconds=0.0;
-            static double production_residual_compose_seconds=0.0;
-            static double production_residual_assembly_seconds=0.0;
-            static double production_initial_defect_seconds=0.0;
-            static double production_range_seconds=0.0;
-            static double production_physical_reconstruction_seconds=0.0;
-            static double production_jacobian_seconds=0.0;
-            ++production_profile_calls;
-            production_centre_seconds+=centre_polynomial_stopwatch.elapsed_seconds();
-            production_residual_seconds+=residual_stopwatch.elapsed_seconds();
-            production_residual_compose_seconds+=residual_compose_stopwatch.elapsed_seconds();
-            production_residual_assembly_seconds+=residual_assembly_stopwatch.elapsed_seconds();
-            production_initial_defect_seconds+=initial_defect_stopwatch.elapsed_seconds();
-            production_jacobian_seconds+=jacobian_stopwatch.elapsed_seconds();
-            if(!this->diagnostics() && production_profile_calls%100u==0u) {
-                std::cerr << "[GronwallCostProfile]"
-                          << " calls=" << production_profile_calls
-                          << " centre_seconds=" << production_centre_seconds
-                          << " residual_seconds=" << production_residual_seconds
-                          << " residual_compose_seconds=" << production_residual_compose_seconds
-                          << " residual_assembly_seconds=" << production_residual_assembly_seconds
-                          << " initial_defect_seconds=" << production_initial_defect_seconds
-                          << " range_seconds=" << production_range_seconds
-                          << " physical_reconstruction_seconds="
-                          << production_physical_reconstruction_seconds
-                          << " jacobian_seconds=" << production_jacobian_seconds
-                          << std::endl;
             }
 
             if(this->diagnostics()) {
@@ -2502,7 +2158,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             // local_bounding_box.  If the centre polynomial also stays in
             // that convex box, the Jacobian bound above applies on every
             // segment joining P(y,t) to the exact solution.
-            Stopwatch<Microseconds> range_stopwatch;
             auto polynomial_range=centre_polynomial.range();
             // Compare against an exact outer box, as elsewhere in the
             // integrator.  Comparing a validated range directly with an
@@ -2520,8 +2175,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 // Obsolete defect-decomposition diagnostics removed: the
                 // restriction-order audit has already localised the loss of
                 // cancellation to separate restriction of the two operands.
-                range_stopwatch.click();
-                production_range_seconds+=range_stopwatch.elapsed_seconds();
+                    production_range_seconds+=range_stopwatch.elapsed_seconds();
 
                 // Use the monotone, fully upper-rounded estimate
                 //
@@ -2552,8 +2206,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                         +gronwall_remainder[i]);
                 }
 
-                Stopwatch<Microseconds> physical_reconstruction_stopwatch;
-                ValidatedVectorMultivariateFunctionPatch
+                    ValidatedVectorMultivariateFunctionPatch
                     physical_gronwall_polynomial=
                         factory.create_zeros(n,centre_polynomial.domain());
                 for(SizeType i=0u; i!=n; ++i) {
@@ -2568,8 +2221,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     }
                 }
 
-                physical_reconstruction_stopwatch.click();
-                production_physical_reconstruction_seconds+=
+                    production_physical_reconstruction_seconds+=
                     physical_reconstruction_stopwatch.elapsed_seconds();
 
                 gronwall_physical_local_flow=physical_gronwall_polynomial;

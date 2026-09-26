@@ -5435,3 +5435,24 @@ the same 3e-14 sweeper threshold, maximum step 0.0025, and order 5.
 A strict historical pre-optimisation graded baseline must additionally be run from the
 recorded historical commit; the current sparse-kernel run is only a control because
 later behaviour-preserving changes outside the product kernel are present.
+
+
+### 9.151 Remove remaining integrator profiling before final benchmark (2026-09-26)
+
+The first seven-second comparison exposed that older investigation instrumentation was
+still active even after the dense-roundoff cleanup. In particular, the run still emitted
+graded-iteration/procedure diagnostics and cumulative widened-defect, recurrence, and
+Gronwall cost profiles.
+
+These remaining always-on benchmark probes are now removed. The production arithmetic
+and accepted optimisation paths are unchanged. Diagnostics explicitly guarded by
+`this->diagnostics()` remain available where they are part of the integrator diagnostic
+interface, but there are no unconditional stopwatch/profile accumulators in the paths
+used by the final benchmark.
+
+The previous seven-second timings (38.117 s sparse-current median, 12.186 s dense graded
+median, 30.853 s preconditioned median) are retained only as contaminated preliminary
+measurements and must not be used as the final comparison.
+
+The final 3x3 seven-second benchmark must be rerun after this cleanup, then compared
+against a strict historical graded run from the chosen pre-optimisation commit.

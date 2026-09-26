@@ -96,8 +96,19 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     }
 
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
-    auto candidate_result=optimiser.feasible_candidate(
-        domain,function,codomain);
+    Pair<ValidatedKleenean,FloatDPApproximationVector> candidate_result;
+    try {
+        candidate_result=optimiser.feasible_candidate(
+            domain,function,codomain);
+    } catch(const SingularMatrixException&) {
+        CONCLOG_PRINTLN(
+            "Interior-point candidate search encountered a singular system");
+        return make_pair(indeterminate,ExactPointType());
+    } catch(const NearBoundaryOfFeasibleDomainException&) {
+        CONCLOG_PRINTLN(
+            "Interior-point candidate search reached the feasible-domain boundary");
+        return make_pair(indeterminate,ExactPointType());
+    }
 
     if(definitely(candidate_result.first)) {
         ExactPointType candidate=cast_exact(candidate_result.second);

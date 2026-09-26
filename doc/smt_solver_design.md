@@ -544,8 +544,14 @@ legacy `NonlinearInteriorPointOptimiser` iteration and its old dual/Taylor
 fallback, whereas current solver code and dedicated tests use
 `NonlinearInfeasibleInteriorPointOptimiser`. The constraint solver now delegates
 candidate generation and validated feasibility/infeasibility classification to
-the latter, retaining its cheap direct interval-disjointness rejection and an
-independent `check_feasibility` confirmation before returning a feasible point.
+the latter, retaining its cheap direct interval-disjointness rejection.
+A `true` result from `feasible_candidate` is already backed by
+`OptimiserBase::validate_feasibility`, so `ConstraintSolver` no longer
+re-certifies it with the weaker pointwise `check_feasibility` routine. The
+outer `NearBoundaryOfFeasibleDomainException` catch was likewise removed
+because `feasible_candidate` converts that condition to `indeterminate`
+internally; only numerical failures that can actually propagate, such as a
+singular Newton system, remain translated to `indeterminate` here.
 This removes the obsolete embedded optimiser algorithm rather than attempting to
 cover it artificially. The separate legacy uses in `paver.cpp` are outside this
 refactoring and require their own audit.

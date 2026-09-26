@@ -141,8 +141,6 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
                 if(definitely(domain.is_empty())) { return true; }
             }
         }
-        if(definitely(domain.is_empty())) { return true; }
-
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0u;
         for(SizeType j=0; j!=domain.size(); ++j) {
@@ -260,15 +258,13 @@ Bool ConstraintSolver::monotone_reduce(
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_lower.upper_bound()<lower.lower_bound())) { lower=UpperIntervalType(lower.lower_bound().raw(),lower.lower_bound().raw()); }
-            else { lower=intersection(lower,new_lower); }
+            lower=intersection(lower,new_lower);
         }
         if(upper.width().raw()>threshold) {
             splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_upper.lower_bound()>upper.upper_bound())) { upper=UpperIntervalType(upper.upper_bound().raw(),upper.upper_bound().raw()); }
-            else { upper=intersection(upper,new_upper); }
+            upper=intersection(upper,new_upper);
         }
         subdomain[variable]=UpperIntervalType(lower.lower_bound(),upper.upper_bound());
         if(not (lower.width().raw()>threshold && upper.width().raw()>threshold)) {

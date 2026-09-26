@@ -143,6 +143,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cm
 include(CoverageSupport)
 
 if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+    include(LLVMCodeCoverage)
     append_llvm_coverage_compiler_flags()
 endif()
 

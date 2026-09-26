@@ -29,7 +29,6 @@
 #include <limits>
 #include <algorithm>
 #include <vector>
-#include <cmath>
 
 #include "numeric/rounding.hpp"
 #include "numeric/numeric.hpp"
@@ -1213,8 +1212,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             const auto dense_pair_start=dense_prerank_end;
             unsigned long long dense_new_slots=0u;
             unsigned long long dense_collision_slots=0u;
-            double dense_nearest_seconds=0.0;
-            double dense_upward_seconds=0.0;
 
             if constexpr (ARawFloat<CoefficientType>) {
                 if(taylor_model_dense_batched_rounding_enabled()) {
@@ -1229,38 +1226,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 collision_flags.reserve(product_pairs);
                 collision_priors.reserve(product_pairs);
 
-                // Diagnostic A/B: estimate the same centre-operation roundoff
-                // from error-free residuals computed during the nearest pass.
-                // The reference upward pass remains authoritative.
-                static unsigned long long residual_ab_calls=0u;
-                static unsigned long long residual_ab_candidate_ge_reference=0u;
-                static long double residual_ab_candidate_sum=0.0L;
-                static long double residual_ab_reference_sum=0.0L;
-                static double residual_ab_max_ratio=0.0;
-
-                static unsigned long long residual_pair_new_count=0u;
-                static unsigned long long residual_pair_new_ge_reference=0u;
-                static long double residual_pair_new_candidate_sum=0.0L;
-                static long double residual_pair_new_reference_sum=0.0L;
-                static double residual_pair_new_max_ratio=0.0;
-
-                static unsigned long long residual_pair_collision_count=0u;
-                static unsigned long long residual_pair_collision_ge_reference=0u;
-                static long double residual_pair_collision_candidate_sum=0.0L;
-                static long double residual_pair_collision_reference_sum=0.0L;
-                static double residual_pair_collision_max_ratio=0.0;
-                const bool residual_ab_active=
-                    Same<CoefficientType,FloatDP> && residual_ab_calls<10000u;
-                std::vector<double> residual_bounds;
-                double residual_base=0.0;
-                if constexpr (Same<CoefficientType,FloatDP>) {
-                    if(residual_ab_active) {
-                        residual_bounds.reserve(product_pairs);
-                        residual_base=product_roundoff.raw().get_d();
-                    }
-                }
-
-                const auto dense_nearest_start=std::chrono::steady_clock::now();
                 CoefficientType::set_rounding_to_nearest();
                 SizeType xi=0u;
                 for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
@@ -1273,59 +1238,25 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         if(touched==unused) {
                             collision_flags.push_back(0u);
                             CoefficientType product=mul(rounded,xv,yv);
-                            if constexpr (Same<CoefficientType,FloatDP>) {
-                                if(residual_ab_active) {
-                                    const double exact_residual=std::fma(
-                                        xiter->coefficient().get_d(),
-                                        yiter->coefficient().get_d(),
-                                        -product.get_d());
-                                    residual_bounds.push_back(std::nextafter(
-                                        std::abs(exact_residual),
-                                        std::numeric_limits<double>::infinity()));
-                                }
-                            }
                             touched=touched_slots.size();
                             touched_slots.push_back(slot);
                             touched_coefficients.emplace_back(product);
                         } else {
                             collision_flags.push_back(1u);
-                            CoefficientType const prior=touched_coefficients[touched];
-                            collision_priors.push_back(prior);
-                            CoefficientType product=mul(rounded,xv,yv);
-                            CoefficientType updated=add(rounded,product,prior);
-                            if constexpr (Same<CoefficientType,FloatDP>) {
-                                if(residual_ab_active) {
-                                    const double pd=product.get_d();
-                                    const double prior_d=prior.get_d();
-                                    const double updated_d=updated.get_d();
-                                    const double product_residual=std::fma(
-                                        xiter->coefficient().get_d(),
-                                        yiter->coefficient().get_d(),
-                                        -pd);
-                                    const double bb=updated_d-pd;
-                                    const double addition_residual=
-                                        (pd-(updated_d-bb))+(prior_d-bb);
-                                    const double contribution=
-                                        std::abs(product_residual)
-                                        +std::abs(addition_residual);
-                                    residual_bounds.push_back(std::nextafter(
-                                        contribution,
-                                        std::numeric_limits<double>::infinity()));
-                                }
-                            }
-                            touched_coefficients[touched]=updated;
+                            collision_priors.push_back(touched_coefficients[touched]);
+                            touched_coefficients[touched]=add(
+                                rounded,mul(rounded,xv,yv),
+                                touched_coefficients[touched]);
                         }
                     }
                 }
 
-                const auto dense_nearest_end=std::chrono::steady_clock::now();
                 dense_collision_slots=
                     static_cast<unsigned long long>(collision_priors.size());
                 dense_new_slots=
                     static_cast<unsigned long long>(product_pairs)
                     -dense_collision_slots;
 
-                const auto dense_upward_start=std::chrono::steady_clock::now();
                 CoefficientType::set_rounding_upward();
                 SizeType pair_index=0u;
                 SizeType collision_index=0u;
@@ -1341,29 +1272,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                             CoefficientType mxv=-xv;
                             CoefficientType u=mul(rounded,xv,yv);
                             CoefficientType ml=mul(rounded,mxv,yv);
-                            CoefficientType contribution=
-                                hlf(add(rounded,ml,u));
-                            if constexpr (Same<CoefficientType,FloatDP>) {
-                                if(residual_ab_active) {
-                                    const double candidate=
-                                        residual_bounds[pair_index];
-                                    const double reference=
-                                        contribution.get_d();
-                                    ++residual_pair_new_count;
-                                    residual_pair_new_candidate_sum+=candidate;
-                                    residual_pair_new_reference_sum+=reference;
-                                    if(candidate>=reference) {
-                                        ++residual_pair_new_ge_reference;
-                                    }
-                                    if(reference>0.0) {
-                                        residual_pair_new_max_ratio=std::max(
-                                            residual_pair_new_max_ratio,
-                                            candidate/reference);
-                                    }
-                                }
-                            }
                             product_roundoff.raw()=add(
-                                rounded,product_roundoff.raw(),contribution);
+                                rounded,product_roundoff.raw(),
+                                hlf(add(rounded,ml,u)));
                         } else {
                             CoefficientType const& prior=
                                 collision_priors[collision_index++];
@@ -1373,113 +1284,9 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                                 rounded,mul(rounded,xv,yv),prior);
                             CoefficientType ml=add(
                                 rounded,mul(rounded,xv,myv),mprior);
-                            CoefficientType contribution=
-                                hlf(add(rounded,ml,u));
-                            if constexpr (Same<CoefficientType,FloatDP>) {
-                                if(residual_ab_active) {
-                                    const double candidate=
-                                        residual_bounds[pair_index];
-                                    const double reference=
-                                        contribution.get_d();
-                                    ++residual_pair_collision_count;
-                                    residual_pair_collision_candidate_sum+=candidate;
-                                    residual_pair_collision_reference_sum+=reference;
-                                    if(candidate>=reference) {
-                                        ++residual_pair_collision_ge_reference;
-                                    }
-                                    if(reference>0.0) {
-                                        residual_pair_collision_max_ratio=std::max(
-                                            residual_pair_collision_max_ratio,
-                                            candidate/reference);
-                                    }
-                                }
-                            }
                             product_roundoff.raw()=add(
-                                rounded,product_roundoff.raw(),contribution);
-                        }
-                    }
-                }
-                const auto dense_upward_end=std::chrono::steady_clock::now();
-                dense_nearest_seconds=
-                    std::chrono::duration<double>(
-                        dense_nearest_end-dense_nearest_start).count();
-                dense_upward_seconds=
-                    std::chrono::duration<double>(
-                        dense_upward_end-dense_upward_start).count();
-
-                if constexpr (Same<CoefficientType,FloatDP>) {
-                    if(residual_ab_active) {
-                        long double candidate=
-                            static_cast<long double>(residual_base);
-                        for(double contribution : residual_bounds) {
-                            candidate+=static_cast<long double>(contribution);
-                        }
-                        const double candidate_d=std::nextafter(
-                            static_cast<double>(candidate),
-                            std::numeric_limits<double>::infinity());
-                        const double reference_d=product_roundoff.raw().get_d();
-                        residual_ab_candidate_sum+=candidate_d;
-                        residual_ab_reference_sum+=reference_d;
-                        if(candidate_d>=reference_d) {
-                            ++residual_ab_candidate_ge_reference;
-                        }
-                        if(reference_d>0.0) {
-                            residual_ab_max_ratio=std::max(
-                                residual_ab_max_ratio,
-                                candidate_d/reference_d);
-                        }
-                        ++residual_ab_calls;
-                        if(residual_ab_calls==10000u) {
-                            std::cerr << "[DenseRoundoffResidualAB]"
-                                      << " calls=" << residual_ab_calls
-                                      << " candidate_ge_reference_calls="
-                                      << residual_ab_candidate_ge_reference
-                                      << " candidate_error_sum="
-                                      << static_cast<double>(residual_ab_candidate_sum)
-                                      << " reference_error_sum="
-                                      << static_cast<double>(residual_ab_reference_sum)
-                                      << " candidate_over_reference="
-                                      << static_cast<double>(
-                                          residual_ab_candidate_sum
-                                          /residual_ab_reference_sum)
-                                      << " max_ratio="
-                                      << residual_ab_max_ratio
-                                      << std::endl;
-
-                            std::cerr << "[DenseRoundoffPairAB]"
-                                      << " calls=" << residual_ab_calls
-                                      << " new_pairs=" << residual_pair_new_count
-                                      << " new_candidate_ge_reference_pairs="
-                                      << residual_pair_new_ge_reference
-                                      << " new_candidate_sum="
-                                      << static_cast<double>(
-                                          residual_pair_new_candidate_sum)
-                                      << " new_reference_sum="
-                                      << static_cast<double>(
-                                          residual_pair_new_reference_sum)
-                                      << " new_candidate_over_reference="
-                                      << static_cast<double>(
-                                          residual_pair_new_candidate_sum
-                                          /residual_pair_new_reference_sum)
-                                      << " new_max_ratio="
-                                      << residual_pair_new_max_ratio
-                                      << " collision_pairs="
-                                      << residual_pair_collision_count
-                                      << " collision_candidate_ge_reference_pairs="
-                                      << residual_pair_collision_ge_reference
-                                      << " collision_candidate_sum="
-                                      << static_cast<double>(
-                                          residual_pair_collision_candidate_sum)
-                                      << " collision_reference_sum="
-                                      << static_cast<double>(
-                                          residual_pair_collision_reference_sum)
-                                      << " collision_candidate_over_reference="
-                                      << static_cast<double>(
-                                          residual_pair_collision_candidate_sum
-                                          /residual_pair_collision_reference_sum)
-                                      << " collision_max_ratio="
-                                      << residual_pair_collision_max_ratio
-                                      << std::endl;
+                                rounded,product_roundoff.raw(),
+                                hlf(add(rounded,ml,u)));
                         }
                     }
                 }
@@ -1572,8 +1379,6 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 dense_seconds(dense_prepare_start,dense_prepare_end),
                 dense_seconds(dense_prerank_start,dense_prerank_end),
                 dense_seconds(dense_pair_start,dense_pair_end),
-                dense_nearest_seconds,
-                dense_upward_seconds,
                 dense_seconds(dense_emit_start,dense_emit_end));
         } else {
             TaylorModel<P,F> accumulated(as,r.sweeper());

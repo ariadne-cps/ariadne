@@ -5413,3 +5413,25 @@ This distinguishes two possible outcomes:
 
 No coefficient, roundoff bound, operation ordering, or integrator output is changed by
 this diagnostic. The production reference remains the 21.6201 s three-run median.
+
+
+### 9.149 Per-pair comparison closes the residual roundoff track (2026-09-26)
+
+The pair-level residual comparison confirms systematic underestimation for both new-slot
+and collision products. The nearest-operation residual totals about 55.2% and 50.0%,
+respectively, of the current directed reference. The residual/FMA replacement track is
+closed and the current upward reconstruction is retained unchanged.
+
+### 9.150 Cleanup and final seven-second benchmark (2026-09-26)
+
+Micro-optimisation work is stopped. Dense roundoff A/B and carried dense-hot-loop
+instrumentation are removed. The final benchmark returns to the original Van der Pol
+horizon of 7 seconds and runs three repetitions per method.
+
+The current-tree benchmark compares the sparse-kernel graded integrator, optimised
+dense-kernel graded integrator, and optimised QR-preconditioned graded integrator under
+the same 3e-14 sweeper threshold, maximum step 0.0025, and order 5.
+
+A strict historical pre-optimisation graded baseline must additionally be run from the
+recorded historical commit; the current sparse-kernel run is only a control because
+later behaviour-preserving changes outside the product kernel are present.

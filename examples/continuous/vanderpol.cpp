@@ -86,10 +86,29 @@ void ariadne_main()
         set_taylor_model_incremental_sweep_enabled(true);
     };
 
-    // Return focus to the preconditioned integrator and the dense kernel.
-    // Use a single stable benchmark point at 3e-14 while dense-kernel
-    // optimisations are developed.
-    {
+    const Real benchmark_time=Real(7.00_dec);
+    const SizeType benchmark_repetitions=3u;
+
+    auto run_graded = [&](String const& method, Bool dense) {
+        ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
+        GradedTaylorSeriesIntegrator integrator(
+            StepMaximumError(loose_tolerance),probe_sweeper,
+            lipschitz_tolerance=0.5_x,
+            minimum_spacial_order=5,minimum_temporal_order=5,
+            maximum_spacial_order=5,maximum_temporal_order=5);
+        VectorFieldEvolver evolver(dynamics,integrator);
+        configure_evolver(evolver,plateau_step);
+        for(SizeType run=1u; run<=benchmark_repetitions; ++run) {
+            configure_taylor_kernel(dense);
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(initial_set,benchmark_time,Semantics::UPPER);
+            stopwatch.click();
+            reset_taylor_kernel();
+            report_orbit(method+"_"+to_string(run),stopwatch,orbit);
+        }
+    };
+
+    auto run_preconditioned = [&]() {
         ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
         PreconditionedGradedTaylorSeriesIntegrator integrator(
             StepMaximumError(loose_tolerance),probe_sweeper,
@@ -99,27 +118,21 @@ void ariadne_main()
         integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
         integrator.set_diagnostics(false);
         integrator.set_carried_expansion_diagnostics(false);
-
         VectorFieldEvolver evolver(dynamics,integrator);
         configure_evolver(evolver,plateau_step);
+        for(SizeType run=1u; run<=benchmark_repetitions; ++run) {
+            configure_taylor_kernel(true);
+            Stopwatch<Milliseconds> stopwatch;
+            auto orbit=evolver.orbit(initial_set,benchmark_time,Semantics::UPPER);
+            stopwatch.click();
+            reset_taylor_kernel();
+            report_orbit("preconditioned_optimized_"+to_string(run),stopwatch,orbit);
+        }
+    };
 
-        configure_taylor_kernel(true);
-        reset_taylor_model_dense_workspace_stats();
-        Stopwatch<Milliseconds> stopwatch;
-        auto orbit=evolver.orbit(
-            initial_set,Real(5.00_dec),Semantics::UPPER);
-        stopwatch.click();
-        reset_taylor_kernel();
-        report_orbit("preconditioned_dense_3e-14",stopwatch,orbit);
-        auto const ws=taylor_model_dense_workspace_stats();
-        std::cerr << "[TaylorDenseWorkspaceProfile]"
-                  << " calls=" << ws.calls
-                  << " slot_resizes=" << ws.slot_resizes
-                  << " coefficient_capacity_grows=" << ws.coefficient_capacity_grows
-                  << " max_slot_count=" << ws.maximum_slot_count
-                  << " max_touched_count=" << ws.maximum_touched_count
-                  << std::endl;
+    run_graded("graded_sparse_current",false);
+    run_graded("graded_optimized",true);
+    run_preconditioned();
 
-    }
 
 }

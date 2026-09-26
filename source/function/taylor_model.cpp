@@ -35,7 +35,6 @@ Bool g_taylor_model_product_accumulator_enabled=false;
 Bool g_taylor_model_dense_accumulator_enabled=false;
 Bool g_taylor_model_dense_batched_rounding_enabled=true;
 TaylorModelDenseWorkspaceStats g_taylor_model_dense_workspace_stats;
-TaylorModelDenseHotLoopProfile g_taylor_model_dense_hot_loop_profile;
 TaylorModelAccumulatorProfile g_taylor_model_accumulator_profile;
 TaylorModelProductProfileContext g_taylor_model_product_profile_context=
     TaylorModelProductProfileContext::GENERAL;
@@ -140,37 +139,6 @@ Void reset_taylor_model_dense_workspace_stats() {
 
 TaylorModelDenseWorkspaceStats taylor_model_dense_workspace_stats() {
     return g_taylor_model_dense_workspace_stats;
-}
-
-Void reset_taylor_model_dense_hot_loop_profile() {
-    g_taylor_model_dense_hot_loop_profile=TaylorModelDenseHotLoopProfile();
-}
-
-TaylorModelDenseHotLoopProfile taylor_model_dense_hot_loop_profile() {
-    return g_taylor_model_dense_hot_loop_profile;
-}
-
-Void record_taylor_model_dense_hot_loop_profile(
-    unsigned long long product_pairs,
-    unsigned long long new_slots,
-    unsigned long long collision_slots,
-    double prepare_seconds,
-    double prerank_seconds,
-    double pair_loop_seconds,
-    double nearest_pass_seconds,
-    double upward_pass_seconds,
-    double emit_sweep_seconds)
-{
-    ++g_taylor_model_dense_hot_loop_profile.calls;
-    g_taylor_model_dense_hot_loop_profile.product_pairs+=product_pairs;
-    g_taylor_model_dense_hot_loop_profile.new_slots+=new_slots;
-    g_taylor_model_dense_hot_loop_profile.collision_slots+=collision_slots;
-    g_taylor_model_dense_hot_loop_profile.prepare_seconds+=prepare_seconds;
-    g_taylor_model_dense_hot_loop_profile.prerank_seconds+=prerank_seconds;
-    g_taylor_model_dense_hot_loop_profile.pair_loop_seconds+=pair_loop_seconds;
-    g_taylor_model_dense_hot_loop_profile.nearest_pass_seconds+=nearest_pass_seconds;
-    g_taylor_model_dense_hot_loop_profile.upward_pass_seconds+=upward_pass_seconds;
-    g_taylor_model_dense_hot_loop_profile.emit_sweep_seconds+=emit_sweep_seconds;
 }
 
 Void record_taylor_model_dense_workspace_prepare(

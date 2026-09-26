@@ -616,6 +616,13 @@ without owning the numerical propagation loop. The theory-literal path is not
 moved in this tranche because strict `GT_ZERO` rejection and derivative-cache
 use are SMT-specific concerns that still need a clean generic boundary.
 
+The first coverage run after extraction exposed one dead SMT adapter:
+`_original_bounds(ValidatedConstraint)` was no longer called because generic
+propagation consumes the constraint bounds directly. It is removed rather than
+kept solely for coverage. The same build also exposed three
+`-Winconsistent-missing-override` diagnostics in `ConstraintSolver`; the
+interface overrides are now marked explicitly with `override`.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

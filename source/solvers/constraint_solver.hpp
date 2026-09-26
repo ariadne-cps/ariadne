@@ -97,11 +97,11 @@ class ConstraintSolver
 {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<ValidatedKleenean,ExactPointType> feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
+    Pair<ValidatedKleenean,ExactPointType> feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const override;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual ValidatedKleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain, const ExactPointType& point) const;
+    ValidatedKleenean check_feasibility(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain, const ExactPointType& point) const override;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual Bool reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
+    Bool reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const override;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)

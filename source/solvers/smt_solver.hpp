@@ -529,7 +529,6 @@ class SmtSolver {
         ExactBoxType const& domain,
         ConjunctionReference const& conjunction) const;
 
-    ExactIntervalType _original_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _original_bounds(SmtTheoryPrimitiveRelation relation) const;
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
     ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;

@@ -80,129 +80,43 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     -> Pair<ValidatedKleenean,ExactPointType>
 {
     CONCLOG_SCOPE_CREATE;
-    static const ExactDouble TERR=-1.0_x*pow(two,-10);
-    static const ExactDouble _inf ( Ariadne::inf.get_d() );
 
     CONCLOG_PRINTLN("domain="<<domain);
     CONCLOG_PRINTLN("function="<<function);
     CONCLOG_PRINTLN("codomain="<<codomain);
     ARIADNE_ASSERT(codomain.dimension()>0);
 
-    // Make codomain bounded
-    UpperBoxType bounds=codomain;
     UpperBoxType image=apply(function,domain);
     CONCLOG_PRINTLN_AT(1,"image="<<image);
     for(SizeType i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
             CONCLOG_PRINTLN("Proved disjointness using direct evaluation");
             return make_pair(false,ExactPointType(0u,dp));
-        } else {
-            bounds[i]=intersection(codomain[i],image[i]);
         }
     }
 
+    NonlinearInfeasibleInteriorPointOptimiser optimiser;
+    auto candidate_result=optimiser.feasible_candidate(
+        domain,function,codomain);
 
-    const SizeType m=domain.size(); // The total number of variables
-    const SizeType n=codomain.size(); // The total number of nontrivial constraints
-    const SizeType l=(m+n)*2; // The total number of lagrange multipliers
-
-    DoublePrecision prec;
-    FloatApproximationVector point(m,dp); // The point in the domain which is the current test point
-    FloatDPApproximation violation(dp); // An upper bound on amount by which the constraints are violated by the test point
-    FloatApproximationVector multipliers(l,dp); // The lagrange multipliers for the constraints
-    FloatApproximationVector slack(l,dp); // The slack between the test point and the violated constraints
-
-    FloatDPApproximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
-    const ExactBoxType& d=domain; const ValidatedVectorMultivariateFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
-    ValidatedVectorMultivariateTaylorFunctionModelDP tfn(d,fn,default_sweeper());
-
-    point=static_cast<FloatApproximationVector>(midpoint(d));
-    for(SizeType k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
-
-    NonlinearInteriorPointOptimiser optimiser;
-    optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
-
-    CONCLOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);
-
-    static const CounterType NUMBER_OF_STEPS=12u;
-
-    // TODO: Don't use fixed number of steps
-    for(CounterType i=0; i!=NUMBER_OF_STEPS; ++i) {
-        CONCLOG_PRINTLN_AT(2,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
-        optimiser.feasibility_step(d,fn,c,x,y,z,t);
-        if(decide(t>=TERR)) {
-            CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
-            if(definitely(this->check_feasibility(
-                    domain,function,codomain,cast_exact(point)))) {
-                return make_pair(true,cast_exact(point));
-            }
-            CONCLOG_PRINTLN("Candidate not yet certified; continuing. f(y)="
-                            <<fn(cast_exact(y)));
+    if(definitely(candidate_result.first)) {
+        ExactPointType candidate=cast_exact(candidate_result.second);
+        if(definitely(this->check_feasibility(
+                domain,function,codomain,candidate))) {
+            return make_pair(true,candidate);
         }
-    }
-    CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
-
-    if(definitely(this->check_feasibility(
-            domain,function,codomain,cast_exact(point)))) {
-        return make_pair(true,cast_exact(point));
+        ARIADNE_WARN(
+            "NonlinearInfeasibleInteriorPointOptimiser reported a validated "
+            "feasible candidate that ConstraintSolver could not certify.");
+        return make_pair(indeterminate,ExactPointType());
     }
 
-    if(decide(t<TERR)) {
-        // Probably disjoint, so try to prove this
-        UpperBoxType subdomain=domain;
-
-        Vector<FloatDP> x_exact=cast_exact(x);
-        // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
-        // This should be easier than using all constraints separately
-        ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
-        ValidatedNumericType cnst(0,prec);
-        for(SizeType j=0; j!=n; ++j) {
-            txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
-            cnst += (c[j].upper_bound()*x_exact[j]-c[j].lower_bound()*x_exact[n+j]);
-        }
-        for(SizeType i=0; i!=m; ++i) {
-            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
-            cnst += (d[i].upper_bound()*x_exact[2*n+i]-d[i].lower_bound()*x_exact[2*n+m+i]);
-        }
-        txg = cnst + txg;
-
-        CONCLOG_PRINTLN_AT(1,"txg="<<txg);
-
-        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
-        this->hull_reduce(subdomain,txg,ExactIntervalType(0,_inf));
-        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
-        if(definitely(subdomain.is_empty())) {
-            CONCLOG_PRINTLN("Proved disjointness using hull reduce");
-            return make_pair(false,ExactPointType());
-        }
-
-        for(SizeType i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
-            CONCLOG_PRINTLN_AT(2,"dom="<<subdomain);
-            if(definitely(subdomain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return make_pair(false,ExactPointType()); }
-        }
-        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
-
-        //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
-        CONCLOG_PRINTLN("Splitting domain");
-        Pair<ExactBoxType,ExactBoxType> sd=d.split();
-
-        auto first=this->feasible(sd.first,fn,c);
-        if(definitely(first.first)) {
-            return first;
-        }
-
-        auto second=this->feasible(sd.second,fn,c);
-        if(definitely(second.first)) {
-            return second;
-        }
-
-        return make_pair(first.first || second.first,ExactPointType());
+    if(not possibly(candidate_result.first)) {
+        return make_pair(false,ExactPointType());
     }
 
     return make_pair(indeterminate,ExactPointType());
 }
-
 
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {

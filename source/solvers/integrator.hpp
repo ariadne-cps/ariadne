@@ -47,6 +47,7 @@
 #include "algebra/matrix.hpp"
 
 #include "function/function_patch.hpp"
+#include "function/taylor_function.hpp"
 
 using namespace ConcLog;
 
@@ -64,8 +65,6 @@ typedef FunctionPatchFactoryInterface<ValidatedTag> ValidatedFunctionPatchFactor
 typedef SharedPointer<const ValidatedFunctionPatchFactoryInterface> ValidatedFunctionPatchFactoryPointer;
 typedef SharedPointer<const ValidatedFunctionPatchFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
-
-FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
 
 struct StepMaximumError : Attribute<ApproximateDouble> {
     StepMaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }

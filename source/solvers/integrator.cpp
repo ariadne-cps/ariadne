@@ -2331,21 +2331,19 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             }
         }
 
-        auto const dense_physical_error=
-            physical_local_flow.error();
-        if(have_gronwall_flow) {
-            physical_local_flow=gronwall_physical_local_flow;
-        }
-
         Bool const gronwall_acceptable=
             have_gronwall_flow
             && definitely(gronwall_physical_local_flow.error()
                           <=this->step_maximum_error());
-        Bool const dense_acceptable=
-            !have_gronwall_flow
-            && definitely(dense_physical_error<=this->step_maximum_error());
+        Bool dense_acceptable=false;
+        if(!have_gronwall_flow) {
+            dense_acceptable=
+                definitely(physical_local_flow.error()
+                          <=this->step_maximum_error());
+        }
 
         if(this->diagnostics() && have_gronwall_flow) {
+            auto const dense_physical_error=physical_local_flow.error();
             std::cerr << "[GronwallAcceptanceComparison]"
                       << " h=" << h
                       << " gronwall_physical_error="
@@ -2355,6 +2353,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << " gronwall_acceptable=" << gronwall_acceptable
                       << " dense_acceptable=" << dense_acceptable
                       << std::endl;
+        }
+
+        if(have_gronwall_flow) {
+            physical_local_flow=gronwall_physical_local_flow;
         }
 
         if(gronwall_acceptable) {

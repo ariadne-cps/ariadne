@@ -519,6 +519,22 @@ The following approaches were tried or considered and deliberately rejected:
 The Git history contains the experimental details; this document records the
 resulting design decisions.
 
+## ConstraintSolver coverage prerequisite
+
+Before moving generic ICP mechanics out of `SmtSolver`, the existing
+`ConstraintSolver` is being audited and brought under the same coverage
+discipline. The first audit identified file-local dead helpers and a permanently
+disabled shaving block in the deprecated list-based `reduce` overload; these
+are removed rather than covered artificially. Existing public numerical
+operations are exercised directly before any SMT refactoring so that later
+behavior changes can be attributed to the refactoring rather than to pre-existing
+coverage gaps.
+
+The architectural rule remains that this audit must not force SMT policy into
+`ConstraintSolver`: generic contraction, feasibility and splitting mechanics
+belong there, while epsilon weakening, epsilon-active literal selection and
+SMT result semantics remain in `SmtSolver`.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

@@ -5289,3 +5289,42 @@ This rejects collision-vector allocation and push-back as the primary target: th
 The run wall time is 21.8941 s and remains diagnostic. The production reference remains the 21.6201 s three-run median.
 
 Next experiment: build a numeric A/B around the batched dense roundoff reconstruction. Keep the nearest-pass coefficient expansion unchanged, then compare the resulting TaylorModel expansion and error against the current two-pass implementation. If exact error equality cannot be preserved, quantify enclosure widening before considering production use. Do not optimise nearest-pass memory structures first: their measured ceiling is smaller than the upward pass.
+
+
+### 9.146 A/B residual-based one-pass roundoff candidate (2026-09-26)
+
+The 9.145 split shows that the second upward traversal accounts for about 70% of the
+dense pair-loop time.  A diagnostic A/B is added for the first 10000 dense FloatDP
+products without changing the authoritative result.
+
+During the unchanged nearest pass, the candidate records a per-pair residual bound:
+- for a new slot, the product residual is obtained with `std::fma(x,y,-p)`, where
+  `p` is the already-computed rounded-nearest product;
+- for a collision, the same product residual is combined with a TwoSum-style residual
+  of the already-computed rounded addition.
+
+The candidate therefore leaves every centre coefficient exactly on the existing path and
+only estimates the scalar roundoff error that could replace the expensive replay pass.
+The current upward pass is still executed and remains authoritative.
+
+Marker:
+
+```
+[DenseRoundoffResidualAB]
+calls=10000
+candidate_ge_reference_calls=...
+candidate_error_sum=...
+reference_error_sum=...
+candidate_over_reference=...
+max_ratio=...
+```
+
+This is a feasibility experiment, not yet a proof-safe replacement.  In particular the
+diagnostic accumulates residual bounds in long double before one upward nudge to double;
+if the candidate magnitude is promising, the next step is to implement the same idea
+with a rigorously directed accumulator and then benchmark it as an optional production
+path.
+
+The decisive question is whether the residual candidate stays close to the current
+reference error while avoiding the second multiplication traversal.  Numerical output is
+not changed by this experiment.

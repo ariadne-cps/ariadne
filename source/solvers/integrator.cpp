@@ -1777,6 +1777,16 @@ Void GradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
        << " )";
 }
 
+PreconditionedGradedTaylorSeriesIntegrator::PreconditionedGradedTaylorSeriesIntegrator(
+        StepMaximumError err)
+    : GradedTaylorSeriesIntegrator(
+          err,
+          ThresholdSweeper<FloatDP>(DP(),err.value()*SWEEP_THRESHOLD_RATIO),
+          DEFAULT_LIPSCHITZ_TOLERANCE,
+          MinimumSpacialOrder(5),MinimumTemporalOrder(5),
+          MaximumSpacialOrder(5),MaximumTemporalOrder(5))
+{ }
+
 Void PreconditionedGradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
     os << "PreconditionedGradedTaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
@@ -2027,9 +2037,16 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
     while(true) {
         have_gronwall_flow=false;
         domt=ExactIntervalType(0,h);
-        if(this->diagnostics()) {
-            // Baseline only: the production path below uses the centre
-            // polynomial plus separately certified remainder.
+        Bool const use_gronwall_path=
+            this->preconditioning()==TaylorSeriesPreconditioning::QR
+            && this->minimum_spacial_order()==this->maximum_spacial_order()
+            && this->minimum_temporal_order()==this->maximum_temporal_order();
+
+        if(this->diagnostics() || !use_gronwall_path) {
+            // Diagnostics compare against the ordinary graded flow.  The same
+            // validated path is also the production fallback for explicit
+            // adaptive-order configurations, for which the specialised
+            // fixed-order QR/Gronwall construction is not applicable.
             local_flow=Ariadne::graded_series_flow_step(
                 p,domy,domt,doma,local_bounding_box,
                 this->step_maximum_error(),this->sweeper(),
@@ -2037,9 +2054,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 this->maximum_spacial_order(),this->maximum_temporal_order());
         }
 
-        if(this->preconditioning()==TaylorSeriesPreconditioning::QR
-            && this->minimum_spacial_order()==this->maximum_spacial_order()
-            && this->minimum_temporal_order()==this->maximum_temporal_order()) {
+        if(use_gronwall_path) {
             CentrePolynomialRecurrenceResult centre_result=
                 graded_series_centre_polynomial_step(
                     p,domy,domt,this->sweeper(),
@@ -2279,7 +2294,7 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << std::endl;
         }
 
-        if(this->diagnostics()) {
+        if(this->diagnostics() || !have_gronwall_flow) {
             physical_local_flow=
                 factory.create_zeros(n,local_flow.domain());
             for(SizeType i=0u; i!=n; ++i) {
@@ -2291,21 +2306,22 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 }
             }
 
-            std::cerr << "[PreconditionedSecondStepCandidate]"
-                      << " mode="
-                      << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
-                      << " h=" << h
-                      << " local_errors=" << local_flow.errors()
-                      << " local_error=" << local_flow.error()
-                      << " physical_errors=" << physical_local_flow.errors()
-                      << " physical_error=" << physical_local_flow.error()
-                      << " local_flow_range=" << local_flow.range()
-                      << std::endl;
+            if(this->diagnostics()) {
+                std::cerr << "[PreconditionedSecondStepCandidate]"
+                          << " mode="
+                          << (this->preconditioning()==TaylorSeriesPreconditioning::QR ? "QR" : "IDENTITY")
+                          << " h=" << h
+                          << " local_errors=" << local_flow.errors()
+                          << " local_error=" << local_flow.error()
+                          << " physical_errors=" << physical_local_flow.errors()
+                          << " physical_error=" << physical_local_flow.error()
+                          << " local_flow_range=" << local_flow.range()
+                          << std::endl;
+            }
         }
 
-        auto dense_physical_error =
-            this->diagnostics() ? physical_local_flow.error()
-                                : gronwall_physical_local_flow.error();
+        auto const dense_physical_error=
+            physical_local_flow.error();
         if(have_gronwall_flow) {
             physical_local_flow=gronwall_physical_local_flow;
         }
@@ -2314,11 +2330,9 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             have_gronwall_flow
             && definitely(gronwall_physical_local_flow.error()
                           <=this->step_maximum_error());
-        Bool dense_acceptable=false;
-        if(this->diagnostics()) {
-            dense_acceptable=
-                definitely(dense_physical_error<=this->step_maximum_error());
-        }
+        Bool const dense_acceptable=
+            !have_gronwall_flow
+            && definitely(dense_physical_error<=this->step_maximum_error());
 
         if(this->diagnostics() && have_gronwall_flow) {
             std::cerr << "[GronwallAcceptanceComparison]"
@@ -2336,19 +2350,11 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
             break;
         }
 
-        // If the certification guard could not build a Gronwall candidate,
-        // retain the old validated path as a safety fallback for now.
-        if(!have_gronwall_flow && this->diagnostics() && dense_acceptable) {
-            physical_local_flow=
-                factory.create_zeros(n,local_flow.domain());
-            for(SizeType i=0u; i!=n; ++i) {
-                physical_local_flow[i]=
-                    factory.create_constant(local_flow.domain(),centre[i]);
-                for(SizeType j=0u; j!=n; ++j) {
-                    physical_local_flow[i]=physical_local_flow[i]
-                        + local_flow[j]*FloatDPBounds(A[i][j]);
-                }
-            }
+        // If the specialised certification path is unavailable, retain
+        // the ordinary validated graded-series result as the production
+        // fallback.  This also keeps explicitly requested adaptive-order
+        // configurations safe.
+        if(dense_acceptable) {
             break;
         }
 

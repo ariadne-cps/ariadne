@@ -522,6 +522,9 @@ class PreconditionedGradedTaylorSeriesIntegrator
     Bool _diagnostics=false;
     Bool _carried_expansion_diagnostics=false;
   public:
+    //! \brief Construct with QR-compatible fixed default orders.
+    PreconditionedGradedTaylorSeriesIntegrator(StepMaximumError err);
+
     using GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator;
     using GradedTaylorSeriesIntegrator::flow_step;
 

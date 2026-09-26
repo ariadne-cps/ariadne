@@ -2876,6 +2876,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
         total.prepare_seconds+=after.prepare_seconds-before.prepare_seconds;
         total.prerank_seconds+=after.prerank_seconds-before.prerank_seconds;
         total.pair_loop_seconds+=after.pair_loop_seconds-before.pair_loop_seconds;
+        total.nearest_pass_seconds+=
+            after.nearest_pass_seconds-before.nearest_pass_seconds;
+        total.upward_pass_seconds+=
+            after.upward_pass_seconds-before.upward_pass_seconds;
         total.emit_sweep_seconds+=after.emit_sweep_seconds-before.emit_sweep_seconds;
     };
     accumulate_dense_delta(
@@ -2921,6 +2925,10 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                       << " " << name << "_prepare_seconds=" << p.prepare_seconds
                       << " " << name << "_prerank_seconds=" << p.prerank_seconds
                       << " " << name << "_pair_loop_seconds=" << p.pair_loop_seconds
+                      << " " << name << "_nearest_pass_seconds="
+                      << p.nearest_pass_seconds
+                      << " " << name << "_upward_pass_seconds="
+                      << p.upward_pass_seconds
                       << " " << name << "_emit_sweep_seconds=" << p.emit_sweep_seconds;
         };
         std::cerr << "[CarriedDenseHotLoopProfile]"

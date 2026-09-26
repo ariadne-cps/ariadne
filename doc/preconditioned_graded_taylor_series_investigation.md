@@ -5228,3 +5228,44 @@ pass separately from the upward roundoff pass and from collision-prior bookkeepi
 This will show whether the remaining opportunity is arithmetic (two-pass validated
 roundoff) or memory traffic from collision_flags/collision_priors. Preserve exact
 arithmetic/order in this diagnostic.
+
+
+### 9.144 Split the dense batched pair loop into nearest and upward passes (2026-09-26)
+
+The 9.143 profile localises about 5.0 s of carried-composition work in the dense pair
+loop, with collision rates above 80%. The active batched-rounding path is therefore split
+without changing arithmetic into two timed subpasses:
+
+```
+nearest_pass:
+    centre-coefficient product/accumulation
+    collision flag creation
+    collision-prior capture
+upward_pass:
+    validated roundoff/error reconstruction using the stored flags/priors
+```
+
+The existing dense hot-loop profile gains:
+
+```
+nearest_pass_seconds
+upward_pass_seconds
+```
+
+and the carried call-site marker reports these separately for flowpipe, endpoint, and
+state composition.
+
+The difference
+
+```
+pair_loop_seconds - nearest_pass_seconds - upward_pass_seconds
+```
+
+captures the small inter-pass bookkeeping/timer gap; collision-vector allocation and
+push-back remain inside the nearest pass, so if nearest dominates the next experiment
+can split arithmetic from flag/prior memory traffic. If upward dominates, the main cost
+is the validated second pass itself.
+
+No numerical operation, product ordering, rounding policy, or enclosure semantics are
+changed. This is a diagnostic-only run; the production reference remains the 21.6201 s
+three-run median.

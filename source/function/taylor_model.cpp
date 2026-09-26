@@ -157,6 +157,8 @@ Void record_taylor_model_dense_hot_loop_profile(
     double prepare_seconds,
     double prerank_seconds,
     double pair_loop_seconds,
+    double nearest_pass_seconds,
+    double upward_pass_seconds,
     double emit_sweep_seconds)
 {
     ++g_taylor_model_dense_hot_loop_profile.calls;
@@ -166,6 +168,8 @@ Void record_taylor_model_dense_hot_loop_profile(
     g_taylor_model_dense_hot_loop_profile.prepare_seconds+=prepare_seconds;
     g_taylor_model_dense_hot_loop_profile.prerank_seconds+=prerank_seconds;
     g_taylor_model_dense_hot_loop_profile.pair_loop_seconds+=pair_loop_seconds;
+    g_taylor_model_dense_hot_loop_profile.nearest_pass_seconds+=nearest_pass_seconds;
+    g_taylor_model_dense_hot_loop_profile.upward_pass_seconds+=upward_pass_seconds;
     g_taylor_model_dense_hot_loop_profile.emit_sweep_seconds+=emit_sweep_seconds;
 }
 

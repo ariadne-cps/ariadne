@@ -1212,6 +1212,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             const auto dense_pair_start=dense_prerank_end;
             unsigned long long dense_new_slots=0u;
             unsigned long long dense_collision_slots=0u;
+            double dense_nearest_seconds=0.0;
+            double dense_upward_seconds=0.0;
 
             if constexpr (ARawFloat<CoefficientType>) {
                 if(taylor_model_dense_batched_rounding_enabled()) {
@@ -1226,6 +1228,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 collision_flags.reserve(product_pairs);
                 collision_priors.reserve(product_pairs);
 
+                const auto dense_nearest_start=std::chrono::steady_clock::now();
                 CoefficientType::set_rounding_to_nearest();
                 SizeType xi=0u;
                 for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
@@ -1251,12 +1254,14 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                     }
                 }
 
+                const auto dense_nearest_end=std::chrono::steady_clock::now();
                 dense_collision_slots=
                     static_cast<unsigned long long>(collision_priors.size());
                 dense_new_slots=
                     static_cast<unsigned long long>(product_pairs)
                     -dense_collision_slots;
 
+                const auto dense_upward_start=std::chrono::steady_clock::now();
                 CoefficientType::set_rounding_upward();
                 SizeType pair_index=0u;
                 SizeType collision_index=0u;
@@ -1290,6 +1295,13 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                         }
                     }
                 }
+                const auto dense_upward_end=std::chrono::steady_clock::now();
+                dense_nearest_seconds=
+                    std::chrono::duration<double>(
+                        dense_nearest_end-dense_nearest_start).count();
+                dense_upward_seconds=
+                    std::chrono::duration<double>(
+                        dense_upward_end-dense_upward_start).count();
                 } else {
                     SizeType xi=0u;
                     for(auto xiter=x.begin(); xiter!=x.end(); ++xiter,++xi) {
@@ -1379,6 +1391,8 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
                 dense_seconds(dense_prepare_start,dense_prepare_end),
                 dense_seconds(dense_prerank_start,dense_prerank_end),
                 dense_seconds(dense_pair_start,dense_pair_end),
+                dense_nearest_seconds,
+                dense_upward_seconds,
                 dense_seconds(dense_emit_start,dense_emit_end));
         } else {
             TaylorModel<P,F> accumulated(as,r.sweeper());

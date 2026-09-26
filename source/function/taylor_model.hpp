@@ -129,6 +129,8 @@ struct TaylorModelDenseHotLoopProfile {
     double prepare_seconds=0.0;
     double prerank_seconds=0.0;
     double pair_loop_seconds=0.0;
+    double nearest_pass_seconds=0.0;
+    double upward_pass_seconds=0.0;
     double emit_sweep_seconds=0.0;
 };
 
@@ -141,6 +143,8 @@ Void record_taylor_model_dense_hot_loop_profile(
     double prepare_seconds,
     double prerank_seconds,
     double pair_loop_seconds,
+    double nearest_pass_seconds,
+    double upward_pass_seconds,
     double emit_sweep_seconds);
 Void record_taylor_model_dense_workspace_prepare(
     Bool slot_resize,

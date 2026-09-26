@@ -612,7 +612,7 @@ class TestConstraintSolver
             ARIADNE_TEST_ASSERT(
                 possibly(intersect(direct_image[0],codomain[0])));
             auto feasibility_result=contractor.feasible(domain,function,codomain);
-            ARIADNE_TEST_ASSERT(not possibly(feasibility_result.first));
+            ARIADNE_TEST_ASSERT(not definitely(feasibility_result.first));
         }
 
         {

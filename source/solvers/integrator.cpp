@@ -2175,7 +2175,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                 // Obsolete defect-decomposition diagnostics removed: the
                 // restriction-order audit has already localised the loss of
                 // cancellation to separate restriction of the two operands.
-                    production_range_seconds+=range_stopwatch.elapsed_seconds();
 
                 // Use the monotone, fully upper-rounded estimate
                 //
@@ -2221,8 +2220,6 @@ PreconditionedGradedTaylorSeriesIntegrator::step(
                     }
                 }
 
-                    production_physical_reconstruction_seconds+=
-                    physical_reconstruction_stopwatch.elapsed_seconds();
 
                 gronwall_physical_local_flow=physical_gronwall_polynomial;
                 have_gronwall_flow=true;

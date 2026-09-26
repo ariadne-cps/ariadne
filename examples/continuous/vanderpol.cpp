@@ -46,93 +46,30 @@ void ariadne_main()
     const ExactDouble loose_tolerance=1e-2_x;
     const ExactDouble plateau_step=0.0025_x;
 
-    auto report_orbit =
-        [&](String const& method, Stopwatch<Milliseconds> const& stopwatch,
-            auto const& orbit) {
-            ARIADNE_ASSERT(!orbit.final().empty());
-            auto achieved_error=
-                orbit.final()[0u].state_function().get(0u).error();
-            auto final_radius=orbit.final()[0u].radius();
-            for(auto const& enclosure : orbit.final()) {
-                final_radius=max(final_radius,enclosure.radius());
-                for(SizeType i=0u;
-                    i!=enclosure.state_function().result_size(); ++i) {
-                    achieved_error=max(
-                        achieved_error,
-                        enclosure.state_function().get(i).error());
-                }
-            }
-            std::cerr << "[IntegratorArchitectureBenchmark]"
-                      << " method=" << method
-                      << " elapsed_seconds=" << stopwatch.elapsed_seconds()
-                      << " achieved_final_error=" << achieved_error
-                      << " final_radius=" << final_radius
-                      << " reach_sets=" << orbit.reach().size()
-                      << std::endl;
-        };
+    ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
+    PreconditionedGradedTaylorSeriesIntegrator integrator(
+        StepMaximumError(loose_tolerance),probe_sweeper,
+        lipschitz_tolerance=0.5_x,
+        minimum_spacial_order=5,minimum_temporal_order=5,
+        maximum_spacial_order=5,maximum_temporal_order=5);
+    integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
+    integrator.set_diagnostics(false);
+    integrator.set_carried_expansion_diagnostics(false);
 
-    auto configure_taylor_kernel =
-        [&](Bool dense) {
-            set_taylor_model_product_profile_enabled(false);
-            set_taylor_model_early_discard_enabled(false);
-            set_taylor_model_incremental_sweep_enabled(!dense);
-            set_taylor_model_product_accumulator_enabled(dense);
-            set_taylor_model_dense_accumulator_enabled(dense);
-        };
+    VectorFieldEvolver evolver(dynamics,integrator);
+    configure_evolver(evolver,plateau_step);
 
-    auto reset_taylor_kernel = [&]() {
-        set_taylor_model_dense_accumulator_enabled(false);
-        set_taylor_model_product_accumulator_enabled(false);
-        set_taylor_model_incremental_sweep_enabled(true);
-    };
+    set_taylor_model_product_profile_enabled(false);
+    set_taylor_model_early_discard_enabled(false);
+    set_taylor_model_incremental_sweep_enabled(false);
+    set_taylor_model_product_accumulator_enabled(true);
+    set_taylor_model_dense_accumulator_enabled(true);
 
-    const Real benchmark_time=Real(7.00_dec);
-    const SizeType benchmark_repetitions=3u;
+    auto orbit=evolver.orbit(
+        initial_set,Real(7.00_dec),Semantics::UPPER);
 
-    auto run_graded = [&](String const& method, Bool dense) {
-        ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
-        GradedTaylorSeriesIntegrator integrator(
-            StepMaximumError(loose_tolerance),probe_sweeper,
-            lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=5,minimum_temporal_order=5,
-            maximum_spacial_order=5,maximum_temporal_order=5);
-        VectorFieldEvolver evolver(dynamics,integrator);
-        configure_evolver(evolver,plateau_step);
-        for(SizeType run=1u; run<=benchmark_repetitions; ++run) {
-            configure_taylor_kernel(dense);
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(initial_set,benchmark_time,Semantics::UPPER);
-            stopwatch.click();
-            reset_taylor_kernel();
-            report_orbit(method+"_"+to_string(run),stopwatch,orbit);
-        }
-    };
-
-    auto run_preconditioned = [&]() {
-        ThresholdSweeper<FloatDP> probe_sweeper(DoublePrecision(),3e-14);
-        PreconditionedGradedTaylorSeriesIntegrator integrator(
-            StepMaximumError(loose_tolerance),probe_sweeper,
-            lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=5,minimum_temporal_order=5,
-            maximum_spacial_order=5,maximum_temporal_order=5);
-        integrator.set_preconditioning(TaylorSeriesPreconditioning::QR);
-        integrator.set_diagnostics(false);
-        integrator.set_carried_expansion_diagnostics(false);
-        VectorFieldEvolver evolver(dynamics,integrator);
-        configure_evolver(evolver,plateau_step);
-        for(SizeType run=1u; run<=benchmark_repetitions; ++run) {
-            configure_taylor_kernel(true);
-            Stopwatch<Milliseconds> stopwatch;
-            auto orbit=evolver.orbit(initial_set,benchmark_time,Semantics::UPPER);
-            stopwatch.click();
-            reset_taylor_kernel();
-            report_orbit("preconditioned_optimized_"+to_string(run),stopwatch,orbit);
-        }
-    };
-
-    run_graded("graded_sparse_current",false);
-    run_graded("graded_optimized",true);
-    run_preconditioned();
-
+    set_taylor_model_dense_accumulator_enabled(false);
+    set_taylor_model_product_accumulator_enabled(false);
+    set_taylor_model_incremental_sweep_enabled(true);
 
 }

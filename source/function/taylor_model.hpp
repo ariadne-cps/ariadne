@@ -120,6 +120,14 @@ struct TaylorModelDenseWorkspaceStats {
 
 Void reset_taylor_model_dense_workspace_stats();
 TaylorModelDenseWorkspaceStats taylor_model_dense_workspace_stats();
+Void record_taylor_model_dense_workspace_touched(
+    unsigned long long touched_count);
+
+Void record_taylor_model_dense_workspace_prepare(
+    Bool slot_resize,
+    Bool capacity_grow,
+    unsigned long long slot_count);
+
 
 struct TaylorModelAccumulatorProfile {
     unsigned long long calls=0u;

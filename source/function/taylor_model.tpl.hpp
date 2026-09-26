@@ -1332,6 +1332,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
         re+=xe*ye;
         re+=xs*ye+ys*xe;
         return;
+}
 
 template<class P, class F> inline TaylorModel<P,F> _fma(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y, TaylorModel<P,F> z) {
     ARIADNE_PRECONDITION(x.argument_size()==y.argument_size());

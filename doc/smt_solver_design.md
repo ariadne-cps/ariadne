@@ -552,6 +552,14 @@ outer `NearBoundaryOfFeasibleDomainException` catch was likewise removed
 because `feasible_candidate` converts that condition to `indeterminate`
 internally; only numerical failures that can actually propagate, such as a
 singular Newton system, remain translated to `indeterminate` here.
+The direct attempts to force the two endpoint-clamp branches in
+`monotone_reduce` produced invalid numerical states before those branches
+could be reached: the validated arithmetic rejected a negative value where a
+positive upper bound is required. Those probes are therefore removed rather
+than turning an invalid state into a coverage test. The two clamp branches stay
+classified as candidate defensive/dead code until a valid reachable
+construction or an invariant proof settles them.
+
 This removes the obsolete embedded optimiser algorithm rather than attempting to
 cover it artificially. The separate legacy uses in `paver.cpp` are outside this
 refactoring and require their own audit.

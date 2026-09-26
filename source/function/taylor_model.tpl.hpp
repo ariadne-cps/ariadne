@@ -1116,10 +1116,64 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             maximum_degree=std::max(maximum_degree,x_degree+y_degree);
 
             const SizeType base=static_cast<SizeType>(maximum_degree+1u);
+
+            // The mixed-radix workspace is excellent for low-dimensional
+            // Taylor models, but grows as base^argument_size.  Differential
+            // inclusions can carry many parameters, so select the dense
+            // representation only while its index space remains compact.
+            constexpr SizeType maximum_dense_slots=1u<<20;
             SizeType slot_count=1u;
+            Bool use_dense=true;
             for(SizeType j=0u; j!=as; ++j) {
+                if(base!=0u
+                   && slot_count>maximum_dense_slots/base) {
+                    use_dense=false;
+                    break;
+                }
                 slot_count*=base;
             }
+            if(slot_count>maximum_dense_slots) {
+                use_dense=false;
+            }
+
+            if(!use_dense) {
+                // Sparse full-product fallback: preserve the production
+                // semantics (complete aggregation followed by one final
+                // sweep) without allocating the exponential dense rank map.
+                TaylorModel<P,F> accumulated(as,r.sweeper());
+                const SizeType product_terms=
+                    x.number_of_terms()*y.number_of_terms();
+                accumulated.expansion().reserve(
+                    r.number_of_terms()+product_terms);
+
+                for(auto riter=r.begin(); riter!=r.end(); ++riter) {
+                    accumulated._append(
+                        riter->index(),riter->coefficient());
+                }
+
+                MultiIndex product_index(as);
+                for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
+                    UniformConstReference<MultiIndex> xa=xiter->index();
+                    UniformConstReference<CoefficientType> xv=
+                        xiter->coefficient();
+                    for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
+                        UniformConstReference<MultiIndex> ya=yiter->index();
+                        UniformConstReference<CoefficientType> yv=
+                            yiter->coefficient();
+                        product_index=xa+ya;
+                        accumulated._append(
+                            product_index,
+                            mul_err(xv,yv,product_roundoff));
+                    }
+                }
+
+                accumulated.error()=r.error()+product_roundoff;
+                accumulated.sort();
+                accumulated.unique();
+                accumulated.sweep();
+                r.expansion().swap(accumulated.expansion());
+                r.error()=accumulated.error();
+            } else {
 
             const SizeType unused=std::numeric_limits<SizeType>::max();
             const SizeType expected_occupied=
@@ -1291,6 +1345,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             r.expansion().swap(accumulated.expansion());
             r.error()=accumulated.error();
             workspace.reset_used_slots();
+            }
 
         ErrorType xs=nul(r.error());
         for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {

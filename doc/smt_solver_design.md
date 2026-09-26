@@ -578,6 +578,23 @@ post-`box_reduce` empty-domain check in `reduce(vector)` was also removed,
 because every mutation in the preceding loop is already followed immediately by
 the same empty-domain return.
 
+### ConstraintSolver branch-coverage audit
+
+The post-cleanup LLVM report for `constraint_solver.cpp` has 100% function
+coverage and 100% line coverage. Its raw branch summary is 110/140 (78.57%),
+but the HTML source view contains 40 explicit source branch sites and every one
+has both outcomes exercised. The remaining 30 branch sites are not attached to
+an explicit branch annotation in the source view; they originate from expanded
+validated/macro/inlined machinery rather than uncovered `if`, loop or
+conditional behavior in `constraint_solver.cpp`. They are therefore not to be
+chased with artificial inputs. Any future explicit source branch introduced in
+this component must still be covered in both directions.
+
+The only uncovered function attributed to `constraint_solver.hpp` is the
+defaulted virtual destructor. A direct lifetime test through
+`ConstraintSolverInterface*` is added so that the interface destruction path
+is exercised explicitly rather than being left as a coverage artefact.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

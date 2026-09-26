@@ -5083,3 +5083,36 @@ construction/unscale instead.
 
 The run is diagnostic because Taylor-model product profiling is enabled to collect these
 counters. The production median reference remains 21.6201 s.
+
+
+### 9.140 Product-pair counter does not instrument the active dense compose path (2026-09-25)
+
+The carried composition product-counter experiment reports zero pairs at every checkpoint,
+including step 2000:
+
+```
+flowpipe_product_pairs = 0
+endpoint_product_pairs = 0
+state_product_pairs    = 0
+```
+
+This does not mean composition performs no polynomial products. The same run reports
+985603 dense-workspace calls while all three composition call sites have substantial
+measured cost. Therefore the generic Taylor-model product-pair counter does not cover the
+active dense-accumulator path used here, so the 9.139 attribution attempt is inconclusive.
+
+The run itself completes all 2000 reach sets with unchanged numerical output in 21.4041 s.
+The carried composition totals are:
+
+```
+flowpipe_compose  4.59191 s
+endpoint_compose  1.94090 s
+state_compose     1.90202 s
+```
+
+The production median reference remains 21.6201 s because this is a single diagnostic run.
+
+Next step: use the dense hot-loop/workspace profiling already present in the Taylor-model
+implementation, and attribute its pair-loop / emit-sweep / preparation costs separately
+to flowpipe, endpoint, and state composition. Do not implement a specialised composer
+until that attribution is known.

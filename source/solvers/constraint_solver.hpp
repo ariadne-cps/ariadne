@@ -59,6 +59,14 @@ template<class X> struct FeasibilityState {
     Vector<X> z;
 };
 
+//! \brief Statistics for generic validated constraint propagation.
+struct ConstraintPropagationStatistics {
+    SizeType hull_rounds = 0u;
+    SizeType hull_effective = 0u;
+    SizeType shaving_rounds = 0u;
+    SizeType shaving_effective = 0u;
+};
+
 
 //! \ingroup OptimisationSubModule
 //! \brief A class for finding solutions of systems of constraints of the form \f$g(y) \leq c\f$.
@@ -100,6 +108,14 @@ class ConstraintSolver
     virtual Pair<ValidatedKleenean,ExactPointType> feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
     virtual Bool reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const;
+
+    //! \brief Repeatedly apply hull propagation and shaving until a fixed point.
+    //! \details Returns true iff the domain is proved empty. Statistics record
+    //! rounds and rounds that changed the domain.
+    Bool propagate(
+        UpperBoxType& domain,
+        const List<ValidatedConstraint>& constraints,
+        ConstraintPropagationStatistics& statistics) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.

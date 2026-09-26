@@ -598,6 +598,24 @@ was therefore invalid and correctly triggered
 destructor, the derived destructor is marked `override`, and the direct
 lifetime test is retained as a regression test for polymorphic destruction.
 
+### First SMT-to-ConstraintSolver extraction
+
+The first behavior-preserving extraction moves the generic hull/shaving fixed
+point used by the validated-constraint SMT path into
+`ConstraintSolver::propagate`. The new method takes the existing
+`List<ValidatedConstraint>` and works directly on the caller's
+`UpperBoxType`; no function/codomain reconstruction or additional dynamic
+dispatch is introduced. It preserves the exact ordering used by the SMT solver:
+hull propagation plus direct validated range rejection, followed on hull stall
+by per-constraint/per-coordinate shaving, repeating until a fixed point or an
+empty box.
+
+`ConstraintPropagationStatistics` records hull/shaving rounds and effective
+rounds so that `SmtSolver` can preserve its observable search statistics
+without owning the numerical propagation loop. The theory-literal path is not
+moved in this tranche because strict `GT_ZERO` rejection and derivative-cache
+use are SMT-specific concerns that still need a clean generic boundary.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

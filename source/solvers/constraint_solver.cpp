@@ -151,6 +151,61 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
     return false;
 }
 
+Bool ConstraintSolver::propagate(
+    UpperBoxType& domain,
+    const List<ValidatedConstraint>& constraints,
+    ConstraintPropagationStatistics& statistics) const
+{
+    for(;;) {
+        UpperBoxType previous=domain;
+        ++statistics.hull_rounds;
+        for(SizeType i=0u; i!=constraints.size(); ++i) {
+            ExactIntervalType const& bounds=constraints[i].bounds();
+            if(this->hull_reduce(domain,constraints[i].function(),bounds)) {
+                return true;
+            }
+            UpperIntervalType image=apply(constraints[i].function(),domain);
+            if(definitely(disjoint(image,bounds))) {
+                return true;
+            }
+        }
+        if(not same(domain,previous)) {
+            ++statistics.hull_effective;
+        }
+
+        if(same(domain,previous)) {
+            UpperBoxType before_shaving=domain;
+            ++statistics.shaving_rounds;
+            for(SizeType i=0u; i!=constraints.size(); ++i) {
+                for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                    if(this->box_reduce(
+                            domain,
+                            constraints[i].function(),
+                            constraints[i].bounds(),
+                            variable)) {
+                        return true;
+                    }
+                }
+            }
+            if(not same(domain,before_shaving)) {
+                ++statistics.shaving_effective;
+            }
+            if(same(domain,before_shaving)) {
+                return false;
+            }
+            continue;
+        }
+
+        for(SizeType i=0u; i!=constraints.size(); ++i) {
+            UpperIntervalType image=apply(constraints[i].function(),domain);
+            if(definitely(disjoint(image,constraints[i].bounds()))) {
+                return true;
+            }
+        }
+    }
+}
+
+
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     const double MINIMUM_REDUCTION = 0.75;

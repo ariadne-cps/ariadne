@@ -40,6 +40,7 @@
 #include "function/function_mixin.hpp"
 #include "function/function_model.hpp"
 #include "function/scaled_function_patch.hpp"
+#include "function/taylor_function.decl.hpp"
 
 namespace Ariadne {
 
@@ -94,8 +95,6 @@ class TaylorFunctionFactory
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
-FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory();
-FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
 
 } // namespace Ariadne
 

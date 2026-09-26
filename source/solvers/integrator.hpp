@@ -47,7 +47,7 @@
 #include "algebra/matrix.hpp"
 
 #include "function/function_patch.hpp"
-#include "function/taylor_function.hpp"
+#include "function/taylor_function.decl.hpp"
 
 using namespace ConcLog;
 

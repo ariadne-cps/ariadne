@@ -139,13 +139,9 @@ else()
 endif()
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
 include(CoverageSupport)
-
-if(COVERAGE AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-    include(LLVMCodeCoverage)
-    append_llvm_coverage_compiler_flags()
-endif()
+enable_project_coverage()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
     execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
@@ -282,13 +278,6 @@ if(APPLE)
 endif()
 
 if(COVERAGE)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        # Keep GCC instrumentation at the same point as before. Moving these
-        # flags before the add_subdirectory() calls instruments tests, Python
-        # bindings and submodules as well, changing the gcov dataset.
-        append_gcc_coverage_compiler_flags()
-    endif()
-
     setup_project_coverage(
         TARGET ariadne
         TEST_TARGET tests

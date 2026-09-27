@@ -1051,6 +1051,21 @@ or `lie`, so higher-box-budget experiments can focus on the dominant Lie query
 without repeatedly paying for the three unsafe-set components. The default
 remains `all`.
 
+At 256 boxes, the Lie-only cheap baseline processes 256 boxes, prunes 119 and
+splits 137, so the pruning fraction rises to about 46.5 percent from about 34.4
+percent at 64 boxes. Elapsed time is 67.241 s: 3.364 s one-time theory
+compilation, 43.484 s direct validated rejection, and 20.294 s whole-box epsilon
+checking. No epsilon-certified box has appeared yet. The increasing pruning
+fraction is evidence that geometric subdivision is improving direct interval
+decision power rather than merely postponing the same unresolved work.
+
+The next measurement continues this budget curve on the Lie query before
+introducing adaptive contractors. Explicit search-depth instrumentation is
+deliberately deferred because the parallel workload currently carries boxes
+without depth metadata; adding sequential-only depth statistics would make the
+public statistics inconsistent. The budget/pruning curve already measures the
+relevant search effect without changing search-state representation.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

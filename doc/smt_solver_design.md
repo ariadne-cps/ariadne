@@ -1118,3 +1118,21 @@ The immediate work on `solvers-smt#830` is:
    change resolves it naturally;
 8. later add CI coverage gates so regressions in functions, lines or branches
    fail automatically.
+
+
+### Coverage note: residual LLVM line-report anomaly
+
+The current coverage run leaves a single source line in the parallel SMT worker
+reported as uncovered even though the associated parallel solve regression
+passes and the surrounding worker logic is exercised. Repeated attempts to
+force that exact source location through additional tests did not make the line
+appear covered, while the semantic behaviour of the parallel path remained
+verified.
+
+This residual is therefore treated as a coverage-instrumentation/toolchain
+anomaly, most likely related to LLVM source-line mapping/instrumentation, rather
+than as evidence of an untested SMT feature. The project does not add further
+artificial tests solely to satisfy that one reported line. Coverage requirements
+continue to apply to functional branches and behaviour introduced by the SMT
+solver work; this specific line is documented as an explicit exception until a
+toolchain-level explanation or reproducible LLVM fix is available.

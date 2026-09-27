@@ -12,6 +12,7 @@
 
 #include "utility/stopwatch.hpp"
 #include "function/procedure.hpp"
+#include "function/procedure.tpl.hpp"
 #include "solvers/smt_solver.hpp"
 
 #include "smt_barr3_full64.hpp"
@@ -162,8 +163,8 @@ Void profile_evaluator(
     ValidatedProcedure procedure(function);
     build_stopwatch.click();
 
-    FloatDPBounds procedure_image;
-    Vector<FloatDPBounds> arguments(cast_vector(domain));
+    UpperIntervalType procedure_image;
+    Vector<UpperIntervalType> arguments=cast_vector(domain);
     Stopwatch<Milliseconds> procedure_stopwatch;
     for(SizeType i=0u; i!=repetitions; ++i) {
         procedure_image=evaluate(procedure,arguments);

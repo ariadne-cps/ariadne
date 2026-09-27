@@ -35,7 +35,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
 
 template<ARawFloat F> class Positive<F> : public F {
     using PR = typename F::PrecisionType;

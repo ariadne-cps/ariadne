@@ -44,8 +44,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
-using Utility::BuiltinFloatingPoint;
 
 struct ExactTag;
 enum class Comparison : ComparableEnumerationType;

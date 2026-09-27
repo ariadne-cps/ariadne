@@ -34,8 +34,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinSignedIntegral;
 
 /************  Ints ********************************************************/
 

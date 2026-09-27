@@ -37,8 +37,6 @@
 
 namespace Ariadne {
 
-using Utility::InputStream;
-using Utility::declval;
 
 class Natural;
 class Integer;

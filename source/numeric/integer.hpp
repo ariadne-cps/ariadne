@@ -45,9 +45,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinSignedIntegral;
-using Utility::BuiltinIntegral;
 
 struct ExactTag;
 class Integer;

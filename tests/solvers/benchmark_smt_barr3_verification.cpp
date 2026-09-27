@@ -13,6 +13,8 @@
 #include "utility/stopwatch.hpp"
 #include "function/procedure.hpp"
 #include "function/procedure.tpl.hpp"
+#include "function/formula.tpl.hpp"
+#include "symbolic/expression.hpp"
 #include "solvers/smt_solver.hpp"
 
 #include "smt_barr3_full64.hpp"
@@ -146,6 +148,39 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << std::endl;
 }
 
+Void profile_formula_evaluator(
+    String const& name,
+    RealExpression const& expression,
+    RealSpace const& space,
+    UpperBoxType const& domain,
+    SizeType repetitions)
+{
+    std::cout << "[formula-profile] " << name
+              << " expression-nodes=" << count_nodes(expression)
+              << " distinct-node-pointers="
+              << count_distinct_node_pointers(expression)
+              << std::endl;
+
+    Stopwatch<Milliseconds> build_stopwatch;
+    Formula<EffectiveNumber> formula=make_formula(expression,space);
+    build_stopwatch.click();
+
+    Vector<UpperIntervalType> arguments=cast_vector(domain);
+    UpperIntervalType image;
+    Stopwatch<Milliseconds> evaluate_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        image=evaluate(formula,arguments);
+    }
+    evaluate_stopwatch.click();
+
+    std::cout << "[formula-profile] " << name
+              << " repetitions=" << repetitions
+              << " formula-build=" << build_stopwatch.elapsed_seconds()
+              << " formula-evaluate=" << evaluate_stopwatch.elapsed_seconds()
+              << " image=" << image
+              << std::endl;
+}
+
 Void profile_evaluator(
     String const& name,
     ValidatedScalarMultivariateFunction const& function,
@@ -273,7 +308,12 @@ Int main(Int argc,const char* argv[]) {
         ValidatedScalarMultivariateFunction lie_function=
             make_function(space,network.lie+network.barrier);
         profile_evaluator("barrier",barrier_function,UpperBoxType(domain),8u);
+        profile_formula_evaluator(
+            "barrier",network.barrier,space,UpperBoxType(domain),8u);
         profile_evaluator("lie+barrier",lie_function,UpperBoxType(domain),8u);
+        profile_formula_evaluator(
+            "lie+barrier",network.lie+network.barrier,
+            space,UpperBoxType(domain),8u);
         return 0;
     }
 

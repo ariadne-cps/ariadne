@@ -49,6 +49,8 @@ namespace Ariadne {
 
 using Utility::BuiltinUnsignedIntegral;
 using Utility::BuiltinIntegral;
+using Utility::Writer;
+using Utility::WriterInterface;
 
 class ExactDouble;
 class Dyadic;
@@ -234,9 +236,11 @@ class ScientificWriter : public WriterInterface<Dyadic> {
 class FractionWriter : public WriterInterface<Dyadic> {
     virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
+namespace Utility {
 template<> class RepresentationWriter<Dyadic> : public WriterInterface<Dyadic> {
     virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
+} // namespace Utility
 
 
 template<BuiltinIntegral N> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }

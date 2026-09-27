@@ -774,10 +774,25 @@ Independent evaluation of the promoted checkpoint parameters gives
 workload used for the 8x8 fixture. This keeps the timing comparison controlled:
 only the network width changes.
 
-The next scaling points are `32x32` and the exact published `64x64` model.
-Each size is added to this dedicated benchmark executable only while its measured
-runtime remains suitable for routine execution; larger cases may later move to
-an explicit performance-only target.
+The third scaling fixture is `2-32-32-1`, using the same
+prefix rule. Its concatenated raw float32 tensor bytes have SHA-256
+`641b4799849f0057a11000a90b6c0910acc280dc0bd97777ca3142ff3089fecf`.
+Independent evaluation after exact float32-to-DP promotion gives
+`B(0,0)=1.1903679778286027`; the regression checks the validated enclosure
+`[1.190,1.191]` before running the same one-box Barr3-domain equation.
+For this larger fixture the source float32 bit patterns are stored directly as
+`uint32_t` and converted with C++20 `std::bit_cast<float>`, then promoted to
+DP. This is representation-equivalent to hexadecimal double literals while
+keeping the fixture substantially smaller.
+
+The first two measured Debug+coverage solve times were 0.195 s for `8x8` and
+0.813 s for `16x16`, a factor of about 4.17, closely tracking the fourfold
+growth of the dense second-layer connection count. The `32x32` point is used
+to determine whether that scaling remains approximately quadratic.
+
+The next scaling point is the exact published `64x64` model. It is added to
+this dedicated benchmark executable only if measured runtime and compile cost
+remain suitable; otherwise it becomes a performance-only target.
 
 ## Current open work
 

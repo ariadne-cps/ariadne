@@ -34,6 +34,17 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
     return static_cast<SizeType>(parsed);
 }
 
+String query_from_argument(Int argc,const char* argv[]) {
+    if(argc<=6) { return "all"; }
+    String argument(argv[6]);
+    if(argument=="all" || argument=="lie") { return argument; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
+        "[all|lie]");
+}
+
 Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argc<=5) { return true; }
     String argument(argv[5]);
@@ -156,6 +167,7 @@ Int main(Int argc,const char* argv[]) {
     Bool const witness_probing_enabled=witness_probing_from_argument(argc,argv);
     Bool const shaving_enabled=shaving_from_argument(argc,argv);
     Bool const hull_enabled=hull_from_argument(argc,argv);
+    String const query=query_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -172,6 +184,7 @@ Int main(Int argc,const char* argv[]) {
               << (shaving_enabled ? "enabled" : "disabled")
               << " hull="
               << (hull_enabled ? "enabled" : "disabled")
+              << " query=" << query
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -240,14 +253,16 @@ Int main(Int argc,const char* argv[]) {
     List<SmtTheoryPrimitiveLiteral> lie_literals({
         barrier_nonnegative,lie_violation});
 
-    timed_solve(
-        "unsafe-sphere",solver,space,unsafe_sphere_domain,sphere_literals);
-    timed_solve(
-        "unsafe-rectangle-1",solver,space,
-        unsafe_rectangle_1_domain,barrier_literals);
-    timed_solve(
-        "unsafe-rectangle-2",solver,space,
-        unsafe_rectangle_2_domain,barrier_literals);
+    if(query=="all") {
+        timed_solve(
+            "unsafe-sphere",solver,space,unsafe_sphere_domain,sphere_literals);
+        timed_solve(
+            "unsafe-rectangle-1",solver,space,
+            unsafe_rectangle_1_domain,barrier_literals);
+        timed_solve(
+            "unsafe-rectangle-2",solver,space,
+            unsafe_rectangle_2_domain,barrier_literals);
+    }
     timed_solve(
         "lie",solver,space,domain,lie_literals);
 

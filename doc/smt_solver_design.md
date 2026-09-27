@@ -1038,6 +1038,19 @@ certification starts succeeding. Hull should then be reintroduced at the same
 box frontier to measure whether its extra contractions reduce the remaining
 search enough to amortize their cost.
 
+At 64 boxes, the no-hull geometric baseline has entered a useful pruning
+regime. The sphere prunes 29/64 boxes, each unsafe rectangle prunes 27/64, and
+the Lie query prunes 22/64 while splitting 42. The Lie query takes 18.618 s,
+including 3.343 s one-time theory compilation, 10.860 s direct rejection and
+4.319 s epsilon checking. Thus plain subdivision plus validated range rejection
+is already eliminating about one third of the processed Lie boxes without the
+expensive hull contractor.
+
+The standalone benchmark now accepts an optional final query selector, `all`
+or `lie`, so higher-box-budget experiments can focus on the dominant Lie query
+without repeatedly paying for the three unsafe-set components. The default
+remains `all`.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

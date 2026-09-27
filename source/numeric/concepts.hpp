@@ -36,6 +36,8 @@
 
 namespace Ariadne {
 
+using namespace Utility;
+
 enum class Comparison : ComparableEnumerationType;
 
 template<class L> concept IsLogical = Constructible<L,Bool> and requires(L l) {

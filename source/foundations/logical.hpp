@@ -38,6 +38,8 @@
 
 namespace Ariadne {
 
+using namespace Utility;
+
 template<class X> class Sequence;
 
 template<class T> String class_name();

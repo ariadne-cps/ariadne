@@ -37,15 +37,11 @@
 
 #include "utility/variant.hpp"
 #include "utility/variant.inl.hpp"
+#include "utility/string.hpp"
 
 namespace Ariadne {
 
-typedef void Void;
-typedef bool Bool;
-typedef unsigned int Nat;
-typedef int Int;
-
-typedef std::ostream OutputStream;
+using namespace Utility;
 
 template<class X> struct Logic;
 template<> struct Logic<String> { typedef Boolean Type; };

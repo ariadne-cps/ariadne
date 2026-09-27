@@ -79,7 +79,7 @@ Still, it is usually preferable to *clone* the repository using Git, in order to
 To do that, you shall issue
 
 ```
-git clone https://github.com/ariadne-cps/ariadne 
+git clone --recurse-submodules https://github.com/ariadne-cps/ariadne
 ```
 
 which creates an *ariadne* directory under the present working directory. Let's switch into that directory. 
@@ -120,6 +120,19 @@ $ cmake --build . --target doc
 
 then you can access the built documentation from the `docs/html/index.html` file in the build directory.
 
+
+### Coverage
+
+For a coverage build, use a separate Debug build directory:
+
+```bash
+mkdir build-coverage
+cd build-coverage
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON
+cmake --build . --parallel --target coverage
+```
+
+On Ubuntu coverage is generated with GCC/lcov. On macOS it is generated with AppleClang/LLVM coverage tools.
 
 ### Installing globally
 

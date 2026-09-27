@@ -912,8 +912,8 @@ _apply_guard_step(HybridEnclosure& set,
                     break;
 /*
                 case CrossingKind::GRAZING:
-                    CONCLOG(6,"critical_time="<<crossing_data.critical_time);
-                    CONCLOG(9,"jump_set.domain()="<<jump_set.domain());
+                    LOGGING_PRINTLN_AT(6,"critical_time="<<crossing_data.critical_time);
+                    LOGGING_PRINTLN_AT(9,"jump_set.domain()="<<jump_set.domain());
                     IntervalDomainType evolution_time_domain=timing_data.evolution_time_domain;
                     ValidatedScalarMultivariateFunctionPatch embedded_space_function=embed(set.space_function(),timing_data.evolution_time_domain);
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);

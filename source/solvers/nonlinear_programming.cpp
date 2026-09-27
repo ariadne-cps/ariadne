@@ -2049,19 +2049,19 @@ Void PenaltyFunctionOptimiser::
 feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
                  RawFloatDPVector& x, RawFloatDPVector& y, RawFloatDPVector& z) const
 {
-    CONCLOG(2,"feasibility_step");
+    LOGGING_PRINTLN_AT(2,"feasibility_step");
     RawFloatDPVector xl=lower_bounds(D); RawFloatDPVector xu=upper_bounds(D);
     RawFloatDPVector zl=lower_bounds(C); RawFloatDPVector zu=upper_bounds(C);
 
     const SizeType n=x.size();
     const SizeType m=y.size();
 
-    CONCLOG(4,"x="<<x<<" y="<<y<<" z="<<z);
+    LOGGING_PRINTLN_AT(4,"x="<<x<<" y="<<y<<" z="<<z);
     Vector<FloatDPDifferential> ddx = FloatDPDifferential::variables(2,x);
     Vector<FloatDPDifferential> ddgx = g.evaluate(ddx);
 
     FloatDPMatrix A=ddgx.jacobian();
-    CONCLOG(6,"A="<<A);
+    LOGGING_PRINTLN_AT(6,"A="<<A);
     RawFloatDPVector v = join(join(x,z),y);
 
     RawFloatDPVector r(n+2*m,n+2*m);
@@ -2075,7 +2075,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
     }
     project(r,range(n+m,n+2*m)) = ddgx.value() - z;
     r[n+2*m]=0.0;
-    CONCLOG(5,"r="<<r);
+    LOGGING_PRINTLN_AT(5,"r="<<r);
 
     FloatDPMatrix S(n+2*m+1,n+2*m+1);
     for(SizeType j=0; j!=m; ++j) {
@@ -2113,15 +2113,15 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
         //S[n+m+j][n+m+j] = -1.0/1024;
     }
 
-    CONCLOG(5,"S="<<S);
-    //CONCLOG(5,"S="<<std::fixed<<pretty(S));
+    LOGGING_PRINTLN_AT(5,"S="<<S);
+    //LOGGING_PRINTLN_AT(5,"S="<<std::fixed<<pretty(S));
 
     FloatDPMatrix Sinv = inverse(S);
-    //CONCLOG(9,"Sinv="<<Sinv<<"\n);
-    //CONCLOG(5,"Sinv="<<std::fixed<<pretty(Sinv));
+    //LOGGING_PRINTLN_AT(9,"Sinv="<<Sinv<<"\n);
+    //LOGGING_PRINTLN_AT(5,"Sinv="<<std::fixed<<pretty(Sinv));
 
     RawFloatDPVector dv = Sinv * r;
-    CONCLOG(5,"dv="<<dv);
+    LOGGING_PRINTLN_AT(5,"dv="<<dv);
 
     FloatDP alpha = 1.0;
     RawFloatDPVector nv = v-dv;
@@ -2130,12 +2130,12 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
         nv = v-alpha*dv;
     }
 
-    CONCLOG(4,"nv="<<nv<<" a="<<alpha);
+    LOGGING_PRINTLN_AT(4,"nv="<<nv<<" a="<<alpha);
 
     x=project(nv,range(0,n));
     z=project(nv,range(n,n+m));
     y=project(nv,range(n+m,n+2*m));
-    CONCLOG(4,"g(x)-z="<<g(x)-z);
+    LOGGING_PRINTLN_AT(4,"g(x)-z="<<g(x)-z);
 
 }
 */
@@ -2371,8 +2371,8 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType d, ValidatedVectorM
 ValidatedKleenean KrawczykOptimiser::
 feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
 {
-    CONCLOG(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c)");
-    CONCLOG(2,"  d="<<d<<", g="<<g<<", c="<<c);
+    LOGGING_PRINTLN_AT(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c)");
+    LOGGING_PRINTLN_AT(2,"  d="<<d<<", g="<<g<<", c="<<c);
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
     ARIADNE_ASSERT(g.result_size()==c.size());
@@ -2383,7 +2383,7 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {
-        CONCLOG(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z);
+        LOGGING_PRINTLN_AT(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z);
         try {
             this->feasibility_step(d,g,c,x,y,z,t);
         }
@@ -2391,21 +2391,21 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
             return indeterminate;
         }
         if(t.lower_bound()>t.upper_bound()) {
-            CONCLOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
+            LOGGING_PRINTLN_AT(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             return indeterminate;
         }
         if(t.lower_bound()>0.0) {
-            CONCLOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
+            LOGGING_PRINTLN_AT(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             if(this->is_feasible_point(d,g,c,midpoint(y))) {
                 return true;
             }
         }
         if(t.upper_bound()<0.0) {
-            CONCLOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
+            LOGGING_PRINTLN_AT(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             return false;
         }
     }
-    CONCLOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
+    LOGGING_PRINTLN_AT(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
     if(this->is_infeasibility_certificate(d,g,c,midpoint(x))) {
         return false;
     }
@@ -2496,7 +2496,7 @@ Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorM
         z[2*n+m+i]=ExactIntervalType(0.0,my[i].upper_bound()-d[i].lower_bound()-tmin);
     }
 
-    CONCLOG(9,"  d="<<d<<", c="<<c<<", y="<<y<<", g(y)="<<gy<<", t="<<t<<", z="<<z);
+    LOGGING_PRINTLN_AT(9,"  d="<<d<<", c="<<c<<", y="<<y<<", g(y)="<<gy<<", t="<<t<<", z="<<z);
 
 }
 
@@ -2518,8 +2518,8 @@ minimisation_step(const ValidatedScalarMultivariateFunction& f, const ValidatedV
     ExactIntervalMatrixType A(m,n);
     set_jacobian_transpose(A,ddg);
 
-    CONCLOG(9,"f="<<f<<"\ng="<<g<<"\nx="<<x<<" y="<<y<<" z="<<z);
-    CONCLOG(9,"A="<<A<<"\nH="<<H);
+    LOGGING_PRINTLN_AT(9,"f="<<f<<"\ng="<<g<<"\nx="<<x<<" y="<<y<<" z="<<z);
+    LOGGING_PRINTLN_AT(9,"A="<<A<<"\nH="<<H);
 
     ARIADNE_NOT_IMPLEMENTED;
 
@@ -2543,29 +2543,29 @@ Void KrawczykOptimiser::feasibility_step(const ValidatedVectorMultivariateFuncti
             A[i][j]=ddg[j][i];
         }
     }
-    CONCLOG(9,"A="<<A);
+    LOGGING_PRINTLN_AT(9,"A="<<A);
 
     // H is the Hessian matrix Hik = xj*dgj/dyidyk
     ExactIntervalMatrixType H(m,m);
     for(SizeType j=0; j!=n; ++j) {
         add_hessian(H,x[j],ddg[j]);
     }
-    CONCLOG(9," H="<<H);
+    LOGGING_PRINTLN_AT(9," H="<<H);
 
     FloatDPMatrix mA=midpoint(A);
-    CONCLOG(9," mA="<<mA);
+    LOGGING_PRINTLN_AT(9," mA="<<mA);
     FloatDPMatrix mH=midpoint(H);
-    CONCLOG(9," mH="<<mH);
+    LOGGING_PRINTLN_AT(9," mH="<<mH);
 
     RawFloatDPVector mD(n);
     for(SizeType j=0; j!=n; ++j) { mD[j]=midpoint(x[j])/midpoint(z[j]); }
-    CONCLOG(9," mD="<<mD);
+    LOGGING_PRINTLN_AT(9," mD="<<mD);
 
     FloatDPMatrix& mS=mH;
     adat(mS,mA,mD);
-    CONCLOG(9,"mS="<<mS);
+    LOGGING_PRINTLN_AT(9,"mS="<<mS);
     FloatDPMatrix mSinv=inverse(mS);
-    CONCLOG(9,"mSinv="<<mSinv);
+    LOGGING_PRINTLN_AT(9,"mSinv="<<mSinv);
 }
 
 // Feasibility step for dual (inequality constrained) problem without using slack variables
@@ -2631,7 +2631,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     }
     catch(const SingularMatrixException& e) {
         ARIADNE_WARN("Matrix S="<<midpoint(SE)<<" is not invertible");
-        CONCLOG(1,"WARNING: Matrix S="<<midpoint(SE)<<" is not invertible");
+        LOGGING_PRINTLN_AT(1,"WARNING: Matrix S="<<midpoint(SE)<<" is not invertible");
         throw e;
     }
 
@@ -2664,15 +2664,15 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     ARIADNE_ASSERT(z.size()==o);
 
     ExactIntervalVectorType yt=join(y,t);
-    CONCLOG(9,"m="<<m<<" n="<<n);
-    CONCLOG(9,"x="<<x<<" yt="<<yt<<" z="<<z);
+    LOGGING_PRINTLN_AT(9,"m="<<m<<" n="<<n);
+    LOGGING_PRINTLN_AT(9,"x="<<x<<" yt="<<yt<<" z="<<z);
 
     Vector< Differential<UpperIntervalType> > ddg=g.evaluate(Differential<UpperIntervalType>::variables(2,y));
-    CONCLOG(9,"  ddg="<<ddg);
+    LOGGING_PRINTLN_AT(9,"  ddg="<<ddg);
 
     // gy is the vector of values of g(y)
     UpperIntervalVectorType gy(n); for(SizeType j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
-    CONCLOG(9,"  g(y)="<<gy<<" ");
+    LOGGING_PRINTLN_AT(9,"  g(y)="<<gy<<" ");
 
     // A is the transpose derivative matrix aij=dgj/dyi, extended with a column of ones
     UpperIntervalMatrixType A(m,n);
@@ -2681,20 +2681,20 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
             A[i][j]=ddg[j][i];
         }
     }
-    CONCLOG(9," A="<<A<<" ");
+    LOGGING_PRINTLN_AT(9," A="<<A<<" ");
 
     // H is the Hessian matrix Hik = (xcuj-xclj)*dgj/dyidyk
     UpperIntervalMatrixType H(m,m);
     for(SizeType j=0; j!=n; ++j) {
         add_hessian(H,x[j]-x[n+j],ddg[j]);
     }
-    CONCLOG(9," H="<<H);
+    LOGGING_PRINTLN_AT(9," H="<<H);
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     UpperIntervalVectorType gye(o);
     for(SizeType j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper_bound()+t; gye[n+j]=c[j].lower_bound()-gy[j]+t; }
     for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper_bound()+t; gye[2*n+m+i]=d[i].lower_bound()-y[i]+t; }
-    CONCLOG(9,"  GE="<<gye);
+    LOGGING_PRINTLN_AT(9,"  GE="<<gye);
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
     UpperIntervalMatrixType AE(m+1,o);
@@ -2715,13 +2715,13 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
 
     // Construct the symmetric matrix and its inverse
     //FloatDPMatrix S(m+1,m+1); adat(S,AE,DE);
-    //CONCLOG(9,"S="<<S);
+    //LOGGING_PRINTLN_AT(9,"S="<<S);
     //S=FloatDPMatrix(m+1,m+1); simple_adat(S,AE,DE);
-    //CONCLOG(9,"S="<<S);
+    //LOGGING_PRINTLN_AT(9,"S="<<S);
     FloatDPMatrix mS=feasibility_adat(mH,mA,mDE);
-    CONCLOG(9,"mS="<<mS);
+    LOGGING_PRINTLN_AT(9,"mS="<<mS);
     FloatDPMatrix mSinv=inverse(mS);
-    CONCLOG(9,"mSinv="<<mSinv);
+    LOGGING_PRINTLN_AT(9,"mSinv="<<mSinv);
 
     // FIXME: What if S is not invertible?
 
@@ -2730,7 +2730,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     //RawFloatDPVector ryt=-prod(AE,x); ryt[m]+=1; // FIXME: Need hessian
     UpperIntervalVectorType ryt=-feasibility_mul(mA,mx); ryt[m]+=1; // FIXME: Need hessian
     UpperIntervalVectorType rz=midpoint(gye)+mz;
-    CONCLOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
+    LOGGING_PRINTLN_AT(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
 
     // Construct the errors on the residuals ([M]-M)([x]-x)
     UpperIntervalVectorType ex=x-mx;
@@ -2742,12 +2742,12 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     UpperIntervalVectorType erx=2.0*emul(ex,ez);
     UpperIntervalVectorType eryt=UpperIntervalMatrixType(AE-mAE)*ex;
     UpperIntervalVectorType erz=UpperIntervalMatrixType(AET-mAET)*eyt;
-    CONCLOG(9,"erx="<<erx<<" eryt="<<eryt<<" erz="<<erz);
+    LOGGING_PRINTLN_AT(9,"erx="<<erx<<" eryt="<<eryt<<" erz="<<erz);
 
     rx+=2.0*emul(ex,ez);
     ryt+=UpperIntervalMatrixType(AE-mAE)*ex;
     rz+=UpperIntervalMatrixType(AET-mAET)*eyt;
-    CONCLOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
+    LOGGING_PRINTLN_AT(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
 
     //RawFloatDPVector rr=prod(AE,ediv(RawFloatDPVector(rx-emul(x,rz)),z))-ryt;
 
@@ -2756,15 +2756,15 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     UpperIntervalVectorType edyt=(mSinv*mAE)*erxdz + mSinv*eyt - (mSinv*(mAE*DiagonalMatrix<FloatDP>(mDE))) * ez;
     UpperIntervalVectorType edz=-erz-feasibility_trmul(mA,edyt);
     UpperIntervalVectorType edx=-ediv(UpperIntervalVectorType(erx+emul(mx,edz)),mz);
-    CONCLOG(9,"edx="<<edx<<" edyt="<<edyt<<" edz="<<edz);
+    LOGGING_PRINTLN_AT(9,"edx="<<edx<<" edyt="<<edyt<<" edz="<<edz);
 
     // Compute the error differences
     UpperIntervalVectorType eerr=prod(mAE,ediv(esub(erx,emul(mx,erz)),mz))-eryt;
-    CONCLOG(9,"  eerr="<<eerr);
+    LOGGING_PRINTLN_AT(9,"  eerr="<<eerr);
     UpperIntervalVectorType eedyt=prod(mSinv,eerr);
     UpperIntervalVectorType eedz=-erz-feasibility_trmul(mA,eedyt);
     UpperIntervalVectorType eedx=-ediv(UpperIntervalVectorType(erx+emul(mx,eedz)),mz);
-    CONCLOG(9,"eedx="<<eedx<<" eedyt="<<eedyt<<" eedz="<<eedz);
+    LOGGING_PRINTLN_AT(9,"eedx="<<eedx<<" eedyt="<<eedyt<<" eedz="<<eedz);
 
 
     // Compute the differences
@@ -2772,7 +2772,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
     UpperIntervalVectorType dyt=prod(mSinv,rr);
     UpperIntervalVectorType dz=-rz-feasibility_trmul(mA,dyt);
     UpperIntervalVectorType dx=-ediv(UpperIntervalVectorType(rx+emul(mx,dz)),mz);
-    CONCLOG(9,"dx="<<dx<<" dyt="<<dyt<<" dz="<<dz<<"\n");
+    LOGGING_PRINTLN_AT(9,"dx="<<dx<<" dyt="<<dyt<<" dz="<<dz<<"\n");
 
     UpperIntervalVectorType nx,ny,nyt,nz; FloatDP nt;
     nx=mx+dx;

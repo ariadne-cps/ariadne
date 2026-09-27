@@ -206,6 +206,120 @@ Bool ConstraintSolver::propagate(
 }
 
 
+
+namespace {
+
+Bool propagation_constraint_infeasible(
+    ConstraintPropagationConstraint const& constraint,
+    UpperBoxType const& domain)
+{
+    UpperIntervalType image=apply(constraint.function,domain);
+    if(constraint.strict_lower
+       && definitely(image.upper_bound()<=constraint.bounds.lower_bound())) {
+        return true;
+    }
+    if(constraint.strict_upper
+       && definitely(image.lower_bound()>=constraint.bounds.upper_bound())) {
+        return true;
+    }
+    return definitely(disjoint(image,constraint.bounds));
+}
+
+Bool propagation_monotone_coordinate_is_safe(
+    ValidatedScalarMultivariateFunction const& derivative,
+    UpperBoxType const& domain)
+{
+    UpperIntervalType derivative_image=apply(derivative,domain);
+    return definitely(derivative_image.lower_bound()>0)
+        || definitely(derivative_image.upper_bound()<0);
+}
+
+} // namespace
+
+Bool ConstraintSolver::propagate(
+    UpperBoxType& domain,
+    const std::vector<ConstraintPropagationConstraint>& constraints,
+    Bool monotone_reduction_enabled,
+    ConstraintPropagationStatistics& statistics) const
+{
+    Bool monotone_attempted=false;
+    for(;;) {
+        UpperBoxType previous=domain;
+        ++statistics.hull_rounds;
+        for(auto const& constraint:constraints) {
+            if(this->hull_reduce(domain,constraint.function,constraint.bounds)) {
+                return true;
+            }
+            if(propagation_constraint_infeasible(constraint,domain)) {
+                return true;
+            }
+        }
+        if(not same(domain,previous)) {
+            ++statistics.hull_effective;
+        }
+
+        if(same(domain,previous)) {
+            UpperBoxType before_shaving=domain;
+            ++statistics.shaving_rounds;
+            for(auto const& constraint:constraints) {
+                for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                    if(this->box_reduce(
+                            domain,constraint.function,constraint.bounds,variable)) {
+                        return true;
+                    }
+                }
+            }
+            if(not same(domain,before_shaving)) {
+                ++statistics.shaving_effective;
+            }
+            if(same(domain,before_shaving)) {
+                if(not monotone_reduction_enabled) {
+                    return false;
+                }
+                if(monotone_attempted) {
+                    return false;
+                }
+                monotone_attempted=true;
+                UpperBoxType before_monotone=domain;
+                ++statistics.monotone_rounds;
+                for(auto const& constraint:constraints) {
+                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(variable>=constraint.derivatives.size()) {
+                            continue;
+                        }
+                        auto const& derivative=constraint.derivatives[variable];
+                        if(not derivative.has_value()) {
+                            continue;
+                        }
+                        if(not propagation_monotone_coordinate_is_safe(
+                                *derivative,domain)) {
+                            continue;
+                        }
+                        this->monotone_reduce(
+                            domain,
+                            constraint.function,
+                            *derivative,
+                            constraint.bounds,
+                            variable);
+                    }
+                }
+                if(not same(domain,before_monotone)) {
+                    ++statistics.monotone_effective;
+                    continue;
+                }
+                return false;
+            }
+            continue;
+        }
+
+        for(auto const& constraint:constraints) {
+            if(propagation_constraint_infeasible(constraint,domain)) {
+                return true;
+            }
+        }
+    }
+}
+
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     const double MINIMUM_REDUCTION = 0.75;

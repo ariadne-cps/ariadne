@@ -315,7 +315,10 @@ ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation
 ExactIntervalType
 SmtSolver::_epsilon_bounds(CompiledTheoryLiteral const& literal) const
 {
-    return this->_epsilon_bounds(literal.relation);
+    FloatDP epsilon(_configuration.epsilon(),dp);
+    return ExactIntervalType(
+        sub(down,literal.bounds.lower_bound(),epsilon),
+        add(up,literal.bounds.upper_bound(),epsilon));
 }
 
 
@@ -366,10 +369,13 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
                 SmtSolverTestSupport::optional_derivative(
                     expression,function,variable));
         }
+        SmtTheoryPrimitiveRelation relation=literals[i].relation();
         result.push_back({
             function,
+            this->_original_bounds(relation),
             std::move(derivatives),
-            literals[i].relation()
+            relation==SmtTheoryPrimitiveRelation::GT_ZERO,
+            false
         });
     }
     return result;
@@ -380,97 +386,19 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  ReductionStatistics& statistics) const
 {
     ConstraintSolver contractor;
-    Bool monotone_attempted=false;
-    for(;;) {
-        UpperBoxType previous=domain;
-        ++statistics.hull_rounds;
-        for(auto const& literal:literals) {
-            if(contractor.hull_reduce(
-                    domain,literal.function,this->_original_bounds(literal.relation))) {
-                return true;
-            }
-            UpperIntervalType image=apply(literal.function,domain);
-            SmtSolverTestSupport::validate_primitive_relation(literal.relation);
-            if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-                if(definitely(image.upper_bound()<=0)) {
-                    return true;
-                }
-            } else if(definitely(disjoint(
-                    image,this->_original_bounds(literal.relation)))) {
-                return true;
-            }
-        }
-        if(not same_box(domain,previous)) {
-            ++statistics.hull_effective;
-        }
-
-        if(same_box(domain,previous)) {
-            UpperBoxType before_shaving=domain;
-            ++statistics.shaving_rounds;
-            for(auto const& literal:literals) {
-                for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-                    if(contractor.box_reduce(
-                            domain,
-                            literal.function,
-                            this->_original_bounds(literal.relation),
-                            variable)) {
-                        return true;
-                    }
-                }
-            }
-            if(not same_box(domain,before_shaving)) {
-                ++statistics.shaving_effective;
-            }
-            if(same_box(domain,before_shaving)) {
-                if(not _configuration.monotone_reduction_enabled()) {
-                    return false;
-                }
-                if(monotone_attempted) {
-                    return false;
-                }
-                monotone_attempted=true;
-                UpperBoxType before_monotone=domain;
-                ++statistics.monotone_rounds;
-                for(auto const& literal:literals) {
-                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-                        auto const& derivative=literal.derivatives[variable];
-                        if(not derivative.has_value()) {
-                            continue;
-                        }
-                        if(not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                                *derivative,domain)) {
-                            continue;
-                        }
-                        contractor.monotone_reduce(
-                            domain,
-                            literal.function,
-                            *derivative,
-                            this->_original_bounds(literal.relation),
-                            variable);
-                    }
-                }
-                if(not same_box(domain,before_monotone)) {
-                    ++statistics.monotone_effective;
-                    continue;
-                }
-                return false;
-            }
-            continue;
-        }
-
-        for(auto const& literal:literals) {
-            UpperIntervalType image=apply(literal.function,domain);
-            SmtSolverTestSupport::validate_primitive_relation(literal.relation);
-            if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-                if(definitely(image.upper_bound()<=0)) {
-                    return true;
-                }
-            } else if(definitely(disjoint(
-                    image,this->_original_bounds(literal.relation)))) {
-                return true;
-            }
-        }
-    }
+    ConstraintPropagationStatistics propagation_statistics;
+    Bool const empty=contractor.propagate(
+        domain,
+        literals,
+        _configuration.monotone_reduction_enabled(),
+        propagation_statistics);
+    statistics.hull_rounds+=propagation_statistics.hull_rounds;
+    statistics.hull_effective+=propagation_statistics.hull_effective;
+    statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
+    statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    statistics.monotone_rounds+=propagation_statistics.monotone_rounds;
+    statistics.monotone_effective+=propagation_statistics.monotone_effective;
+    return empty;
 }
 
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
@@ -479,13 +407,20 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
         UpperIntervalType image=apply(literal.function,domain);
-        SmtSolverTestSupport::validate_primitive_relation(literal.relation);
-        if(literal.relation==SmtTheoryPrimitiveRelation::GT_ZERO) {
-            if(not definitely(image.lower_bound()>-epsilon)) {
+        auto relaxed_lower=sub(down,literal.bounds.lower_bound(),epsilon);
+        auto relaxed_upper=add(up,literal.bounds.upper_bound(),epsilon);
+        if(literal.strict_lower) {
+            if(not definitely(image.lower_bound()>relaxed_lower)) {
                 return false;
             }
-        } else if(not definitely(
-                subset(image,this->_epsilon_bounds(literal.relation)))) {
+        } else if(not definitely(image.lower_bound()>=relaxed_lower)) {
+            return false;
+        }
+        if(literal.strict_upper) {
+            if(not definitely(image.upper_bound()<relaxed_upper)) {
+                return false;
+            }
+        } else if(not definitely(image.upper_bound()<=relaxed_upper)) {
             return false;
         }
     }
@@ -1147,15 +1082,6 @@ std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
         return std::nullopt;
     }
     return function.derivative(variable);
-}
-
-Bool monotone_coordinate_is_safe(
-    ValidatedScalarMultivariateFunction const& derivative,
-    UpperBoxType const& domain)
-{
-    UpperIntervalType derivative_image=apply(derivative,domain);
-    return definitely(derivative_image.lower_bound()>0)
-        || definitely(derivative_image.upper_bound()<0);
 }
 
 SearchOutcome SearchOutcome::exhausted()

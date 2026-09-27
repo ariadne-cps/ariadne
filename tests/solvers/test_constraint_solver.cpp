@@ -59,6 +59,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_monotone_reduce());
         ARIADNE_TEST_CALL(test_lyapunov_reduce());
         ARIADNE_TEST_CALL(test_propagate());
+        ARIADNE_TEST_CALL(test_precompiled_propagate());
         ARIADNE_TEST_CALL(test_reduce_edge_cases());
         ARIADNE_TEST_CALL(test_check_feasibility());
         ARIADNE_TEST_CALL(test_feasible());
@@ -514,6 +515,84 @@ class TestConstraintSolver
             Bool empty=solver.propagate(domain,constraints,statistics);
             ARIADNE_TEST_ASSERT(empty);
             ARIADNE_TEST_ASSERT(statistics.hull_rounds>=1u);
+        }
+    }
+
+    Void test_precompiled_propagate() {
+        ConstraintSolver solver;
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+
+        {
+            std::cout << "[constraint-propagate-precompiled] strict lower endpoint rejects equality" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,0.0_x}});
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {x[0],ExactIntervalType(0.0_x,+infty),{},true,false}
+            });
+            ConstraintPropagationStatistics statistics;
+            ARIADNE_TEST_ASSERT(solver.propagate(domain,constraints,false,statistics));
+            ARIADNE_TEST_EQUAL(statistics.monotone_rounds,0u);
+        }
+
+        {
+            std::cout << "[constraint-propagate-precompiled] strict upper endpoint rejects equality" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,0.0_x}});
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {x[0],ExactIntervalType(-infty,0.0_x),{},false,true}
+            });
+            ConstraintPropagationStatistics statistics;
+            ARIADNE_TEST_ASSERT(solver.propagate(domain,constraints,false,statistics));
+        }
+
+        {
+            std::cout << "[constraint-propagate-precompiled] monotone derivative contracts after stall" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,2.0_x}});
+            auto function=exp(x[0])+x[0];
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {function,
+                 ExactIntervalType(3.0_x,3.0_x),
+                 {function.derivative(0u)},
+                 false,
+                 false}
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,true,statistics);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_EQUAL(statistics.monotone_rounds,1u);
+            ARIADNE_TEST_EQUAL(statistics.monotone_effective,1u);
+            ARIADNE_TEST_ASSERT(possibly(contains(domain[0],ExactDouble(1.0_x))));
+        }
+
+        {
+            std::cout << "[constraint-propagate-precompiled] missing derivative is skipped" << std::endl;
+            UpperBoxType domain=ExactBoxType({{-1.0_x,1.0_x}});
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {sqr(x[0]),
+                 ExactIntervalType(0.0_x,1.0_x),
+                 {std::nullopt},
+                 false,
+                 false}
+            });
+            ConstraintPropagationStatistics statistics;
+            ARIADNE_TEST_ASSERT(not solver.propagate(domain,constraints,true,statistics));
+            ARIADNE_TEST_EQUAL(statistics.monotone_rounds,1u);
+            ARIADNE_TEST_EQUAL(statistics.monotone_effective,0u);
+        }
+
+        {
+            std::cout << "[constraint-propagate-precompiled] nonmonotone derivative is skipped" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,4.0_x}});
+            auto function=sin(x[0]);
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {function,
+                 ExactIntervalType(0.0_x,0.0_x),
+                 {function.derivative(0u)},
+                 false,
+                 false}
+            });
+            ConstraintPropagationStatistics statistics;
+            ARIADNE_TEST_ASSERT(not solver.propagate(domain,constraints,true,statistics));
+            ARIADNE_TEST_EQUAL(statistics.monotone_rounds,1u);
+            ARIADNE_TEST_EQUAL(statistics.monotone_effective,0u);
         }
     }
 

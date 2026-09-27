@@ -623,6 +623,29 @@ kept solely for coverage. The same build also exposed three
 `-Winconsistent-missing-override` diagnostics in `ConstraintSolver`; the
 interface overrides are now marked explicitly with `override`.
 
+### Second SMT-to-ConstraintSolver extraction
+
+The theory-literal reduction path now compiles each normalized literal into a
+generic `ConstraintPropagationConstraint`: validated function, closed interval
+hull, optional precompiled derivatives, and open/closed endpoint flags. This is
+a numerical constraint representation, not an SMT representation. Strict
+`GT_ZERO` becomes the generic target `[0,+inf)` with an open lower endpoint.
+Hull and shaving operate on the closed interval hull, while direct validated
+rejection observes endpoint openness exactly as before.
+
+The precompiled `ConstraintSolver::propagate` overload preserves the former
+theory ordering: hull plus direct rejection, shaving on hull stall, then at most
+one derivative-assisted monotone pass before fixed point. Derivatives are still
+compiled once by the SMT frontend and reused for every box, so the extraction
+adds neither per-box derivative construction nor generic virtual dispatch. SMT
+configuration still controls whether monotone contraction is enabled.
+
+The compiled SMT theory representation is now the generic numerical propagation
+constraint itself. Epsilon weakening remains in `SmtSolver`: the numerical
+bounds are shifted by epsilon and open endpoints retain strict comparisons when
+certifying a witness. Thus numerical propagation moves down without moving SMT
+epsilon-result semantics into `ConstraintSolver`.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

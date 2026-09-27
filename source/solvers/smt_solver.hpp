@@ -279,10 +279,6 @@ std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
     ValidatedScalarMultivariateFunction const& function,
     SizeType variable);
 
-Bool monotone_coordinate_is_safe(
-    ValidatedScalarMultivariateFunction const& derivative,
-    UpperBoxType const& domain);
-
 struct SearchOutcome {
     std::optional<UpperBoxType> witness;
     std::optional<SizeType> backjump_level;
@@ -490,11 +486,7 @@ class SmtSolver {
         Bool non_splittable_epsilon_overlap = false;
     };
 
-    struct CompiledTheoryLiteral {
-        ValidatedScalarMultivariateFunction function;
-        std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
-        SmtTheoryPrimitiveRelation relation;
-    };
+    using CompiledTheoryLiteral = ConstraintPropagationConstraint;
     using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;
 
     struct ConjunctionReference {

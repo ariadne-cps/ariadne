@@ -29,6 +29,9 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
+#include <optional>
+#include <vector>
+
 #include "logging/logging.hpp"
 #include "utility/container.hpp"
 
@@ -67,6 +70,19 @@ struct ConstraintPropagationStatistics {
     SizeType hull_effective = 0u;
     SizeType shaving_rounds = 0u;
     SizeType shaving_effective = 0u;
+    SizeType monotone_rounds = 0u;
+    SizeType monotone_effective = 0u;
+};
+
+//! \brief Precompiled numerical data for validated box propagation.
+//! \details Open endpoints affect rejection semantics; hull and shaving
+//! contractors operate on the closed interval hull.
+struct ConstraintPropagationConstraint {
+    ValidatedScalarMultivariateFunction function;
+    ExactIntervalType bounds;
+    std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
+    Bool strict_lower = false;
+    Bool strict_upper = false;
 };
 
 
@@ -117,6 +133,14 @@ class ConstraintSolver
     Bool propagate(
         UpperBoxType& domain,
         const List<ValidatedConstraint>& constraints,
+        ConstraintPropagationStatistics& statistics) const;
+
+    //! \brief Propagate precompiled numerical constraints, optionally using
+    //! derivative-assisted monotone contraction after hull/shaving stall.
+    Bool propagate(
+        UpperBoxType& domain,
+        const std::vector<ConstraintPropagationConstraint>& constraints,
+        Bool monotone_reduction_enabled,
         ConstraintPropagationStatistics& statistics) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.

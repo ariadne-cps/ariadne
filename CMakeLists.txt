@@ -233,9 +233,9 @@ add_custom_target(tests)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
-
 add_subdirectory(submodules)
+
+include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
 
 add_subdirectory(source)
 add_subdirectory(python)

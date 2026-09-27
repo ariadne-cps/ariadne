@@ -31,7 +31,7 @@
 #include "utility/stlio.hpp"
 
 #include "utility/macros.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "numeric/numeric.hpp"
 
 #include "geometry/binary_tree.hpp"

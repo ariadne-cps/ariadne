@@ -964,7 +964,8 @@ class TestSmtSolver {
 
         {
             List<SmtTheoryPrimitiveLiteral> literals({
-                make_smt_theory_literal(ex>=2)
+                SmtTheoryPrimitiveLiteral(
+                    ex-2,SmtTheoryPrimitiveRelation::GEQ_ZERO)
             });
             SmtResult result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,1)}),literals);
@@ -977,7 +978,8 @@ class TestSmtSolver {
 
         {
             List<SmtTheoryPrimitiveLiteral> literals({
-                make_smt_theory_literal(ex>=0)
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
             });
             SmtResult result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,0.0625_x)}),literals);
@@ -989,7 +991,8 @@ class TestSmtSolver {
 
         {
             List<SmtTheoryPrimitiveLiteral> literals({
-                make_smt_theory_literal(ex>=0)
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
             });
             SmtResult result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
@@ -1001,7 +1004,8 @@ class TestSmtSolver {
 
         {
             List<SmtTheoryPrimitiveLiteral> literals({
-                make_smt_theory_literal(ex>0)
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GT_ZERO)
             });
             SmtResult result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,0)}),literals);
@@ -1024,7 +1028,8 @@ class TestSmtSolver {
                 false,
                 true));
             List<SmtTheoryPrimitiveLiteral> literals({
-                make_smt_theory_literal(ex>=0)
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
             });
             SmtResult result=contractor_solver.solve(
                 space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);

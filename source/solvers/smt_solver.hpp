@@ -153,6 +153,7 @@ struct SmtSearchStatistics {
     SizeType sensitivity_derivatives_built = 0u;
     SizeType sensitivity_derivative_evaluations = 0u;
     SizeType epsilon_box_certifications = 0u;
+    SizeType fused_direct_classification_boxes = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     double theory_compile_seconds = 0.0;
@@ -535,6 +536,7 @@ class SmtSolver {
         SizeType sensitivity_derivatives_built = 0u;
         SizeType sensitivity_derivative_evaluations = 0u;
         Bool epsilon_box_certification = false;
+        Bool fused_direct_classification = false;
         Bool dp_resolution_exhausted = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
@@ -604,6 +606,22 @@ class SmtSolver {
                             CompiledTheoryLiteral const& literal) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
+
+    struct DirectClassification {
+        Bool used = false;
+        Bool pruned = false;
+        Bool epsilon_satisfied = false;
+        double seconds = 0.0;
+    };
+
+    DirectClassification _direct_classification(
+        UpperBoxType const& domain,
+        List<ValidatedConstraint> const& constraints,
+        ReductionStatistics& statistics) const;
+    DirectClassification _direct_classification(
+        UpperBoxType const& domain,
+        CompiledTheoryLiterals const& literals,
+        ReductionStatistics& statistics) const;
 
     template<class Conjunction>
     std::optional<UpperBoxType> _epsilon_witness(

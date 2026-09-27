@@ -504,6 +504,77 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
     return true;
 }
 
+SmtSolver::DirectClassification
+SmtSolver::_direct_classification(
+    UpperBoxType const&,
+    List<ValidatedConstraint> const&,
+    ReductionStatistics&) const
+{
+    return {};
+}
+
+SmtSolver::DirectClassification
+SmtSolver::_direct_classification(
+    UpperBoxType const& domain,
+    CompiledTheoryLiterals const& literals,
+    ReductionStatistics& statistics) const
+{
+    DirectClassification result;
+    if(_configuration.hull_reduction_enabled()
+       || _configuration.shaving_reduction_enabled()
+       || _configuration.monotone_reduction_enabled()) {
+        return result;
+    }
+
+    result.used=true;
+    ++statistics.hull_rounds;
+    Bool all_epsilon_satisfied=true;
+    FloatDP epsilon(_configuration.epsilon(),dp);
+    auto const start=std::chrono::steady_clock::now();
+
+    for(auto const& literal:literals) {
+        UpperIntervalType image=apply(literal.function,domain);
+
+        Bool original_infeasible=false;
+        if(literal.strict_lower
+           && definitely(image.upper_bound()<=literal.bounds.lower_bound())) {
+            original_infeasible=true;
+        } else if(literal.strict_upper
+                  && definitely(image.lower_bound()>=literal.bounds.upper_bound())) {
+            original_infeasible=true;
+        } else if(definitely(disjoint(image,literal.bounds))) {
+            original_infeasible=true;
+        }
+        if(original_infeasible) {
+            result.pruned=true;
+            all_epsilon_satisfied=false;
+            break;
+        }
+
+        auto relaxed_lower=sub(down,literal.bounds.lower_bound(),epsilon);
+        auto relaxed_upper=add(up,literal.bounds.upper_bound(),epsilon);
+        Bool epsilon_satisfied=true;
+        if(literal.strict_lower) {
+            epsilon_satisfied=
+                definitely(image.lower_bound()>relaxed_lower);
+        } else {
+            epsilon_satisfied=
+                definitely(image.lower_bound()>=relaxed_lower);
+        }
+        epsilon_satisfied=
+            epsilon_satisfied
+            && definitely(image.upper_bound()<=relaxed_upper);
+        if(not epsilon_satisfied) {
+            all_epsilon_satisfied=false;
+        }
+    }
+
+    result.seconds=elapsed_seconds(start);
+    statistics.hull_direct_rejection_seconds+=result.seconds;
+    result.epsilon_satisfied=all_epsilon_satisfied && not result.pruned;
+    return result;
+}
+
 ValidatedScalarMultivariateFunction const&
 SmtSolver::_function(ValidatedConstraint const& constraint) const
 {
@@ -594,23 +665,40 @@ SmtSolver::_process_box(
         std::nullopt,
         reductions};
 
+    auto direct=this->_direct_classification(domain,conjunction,reductions);
     auto phase_start=std::chrono::steady_clock::now();
-    Bool const pruned=this->_original_reduce(domain,conjunction,reductions);
-    result.reductions=reductions;
-    result.reduction_seconds=elapsed_seconds(phase_start);
-    if(pruned) {
-        result.status=BoxProcessingStatus::PRUNED;
-        return result;
-    }
+    if(direct.used) {
+        result.fused_direct_classification=true;
+        result.reductions=reductions;
+        result.reduction_seconds=direct.seconds;
+        if(direct.pruned) {
+            result.status=BoxProcessingStatus::PRUNED;
+            return result;
+        }
+        if(direct.epsilon_satisfied) {
+            result.status=BoxProcessingStatus::EPSILON_SAT;
+            result.witness=domain;
+            result.epsilon_box_certification=true;
+            return result;
+        }
+    } else {
+        Bool const pruned=this->_original_reduce(domain,conjunction,reductions);
+        result.reductions=reductions;
+        result.reduction_seconds=elapsed_seconds(phase_start);
+        if(pruned) {
+            result.status=BoxProcessingStatus::PRUNED;
+            return result;
+        }
 
-    phase_start=std::chrono::steady_clock::now();
-    Bool const epsilon_satisfied=this->_epsilon_satisfied(domain,conjunction);
-    result.epsilon_check_seconds=elapsed_seconds(phase_start);
-    if(epsilon_satisfied) {
-        result.status=BoxProcessingStatus::EPSILON_SAT;
-        result.witness=domain;
-        result.epsilon_box_certification=true;
-        return result;
+        phase_start=std::chrono::steady_clock::now();
+        Bool const epsilon_satisfied=this->_epsilon_satisfied(domain,conjunction);
+        result.epsilon_check_seconds=elapsed_seconds(phase_start);
+        if(epsilon_satisfied) {
+            result.status=BoxProcessingStatus::EPSILON_SAT;
+            result.witness=domain;
+            result.epsilon_box_certification=true;
+            return result;
+        }
     }
 
     if(_configuration.deterministic_witness_probing_enabled()) {
@@ -720,6 +808,9 @@ SmtSolver::_accumulate_box_processing_statistics(
     statistics.shaving_function_evaluations+=
         processing.reductions.shaving_function_evaluations;
     statistics.candidate_search_seconds+=processing.candidate_search_seconds;
+    if(processing.fused_direct_classification) {
+        ++statistics.fused_direct_classification_boxes;
+    }
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
             processing.status,
@@ -1092,6 +1183,8 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.sensitivity_derivative_build_seconds+=source.sensitivity_derivative_build_seconds;
     target.sensitivity_derivative_evaluation_seconds+=source.sensitivity_derivative_evaluation_seconds;
     target.epsilon_box_certifications+=source.epsilon_box_certifications;
+    target.fused_direct_classification_boxes+=
+        source.fused_direct_classification_boxes;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;
     target.boolean_decisions+=source.boolean_decisions;

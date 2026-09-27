@@ -1273,6 +1273,48 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-solve] epsilon-active theory split ignores certified wide literal" << std::endl;
+            RealVariable ax("active_split_x");
+            RealVariable ay("active_split_y");
+            RealExpression eax=ax;
+            RealExpression eay=ay;
+            RealSpace aspace({ax,ay});
+
+            auto inactive_alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(eay>=-1000));
+            auto active_alternatives=normalize_smt_theory_literal(
+                make_smt_theory_literal(sin(10*eax)==0.3_x));
+            ARIADNE_TEST_EQUAL(inactive_alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(inactive_alternatives[0].size(),1u);
+            ARIADNE_TEST_EQUAL(active_alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(active_alternatives[0].size(),1u);
+
+            List<SmtTheoryPrimitiveLiteral> literals;
+            literals.append(inactive_alternatives[0][0]);
+            literals.append(active_alternatives[0][0]);
+
+            SmtSolver active_split_solver(SmtSolverConfiguration(
+                0.01_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false));
+            ExactBoxType domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-100,100)
+            });
+            SmtResult solve_result=active_split_solver.solve(
+                aspace,domain,literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_guided_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
+        }
+
+        {
             std::cout << "[smt-solve] forced splitting UNSAT: sin(x)=0 and cos(x)=0 on [0,7]" << std::endl;
             ExactBoxType domain({ExactIntervalType(0,7)});
             List<ValidatedConstraint> constraints({
@@ -1317,6 +1359,39 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
+        }
+
+        {
+            std::cout << "[smt-solve] epsilon-active split ignores already certified wide constraint" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            SmtSolver active_split_solver(SmtSolverConfiguration(
+                0.01_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false));
+            ExactBoxType domain({
+                ExactIntervalType(-1,1),
+                ExactIntervalType(-100,100)
+            });
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(-100.0_x),
+                    xy[1],
+                    ValidatedNumber(100.0_x)),
+                ValidatedConstraint(
+                    ValidatedNumber(0.3_x),
+                    sin(10*xy[0]),
+                    ValidatedNumber(0.3_x))
+            });
+            SmtResult solve_result=active_split_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().sensitivity_guided_splits,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().sensitivity_overrides_geometric_splits,1u);
         }

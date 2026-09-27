@@ -328,13 +328,19 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
     return empty;
 }
 
+Bool SmtSolver::_epsilon_satisfied(
+    UpperBoxType const& domain,
+    ValidatedConstraint const& constraint) const
+{
+    UpperIntervalType image=apply(constraint.function(),domain);
+    return definitely(subset(image,this->_epsilon_bounds(constraint)));
+}
+
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    List<ValidatedConstraint> const& constraints) const
 {
     for(SizeType i=0; i!=constraints.size(); ++i) {
-        auto const& constraint=constraints[i];
-        UpperIntervalType image=apply(constraint.function(),domain);
-        if(not definitely(subset(image,this->_epsilon_bounds(constraint)))) {
+        if(not this->_epsilon_satisfied(domain,constraints[i])) {
             return false;
         }
     }
@@ -392,22 +398,29 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
     return empty;
 }
 
+Bool SmtSolver::_epsilon_satisfied(
+    UpperBoxType const& domain,
+    CompiledTheoryLiteral const& literal) const
+{
+    FloatDP epsilon(_configuration.epsilon(),dp);
+    UpperIntervalType image=apply(literal.function,domain);
+    auto relaxed_lower=sub(down,literal.bounds.lower_bound(),epsilon);
+    auto relaxed_upper=add(up,literal.bounds.upper_bound(),epsilon);
+    if(literal.strict_lower) {
+        if(not definitely(image.lower_bound()>relaxed_lower)) {
+            return false;
+        }
+    } else if(not definitely(image.lower_bound()>=relaxed_lower)) {
+        return false;
+    }
+    return definitely(image.upper_bound()<=relaxed_upper);
+}
+
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    CompiledTheoryLiterals const& literals) const
 {
-    FloatDP epsilon(_configuration.epsilon(),dp);
     for(auto const& literal:literals) {
-        UpperIntervalType image=apply(literal.function,domain);
-        auto relaxed_lower=sub(down,literal.bounds.lower_bound(),epsilon);
-        auto relaxed_upper=add(up,literal.bounds.upper_bound(),epsilon);
-        if(literal.strict_lower) {
-            if(not definitely(image.lower_bound()>relaxed_lower)) {
-                return false;
-            }
-        } else if(not definitely(image.lower_bound()>=relaxed_lower)) {
-            return false;
-        }
-        if(not definitely(image.upper_bound()<=relaxed_upper)) {
+        if(not this->_epsilon_satisfied(domain,literal)) {
             return false;
         }
     }
@@ -470,7 +483,9 @@ SmtSolver::_split_box(
     std::vector<ValidatedScalarMultivariateFunction> functions;
     functions.reserve(conjunction.size());
     for(auto const& item:conjunction) {
-        functions.push_back(this->_function(item));
+        if(not this->_epsilon_satisfied(domain,item)) {
+            functions.push_back(this->_function(item));
+        }
     }
     auto selection=sensitivity_split_coordinate(domain,functions);
     return {domain.split(selection.first),selection.second};

@@ -523,6 +523,8 @@ class SmtSolver {
                           List<ValidatedConstraint> const& constraints,
                           ReductionStatistics& statistics) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
+                            ValidatedConstraint const& constraint) const;
+    Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
 
     CompiledTheoryLiterals _compile_theory_literals(
@@ -531,6 +533,8 @@ class SmtSolver {
     Bool _original_reduce(UpperBoxType& domain,
                           CompiledTheoryLiterals const& literals,
                           ReductionStatistics& statistics) const;
+    Bool _epsilon_satisfied(UpperBoxType const& domain,
+                            CompiledTheoryLiteral const& literal) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             CompiledTheoryLiterals const& literals) const;
 

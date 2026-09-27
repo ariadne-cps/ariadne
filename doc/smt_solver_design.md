@@ -667,15 +667,31 @@ remains a generic propagation feature and is tested directly in
 vector shorter than the box dimension and a negative monotone derivative,
 rather than leaving those generic propagation branches unexercised.
 
+### Epsilon-active splitting
+
+Sensitivity-guided splitting now receives only constraints whose validated image
+on the current reduced box has not yet met the epsilon stopping condition.
+Constraints that are already epsilon-certified remain part of the conjunction
+and continue to be checked after every contraction, but they no longer steer the
+split coordinate. This applies uniformly to validated constraints and compiled
+theory literals, including strict lower endpoints.
+
+The implementation reuses the same per-constraint epsilon certification used by
+whole-box stopping, so active-set selection cannot drift semantically from
+`EPSILON_SAT` certification. End-to-end regressions use a deliberately wider
+second coordinate controlled only by an already certified constraint/literal;
+the unresolved first-coordinate constraint must override the geometric split
+that the inactive wide coordinate would otherwise induce.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:
 
 1. validate the explicit UNKNOWN-reason plumbing across sequential, parallel and
    Boolean search and restore full coverage for the new branches;
-2. make splitting focus on constraints whose validated box evaluation has not
-   yet met the epsilon stopping condition, mirroring the active-formula idea in
-   dReal while retaining Ariadne's sensitivity guidance;
+2. [completed] splitting focuses sensitivity analysis on constraints whose
+   validated box evaluation has not yet met the epsilon stopping condition,
+   while retaining Ariadne's sensitivity guidance;
 3. investigate rigorous DP stopping certificates based on validated continuity
    or derivative information that can reduce `DP_RESOLUTION_EXHAUSTED` without
    arbitrary-precision arithmetic;

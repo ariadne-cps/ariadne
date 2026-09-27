@@ -763,9 +763,6 @@ class TestSmtSolver {
             SmtSolverTestSupport::original_bounds(solver,invalid),
             std::runtime_error);
         ARIADNE_TEST_THROWS(
-            SmtSolverTestSupport::epsilon_bounds(solver,invalid),
-            std::runtime_error);
-        ARIADNE_TEST_THROWS(
             SmtSolverTestSupport::epsilon_primitive_image_infeasible(
                 invalid,
                 UpperIntervalType(ExactIntervalType(0,0)),

@@ -654,6 +654,19 @@ compilation/differentiability remains tested in SMT, while the actual monotone
 gating behavior is exercised through the generic propagation tests in
 `test_constraint_solver`.
 
+### Second-extraction coverage cleanup
+
+Coverage after the precompiled-propagation extraction exposed three useful
+boundary facts. The relation-based SMT `_epsilon_bounds` helper had become
+production-dead and was only kept alive by an invalid-enum test, so it is
+removed. Normalized SMT primitives can have an open lower endpoint
+(`GT_ZERO`) but never an open upper endpoint, so epsilon certification no
+longer carries an unreachable `strict_upper` branch; upper-end openness
+remains a generic propagation feature and is tested directly in
+`ConstraintSolver`. Finally, direct generic tests now cover a derivative
+vector shorter than the box dimension and a negative monotone derivative,
+rather than leaving those generic propagation branches unexercised.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

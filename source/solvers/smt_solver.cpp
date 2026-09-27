@@ -303,15 +303,6 @@ ExactIntervalType SmtSolver::_epsilon_bounds(ValidatedConstraint const& constrai
         add(up,bounds.upper_bound(),epsilon));
 }
 
-ExactIntervalType SmtSolver::_epsilon_bounds(SmtTheoryPrimitiveRelation relation) const
-{
-    SmtSolverTestSupport::validate_primitive_relation(relation);
-    FloatDP epsilon(_configuration.epsilon(),dp);
-    if(relation==SmtTheoryPrimitiveRelation::EQ_ZERO) {
-        return ExactIntervalType(-epsilon,+epsilon);
-    }
-    return ExactIntervalType(-epsilon,+infty);
-}
 ExactIntervalType
 SmtSolver::_epsilon_bounds(CompiledTheoryLiteral const& literal) const
 {
@@ -416,11 +407,7 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
         } else if(not definitely(image.lower_bound()>=relaxed_lower)) {
             return false;
         }
-        if(literal.strict_upper) {
-            if(not definitely(image.upper_bound()<relaxed_upper)) {
-                return false;
-            }
-        } else if(not definitely(image.upper_bound()<=relaxed_upper)) {
+        if(not definitely(image.upper_bound()<=relaxed_upper)) {
             return false;
         }
     }
@@ -1354,13 +1341,6 @@ ExactIntervalType original_bounds(
     SmtTheoryPrimitiveRelation relation)
 {
     return solver._original_bounds(relation);
-}
-
-ExactIntervalType epsilon_bounds(
-    SmtSolver const& solver,
-    SmtTheoryPrimitiveRelation relation)
-{
-    return solver._epsilon_bounds(relation);
 }
 
 Bool epsilon_satisfied(

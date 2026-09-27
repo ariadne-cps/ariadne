@@ -396,10 +396,6 @@ ExactIntervalType original_bounds(
     SmtSolver const& solver,
     SmtTheoryPrimitiveRelation relation);
 
-ExactIntervalType epsilon_bounds(
-    SmtSolver const& solver,
-    SmtTheoryPrimitiveRelation relation);
-
 Bool epsilon_satisfied(
     SmtSolver const& solver,
     UpperBoxType const& domain,
@@ -454,8 +450,6 @@ class SmtSolver {
   private:
     friend struct SmtParallelTask;
     friend ExactIntervalType SmtSolverTestSupport::original_bounds(
-        SmtSolver const&, SmtTheoryPrimitiveRelation);
-    friend ExactIntervalType SmtSolverTestSupport::epsilon_bounds(
         SmtSolver const&, SmtTheoryPrimitiveRelation);
     friend Bool SmtSolverTestSupport::epsilon_satisfied(
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
@@ -524,7 +518,6 @@ class SmtSolver {
 
     ExactIntervalType _original_bounds(SmtTheoryPrimitiveRelation relation) const;
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
-    ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;
     ExactIntervalType _epsilon_bounds(CompiledTheoryLiteral const& literal) const;
     Bool _original_reduce(UpperBoxType& domain,
                           List<ValidatedConstraint> const& constraints,

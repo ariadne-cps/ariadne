@@ -35,7 +35,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 
 #include "numeric/integer.hpp"
 #include "symbolic/variable.hpp"

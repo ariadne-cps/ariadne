@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

@@ -33,7 +33,7 @@
 #include "utility/container.hpp"
 
 #include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
 

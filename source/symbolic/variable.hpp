@@ -36,7 +36,7 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "utility/string.hpp"
 
 #include "foundations/logical.decl.hpp"

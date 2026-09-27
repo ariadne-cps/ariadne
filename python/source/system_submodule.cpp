@@ -30,7 +30,7 @@
 #include <iomanip>
 #include <functional>
 
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 #include "symbolic/expression.hpp"

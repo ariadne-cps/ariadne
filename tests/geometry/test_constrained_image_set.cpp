@@ -39,7 +39,6 @@
 
 using namespace Ariadne;
 using namespace std;
-using Helper::make_lpair;
 
 class TestConstrainedImageSet
 {

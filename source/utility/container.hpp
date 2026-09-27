@@ -137,7 +137,7 @@ template<class T> class LinkedList
 };
 template<class T> inline OutputStream&
 operator<< (OutputStream &os, const std::list<T>& l) {
-    return Helper::write_sequence(os,l.begin(),l.end());
+    return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
 }
 
 

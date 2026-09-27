@@ -98,8 +98,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git init WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/python/pybind11 OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 python/pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/helper OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/helper submodules/helper WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/utility OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/utility submodules/utility WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
@@ -114,10 +114,10 @@ if(GIT_FOUND)
     else()
         message(STATUS "pybind11 submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/helper/CMakeLists.txt)
-        message(ERROR "Helper download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/utility/CMakeLists.txt)
+        message(ERROR "Utility download failure")
     else()
-        message(STATUS "Helper submodule found")
+        message(STATUS "Utility submodule found")
     endif()
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/conclog/CMakeLists.txt)
         message(ERROR "ConcLog download failure")
@@ -159,8 +159,8 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
 endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/helper/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    message(STATUS "Created symbolic link to ConcLog submodule")
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/utility/include/utility ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
+    message(STATUS "Created symbolic link to Utility submodule")
 endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
@@ -231,7 +231,7 @@ add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
-    $<TARGET_OBJECTS:HELPER_SRC>
+    $<TARGET_OBJECTS:UTILITY_SRC>
     source/geometry/interval.cpp
 )
 
@@ -247,7 +247,7 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
-    $<TARGET_OBJECTS:HELPER_SRC>
+    $<TARGET_OBJECTS:UTILITY_SRC>
 )
 
 add_library(ariadne SHARED
@@ -264,7 +264,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
-    $<TARGET_OBJECTS:HELPER_SRC>
+    $<TARGET_OBJECTS:UTILITY_SRC>
 )
 
 target_include_directories(ariadne PUBLIC

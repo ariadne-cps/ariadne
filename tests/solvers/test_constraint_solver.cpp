@@ -559,7 +559,11 @@ class TestConstraintSolver
             ARIADNE_TEST_ASSERT(not empty);
             ARIADNE_TEST_EQUAL(statistics.monotone_rounds,1u);
             ARIADNE_TEST_EQUAL(statistics.monotone_effective,1u);
-            ARIADNE_TEST_ASSERT(possibly(contains(domain[0],ExactDouble(1.0_x))));
+            ARIADNE_TEST_ASSERT(refines(
+                domain,UpperBoxType(ExactBoxType{{0.0_x,2.0_x}})));
+            UpperIntervalType image=Ariadne::apply(function,domain);
+            ARIADNE_TEST_ASSERT(
+                possibly(intersect(image,ExactIntervalType(3.0_x,3.0_x))));
         }
 
         {

@@ -7,7 +7,7 @@
 #ifndef ARIADNE_TAYLOR_FUNCTION_DECL_HPP
 #define ARIADNE_TAYLOR_FUNCTION_DECL_HPP
 
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 
 namespace Ariadne {
 

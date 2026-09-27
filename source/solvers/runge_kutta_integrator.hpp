@@ -28,7 +28,10 @@
 #include <iostream>
 
 #include "utility/container.hpp"
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "solvers/integrator.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

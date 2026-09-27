@@ -35,7 +35,10 @@
 #include <iostream>
 
 #include "logging/logging.hpp"
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
 

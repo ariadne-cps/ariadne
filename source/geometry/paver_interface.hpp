@@ -29,7 +29,7 @@
 #ifndef ARIADNE_PAVER_INTERFACE_HPP
 #define ARIADNE_PAVER_INTERFACE_HPP
 
-#include "utility/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "utility/writable.hpp"
 
 namespace Ariadne {

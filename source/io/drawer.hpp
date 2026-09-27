@@ -30,7 +30,10 @@
 #define ARIADNE_DRAWER_HPP
 
 #include <iosfwd>
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "io/drawer_interface.hpp"
 
 namespace Ariadne {

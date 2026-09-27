@@ -34,7 +34,7 @@
 #include <list>
 #include <iostream>
 
-#include "utility/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "logging/logging.hpp"
 #include "utility/container.hpp"
 #include "io/graphics_interface.hpp"

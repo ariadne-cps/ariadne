@@ -11,6 +11,7 @@
 #include <string>
 
 #include "utility/stopwatch.hpp"
+#include "function/procedure.hpp"
 #include "solvers/smt_solver.hpp"
 
 #include "smt_barr3_full64.hpp"
@@ -37,12 +38,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="eval") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie]");
+        "[all|lie|eval]");
 }
 
 Bool hull_from_argument(Int argc,const char* argv[]) {
@@ -144,6 +145,41 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << std::endl;
 }
 
+Void profile_evaluator(
+    String const& name,
+    ValidatedScalarMultivariateFunction const& function,
+    UpperBoxType const& domain,
+    SizeType repetitions)
+{
+    UpperIntervalType function_image;
+    Stopwatch<Milliseconds> function_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        function_image=apply(function,domain);
+    }
+    function_stopwatch.click();
+
+    Stopwatch<Milliseconds> build_stopwatch;
+    ValidatedProcedure procedure(function);
+    build_stopwatch.click();
+
+    UpperIntervalType procedure_image;
+    Vector<UpperIntervalType> arguments=cast_vector(domain);
+    Stopwatch<Milliseconds> procedure_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        procedure_image=evaluate(procedure,arguments);
+    }
+    procedure_stopwatch.click();
+
+    std::cout << "[eval-profile] " << name
+              << " repetitions=" << repetitions
+              << " function-apply=" << function_stopwatch.elapsed_seconds()
+              << " procedure-build=" << build_stopwatch.elapsed_seconds()
+              << " procedure-evaluate=" << procedure_stopwatch.elapsed_seconds()
+              << " function-image=" << function_image
+              << " procedure-image=" << procedure_image
+              << std::endl;
+}
+
 SmtResult timed_solve(
     String const& name,
     SmtSolver const& solver,
@@ -229,6 +265,16 @@ Int main(Int argc,const char* argv[]) {
         primitive(sphere_value<=0.16_x);
     SmtTheoryPrimitiveLiteral lie_violation=
         primitive((network.lie+network.barrier)<0);
+
+    if(query=="eval") {
+        ValidatedScalarMultivariateFunction barrier_function=
+            make_function(space,network.barrier);
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_evaluator("barrier",barrier_function,UpperBoxType(domain),8u);
+        profile_evaluator("lie+barrier",lie_function,UpperBoxType(domain),8u);
+        return 0;
+    }
 
     // First isolate the cost of validated box processing. Candidate search and
     // derivative-assisted monotone contraction are deliberately disabled here:

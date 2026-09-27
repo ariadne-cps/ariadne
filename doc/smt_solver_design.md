@@ -749,7 +749,14 @@ sensitivity-guided split. This exercises expression compilation, cached
 derivatives, validated reduction, epsilon checking and neural-expression split
 selection without turning the ordinary test suite into a long benchmark.
 
-The neural regression measures its own solve time with
+Neural scaling regressions live in the dedicated executable
+`tests/solvers/test_smt_neural_benchmarks.cpp`, rather than in
+`test_smt_solver.cpp`. This keeps benchmark timing and scaling diagnostics
+readable and prevents them from being buried among the general SMT regression
+output. The executable is still part of the normal solver test set, so functional
+failures and coverage remain visible.
+
+Each neural regression measures its own solve time with
 `Stopwatch<Milliseconds>`, following the existing Ariadne timing pattern used
 by `examples/continuous/vanderpol.cpp`: construct the stopwatch immediately
 before the measured solver call, call `click()` immediately afterwards, and
@@ -757,8 +764,9 @@ report `elapsed_seconds()`. Timing is diagnostic only and is never used as a
 pass/fail assertion, since Debug/coverage instrumentation and host load can vary.
 
 The next scaling points are `16x16`, `32x32` and the exact published
-`64x64` model. Each size is promoted into the ordinary suite only if measured
-runtime remains suitable; larger cases remain explicit performance benchmarks.
+`64x64` model. Each size is added to this dedicated benchmark executable only
+while its measured runtime remains suitable for routine execution; larger cases
+may later move to an explicit performance-only target.
 
 ## Current open work
 

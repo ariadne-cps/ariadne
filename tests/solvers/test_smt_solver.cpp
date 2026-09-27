@@ -24,11 +24,8 @@
 
 #include <sstream>
 
-#include "utility/stopwatch.hpp"
 #include "solvers/smt_solver.hpp"
 #include "betterthreads/thread_manager.hpp"
-
-#include "smt_barr3_prefix8.hpp"
 
 #include "../test.hpp"
 
@@ -64,7 +61,6 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
         ARIADNE_TEST_CALL(test_epsilon_predicates());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
-        ARIADNE_TEST_CALL(test_barr3_neural_fixture());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
@@ -871,56 +867,6 @@ class TestSmtSolver {
             std::runtime_error);
     }
 
-    Void test_barr3_neural_fixture() {
-        std::cout << "[smt-neural] Barr3-derived 2-8-8-1 fixture" << std::endl;
-
-        RealVariable bx("barr3_x"), by("barr3_y");
-        RealExpression ebx=bx, eby=by;
-        RealSpace space({bx,by});
-        RealExpression barrier=TestBarr3Prefix8::network(ebx,eby);
-
-        std::cout << "[smt-neural] singleton evaluation preserves frozen parameter layout" << std::endl;
-        auto barrier_function=make_function(space,barrier);
-        UpperBoxType origin=ExactBoxType({
-            ExactIntervalType(0.0_x,0.0_x),
-            ExactIntervalType(0.0_x,0.0_x)
-        });
-        UpperIntervalType origin_image=apply(barrier_function,origin);
-        ARIADNE_TEST_ASSERT(definitely(subset(
-            origin_image,
-            ExactIntervalType(-0.275_x,-0.274_x))));
-
-        std::cout << "[smt-neural] one-box Barr3-domain search reaches genuine split" << std::endl;
-        auto alternatives=normalize_smt_theory_literal(
-            make_smt_theory_literal(barrier==0));
-        ARIADNE_TEST_EQUAL(alternatives.size(),1u);
-        ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
-
-        List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
-        ExactBoxType barr3_domain({
-            ExactIntervalType(-3.0_x,2.5_x),
-            ExactIntervalType(-2.0_x,1.0_x)
-        });
-        SmtSolver solver(SmtSolverConfiguration(
-            0.01_x,
-            std::numeric_limits<SizeType>::max(),
-            std::numeric_limits<SizeType>::max(),
-            1u,
-            false));
-        Stopwatch<Milliseconds> stopwatch;
-        SmtResult solve_result=solver.solve(space,barr3_domain,literals);
-        stopwatch.click();
-        std::cout << "[smt-neural] Barr3-derived 2-8-8-1 solve time="
-                  << stopwatch.elapsed_seconds() << " s" << std::endl;
-        ARIADNE_TEST_ASSERT(solve_result.is_unknown());
-        ARIADNE_TEST_EQUAL(
-            solve_result.unknown_reason(),SmtUnknownReason::RESOURCE_EXHAUSTED);
-        ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
-        ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
-        ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
-        ARIADNE_TEST_ASSERT(
-            solve_result.statistics().sensitivity_guided_splits>=1u);
-    }
 
     Void test_solve() {
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);

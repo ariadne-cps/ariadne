@@ -54,7 +54,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariat
 }
 
 Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, Suggestion<StepSizeType> const& hsug) const {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     const PositiveFloatDP BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
     const PositiveFloatDP INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
@@ -68,11 +68,11 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(product(D,to_time_bounds(t,t+h),A))))).upper();
     StepSizeType hlip = static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance.value()/lipschitz));
     h=min(hlip,h);
-    CONCLOG_PRINTLN("min(hlip,h)="<<h);
+    LOGGING_PRINTLN("min(hlip,h)="<<h);
 
     IntervalDomainType T = to_time_bounds(t,t+h);
 
-    CONCLOG_PRINTLN("Finding contraction");
+    LOGGING_PRINTLN("Finding contraction");
 
     UpperBoxType B=D;
     Bool success=false;
@@ -83,21 +83,21 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             UpperBoxType Br=this->_refinement(f,D,T,A,B);
             if(not definitely(is_bounded(Br))) {
                 success=false;
-                CONCLOG_PRINTLN_AT(1,"B is not bounded.");
+                LOGGING_PRINTLN_AT(1,"B is not bounded.");
                 break;
             } else if(refines(Br,B)) {
                 B=Br;
                 success=true;
-                CONCLOG_PRINTLN_AT(1,"Found contraction of B="<<B);
+                LOGGING_PRINTLN_AT(1,"Found contraction of B="<<B);
                 break;
             } else {
                 B=this->_formula(f,D,T,A,B, NO_WIDENING,INITIAL_REFINING_WIDENING);
-                CONCLOG_PRINTLN_AT(1,"Expanding B to "<<B);
+                LOGGING_PRINTLN_AT(1,"Expanding B to "<<B);
             }
         }
         if(!success) {
             StepSizeType hnew=hlf(hprev);
-            CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
+            LOGGING_PRINTLN_AT(1,"Reduced h to "<<h);
             hprev=h;
             h=StepSizeType(hnew.get_d());
             if (h < this->_minimum_step_size.value())
@@ -106,13 +106,13 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
         }
     }
 
-    CONCLOG_PRINTLN("Refining B");
+    LOGGING_PRINTLN("Refining B");
     for(CounterType i=0; i<REFINEMENT_STEPS; ++i) {
         B = this->_refinement(f,D,T,A,B);
-        CONCLOG_PRINTLN_AT(1,"B="<<B);
+        LOGGING_PRINTLN_AT(1,"B="<<B);
     }
 
-    CONCLOG_PRINTLN("Found B="<<B<<" using h="<<h);
+    LOGGING_PRINTLN("Found B="<<B<<" using h="<<h);
 
     return std::make_pair(h,B);
 }

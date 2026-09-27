@@ -49,12 +49,12 @@ void LALO20() {
     Real x6_0(0.1_dec);
     Real x7_0(0.45_dec);
 
-    CONCLOG_PRINTLN("Laub-Loomis benchmark (LALO20):");
+    LOGGING_PRINTLN("Laub-Loomis benchmark (LALO20):");
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
     {
-        CONCLOG_PRINTLN_AT(1,"Running for W=0.01...");
+        LOGGING_PRINTLN_AT(1,"Running for W=0.01...");
 
         StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
@@ -79,15 +79,15 @@ void LALO20() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(2,"Computing orbit...");
-        CONCLOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_PRINTLN_AT(2,"Computing orbit...");
+        LOGGING_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
-        CONCLOG_PRINTLN_AT(2,"Checking properties...");
+        LOGGING_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 4.5_dec)) {
-                CONCLOG_PRINTLN_AT(3,"Set with value " << bb[x4] << " does not respect the specification.");
+                LOGGING_PRINTLN_AT(3,"Set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -95,9 +95,9 @@ void LALO20() {
         auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
-        if (ce>0) CONCLOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
-        CONCLOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
+        if (ce>0) LOGGING_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        LOGGING_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        LOGGING_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W001");
         if (ce==0)
@@ -108,7 +108,7 @@ void LALO20() {
     }
 
     {
-        CONCLOG_PRINTLN_AT(1,"Running for W=0.05...");
+        LOGGING_PRINTLN_AT(1,"Running for W=0.05...");
 
         StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
@@ -133,15 +133,15 @@ void LALO20() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(2,"Computing orbit...");
-        CONCLOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_PRINTLN_AT(2,"Computing orbit...");
+        LOGGING_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
-        CONCLOG_PRINTLN_AT(2,"Checking properties...");
+        LOGGING_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 4.5_dec)) {
-                CONCLOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
+                LOGGING_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -149,9 +149,9 @@ void LALO20() {
         auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
-        if (ce>0) CONCLOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
-        CONCLOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
+        if (ce>0) LOGGING_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        LOGGING_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        LOGGING_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W005");
         if (ce==0)
@@ -162,7 +162,7 @@ void LALO20() {
     }
 
     {
-        CONCLOG_PRINTLN_AT(1,"Running for W=0.1...");
+        LOGGING_PRINTLN_AT(1,"Running for W=0.1...");
 
         StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
@@ -187,15 +187,15 @@ void LALO20() {
 
         Stopwatch<Milliseconds> sw;
 
-        CONCLOG_PRINTLN_AT(2,"Computing orbit...");
-        CONCLOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        LOGGING_PRINTLN_AT(2,"Computing orbit...");
+        LOGGING_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
-        CONCLOG_PRINTLN_AT(2,"Checking properties...");
+        LOGGING_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 5)) {
-                CONCLOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
+                LOGGING_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -204,9 +204,9 @@ void LALO20() {
         auto x4_width = final_bounds[x4].width();
 
         sw.click();
-        if (ce>0) CONCLOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
-        CONCLOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
+        if (ce>0) LOGGING_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        LOGGING_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        LOGGING_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W01");
         if (ce==0)
@@ -216,7 +216,7 @@ void LALO20() {
         reach3.adjoin(orbit.reach());
     }
 
-    CONCLOG_PRINTLN("Plotting...");
+    LOGGING_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=20,1.5<=x4<=5}));
     fig << line_colour(0.0,0.0,0.0);
     fig << line_style(false);
@@ -226,6 +226,6 @@ void LALO20() {
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    CONCLOG_RUN_MUTED(fig.write(benchmark.name().c_str()))
-    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.");
+    LOGGING_RUN_MUTED(fig.write(benchmark.name().c_str()))
+    LOGGING_PRINTLN("File " << benchmark.name() << ".png written.");
 }

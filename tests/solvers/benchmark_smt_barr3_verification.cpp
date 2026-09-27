@@ -322,13 +322,30 @@ Void profile_evaluator(
     }
     procedure_stopwatch.click();
 
+    Vector<FloatDPBounds> bounds_arguments(
+        domain.size(),FloatDPBounds(DoublePrecision()));
+    for(SizeType i=0u; i!=domain.size(); ++i) {
+        bounds_arguments[i]=FloatDPBounds(
+            domain[i].lower_bound().raw(),
+            domain[i].upper_bound().raw());
+    }
+    FloatDPBounds procedure_bounds_image=evaluate(procedure,bounds_arguments);
+    Stopwatch<Milliseconds> procedure_bounds_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        procedure_bounds_image=evaluate(procedure,bounds_arguments);
+    }
+    procedure_bounds_stopwatch.click();
+
     std::cout << "[eval-profile] " << name
               << " repetitions=" << repetitions
               << " function-apply=" << function_stopwatch.elapsed_seconds()
               << " procedure-build=" << build_stopwatch.elapsed_seconds()
-              << " procedure-evaluate=" << procedure_stopwatch.elapsed_seconds()
+              << " procedure-upper-evaluate=" << procedure_stopwatch.elapsed_seconds()
+              << " procedure-bounds-evaluate="
+              << procedure_bounds_stopwatch.elapsed_seconds()
               << " function-image=" << function_image
               << " procedure-image=" << procedure_image
+              << " procedure-bounds-image=" << procedure_bounds_image
               << std::endl;
 }
 

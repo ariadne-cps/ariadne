@@ -30,11 +30,12 @@
 #define ARIADNE_BITS_HPP
 
 #include <iosfwd>
+#include "utility/typedefs.hpp"
 #include <cassert>
 
 namespace Ariadne {
 
-using OutputStream = std::ostream;
+using Utility::OutputStream;
 
 //! \brief A count of a number of binary digits, usable to define an accuracy or precision specification.
 class Bits {

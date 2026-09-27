@@ -26,6 +26,7 @@
 #define ARIADNE_REAL_INTERFACE_HPP
 
 #include <iosfwd>
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 
@@ -45,7 +46,7 @@ using DyadicBounds = Bounds<Dyadic>;
 using FloatDPBounds = Bounds<FloatDP>;
 using FloatMPBounds = Bounds<FloatMP>;
 
-using OutputStream = std::ostream;
+using Utility::OutputStream;
 
 class Real;
 

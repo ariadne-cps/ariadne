@@ -31,6 +31,7 @@
 #define ARIADNE_ROUNDING_HPP
 
 #include <iosfwd>
+#include "utility/typedefs.hpp"
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 || defined __arm__ || defined __aarch64__ )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
@@ -186,7 +187,7 @@ inline rounding_mode_t get_builtin_rounding_mode() { return ROUND_TO_NEAREST; }
 
 namespace Ariadne {
 
-using OutputStream = std::ostream;
+using Utility::OutputStream;
 
 //!@{
 //! \ingroup NumericModule

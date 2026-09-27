@@ -36,7 +36,9 @@
 
 namespace Ariadne {
 
-using namespace Utility;
+using Utility::Nat;
+using Utility::OutputStream;
+using Utility::WritableTemporary;
 class Natural;
 
 class Dyadic; class Rational; class Real;

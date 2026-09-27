@@ -36,7 +36,14 @@
 
 namespace Ariadne {
 
-using namespace Utility;
+using Utility::ComparableEnumerationType;
+using Utility::Bool;
+using Utility::Constructible;
+using Utility::ConvertibleTo;
+using Utility::SameAs;
+using Utility::Assignable;
+using Utility::BuiltinArithmetic;
+using Utility::declval;
 
 enum class Comparison : ComparableEnumerationType;
 

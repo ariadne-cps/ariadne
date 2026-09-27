@@ -26,13 +26,14 @@
 #define ARIADNE_GEOMETRY_CONCEPTS_HPP
 
 #include <iosfwd>
+#include "utility/typedefs.hpp"
 
 #include "utility/metaprogramming.hpp"
 #include "foundations/logical.decl.hpp"
 
 namespace Ariadne {
 
-using OutputStream = std::ostream;
+using Utility::OutputStream;
 
 template<class T> struct SetTraits;
 template<class T> using DimensionOfType = typename SetTraits<T>::DimensionType;

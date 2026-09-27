@@ -30,12 +30,13 @@
 #define ARIADNE_ACCURACY_HPP
 
 #include <iosfwd>
+#include "utility/typedefs.hpp"
 #include "dyadic.hpp"
 #include "bits.hpp"
 
 namespace Ariadne {
 
-using OutputStream = std::ostream;
+using Utility::OutputStream;
 
 class Bits;
 

@@ -106,11 +106,14 @@ class NumberInterface;
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
-template<class I> struct InterfaceTraits;
+namespace Utility {
+
 template<> struct InterfaceTraits<NumberInterface> {
     template<class X> using MixinType = NumberMixin<X>;
     template<class X> using WrapperType = NumberWrapper<X>;
 };
+
+} // namespace Utility
 
 template<class X> inline X const* extract(NumberInterface const* y) {
      return dynamic_cast<NumberWrapper<X>const*>(y);

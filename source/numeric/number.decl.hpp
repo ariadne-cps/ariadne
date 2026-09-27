@@ -37,7 +37,17 @@
 
 namespace Ariadne {
 
-using namespace Utility;
+using Utility::Void;
+using Utility::Nat;
+using Utility::Int;
+using Utility::Dbl;
+using Utility::True;
+using Utility::False;
+using Utility::GenericType;
+using Utility::HasGenericType;
+using Utility::Convertible;
+using Utility::Same;
+using Utility::CharacteristicsType;
 
 class Real;
 
@@ -139,7 +149,6 @@ template<class X> concept Generic = not Concrete<X>;
 template<class Y> concept GenericNumber = IsGenericNumber<Y>::value;
 template<class X> concept ConcreteNumber = Concrete<X> and Convertible<X,Real>;
 
-template<class T> struct CharacteristicsTrait;
 //template<class T> requires BuiltinArithmetic<T> decltype(auto) characteristics(T const& t) { return std::tuple<>(); }
 //template<class Y> requires GenericNumber<Y> struct CharacteristicsTrait<Y> { typedef Tuple<> Type; };
 template<class Y> requires GenericNumber<Y> inline decltype(auto) characteristics(Y const&) { return std::tuple<>(); }

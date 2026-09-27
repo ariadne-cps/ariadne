@@ -31,9 +31,12 @@
 
 #include <functional>
 
+#include "utility/typedefs.hpp"
+#include "utility/writable.hpp"
+
 namespace Ariadne {
 
-using Nat = unsigned int;
+using namespace Utility;
 class Natural;
 
 class Dyadic; class Rational; class Real;
@@ -86,9 +89,6 @@ template<class X> class FastCauchySequence : public Sequence<X> {
     friend CompletionType<X> limit(FastCauchySequence<X> const&);
 };
 
-
-using OutputStream = std::ostream;
-template<class T, class W> class WritableTemporary;
 
 class SequenceWriter {
     Nat _num;

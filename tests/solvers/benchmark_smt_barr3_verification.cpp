@@ -34,6 +34,17 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
     return static_cast<SizeType>(parsed);
 }
 
+Bool witness_probing_from_argument(Int argc,const char* argv[]) {
+    if(argc<=3) { return true; }
+    String argument(argv[3]);
+    if(argument=="witness") { return true; }
+    if(argument=="no-witness") { return false; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[witness|no-witness]");
+}
+
 Bool sensitivity_from_argument(Int argc,const char* argv[]) {
     if(argc<=2) { return true; }
     String argument(argv[2]);
@@ -108,6 +119,7 @@ SmtResult timed_solve(
 Int main(Int argc,const char* argv[]) {
     SizeType const box_limit=box_limit_from_argument(argc,argv);
     Bool const sensitivity_enabled=sensitivity_from_argument(argc,argv);
+    Bool const witness_probing_enabled=witness_probing_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -118,6 +130,8 @@ Int main(Int argc,const char* argv[]) {
     }
     std::cout << " split-policy="
               << (sensitivity_enabled ? "sensitivity" : "geometric")
+              << " witness-probing="
+              << (witness_probing_enabled ? "enabled" : "disabled")
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -174,7 +188,8 @@ Int main(Int argc,const char* argv[]) {
         box_limit,
         false,
         false,
-        sensitivity_enabled));
+        sensitivity_enabled,
+        witness_probing_enabled));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

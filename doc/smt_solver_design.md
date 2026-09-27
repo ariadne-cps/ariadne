@@ -953,6 +953,25 @@ validated sensitivity analysis enabled or with the solver's geometric box split
 only. This switch is diagnostic and does not weaken result semantics: it changes
 only the search heuristic.
 
+At an eight-box budget the comparison shows no pruning or epsilon certification
+under either policy. The Lie query takes 96.985 s with sensitivity and 56.706 s
+with geometric splitting; sensitivity itself accounts for 40.277 s, while both
+runs process eight boxes and return the same resource-exhaustion outcome. The
+geometric run therefore removes about 42 percent of elapsed time at this budget
+without losing observable search progress. This is evidence against paying for
+full derivative-based sensitivity unconditionally on the Barr3 workload, but it
+is not yet sufficient to change the solver default.
+
+With sensitivity removed, deterministic midpoint/endpoint/corner witness
+probing becomes the next large heuristic cost: 13.859 s of the 56.706 s Lie
+geometric run, with no witness found. The configuration therefore also exposes
+an opt-out for deterministic witness probing, enabled by default to preserve
+existing behavior. The benchmark accepts a third argument, `witness` or
+`no-witness`, so the pure geometric branch-and-prune baseline can be measured
+before increasing the box budget. Disabling probing changes only when heuristic
+point candidates are attempted; validated whole-box epsilon certification
+remains active.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

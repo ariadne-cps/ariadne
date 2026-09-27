@@ -92,6 +92,69 @@ inline RealExpression network(RealExpression const& x0, RealExpression const& x1
     return output;
 }
 
+
+struct NetworkAndLie {
+    RealExpression barrier;
+    RealExpression lie;
+};
+
+inline NetworkAndLie network_and_lie(
+    RealExpression const& x0,
+    RealExpression const& x1)
+{
+    auto const& p=parameters();
+
+    std::array<RealExpression,width> h1;
+    std::array<RealExpression,width> dh1_dx;
+    std::array<RealExpression,width> dh1_dy;
+    for(SizeType i=0u;i!=width;++i) {
+        RealExpression z=constant(p[b1_offset+i])
+            + constant(p[w1_offset+2u*i])*x0
+            + constant(p[w1_offset+2u*i+1u])*x1;
+        h1[i]=tanh_expression(z);
+        RealExpression factor=1-h1[i]*h1[i];
+        dh1_dx[i]=factor*constant(p[w1_offset+2u*i]);
+        dh1_dy[i]=factor*constant(p[w1_offset+2u*i+1u]);
+    }
+
+    std::array<RealExpression,width> h2;
+    std::array<RealExpression,width> dh2_dx;
+    std::array<RealExpression,width> dh2_dy;
+    for(SizeType i=0u;i!=width;++i) {
+        RealExpression z=constant(p[b2_offset+i]);
+        RealExpression dz_dx=RealExpression(0);
+        RealExpression dz_dy=RealExpression(0);
+        for(SizeType j=0u;j!=width;++j) {
+            RealExpression weight=constant(p[w2_offset+width*i+j]);
+            z=z+weight*h1[j];
+            dz_dx=dz_dx+weight*dh1_dx[j];
+            dz_dy=dz_dy+weight*dh1_dy[j];
+        }
+        h2[i]=tanh_expression(z);
+        RealExpression factor=1-h2[i]*h2[i];
+        dh2_dx[i]=factor*dz_dx;
+        dh2_dy[i]=factor*dz_dy;
+    }
+
+    RealExpression barrier=constant(p[b3_offset]);
+    RealExpression db_dx=RealExpression(0);
+    RealExpression db_dy=RealExpression(0);
+    for(SizeType i=0u;i!=width;++i) {
+        RealExpression weight=constant(p[w3_offset+i]);
+        barrier=barrier+weight*h2[i];
+        db_dx=db_dx+weight*dh2_dx[i];
+        db_dy=db_dy+weight*dh2_dy[i];
+    }
+
+    // Published Barr3 dynamics:
+    //   x_dot = y
+    //   y_dot = -x-y+x^3/3
+    RealExpression dx=x1;
+    RealExpression dy=-x0-x1+(x0*x0*x0)/3;
+    RealExpression lie=db_dx*dx+db_dy*dy;
+    return {barrier,lie};
+}
+
 } // namespace Ariadne::TestBarr3Full64
 
 #endif

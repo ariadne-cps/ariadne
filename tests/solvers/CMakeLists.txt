@@ -25,3 +25,9 @@ target_compile_definitions(
 add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+
+add_executable(benchmark_smt_barr3_verification benchmark_smt_barr3_verification.cpp)
+target_link_libraries(benchmark_smt_barr3_verification ariadne-kernel)
+target_compile_definitions(
+    benchmark_smt_barr3_verification
+    PRIVATE ARIADNE_SMT_BARR3_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/smt_barr3_full64.bin")

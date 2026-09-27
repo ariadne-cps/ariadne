@@ -816,6 +816,44 @@ origin enclosure `[3.809,3.810]` before executing the same one-box
 comparison while making the `64x64` point the actual published network rather
 than a truncated surrogate.
 
+
+### Published Barr3 verification workload
+
+The repository now also contains the standalone executable
+`benchmark_smt_barr3_verification`. It reproduces the two actual counterexample
+queries used by the public FOSSIL `BarrierAlt` verifier for Barr3, rather than
+the synthetic `B(x,y)=0` scaling query.
+
+The source benchmark defines
+`XD=[-3,2.5]x[-2,1]` and the unsafe set as the union of a radius-0.4 sphere
+centred at `(-1,-1)`, the rectangle `[0.4,0.6]x[0.1,0.5]`, and the rectangle
+`[0.4,0.8]x[0.1,0.3]`. The current public `BarrierAlt.get_constraints()`
+checks only two counterexample formulae: `XU && B>=0`, and
+`XD && B>=0 && Bdot+B<0` with alpha=1. The initial-set condition is present
+in the benchmark data but commented out in that verifier implementation, so the
+Ariadne reproduction deliberately does not invent an initial-set query.
+
+The Lie derivative is built analytically by forward-propagating
+`d/dx tanh(z)=(1-tanh(z)^2) dz/dx` and the analogous y derivative through the
+two dense layers, then applying the published dynamics
+`x_dot=y`, `y_dot=-x-y+x^3/3`. This avoids asking the generic symbolic
+differentiator to expand the already large network expression while remaining
+mathematically identical to the network derivative.
+
+FOSSIL's default dReal precision is `1e-5`; the standalone Ariadne benchmark
+therefore uses epsilon `1e-5`. Candidate witness search and monotone
+contraction are enabled. To avoid accidentally turning every development run
+into a potentially long verification, the executable defaults to a one-box
+smoke budget. A numeric first argument sets the per-query box-processing limit;
+the literal argument `full` removes the box budget. The intended progression
+is therefore e.g. `benchmark_smt_barr3_verification 16`, then larger budgets,
+and only then `benchmark_smt_barr3_verification full`.
+
+The executable reports expression-construction time separately from the unsafe
+and Lie-query solve times, plus the full SMT statistics and UNKNOWN reason. It
+is intentionally not registered with CTest; the ordinary neural scaling
+regressions remain deterministic and bounded.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

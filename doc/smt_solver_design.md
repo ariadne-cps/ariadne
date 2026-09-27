@@ -1157,3 +1157,47 @@ artificial tests solely to satisfy that one reported line. Coverage requirements
 continue to apply to functional branches and behaviour introduced by the SMT
 solver work; this specific line is documented as an explicit exception until a
 toolchain-level explanation or reproducible LLVM fix is available.
+
+
+The evaluator diagnostics were then extended in three directions. First, the
+same ValidatedProcedure tape was evaluated on FloatDPBounds rather than
+UpperIntervalType; second, the originating RealExpression was converted to
+Formula<EffectiveNumber> and evaluated on both interval backends; third, the
+benchmark added a Barr3-only reference evaluator that executes the published
+2-64-64-1 network directly on FloatDPBounds, propagating the two input
+derivatives forward through the network and evaluating tanh with a sign-stable
+interval formula. The direct evaluator is diagnostic only and is not used by
+the solver.
+
+On the full initial box, eight Lie-plus-barrier evaluations take about 1.257 s
+through the current validated-function apply, 0.813 s through the precompiled
+procedure on FloatDPBounds, 1.266 s through Formula on FloatDPBounds, but only
+0.014 s through the direct network evaluator. The corresponding barrier times
+are 0.162 s, 0.106 s, 0.158 s and 0.014 s respectively. Thus replacing apply by
+the existing procedure tape alone yields only a modest improvement; it does not
+explain the roughly two-orders-of-magnitude gap exposed by the network-specific
+reference path.
+
+The direct evaluator also returns finite enclosures on the initial box:
+approximately [-24.4,24.5] for the barrier and [-971.8,970.6] for
+Lie-plus-barrier. All three generic expression/function paths instead return an
+unbounded interval. The published network fixture currently represents tanh(z)
+as (exp(2z)-1)/(exp(2z)+1); on wide interval arguments that representation can
+overflow and lose all range information even though the mathematical activation
+is bounded. The direct diagnostic uses equivalent sign-stable formulas on
+one-sided intervals and the conservative range [-1,1] when an interval crosses
+zero. This establishes a real numerical representation problem, but the
+observed speedup must not be attributed to stable tanh alone: the direct
+evaluator also propagates the barrier gradient compactly in forward mode instead
+of evaluating the very large pre-expanded symbolic Lie expression.
+
+The structural diagnostic reinforces that distinction. The Lie-plus-barrier
+expression reports 1,856,788 recursive node visits but only 31,568 distinct
+expression-node pointers; the barrier reports 263,169 visits but only 14,019
+distinct pointers. Procedure conversion already memoizes Formula node pointers,
+so the next diagnostic prints the resulting procedure instruction count.
+Comparing that count with the distinct-node count will determine whether shared
+subexpressions are lost before procedure construction or whether the remaining
+cost is primarily generic instruction dispatch and the expanded
+activation/derivative representation. No core tanh operator or specialized
+Barr3 execution path should be introduced until this distinction is measured.

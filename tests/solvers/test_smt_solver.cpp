@@ -109,6 +109,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not configuration.monotone_reduction_enabled());
         ARIADNE_TEST_ASSERT(configuration.sensitivity_split_enabled());
         ARIADNE_TEST_ASSERT(configuration.deterministic_witness_probing_enabled());
+        ARIADNE_TEST_ASSERT(configuration.shaving_reduction_enabled());
         std::cout << "[smt-config] enable monotone reduction" << std::endl;
         SmtSolverConfiguration monotone_configuration(
             0.125_x,
@@ -142,6 +143,19 @@ class TestSmtSolver {
             false);
         ARIADNE_TEST_ASSERT(
             not no_witness_configuration.deterministic_witness_probing_enabled());
+
+        std::cout << "[smt-config] disable shaving reduction" << std::endl;
+        SmtSolverConfiguration no_shaving_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            true,
+            false,
+            true,
+            true,
+            false);
+        ARIADNE_TEST_ASSERT(not no_shaving_configuration.shaving_reduction_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);

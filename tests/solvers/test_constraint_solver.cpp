@@ -503,6 +503,22 @@ class TestConstraintSolver
         }
 
         {
+            std::cout << "[constraint-propagate] disabling shaving stops after hull stall" << std::endl;
+            UpperBoxType domain=ExactBoxType({{-2.0_x,2.0_x}});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(0.75_x),
+                    sqr(x[0])+x[0],
+                    ValidatedNumber(0.75_x))
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,statistics,false);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_EQUAL(statistics.shaving_rounds,0u);
+            ARIADNE_TEST_EQUAL(statistics.shaving_function_evaluations,0u);
+        }
+
+        {
             std::cout << "[constraint-propagate] direct validated rejection proves empty" << std::endl;
             UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
             List<ValidatedConstraint> constraints({
@@ -551,6 +567,25 @@ class TestConstraintSolver
             });
             ConstraintPropagationStatistics statistics;
             ARIADNE_TEST_ASSERT(not solver.propagate(domain,constraints,false,statistics));
+        }
+
+        {
+            std::cout << "[constraint-propagate-precompiled] disabling shaving reaches monotone phase" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,2.0_x}});
+            auto function=exp(x[0])+x[0];
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {function,
+                 ExactIntervalType(3.0_x,3.0_x),
+                 {function.derivative(0u)},
+                 false,
+                 false}
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,true,statistics,false);
+            ARIADNE_TEST_ASSERT(not empty);
+            ARIADNE_TEST_EQUAL(statistics.shaving_rounds,0u);
+            ARIADNE_TEST_EQUAL(statistics.shaving_function_evaluations,0u);
+            ARIADNE_TEST_EQUAL(statistics.monotone_rounds,1u);
         }
 
         {

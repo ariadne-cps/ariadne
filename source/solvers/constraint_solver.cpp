@@ -154,7 +154,8 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
 Bool ConstraintSolver::propagate(
     UpperBoxType& domain,
     const List<ValidatedConstraint>& constraints,
-    ConstraintPropagationStatistics& statistics) const
+    ConstraintPropagationStatistics& statistics,
+    Bool shaving_reduction_enabled) const
 {
     for(;;) {
         UpperBoxType previous=domain;
@@ -174,6 +175,9 @@ Bool ConstraintSolver::propagate(
         }
 
         if(same(domain,previous)) {
+            if(not shaving_reduction_enabled) {
+                return false;
+            }
             UpperBoxType before_shaving=domain;
             ++statistics.shaving_rounds;
             for(SizeType i=0u; i!=constraints.size(); ++i) {
@@ -241,7 +245,8 @@ Bool ConstraintSolver::propagate(
     UpperBoxType& domain,
     const std::vector<ConstraintPropagationConstraint>& constraints,
     Bool monotone_reduction_enabled,
-    ConstraintPropagationStatistics& statistics) const
+    ConstraintPropagationStatistics& statistics,
+    Bool shaving_reduction_enabled) const
 {
     Bool monotone_attempted=false;
     for(;;) {
@@ -261,18 +266,20 @@ Bool ConstraintSolver::propagate(
 
         if(same(domain,previous)) {
             UpperBoxType before_shaving=domain;
-            ++statistics.shaving_rounds;
-            for(auto const& constraint:constraints) {
-                for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-                    if(this->box_reduce(
-                            domain,constraint.function,constraint.bounds,variable,
-                            statistics.shaving_function_evaluations)) {
-                        return true;
+            if(shaving_reduction_enabled) {
+                ++statistics.shaving_rounds;
+                for(auto const& constraint:constraints) {
+                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        if(this->box_reduce(
+                                domain,constraint.function,constraint.bounds,variable,
+                                statistics.shaving_function_evaluations)) {
+                            return true;
+                        }
                     }
                 }
-            }
-            if(not same(domain,before_shaving)) {
-                ++statistics.shaving_effective;
+                if(not same(domain,before_shaving)) {
+                    ++statistics.shaving_effective;
+                }
             }
             if(same(domain,before_shaving)) {
                 if(not monotone_reduction_enabled) {

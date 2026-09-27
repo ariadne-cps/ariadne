@@ -73,7 +73,8 @@ class SmtSolverConfiguration {
         Bool candidate_search_enabled=true,
         Bool monotone_reduction_enabled=false,
         Bool sensitivity_split_enabled=true,
-        Bool deterministic_witness_probing_enabled=true);
+        Bool deterministic_witness_probing_enabled=true,
+        Bool shaving_reduction_enabled=true);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -102,6 +103,9 @@ class SmtSolverConfiguration {
         return _deterministic_witness_probing_enabled;
     }
 
+    //! \brief Whether coordinate shaving is enabled during validated propagation.
+    Bool shaving_reduction_enabled() const { return _shaving_reduction_enabled; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -111,6 +115,7 @@ class SmtSolverConfiguration {
     Bool _monotone_reduction_enabled;
     Bool _sensitivity_split_enabled;
     Bool _deterministic_witness_probing_enabled;
+    Bool _shaving_reduction_enabled;
 };
 
 //! \ingroup Solvers

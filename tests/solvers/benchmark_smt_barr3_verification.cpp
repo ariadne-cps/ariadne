@@ -265,6 +265,10 @@ Void profile_formula_evaluator(
     Formula<EffectiveNumber> formula=make_formula(expression,space);
     build_stopwatch.click();
 
+    Stopwatch<Milliseconds> procedure_build_stopwatch;
+    EffectiveProcedure expression_procedure(space.dimension(),formula);
+    procedure_build_stopwatch.click();
+
     Vector<UpperIntervalType> upper_arguments=cast_vector(domain);
     UpperIntervalType upper_image=evaluate(formula,upper_arguments);
     Stopwatch<Milliseconds> upper_stopwatch;
@@ -287,13 +291,29 @@ Void profile_formula_evaluator(
     }
     bounds_stopwatch.click();
 
+    FloatDPBounds expression_procedure_image=
+        evaluate(expression_procedure,bounds_arguments);
+    Stopwatch<Milliseconds> expression_procedure_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        expression_procedure_image=evaluate(
+            expression_procedure,bounds_arguments);
+    }
+    expression_procedure_stopwatch.click();
+
     std::cout << "[formula-profile] " << name
               << " repetitions=" << repetitions
               << " formula-build=" << build_stopwatch.elapsed_seconds()
+              << " expression-procedure-build="
+              << procedure_build_stopwatch.elapsed_seconds()
+              << " expression-procedure-instructions="
+              << expression_procedure._instructions.size()
               << " formula-upper-evaluate=" << upper_stopwatch.elapsed_seconds()
               << " formula-bounds-evaluate=" << bounds_stopwatch.elapsed_seconds()
+              << " expression-procedure-bounds-evaluate="
+              << expression_procedure_stopwatch.elapsed_seconds()
               << " upper-image=" << upper_image
               << " bounds-image=" << bounds_image
+              << " expression-procedure-image=" << expression_procedure_image
               << std::endl;
 }
 

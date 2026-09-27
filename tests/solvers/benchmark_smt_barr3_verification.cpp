@@ -34,6 +34,15 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
     return static_cast<SizeType>(parsed);
 }
 
+SmtTheoryPrimitiveLiteral primitive(ContinuousPredicate const& predicate) {
+    auto alternatives=normalize_smt_theory_literal(
+        make_smt_theory_literal(predicate));
+    if(alternatives.size()!=1u || alternatives[0].size()!=1u) {
+        throw std::runtime_error("Expected one primitive SMT literal");
+    }
+    return alternatives[0][0];
+}
+
 Void print_result(String const& name,SmtResult const& result,double seconds) {
     std::cout << "[" << name << "] status=" << result.status();
     if(result.is_unknown()) {
@@ -51,6 +60,22 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds
               << " sensitivity-splits=" << result.statistics().sensitivity_guided_splits
               << std::endl;
+}
+
+SmtResult timed_solve(
+    String const& name,
+    SmtSolver const& solver,
+    RealSpace const& space,
+    ExactBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals)
+{
+    std::cout << "[start] " << name
+              << " literals=" << literals.size() << std::endl << std::flush;
+    Stopwatch<Milliseconds> stopwatch;
+    SmtResult result=solver.solve(space,domain,literals);
+    stopwatch.click();
+    print_result(name,result,stopwatch.elapsed_seconds());
+    return result;
 }
 
 } // namespace
@@ -81,40 +106,64 @@ Int main(Int argc,const char* argv[]) {
     std::cout << "[construction] network+Lie="
               << construction_stopwatch.elapsed_seconds() << " s" << std::endl;
 
+    // For diagnosis and performance, use direct primitive conjunctions rather
+    // than routing the unsafe union through DPLL(T). The decomposition is
+    // logically exact: XU is the union of these three components, so the
+    // unsafe obligation is UNSAT iff all three component queries are UNSAT.
+    //
+    // Rectangle membership is encoded directly in each query domain. The
+    // spherical component uses its tight bounding box plus the sphere literal.
+    ExactBoxType unsafe_sphere_domain({
+        ExactIntervalType(-1.4_x,-0.6_x),
+        ExactIntervalType(-1.4_x,-0.6_x)
+    });
+    ExactBoxType unsafe_rectangle_1_domain({
+        ExactIntervalType(0.4_x,0.6_x),
+        ExactIntervalType(0.1_x,0.5_x)
+    });
+    ExactBoxType unsafe_rectangle_2_domain({
+        ExactIntervalType(0.4_x,0.8_x),
+        ExactIntervalType(0.1_x,0.3_x)
+    });
+
     RealExpression sphere_value=(ex+1)*(ex+1)+(ey+1)*(ey+1);
-    ContinuousPredicate unsafe_sphere=(sphere_value<=0.16_x);
-    ContinuousPredicate unsafe_rectangle_1=
-        (ex>=0.4_x)&&(ex<=0.6_x)&&(ey>=0.1_x)&&(ey<=0.5_x);
-    ContinuousPredicate unsafe_rectangle_2=
-        (ex>=0.4_x)&&(ex<=0.8_x)&&(ey>=0.1_x)&&(ey<=0.3_x);
-    ContinuousPredicate unsafe=
-        unsafe_sphere||unsafe_rectangle_1||unsafe_rectangle_2;
+    SmtTheoryPrimitiveLiteral barrier_nonnegative=
+        primitive(network.barrier>=0);
+    SmtTheoryPrimitiveLiteral sphere_inside=
+        primitive(sphere_value<=0.16_x);
+    SmtTheoryPrimitiveLiteral lie_violation=
+        primitive((network.lie+network.barrier)<0);
 
-    // These are exactly the two negated BarrierAlt conditions in the public
-    // Barr3 verifier. An UNSAT answer means the corresponding certificate
-    // obligation is established; EPSILON_SAT is a candidate counterexample.
-    ContinuousPredicate unsafe_counterexample=
-        unsafe&&(network.barrier>=0);
-    ContinuousPredicate lie_counterexample=
-        (network.barrier>=0)&&((network.lie+network.barrier)<0);
-
+    // First isolate the cost of validated box processing. Candidate search and
+    // derivative-assisted monotone contraction are deliberately disabled here:
+    // the previous version enabled both and a nominal one-box run could spend
+    // an unbounded amount of wall time inside the per-box nonlinear candidate
+    // optimiser / derivative contractors before the box budget was observed.
     SmtSolver solver(SmtSolverConfiguration(
         0.00001_x,
         std::numeric_limits<SizeType>::max(),
         std::numeric_limits<SizeType>::max(),
         box_limit,
-        true,
-        true));
+        false,
+        false));
 
-    Stopwatch<Milliseconds> unsafe_stopwatch;
-    SmtResult unsafe_result=solver.solve(space,domain,unsafe_counterexample);
-    unsafe_stopwatch.click();
-    print_result("unsafe",unsafe_result,unsafe_stopwatch.elapsed_seconds());
+    List<SmtTheoryPrimitiveLiteral> sphere_literals({
+        sphere_inside,barrier_nonnegative});
+    List<SmtTheoryPrimitiveLiteral> barrier_literals({
+        barrier_nonnegative});
+    List<SmtTheoryPrimitiveLiteral> lie_literals({
+        barrier_nonnegative,lie_violation});
 
-    Stopwatch<Milliseconds> lie_stopwatch;
-    SmtResult lie_result=solver.solve(space,domain,lie_counterexample);
-    lie_stopwatch.click();
-    print_result("lie",lie_result,lie_stopwatch.elapsed_seconds());
+    timed_solve(
+        "unsafe-sphere",solver,space,unsafe_sphere_domain,sphere_literals);
+    timed_solve(
+        "unsafe-rectangle-1",solver,space,
+        unsafe_rectangle_1_domain,barrier_literals);
+    timed_solve(
+        "unsafe-rectangle-2",solver,space,
+        unsafe_rectangle_2_domain,barrier_literals);
+    timed_solve(
+        "lie",solver,space,domain,lie_literals);
 
     return 0;
 }

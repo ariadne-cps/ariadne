@@ -849,10 +849,31 @@ the literal argument `full` removes the box budget. The intended progression
 is therefore e.g. `benchmark_smt_barr3_verification 16`, then larger budgets,
 and only then `benchmark_smt_barr3_verification full`.
 
-The executable reports expression-construction time separately from the unsafe
-and Lie-query solve times, plus the full SMT statistics and UNKNOWN reason. It
-is intentionally not registered with CTest; the ordinary neural scaling
-regressions remain deterministic and bounded.
+The executable reports expression-construction time separately from each unsafe
+component and the Lie-query solve time, plus the full SMT statistics and UNKNOWN
+reason. It is intentionally not registered with CTest; the ordinary neural
+scaling regressions remain deterministic and bounded.
+
+The first full-model attempt exposed an important benchmarking pitfall: with a
+nominal box limit of one, the run was still interruptible only after more than
+18 minutes, while constructing the network and analytic Lie expression took
+only about 0.002 s in Release. A box budget limits completed calls to
+`_process_box`; it does not bound the work performed *inside* one box. The
+previous benchmark simultaneously routed the unsafe union through DPLL(T),
+enabled nonlinear candidate witness search, and enabled derivative-assisted
+monotone contraction. Any of those per-box/theory operations may dominate
+before the outer box counter can advance.
+
+The diagnostic benchmark therefore now removes those confounders before any
+solver change is considered. The unsafe union is decomposed exactly into its
+three components and solved as direct primitive conjunctions; rectangle bounds
+are represented as query boxes, while the spherical component uses its tight
+bounding box plus the sphere inequality. Candidate witness search and monotone
+contraction are disabled. Each query prints a flushed `[start]` marker before
+entering the solver. This establishes the baseline cost of compilation,
+hull/shaving propagation, epsilon checks and sensitivity splitting on one real
+64x64 Barr3 box. Features are to be re-enabled one at a time only after this
+baseline is measured.
 
 ## Current open work
 

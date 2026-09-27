@@ -3283,6 +3283,40 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-parallel] fused direct box processing" << std::endl;
+            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            ConcurrencyGuard concurrency_guard(thread_manager);
+            SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u
+                ? 2u : thread_manager.maximum_concurrency();
+            if(parallel_concurrency>0u) {
+                SmtSolver cheap_solver(SmtSolverConfiguration(
+                    0.125_x,
+                    std::numeric_limits<SizeType>::max(),
+                    std::numeric_limits<SizeType>::max(),
+                    1u,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false));
+                List<SmtTheoryPrimitiveLiteral> literals({
+                    SmtTheoryPrimitiveLiteral(
+                        ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+                });
+                thread_manager.set_concurrency(parallel_concurrency);
+                SmtResult solve_result=cheap_solver.solve_parallel(
+                    space,
+                    ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),
+                    literals);
+                ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+                ARIADNE_TEST_EQUAL(
+                    solve_result.statistics().fused_direct_classification_boxes,1u);
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+            }
+        }
+
+        {
             std::cout << "[smt-dpll] sequential/parallel theory agreement" << std::endl;
             auto& thread_manager=BetterThreads::ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);

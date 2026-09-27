@@ -32,7 +32,7 @@
 #include <memory>
 
 #include "utility/macros.hpp"
-#include "helper/stlio.hpp"
+#include "utility/stlio.hpp"
 #include "function/function.hpp"
 #include "geometry/box.decl.hpp"
 #include "io/graphics_interface.hpp"

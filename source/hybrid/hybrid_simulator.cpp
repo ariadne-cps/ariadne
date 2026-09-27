@@ -33,7 +33,7 @@
 #include "utility/array.hpp"
 #include "utility/container.hpp"
 #include "utility/tuple.hpp"
-#include "helper/stlio.hpp"
+#include "utility/stlio.hpp"
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"

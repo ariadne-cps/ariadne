@@ -179,11 +179,6 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
     message(STATUS "Created symbolic links directory for submodules")
 endif()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/utility/include/utility ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
-    message(STATUS "Created symbolic link to Utility submodule")
-endif()
-
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
     execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/logging/include/logging ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
     message(STATUS "Created symbolic link to Logging submodule")
@@ -363,6 +358,5 @@ install(FILES
     DESTINATION lib/cmake/Ariadne
 )
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/logging DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/threading DESTINATION include FILES_MATCHING PATTERN "*.hpp")

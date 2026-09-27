@@ -1,5 +1,5 @@
 /***************************************************************************
- *            helper/stlio.hpp
+ *            utility/stlio.hpp
  *
  *  Copyright  2005-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file helper/stlio.hpp
+/*! \file utility/stlio.hpp
  *  \brief Input-output utilities
  */
 
@@ -228,7 +228,7 @@ inline
 std::ostream&
 operator<< (std::ostream &os, const std::vector<T>& v)
 {
-    return Helper::write_sequence(os,v.begin(),v.end());
+    return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
 }
 */
 
@@ -239,14 +239,14 @@ inline
 std::ostream&
 operator<< (std::ostream &os, const std::deque<T>& d)
 {
-    return Helper::write_sequence(os,d.begin(),d.end());
+    return Ariadne::Utility::write_sequence(os,d.begin(),d.end());
 }
 
 template<class T>
 inline
 ostream&
 operator<< (std::ostream &os, const std::valarray<T>& v) {
-    return Helper::write_sequence(os,&(v[0]),&(v[v.size()-1]));
+    return Ariadne::Utility::write_sequence(os,&(v[0]),&(v[v.size()-1]));
 }
 
 template<class T, class C>
@@ -254,7 +254,7 @@ inline
 std::ostream&
 operator<<(std::ostream &os, const std::set<T,C>& s)
 {
-    return Helper::write_sequence(os,s.begin(), s.end(), '{', '}');
+    return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
 }
 
 template<class K, class T, class C>

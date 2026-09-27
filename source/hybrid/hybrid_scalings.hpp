@@ -33,7 +33,7 @@
 #include <map>
 
 #include "utility/container.hpp"
-#include "helper/stlio.hpp"
+#include "utility/stlio.hpp"
 
 #include "symbolic/variable.hpp"
 

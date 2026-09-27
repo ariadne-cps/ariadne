@@ -70,6 +70,7 @@ struct ConstraintPropagationStatistics {
     SizeType hull_effective = 0u;
     SizeType shaving_rounds = 0u;
     SizeType shaving_effective = 0u;
+    SizeType shaving_function_evaluations = 0u;
     SizeType monotone_rounds = 0u;
     SizeType monotone_effective = 0u;
 };
@@ -161,6 +162,9 @@ class ConstraintSolver
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
+    //! \brief As box_reduce(), additionally accumulating the number of validated
+    //! function evaluations performed while shaving.
+    Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j, SizeType& function_evaluations) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
     Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;

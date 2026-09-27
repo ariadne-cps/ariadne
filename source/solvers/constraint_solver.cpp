@@ -182,7 +182,8 @@ Bool ConstraintSolver::propagate(
                             domain,
                             constraints[i].function(),
                             constraints[i].bounds(),
-                            variable)) {
+                            variable,
+                            statistics.shaving_function_evaluations)) {
                         return true;
                     }
                 }
@@ -264,7 +265,8 @@ Bool ConstraintSolver::propagate(
             for(auto const& constraint:constraints) {
                 for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
                     if(this->box_reduce(
-                            domain,constraint.function,constraint.bounds,variable)) {
+                            domain,constraint.function,constraint.bounds,variable,
+                            statistics.shaving_function_evaluations)) {
                         return true;
                     }
                 }
@@ -488,6 +490,17 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
 
 Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
+    SizeType function_evaluations=0u;
+    return this->box_reduce(domain,function,bounds,variable,function_evaluations);
+}
+
+Bool ConstraintSolver::box_reduce(
+    UpperBoxType& domain,
+    const ValidatedScalarMultivariateFunction& function,
+    const ExactIntervalType& bounds,
+    SizeType variable,
+    SizeType& function_evaluations) const
+{
     LOGGING_SCOPE_CREATE;
     LOGGING_PRINTLN("domain="<<domain);
     LOGGING_PRINTLN("function="<<function);
@@ -512,6 +525,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     for(Nat i=0; i!=n; ++i) {
         subinterval=ExactIntervalType(cast_exact(affine(l,u,i,n)),cast_exact(affine(l,u,i+1,n)));
         slice[variable]=subinterval;
+        ++function_evaluations;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_lower_bound(subinterval.upper_bound());
@@ -530,6 +544,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     for(SizeType j=n-1; j!=imax; --j) {
         subinterval=ExactIntervalType(cast_exact(affine(l,u,j,n)),cast_exact(affine(l,u,j+1,n)));
         slice[variable]=subinterval;
+        ++function_evaluations;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
             new_interval.set_upper_bound(subinterval.lower_bound());

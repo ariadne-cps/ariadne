@@ -34,6 +34,17 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
     return static_cast<SizeType>(parsed);
 }
 
+Bool hull_from_argument(Int argc,const char* argv[]) {
+    if(argc<=5) { return true; }
+    String argument(argv[5]);
+    if(argument=="hull") { return true; }
+    if(argument=="no-hull") { return false; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[witness|no-witness] [shaving|no-shaving] [hull|no-hull]");
+}
+
 Bool shaving_from_argument(Int argc,const char* argv[]) {
     if(argc<=4) { return true; }
     String argument(argv[4]);
@@ -144,6 +155,7 @@ Int main(Int argc,const char* argv[]) {
     Bool const sensitivity_enabled=sensitivity_from_argument(argc,argv);
     Bool const witness_probing_enabled=witness_probing_from_argument(argc,argv);
     Bool const shaving_enabled=shaving_from_argument(argc,argv);
+    Bool const hull_enabled=hull_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -158,6 +170,8 @@ Int main(Int argc,const char* argv[]) {
               << (witness_probing_enabled ? "enabled" : "disabled")
               << " shaving="
               << (shaving_enabled ? "enabled" : "disabled")
+              << " hull="
+              << (hull_enabled ? "enabled" : "disabled")
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -216,7 +230,8 @@ Int main(Int argc,const char* argv[]) {
         false,
         sensitivity_enabled,
         witness_probing_enabled,
-        shaving_enabled));
+        shaving_enabled,
+        hull_enabled));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

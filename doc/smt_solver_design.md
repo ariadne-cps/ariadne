@@ -1005,6 +1005,21 @@ itself and leaves its arithmetic and traversal order unchanged. It distinguishes
 the cost of evaluating the Barr3 procedure from the inverse interval operations
 performed by the backward contractor before either path is optimized.
 
+The detailed no-shaving run attributes the Lie hull contraction almost entirely
+to forward procedure execution: 26.497 s of 28.036 s, versus 1.511 s for
+backward propagation and 0.025 s for temporary allocation. Rebuilding the
+procedure costs another 4.783 s, while direct validated rejection costs only
+1.367 s. Thus the dominant current cost is validated forward execution through
+the `Procedure` representation, not inverse/backward contraction.
+
+Before optimizing that execution engine, the benchmark can now disable hull
+reduction while retaining direct validated range rejection. Hull remains enabled
+by default. This experiment measures whether the expensive contractor produces
+enough pruning/contraction on Barr3 to justify optimizing it, or whether a
+cheaper/adaptive contractor schedule should be preferred. Both generic and
+precompiled propagation paths retain direct rejection when hull is disabled and
+have explicit tests for that behavior.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

@@ -38,7 +38,7 @@
 #include "function/function_patch_interface.hpp"
 
 #include "logging/logging.hpp"
-#include "utility/attribute.hpp"
+#include "solvers/solver_attributes.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
 #include "numeric/numeric.hpp"

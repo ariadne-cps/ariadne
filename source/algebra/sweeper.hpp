@@ -30,7 +30,6 @@
 #define ARIADNE_SWEEPER_HPP
 
 #include "utility/macros.hpp"
-#include "utility/attribute.hpp"
 #include "numeric/float.decl.hpp"
 #include "algebra/multi_index.hpp"
 #include "algebra/expansion.hpp"

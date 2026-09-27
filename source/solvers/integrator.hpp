@@ -53,6 +53,9 @@ using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
+using Utility::Attribute;
+using Utility::Generator;
+
 class Real;
 template<class X> class Vector;
 template<class X> class Differential;

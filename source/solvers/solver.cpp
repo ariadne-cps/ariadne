@@ -30,7 +30,7 @@
 
 #include "solvers/solver.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/differential.hpp"
@@ -46,7 +46,7 @@
 #include "algebra/evaluate.hpp"
 #include "algebra/evaluate.tpl.hpp"
 
-using namespace ConcLog;
+using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

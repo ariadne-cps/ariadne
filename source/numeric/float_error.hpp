@@ -47,6 +47,8 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 //! \sa FloatDP, FloatMP, Float, UpperBound.

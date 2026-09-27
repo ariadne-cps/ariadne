@@ -34,6 +34,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinSignedIntegral;
+
 /************  Ints ********************************************************/
 
 class Nat32 {

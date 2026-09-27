@@ -33,6 +33,10 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinSignedIntegral;
+using Utility::BuiltinFloatingPoint;
+
 template<class PR> class FloatFactory {
   protected:
     PR _pr; typedef RawFloatType<PR> F;

@@ -37,6 +37,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+
 //! \ingroup NumericModule
 //! \brief A decimal number.
 //! \sa Integer, Dyadic, Rational, Real

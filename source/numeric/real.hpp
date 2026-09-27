@@ -39,6 +39,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinSignedIntegral;
+
 class Accuracy;
 
 class Real;

@@ -51,6 +51,10 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+using Utility::BuiltinFloatingPoint;
+
 /************ Number *********************************************************/
 
 template<class X> struct IsNumber;

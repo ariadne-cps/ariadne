@@ -749,19 +749,19 @@ sensitivity-guided split. This exercises expression compilation, cached
 derivatives, validated reduction, epsilon checking and neural-expression split
 selection without turning the ordinary test suite into a long benchmark.
 
-Neural scaling regressions live in the dedicated executable
-`tests/solvers/test_smt_neural_benchmarks.cpp`, rather than in
-`test_smt_solver.cpp`. This keeps benchmark timing and scaling diagnostics
-readable and prevents them from being buried among the general SMT regression
-output. The executable is still part of the normal solver test set, so functional
-failures and coverage remain visible.
+The ordinary neural regression is intentionally kept cheap. The executable
+`tests/solvers/test_smt_neural_benchmarks.cpp` retains only the published Barr3
+`2-64-64-1` model: it checks the validated origin value, theory-literal
+normalization, and one-box end-to-end SMT processing using the cheap geometric
+path with sensitivity, witness probing, shaving and hull reduction disabled.
+This preserves a real neural-expression regression while avoiding contractor
+performance work in every normal CTest and coverage run.
 
-Each neural regression measures its own solve time with
-`Stopwatch<Milliseconds>`, following the existing Ariadne timing pattern used
-by `examples/continuous/vanderpol.cpp`: construct the stopwatch immediately
-before the measured solver call, call `click()` immediately afterwards, and
-report `elapsed_seconds()`. Timing is diagnostic only and is never used as a
-pass/fail assertion, since Debug/coverage instrumentation and host load can vary.
+The earlier `8x8`, `16x16` and `32x32` prefix solves remain useful historical
+scaling fixtures, but their repeated one-box solves are no longer part of the
+ordinary regression suite. Performance and scaling measurements now belong to
+`benchmark_smt_barr3_verification`, which exercises the actual published
+verification workload and reports detailed phase statistics.
 
 The second scaling fixture is `2-16-16-1`, extracted by the
 same prefix rule: first 16 first-layer neurons, top-left `16x16` second-layer

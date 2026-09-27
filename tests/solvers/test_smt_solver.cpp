@@ -64,6 +64,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_fused_direct_classification());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
         ARIADNE_TEST_CALL(test_solve());
+        ARIADNE_TEST_CALL(test_geometric_validated_constraint_split());
         ARIADNE_TEST_CALL(test_theory_solve());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
         ARIADNE_TEST_CALL(test_parallel_solve());
@@ -1087,6 +1088,24 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-fast-path] equality upper epsilon bound remains unresolved" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::EQ_ZERO)
+            });
+            auto observation=SmtSolverTestSupport::process_compiled_box(
+                solver,space,
+                UpperBoxType(ExactBoxType({
+                    ExactIntervalType(0,0.25_x)})),
+                literals);
+            ARIADNE_TEST_ASSERT(
+                observation.status==
+                    SmtSolverTestSupport::BoxProcessingStatus::SPLIT);
+            ARIADNE_TEST_ASSERT(observation.fused_direct_classification);
+            ARIADNE_TEST_ASSERT(not observation.epsilon_box_certification);
+        }
+
+        {
             SmtSolver contractor_solver(SmtSolverConfiguration(
                 0.125_x,
                 std::numeric_limits<SizeType>::max(),
@@ -1830,6 +1849,36 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints;
             ARIADNE_TEST_THROWS(solver.solve(domain,constraints),std::runtime_error);
         }
+    }
+
+    Void test_geometric_validated_constraint_split() {
+        std::cout << "[smt-geometric] validated constraint uses geometric split" << std::endl;
+        RealVariable gx("geometric_constraint_x");
+        RealSpace space({gx});
+        auto function=ValidatedScalarMultivariateFunction::identity(1u)[0];
+        List<ValidatedConstraint> constraints({
+            ValidatedConstraint(
+                ValidatedNumber(0.0_x),
+                function,
+                ValidatedNumber(+infinity))
+        });
+        SmtSolver solver(SmtSolverConfiguration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            1u,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false));
+        SmtResult solve_result=solver.solve(
+            ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),
+            constraints);
+        ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+        ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+        ARIADNE_TEST_EQUAL(solve_result.statistics().sensitivity_guided_splits,0u);
     }
 
     Void test_theory_solve() {

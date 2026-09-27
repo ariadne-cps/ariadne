@@ -972,6 +972,22 @@ before increasing the box budget. Disabling probing changes only when heuristic
 point candidates are attempted; validated whole-box epsilon certification
 remains active.
 
+The eight-box geometric/no-witness run reduces the Lie query further to
+42.847 s. Of that, 39.241 s are original reduction; the run performs 64 shaving
+function evaluations and still records no pruned box or epsilon certification.
+The unsafe rectangles likewise spend about 4.81 s of roughly 5.21 s total in
+reduction. With sensitivity and deterministic point probing removed, coordinate
+shaving is therefore the dominant measured cost.
+
+A further diagnostic switch disables coordinate shaving while retaining hull
+propagation, direct validated range rejection and whole-box epsilon
+certification. Shaving remains enabled by default. This switch is implemented
+at the generic `ConstraintSolver::propagate` boundary rather than by duplicating
+propagation in SMT; both validated-constraint and precompiled-constraint paths
+are tested with shaving disabled. Monotone contraction remains independently
+configurable and, when enabled, is still reached after a hull stall even if
+shaving is disabled.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

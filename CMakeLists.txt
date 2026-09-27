@@ -68,19 +68,10 @@ include(CTest)
 
 include(UseDoxygen OPTIONAL)
 
-include(CheckTypeSize)
 include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
 include(CheckLibraryExists)
-
-check_type_size("char" SIZEOF_CHAR)
-check_type_size("short int" SIZEOF_SHORT_INT)
-check_type_size("int" SIZEOF_INT)
-check_type_size("long int" SIZEOF_LONG_INT)
-check_type_size("long long int" SIZEOF_LONG_LONG_INT)
-check_type_size("float" SIZEOF_FLOAT)
-check_type_size("double" SIZEOF_DOUBLE)
 
 check_include_file("dlfcn.h" HAVE_DLFCN_H)
 check_include_file("execinfo.h" HAVE_EXECINFO_H)

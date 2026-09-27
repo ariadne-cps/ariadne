@@ -539,9 +539,6 @@ SmtSolver::_direct_classification(
         if(literal.strict_lower
            && definitely(image.upper_bound()<=literal.bounds.lower_bound())) {
             original_infeasible=true;
-        } else if(literal.strict_upper
-                  && definitely(image.lower_bound()>=literal.bounds.upper_bound())) {
-            original_infeasible=true;
         } else if(definitely(disjoint(image,literal.bounds))) {
             original_infeasible=true;
         }

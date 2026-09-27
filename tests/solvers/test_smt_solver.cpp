@@ -1016,6 +1016,24 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-fast-path] strict epsilon relaxation certifies near-zero box" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GT_ZERO)
+            });
+            SmtResult solve_result=solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(-0.0625_x,0.0625_x)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_pruned,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().epsilon_box_certifications,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().fused_direct_classification_boxes,1u);
+        }
+
+        {
             SmtSolver contractor_solver(SmtSolverConfiguration(
                 0.125_x,
                 std::numeric_limits<SizeType>::max(),

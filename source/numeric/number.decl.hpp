@@ -48,6 +48,7 @@ using Utility::HasGenericType;
 using Utility::Convertible;
 using Utility::Same;
 using Utility::CharacteristicsType;
+using Utility::Pair;
 
 class Real;
 

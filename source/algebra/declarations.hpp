@@ -21,6 +21,8 @@
 
 namespace Ariadne {
 
+using Utility::Pair;
+
 template<class X> class Algebra;
 template<class X> class ElementaryAlgebra;
 

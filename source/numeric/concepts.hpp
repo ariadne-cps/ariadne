@@ -38,6 +38,7 @@ namespace Ariadne {
 
 using Utility::ComparableEnumerationType;
 using Utility::Bool;
+using Utility::Int;
 using Utility::Constructible;
 using Utility::ConvertibleTo;
 using Utility::SameAs;

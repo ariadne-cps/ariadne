@@ -37,6 +37,8 @@
 
 namespace Ariadne {
 
+using Utility::make_handle;
+
 namespace Detail {
 
 inline LogicalValue check(LogicalValue l, Effort e) { return l; }

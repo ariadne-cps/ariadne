@@ -21,6 +21,8 @@
 
 namespace Ariadne {
 
+using Utility::Pair;
+
 template<class X> struct InformationTypedef;
 template<> struct InformationTypedef<Real> { typedef EffectiveTag Type; };
 template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };

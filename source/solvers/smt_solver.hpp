@@ -72,7 +72,8 @@ class SmtSolverConfiguration {
         SizeType box_processing_limit=std::numeric_limits<SizeType>::max(),
         Bool candidate_search_enabled=true,
         Bool monotone_reduction_enabled=false,
-        Bool sensitivity_split_enabled=true);
+        Bool sensitivity_split_enabled=true,
+        Bool deterministic_witness_probing_enabled=true);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -96,6 +97,11 @@ class SmtSolverConfiguration {
     //! \brief Whether sensitivity-guided splitting is enabled.
     Bool sensitivity_split_enabled() const { return _sensitivity_split_enabled; }
 
+    //! \brief Whether deterministic midpoint/endpoint/corner witness probing is enabled.
+    Bool deterministic_witness_probing_enabled() const {
+        return _deterministic_witness_probing_enabled;
+    }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -104,6 +110,7 @@ class SmtSolverConfiguration {
     Bool _candidate_search_enabled;
     Bool _monotone_reduction_enabled;
     Bool _sensitivity_split_enabled;
+    Bool _deterministic_witness_probing_enabled;
 };
 
 //! \ingroup Solvers

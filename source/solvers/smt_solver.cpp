@@ -247,14 +247,16 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     ExactDouble epsilon, SizeType theory_minimization_budget,
     SizeType learned_clause_limit, SizeType box_processing_limit,
     Bool candidate_search_enabled, Bool monotone_reduction_enabled,
-    Bool sensitivity_split_enabled)
+    Bool sensitivity_split_enabled,
+    Bool deterministic_witness_probing_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
       _box_processing_limit(box_processing_limit),
       _candidate_search_enabled(candidate_search_enabled),
       _monotone_reduction_enabled(monotone_reduction_enabled),
-      _sensitivity_split_enabled(sensitivity_split_enabled)
+      _sensitivity_split_enabled(sensitivity_split_enabled),
+      _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -575,13 +577,15 @@ SmtSolver::_process_box(
         return result;
     }
 
-    phase_start=std::chrono::steady_clock::now();
-    auto witness=this->_epsilon_witness(domain,conjunction);
-    result.witness_probe_seconds=elapsed_seconds(phase_start);
-    if(witness.has_value()) {
-        result.status=BoxProcessingStatus::EPSILON_SAT;
-        result.witness=*witness;
-        return result;
+    if(_configuration.deterministic_witness_probing_enabled()) {
+        phase_start=std::chrono::steady_clock::now();
+        auto witness=this->_epsilon_witness(domain,conjunction);
+        result.witness_probe_seconds=elapsed_seconds(phase_start);
+        if(witness.has_value()) {
+            result.status=BoxProcessingStatus::EPSILON_SAT;
+            result.witness=*witness;
+            return result;
+        }
     }
 
     phase_start=std::chrono::steady_clock::now();

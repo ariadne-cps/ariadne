@@ -96,7 +96,11 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
 
 Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     UpperBoxType const& domain,
-    std::vector<ValidatedScalarMultivariateFunction> const& functions)
+    std::vector<ValidatedScalarMultivariateFunction> const& functions,
+    SizeType* derivatives_built=nullptr,
+    SizeType* derivative_evaluations=nullptr,
+    double* derivative_build_seconds=nullptr,
+    double* derivative_evaluation_seconds=nullptr)
 {
     auto widths=domain.widths();
 
@@ -115,7 +119,21 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
         Bool active=false;
         UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
         for(auto const& function:functions) {
-            UpperIntervalType derivative_image=apply(function.derivative(variable),domain);
+            auto const build_start=std::chrono::steady_clock::now();
+            auto derivative=function.derivative(variable);
+            double const build_seconds=elapsed_seconds(build_start);
+            if(derivatives_built!=nullptr) { ++*derivatives_built; }
+            if(derivative_build_seconds!=nullptr) {
+                *derivative_build_seconds+=build_seconds;
+            }
+
+            auto const evaluation_start=std::chrono::steady_clock::now();
+            UpperIntervalType derivative_image=apply(derivative,domain);
+            double const evaluation_seconds=elapsed_seconds(evaluation_start);
+            if(derivative_evaluations!=nullptr) { ++*derivative_evaluations; }
+            if(derivative_evaluation_seconds!=nullptr) {
+                *derivative_evaluation_seconds+=evaluation_seconds;
+            }
             Bool const lower_is_zero=
                 derivative_image.lower_bound().raw()
                     ==zero_derivative.lower_bound().raw();
@@ -338,6 +356,8 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
     statistics.hull_effective+=propagation_statistics.hull_effective;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    statistics.shaving_function_evaluations+=
+        propagation_statistics.shaving_function_evaluations;
     return empty;
 }
 
@@ -408,6 +428,8 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
     statistics.hull_effective+=propagation_statistics.hull_effective;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    statistics.shaving_function_evaluations+=
+        propagation_statistics.shaving_function_evaluations;
     statistics.monotone_rounds+=propagation_statistics.monotone_rounds;
     statistics.monotone_effective+=propagation_statistics.monotone_effective;
     return empty;
@@ -493,7 +515,11 @@ template<class Conjunction>
 Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
 SmtSolver::_split_box(
     UpperBoxType const& domain,
-    Conjunction const& conjunction) const
+    Conjunction const& conjunction,
+    SizeType& derivatives_built,
+    SizeType& derivative_evaluations,
+    double& derivative_build_seconds,
+    double& derivative_evaluation_seconds) const
 {
     std::vector<ValidatedScalarMultivariateFunction> functions;
     functions.reserve(conjunction.size());
@@ -502,7 +528,12 @@ SmtSolver::_split_box(
             functions.push_back(this->_function(item));
         }
     }
-    auto selection=sensitivity_split_coordinate(domain,functions);
+    auto selection=sensitivity_split_coordinate(
+        domain,functions,
+        &derivatives_built,
+        &derivative_evaluations,
+        &derivative_build_seconds,
+        &derivative_evaluation_seconds);
     return {domain.split(selection.first),selection.second};
 }
 
@@ -548,7 +579,12 @@ SmtSolver::_process_box(
     }
 
     phase_start=std::chrono::steady_clock::now();
-    auto split_result=this->_split_box(domain,conjunction);
+    auto split_result=this->_split_box(
+        domain,conjunction,
+        result.sensitivity_derivatives_built,
+        result.sensitivity_derivative_evaluations,
+        result.sensitivity_derivative_build_seconds,
+        result.sensitivity_derivative_evaluation_seconds);
     result.split_seconds=elapsed_seconds(phase_start);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
@@ -614,6 +650,16 @@ SmtSolver::_accumulate_box_processing_statistics(
     statistics.epsilon_check_seconds+=processing.epsilon_check_seconds;
     statistics.witness_probe_seconds+=processing.witness_probe_seconds;
     statistics.split_seconds+=processing.split_seconds;
+    statistics.sensitivity_derivatives_built+=
+        processing.sensitivity_derivatives_built;
+    statistics.sensitivity_derivative_evaluations+=
+        processing.sensitivity_derivative_evaluations;
+    statistics.sensitivity_derivative_build_seconds+=
+        processing.sensitivity_derivative_build_seconds;
+    statistics.sensitivity_derivative_evaluation_seconds+=
+        processing.sensitivity_derivative_evaluation_seconds;
+    statistics.shaving_function_evaluations+=
+        processing.reductions.shaving_function_evaluations;
     statistics.candidate_search_seconds+=processing.candidate_search_seconds;
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
@@ -970,10 +1016,15 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.hull_effective_reductions+=source.hull_effective_reductions;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
+    target.shaving_function_evaluations+=source.shaving_function_evaluations;
     target.monotone_reduction_rounds+=source.monotone_reduction_rounds;
     target.monotone_effective_reductions+=source.monotone_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;
     target.sensitivity_overrides_geometric_splits+=source.sensitivity_overrides_geometric_splits;
+    target.sensitivity_derivatives_built+=source.sensitivity_derivatives_built;
+    target.sensitivity_derivative_evaluations+=source.sensitivity_derivative_evaluations;
+    target.sensitivity_derivative_build_seconds+=source.sensitivity_derivative_build_seconds;
+    target.sensitivity_derivative_evaluation_seconds+=source.sensitivity_derivative_evaluation_seconds;
     target.epsilon_box_certifications+=source.epsilon_box_certifications;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;

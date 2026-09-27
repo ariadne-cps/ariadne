@@ -116,10 +116,13 @@ struct SmtSearchStatistics {
     SizeType hull_effective_reductions = 0u;
     SizeType shaving_reduction_rounds = 0u;
     SizeType shaving_effective_reductions = 0u;
+    SizeType shaving_function_evaluations = 0u;
     SizeType monotone_reduction_rounds = 0u;
     SizeType monotone_effective_reductions = 0u;
     SizeType sensitivity_guided_splits = 0u;
     SizeType sensitivity_overrides_geometric_splits = 0u;
+    SizeType sensitivity_derivatives_built = 0u;
+    SizeType sensitivity_derivative_evaluations = 0u;
     SizeType epsilon_box_certifications = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
@@ -128,6 +131,8 @@ struct SmtSearchStatistics {
     double epsilon_check_seconds = 0.0;
     double witness_probe_seconds = 0.0;
     double split_seconds = 0.0;
+    double sensitivity_derivative_build_seconds = 0.0;
+    double sensitivity_derivative_evaluation_seconds = 0.0;
     double candidate_search_seconds = 0.0;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
@@ -479,6 +484,7 @@ class SmtSolver {
         SizeType hull_effective = 0u;
         SizeType shaving_rounds = 0u;
         SizeType shaving_effective = 0u;
+        SizeType shaving_function_evaluations = 0u;
         SizeType monotone_rounds = 0u;
         SizeType monotone_effective = 0u;
     };
@@ -490,6 +496,8 @@ class SmtSolver {
         ReductionStatistics reductions;
         Bool sensitivity_guided_split = false;
         Bool sensitivity_overrode_geometric_split = false;
+        SizeType sensitivity_derivatives_built = 0u;
+        SizeType sensitivity_derivative_evaluations = 0u;
         Bool epsilon_box_certification = false;
         Bool dp_resolution_exhausted = false;
         Bool candidate_witness_search = false;
@@ -499,6 +507,8 @@ class SmtSolver {
         double epsilon_check_seconds = 0.0;
         double witness_probe_seconds = 0.0;
         double split_seconds = 0.0;
+        double sensitivity_derivative_build_seconds = 0.0;
+        double sensitivity_derivative_evaluation_seconds = 0.0;
         double candidate_search_seconds = 0.0;
     };
 
@@ -571,7 +581,11 @@ class SmtSolver {
     template<class Conjunction>
     Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
         UpperBoxType const& domain,
-        Conjunction const& conjunction) const;
+        Conjunction const& conjunction,
+        SizeType& derivatives_built,
+        SizeType& derivative_evaluations,
+        double& derivative_build_seconds,
+        double& derivative_evaluation_seconds) const;
 
     ValidatedScalarMultivariateFunction const& _function(
         ValidatedConstraint const& constraint) const;

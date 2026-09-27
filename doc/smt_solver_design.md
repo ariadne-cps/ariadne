@@ -1066,6 +1066,22 @@ without depth metadata; adding sequential-only depth statistics would make the
 public statistics inconsistent. The budget/pruning curve already measures the
 relevant search effect without changing search-state representation.
 
+At 512 boxes the Lie-only cheap baseline prunes 248/512 boxes (48.4 percent)
+and splits 264, suggesting the pruning fraction is approaching a plateau near
+one half. Runtime is 130.651 s: 86.169 s direct rejection and 41.033 s whole-box
+epsilon checking after 3.352 s compilation. The epsilon phase therefore becomes
+the next avoidable duplicate cost: on this contractor-free path it reevaluates
+the same unchanged literal functions immediately after direct rejection.
+
+The compiled-theory box processor now has a fused direct-classification path
+used only when hull, shaving and monotone reduction are all disabled. Each
+literal image is evaluated once and that same validated image is used both for
+original infeasibility (including strict endpoint semantics) and whole-box
+epsilon certification. If any box-modifying contractor is enabled, the existing
+separate reduction and post-reduction epsilon evaluation remain unchanged. Tests
+cover original pruning, epsilon certification, an unresolved split, strict `>0`
+endpoint rejection, fast-path gating, and statistics aggregation.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

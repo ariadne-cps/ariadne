@@ -61,6 +61,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_cdcl_helpers());
         ARIADNE_TEST_CALL(test_invalid_internal_relations());
         ARIADNE_TEST_CALL(test_epsilon_predicates());
+        ARIADNE_TEST_CALL(test_fused_direct_classification());
         ARIADNE_TEST_CALL(test_box_processing_statistics());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
@@ -395,6 +396,7 @@ class TestSmtSolver {
         no_conflict.sensitivity_derivative_evaluations=3u;
         no_conflict.sensitivity_derivative_build_seconds=0.25;
         no_conflict.sensitivity_derivative_evaluation_seconds=0.5;
+        no_conflict.fused_direct_classification_boxes=6u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
@@ -411,6 +413,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluations,3u);
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_build_seconds,0.25);
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluation_seconds,0.5);
+        ARIADNE_TEST_EQUAL(target.fused_direct_classification_boxes,6u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -939,6 +942,95 @@ class TestSmtSolver {
             not SmtSolverTestSupport::epsilon_satisfied(
                 solver,wide_box,inside));
 
+    }
+
+    Void test_fused_direct_classification() {
+        std::cout << "[smt-fast-path] fused rejection and epsilon classification" << std::endl;
+        RealVariable sx("fast_path_x");
+        RealExpression ex=sx;
+        RealSpace space({sx});
+
+        SmtSolver solver(SmtSolverConfiguration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            1u,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false));
+
+        {
+            List<SmtTheoryPrimitiveLiteral> literals({
+                make_smt_theory_literal(ex>=2)
+            });
+            SmtResult result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().fused_direct_classification_boxes,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().epsilon_box_certifications,0u);
+        }
+
+        {
+            List<SmtTheoryPrimitiveLiteral> literals({
+                make_smt_theory_literal(ex>=0)
+            });
+            SmtResult result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0.0625_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(
+                result.statistics().fused_direct_classification_boxes,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().epsilon_box_certifications,1u);
+        }
+
+        {
+            List<SmtTheoryPrimitiveLiteral> literals({
+                make_smt_theory_literal(ex>=0)
+            });
+            SmtResult result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_unknown());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_split,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().fused_direct_classification_boxes,1u);
+        }
+
+        {
+            List<SmtTheoryPrimitiveLiteral> literals({
+                make_smt_theory_literal(ex>0)
+            });
+            SmtResult result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),literals);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_pruned,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().fused_direct_classification_boxes,1u);
+        }
+
+        {
+            SmtSolver contractor_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true));
+            List<SmtTheoryPrimitiveLiteral> literals({
+                make_smt_theory_literal(ex>=0)
+            });
+            SmtResult result=contractor_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().fused_direct_classification_boxes,0u);
+        }
     }
 
     Void test_box_processing_statistics() {

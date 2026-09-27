@@ -176,9 +176,9 @@ DirectBarr3Evaluation direct_barr3_evaluate(Vector<FloatDPBounds> const& x)
         return FloatDPBounds(ExactDouble(p[i]),dp);
     };
 
-    std::array<FloatDPBounds,width> h1;
-    std::array<FloatDPBounds,width> dh1_dx;
-    std::array<FloatDPBounds,width> dh1_dy;
+    Vector<FloatDPBounds> h1(width,FloatDPBounds(0,dp));
+    Vector<FloatDPBounds> dh1_dx(width,FloatDPBounds(0,dp));
+    Vector<FloatDPBounds> dh1_dy(width,FloatDPBounds(0,dp));
     for(SizeType i=0u;i!=width;++i) {
         FloatDPBounds z=c(TestBarr3Full64::b1_offset+i)
             + c(TestBarr3Full64::w1_offset+2u*i)*x[0]
@@ -189,9 +189,9 @@ DirectBarr3Evaluation direct_barr3_evaluate(Vector<FloatDPBounds> const& x)
         dh1_dy[i]=factor*c(TestBarr3Full64::w1_offset+2u*i+1u);
     }
 
-    std::array<FloatDPBounds,width> h2;
-    std::array<FloatDPBounds,width> dh2_dx;
-    std::array<FloatDPBounds,width> dh2_dy;
+    Vector<FloatDPBounds> h2(width,FloatDPBounds(0,dp));
+    Vector<FloatDPBounds> dh2_dx(width,FloatDPBounds(0,dp));
+    Vector<FloatDPBounds> dh2_dy(width,FloatDPBounds(0,dp));
     for(SizeType i=0u;i!=width;++i) {
         FloatDPBounds z=c(TestBarr3Full64::b2_offset+i);
         FloatDPBounds dz_dx(0,dp);

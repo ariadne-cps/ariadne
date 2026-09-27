@@ -30,6 +30,7 @@
 #define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
 #include "algebra/algebra_interface.hpp"
+#include "utility/writable.hpp"
 
 #include "function/function.decl.hpp"
 #include "function/function_interface.hpp"
@@ -39,6 +40,8 @@
 #include "numeric/operators.hpp"
 
 namespace Ariadne {
+
+using Utility::WritableInterface;
 
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
 template<class P, class ARG, class PR, class PRE> class FunctionModelCreatorInterface;

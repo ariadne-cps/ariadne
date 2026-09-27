@@ -34,6 +34,8 @@
 
 namespace Ariadne {
 
+using Utility::WritableInterface;
+
 /*! \brief Configuration altering the model of a class.
  *
  *  \details A configuration allows controlled change in the behavior of a class.

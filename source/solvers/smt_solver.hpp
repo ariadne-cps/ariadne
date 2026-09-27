@@ -71,7 +71,8 @@ class SmtSolverConfiguration {
         SizeType learned_clause_limit=std::numeric_limits<SizeType>::max(),
         SizeType box_processing_limit=std::numeric_limits<SizeType>::max(),
         Bool candidate_search_enabled=true,
-        Bool monotone_reduction_enabled=false);
+        Bool monotone_reduction_enabled=false,
+        Bool sensitivity_split_enabled=true);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -92,6 +93,9 @@ class SmtSolverConfiguration {
     //! \brief Whether validated monotone/Newton contraction is enabled.
     Bool monotone_reduction_enabled() const { return _monotone_reduction_enabled; }
 
+    //! \brief Whether sensitivity-guided splitting is enabled.
+    Bool sensitivity_split_enabled() const { return _sensitivity_split_enabled; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -99,6 +103,7 @@ class SmtSolverConfiguration {
     SizeType _box_processing_limit;
     Bool _candidate_search_enabled;
     Bool _monotone_reduction_enabled;
+    Bool _sensitivity_split_enabled;
 };
 
 //! \ingroup Solvers

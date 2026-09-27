@@ -107,6 +107,7 @@ class TestSmtSolver {
             false);
         ARIADNE_TEST_ASSERT(not no_candidate_configuration.candidate_search_enabled());
         ARIADNE_TEST_ASSERT(not configuration.monotone_reduction_enabled());
+        ARIADNE_TEST_ASSERT(configuration.sensitivity_split_enabled());
         std::cout << "[smt-config] enable monotone reduction" << std::endl;
         SmtSolverConfiguration monotone_configuration(
             0.125_x,
@@ -116,6 +117,17 @@ class TestSmtSolver {
             true,
             true);
         ARIADNE_TEST_ASSERT(monotone_configuration.monotone_reduction_enabled());
+
+        std::cout << "[smt-config] disable sensitivity splitting" << std::endl;
+        SmtSolverConfiguration geometric_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            true,
+            false,
+            false);
+        ARIADNE_TEST_ASSERT(not geometric_configuration.sensitivity_split_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);

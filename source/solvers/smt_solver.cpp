@@ -246,13 +246,15 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
 SmtSolverConfiguration::SmtSolverConfiguration(
     ExactDouble epsilon, SizeType theory_minimization_budget,
     SizeType learned_clause_limit, SizeType box_processing_limit,
-    Bool candidate_search_enabled, Bool monotone_reduction_enabled)
+    Bool candidate_search_enabled, Bool monotone_reduction_enabled,
+    Bool sensitivity_split_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
       _box_processing_limit(box_processing_limit),
       _candidate_search_enabled(candidate_search_enabled),
-      _monotone_reduction_enabled(monotone_reduction_enabled)
+      _monotone_reduction_enabled(monotone_reduction_enabled),
+      _sensitivity_split_enabled(sensitivity_split_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -521,6 +523,10 @@ SmtSolver::_split_box(
     double& derivative_build_seconds,
     double& derivative_evaluation_seconds) const
 {
+    if(not _configuration.sensitivity_split_enabled()) {
+        return {domain.split(),{false,false}};
+    }
+
     std::vector<ValidatedScalarMultivariateFunction> functions;
     functions.reserve(conjunction.size());
     for(auto const& item:conjunction) {

@@ -763,10 +763,21 @@ before the measured solver call, call `click()` immediately afterwards, and
 report `elapsed_seconds()`. Timing is diagnostic only and is never used as a
 pass/fail assertion, since Debug/coverage instrumentation and host load can vary.
 
-The next scaling points are `16x16`, `32x32` and the exact published
-`64x64` model. Each size is added to this dedicated benchmark executable only
-while its measured runtime remains suitable for routine execution; larger cases
-may later move to an explicit performance-only target.
+The second scaling fixture is `2-16-16-1`, extracted by the
+same prefix rule: first 16 first-layer neurons, top-left `16x16` second-layer
+block, corresponding biases/output weights, and the original output bias. Its
+concatenated raw float32 tensor bytes have SHA-256
+`2aa09bc348938809ce0f904779d8585561e7ce7017bf36d65e05149cfb2f6ce5`.
+Independent evaluation of the promoted checkpoint parameters gives
+`B(0,0)=-0.46582943379545416`; the test checks a tight validated enclosure
+`[-0.466,-0.465]` before running the same one-box Barr3-domain equation
+workload used for the 8x8 fixture. This keeps the timing comparison controlled:
+only the network width changes.
+
+The next scaling points are `32x32` and the exact published `64x64` model.
+Each size is added to this dedicated benchmark executable only while its measured
+runtime remains suitable for routine execution; larger cases may later move to
+an explicit performance-only target.
 
 ## Current open work
 

@@ -35,7 +35,9 @@
 
 namespace Ariadne {
 
-using OutputStream = std::ostream;
+using Utility::ComparableEnumerationType;
+
+using Utility::OutputStream;
 
 //! \brief The sign of a numerical value.
 enum class Sign : ComparableEnumerationType { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };

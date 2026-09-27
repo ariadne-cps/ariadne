@@ -35,7 +35,8 @@
 
 namespace Ariadne {
 
-using namespace Utility;
+using Utility::Void;
+using Utility::Convertible;
 
 class ParadigmError { };
 

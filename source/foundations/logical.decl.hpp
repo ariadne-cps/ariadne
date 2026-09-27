@@ -35,8 +35,8 @@
 
 namespace Ariadne {
 
-typedef void Void;
-typedef bool Bool;
+
+using Utility::Bool;
 
 class Indeterminate;
 extern const Indeterminate indeterminate;
@@ -110,12 +110,7 @@ template<class P> using InequalityLogicalType = ApartnessType<P>;
 
 namespace Detail {
 
-#if (defined __arm || defined __aarch64__)
-typedef short ComparableEnumerationType;
-#else
-typedef char ComparableEnumerationType;
-#endif
-
+using Utility::ComparableEnumerationType;
 enum class LogicalValue : ComparableEnumerationType;
 }
 using Detail::LogicalValue;

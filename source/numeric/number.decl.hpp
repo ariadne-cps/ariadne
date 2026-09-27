@@ -59,9 +59,13 @@ template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 template<class X> using GenericNumericType = GenericType<NumericType<X>>;
 
 
-typedef uint Nat;
-typedef int Int;
-typedef double Dbl;
+using Utility::Nat;
+using Utility::Int;
+using Utility::Dbl;
+using Utility::GenericType;
+using Utility::HasGenericType;
+using Utility::True;
+using Utility::False;
 
 class Nat32;
 class Nat64;

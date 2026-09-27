@@ -33,7 +33,6 @@
 
 namespace Ariadne {
 
-using Utility::OutputStream;
 
 template<class T> struct SetTraits;
 template<class T> using DimensionOfType = typename SetTraits<T>::DimensionType;

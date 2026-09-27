@@ -34,7 +34,6 @@
 
 namespace Ariadne {
 
-using Utility::StringStream;
 
 const Integer Decimal::_ten = Integer(10);
 

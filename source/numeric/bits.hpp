@@ -35,7 +35,6 @@
 
 namespace Ariadne {
 
-using Utility::OutputStream;
 
 //! \brief A count of a number of binary digits, usable to define an accuracy or precision specification.
 class Bits {

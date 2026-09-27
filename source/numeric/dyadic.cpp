@@ -47,7 +47,6 @@
 namespace Ariadne {
 
 using Utility::Writer;
-using Utility::StringStream;
 
 template<class X> class FiniteOperations;
 template<class X> class ExtensionOperations;

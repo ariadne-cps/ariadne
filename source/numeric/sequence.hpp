@@ -37,7 +37,6 @@
 namespace Ariadne {
 
 using Utility::Nat;
-using Utility::OutputStream;
 using Utility::WritableTemporary;
 class Natural;
 

@@ -187,7 +187,6 @@ inline rounding_mode_t get_builtin_rounding_mode() { return ROUND_TO_NEAREST; }
 
 namespace Ariadne {
 
-using Utility::OutputStream;
 
 //!@{
 //! \ingroup NumericModule

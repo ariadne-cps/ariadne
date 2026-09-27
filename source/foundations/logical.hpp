@@ -40,7 +40,6 @@ namespace Ariadne {
 
 using Utility::String;
 using Utility::Nat;
-using Utility::OutputStream;
 using Utility::Handle;
 using Utility::SharedPointer;
 using Utility::ConstructibleFrom;

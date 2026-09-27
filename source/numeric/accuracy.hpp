@@ -36,7 +36,6 @@
 
 namespace Ariadne {
 
-using Utility::OutputStream;
 
 class Bits;
 

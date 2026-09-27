@@ -46,7 +46,6 @@ using DyadicBounds = Bounds<Dyadic>;
 using FloatDPBounds = Bounds<FloatDP>;
 using FloatMPBounds = Bounds<FloatMP>;
 
-using Utility::OutputStream;
 
 class Real;
 

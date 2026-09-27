@@ -496,48 +496,110 @@ Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 
 
 namespace {
-typedef Real R; typedef EffectiveNumber Y; typedef Map<Identifier,SizeType> VM; typedef Map<const Void*,Formula<Y>> FM;
+typedef Real R;
+typedef EffectiveNumber Y;
 
-const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache);
-Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& cache);
+using FormulaSharingCache=Map<const Void*,Formula<Y>>;
 
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Constant<Real>& e, const SPC&, CACHE&) {
-    return Formula<Y>::constant(e.value()); }
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Variable<Real>& e, const SPC& spc, CACHE&) {
-    return Formula<Y>::coordinate(spc[e.name()]); }
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const UnaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
-    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache)); }
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const BinaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
-    return make_formula<Y>(e.op(),_cached_make_formula(e.arg1(),spc,cache),_cached_make_formula(e.arg2(),spc,cache)); }
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
-    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
+const Formula<EffectiveNumber>& _make_formula_preserving_sharing(
+    const Expression<Real>& e,
+    const Map<Identifier,SizeType>& variable_indices,
+    FormulaSharingCache& sharing_cache);
 
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>&, const SPC&, CACHE&) {
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const Constant<Real>& e,
+    const SPC&,
+    FormulaSharingCache&)
+{
+    return Formula<Y>::constant(e.value());
+}
+
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const Variable<Real>& e,
+    const SPC& variable_indices,
+    FormulaSharingCache&)
+{
+    return Formula<Y>::coordinate(variable_indices[e.name()]);
+}
+
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const UnaryExpressionNode<R>& e,
+    const SPC& variable_indices,
+    FormulaSharingCache& sharing_cache)
+{
+    return make_formula<Y>(
+        e.op(),
+        _make_formula_preserving_sharing(
+            e.arg(),variable_indices,sharing_cache));
+}
+
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const BinaryExpressionNode<R>& e,
+    const SPC& variable_indices,
+    FormulaSharingCache& sharing_cache)
+{
+    return make_formula<Y>(
+        e.op(),
+        _make_formula_preserving_sharing(
+            e.arg1(),variable_indices,sharing_cache),
+        _make_formula_preserving_sharing(
+            e.arg2(),variable_indices,sharing_cache));
+}
+
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const GradedExpressionNode<R>& e,
+    const SPC& variable_indices,
+    FormulaSharingCache& sharing_cache)
+{
+    return make_formula<Y>(
+        e.op(),
+        _make_formula_preserving_sharing(
+            e.arg(),variable_indices,sharing_cache),
+        e.num());
+}
+
+template<class SPC>
+Formula<Y> _convert_expression_node(
+    const SymbolicType<Real(RealVector,SizeType)>&,
+    const SPC&,
+    FormulaSharingCache&)
+{
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)
+const Formula<EffectiveNumber>& _make_formula_preserving_sharing(
+    const Expression<Real>& e,
+    const Map<Identifier,SizeType>& variable_indices,
+    FormulaSharingCache& sharing_cache)
 {
-    const ExpressionNode<Real>* eptr=&e.node_ref();
-    if(cache.has_key(eptr)) { return cache.get(eptr); }
-    return insert(cache, eptr, eptr->accept([&](auto en){return _cached_make_formula_impl(en,spc,cache);}));
-}
-
-Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& no_cache)
-{
-    return e.node_ref().accept([&](auto en){return _cached_make_formula_impl(en,spc,no_cache);});
+    const ExpressionNode<Real>* expression_node=&e.node_ref();
+    if(sharing_cache.has_key(expression_node)) {
+        return sharing_cache.get(expression_node);
+    }
+    return insert(
+        sharing_cache,
+        expression_node,
+        expression_node->accept([&](auto node) {
+            return _convert_expression_node(
+                node,variable_indices,sharing_cache);
+        }));
 }
 
 } // namespace
 
-const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache) {
-    return _cached_make_formula(e,spc,cache);
-}
 
-Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v)
+Formula<EffectiveNumber> make_formula(
+    const Expression<Real>& e,
+    const Map<Identifier,SizeType>& variable_indices)
 {
-    Map< const Void*, Formula<EffectiveNumber> > cache;
-    return cached_make_formula(e,v,cache);
+    FormulaSharingCache sharing_cache;
+    return _make_formula_preserving_sharing(
+        e,variable_indices,sharing_cache);
 }
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)

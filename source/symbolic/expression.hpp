@@ -308,6 +308,7 @@ template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e)
 //! \related Expression
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
+//! Shared expression nodes remain shared in the resulting formula DAG.
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);

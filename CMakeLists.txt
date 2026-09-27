@@ -100,8 +100,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 python/pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/utility OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/utility submodules/utility WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/logging OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/logging submodules/logging WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/threading OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/threading submodules/threading WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/configuration OUTPUT_QUIET ERROR_QUIET)
@@ -119,10 +119,10 @@ if(GIT_FOUND)
     else()
         message(STATUS "Utility submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/conclog/CMakeLists.txt)
-        message(ERROR "ConcLog download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/logging/CMakeLists.txt)
+        message(ERROR "Logging download failure")
     else()
-        message(STATUS "ConcLog submodule found")
+        message(STATUS "Logging submodule found")
     endif()
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/threading/CMakeLists.txt)
         message(ERROR "Threading download failure")
@@ -148,7 +148,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/utility|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/conclog|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/logging|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
     )
     require_same_dependency_commit(Utility
@@ -158,7 +158,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Logging
         REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/conclog"
+            "${PROJECT_SOURCE_DIR}|submodules/logging"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/logging"
     )
 endif()
@@ -185,7 +185,7 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
 endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/conclog/include/logging ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/logging/include/logging ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
     message(STATUS "Created symbolic link to Logging submodule")
 endif()
 

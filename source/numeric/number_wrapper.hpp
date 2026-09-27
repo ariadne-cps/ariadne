@@ -246,6 +246,8 @@ class ValidatedAlgebraicNumberInterface;
 template<class F> class ConcreteNumberInterface;
 template<class F, class FE> class ConcreteBallInterface;
 
+namespace Utility {
+
 template<> struct Managed<AlgebraicNumberInterface> {
     typedef Aware<Integer,Dyadic,Rational,Real> Types;
     //FIXME: typedef Aware<ExactDouble,Integer,Dyadic,Rational,Real> Types;
@@ -280,6 +282,8 @@ template<class F> struct DispatcherTraits<LowerBound<F>> { typedef ConcreteNumbe
 template<class F> struct DispatcherTraits<Approximation<F>> { typedef ConcreteNumberInterface<F> Interface; };
 
 template<class F, class FE> struct DispatcherTraits<Ball<F,FE>> { typedef ConcreteBallInterface<F,FE> Interface; };
+
+} // namespace Utility
 
 
 class AlgebraicNumberInterface

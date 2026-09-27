@@ -141,6 +141,27 @@ endif()
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
 include(CoverageSupport)
+include(DependencyChecks)
+
+if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    require_same_dependency_commit(Configuration
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/utility|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/conclog|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/configuration"
+    )
+    require_same_dependency_commit(Utility
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/utility"
+    )
+    require_same_dependency_commit(Logging
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/conclog"
+            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/logging"
+    )
+endif()
 
 if(COVERAGE)
     if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")

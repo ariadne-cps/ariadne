@@ -1860,9 +1860,9 @@ class TestSmtSolver {
         ValidatedScalarMultivariateFunction function=coordinates[0];
         List<ValidatedConstraint> constraints({
             ValidatedConstraint(
-                ValidatedNumber(0.0_x),
+                ExactNumber(-0.0625_x),
                 function,
-                ValidatedNumber(+infinity))
+                ExactNumber(0.0625_x))
         });
         SmtSolver solver(SmtSolverConfiguration(
             0.125_x,

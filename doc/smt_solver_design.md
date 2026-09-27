@@ -1082,6 +1082,21 @@ separate reduction and post-reduction epsilon evaluation remain unchanged. Tests
 cover original pruning, epsilon certification, an unresolved split, strict `>0`
 endpoint rejection, fast-path gating, and statistics aggregation.
 
+The 512-box Lie rerun confirms the optimization is behavior-preserving on the
+Barr3 baseline: `pruned=248` and `split=264` are unchanged, while
+`fused-direct=512` confirms the fused path classified every processed box.
+Whole-box epsilon-check time falls from 41.033 s to 0 because the epsilon decision
+now reuses the direct-rejection image, and total elapsed time falls from
+130.651 s to 89.703 s (about 31 percent). The remaining measured runtime is now
+dominated by the single validated function evaluation per literal used by direct
+classification: 86.248 s after 3.363 s one-time theory compilation.
+
+Before further performance work, coverage must be returned to 100 percent for
+all newly introduced configuration branches, diagnostics and the fused direct
+classification behavior. In particular, coverage should confirm both sides of
+the fast-path gate and the strict/non-strict classification branches rather than
+merely exercising the successful Barr3 path.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

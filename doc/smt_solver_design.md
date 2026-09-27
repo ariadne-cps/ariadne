@@ -712,6 +712,44 @@ Ariadne fixture, extract the exact matrices and biases from one of those files
 and record their source and checksum. Do not substitute newly trained or random
 weights while describing the result as the published benchmark.
 
+### First in-suite neural scaling fixture
+
+The first permanent neural regression is a `2-8-8-1` prefix extracted
+deterministically from the published Barrier-3 `2-64-64-1` checkpoint. The
+extraction keeps the first eight first-layer neurons, the top-left `8x8`
+second-layer block, the corresponding first eight biases and output weights,
+and the original output bias. It is deliberately labelled a **scaling
+fixture**, not the published Barrier-3 certificate: truncating the trained
+network changes the represented function and carries no published safety
+claim.
+
+The source checkpoint SHA-256 is
+`788fd56f21abb0cb5b83206b12d4d8d0ed718896c2140222a8fd129475f6c213`.
+The concatenated raw float32 bytes of the extracted tensors have SHA-256
+`9431d092372b0bc57ffcf4b651d6bcd2f664c29d79988f7055880f79c4c53aec`.
+The C++ fixture stores every parameter as a hexadecimal binary floating-point
+literal, so each source float32 is promoted exactly to DP.
+
+Ariadne currently has no primitive symbolic `tanh` expression node. The
+fixture therefore uses the exact real identity
+`tanh(z)=(exp(2*z)-1)/(exp(2*z)+1)`. This preserves the mathematical network
+function but makes the expression graph somewhat larger than a native tanh
+node would. Benchmark conclusions must keep that distinction explicit.
+
+The regression has two purposes. First, it evaluates the frozen network at the
+origin and checks a tight validated output interval, catching tensor-layout or
+parameter-order mistakes. Second, it asks the SMT solver to solve the
+nontrivial equation `B(x,y)=0` over the full Barr3 domain
+`[-3,2.5]x[-2,1]` with a one-box budget and candidate search disabled. The
+expected result is `UNKNOWN(RESOURCE_EXHAUSTED)` after a genuine
+sensitivity-guided split. This exercises expression compilation, cached
+derivatives, validated reduction, epsilon checking and neural-expression split
+selection without turning the ordinary test suite into a long benchmark.
+
+The next scaling points are `16x16`, `32x32` and the exact published
+`64x64` model. Each size is promoted into the ordinary suite only if measured
+runtime remains suitable; larger cases remain explicit performance benchmarks.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

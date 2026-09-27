@@ -37,7 +37,7 @@
 
 #include "utility/tuple.hpp"
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
@@ -59,7 +59,7 @@ typedef Dyadic StepSizeType;
 
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
-using BetterThreads::DynamicWorkload;
+using Threading::DynamicWorkload;
 
 class IntegratorInterface;
 class SolverInterface;

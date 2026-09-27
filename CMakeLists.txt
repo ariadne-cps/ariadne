@@ -102,8 +102,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/utility submodules/utility WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/threading OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/threading submodules/threading WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/configuration OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/configuration submodules/configuration WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
@@ -124,10 +124,10 @@ if(GIT_FOUND)
     else()
         message(STATUS "ConcLog submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/betterthreads/CMakeLists.txt)
-        message(ERROR "BetterThreads download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/threading/CMakeLists.txt)
+        message(ERROR "Threading download failure")
     else()
-        message(STATUS "BetterThreads submodule found")
+        message(STATUS "Threading submodule found")
     endif()
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/configuration/cmake/CoverageSupport.cmake)
         message(ERROR "Configuration download failure")
@@ -149,17 +149,17 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/utility|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/conclog|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
     )
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/utility"
     )
     require_same_dependency_commit(Logging
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/conclog"
-            "${PROJECT_SOURCE_DIR}/submodules/betterthreads|submodules/logging"
+            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/logging"
     )
 endif()
 
@@ -190,8 +190,8 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
 endif()
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/betterthreads/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
-    message(STATUS "Created symbolic link to BetterThreads submodule")
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/threading/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+    message(STATUS "Created symbolic link to Threading submodule")
 endif()
 
 find_package(Threads)

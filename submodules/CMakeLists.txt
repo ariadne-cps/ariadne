@@ -1,3 +1,3 @@
 add_subdirectory(conclog)
 add_subdirectory(utility)
-add_subdirectory(betterthreads)
+add_subdirectory(threading)

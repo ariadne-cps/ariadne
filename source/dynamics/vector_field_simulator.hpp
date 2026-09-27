@@ -37,8 +37,8 @@
 #include "dynamics/vector_field.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "betterthreads/workload.hpp"
-#include "betterthreads/using.hpp"
+#include "threading/workload.hpp"
+#include "threading/using.hpp"
 
 using namespace Ariadne::Logging;
 
@@ -90,7 +90,7 @@ class VectorFieldSimulator
       private:
         std::mutex _mux;
     };
-    typedef BetterThreads::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef Threading::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.

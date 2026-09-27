@@ -24,14 +24,14 @@
 
 #include "io/command_line_interface.hpp"
 #include "logging/logging.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "threading/thread_manager.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne::Logging;
 
 using namespace Ariadne;
 
-using BetterThreads::ThreadManager;
+using Threading::ThreadManager;
 
 class TestCommandLineInterface {
   public:

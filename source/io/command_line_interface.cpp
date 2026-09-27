@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "threading/thread_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"
@@ -37,7 +37,7 @@ using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
-using BetterThreads::ThreadManager;
+using Threading::ThreadManager;
 
 
 ArgumentStream::ArgumentStream(List<String> const& args) {

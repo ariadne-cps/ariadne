@@ -43,7 +43,7 @@
 #include "geometry/curve.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
-#include "betterthreads/using.hpp"
+#include "threading/using.hpp"
 
 namespace Ariadne {
 

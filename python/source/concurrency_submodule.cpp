@@ -24,10 +24,10 @@
 
 #include "pybind11.hpp"
 #include "utilities.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "threading/thread_manager.hpp"
 
 using namespace Ariadne;
-using BetterThreads::ThreadManager;
+using Threading::ThreadManager;
 
 Void export_task_manager(pybind11::module& module)
 {

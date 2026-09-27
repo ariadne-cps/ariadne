@@ -4,9 +4,9 @@
 [submodule "submodules/conclog"]
 	path = submodules/conclog
 	url = https://github.com/ariadne-cps/conclog
-[submodule "submodules/betterthreads"]
-	path = submodules/betterthreads
-	url = https://github.com/ariadne-cps/betterthreads
+[submodule "submodules/threading"]
+	path = submodules/threading
+	url = https://github.com/ariadne-cps/threading
 [submodule "submodules/utility"]
 	path = submodules/utility
 	url = https://github.com/ariadne-cps/utility

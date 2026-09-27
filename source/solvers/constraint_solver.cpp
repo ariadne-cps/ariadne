@@ -27,7 +27,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"

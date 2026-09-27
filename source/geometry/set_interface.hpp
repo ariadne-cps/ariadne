@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "utility/writable.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function_traits.hpp"

@@ -34,7 +34,7 @@
 #include <map>
 
 
-#include "utility/tribool.hpp"
+#include "foundations/tribool.hpp"
 #include "geometry/set_interface.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "symbolic/space.hpp"

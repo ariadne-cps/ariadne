@@ -47,7 +47,7 @@ void ariadne_main()
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    CONCLOG_PRINTLN(evolver.configuration())
+    LOGGING_PRINTLN(evolver.configuration())
 
     Real x1_0(1.2_dec);
     Real x2_0(1.05_dec);
@@ -60,30 +60,30 @@ void ariadne_main()
 
     RealExpressionBoundedConstraintSet initial_set({{x1_0-eps<=x1<=x1_0+eps},{x2_0-eps<=x2<=x2_0+eps},{x3_0-eps<=x3<=x3_0+eps},{x4_0-eps<=x4<=x4_0+eps},{x5_0-eps<=x5<=x5_0+eps},{x6_0-eps<=x6<=x6_0+eps},{x7_0-eps<=x7<=x7_0+eps}});
 
-    CONCLOG_PRINTLN_VAR(initial_set);
+    LOGGING_PRINTLN_VAR(initial_set);
     Real evolution_time(10);
 
     Stopwatch<Milliseconds> sw;
-    CONCLOG_PRINTLN("Computing orbit...")
+    LOGGING_PRINTLN("Computing orbit...")
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
-    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+    LOGGING_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
-    CONCLOG_PRINTLN("Plotting...")
+    LOGGING_PRINTLN("Plotting...")
     TimeVariable t;
     /*
     for (auto const& v : dynamics.state_space().variables()) {
-        CONCLOG_PRINTLN_AT(1,"Plotting t-" << v.name())
+        LOGGING_PRINTLN_AT(1,"Plotting t-" << v.name())
         LabelledFigure fig(Axes2d{{0<=t<=evolution_time},{0<=v<=5}});
         fig << orbit;
         char filename[64];
         snprintf(filename,64,"laub-loomis_t-%s",v.name().c_str());
         fig.write(filename);
     }*/
-    CONCLOG_PRINTLN_AT(1,"Plotting x5-x7")
+    LOGGING_PRINTLN_AT(1,"Plotting x5-x7")
     LabelledFigure fig(Axes2d{{0<=x5<=1.2_dec},{0.1_dec<=x7<=0.6_dec}});
     fig << orbit;
     fig.write("laub-loomis_x5-x7");
     sw.click();
-    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+    LOGGING_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 }

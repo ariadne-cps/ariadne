@@ -27,7 +27,7 @@
 
 void ariadne_main()
 {
-    CONCLOG_PRINTLN("Lorenz system");
+    LOGGING_PRINTLN("Lorenz system");
 
     RealConstant rho("rho",28), sigma("sigma",10), beta("beta",8/3_q);
     RealVariable x("x"), y("y"), z("z");
@@ -44,7 +44,7 @@ void ariadne_main()
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.25);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    CONCLOG_PRINTLN(evolver.configuration());
+    LOGGING_PRINTLN(evolver.configuration());
 
     Real x0 = 1.0_dec;
     Real y0 = 1.0_dec;
@@ -53,28 +53,28 @@ void ariadne_main()
 
     RealExpressionBoundedConstraintSet initial_set({x0-eps<=x<=x0+eps,y0-eps<=y<=y0+eps,z0-eps<=z<=z0+eps});
 
-    CONCLOG_PRINTLN("Initial set: " << initial_set);
+    LOGGING_PRINTLN("Initial set: " << initial_set);
     Real evolution_time = 100;
     Stopwatch<Milliseconds> sw;
-    CONCLOG_PRINTLN("Computing simulation...");
+    LOGGING_PRINTLN("Computing simulation...");
     auto simulation = simulator.orbit(initial_set,evolution_time);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+    LOGGING_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-    CONCLOG_PRINTLN("Plotting...");;
+    LOGGING_PRINTLN("Plotting...");;
     Axes2d axes({-32<=x<=32,-32<=y<=32});
     LabelledFigure fig=LabelledFigure(axes);
     fig.draw(simulation);
     fig.write("lorenz_simulation");
 
     sw.restart();
-    CONCLOG_PRINTLN("Computing evolution... ");
+    LOGGING_PRINTLN("Computing evolution... ");
     evolution_time = 6;
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+    LOGGING_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-    CONCLOG_PRINTLN("Plotting...");
+    LOGGING_PRINTLN("Plotting...");
     fig.clear();
     fig.draw(evolution);
     fig.write("lorenz_evolution");

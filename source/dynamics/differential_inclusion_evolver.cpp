@@ -192,7 +192,7 @@ DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& sys
     , _configuration(new ConfigurationType())
 {
     ARIADNE_PRECONDITION(system.inputs().size() > 0);
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
 }
 
 Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionPatch& function, InclusionEvolverState& state) {
@@ -210,9 +210,9 @@ Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultiv
 template<class T> using Optional=std::optional<T>;
 
 auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real const& tmax) -> OrbitType {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"System: "<<_system);
-    CONCLOG_PRINTLN_AT(1,"Initial: "<<initial);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN_AT(1,"System: "<<_system);
+    LOGGING_PRINTLN_AT(1,"Initial: "<<initial);
 
     auto initial_box = initial_ranges_to_box(initial);
 
@@ -225,7 +225,7 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
     EnclosureConfiguration config(function_factory);
 
     EnclosureType evolve(initial,_system.state_space(),config);
-    CONCLOG_PRINTLN_VAR_AT(1,evolve)
+    LOGGING_PRINTLN_VAR_AT(1,evolve)
     ValidatedVectorMultivariateFunctionPatch evolve_function = function_factory.create_identity(initial_box);
 
     TimeStepType t;
@@ -237,13 +237,13 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
     ProgressIndicator indicator(tmax.get_d());
 
     while (possibly(t<lower_bound(tmax))) {
-        CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+        LOGGING_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
 
-        CONCLOG_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
+        LOGGING_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
 
         auto approximators_to_use = state.approximators_to_use();
 
-        CONCLOG_PRINTLN_AT(1,"#s="<<std::setw(4)<<result.reach().size()
+        LOGGING_PRINTLN_AT(1,"#s="<<std::setw(4)<<result.reach().size()
                                  <<" t="<<std::setw(7)<<t.get_d()
                                  <<" p="<<std::setw(4)<<evolve_function.argument_size()
                                  <<" r="<<std::setw(7)<<evolve_function.range().radius()
@@ -255,8 +255,8 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         UpperBoxType B;
         StepSizeType h;
 
-        CONCLOG_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),suggest(hsug)));
-        CONCLOG_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
+        LOGGING_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),suggest(hsug)));
+        LOGGING_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
 
         TimeStepType new_t = lower_bound(t+h);
 
@@ -268,15 +268,15 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         FloatDPApproximation best_reach_rigorous_volume(inf,dp);
 
         for (auto const& approximator : approximators_to_use) {
-            CONCLOG_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
+            LOGGING_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
 
-            CONCLOG_RUN_AT(2,auto current_reach=approximator.reach(domx,evolve_function,B,t,h));
+            LOGGING_RUN_AT(2,auto current_reach=approximator.reach(domx,evolve_function,B,t,h));
             auto current_evolve=approximator.evolve(current_reach.at(current_reach.size()-1u),new_t);
 
             FloatDPApproximation current_volume = volume(current_evolve.range());
             if (decide(current_volume < best_volume)) {
                 best = approximator;
-                CONCLOG_PRINTLN_AT(3,"best approximator: " << best);
+                LOGGING_PRINTLN_AT(3,"best approximator: " << best);
                 if (best.is_reach_rigorous()) {
                     best_reach_function = current_reach.at(0);
                 }
@@ -294,16 +294,16 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
             best_reach_function = best_reach_rigorous_function;
 
         if (approximators_to_use.size() > 1)
-            CONCLOG_PRINTLN_AT(2,"chosen approximator: " << best << (best.is_reach_rigorous() ? "" : " (reach taken from other approximator)"));
+            LOGGING_PRINTLN_AT(2,"chosen approximator: " << best << (best.is_reach_rigorous() ? "" : " (reach taken from other approximator)"));
 
         state.update_with_best(best);
 
         evolve_function = best_evolve_function.value();
         ValidatedVectorMultivariateFunctionPatch reach_function = best_reach_function.value();
 
-        CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
+        LOGGING_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 
-        CONCLOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
+        LOGGING_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
 
         auto time_ivl_function = function_factory.create_coordinate(reach_function.domain(),reach_function.result_size());
         EnclosureType reach_enclosure(Enclosure(reach_function.domain(),reach_function,time_ivl_function,List<ValidatedConstraint>(),config),_system.state_space());
@@ -316,10 +316,10 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         state.next_step();
         t=new_t;
         indicator.update_current(t.get_d());
-        CONCLOG_PRINTLN_AT(2,"updated schedule: " << state.schedule());
+        LOGGING_PRINTLN_AT(2,"updated schedule: " << state.schedule());
     }
 
-    CONCLOG_PRINTLN_AT(1,"approximation % ="<<convert_to_percentages(state.global_optima_count()));
+    LOGGING_PRINTLN_AT(1,"approximation % ="<<convert_to_percentages(state.global_optima_count()));
     result.adjoin_final(evolve);
 
     return result;
@@ -370,14 +370,14 @@ Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
 }
 
 ValidatedVectorMultivariateFunctionPatch LohnerReconditioner::incorporate_errors(ValidatedVectorMultivariateFunctionPatch const& f) const {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     ValidatedVectorMultivariateTaylorFunctionModelDP const& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(f.reference());
 
     BoxDomainType domain=f.domain();
     auto ferrors=f.errors(); BoxDomainType errors(f.result_size(),[&](SizeType i){return cast_exact_interval(ferrors[i]*FloatDPUpperInterval(-1,+1));}); // TODO: Avoid cast;
     //    BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1));
 
-    CONCLOG_PRINTLN("Uniform errors:"<<errors);
+    LOGGING_PRINTLN("Uniform errors:"<<errors);
 
     ValidatedVectorMultivariateFunctionPatch error_function(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,tf.properties()));
     ValidatedVectorMultivariateFunctionPatch result = embed(f,errors)+embed(domain,error_function);
@@ -386,12 +386,12 @@ ValidatedVectorMultivariateFunctionPatch LohnerReconditioner::incorporate_errors
 }
 
 Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionPatch& f) const {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("f="<<f);
+    LOGGING_SCOPE_CREATE;
+    LOGGING_PRINTLN("f="<<f);
     auto m=f.argument_size();
     auto n=f.result_size();
 
-    CONCLOG_PRINTLN("num.parameters="<<m<<", to keep="<< this->_number_of_parameters_to_keep );
+    LOGGING_PRINTLN("num.parameters="<<m<<", to keep="<< this->_number_of_parameters_to_keep );
 
     ValidatedVectorMultivariateTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(f.reference());
 
@@ -413,7 +413,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
         }
     }
 
-    CONCLOG_PRINTLN_AT(1,"C"<<C);
+    LOGGING_PRINTLN_AT(1,"C"<<C);
     Array<IndexedFloatDPError> Ce(m);
     for (auto j : range(m)) {
         Ce[j].index = j;
@@ -421,20 +421,20 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
             Ce[j].value += C[j][i];
         }
     }
-    CONCLOG_PRINTLN_AT(1,"Ce:"<<Ce);
+    LOGGING_PRINTLN_AT(1,"Ce:"<<Ce);
     auto SCe=Ce;
     std::sort(SCe.begin(),SCe.end(),IndexedFloatDPErrorComparator());
-    CONCLOG_PRINTLN_AT(1,"SortedCe:"<<SCe);
+    LOGGING_PRINTLN_AT(1,"SortedCe:"<<SCe);
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
 
     if (m <= this->_number_of_parameters_to_keep) {
-        CONCLOG_PRINTLN("Insufficient number of variables, not simplifying");
+        LOGGING_PRINTLN("Insufficient number of variables, not simplifying");
         return;
     }
 
     Nat number_of_variables_to_remove = m - this->_number_of_parameters_to_keep;
-    CONCLOG_PRINTLN_AT(1, "Number of parameters to remove:" << _number_of_parameters_to_keep);
+    LOGGING_PRINTLN_AT(1, "Number of parameters to remove:" << _number_of_parameters_to_keep);
 
     for (auto j : range(number_of_variables_to_remove)) {
         remove_indices.append(SCe[j].index);
@@ -444,10 +444,10 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
         keep_indices.append(SCe[j].index);
     }
 
-    CONCLOG_PRINTLN_AT(1,"number of kept parameters: " << keep_indices.size() << "/" << m);
+    LOGGING_PRINTLN_AT(1,"number of kept parameters: " << keep_indices.size() << "/" << m);
 
-    CONCLOG_PRINTLN_AT(2,"keep_indices:"<<keep_indices);
-    CONCLOG_PRINTLN_AT(2,"remove_indices:"<<remove_indices);
+    LOGGING_PRINTLN_AT(2,"keep_indices:"<<keep_indices);
+    LOGGING_PRINTLN_AT(2,"remove_indices:"<<remove_indices);
 
     for (auto i : range(n)) {
         FloatDPError error = tf[i].error();

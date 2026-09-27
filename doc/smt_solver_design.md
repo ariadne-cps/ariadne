@@ -1100,6 +1100,18 @@ classification evaluation or whether the existing function evaluator is already
 the better execution path. No solver semantics or default configuration change
 is made by this diagnostic.
 
+The evaluator comparison decisively rejects `ValidatedProcedure` as a cheap-path
+replacement on Barr3. Across eight evaluations of the full input box, the barrier
+term takes 0.163 s with normal validated function `apply` versus 3.399 s with
+forward-only `ValidatedProcedure` evaluation, while `lie+barrier` takes 1.214 s
+versus 23.935 s. This is roughly a 20x slowdown in both cases, even before
+amortizing procedure construction (0.073 s and 0.617 s respectively). Both
+methods return the same uninformative `[-inf,+inf]` image on the full box, so the
+extra procedure cost buys no additional pruning power. Procedure evaluation is
+therefore excluded from the cheap-first path; further performance work should
+focus on the existing validated function evaluator and on preserving/sharing
+expression structure across box evaluations.
+
 Before further performance work, coverage must be returned to 100 percent for
 all newly introduced configuration branches, diagnostics and the fused direct
 classification behavior. In particular, coverage should confirm both sides of

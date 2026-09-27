@@ -37,9 +37,6 @@
 
 namespace Ariadne {
 
-using Nat = uint;
-using Int = int;
-
 class Natural;
 class Integer;
 

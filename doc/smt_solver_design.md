@@ -738,7 +738,10 @@ node would. Benchmark conclusions must keep that distinction explicit.
 
 The regression has two purposes. First, it evaluates the frozen network at the
 origin and checks a tight validated output interval, catching tensor-layout or
-parameter-order mistakes. Second, it asks the SMT solver to solve the
+parameter-order mistakes. The test avoids naming local variables `result`
+inside `ARIADNE_TEST_ASSERT` scopes because the test macro itself declares a
+temporary named `result`; using the same identifier causes a self-initializer
+compile error after macro expansion. Second, it asks the SMT solver to solve the
 nontrivial equation `B(x,y)=0` over the full Barr3 domain
 `[-3,2.5]x[-2,1]` with a one-box budget and candidate search disabled. The
 expected result is `UNKNOWN(RESOURCE_EXHAUSTED)` after a genuine

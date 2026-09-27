@@ -906,15 +906,15 @@ class TestSmtSolver {
             std::numeric_limits<SizeType>::max(),
             1u,
             false));
-        SmtResult result=solver.solve(space,barr3_domain,literals);
-        ARIADNE_TEST_ASSERT(result.is_unknown());
+        SmtResult solve_result=solver.solve(space,barr3_domain,literals);
+        ARIADNE_TEST_ASSERT(solve_result.is_unknown());
         ARIADNE_TEST_EQUAL(
-            result.unknown_reason(),SmtUnknownReason::RESOURCE_EXHAUSTED);
-        ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,1u);
-        ARIADNE_TEST_EQUAL(result.statistics().boxes_split,1u);
-        ARIADNE_TEST_EQUAL(result.statistics().box_budget_exhaustions,1u);
+            solve_result.unknown_reason(),SmtUnknownReason::RESOURCE_EXHAUSTED);
+        ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+        ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,1u);
+        ARIADNE_TEST_EQUAL(solve_result.statistics().box_budget_exhaustions,1u);
         ARIADNE_TEST_ASSERT(
-            result.statistics().sensitivity_guided_splits>=1u);
+            solve_result.statistics().sensitivity_guided_splits>=1u);
     }
 
     Void test_solve() {

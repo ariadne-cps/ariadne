@@ -235,7 +235,7 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 add_subdirectory(submodules)
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/utility/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
 
 add_subdirectory(source)
 add_subdirectory(python)

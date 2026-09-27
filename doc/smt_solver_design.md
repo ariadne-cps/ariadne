@@ -892,6 +892,16 @@ two-variable literal produces zero cached derivatives with monotone reduction
 off and two with it on. This is a semantics-preserving optimization: it changes
 only unused precomputation, not the enabled contractor set.
 
+
+Because that optimization changed the one-box timings only modestly, the solver
+now records diagnostic phase timings in `SmtSearchStatistics`: theory
+compilation, original reduction, epsilon box checking, midpoint/end-point
+witness probing, sensitivity splitting, and nonlinear candidate search. These
+are accumulated across processed boxes and are diagnostic only; no solver
+decision depends on wall-clock time. The Barr3 verification runner prints all
+of them so the expensive phase can be identified before changing contractor
+policy.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

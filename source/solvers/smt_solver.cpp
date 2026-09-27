@@ -24,6 +24,8 @@
 
 #include "solvers/smt_solver.hpp"
 
+#include <chrono>
+
 #include <vector>
 #include <utility>
 #include <atomic>
@@ -43,6 +45,17 @@
 #include "utility/exceptions.hpp"
 
 namespace Ariadne {
+
+namespace {
+
+inline double elapsed_seconds(
+    std::chrono::steady_clock::time_point const& start)
+{
+    return std::chrono::duration<double>(
+        std::chrono::steady_clock::now()-start).count();
+}
+
+} // namespace
 
 namespace {
 
@@ -500,22 +513,43 @@ SmtSolver::_process_box(
     Conjunction const& conjunction) const
 {
     ReductionStatistics reductions;
-    if(this->_original_reduce(domain,conjunction,reductions)) {
-        return {BoxProcessingStatus::PRUNED,std::nullopt,std::nullopt,reductions};
+    BoxProcessingResult result{
+        BoxProcessingStatus::UNKNOWN,
+        std::nullopt,
+        std::nullopt,
+        reductions};
+
+    auto phase_start=std::chrono::steady_clock::now();
+    Bool const pruned=this->_original_reduce(domain,conjunction,reductions);
+    result.reductions=reductions;
+    result.reduction_seconds=elapsed_seconds(phase_start);
+    if(pruned) {
+        result.status=BoxProcessingStatus::PRUNED;
+        return result;
     }
 
-    if(this->_epsilon_satisfied(domain,conjunction)) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,domain,std::nullopt,reductions};
+    phase_start=std::chrono::steady_clock::now();
+    Bool const epsilon_satisfied=this->_epsilon_satisfied(domain,conjunction);
+    result.epsilon_check_seconds=elapsed_seconds(phase_start);
+    if(epsilon_satisfied) {
+        result.status=BoxProcessingStatus::EPSILON_SAT;
+        result.witness=domain;
         result.epsilon_box_certification=true;
         return result;
     }
 
-    if(auto witness=this->_epsilon_witness(domain,conjunction); witness.has_value()) {
-        return {BoxProcessingStatus::EPSILON_SAT,*witness,std::nullopt,reductions};
+    phase_start=std::chrono::steady_clock::now();
+    auto witness=this->_epsilon_witness(domain,conjunction);
+    result.witness_probe_seconds=elapsed_seconds(phase_start);
+    if(witness.has_value()) {
+        result.status=BoxProcessingStatus::EPSILON_SAT;
+        result.witness=*witness;
+        return result;
     }
 
+    phase_start=std::chrono::steady_clock::now();
     auto split_result=this->_split_box(domain,conjunction);
+    result.split_seconds=elapsed_seconds(phase_start);
     Pair<UpperBoxType,UpperBoxType> children=split_result.first;
 
     Bool const splittable=not same_box(children.first,children.second);
@@ -525,42 +559,34 @@ SmtSolver::_process_box(
     Bool const candidate_search_attempted=
         _configuration.candidate_search_enabled() & splittable;
     if(candidate_search_attempted) {
+        phase_start=std::chrono::steady_clock::now();
         candidate=this->_epsilon_candidate_witness(domain,conjunction);
         candidate_certified=this->_epsilon_satisfied(*candidate,conjunction);
+        result.candidate_search_seconds=elapsed_seconds(phase_start);
     }
     auto candidate_outcome=SmtSolverTestSupport::candidate_witness_outcome(
         candidate_search_attempted,
         candidate_certified ? candidate : std::nullopt);
     if(candidate_outcome.certified) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::EPSILON_SAT,
-            *candidate_outcome.witness,
-            std::nullopt,
-            reductions};
+        result.status=BoxProcessingStatus::EPSILON_SAT;
+        result.witness=*candidate_outcome.witness;
         result.candidate_witness_search=true;
         result.candidate_witness_success=true;
         return result;
     }
 
     if(not splittable) {
-        BoxProcessingResult result{
-            BoxProcessingStatus::UNKNOWN,
-            std::nullopt,
-            std::nullopt,
-            reductions};
+        result.status=BoxProcessingStatus::UNKNOWN;
         result.dp_resolution_exhausted=true;
         result.candidate_witness_search=false;
         result.non_splittable_epsilon_overlap=true;
         return result;
     }
 
-    BoxProcessingResult result{
-        BoxProcessingStatus::SPLIT,
-        std::nullopt,
-        children,
-        reductions,
-        split_result.second.first,
-        split_result.second.second};
+    result.status=BoxProcessingStatus::SPLIT;
+    result.children=children;
+    result.sensitivity_guided_split=split_result.second.first;
+    result.sensitivity_overrode_geometric_split=split_result.second.second;
     result.candidate_witness_search=candidate_outcome.attempted;
     return result;
 }
@@ -584,6 +610,11 @@ SmtSolver::_accumulate_box_processing_statistics(
     BoxProcessingResult const& processing) const
 {
     SmtSolverTestSupport::record_parallel_processing_thread();
+    statistics.reduction_seconds+=processing.reduction_seconds;
+    statistics.epsilon_check_seconds+=processing.epsilon_check_seconds;
+    statistics.witness_probe_seconds+=processing.witness_probe_seconds;
+    statistics.split_seconds+=processing.split_seconds;
+    statistics.candidate_search_seconds+=processing.candidate_search_seconds;
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
             processing.status,
@@ -674,12 +705,25 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
     }
 
+    auto compile_start=std::chrono::steady_clock::now();
     CompiledTheoryLiterals compiled=this->_compile_theory_literals(space,literals);
+    double const compile_seconds=elapsed_seconds(compile_start);
     if(compiled.empty()) {
-        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()));
+        SmtSearchStatistics statistics;
+        statistics.theory_compile_seconds=compile_seconds;
+        return SmtResult::epsilon_sat(singleton_box(domain.midpoint()),statistics);
     }
-    return this->_solve_sequential_conjunction(
+    SmtResult result=this->_solve_sequential_conjunction(
         domain,ConjunctionReference(compiled));
+    SmtSearchStatistics statistics=result.statistics();
+    statistics.theory_compile_seconds+=compile_seconds;
+    if(result.is_unsat()) {
+        return SmtResult::unsat(statistics);
+    }
+    if(result.is_epsilon_sat()) {
+        return SmtResult::epsilon_sat(result.witness(),statistics);
+    }
+    return SmtResult::unknown(result.unknown_reason(),statistics);
 }
 
 

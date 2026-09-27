@@ -123,6 +123,12 @@ struct SmtSearchStatistics {
     SizeType epsilon_box_certifications = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
+    double theory_compile_seconds = 0.0;
+    double reduction_seconds = 0.0;
+    double epsilon_check_seconds = 0.0;
+    double witness_probe_seconds = 0.0;
+    double split_seconds = 0.0;
+    double candidate_search_seconds = 0.0;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
     SizeType boolean_reasoned_propagations = 0u;
@@ -489,6 +495,11 @@ class SmtSolver {
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
         Bool non_splittable_epsilon_overlap = false;
+        double reduction_seconds = 0.0;
+        double epsilon_check_seconds = 0.0;
+        double witness_probe_seconds = 0.0;
+        double split_seconds = 0.0;
+        double candidate_search_seconds = 0.0;
     };
 
     using CompiledTheoryLiteral = ConstraintPropagationConstraint;

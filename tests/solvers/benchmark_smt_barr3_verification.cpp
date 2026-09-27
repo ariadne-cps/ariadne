@@ -59,6 +59,12 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " shaving-rounds=" << result.statistics().shaving_reduction_rounds
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds
               << " sensitivity-splits=" << result.statistics().sensitivity_guided_splits
+              << " compile=" << result.statistics().theory_compile_seconds
+              << " reduce=" << result.statistics().reduction_seconds
+              << " epsilon=" << result.statistics().epsilon_check_seconds
+              << " witness=" << result.statistics().witness_probe_seconds
+              << " split-phase=" << result.statistics().split_seconds
+              << " candidate=" << result.statistics().candidate_search_seconds
               << std::endl;
 }
 

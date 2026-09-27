@@ -56,7 +56,16 @@ using ValidatedProcedure = Procedure<ValidatedNumber>; //!< <p/>
 using EffectiveProcedure = Procedure<EffectiveNumber>; //!< <p/>
 //!@}
 
+struct ProcedureHullReductionStatistics {
+    double temporary_allocation_seconds = 0.0;
+    double forward_execution_seconds = 0.0;
+    double backward_propagation_seconds = 0.0;
+};
+
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
+Void simple_hull_reduce(
+    UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom,
+    ProcedureHullReductionStatistics& statistics);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
 struct ConstantProcedureInstruction : Symbolic<Cnst,SizeType> { using Symbolic<Cnst,SizeType>::Symbolic; };

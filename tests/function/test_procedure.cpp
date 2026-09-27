@@ -202,8 +202,12 @@ Void TestProcedure::test_propagate()
         UpperBoxType x=ExactBoxType{ {0.25_x,2.0_x}, {0.5_x,3.0_x} };
         ARIADNE_TEST_PRINT(x);
 
-        simple_hull_reduce(x,p,ExactIntervalType(1,1));
+        ProcedureHullReductionStatistics statistics;
+        simple_hull_reduce(x,p,ExactIntervalType(1,1),statistics);
         ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_ASSERT(statistics.temporary_allocation_seconds>=0.0);
+        ARIADNE_TEST_ASSERT(statistics.forward_execution_seconds>=0.0);
+        ARIADNE_TEST_ASSERT(statistics.backward_propagation_seconds>=0.0);
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
         ARIADNE_TEST_PRINT(x);
     }

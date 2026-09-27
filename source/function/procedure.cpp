@@ -25,12 +25,25 @@
 #include "procedure.hpp"
 #include "procedure.tpl.hpp"
 
+#include <chrono>
+
 #include "algebra/differential.hpp"
 #include "algebra/fixed_univariate_differential.hpp"
 #include "algebra/graded.hpp"
 #include "function/function.hpp"
 
 namespace Ariadne {
+
+namespace {
+
+inline double procedure_elapsed_seconds(
+    std::chrono::steady_clock::time_point const& start)
+{
+    return std::chrono::duration<double>(
+        std::chrono::steady_clock::now()-start).count();
+}
+
+} // namespace
 
 template class Procedure<ApproximateNumber>;
 template class Procedure<ValidatedNumber>;
@@ -70,6 +83,33 @@ Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactInt
     _execute(t,p,c,cast_vector(dom));
     restrict(t.back(),codom);
     _backpropagate(cast_vector(dom),t,p,c);
+}
+
+Void simple_hull_reduce(
+    UpperBoxType& dom,
+    const ValidatedProcedure& f,
+    ExactIntervalType codom,
+    ProcedureHullReductionStatistics& statistics)
+{
+    const List<ProcedureInstruction>& p=f._instructions;
+    const List<ValidatedNumber>& c=f._constants;
+
+    auto phase_start=std::chrono::steady_clock::now();
+    List<UpperIntervalType> t(p.size());
+    statistics.temporary_allocation_seconds+=
+        procedure_elapsed_seconds(phase_start);
+
+    phase_start=std::chrono::steady_clock::now();
+    _execute(t,p,c,cast_vector(dom));
+    statistics.forward_execution_seconds+=
+        procedure_elapsed_seconds(phase_start);
+
+    restrict(t.back(),codom);
+
+    phase_start=std::chrono::steady_clock::now();
+    _backpropagate(cast_vector(dom),t,p,c);
+    statistics.backward_propagation_seconds+=
+        procedure_elapsed_seconds(phase_start);
 }
 
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, ExactBoxType codom)

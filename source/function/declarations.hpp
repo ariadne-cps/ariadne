@@ -20,7 +20,6 @@
 
 namespace Ariadne {
 
-using Utility::Pair;
 
 template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;

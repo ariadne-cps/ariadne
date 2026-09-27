@@ -41,7 +41,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
 
 class UniIndex {
     DegreeType _a;

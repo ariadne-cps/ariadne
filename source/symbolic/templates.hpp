@@ -36,7 +36,6 @@
 
 namespace Ariadne {
 
-using Utility::Variant;
 
 template<class T> class Expression;
 

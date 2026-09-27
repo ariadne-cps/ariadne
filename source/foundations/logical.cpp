@@ -37,7 +37,6 @@
 
 namespace Ariadne {
 
-using Utility::make_handle;
 
 namespace Detail {
 

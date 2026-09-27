@@ -1091,6 +1091,15 @@ now reuses the direct-rejection image, and total elapsed time falls from
 dominated by the single validated function evaluation per literal used by direct
 classification: 86.248 s after 3.363 s one-time theory compilation.
 
+Before changing the evaluator, the standalone Barr3 benchmark now provides an
+`eval` mode that compares the current validated function `apply` against a
+precompiled `ValidatedProcedure` evaluated forward-only on the same full Barr3
+box. Procedure construction is timed separately. This experiment determines
+whether procedure precompilation is a viable replacement for the dominant cheap
+classification evaluation or whether the existing function evaluator is already
+the better execution path. No solver semantics or default configuration change
+is made by this diagnostic.
+
 Before further performance work, coverage must be returned to 100 percent for
 all newly introduced configuration branches, diagnostics and the fused direct
 classification behavior. In particular, coverage should confirm both sides of

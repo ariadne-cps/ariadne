@@ -504,10 +504,6 @@ class TestSmtSolver {
         auto positive_derivative=SmtSolverTestSupport::optional_derivative(
             smooth_expression,smooth_function,0u);
         ARIADNE_TEST_ASSERT(positive_derivative.has_value());
-        ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::monotone_coordinate_is_safe(
-                *positive_derivative,positive_domain));
-
         RealExpression nonsmooth_expression=max(
             RealExpression(sx),RealExpression(0));
         ValidatedScalarMultivariateFunction nonsmooth_function(
@@ -527,16 +523,17 @@ class TestSmtSolver {
             std::runtime_error);
         auto negative_derivative=(-exp(x[0])-x[0]).derivative(0u);
         ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::monotone_coordinate_is_safe(
-                negative_derivative,positive_domain));
+            definitely(apply(negative_derivative,positive_domain).upper_bound()<0));
 
         auto sine_derivative=sin(x[0]).derivative(0u);
         ARIADNE_TEST_ASSERT(
-            SmtSolverTestSupport::monotone_coordinate_is_safe(
-                sine_derivative,monotone_sine_domain));
+            definitely(apply(sine_derivative,monotone_sine_domain).upper_bound()<0));
+        UpperIntervalType nonmonotone_image=
+            apply(sine_derivative,nonmonotone_sine_domain);
         ARIADNE_TEST_ASSERT(
-            not SmtSolverTestSupport::monotone_coordinate_is_safe(
-                sine_derivative,nonmonotone_sine_domain));
+            not definitely(nonmonotone_image.lower_bound()>0));
+        ARIADNE_TEST_ASSERT(
+            not definitely(nonmonotone_image.upper_bound()<0));
     }
 
     Void test_search_outcome() {

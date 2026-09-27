@@ -37,6 +37,7 @@
 #include "geometry/box.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
+#include "solvers/constraint_solver.hpp"
 #include "solvers/smt_theory.hpp"
 #include "solvers/smt_boolean.hpp"
 #include "symbolic/space.hpp"

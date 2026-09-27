@@ -646,6 +646,14 @@ bounds are shifted by epsilon and open endpoints retain strict comparisons when
 certifying a witness. Thus numerical propagation moves down without moving SMT
 epsilon-result semantics into `ConstraintSolver`.
 
+The first build of this extraction exposed two ownership-boundary issues. The
+SMT header now includes `constraint_solver.hpp` because its compiled-theory
+alias names `ConstraintPropagationConstraint` directly. Tests that previously
+called the SMT-only monotonicity helper were also adjusted: derivative
+compilation/differentiability remains tested in SMT, while the actual monotone
+gating behavior is exercised through the generic propagation tests in
+`test_constraint_solver`.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

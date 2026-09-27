@@ -42,8 +42,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinIntegral;
 
 class Int64;
 

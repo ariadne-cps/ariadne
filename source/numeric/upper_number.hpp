@@ -51,8 +51,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinIntegral;
 
 template<class X> struct IsNumber;
 template<class P> class UpperNumber;

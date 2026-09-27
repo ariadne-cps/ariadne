@@ -51,11 +51,7 @@
 
 namespace Ariadne {
 
-using Utility::LogicalNegationType;
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinIntegral;
-using Utility::BuiltinFloatingPoint;
 
 /************ Number *********************************************************/
 

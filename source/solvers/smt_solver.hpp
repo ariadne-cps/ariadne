@@ -135,6 +135,9 @@ struct SmtSearchStatistics {
     double hull_procedure_build_seconds = 0.0;
     double hull_contraction_seconds = 0.0;
     double hull_direct_rejection_seconds = 0.0;
+    double hull_temporary_allocation_seconds = 0.0;
+    double hull_forward_execution_seconds = 0.0;
+    double hull_backward_propagation_seconds = 0.0;
     SizeType shaving_reduction_rounds = 0u;
     SizeType shaving_effective_reductions = 0u;
     SizeType shaving_function_evaluations = 0u;
@@ -507,6 +510,9 @@ class SmtSolver {
         double hull_procedure_build_seconds = 0.0;
         double hull_contraction_seconds = 0.0;
         double hull_direct_rejection_seconds = 0.0;
+        double hull_temporary_allocation_seconds = 0.0;
+        double hull_forward_execution_seconds = 0.0;
+        double hull_backward_propagation_seconds = 0.0;
         SizeType shaving_rounds = 0u;
         SizeType shaving_effective = 0u;
         SizeType shaving_function_evaluations = 0u;

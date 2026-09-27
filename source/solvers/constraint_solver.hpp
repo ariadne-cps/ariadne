@@ -52,6 +52,7 @@ template<class X, class R> class Constraint;
 
 template<class X> class Procedure;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
+struct ProcedureHullReductionStatistics;
 
 template<class P,class F> class TaylorModel;
 template<class M> class VectorScaledFunctionPatch;
@@ -72,6 +73,9 @@ struct ConstraintPropagationStatistics {
     double hull_procedure_build_seconds = 0.0;
     double hull_contraction_seconds = 0.0;
     double hull_direct_rejection_seconds = 0.0;
+    double hull_temporary_allocation_seconds = 0.0;
+    double hull_forward_execution_seconds = 0.0;
+    double hull_backward_propagation_seconds = 0.0;
     SizeType shaving_rounds = 0u;
     SizeType shaving_effective = 0u;
     SizeType shaving_function_evaluations = 0u;
@@ -158,6 +162,10 @@ class ConstraintSolver
     //! This method is sharp if each variable occurs at most once in the constraint.
     Bool hull_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& codomain) const;
     Bool hull_reduce(UpperBoxType& bx, const ValidatedProcedure& procedure, const ExactIntervalType& codomain) const;
+    Bool hull_reduce(
+        UpperBoxType& bx, const ValidatedProcedure& procedure,
+        const ExactIntervalType& codomain,
+        ProcedureHullReductionStatistics& statistics) const;
 
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
     //! with \a multipliers innner product \a codomain, centering at \a centre.

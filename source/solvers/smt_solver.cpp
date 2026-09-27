@@ -369,6 +369,12 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         propagation_statistics.hull_contraction_seconds;
     statistics.hull_direct_rejection_seconds+=
         propagation_statistics.hull_direct_rejection_seconds;
+    statistics.hull_temporary_allocation_seconds+=
+        propagation_statistics.hull_temporary_allocation_seconds;
+    statistics.hull_forward_execution_seconds+=
+        propagation_statistics.hull_forward_execution_seconds;
+    statistics.hull_backward_propagation_seconds+=
+        propagation_statistics.hull_backward_propagation_seconds;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
     statistics.shaving_function_evaluations+=
@@ -450,6 +456,12 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         propagation_statistics.hull_contraction_seconds;
     statistics.hull_direct_rejection_seconds+=
         propagation_statistics.hull_direct_rejection_seconds;
+    statistics.hull_temporary_allocation_seconds+=
+        propagation_statistics.hull_temporary_allocation_seconds;
+    statistics.hull_forward_execution_seconds+=
+        propagation_statistics.hull_forward_execution_seconds;
+    statistics.hull_backward_propagation_seconds+=
+        propagation_statistics.hull_backward_propagation_seconds;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
     statistics.shaving_function_evaluations+=
@@ -684,6 +696,12 @@ SmtSolver::_accumulate_box_processing_statistics(
         processing.reductions.hull_contraction_seconds;
     statistics.hull_direct_rejection_seconds+=
         processing.reductions.hull_direct_rejection_seconds;
+    statistics.hull_temporary_allocation_seconds+=
+        processing.reductions.hull_temporary_allocation_seconds;
+    statistics.hull_forward_execution_seconds+=
+        processing.reductions.hull_forward_execution_seconds;
+    statistics.hull_backward_propagation_seconds+=
+        processing.reductions.hull_backward_propagation_seconds;
     statistics.epsilon_check_seconds+=processing.epsilon_check_seconds;
     statistics.witness_probe_seconds+=processing.witness_probe_seconds;
     statistics.split_seconds+=processing.split_seconds;
@@ -1055,6 +1073,9 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.hull_procedure_build_seconds+=source.hull_procedure_build_seconds;
     target.hull_contraction_seconds+=source.hull_contraction_seconds;
     target.hull_direct_rejection_seconds+=source.hull_direct_rejection_seconds;
+    target.hull_temporary_allocation_seconds+=source.hull_temporary_allocation_seconds;
+    target.hull_forward_execution_seconds+=source.hull_forward_execution_seconds;
+    target.hull_backward_propagation_seconds+=source.hull_backward_propagation_seconds;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.shaving_function_evaluations+=source.shaving_function_evaluations;

@@ -181,14 +181,21 @@ Bool ConstraintSolver::propagate(
             statistics.hull_procedure_build_seconds+=
                 constraint_elapsed_seconds(phase_start);
 
+            ProcedureHullReductionStatistics hull_statistics;
             phase_start=std::chrono::steady_clock::now();
-            if(this->hull_reduce(domain,procedure,bounds)) {
-                statistics.hull_contraction_seconds+=
-                    constraint_elapsed_seconds(phase_start);
-                return true;
-            }
+            Bool const hull_empty=this->hull_reduce(
+                domain,procedure,bounds,hull_statistics);
             statistics.hull_contraction_seconds+=
                 constraint_elapsed_seconds(phase_start);
+            statistics.hull_temporary_allocation_seconds+=
+                hull_statistics.temporary_allocation_seconds;
+            statistics.hull_forward_execution_seconds+=
+                hull_statistics.forward_execution_seconds;
+            statistics.hull_backward_propagation_seconds+=
+                hull_statistics.backward_propagation_seconds;
+            if(hull_empty) {
+                return true;
+            }
 
             phase_start=std::chrono::steady_clock::now();
             UpperIntervalType image=apply(constraints[i].function(),domain);
@@ -287,14 +294,21 @@ Bool ConstraintSolver::propagate(
             statistics.hull_procedure_build_seconds+=
                 constraint_elapsed_seconds(phase_start);
 
+            ProcedureHullReductionStatistics hull_statistics;
             phase_start=std::chrono::steady_clock::now();
-            if(this->hull_reduce(domain,procedure,constraint.bounds)) {
-                statistics.hull_contraction_seconds+=
-                    constraint_elapsed_seconds(phase_start);
-                return true;
-            }
+            Bool const hull_empty=this->hull_reduce(
+                domain,procedure,constraint.bounds,hull_statistics);
             statistics.hull_contraction_seconds+=
                 constraint_elapsed_seconds(phase_start);
+            statistics.hull_temporary_allocation_seconds+=
+                hull_statistics.temporary_allocation_seconds;
+            statistics.hull_forward_execution_seconds+=
+                hull_statistics.forward_execution_seconds;
+            statistics.hull_backward_propagation_seconds+=
+                hull_statistics.backward_propagation_seconds;
+            if(hull_empty) {
+                return true;
+            }
 
             phase_start=std::chrono::steady_clock::now();
             Bool const infeasible=propagation_constraint_infeasible(
@@ -411,6 +425,16 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedProcedur
     LOGGING_PRINTLN("bounds="<<bounds);
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
+    return definitely(domain.is_empty());
+}
+
+Bool ConstraintSolver::hull_reduce(
+    UpperBoxType& domain,
+    const ValidatedProcedure& procedure,
+    const ExactIntervalType& bounds,
+    ProcedureHullReductionStatistics& statistics) const
+{
+    Ariadne::simple_hull_reduce(domain,procedure,bounds,statistics);
     return definitely(domain.is_empty());
 }
 

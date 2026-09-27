@@ -785,14 +785,36 @@ For this larger fixture the source float32 bit patterns are stored directly as
 DP. This is representation-equivalent to hexadecimal double literals while
 keeping the fixture substantially smaller.
 
-The first two measured Debug+coverage solve times were 0.195 s for `8x8` and
-0.813 s for `16x16`, a factor of about 4.17, closely tracking the fourfold
-growth of the dense second-layer connection count. The `32x32` point is used
-to determine whether that scaling remains approximately quadratic.
+The measured Debug+coverage solve times are 0.195 s for `8x8`,
+0.767 s for `16x16`, and 3.028 s for `32x32`. The two successive ratios
+are about 3.93 and 3.95, closely tracking the fourfold growth of the dense
+second-layer connection count. Up through `32x32` there is therefore no
+evidence of additional super-quadratic scaling from the current symbolic tanh
+expansion or SMT machinery.
 
-The next scaling point is the exact published `64x64` model. It is added to
-this dedicated benchmark executable only if measured runtime and compile cost
-remain suitable; otherwise it becomes a performance-only target.
+The exact published `2-64-64-1` model is now included as the fourth scaling
+point. Rather than embedding another very large C++ initializer, the six
+float32 tensors are stored internally as the raw little-endian tensor payload
+`tests/solvers/data/smt_barr3_full64.bin`. The payload is derived directly
+from the verified checkpoint by concatenating `W1,b1,W2,b2,W3,b3` in that
+order. Its SHA-256 is
+`d1c6646a9354d44092e23de07495c40d2a6575f2235aaa5be0d68b1e9b61bdbf`
+and its size is 17668 bytes, corresponding to exactly 4417 float32
+parameters. The original checkpoint SHA-256 remains
+`788fd56f21abb0cb5b83206b12d4d8d0ed718896c2140222a8fd129475f6c213`.
+
+`smt_barr3_full64.hpp` parses that internal payload directly, reconstructs
+each IEEE-754 binary32 value from its bytes, promotes it exactly to DP and
+builds the same two-layer tanh `RealExpression`. No PyTorch, ONNX or external
+framework is used at test runtime. The data path is supplied only to the
+dedicated benchmark executable through a CMake compile definition.
+
+Independent exact float32-to-DP evaluation gives
+`B(0,0)=3.809158158082951`; the full-model regression checks a validated
+origin enclosure `[3.809,3.810]` before executing the same one-box
+`B(x,y)=0` workload as the three prefix fixtures. This preserves the scaling
+comparison while making the `64x64` point the actual published network rather
+than a truncated surrogate.
 
 ## Current open work
 

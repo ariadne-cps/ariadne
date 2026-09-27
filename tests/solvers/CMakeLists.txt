@@ -18,6 +18,10 @@ foreach(TEST ${UNIT_TESTS})
     set_property(TEST ${TEST} PROPERTY LABELS "solvers;kernel")
 endforeach()
 
+target_compile_definitions(
+    test_smt_neural_benchmarks
+    PRIVATE ARIADNE_SMT_BARR3_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/smt_barr3_full64.bin")
+
 add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})

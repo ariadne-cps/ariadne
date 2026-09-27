@@ -34,6 +34,16 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
     return static_cast<SizeType>(parsed);
 }
 
+Bool sensitivity_from_argument(Int argc,const char* argv[]) {
+    if(argc<=2) { return true; }
+    String argument(argv[2]);
+    if(argument=="sensitivity") { return true; }
+    if(argument=="geometric") { return false; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric]");
+}
+
 SmtTheoryPrimitiveLiteral primitive(ContinuousPredicate const& predicate) {
     auto alternatives=normalize_smt_theory_literal(
         make_smt_theory_literal(predicate));
@@ -97,6 +107,7 @@ SmtResult timed_solve(
 
 Int main(Int argc,const char* argv[]) {
     SizeType const box_limit=box_limit_from_argument(argc,argv);
+    Bool const sensitivity_enabled=sensitivity_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -105,7 +116,9 @@ Int main(Int argc,const char* argv[]) {
     } else {
         std::cout << box_limit;
     }
-    std::cout << std::endl;
+    std::cout << " split-policy="
+              << (sensitivity_enabled ? "sensitivity" : "geometric")
+              << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
     RealExpression ex=x, ey=y;
@@ -160,7 +173,8 @@ Int main(Int argc,const char* argv[]) {
         std::numeric_limits<SizeType>::max(),
         box_limit,
         false,
-        false));
+        false,
+        sensitivity_enabled));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

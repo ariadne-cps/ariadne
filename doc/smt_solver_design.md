@@ -937,6 +937,22 @@ target workload, retaining it unconditionally would be pure heuristic overhead;
 if it does, its search benefit must be measured against that per-box cost before
 replacing it.
 
+The override diagnostic shows `sensitivity-overrides=0` for both unsafe
+rectangles and for the Lie query, while the unsafe sphere reports one override.
+The sphere has equal coordinate widths, so sensitivity is acting as an expensive
+tie-breaker there; on the full Lie domain the geometrically widest coordinate
+already matches the sensitivity choice despite about 5 seconds of sensitivity
+work per box in the measured Release run.
+
+To measure search-quality tradeoffs before changing the default heuristic,
+`SmtSolverConfiguration` now exposes an opt-out for sensitivity-guided
+splitting. It defaults to enabled, preserving existing solver behavior. The
+standalone Barr3 benchmark accepts an optional second argument,
+`sensitivity` or `geometric`, so identical box budgets can be compared with
+validated sensitivity analysis enabled or with the solver's geometric box split
+only. This switch is diagnostic and does not weaken result semantics: it changes
+only the search heuristic.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

@@ -55,7 +55,7 @@ jobs:
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build -DWARNINGS_AS_ERRORS=ON
+      run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
@@ -63,7 +63,7 @@ jobs:
 
     - name: Build, Test and Generate Code Coverage
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --parallel $($NPROC) --target coverage -DWARNINGS_AS_ERRORS=ON
+      run: cmake --build . --parallel $($NPROC) --target coverage
 
     - name: Upload Code Coverage
       if: runner.os == 'macOS'

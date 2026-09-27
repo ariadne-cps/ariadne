@@ -29,7 +29,7 @@
 #ifndef ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 #define ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
@@ -40,7 +40,7 @@
 #include "betterthreads/workload.hpp"
 #include "betterthreads/using.hpp"
 
-using namespace ConcLog;
+using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

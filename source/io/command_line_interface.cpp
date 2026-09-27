@@ -30,10 +30,10 @@
 #include "gnuplot.hpp"
 #include "cairo.hpp"
 #include "null_graphics.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 #include "command_line_interface.hpp"
 
-using namespace ConcLog;
+using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -69,7 +69,7 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "function/functional.hpp"
 
@@ -81,7 +81,7 @@
 
 #include "betterthreads/workload.hpp"
 
-using namespace ConcLog;
+using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

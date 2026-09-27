@@ -147,6 +147,107 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << std::endl;
 }
 
+FloatDPBounds stable_tanh(FloatDPBounds const& x)
+{
+    FloatDPBounds one(1,dp);
+    FloatDPBounds two(2,dp);
+    if(x.lower_raw()>=FloatDP(0,dp)) {
+        FloatDPBounds e=exp(two*x);
+        return one-two/(e+one);
+    }
+    if(x.upper_raw()<=FloatDP(0,dp)) {
+        FloatDPBounds e=exp(-two*x);
+        return two/(e+one)-one;
+    }
+    return FloatDPBounds(-1,1,dp);
+}
+
+struct DirectBarr3Evaluation {
+    FloatDPBounds barrier;
+    FloatDPBounds lie_plus_barrier;
+};
+
+DirectBarr3Evaluation direct_barr3_evaluate(Vector<FloatDPBounds> const& x)
+{
+    auto const& p=TestBarr3Full64::parameters();
+    constexpr SizeType width=TestBarr3Full64::width;
+
+    auto c=[&](SizeType i) {
+        return FloatDPBounds(ExactDouble(p[i]),dp);
+    };
+
+    std::array<FloatDPBounds,width> h1;
+    std::array<FloatDPBounds,width> dh1_dx;
+    std::array<FloatDPBounds,width> dh1_dy;
+    for(SizeType i=0u;i!=width;++i) {
+        FloatDPBounds z=c(TestBarr3Full64::b1_offset+i)
+            + c(TestBarr3Full64::w1_offset+2u*i)*x[0]
+            + c(TestBarr3Full64::w1_offset+2u*i+1u)*x[1];
+        h1[i]=stable_tanh(z);
+        FloatDPBounds factor=FloatDPBounds(1,dp)-sqr(h1[i]);
+        dh1_dx[i]=factor*c(TestBarr3Full64::w1_offset+2u*i);
+        dh1_dy[i]=factor*c(TestBarr3Full64::w1_offset+2u*i+1u);
+    }
+
+    std::array<FloatDPBounds,width> h2;
+    std::array<FloatDPBounds,width> dh2_dx;
+    std::array<FloatDPBounds,width> dh2_dy;
+    for(SizeType i=0u;i!=width;++i) {
+        FloatDPBounds z=c(TestBarr3Full64::b2_offset+i);
+        FloatDPBounds dz_dx(0,dp);
+        FloatDPBounds dz_dy(0,dp);
+        for(SizeType j=0u;j!=width;++j) {
+            FloatDPBounds weight=c(TestBarr3Full64::w2_offset+width*i+j);
+            z+=weight*h1[j];
+            dz_dx+=weight*dh1_dx[j];
+            dz_dy+=weight*dh1_dy[j];
+        }
+        h2[i]=stable_tanh(z);
+        FloatDPBounds factor=FloatDPBounds(1,dp)-sqr(h2[i]);
+        dh2_dx[i]=factor*dz_dx;
+        dh2_dy[i]=factor*dz_dy;
+    }
+
+    FloatDPBounds barrier=c(TestBarr3Full64::b3_offset);
+    FloatDPBounds db_dx(0,dp);
+    FloatDPBounds db_dy(0,dp);
+    for(SizeType i=0u;i!=width;++i) {
+        FloatDPBounds weight=c(TestBarr3Full64::w3_offset+i);
+        barrier+=weight*h2[i];
+        db_dx+=weight*dh2_dx[i];
+        db_dy+=weight*dh2_dy[i];
+    }
+
+    FloatDPBounds dx=x[1];
+    FloatDPBounds dy=-x[0]-x[1]+(x[0]*x[0]*x[0])/FloatDPBounds(3,dp);
+    FloatDPBounds lie=db_dx*dx+db_dy*dy;
+    return {barrier,lie+barrier};
+}
+
+Void profile_direct_barr3(UpperBoxType const& domain, SizeType repetitions)
+{
+    Vector<FloatDPBounds> x(
+        domain.size(),FloatDPBounds(DoublePrecision()));
+    for(SizeType i=0u;i!=domain.size();++i) {
+        x[i]=FloatDPBounds(
+            domain[i].lower_bound().raw(),
+            domain[i].upper_bound().raw());
+    }
+
+    DirectBarr3Evaluation result=direct_barr3_evaluate(x);
+    Stopwatch<Milliseconds> stopwatch;
+    for(SizeType i=0u;i!=repetitions;++i) {
+        result=direct_barr3_evaluate(x);
+    }
+    stopwatch.click();
+
+    std::cout << "[direct-profile] repetitions=" << repetitions
+              << " evaluate=" << stopwatch.elapsed_seconds()
+              << " barrier=" << result.barrier
+              << " lie+barrier=" << result.lie_plus_barrier
+              << std::endl;
+}
+
 Void profile_formula_evaluator(
     String const& name,
     RealExpression const& expression,
@@ -329,6 +430,7 @@ Int main(Int argc,const char* argv[]) {
         profile_formula_evaluator(
             "lie+barrier",network.lie+network.barrier,
             space,UpperBoxType(domain),8u);
+        profile_direct_barr3(UpperBoxType(domain),8u);
         return 0;
     }
 

@@ -57,6 +57,7 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " candidate-successes=" << result.statistics().candidate_witness_successes
               << " hull-rounds=" << result.statistics().hull_reduction_rounds
               << " shaving-rounds=" << result.statistics().shaving_reduction_rounds
+              << " shaving-evals=" << result.statistics().shaving_function_evaluations
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds
               << " sensitivity-splits=" << result.statistics().sensitivity_guided_splits
               << " compile=" << result.statistics().theory_compile_seconds
@@ -64,6 +65,12 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " epsilon=" << result.statistics().epsilon_check_seconds
               << " witness=" << result.statistics().witness_probe_seconds
               << " split-phase=" << result.statistics().split_seconds
+              << " sensitivity-builds=" << result.statistics().sensitivity_derivatives_built
+              << " sensitivity-evals=" << result.statistics().sensitivity_derivative_evaluations
+              << " sensitivity-build-time="
+              << result.statistics().sensitivity_derivative_build_seconds
+              << " sensitivity-eval-time="
+              << result.statistics().sensitivity_derivative_evaluation_seconds
               << " candidate=" << result.statistics().candidate_search_seconds
               << std::endl;
 }

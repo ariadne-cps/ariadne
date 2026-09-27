@@ -902,6 +902,24 @@ decision depends on wall-clock time. The Barr3 verification runner prints all
 of them so the expensive phase can be identified before changing contractor
 policy.
 
+A subsequent Release one-box run measured 1.479 s for the unsafe sphere,
+1.564 s and 1.566 s for the two unsafe rectangles, and 14.387 s for the Lie
+query. The Lie-query phase breakdown was 3.240 s theory compilation, 4.783 s
+original reduction, 0.020 s whole-box epsilon checking, 1.476 s deterministic
+witness probing, and 4.763 s sensitivity splitting. This rules out epsilon
+containment checking as the dominant cost and localizes most of the remaining
+one-box expense to propagation and sensitivity analysis.
+
+The diagnostic statistics now split sensitivity cost further into symbolic
+derivative construction time and validated derivative-evaluation time, with
+counts for both operations. Constraint propagation also counts the validated
+function evaluations performed by coordinate shaving. These counters are
+observational only and do not alter contractor or split semantics. The next
+optimization decision is deliberately deferred until the full Barr3 one-box
+benchmark identifies whether sensitivity time is dominated by derivative
+construction or derivative evaluation, and how many expensive neural-function
+evaluations shaving performs.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

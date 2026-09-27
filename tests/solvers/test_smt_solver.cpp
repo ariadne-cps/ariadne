@@ -234,7 +234,10 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(unsat.statistics().hull_effective_reductions,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_reduction_rounds,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().shaving_effective_reductions,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().shaving_function_evaluations,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_guided_splits,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_derivatives_built,0u);
+        ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_derivative_evaluations,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().sensitivity_overrides_geometric_splits,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().epsilon_box_certifications,0u);
         ARIADNE_TEST_EQUAL(unsat.statistics().candidate_witness_searches,0u);
@@ -324,6 +327,11 @@ class TestSmtSolver {
         no_conflict.boxes_processed=3u;
         no_conflict.monotone_reduction_rounds=4u;
         no_conflict.monotone_effective_reductions=2u;
+        no_conflict.shaving_function_evaluations=17u;
+        no_conflict.sensitivity_derivatives_built=3u;
+        no_conflict.sensitivity_derivative_evaluations=3u;
+        no_conflict.sensitivity_derivative_build_seconds=0.25;
+        no_conflict.sensitivity_derivative_evaluation_seconds=0.5;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
@@ -331,6 +339,11 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.boxes_processed,3u);
         ARIADNE_TEST_EQUAL(target.monotone_reduction_rounds,4u);
         ARIADNE_TEST_EQUAL(target.monotone_effective_reductions,2u);
+        ARIADNE_TEST_EQUAL(target.shaving_function_evaluations,17u);
+        ARIADNE_TEST_EQUAL(target.sensitivity_derivatives_built,3u);
+        ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluations,3u);
+        ARIADNE_TEST_EQUAL(target.sensitivity_derivative_build_seconds,0.25);
+        ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluation_seconds,0.5);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);

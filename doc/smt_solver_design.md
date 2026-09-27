@@ -1201,3 +1201,26 @@ subexpressions are lost before procedure construction or whether the remaining
 cost is primarily generic instruction dispatch and the expanded
 activation/derivative representation. No core tanh operator or specialized
 Barr3 execution path should be introduced until this distinction is measured.
+
+
+The procedure-instruction diagnostic then identified a generic DAG-preservation
+bug outside the SMT solver. For the Barr3 barrier, the original expression has
+263,169 recursive node visits but only 14,019 distinct node pointers, while the
+procedure built from the expression-space conversion contained 263,169
+instructions. For Lie-plus-barrier the corresponding counts were 1,856,788
+visits, 31,568 distinct pointers and 1,856,788 instructions. The procedure
+converter itself already caches Formula node pointers; inspection showed that
+the public make_formula(Expression<Real>, Space<Real>) overload deliberately
+called the internal no-cache conversion, unlike the Map<Identifier,SizeType>
+overload, which already uses the node-pointer cache.
+
+The Space<Real> overload now delegates to the cached Map overload. A structural
+Procedure regression constructs an expression with an explicitly shared
+subgraph and checks that conversion produces one instruction per distinct
+expression node rather than one per recursive occurrence, while preserving the
+evaluated value. This is a general symbolic-function fix rather than an
+SMT-specific optimization. The Barr3 evaluator benchmark should be rerun before
+adding a native tanh operator: if procedure instruction counts collapse toward
+the distinct-node counts and evaluation time falls accordingly, DAG preservation
+must be accounted for separately from the remaining numerical instability of
+the exp-ratio tanh representation.

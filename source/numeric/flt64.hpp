@@ -47,6 +47,8 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinIntegral;
+
 /************ Flt64 ********************************************************/
 
 Void set_default_rounding();

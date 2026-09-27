@@ -41,6 +41,10 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+using Utility::BuiltinFloatingPoint;
+
 //! \ingroup NumericModule
 //! \brief Floating point number approximations to real numbers supporting approxiamate arithmetic.
 //! \details

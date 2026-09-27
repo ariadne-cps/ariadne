@@ -41,6 +41,8 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinIntegral;
+
 /************ FloatMP ********************************************************/
 
 struct NoInit;

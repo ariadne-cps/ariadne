@@ -41,6 +41,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
 //! \sa LowerReal, FloatDP, FloatMP, Bounds, UpperBound.

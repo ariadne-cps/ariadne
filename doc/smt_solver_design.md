@@ -1224,3 +1224,25 @@ adding a native tanh operator: if procedure instruction counts collapse toward
 the distinct-node counts and evaluation time falls accordingly, DAG preservation
 must be accounted for separately from the remaining numerical instability of
 the exp-ratio tanh representation.
+
+
+The DAG-preservation change was validated by the symbolic expression, Procedure,
+and SMT solver test suites. The Barr3 diagnostic run immediately before the
+naming-only refactor also confirms the expected structural effect: the
+expression-derived procedure now contains exactly 14,019 instructions for the
+barrier and 31,568 for Lie-plus-barrier, matching the respective distinct
+expression-node-pointer counts rather than the 263,169 and 1,856,788 recursive
+node visits. On FloatDPBounds, eight evaluations take about 0.005 s and 0.015 s
+respectively, compared with 0.106 s and 0.741 s for procedures produced through
+the sharing-losing function conversion measured before the fix. The compact
+Lie-plus-barrier procedure is therefore already within measurement noise of the
+Barr3-specific direct reference evaluator (0.013 s for eight combined network
+evaluations).
+
+This separates the two previously conflated issues. DAG preservation accounts
+for essentially all of the large generic-evaluation performance gap. The
+remaining material problem is enclosure quality: the generic expression paths
+still return an unbounded interval on the initial Barr3 box, while the stable
+direct network evaluation returns finite enclosures. Work can therefore move to
+a general stable representation of tanh without using a Barr3-specific execution
+path as a solver optimization.

@@ -1855,7 +1855,9 @@ class TestSmtSolver {
         std::cout << "[smt-geometric] validated constraint uses geometric split" << std::endl;
         RealVariable gx("geometric_constraint_x");
         RealSpace space({gx});
-        auto function=ValidatedScalarMultivariateFunction::identity(1u)[0];
+        List<ValidatedScalarMultivariateFunction> coordinates=
+            ValidatedScalarMultivariateFunction::coordinates(1u);
+        ValidatedScalarMultivariateFunction function=coordinates[0];
         List<ValidatedConstraint> constraints({
             ValidatedConstraint(
                 ValidatedNumber(0.0_x),

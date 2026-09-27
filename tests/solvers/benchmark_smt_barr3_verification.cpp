@@ -162,8 +162,8 @@ Void profile_evaluator(
     ValidatedProcedure procedure(function);
     build_stopwatch.click();
 
-    UpperIntervalType procedure_image;
-    Vector<UpperIntervalType> arguments=cast_vector(domain);
+    FloatDPBounds procedure_image;
+    Vector<FloatDPBounds> arguments(cast_vector(domain));
     Stopwatch<Milliseconds> procedure_stopwatch;
     for(SizeType i=0u; i!=repetitions; ++i) {
         procedure_image=evaluate(procedure,arguments);

@@ -683,6 +683,35 @@ second coordinate controlled only by an already certified constraint/literal;
 the unresolved first-coordinate constraint must override the geometric split
 that the inactive wide coordinate would otherwise induce.
 
+## Neural benchmark plan
+
+The first external neural workload will use the public Barrier 3 benchmark
+family rather than an ad-hoc network. Two distinct public references are kept
+separate:
+
+- the original FOSSIL Barr3 benchmark uses the two-state dynamics
+  `x_dot=y`, `y_dot=-x-y+x^3/3`, domain `[-3,2.5]x[-2,1]`, and a
+  sigmoid `2-10-10-1` barrier network;
+- the 2026 L4DC reproducibility package for scalable neural-CBF verification
+  reuses Barrier 3 with the same dynamics and publishes a pretrained
+  `2-64-64-1` tanh network, together with a FOSSIL/dReal verification script.
+  The paper reports that the identically trained Barrier 3 network is verified
+  by dReal and uses it as a scaling comparison.
+
+This second artifact matches the eventual Ariadne target substantially better
+than a synthetic `2-8-8-1` network. The benchmark progression will therefore
+start from a smaller internal representation only if needed for suite runtime,
+but the external reference target is the published Barrier 3 `2-64-64-1`
+tanh model. The Ariadne benchmark must contain only frozen numeric parameters
+and internally constructed `RealExpression` objects; it must not depend at
+runtime on PyTorch, ONNX, FOSSIL or another ML framework.
+
+The public pretrained `barr3_cbf.pth` and `barr3_cbf.onnx` files are stored
+through Git LFS in the external reproducibility repository. Before adding the
+Ariadne fixture, extract the exact matrices and biases from one of those files
+and record their source and checksum. Do not substitute newly trained or random
+weights while describing the result as the published benchmark.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

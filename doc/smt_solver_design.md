@@ -1020,6 +1020,24 @@ cheaper/adaptive contractor schedule should be preferred. Both generic and
 precompiled propagation paths retain direct rejection when hull is disabled and
 have explicit tests for that behavior.
 
+The eight-box no-hull run makes the tradeoff concrete. The Lie query drops from
+37.832 s with hull enabled (and shaving, sensitivity and witness probing already
+disabled) to 4.975 s with hull disabled. Both runs process eight boxes, prune
+zero Lie boxes, certify zero epsilon boxes and perform eight splits. The sphere
+also retains the same one pruned box while dropping from 4.504 s to 0.387 s.
+Thus, at this budget, hull contraction adds no observable pruning progress on
+Barr3 while dominating runtime by more than an order of magnitude over direct
+validated rejection.
+
+This does not yet justify removing hull contraction from the solver default:
+contractor value can emerge only after further subdivision, and other workloads
+may benefit substantially. The next Barr3 experiment therefore increases the
+box budget using the cheap geometric/no-witness/no-shaving/no-hull baseline to
+locate where direct validated range rejection starts pruning or epsilon
+certification starts succeeding. Hull should then be reintroduced at the same
+box frontier to measure whether its extra contractions reduce the remaining
+search enough to amortize their cost.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

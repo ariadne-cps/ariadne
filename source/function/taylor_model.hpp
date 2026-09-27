@@ -32,7 +32,7 @@
 #include <map>
 
 #include "utility/macros.hpp"
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 #include "utility/array.hpp"
 #include "utility/pointer.hpp"
 #include "algebra/vector.hpp"

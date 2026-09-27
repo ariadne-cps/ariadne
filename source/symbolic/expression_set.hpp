@@ -32,7 +32,10 @@
 #include <iostream>
 
 #include "utility/container.hpp"
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "symbolic/variable.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"

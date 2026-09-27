@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "foundations/tribool.hpp"
 #include "utility/writable.hpp"
 #include "numeric/numeric.hpp"

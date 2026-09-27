@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 #include "function/function.decl.hpp"
 #include "function/function_traits.hpp"
 

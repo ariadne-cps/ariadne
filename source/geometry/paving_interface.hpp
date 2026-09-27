@@ -30,7 +30,7 @@
 #define ARIADNE_PAVING_INTERFACE_HPP
 
 #include <iosfwd>
-#include "utility/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "geometry/grid_cell.hpp"
 #include "geometry/set_interface.hpp"
 #include "io/graphics_interface.hpp"

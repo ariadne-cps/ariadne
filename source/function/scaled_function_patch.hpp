@@ -32,7 +32,7 @@
 #include <iosfwd>
 #include "utility/container.hpp"
 #include "utility/exceptions.hpp"
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "function/taylor_model.hpp"

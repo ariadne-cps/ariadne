@@ -36,7 +36,6 @@
 namespace Ariadne {
 
 
-using Utility::Bool;
 
 class Indeterminate;
 extern const Indeterminate indeterminate;
@@ -110,7 +109,6 @@ template<class P> using InequalityLogicalType = ApartnessType<P>;
 
 namespace Detail {
 
-using Utility::ComparableEnumerationType;
 enum class LogicalValue : ComparableEnumerationType;
 }
 using Detail::LogicalValue;

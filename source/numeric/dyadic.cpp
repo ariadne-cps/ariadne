@@ -46,7 +46,6 @@
 
 namespace Ariadne {
 
-using Utility::Writer;
 
 template<class X> class FiniteOperations;
 template<class X> class ExtensionOperations;
@@ -481,7 +480,7 @@ auto FractionWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputSt
     return os;
 }
 
-auto Utility::RepresentationWriter<Dyadic>::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+auto RepresentationWriter<Dyadic>::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
     return os << "Dyadic(" << x.mantissa() << "," << x.exponent() << "u)";
 }
 

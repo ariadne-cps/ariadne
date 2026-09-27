@@ -31,6 +31,7 @@
 #include "utility/stdlib.hpp"
 #include "utility/typedefs.hpp"
 #include "utility/handle.hpp"
+#include "utility/string.hpp"
 #include "foundations/paradigm.hpp"
 
 #include "logical.decl.hpp"

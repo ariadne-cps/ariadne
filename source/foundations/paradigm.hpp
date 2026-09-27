@@ -31,8 +31,11 @@
 
 #include <cstdint>
 #include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
+
+using namespace Utility;
 
 class ParadigmError { };
 

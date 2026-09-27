@@ -875,6 +875,23 @@ hull/shaving propagation, epsilon checks and sensitivity splitting on one real
 64x64 Barr3 box. Features are to be re-enabled one at a time only after this
 baseline is measured.
 
+The Release one-box baseline after this isolation is 1.642 s for the unsafe
+sphere, 1.768 s and 1.757 s for the two unsafe rectangles, and 15.962 s for
+the Lie query. Network+Lie expression construction remains only 0.002 s.
+The Lie query is therefore roughly nine times more expensive per box than a
+barrier-only query even before candidate search or monotone contraction.
+
+Inspection of theory compilation identified one source of avoidable work:
+`_compile_theory_literals()` eagerly constructed every coordinate derivative
+for every theory literal even when monotone contraction was disabled. Those
+cached derivatives are consumed only by the monotone-contraction path; hull,
+shaving, epsilon checking and sensitivity splitting use the compiled functions
+directly. Theory compilation now leaves the derivative cache empty unless
+`monotone_reduction_enabled()` is true. A dedicated regression checks that a
+two-variable literal produces zero cached derivatives with monotone reduction
+off and two with it on. This is a semantics-preserving optimization: it changes
+only unused precomputation, not the enabled contractor set.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

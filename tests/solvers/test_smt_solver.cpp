@@ -53,6 +53,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_statistics_aggregation());
         ARIADNE_TEST_CALL(test_parallel_state_transitions());
         ARIADNE_TEST_CALL(test_epsilon_witness_candidate_limits());
+        ARIADNE_TEST_CALL(test_theory_derivative_compilation_policy());
         ARIADNE_TEST_CALL(test_candidate_witness_outcome());
         ARIADNE_TEST_CALL(test_sensitivity_split_selection());
         ARIADNE_TEST_CALL(test_monotone_coordinate_gating());
@@ -404,6 +405,40 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(
             SmtSolverTestSupport::epsilon_witness_candidate_count(sixty_four_dimensions),
             131u);
+    }
+
+    Void test_theory_derivative_compilation_policy() {
+        RealVariable x("compile_derivative_x"), y("compile_derivative_y");
+        RealSpace space({x,y});
+        RealExpression expression=x*x+y;
+        List<SmtTheoryPrimitiveLiteral> literals({
+            normalize_smt_theory_literal(
+                make_smt_theory_literal(expression>=0))[0][0]
+        });
+
+        SmtSolver without_monotone(SmtSolverConfiguration(
+            0.01_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false));
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::compiled_theory_derivative_count(
+                without_monotone,space,literals),
+            0u);
+
+        SmtSolver with_monotone(SmtSolverConfiguration(
+            0.01_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            true));
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::compiled_theory_derivative_count(
+                with_monotone,space,literals),
+            space.dimension());
     }
 
     Void test_candidate_witness_outcome() {

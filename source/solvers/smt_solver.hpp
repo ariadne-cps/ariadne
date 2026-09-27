@@ -280,6 +280,13 @@ std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
     ValidatedScalarMultivariateFunction const& function,
     SizeType variable);
 
+//! \brief Number of cached coordinate derivatives produced while compiling
+//! theory literals under the solver's current configuration.
+SizeType compiled_theory_derivative_count(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    List<SmtTheoryPrimitiveLiteral> const& literals);
+
 struct SearchOutcome {
     std::optional<UpperBoxType> witness;
     std::optional<SizeType> backjump_level;
@@ -455,6 +462,9 @@ class SmtSolver {
         SmtSolver const&, UpperBoxType const&, List<ValidatedConstraint> const&);
     friend Bool SmtSolverTestSupport::epsilon_satisfied(
         SmtSolver const&, RealSpace const&, UpperBoxType const&,
+        List<SmtTheoryPrimitiveLiteral> const&);
+    friend SizeType SmtSolverTestSupport::compiled_theory_derivative_count(
+        SmtSolver const&, RealSpace const&,
         List<SmtTheoryPrimitiveLiteral> const&);
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 

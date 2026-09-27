@@ -360,11 +360,13 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
         }
         ValidatedScalarMultivariateFunction function(space,expression);
         std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
-        derivatives.reserve(space.dimension());
-        for(SizeType variable=0u; variable!=space.dimension(); ++variable) {
-            derivatives.push_back(
-                SmtSolverTestSupport::optional_derivative(
-                    expression,function,variable));
+        if(_configuration.monotone_reduction_enabled()) {
+            derivatives.reserve(space.dimension());
+            for(SizeType variable=0u; variable!=space.dimension(); ++variable) {
+                derivatives.push_back(
+                    SmtSolverTestSupport::optional_derivative(
+                        expression,function,variable));
+            }
         }
         SmtTheoryPrimitiveRelation relation=literals[i].relation();
         result.push_back({
@@ -1084,6 +1086,19 @@ std::optional<ValidatedScalarMultivariateFunction> optional_derivative(
         return std::nullopt;
     }
     return function.derivative(variable);
+}
+
+SizeType compiled_theory_derivative_count(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    List<SmtTheoryPrimitiveLiteral> const& literals)
+{
+    auto compiled=solver._compile_theory_literals(space,literals);
+    SizeType count=0u;
+    for(auto const& literal:compiled) {
+        count+=literal.derivatives.size();
+    }
+    return count;
 }
 
 SearchOutcome SearchOutcome::exhausted()

@@ -24,6 +24,7 @@
 
 #include <sstream>
 
+#include "utility/stopwatch.hpp"
 #include "solvers/smt_solver.hpp"
 #include "betterthreads/thread_manager.hpp"
 
@@ -906,7 +907,11 @@ class TestSmtSolver {
             std::numeric_limits<SizeType>::max(),
             1u,
             false));
+        Stopwatch<Milliseconds> stopwatch;
         SmtResult solve_result=solver.solve(space,barr3_domain,literals);
+        stopwatch.click();
+        std::cout << "[smt-neural] Barr3-derived 2-8-8-1 solve time="
+                  << stopwatch.elapsed_seconds() << " s" << std::endl;
         ARIADNE_TEST_ASSERT(solve_result.is_unknown());
         ARIADNE_TEST_EQUAL(
             solve_result.unknown_reason(),SmtUnknownReason::RESOURCE_EXHAUSTED);

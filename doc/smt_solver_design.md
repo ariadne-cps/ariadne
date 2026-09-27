@@ -749,6 +749,13 @@ sensitivity-guided split. This exercises expression compilation, cached
 derivatives, validated reduction, epsilon checking and neural-expression split
 selection without turning the ordinary test suite into a long benchmark.
 
+The neural regression measures its own solve time with
+`Stopwatch<Milliseconds>`, following the existing Ariadne timing pattern used
+by `examples/continuous/vanderpol.cpp`: construct the stopwatch immediately
+before the measured solver call, call `click()` immediately afterwards, and
+report `elapsed_seconds()`. Timing is diagnostic only and is never used as a
+pass/fail assertion, since Debug/coverage instrumentation and host load can vary.
+
 The next scaling points are `16x16`, `32x32` and the exact published
 `64x64` model. Each size is promoted into the ordinary suite only if measured
 runtime remains suitable; larger cases remain explicit performance benchmarks.

@@ -164,19 +164,35 @@ Void profile_formula_evaluator(
     Formula<EffectiveNumber> formula=make_formula(expression,space);
     build_stopwatch.click();
 
-    Vector<UpperIntervalType> arguments=cast_vector(domain);
-    UpperIntervalType image;
-    Stopwatch<Milliseconds> evaluate_stopwatch;
+    Vector<UpperIntervalType> upper_arguments=cast_vector(domain);
+    UpperIntervalType upper_image=evaluate(formula,upper_arguments);
+    Stopwatch<Milliseconds> upper_stopwatch;
     for(SizeType i=0u; i!=repetitions; ++i) {
-        image=evaluate(formula,arguments);
+        upper_image=evaluate(formula,upper_arguments);
     }
-    evaluate_stopwatch.click();
+    upper_stopwatch.click();
+
+    Vector<FloatDPBounds> bounds_arguments(
+        domain.size(),FloatDPBounds(DoublePrecision()));
+    for(SizeType i=0u; i!=domain.size(); ++i) {
+        bounds_arguments[i]=FloatDPBounds(
+            domain[i].lower_bound().raw(),
+            domain[i].upper_bound().raw());
+    }
+    FloatDPBounds bounds_image=evaluate(formula,bounds_arguments);
+    Stopwatch<Milliseconds> bounds_stopwatch;
+    for(SizeType i=0u; i!=repetitions; ++i) {
+        bounds_image=evaluate(formula,bounds_arguments);
+    }
+    bounds_stopwatch.click();
 
     std::cout << "[formula-profile] " << name
               << " repetitions=" << repetitions
               << " formula-build=" << build_stopwatch.elapsed_seconds()
-              << " formula-evaluate=" << evaluate_stopwatch.elapsed_seconds()
-              << " image=" << image
+              << " formula-upper-evaluate=" << upper_stopwatch.elapsed_seconds()
+              << " formula-bounds-evaluate=" << bounds_stopwatch.elapsed_seconds()
+              << " upper-image=" << upper_image
+              << " bounds-image=" << bounds_image
               << std::endl;
 }
 

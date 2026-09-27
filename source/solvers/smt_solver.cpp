@@ -249,7 +249,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool candidate_search_enabled, Bool monotone_reduction_enabled,
     Bool sensitivity_split_enabled,
     Bool deterministic_witness_probing_enabled,
-    Bool shaving_reduction_enabled)
+    Bool shaving_reduction_enabled,
+    Bool hull_reduction_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -258,7 +259,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _monotone_reduction_enabled(monotone_reduction_enabled),
       _sensitivity_split_enabled(sensitivity_split_enabled),
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
-      _shaving_reduction_enabled(shaving_reduction_enabled)
+      _shaving_reduction_enabled(shaving_reduction_enabled),
+      _hull_reduction_enabled(hull_reduction_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -358,7 +360,8 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
     ConstraintPropagationStatistics propagation_statistics;
     Bool const empty=contractor.propagate(
         domain,constraints,propagation_statistics,
-        _configuration.shaving_reduction_enabled());
+        _configuration.shaving_reduction_enabled(),
+        _configuration.hull_reduction_enabled());
     statistics.hull_rounds+=propagation_statistics.hull_rounds;
     statistics.hull_effective+=propagation_statistics.hull_effective;
     statistics.hull_procedure_builds+=
@@ -445,7 +448,8 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         literals,
         _configuration.monotone_reduction_enabled(),
         propagation_statistics,
-        _configuration.shaving_reduction_enabled());
+        _configuration.shaving_reduction_enabled(),
+        _configuration.hull_reduction_enabled());
     statistics.hull_rounds+=propagation_statistics.hull_rounds;
     statistics.hull_effective+=propagation_statistics.hull_effective;
     statistics.hull_procedure_builds+=

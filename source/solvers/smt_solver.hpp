@@ -74,7 +74,8 @@ class SmtSolverConfiguration {
         Bool monotone_reduction_enabled=false,
         Bool sensitivity_split_enabled=true,
         Bool deterministic_witness_probing_enabled=true,
-        Bool shaving_reduction_enabled=true);
+        Bool shaving_reduction_enabled=true,
+        Bool hull_reduction_enabled=true);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -106,6 +107,9 @@ class SmtSolverConfiguration {
     //! \brief Whether coordinate shaving is enabled during validated propagation.
     Bool shaving_reduction_enabled() const { return _shaving_reduction_enabled; }
 
+    //! \brief Whether hull reduction is enabled during validated propagation.
+    Bool hull_reduction_enabled() const { return _hull_reduction_enabled; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -116,6 +120,7 @@ class SmtSolverConfiguration {
     Bool _sensitivity_split_enabled;
     Bool _deterministic_witness_probing_enabled;
     Bool _shaving_reduction_enabled;
+    Bool _hull_reduction_enabled;
 };
 
 //! \ingroup Solvers

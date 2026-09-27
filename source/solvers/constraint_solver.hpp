@@ -143,7 +143,8 @@ class ConstraintSolver
         UpperBoxType& domain,
         const List<ValidatedConstraint>& constraints,
         ConstraintPropagationStatistics& statistics,
-        Bool shaving_reduction_enabled=true) const;
+        Bool shaving_reduction_enabled=true,
+        Bool hull_reduction_enabled=true) const;
 
     //! \brief Propagate precompiled numerical constraints, optionally using
     //! derivative-assisted monotone contraction after hull/shaving stall.
@@ -152,7 +153,8 @@ class ConstraintSolver
         const std::vector<ConstraintPropagationConstraint>& constraints,
         Bool monotone_reduction_enabled,
         ConstraintPropagationStatistics& statistics,
-        Bool shaving_reduction_enabled=true) const;
+        Bool shaving_reduction_enabled=true,
+        Bool hull_reduction_enabled=true) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.

@@ -523,6 +523,22 @@ class TestConstraintSolver
         }
 
         {
+            std::cout << "[constraint-propagate] disabling hull keeps direct rejection" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(
+                    ValidatedNumber(2.0_x),
+                    sqr(x[0])-x[0],
+                    ValidatedNumber(2.0_x))
+            });
+            ConstraintPropagationStatistics statistics;
+            Bool empty=solver.propagate(domain,constraints,statistics,false,false);
+            ARIADNE_TEST_ASSERT(empty);
+            ARIADNE_TEST_EQUAL(statistics.hull_procedure_builds,0u);
+            ARIADNE_TEST_EQUAL(statistics.shaving_rounds,0u);
+        }
+
+        {
             std::cout << "[constraint-propagate] direct validated rejection proves empty" << std::endl;
             UpperBoxType domain=ExactBoxType({{0.0_x,1.0_x}});
             List<ValidatedConstraint> constraints({
@@ -541,6 +557,19 @@ class TestConstraintSolver
     Void test_precompiled_propagate() {
         ConstraintSolver solver;
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+
+        {
+            std::cout << "[constraint-propagate-precompiled] disabling hull keeps strict direct rejection" << std::endl;
+            UpperBoxType domain=ExactBoxType({{0.0_x,0.0_x}});
+            std::vector<ConstraintPropagationConstraint> constraints({
+                {x[0],ExactIntervalType(0.0_x,+infty),{},true,false}
+            });
+            ConstraintPropagationStatistics statistics;
+            ARIADNE_TEST_ASSERT(
+                solver.propagate(domain,constraints,false,statistics,false,false));
+            ARIADNE_TEST_EQUAL(statistics.hull_procedure_builds,0u);
+            ARIADNE_TEST_EQUAL(statistics.shaving_rounds,0u);
+        }
 
         {
             std::cout << "[constraint-propagate-precompiled] strict lower endpoint rejects equality" << std::endl;

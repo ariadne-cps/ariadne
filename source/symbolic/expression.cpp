@@ -542,8 +542,8 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Ident
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    Map<Identifier, SizeType> variable_indices = spc.indices_from_names(); Void* no_cache;
-    return _cached_make_formula(e,variable_indices,no_cache);
+    Map<Identifier,SizeType> variable_indices=spc.indices_from_names();
+    return make_formula(e,variable_indices);
 }
 
 

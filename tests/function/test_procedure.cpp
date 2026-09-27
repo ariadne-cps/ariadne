@@ -33,6 +33,8 @@
 #include "config.hpp"
 
 #include "function/procedure.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
 #include "numeric/numeric.hpp"
 #include "geometry/interval.hpp"
 
@@ -79,6 +81,7 @@ class TestProcedure
     Void test();
   private:
     Void test_construct_from_formula();
+    Void test_expression_dag_preservation();
     Void test_construct_from_expansion();
     Void test_evaluate();
     Void test_propagate();
@@ -100,6 +103,7 @@ TestProcedure::TestProcedure()
 Void TestProcedure::test()
 {
     ARIADNE_TEST_CALL(test_construct_from_formula());
+    ARIADNE_TEST_CALL(test_expression_dag_preservation());
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
@@ -137,6 +141,28 @@ Void TestProcedure::test_construct_from_formula()
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_EQUALS(p.result_size(),3u);
     ARIADNE_TEST_EQUALS(p.argument_size(),2u);
+}
+
+
+Void TestProcedure::test_expression_dag_preservation()
+{
+    RealVariable x("dag_x"), y("dag_y");
+    RealSpace space({x,y});
+    RealExpression shared=x+y;
+    RealExpression expression=shared*shared+shared;
+
+    ARIADNE_TEST_EQUAL(count_nodes(expression),11u);
+    ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expression),5u);
+
+    Formula<EffectiveNumber> formula=make_formula(expression,space);
+    EffectiveProcedure procedure(space.dimension(),formula);
+
+    ARIADNE_TEST_EQUAL(procedure._instructions.size(),5u);
+
+    Vector<FloatDPBounds> arguments({
+        FloatDPBounds(1,dp),FloatDPBounds(2,dp)
+    });
+    ARIADNE_TEST_EQUAL(evaluate(procedure,arguments),FloatDPBounds(12,dp));
 }
 
 

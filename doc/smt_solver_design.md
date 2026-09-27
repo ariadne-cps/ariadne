@@ -920,6 +920,23 @@ benchmark identifies whether sensitivity time is dominated by derivative
 construction or derivative evaluation, and how many expensive neural-function
 evaluations shaving performs.
 
+The first run with those counters resolves that question. On the Lie query,
+sensitivity performs four derivative constructions in 0.560 s but four
+validated derivative evaluations in 4.052 s; derivative evaluation, not symbolic
+derivative construction, is therefore the dominant sensitivity cost. The same
+box performs eight shaving function evaluations while the complete reduction
+phase costs 4.940 s. Barrier-only rectangles show the same qualitative pattern:
+two derivative builds take about 0.07 s while two derivative evaluations take
+about 0.44 s. Caching symbolic derivatives can still amortize construction over
+multiple boxes, but it cannot address the dominant per-box cost seen here.
+
+Before changing split policy, the benchmark also reports whether sensitivity
+actually overrides the geometrically widest coordinate. If the expensive
+validated derivative analysis does not change the selected coordinate on the
+target workload, retaining it unconditionally would be pure heuristic overhead;
+if it does, its search benefit must be measured against that per-box cost before
+replacing it.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

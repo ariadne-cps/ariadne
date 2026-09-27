@@ -60,6 +60,8 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " shaving-evals=" << result.statistics().shaving_function_evaluations
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds
               << " sensitivity-splits=" << result.statistics().sensitivity_guided_splits
+              << " sensitivity-overrides="
+              << result.statistics().sensitivity_overrides_geometric_splits
               << " compile=" << result.statistics().theory_compile_seconds
               << " reduce=" << result.statistics().reduction_seconds
               << " epsilon=" << result.statistics().epsilon_check_seconds

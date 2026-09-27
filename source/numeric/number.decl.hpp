@@ -37,18 +37,6 @@
 
 namespace Ariadne {
 
-using Utility::Void;
-using Utility::Nat;
-using Utility::Int;
-using Utility::Dbl;
-using Utility::True;
-using Utility::False;
-using Utility::GenericType;
-using Utility::HasGenericType;
-using Utility::Convertible;
-using Utility::Same;
-using Utility::CharacteristicsType;
-using Utility::Pair;
 
 class Real;
 

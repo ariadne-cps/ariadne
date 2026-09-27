@@ -35,11 +35,6 @@
 
 namespace Ariadne {
 
-using Utility::Void;
-using Utility::Convertible;
-using Utility::ComparableEnumerationType;
-using Utility::DegreeType;
-using Utility::DimensionType;
 
 class ParadigmError { };
 

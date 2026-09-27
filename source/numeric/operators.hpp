@@ -41,14 +41,6 @@
 
 namespace Ariadne {
 
-using Utility::String;
-using Utility::DifferenceType;
-using Utility::ProductType;
-using Utility::QuotientType;
-using Utility::ArithmeticType;
-using Utility::OneOf;
-using Utility::CodedVariant;
-using Utility::declval;
 
 template<class X> struct Logic;
 template<> struct Logic<String> { typedef Boolean Type; };

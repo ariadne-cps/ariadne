@@ -106,14 +106,12 @@ class NumberInterface;
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
-namespace Utility {
 
 template<> struct InterfaceTraits<NumberInterface> {
     template<class X> using MixinType = NumberMixin<X>;
     template<class X> using WrapperType = NumberWrapper<X>;
 };
 
-} // namespace Utility
 
 template<class X> inline X const* extract(NumberInterface const* y) {
      return dynamic_cast<NumberWrapper<X>const*>(y);
@@ -246,7 +244,6 @@ class ValidatedAlgebraicNumberInterface;
 template<class F> class ConcreteNumberInterface;
 template<class F, class FE> class ConcreteBallInterface;
 
-namespace Utility {
 
 template<> struct Managed<AlgebraicNumberInterface> {
     typedef Aware<Integer,Dyadic,Rational,Real> Types;
@@ -283,7 +280,6 @@ template<class F> struct DispatcherTraits<Approximation<F>> { typedef ConcreteNu
 
 template<class F, class FE> struct DispatcherTraits<Ball<F,FE>> { typedef ConcreteBallInterface<F,FE> Interface; };
 
-} // namespace Utility
 
 
 class AlgebraicNumberInterface

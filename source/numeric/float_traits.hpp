@@ -33,7 +33,6 @@
 
 namespace Ariadne {
 
-namespace Utility {
 
 template<> struct GenericTrait<FloatDP> { typedef ExactNumber Type; };
 template<> struct GenericTrait<FloatMP> { typedef ExactNumber Type; };
@@ -54,7 +53,6 @@ template<class F, class FE> struct CharacteristicsTrait<Ball<F,FE>> { typedef Pa
 template<class F> struct CharacteristicsTrait<Error<F>> { typedef CharacteristicsType<F> Type; };
 template<class F> struct CharacteristicsTrait<Rounded<F>> { typedef CharacteristicsType<F> Type; };
 
-} // namespace Utility
 
 template<class F> struct ConcreteTraits<Rounded<F>> {
     typedef DP CharacteristicsType;

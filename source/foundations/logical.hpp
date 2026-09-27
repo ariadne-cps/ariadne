@@ -38,14 +38,6 @@
 
 namespace Ariadne {
 
-using Utility::String;
-using Utility::Nat;
-using Utility::Handle;
-using Utility::SharedPointer;
-using Utility::ConstructibleFrom;
-using Utility::ComparableEnumerationType;
-using Utility::SizeType;
-using Utility::Array;
 
 template<class X> class Sequence;
 

@@ -41,7 +41,7 @@
 
 #include "solvers/integrator.hpp"
 
-#include "conclog/logging.hpp"
+#include "logging/logging.hpp"
 
 #include "dynamics/vector_field.hpp"
 #include "dynamics/vector_field_evolver.hpp"
@@ -50,7 +50,7 @@
 #include "symbolic/assignment.hpp"
 #include "symbolic/expression_set.hpp"
 
-using namespace ConcLog;
+using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
@@ -172,7 +172,7 @@ auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
-    CONCLOG_SCOPE_CREATE
+    LOGGING_SCOPE_CREATE
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
 
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
@@ -191,7 +191,7 @@ Void VectorFieldEvolver::
 _append_initial_set(WorkloadType& workload, TimeStepType const& initial_time, EnclosureType const& current_set) const
 {
     if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
-        CONCLOG_PRINTLN_AT(1,"set is too large, splitting")
+        LOGGING_PRINTLN_AT(1,"set is too large, splitting")
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(workload,initial_time,split_sets.first); }
         if(!definitely(split_sets.second.is_empty())) { _append_initial_set(workload,initial_time,split_sets.second); }
@@ -207,12 +207,12 @@ _process_timed_enclosure(WorkloadType::Access& workload,
                          TimeType const& maximum_time,
                          Semantics semantics,
                          SharedPointer<SynchronisedOrbit> result) const {
-    CONCLOG_SCOPE_CREATE
+    LOGGING_SCOPE_CREATE
     TimeStepType current_time=current_timed_set.first;
     EnclosureType current_set=current_timed_set.second;
     FloatDPUpperBound current_set_radius=current_set.euclidean_set().bounding_box().radius();
 
-    CONCLOG_PRINTLN("#r="<<std::setw(5)<<std::left<<result->reach_size()
+    LOGGING_PRINTLN("#r="<<std::setw(5)<<std::left<<result->reach_size()
                              <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                              <<" p="<<std::setw(4)<<std::left<<current_set.number_of_parameters()
                              <<" r="<<std::setw(7)<<current_set.radius()
@@ -228,7 +228,7 @@ _process_timed_enclosure(WorkloadType::Access& workload,
             workload.append({current_time,subdivided_set_model});
         }
     } else if (semantics == Semantics::LOWER and decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
-        CONCLOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set << " due to maximum radius being exceeded.")
+        LOGGING_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set << " due to maximum radius being exceeded.")
     } else {
         this->_process_timed_enclosure_step(workload,current_timed_set,maximum_time,semantics,result);
     }
@@ -242,20 +242,20 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
                               Semantics semantics,
                               SharedPointer<SynchronisedOrbit> result) const
 {
-    CONCLOG_SCOPE_CREATE
+    LOGGING_SCOPE_CREATE
     typedef EffectiveVectorMultivariateFunction FunctionType;
 
     EnclosureType current_set=working_timed_set_model.second;
     TimeStepType current_time=working_timed_set_model.first;
     SharedPointer<PreconditionedTaylorSeriesState> carried_preconditioned_state=
         working_timed_set_model.preconditioned_state;
-    CONCLOG_PRINTLN_AT(1,"working_timed_set_model time = "<<current_time)
+    LOGGING_PRINTLN_AT(1,"working_timed_set_model time = "<<current_time)
 
-    CONCLOG_PRINTLN("current_time = "<<current_time)
-    CONCLOG_PRINTLN("current_set = " << current_set)
+    LOGGING_PRINTLN("current_time = "<<current_time)
+    LOGGING_PRINTLN("current_set = " << current_set)
 
-    CONCLOG_PRINTLN("box = " << current_set.bounding_box())
-    CONCLOG_PRINTLN("radius = " << current_set.euclidean_set().bounding_box().radius())
+    LOGGING_PRINTLN("box = " << current_set.bounding_box())
+    LOGGING_PRINTLN("radius = " << current_set.euclidean_set().bounding_box().radius())
 
     IntegratorInterface const* integrator=this->_integrator.operator->();
     auto const* preconditioned_integrator=
@@ -280,7 +280,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     // Get bounding boxes for time and space bounding_box
     auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
-    CONCLOG_PRINTLN("current_set_bounds = "<<current_set_bounds)
+    LOGGING_PRINTLN("current_set_bounds = "<<current_set_bounds)
 
     StepSizeType step_size;
     EnclosureType reach_set=current_set;

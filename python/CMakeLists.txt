@@ -27,6 +27,7 @@ if(Python3_FOUND)
     pybind11_add_module(pyariadne-numeric
             $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
             $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
+            $<TARGET_OBJECTS:UTILITY_SRC>
             $<TARGET_OBJECTS:ariadne-foundations>
             $<TARGET_OBJECTS:ariadne-numeric>
             )

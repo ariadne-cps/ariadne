@@ -340,7 +340,7 @@ Void profile_evaluator(
               << " repetitions=" << repetitions
               << " function-apply=" << function_stopwatch.elapsed_seconds()
               << " procedure-build=" << build_stopwatch.elapsed_seconds()
-              << " procedure-instructions=" << procedure.temporaries_size()
+              << " procedure-instructions=" << procedure._instructions.size()
               << " procedure-upper-evaluate=" << procedure_stopwatch.elapsed_seconds()
               << " procedure-bounds-evaluate="
               << procedure_bounds_stopwatch.elapsed_seconds()

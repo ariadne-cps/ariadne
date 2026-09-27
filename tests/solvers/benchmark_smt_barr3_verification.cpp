@@ -13,7 +13,6 @@
 #include "utility/stopwatch.hpp"
 #include "function/procedure.hpp"
 #include "function/procedure.tpl.hpp"
-#include "function/formula.tpl.hpp"
 #include "symbolic/expression.hpp"
 #include "solvers/smt_solver.hpp"
 

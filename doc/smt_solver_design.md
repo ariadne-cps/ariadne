@@ -998,6 +998,13 @@ whether the next optimization should precompile procedures once per theory
 literal rather than rebuilding their common-subexpression-eliminated instruction
 DAG for every box.
 
+The next diagnostic separates the measured hull-contraction interval further
+into temporary-storage allocation, forward procedure execution and backward
+constraint propagation. This instrumentation lives in `simple_hull_reduce`
+itself and leaves its arithmetic and traversal order unchanged. It distinguishes
+the cost of evaluating the Barr3 procedure from the inverse interval operations
+performed by the backward contractor before either path is optimized.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

@@ -94,6 +94,12 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " hull-contract-time=" << result.statistics().hull_contraction_seconds
               << " hull-reject-time="
               << result.statistics().hull_direct_rejection_seconds
+              << " hull-temp-time="
+              << result.statistics().hull_temporary_allocation_seconds
+              << " hull-forward-time="
+              << result.statistics().hull_forward_execution_seconds
+              << " hull-backward-time="
+              << result.statistics().hull_backward_propagation_seconds
               << " shaving-rounds=" << result.statistics().shaving_reduction_rounds
               << " shaving-evals=" << result.statistics().shaving_function_evaluations
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds

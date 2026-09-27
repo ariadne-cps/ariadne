@@ -30,7 +30,7 @@
 #define ARIADNE_LRU_CACHE_HPP
 
 #include <map>
-#include "macros.hpp"
+#include "utility/macros.hpp"
 
 namespace Ariadne {
 

@@ -36,7 +36,7 @@
 #include "metaprogramming.hpp"
 #include "helper/stlio.hpp"
 #include "array.hpp"
-#include "macros.hpp"
+#include "utility/macros.hpp"
 #include "typedefs.hpp"
 
 namespace Ariadne {

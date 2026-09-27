@@ -31,7 +31,7 @@
 #ifndef ARIADNE_PATH_HPP
 #define ARIADNE_PATH_HPP
 
-#include "macros.hpp"
+#include "utility/macros.hpp"
 #include "typedefs.hpp"
 
 #include "container.hpp"

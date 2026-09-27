@@ -32,7 +32,7 @@
 #define ARIADNE_UTILITY_MODULE_HPP
 
 #include "stdlib.hpp"
-#include "macros.hpp"
+#include "utility/macros.hpp"
 
 #include "typedefs.hpp"
 #include "string.hpp"

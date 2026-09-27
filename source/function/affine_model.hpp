@@ -35,7 +35,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

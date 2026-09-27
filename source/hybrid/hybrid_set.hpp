@@ -36,7 +36,10 @@
 
 #include "utility/macros.hpp"
 #include "utility/stlio.hpp"
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "utility/container.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"

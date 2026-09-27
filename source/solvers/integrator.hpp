@@ -37,7 +37,10 @@
 #include "solvers/bounder.hpp"
 #include "function/function_interface.hpp"
 
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "utility/attribute.hpp"
 #include "numeric/dyadic.hpp"
 #include "logging/logging.hpp"

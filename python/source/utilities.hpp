@@ -34,7 +34,10 @@
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "utility/metaprogramming.hpp"
 
 

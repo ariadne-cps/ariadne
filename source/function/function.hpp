@@ -35,7 +35,7 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/declarations.hpp"
+#include "function/declarations.hpp"
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"

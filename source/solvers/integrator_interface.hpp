@@ -33,7 +33,10 @@
 #include <iosfwd>
 #include <memory>
 
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 
 namespace Ariadne {
 

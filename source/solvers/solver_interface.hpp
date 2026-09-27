@@ -33,7 +33,10 @@
 #include <stdexcept>
 #include <string>
 
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
+#include "algebra/declarations.hpp"
+#include "function/declarations.hpp"
+#include "geometry/declarations.hpp"
 #include "logging/logging.hpp"
 
 using namespace Ariadne::Logging;

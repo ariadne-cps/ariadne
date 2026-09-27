@@ -34,7 +34,7 @@
 #include "utility/macros.hpp"
 #include "utility/metaprogramming.hpp"
 #include "utility/container.hpp"
-#include "utility/declarations.hpp"
+#include "algebra/declarations.hpp"
 #include "utility/uniform_array.hpp"
 #include "numeric/builtin.hpp"
 

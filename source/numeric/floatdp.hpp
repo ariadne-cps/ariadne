@@ -34,7 +34,7 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "utility/declarations.hpp"
+#include "numeric/declarations.hpp"
 #include "numeric/operators.hpp"
 #include "numeric/rounding.hpp"
 #include "numeric/sign.hpp"

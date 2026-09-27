@@ -1429,11 +1429,11 @@ class TestSmtSolver {
                 true));
             SmtResult monotone_result=monotone_solver.solve(
                 mspace,ExactBoxType({ExactIntervalType(0,2)}),mliterals);
-            ARIADNE_TEST_ASSERT(not monotone_solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(not monotone_result.is_unknown());
             ARIADNE_TEST_EQUAL(
-                monotone_solve_result.statistics().monotone_reduction_rounds,1u);
+                monotone_result.statistics().monotone_reduction_rounds,1u);
             ARIADNE_TEST_EQUAL(
-                monotone_solve_result.statistics().monotone_effective_reductions,1u);
+                monotone_result.statistics().monotone_effective_reductions,1u);
         }
 
         {
@@ -2901,11 +2901,11 @@ class TestSmtSolver {
             ExactBoxType domain({ExactIntervalType(-1,1)});
 
             SmtResult true_result=solver.solve(space,domain,ContinuousPredicate(true));
-            ARIADNE_TEST_ASSERT(true_solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(true_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(true_result.has_witness());
 
             SmtResult false_result=solver.solve(space,domain,ContinuousPredicate(false));
-            ARIADNE_TEST_ASSERT(false_solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(false_result.is_unsat());
 
             ContinuousPredicate atom=(ex>=0);
             SmtResult mixed_true=solver.solve(
@@ -3191,14 +3191,14 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints;
             SmtResult constraints_result=solver.solve_parallel(
                 empty_domain,constraints);
-            ARIADNE_TEST_ASSERT(constraints_solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(constraints_result.is_unsat());
 
             RealVariable x("empty_parallel_x");
             RealSpace space({x});
             List<SmtTheoryPrimitiveLiteral> literals;
             SmtResult theory_result=solver.solve_parallel(
                 space,empty_domain,literals);
-            ARIADNE_TEST_ASSERT(theory_solve_result.is_unsat());
+            ARIADNE_TEST_ASSERT(theory_result.is_unsat());
         }
 
         {
@@ -3213,22 +3213,22 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints;
             SmtResult constraints_result=zero_budget_solver.solve_parallel(
                 domain,constraints);
-            ARIADNE_TEST_ASSERT(constraints_solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(constraints_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(constraints_result.has_witness());
-            ARIADNE_TEST_EQUAL(constraints_solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(constraints_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(
-                constraints_solve_result.statistics().box_budget_exhaustions,0u);
+                constraints_result.statistics().box_budget_exhaustions,0u);
 
             RealVariable x("x");
             RealSpace space({x});
             List<SmtTheoryPrimitiveLiteral> literals;
             SmtResult theory_result=zero_budget_solver.solve_parallel(
                 space,domain,literals);
-            ARIADNE_TEST_ASSERT(theory_solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(theory_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(theory_result.has_witness());
-            ARIADNE_TEST_EQUAL(theory_solve_result.statistics().boxes_processed,0u);
+            ARIADNE_TEST_EQUAL(theory_result.statistics().boxes_processed,0u);
             ARIADNE_TEST_EQUAL(
-                theory_solve_result.statistics().box_budget_exhaustions,0u);
+                theory_result.statistics().box_budget_exhaustions,0u);
         }
 
         {

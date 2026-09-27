@@ -1034,6 +1034,59 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-fast-path] direct compiled pruning" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex-2,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            auto observation=SmtSolverTestSupport::process_compiled_box(
+                solver,space,
+                UpperBoxType(ExactBoxType({ExactIntervalType(0,1)})),
+                literals);
+            ARIADNE_TEST_ASSERT(
+                observation.status==
+                    SmtSolverTestSupport::BoxProcessingStatus::PRUNED);
+            ARIADNE_TEST_ASSERT(observation.fused_direct_classification);
+            ARIADNE_TEST_ASSERT(not observation.epsilon_box_certification);
+        }
+
+        {
+            std::cout << "[smt-fast-path] direct compiled epsilon certification" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GT_ZERO)
+            });
+            auto observation=SmtSolverTestSupport::process_compiled_box(
+                solver,space,
+                UpperBoxType(ExactBoxType({
+                    ExactIntervalType(-0.0625_x,0.0625_x)})),
+                literals);
+            ARIADNE_TEST_ASSERT(
+                observation.status==
+                    SmtSolverTestSupport::BoxProcessingStatus::EPSILON_SAT);
+            ARIADNE_TEST_ASSERT(observation.fused_direct_classification);
+            ARIADNE_TEST_ASSERT(observation.epsilon_box_certification);
+        }
+
+        {
+            std::cout << "[smt-fast-path] direct compiled geometric split" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            auto observation=SmtSolverTestSupport::process_compiled_box(
+                solver,space,
+                UpperBoxType(ExactBoxType({
+                    ExactIntervalType(-0.25_x,0.25_x)})),
+                literals);
+            ARIADNE_TEST_ASSERT(
+                observation.status==
+                    SmtSolverTestSupport::BoxProcessingStatus::SPLIT);
+            ARIADNE_TEST_ASSERT(observation.fused_direct_classification);
+            ARIADNE_TEST_ASSERT(not observation.epsilon_box_certification);
+        }
+
+        {
             SmtSolver contractor_solver(SmtSolverConfiguration(
                 0.125_x,
                 std::numeric_limits<SizeType>::max(),

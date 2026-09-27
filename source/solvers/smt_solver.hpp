@@ -373,6 +373,18 @@ Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input);
 
+struct DirectBoxProcessingObservation {
+    BoxProcessingStatus status = BoxProcessingStatus::UNKNOWN;
+    Bool fused_direct_classification = false;
+    Bool epsilon_box_certification = false;
+};
+
+DirectBoxProcessingObservation process_compiled_box(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    UpperBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals);
+
 Void validate_primitive_relation(SmtTheoryPrimitiveRelation relation);
 
 std::vector<Int> resolve_clause_on_variable(
@@ -507,6 +519,10 @@ class SmtSolver {
     friend SizeType SmtSolverTestSupport::compiled_theory_derivative_count(
         SmtSolver const&, RealSpace const&,
         List<SmtTheoryPrimitiveLiteral> const&);
+    friend SmtSolverTestSupport::DirectBoxProcessingObservation
+        SmtSolverTestSupport::process_compiled_box(
+            SmtSolver const&, RealSpace const&, UpperBoxType const&,
+            List<SmtTheoryPrimitiveLiteral> const&);
     using BoxProcessingStatus=SmtSolverTestSupport::BoxProcessingStatus;
 
     struct ReductionStatistics {

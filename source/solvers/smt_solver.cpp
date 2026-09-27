@@ -1642,6 +1642,21 @@ Bool epsilon_satisfied(
     return solver._epsilon_satisfied(domain,compiled);
 }
 
+DirectBoxProcessingObservation process_compiled_box(
+    SmtSolver const& solver,
+    RealSpace const& space,
+    UpperBoxType const& domain,
+    List<SmtTheoryPrimitiveLiteral> const& literals)
+{
+    auto compiled=solver._compile_theory_literals(space,literals);
+    auto processing=solver._process_box(domain,compiled);
+    return {
+        processing.status,
+        processing.fused_direct_classification,
+        processing.epsilon_box_certification
+    };
+}
+
 Void accumulate_box_processing_statistics(
     SmtSearchStatistics& statistics,
     BoxProcessingStatisticsInput const& input)

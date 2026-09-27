@@ -174,28 +174,6 @@ if(COVERAGE)
     endif()
 endif()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
-    execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
-    message(STATUS "Created symbolic links directory for submodules")
-endif()
-
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/logging/include/logging ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
-    message(STATUS "Created symbolic link to Logging submodule")
-endif()
-
-file(REMOVE_RECURSE ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading)
-file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading)
-file(GLOB THREADING_INCLUDE_FILES ${PROJECT_SOURCE_DIR}/submodules/threading/include/threading/*)
-foreach(THREADING_INCLUDE_FILE ${THREADING_INCLUDE_FILES})
-    if(NOT IS_DIRECTORY ${THREADING_INCLUDE_FILE})
-        get_filename_component(THREADING_INCLUDE_NAME ${THREADING_INCLUDE_FILE} NAME)
-        file(CREATE_LINK ${THREADING_INCLUDE_FILE} ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading/${THREADING_INCLUDE_NAME} SYMBOLIC)
-    endif()
-endforeach()
-file(CREATE_LINK ${PROJECT_SOURCE_DIR}/submodules/utility/include/utility ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading/utility SYMBOLIC)
-file(CREATE_LINK ${PROJECT_SOURCE_DIR}/submodules/logging/include/logging ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading/logging SYMBOLIC)
-message(STATUS "Created isolated Threading include view")
 
 find_package(Threads)
 if(NOT Threads_FOUND)
@@ -238,7 +216,12 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 add_subdirectory(submodules)
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/utility/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/source
+    ${PROJECT_SOURCE_DIR}/submodules/logging/include
+    ${PROJECT_SOURCE_DIR}/submodules/threading/include
+    ${PROJECT_SOURCE_DIR}/submodules/utility/include
+)
 
 add_subdirectory(source)
 add_subdirectory(python)
@@ -358,5 +341,6 @@ install(FILES
     DESTINATION lib/cmake/Ariadne
 )
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/logging DESTINATION include FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/threading DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/logging/include/logging DESTINATION include/ariadne)
+install(DIRECTORY submodules/threading/include/threading DESTINATION include/ariadne)
+install(DIRECTORY submodules/utility/include/utility DESTINATION include/ariadne)

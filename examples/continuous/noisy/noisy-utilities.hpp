@@ -40,20 +40,20 @@ inline ApproximateDouble score(ListSet<LabelledEnclosure> const& bbx) {
 }
 
 void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
     evolver.configuration().set_approximations(approximations);
     evolver.configuration().set_maximum_step_size(step);
 
     Stopwatch<Milliseconds> sw;
-    CONCLOG_PRINTLN("Evolving...");
+    LOGGING_PRINTLN("Evolving...");
     auto orbit = evolver.orbit(initial,evolution_time);
-    CONCLOG_PRINTLN("Done.")
+    LOGGING_PRINTLN("Done.")
     sw.click();
 
-    CONCLOG_PRINTLN("Score: " << score(orbit.final()) << ", time: " << sw.elapsed_seconds() << " s");
+    LOGGING_PRINTLN("Score: " << score(orbit.final()) << ", time: " << sw.elapsed_seconds() << " s");
 
-    CONCLOG_PRINTLN("Plotting...");
+    LOGGING_PRINTLN("Plotting...");
     auto n = ivf.dimension();
     DifferentialInclusion::EnclosureType::BoundingBoxType::EuclideanSetType graphics_box(n);
     for (auto set: orbit.reach()) {
@@ -71,7 +71,7 @@ void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox 
             fig.write((name+num_char).c_str());
         }
     }
-    CONCLOG_PRINTLN("Done.")
+    LOGGING_PRINTLN("Done.")
 }
 
 void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,

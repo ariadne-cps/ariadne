@@ -41,7 +41,7 @@ void ariadne_main()
     List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC()};
 
     for (SystemType s : systems) {
-        CONCLOG_PRINTLN(std::get<0>(s));
+        LOGGING_PRINTLN(std::get<0>(s));
         run_noisy_system(s);
     }
 }

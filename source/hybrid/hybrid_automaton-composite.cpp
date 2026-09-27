@@ -754,7 +754,7 @@ CompositeHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& ini
 Set<DiscreteLocation>
 CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& initial_locations) const
 {
-    CONCLOG_SCOPE_CREATE;
+    LOGGING_SCOPE_CREATE;
     const CompositeHybridAutomaton& automaton=*this;
 
     Set<DiscreteLocation> reached=initial_locations;
@@ -771,25 +771,25 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
     while(!working.empty()) {
         ++step;
         for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
-            CONCLOG_PRINTLN_AT(1,"new_mode");
+            LOGGING_PRINTLN_AT(1,"new_mode");
             DiscreteLocation location=*source_iter;
-            CONCLOG_PRINTLN_AT(1,"mode: "<<location<<":");
-            CONCLOG_PRINTLN_AT(2,"auxiliary="<<automaton.auxiliary_assignments(location));
-            CONCLOG_PRINTLN_AT(2,"function="<<automaton.auxiliary_function(location));
-            CONCLOG_PRINTLN_AT(2,"dynamic="<<automaton.dynamic_assignments(location));
-            CONCLOG_PRINTLN_AT(2,"function="<<automaton.dynamic_function(location));
+            LOGGING_PRINTLN_AT(1,"mode: "<<location<<":");
+            LOGGING_PRINTLN_AT(2,"auxiliary="<<automaton.auxiliary_assignments(location));
+            LOGGING_PRINTLN_AT(2,"function="<<automaton.auxiliary_function(location));
+            LOGGING_PRINTLN_AT(2,"dynamic="<<automaton.dynamic_assignments(location));
+            LOGGING_PRINTLN_AT(2,"function="<<automaton.dynamic_function(location));
 
             Set<DiscreteEvent> events=automaton.events(location);
-            CONCLOG_PRINTLN_AT(1,"events: "<<events);
+            LOGGING_PRINTLN_AT(1,"events: "<<events);
             for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
-                CONCLOG_PRINTLN_AT(2,"event:"<<event);
+                LOGGING_PRINTLN_AT(2,"event:"<<event);
                 DiscreteLocation target=automaton.target(location,event);
-                CONCLOG_PRINTLN_AT(3,"transition: "<<event<<" -> "<<target);
-                CONCLOG_PRINTLN_AT(3,"reset="<<automaton.reset_assignments(location,event));
-                CONCLOG_PRINTLN_AT(3,"function="<<automaton.reset_function(location,event));
-                CONCLOG_PRINTLN_AT(3,"guard="<<automaton.guard_predicate(location,event));
-                CONCLOG_PRINTLN_AT(3,"function="<<automaton.guard_function(location,event));
+                LOGGING_PRINTLN_AT(3,"transition: "<<event<<" -> "<<target);
+                LOGGING_PRINTLN_AT(3,"reset="<<automaton.reset_assignments(location,event));
+                LOGGING_PRINTLN_AT(3,"function="<<automaton.reset_function(location,event));
+                LOGGING_PRINTLN_AT(3,"guard="<<automaton.guard_predicate(location,event));
+                LOGGING_PRINTLN_AT(3,"function="<<automaton.guard_function(location,event));
                 if(!reached.contains(target)) {
                     found.insert(target);
                     reached.insert(target);
@@ -798,7 +798,7 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
            }
 
         }
-        CONCLOG_PRINTLN_AT(1,"step "<<step<<" found: "<<found);
+        LOGGING_PRINTLN_AT(1,"step "<<step<<" found: "<<found);
         working.clear();
         working.swap(found);
     }

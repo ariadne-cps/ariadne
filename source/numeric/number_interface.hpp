@@ -40,8 +40,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
-using Utility::ClonableInterface;
 
 /************ Number *********************************************************/
 

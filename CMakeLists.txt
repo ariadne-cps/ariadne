@@ -250,8 +250,8 @@ add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-foundations>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
     source/geometry/interval.cpp
 )
@@ -266,8 +266,8 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
 )
 
@@ -283,8 +283,8 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
-    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
-    $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:THREADING_SRC>
+    $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
 )
 

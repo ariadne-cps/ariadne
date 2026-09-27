@@ -189,8 +189,8 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/logging)
     message(STATUS "Created symbolic link to Logging submodule")
 endif()
 
-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
-    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/threading/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/threading/include/threading ${PROJECT_SOURCE_DIR}/submodules/.symbolic/threading)
     message(STATUS "Created symbolic link to Threading submodule")
 endif()
 
@@ -357,4 +357,4 @@ install(FILES
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/logging DESTINATION include FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/threading DESTINATION include FILES_MATCHING PATTERN "*.hpp")

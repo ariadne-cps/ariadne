@@ -88,6 +88,12 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " candidate-searches=" << result.statistics().candidate_witness_searches
               << " candidate-successes=" << result.statistics().candidate_witness_successes
               << " hull-rounds=" << result.statistics().hull_reduction_rounds
+              << " hull-procedure-builds=" << result.statistics().hull_procedure_builds
+              << " hull-procedure-build-time="
+              << result.statistics().hull_procedure_build_seconds
+              << " hull-contract-time=" << result.statistics().hull_contraction_seconds
+              << " hull-reject-time="
+              << result.statistics().hull_direct_rejection_seconds
               << " shaving-rounds=" << result.statistics().shaving_reduction_rounds
               << " shaving-evals=" << result.statistics().shaving_function_evaluations
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds

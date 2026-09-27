@@ -496,6 +496,10 @@ class TestConstraintSolver
             Bool empty=solver.propagate(domain,constraints,statistics);
             ARIADNE_TEST_ASSERT(not empty);
             ARIADNE_TEST_ASSERT(statistics.hull_rounds>=1u);
+            ARIADNE_TEST_ASSERT(statistics.hull_procedure_builds>=1u);
+            ARIADNE_TEST_ASSERT(statistics.hull_procedure_build_seconds>=0.0);
+            ARIADNE_TEST_ASSERT(statistics.hull_contraction_seconds>=0.0);
+            ARIADNE_TEST_ASSERT(statistics.hull_direct_rejection_seconds>=0.0);
             ARIADNE_TEST_ASSERT(statistics.shaving_rounds>=1u);
             ARIADNE_TEST_ASSERT(statistics.hull_effective<=statistics.hull_rounds);
             ARIADNE_TEST_ASSERT(statistics.shaving_effective<=statistics.shaving_rounds);
@@ -546,6 +550,7 @@ class TestConstraintSolver
             });
             ConstraintPropagationStatistics statistics;
             ARIADNE_TEST_ASSERT(solver.propagate(domain,constraints,false,statistics));
+            ARIADNE_TEST_EQUAL(statistics.hull_procedure_builds,1u);
             ARIADNE_TEST_EQUAL(statistics.monotone_rounds,0u);
         }
 

@@ -131,6 +131,10 @@ struct SmtSearchStatistics {
     SizeType non_splittable_epsilon_overlap_boxes = 0u;
     SizeType hull_reduction_rounds = 0u;
     SizeType hull_effective_reductions = 0u;
+    SizeType hull_procedure_builds = 0u;
+    double hull_procedure_build_seconds = 0.0;
+    double hull_contraction_seconds = 0.0;
+    double hull_direct_rejection_seconds = 0.0;
     SizeType shaving_reduction_rounds = 0u;
     SizeType shaving_effective_reductions = 0u;
     SizeType shaving_function_evaluations = 0u;
@@ -499,6 +503,10 @@ class SmtSolver {
     struct ReductionStatistics {
         SizeType hull_rounds = 0u;
         SizeType hull_effective = 0u;
+        SizeType hull_procedure_builds = 0u;
+        double hull_procedure_build_seconds = 0.0;
+        double hull_contraction_seconds = 0.0;
+        double hull_direct_rejection_seconds = 0.0;
         SizeType shaving_rounds = 0u;
         SizeType shaving_effective = 0u;
         SizeType shaving_function_evaluations = 0u;

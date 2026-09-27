@@ -988,6 +988,16 @@ are tested with shaving disabled. Monotone contraction remains independently
 configurable and, when enabled, is still reached after a hull stall even if
 shaving is disabled.
 
+The no-shaving eight-box run leaves 33.855 s of the 37.417 s Lie query inside
+original reduction. Inspection shows that the scalar-function `hull_reduce`
+overload constructs a new `ValidatedProcedure` from the unchanged validated
+function on every call before invoking `simple_hull_reduce`. The benchmark now
+separates this procedure-construction time from the hull contraction itself and
+from the subsequent direct validated range rejection. This will determine
+whether the next optimization should precompile procedures once per theory
+literal rather than rebuilding their common-subexpression-eliminated instruction
+DAG for every box.
+
 ## Current open work
 
 The immediate work on `solvers-smt#830` is:

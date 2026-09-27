@@ -25,6 +25,8 @@
 #include "function/functional.hpp"
 #include "config.hpp"
 
+#include <chrono>
+
 #include "utility/macros.hpp"
 #include "utility/tuple.hpp"
 #include "paradigm/logical.hpp"
@@ -46,6 +48,17 @@
 #include "solvers/solver.hpp"
 
 namespace Ariadne {
+
+namespace {
+
+inline double constraint_elapsed_seconds(
+    std::chrono::steady_clock::time_point const& start)
+{
+    return std::chrono::duration<double>(
+        std::chrono::steady_clock::now()-start).count();
+}
+
+} // namespace
 
 template<class X> inline Approximation<X> affine(Approximation<X> l, Approximation<X> u, Nat i, Nat n) {
     return (l*(n-i)+u*i)/n;
@@ -162,10 +175,25 @@ Bool ConstraintSolver::propagate(
         ++statistics.hull_rounds;
         for(SizeType i=0u; i!=constraints.size(); ++i) {
             ExactIntervalType const& bounds=constraints[i].bounds();
-            if(this->hull_reduce(domain,constraints[i].function(),bounds)) {
+            auto phase_start=std::chrono::steady_clock::now();
+            ValidatedProcedure procedure(constraints[i].function());
+            ++statistics.hull_procedure_builds;
+            statistics.hull_procedure_build_seconds+=
+                constraint_elapsed_seconds(phase_start);
+
+            phase_start=std::chrono::steady_clock::now();
+            if(this->hull_reduce(domain,procedure,bounds)) {
+                statistics.hull_contraction_seconds+=
+                    constraint_elapsed_seconds(phase_start);
                 return true;
             }
+            statistics.hull_contraction_seconds+=
+                constraint_elapsed_seconds(phase_start);
+
+            phase_start=std::chrono::steady_clock::now();
             UpperIntervalType image=apply(constraints[i].function(),domain);
+            statistics.hull_direct_rejection_seconds+=
+                constraint_elapsed_seconds(phase_start);
             if(definitely(disjoint(image,bounds))) {
                 return true;
             }
@@ -253,10 +281,27 @@ Bool ConstraintSolver::propagate(
         UpperBoxType previous=domain;
         ++statistics.hull_rounds;
         for(auto const& constraint:constraints) {
-            if(this->hull_reduce(domain,constraint.function,constraint.bounds)) {
+            auto phase_start=std::chrono::steady_clock::now();
+            ValidatedProcedure procedure(constraint.function);
+            ++statistics.hull_procedure_builds;
+            statistics.hull_procedure_build_seconds+=
+                constraint_elapsed_seconds(phase_start);
+
+            phase_start=std::chrono::steady_clock::now();
+            if(this->hull_reduce(domain,procedure,constraint.bounds)) {
+                statistics.hull_contraction_seconds+=
+                    constraint_elapsed_seconds(phase_start);
                 return true;
             }
-            if(propagation_constraint_infeasible(constraint,domain)) {
+            statistics.hull_contraction_seconds+=
+                constraint_elapsed_seconds(phase_start);
+
+            phase_start=std::chrono::steady_clock::now();
+            Bool const infeasible=propagation_constraint_infeasible(
+                constraint,domain);
+            statistics.hull_direct_rejection_seconds+=
+                constraint_elapsed_seconds(phase_start);
+            if(infeasible) {
                 return true;
             }
         }

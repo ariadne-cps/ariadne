@@ -42,6 +42,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+
 class Int64;
 
 enum class Comparison : ComparableEnumerationType;

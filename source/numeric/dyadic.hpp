@@ -47,6 +47,9 @@
 
 namespace Ariadne {
 
+using Utility::BuiltinUnsignedIntegral;
+using Utility::BuiltinIntegral;
+
 class ExactDouble;
 class Dyadic;
 extern const Dyadic infty;

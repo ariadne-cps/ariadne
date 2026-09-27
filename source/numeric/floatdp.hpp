@@ -46,7 +46,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
 
 struct NoInit { };
 

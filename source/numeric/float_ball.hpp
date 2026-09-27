@@ -43,9 +43,7 @@
 
 namespace Ariadne {
 
-using Utility::DefaultConstructible;
 
-using Utility::BuiltinUnsignedIntegral;
 
 template<class PRE, class PR> requires DefaultConstructible<PRE> inline
     PRE _error_precision(PR const&) { return PRE(); }

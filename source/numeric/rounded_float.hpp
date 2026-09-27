@@ -46,7 +46,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
 
 class Rational;
 enum class Comparison : ComparableEnumerationType;

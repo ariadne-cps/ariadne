@@ -41,7 +41,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
 
 /************ FloatMP ********************************************************/
 

@@ -47,7 +47,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinIntegral;
 
 /************ Flt64 ********************************************************/
 

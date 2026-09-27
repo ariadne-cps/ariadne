@@ -43,8 +43,6 @@
 
 namespace Ariadne {
 
-using Utility::BuiltinUnsignedIntegral;
-using Utility::BuiltinIntegral;
 
 struct DefaultTag;
 

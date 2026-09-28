@@ -123,6 +123,8 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " split=" << result.statistics().boxes_split
               << " epsilon-certified=" << result.statistics().epsilon_box_certifications
               << " fused-direct=" << result.statistics().fused_direct_classification_boxes
+              << " fused-literal-evals="
+              << result.statistics().fused_direct_literal_evaluations
               << " candidate-searches=" << result.statistics().candidate_witness_searches
               << " candidate-successes=" << result.statistics().candidate_witness_successes
               << " hull-rounds=" << result.statistics().hull_reduction_rounds

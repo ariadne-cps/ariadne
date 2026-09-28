@@ -1424,3 +1424,31 @@ unchanged. If hull is again ineffective or its contractions do not materially
 alter pruning at this frontier, the next development step should move away from
 eager per-box contractors and toward a cheaper adaptive trigger or a different
 search heuristic.
+
+
+The 64-box hull-only comparison rejects eager hull contraction on Barr3. With
+geometric splitting and witness probing, shaving and monotone reduction
+disabled, enabling hull changes the Lie result only from 27 pruned / 37 split
+boxes to 28 pruned / 36 split boxes, while elapsed time rises from about
+2.77 s to 44.439 s. The run reports 64 hull rounds, zero effective non-empty
+hull contractions, 128 procedure builds costing 5.841 s, and 35.503 s in hull
+contraction itself. Of that contraction time, 33.670 s is forward Procedure
+execution and 1.799 s is backward propagation. Eager hull therefore costs about
+an order of magnitude more than the contractor-free path for one additional
+pruned box at this frontier. The zero hull-effective count does not imply that
+hull never contributed to rejection: a hull contraction that directly empties
+a box returns before the non-empty contraction counter is incremented. It does
+show that no surviving box was narrowed for later search. Hull is therefore
+excluded from the Barr3 cheap-first path alongside monotone/Newton reduction.
+
+Before introducing another search heuristic, the cheap fused-classification
+path now counts literal evaluations. This is diagnostic only. On the current
+two-literal Lie conjunction the literals are ordered as barrier non-negativity
+followed by the Lie violation. Because the fused path stops at the first
+originally infeasible literal and no whole-box epsilon certification has yet
+occurred on this workload, a 64-box contractor-free run can attribute pruning
+without separate SAT queries: with E literal evaluations, the number of boxes
+rejected by the first barrier literal is 2*64-E, and the remaining pruned boxes
+were rejected only after evaluating the Lie literal. This identifies which
+constraint drives the observed pruning plateau before paying for a new
+coordinate-selection heuristic.

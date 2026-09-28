@@ -533,6 +533,7 @@ SmtSolver::_direct_classification(
     auto const start=std::chrono::steady_clock::now();
 
     for(auto const& literal:literals) {
+        ++result.literal_evaluations;
         UpperIntervalType image=apply(literal.function,domain);
 
         Bool original_infeasible=false;
@@ -666,6 +667,7 @@ SmtSolver::_process_box(
     auto phase_start=std::chrono::steady_clock::now();
     if(direct.used) {
         result.fused_direct_classification=true;
+        result.fused_direct_literal_evaluations=direct.literal_evaluations;
         result.reductions=reductions;
         result.reduction_seconds=direct.seconds;
         if(direct.pruned) {
@@ -808,6 +810,8 @@ SmtSolver::_accumulate_box_processing_statistics(
     if(processing.fused_direct_classification) {
         ++statistics.fused_direct_classification_boxes;
     }
+    statistics.fused_direct_literal_evaluations+=
+        processing.fused_direct_literal_evaluations;
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
             processing.status,
@@ -1182,6 +1186,8 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.epsilon_box_certifications+=source.epsilon_box_certifications;
     target.fused_direct_classification_boxes+=
         source.fused_direct_classification_boxes;
+    target.fused_direct_literal_evaluations+=
+        source.fused_direct_literal_evaluations;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;
     target.boolean_decisions+=source.boolean_decisions;

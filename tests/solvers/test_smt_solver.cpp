@@ -398,6 +398,7 @@ class TestSmtSolver {
         no_conflict.sensitivity_derivative_build_seconds=0.25;
         no_conflict.sensitivity_derivative_evaluation_seconds=0.5;
         no_conflict.fused_direct_classification_boxes=6u;
+        no_conflict.fused_direct_literal_evaluations=13u;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
@@ -415,6 +416,7 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_build_seconds,0.25);
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluation_seconds,0.5);
         ARIADNE_TEST_EQUAL(target.fused_direct_classification_boxes,6u);
+        ARIADNE_TEST_EQUAL(target.fused_direct_literal_evaluations,13u);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -1103,6 +1105,33 @@ class TestSmtSolver {
                     SmtSolverTestSupport::BoxProcessingStatus::SPLIT);
             ARIADNE_TEST_ASSERT(observation.fused_direct_classification);
             ARIADNE_TEST_ASSERT(not observation.epsilon_box_certification);
+        }
+
+        {
+            std::cout << "[smt-fast-path] direct literal evaluation accounting" << std::endl;
+            List<SmtTheoryPrimitiveLiteral> early_rejection({
+                SmtTheoryPrimitiveLiteral(
+                    ex-2,SmtTheoryPrimitiveRelation::GEQ_ZERO),
+                SmtTheoryPrimitiveLiteral(
+                    ex+2,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            SmtResult rejected=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),early_rejection);
+            ARIADNE_TEST_ASSERT(rejected.is_unsat());
+            ARIADNE_TEST_EQUAL(
+                rejected.statistics().fused_direct_literal_evaluations,1u);
+
+            List<SmtTheoryPrimitiveLiteral> unresolved({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO),
+                SmtTheoryPrimitiveLiteral(
+                    -ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            SmtResult split=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),unresolved);
+            ARIADNE_TEST_ASSERT(split.is_unknown());
+            ARIADNE_TEST_EQUAL(
+                split.statistics().fused_direct_literal_evaluations,2u);
         }
 
         {

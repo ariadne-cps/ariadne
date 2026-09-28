@@ -154,6 +154,7 @@ struct SmtSearchStatistics {
     SizeType sensitivity_derivative_evaluations = 0u;
     SizeType epsilon_box_certifications = 0u;
     SizeType fused_direct_classification_boxes = 0u;
+    SizeType fused_direct_literal_evaluations = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     double theory_compile_seconds = 0.0;
@@ -553,6 +554,7 @@ class SmtSolver {
         SizeType sensitivity_derivative_evaluations = 0u;
         Bool epsilon_box_certification = false;
         Bool fused_direct_classification = false;
+        SizeType fused_direct_literal_evaluations = 0u;
         Bool dp_resolution_exhausted = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
@@ -627,6 +629,7 @@ class SmtSolver {
         Bool used = false;
         Bool pruned = false;
         Bool epsilon_satisfied = false;
+        SizeType literal_evaluations = 0u;
         double seconds = 0.0;
     };
 

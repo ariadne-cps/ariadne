@@ -200,7 +200,7 @@ template<class F> Void TestTaylorModel<F>::test_concept()
     tr+=t; tr-=t;
 
     tr=exp(t); tr=log(t); tr=sqrt(t);
-    tr=sin(t); tr=cos(t); tr=tan(t);
+    tr=sin(t); tr=cos(t); tr=tan(t); tr=tanh(t);
     //tr=asin(t); tr=acos(t); tr=atan(t);
 
     tr.sweep(); tr.clobber();
@@ -452,6 +452,19 @@ template<class F> Void TestTaylorModel<F>::test_functions()
     ARIADNE_TEST_PRINT(sin(x));
     ARIADNE_TEST_PRINT(cos(x));
     ARIADNE_TEST_PRINT(x.tolerance());
+
+    // Validated tanh must remain bounded and must not form a reciprocal whose
+    // Taylor enclosure spuriously contains zero on a wide cross-zero input.
+    ValidatedTaylorModelType wide_tanh=tanh(4*x);
+    FloatBounds<PR> unit_interval(-1,+1,pr);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,wide_tanh.range(),unit_interval);
+
+    // On one-sided ranges use the sign-stable exponential identity rather
+    // than the dependency-prone exp(2*x) quotient.
+    ValidatedTaylorModelType positive_tanh=tanh(4+x);
+    ValidatedTaylorModelType negative_tanh=tanh(-4+x);
+    ARIADNE_TEST_ASSERT(definitely(positive_tanh.range().lower_bound()>=0));
+    ARIADNE_TEST_ASSERT(definitely(negative_tanh.range().upper_bound()<=0));
 
     const ExactDouble LAXITY=128;
     // Threshold based on sweeper characteristics

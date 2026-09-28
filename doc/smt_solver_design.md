@@ -1619,3 +1619,25 @@ materially tighter finite enclosure at tolerable construction cost. Its generic
 `tanh` path currently uses the normed-algebra exp-ratio identity, so this
 diagnostic also reveals whether the numerical stability issue previously fixed
 for interval evaluation reappears in Taylor arithmetic.
+
+The first Taylor-enclosure diagnostic did not reach a range comparison. During
+construction of the Lie-plus-barrier Taylor model it threw
+`DivideByZeroException` inside reciprocal evaluation. The reported denominator
+Taylor model had average about 6.17 but radius about 149.33, so its polynomial
+enclosure spuriously crossed zero. Inspection confirms that validated interval
+`tanh` had already been made sign-stable, but `NormedAlgebraOperations<Tanh>`
+still used `(exp(2*x)-1)/(exp(2*x)+1)`. Thus this failure is a second instance
+of the same numerical representation defect, now exposed in Taylor arithmetic;
+it is not evidence that Taylor models themselves lack useful correlation.
+
+`TaylorModel` now overrides `Tanh` for validated models. On a definitely
+nonnegative range it uses `(1-exp(-2*x))/(1+exp(-2*x))`; on a definitely
+nonpositive range it uses the symmetric `(exp(2*x)-1)/(exp(2*x)+1)`. Before
+taking either reciprocal it verifies that the denominator Taylor range remains
+strictly positive. If the input crosses zero, or if the modeled denominator
+still loses positivity, the implementation returns the rigorous bounded model
+`0 +/- 1`. Approximate Taylor models retain the existing normed-algebra path.
+A focused Taylor-model regression exercises a wide cross-zero input as well as
+positive and negative one-sided inputs. The standalone `taylor` Barr3
+diagnostic should now be rerun before deciding whether Taylor enclosure is
+worth integrating into SMT classification.

@@ -154,6 +154,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
     static TaylorModel<P,F> apply(Max,X const& c, TaylorModel<P,F> const& tm);
     static TaylorModel<P,F> apply(Min,X const& c, TaylorModel<P,F> const& tm);
     static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
+    static TaylorModel<P,F> apply(Tanh,TaylorModel<P,F> const& tm);
 };
 
 template<class P, class F> class TaylorModel;

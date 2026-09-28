@@ -1658,6 +1658,40 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
     }
 }
 
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Tanh, const TaylorModel<P,F>& x) {
+    if constexpr (Same<P,ValidatedTag>) {
+        typedef TaylorModel<P,F> ModelType;
+        typedef typename ModelType::RangeType RangeType;
+        RangeType xr=x.range();
+
+        auto fallback=[&x]() {
+            ModelType result=x.create();
+            result.error()=typename ModelType::ErrorType(1u,x.precision());
+            return result;
+        };
+
+        if(definitely(xr.lower_bound()>=0)) {
+            ModelType e=exp(-2*x);
+            ModelType denominator=1+e;
+            if(definitely(denominator.range().lower_bound()>0)) {
+                return (1-e)/denominator;
+            }
+            return fallback();
+        }
+        if(definitely(xr.upper_bound()<=0)) {
+            ModelType e=exp(2*x);
+            ModelType denominator=1+e;
+            if(definitely(denominator.range().lower_bound()>0)) {
+                return (e-1)/denominator;
+            }
+            return fallback();
+        }
+        return fallback();
+    } else {
+        return NormedAlgebraOperations<TaylorModel<P,F>>::apply(Tanh(),x);
+    }
+}
+
 template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Max op, const TaylorModel<P,F>& x, const NumericType& c) {
     return apply(op, x, x.create_constant(c));
 }

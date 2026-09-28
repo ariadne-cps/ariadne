@@ -1769,3 +1769,17 @@ Candidate forms could eventually be scored on the current box by enclosure
 width and evaluation cost. This is deliberately deferred: the current work
 continues with direct measurements of the factored Barr3 dynamics before any
 general expression optimizer is designed or integrated.
+
+The first search measurement with the factored Barr3 dynamics is neutral at the
+64-box frontier. With geometric splitting, Lie-first literal order and all
+optional expensive mechanisms disabled, the solver still processes 64 boxes,
+prunes 27 and splits 37, with 101 fused literal evaluations and no epsilon
+certification. Elapsed time is about 2.713 s versus about 2.738 s for the
+previous Lie-first baseline. Thus the much tighter initial Lie-plus-barrier
+enclosure does not yet create additional decisions at this shallow frontier.
+
+The next measurement repeats the established 256-box geometric frontier. The
+pre-rewrite reference was 123 pruned / 133 split in about 9.24 s. If the
+factored dynamics starts changing pruning only at deeper boxes, that run should
+reveal it; if the outcome remains identical, the rewrite should be retained for
+its enclosure quality but not credited as a search-power improvement.

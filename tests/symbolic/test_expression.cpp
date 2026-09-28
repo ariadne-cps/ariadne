@@ -35,6 +35,7 @@
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
+#include "function/procedure.hpp"
 #include "function/taylor_model.hpp"
 
 #include "algebra/matrix.tpl.hpp"
@@ -292,6 +293,14 @@ class TestExpression {
         ARIADNE_TEST_PRINT(expr9);
         eliminate_common_subexpressions(expr9);
         ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr9),5);
+
+        // Cross-output CSE must survive Expression -> Formula conversion.
+        Vector<RealExpression> expressions({x+y,x+y});
+        eliminate_common_subexpressions(expressions);
+        Vector<Formula<EffectiveNumber>> formulae=
+            make_formula(expressions,RealSpace({x,y,z}));
+        Vector<EffectiveProcedure> procedure(argument_size=3u,formulae);
+        ARIADNE_TEST_EQUAL(procedure.temporaries_size(),3u);
     }
 
     Void test_substitute() {

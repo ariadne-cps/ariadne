@@ -2109,3 +2109,36 @@ derivative and 48.73 for the y derivative. This validates the semantics of the
 multi-output procedure path after the join fix. The earlier shared-performance
 numbers obtained before the fix remain invalid and must not be reused; the
 performance profile must now be rerun from the corrected branch.
+
+
+The corrected shared-procedure performance run preserves the expected
+first-order bound quality but provides essentially no cross-output sharing.
+At the 256-box frontier it again resolves 28 of 126 natural `db/dy` zero
+crossings, with average combined width about 4.797. The three separately
+compiled procedures contain 1,705,353 instructions in total, while the
+multi-output procedure contains 1,705,349: only four instructions are shared.
+The shared evaluation therefore takes about 20.57 s for 133 boxes, compared
+with about 19.11 s for the natural plus separate derivative evaluations in the
+previous profile, and total diagnostic time rises to about 29.39 s. The
+multi-output `Procedure` mechanism is not the limitation; the derivative
+functions arrive with almost entirely distinct Formula node identities.
+
+Ariadne already provides structural CSE for
+`Vector<Expression<Real>>`, using one eliminator cache across all outputs.
+However, the vector `make_formula` conversion previously called the scalar
+conversion independently for each component, thereby discarding cross-output
+node sharing before `Vector<Procedure>` could exploit it. The vector
+conversion now uses one `FormulaSharingCache` across all components, and the
+auxiliary-substitution overload delegates to the same shared conversion.
+A regression test checks that two structurally identical vector outputs reduce
+to a three-instruction procedure after expression CSE.
+
+Query `lie-gradient-expression-cse-profile` is the gate for this direction.
+It forms `[db/dy,d(db/dy)/dx,d(db/dy)/dy]` directly as real expressions,
+simplifies the two symbolic derivatives, applies vector-wide common
+subexpression elimination, and compares the resulting effective multi-output
+Procedure size against the same expressions without CSE. This first measures
+structural compression only. A validated frontier benchmark is justified only
+if the instruction count falls substantially; otherwise first-order symbolic
+range evaluation should be considered exhausted and work should move to a
+different enclosure representation.

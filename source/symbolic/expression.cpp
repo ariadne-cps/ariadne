@@ -623,9 +623,12 @@ Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e,
 
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc)
 {
+    Map<Identifier,SizeType> variable_indices=spc.indices_from_names();
+    FormulaSharingCache sharing_cache;
     Vector<Formula<EffectiveNumber>> res(e.size());
     for(SizeType i=0; i!=e.size(); ++i) {
-        res[i]=make_formula(e[i],spc);
+        res[i]=_make_formula_preserving_sharing(
+            e[i],variable_indices,sharing_cache);
     }
     return res;
 }
@@ -642,11 +645,7 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& out, const List<As
 
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc)
 {
-    Vector<Formula<EffectiveNumber>> res(out.size());
-    for(SizeType i=0; i!=out.size(); ++i) {
-        res[i]=make_formula(out[i],aux,spc);
-    }
-    return res;
+    return make_formula(substitute(out,aux),spc);
 }
 
 

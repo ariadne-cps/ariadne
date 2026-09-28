@@ -43,12 +43,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -60,7 +60,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -71,7 +71,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -83,7 +83,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -2215,6 +2215,234 @@ Void profile_lie_gradient_expression_cse_frontier(
               << std::endl;
 }
 
+struct GradientCsePruneProfileCounts {
+    SizeType processed = 0u;
+    SizeType natural_pruned = 0u;
+    SizeType split = 0u;
+    SizeType db_dy_cross_zero = 0u;
+    SizeType recomposed_natural_pruned = 0u;
+    SizeType improved_pruned = 0u;
+    SizeType improved_intersection_pruned = 0u;
+    SizeType centered_sign_definite = 0u;
+    SizeType monotone_coordinates = 0u;
+    SizeType cse_evaluations = 0u;
+    SizeType component_evaluations = 0u;
+    double natural_lie_width_sum = 0.0;
+    double recomposed_natural_width_sum = 0.0;
+    double improved_lie_width_sum = 0.0;
+    double intersected_lie_width_sum = 0.0;
+    double cse_seconds = 0.0;
+    double component_seconds = 0.0;
+};
+
+Void profile_lie_gradient_cse_pruning(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    RealExpression const& db_dy_expression,
+    RealVariable const& x,
+    RealVariable const& y,
+    RealSpace const& space,
+    ValidatedScalarMultivariateFunction const& db_dx_function,
+    ValidatedScalarMultivariateFunction const& db_dy_function,
+    ValidatedScalarMultivariateFunction const& barrier_function,
+    ValidatedScalarMultivariateFunction const& dy_function,
+    ValidatedScalarMultivariateFunction const& lie_function)
+{
+    Stopwatch<Milliseconds> derivative_stopwatch;
+    Vector<RealExpression> expressions({
+        db_dy_expression,
+        simplify(derivative(db_dy_expression,x)),
+        simplify(derivative(db_dy_expression,y))
+    });
+    derivative_stopwatch.click();
+
+    Stopwatch<Milliseconds> cse_stopwatch;
+    eliminate_common_subexpressions(expressions);
+    cse_stopwatch.click();
+
+    Stopwatch<Milliseconds> procedure_build_stopwatch;
+    Vector<Formula<EffectiveNumber>> formulae=
+        make_formula(expressions,space);
+    Vector<EffectiveProcedure> cse_procedure(
+        space.dimension(),formulae);
+    EffectiveProcedure scalar_cse_procedure(
+        space.dimension(),formulae[0u]);
+    ValidatedProcedure natural_db_dy_procedure(db_dy_function);
+    procedure_build_stopwatch.click();
+
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+    GradientCsePruneProfileCounts counts;
+
+    Stopwatch<Milliseconds> stopwatch;
+    while(not pending.empty() && counts.processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++counts.processed;
+
+        UpperIntervalType natural_lie=apply(lie_function,box);
+        if(definitely(natural_lie.lower_bound()>=0)) {
+            ++counts.natural_pruned;
+            continue;
+        }
+
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++counts.split;
+
+        Vector<FloatDPBounds> arguments=bounds_arguments(box);
+        UpperIntervalType natural_db_dy=
+            make_interval(evaluate(natural_db_dy_procedure,arguments));
+        if(crosses_zero(natural_db_dy)) {
+            ++counts.db_dy_cross_zero;
+
+            Stopwatch<Milliseconds> cse_eval_stopwatch;
+            Vector<FloatDPBounds> images=
+                evaluate(cse_procedure,arguments);
+
+            Vector<FloatDPBounds> midpoint_arguments(arguments);
+            for(SizeType i=0u;i!=box.dimension();++i) {
+                auto midpoint=box[i].midpoint();
+                midpoint_arguments[i]=FloatDPBounds(
+                    midpoint.raw(),midpoint.raw());
+            }
+            FloatDPBounds centered_bounds=
+                evaluate(scalar_cse_procedure,midpoint_arguments);
+            for(SizeType i=0u;i!=box.dimension();++i) {
+                centered_bounds+=images[i+1u]
+                    *(arguments[i]-midpoint_arguments[i]);
+            }
+            UpperIntervalType centered_image=make_interval(centered_bounds);
+            if(not crosses_zero(centered_image)) {
+                ++counts.centered_sign_definite;
+            }
+
+            UpperIntervalType improved_db_dy=
+                intersection(natural_db_dy,centered_image);
+
+            Vector<FloatDPBounds> lower_arguments(arguments);
+            Vector<FloatDPBounds> upper_arguments(arguments);
+            SizeType monotone_coordinates=0u;
+            for(SizeType i=0u;i!=box.dimension();++i) {
+                UpperIntervalType derivative_image=
+                    make_interval(images[i+1u]);
+                if(definitely(derivative_image.lower_bound()>0)) {
+                    auto lower=box[i].lower_bound().raw();
+                    auto upper=box[i].upper_bound().raw();
+                    lower_arguments[i]=FloatDPBounds(lower,lower);
+                    upper_arguments[i]=FloatDPBounds(upper,upper);
+                    ++monotone_coordinates;
+                } else if(definitely(derivative_image.upper_bound()<0)) {
+                    auto lower=box[i].lower_bound().raw();
+                    auto upper=box[i].upper_bound().raw();
+                    lower_arguments[i]=FloatDPBounds(upper,upper);
+                    upper_arguments[i]=FloatDPBounds(lower,lower);
+                    ++monotone_coordinates;
+                }
+            }
+            counts.monotone_coordinates+=monotone_coordinates;
+            if(monotone_coordinates!=0u) {
+                FloatDPBounds lower_image=
+                    evaluate(scalar_cse_procedure,lower_arguments);
+                FloatDPBounds upper_image=
+                    evaluate(scalar_cse_procedure,upper_arguments);
+                UpperIntervalType monotone_image=make_interval(
+                    FloatDPBounds(lower_image.lower(),upper_image.upper()));
+                improved_db_dy=
+                    intersection(improved_db_dy,monotone_image);
+            }
+            cse_eval_stopwatch.click();
+            counts.cse_seconds+=cse_eval_stopwatch.elapsed_seconds();
+            ++counts.cse_evaluations;
+
+            Stopwatch<Milliseconds> component_stopwatch;
+            UpperIntervalType db_dx_image=apply(db_dx_function,box);
+            UpperIntervalType barrier_image=apply(barrier_function,box);
+            UpperIntervalType dy_image=apply(dy_function,box);
+            UpperIntervalType dx_image=box[1u];
+
+            UpperIntervalType recomposed_natural=
+                db_dx_image*dx_image
+                + natural_db_dy*dy_image
+                + barrier_image;
+            UpperIntervalType improved_lie=
+                db_dx_image*dx_image
+                + improved_db_dy*dy_image
+                + barrier_image;
+            UpperIntervalType intersected_lie=
+                intersection(natural_lie,improved_lie);
+            component_stopwatch.click();
+            counts.component_seconds+=component_stopwatch.elapsed_seconds();
+            counts.component_evaluations+=3u;
+
+            if(definitely(recomposed_natural.lower_bound()>=0)) {
+                ++counts.recomposed_natural_pruned;
+            }
+            if(definitely(improved_lie.lower_bound()>=0)) {
+                ++counts.improved_pruned;
+            }
+            if(definitely(intersected_lie.lower_bound()>=0)) {
+                ++counts.improved_intersection_pruned;
+            }
+
+            counts.natural_lie_width_sum+=
+                natural_lie.width().raw().get_d();
+            counts.recomposed_natural_width_sum+=
+                recomposed_natural.width().raw().get_d();
+            counts.improved_lie_width_sum+=
+                improved_lie.width().raw().get_d();
+            counts.intersected_lie_width_sum+=
+                intersected_lie.width().raw().get_d();
+        }
+
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
+    }
+    stopwatch.click();
+
+    auto average=[](double sum,SizeType count) {
+        return count==0u ? 0.0 : sum/static_cast<double>(count);
+    };
+
+    std::cout << "[lie-gradient-cse-prune-profile]"
+              << " time=" << stopwatch.elapsed_seconds()
+              << " derivative-build-time="
+              << derivative_stopwatch.elapsed_seconds()
+              << " cse-time=" << cse_stopwatch.elapsed_seconds()
+              << " procedure-build-time="
+              << procedure_build_stopwatch.elapsed_seconds()
+              << " cse-instructions="
+              << cse_procedure.temporaries_size()
+              << " processed=" << counts.processed
+              << " natural-pruned=" << counts.natural_pruned
+              << " split=" << counts.split
+              << " db/dy-cross-zero=" << counts.db_dy_cross_zero
+              << " centered-sign-definite="
+              << counts.centered_sign_definite
+              << " monotone-coordinates="
+              << counts.monotone_coordinates
+              << " recomposed-natural-pruned="
+              << counts.recomposed_natural_pruned
+              << " improved-pruned=" << counts.improved_pruned
+              << " improved-intersection-pruned="
+              << counts.improved_intersection_pruned
+              << " avg-natural-lie-width="
+              << average(counts.natural_lie_width_sum,counts.db_dy_cross_zero)
+              << " avg-recomposed-natural-width="
+              << average(counts.recomposed_natural_width_sum,counts.db_dy_cross_zero)
+              << " avg-improved-lie-width="
+              << average(counts.improved_lie_width_sum,counts.db_dy_cross_zero)
+              << " avg-intersected-lie-width="
+              << average(counts.intersected_lie_width_sum,counts.db_dy_cross_zero)
+              << " cse-evals=" << counts.cse_evaluations
+              << " cse-eval-time=" << counts.cse_seconds
+              << " component-evals=" << counts.component_evaluations
+              << " component-time=" << counts.component_seconds
+              << std::endl;
+}
+
 TestBarr3Full64::NetworkAndLie reassociated_network_and_lie(
     RealExpression const& x0,
     RealExpression const& x1)
@@ -2657,6 +2885,26 @@ Int main(Int argc,const char* argv[]) {
             box_limit,UpperBoxType(domain),
             network.db_dy,x,y,space,
             db_dy_function,lie_function);
+        return 0;
+    }
+
+    if(query=="lie-gradient-cse-prune-profile") {
+        RealExpression dy=x*(sqr(x)/3-1)-y;
+        ValidatedScalarMultivariateFunction db_dx_function=
+            make_function(space,network.db_dx);
+        ValidatedScalarMultivariateFunction db_dy_function=
+            make_function(space,network.db_dy);
+        ValidatedScalarMultivariateFunction barrier_function=
+            make_function(space,network.barrier);
+        ValidatedScalarMultivariateFunction dy_function=
+            make_function(space,dy);
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_lie_gradient_cse_pruning(
+            box_limit,UpperBoxType(domain),
+            network.db_dy,x,y,space,
+            db_dx_function,db_dy_function,
+            barrier_function,dy_function,lie_function);
         return 0;
     }
 

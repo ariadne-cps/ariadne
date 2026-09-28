@@ -2221,3 +2221,26 @@ criterion for the scalar arithmetic used by Barr3 while making each internal
 cache comparison local. The next structural profile must still produce 90,698
 distinct CSE node pointers and 51,715 procedure instructions; only the
 preprocessing time is expected to change.
+
+
+The local-key CSE optimisation is successful. It preserves exactly the previous
+compressed structure (90,698 distinct CSE node pointers and 51,715 Procedure
+instructions) while reducing Barr3 CSE time from about 45.18 s to about 3.23 s.
+This is roughly a 14x preprocessing speed-up, and it also reverses the failed
+pointer-memo attempt that had increased CSE time to about 65.5 s. Symbolic
+derivative construction remains about 1.8 s and CSE compilation about 0.017 s.
+At this point the CSE-based first-order range evaluator has both acceptable
+one-time compilation cost and very low repeated evaluation cost.
+
+Before integrating it into the SMT solver, query
+`lie-gradient-cse-prune-profile` measures solver-relevant decision power
+rather than derivative range quality. It replays the same geometric frontier
+and considers only boxes that the ordinary `lie+barrier` interval cannot
+prune and whose natural `db/dy` range crosses zero. For those boxes it forms
+the CSE centered/monotonicity intersection for `db/dy`, recomposes the Lie
+range as `db/dx*dx + db/dy*dy + barrier`, and intersects that result with the
+ordinary direct Lie range. It reports both the natural recomposed baseline and
+the improved recomposed/intersected pruning counts. This isolates whether the
+tighter neural derivative actually raises the lower bound of the SMT literal
+enough to exclude additional boxes; a range evaluator should not be integrated
+based only on narrower intermediate derivatives.

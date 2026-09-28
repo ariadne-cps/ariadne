@@ -40,12 +40,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="eval") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|eval]");
+        "[all|lie|lie-only|eval]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -57,7 +57,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|eval] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -68,7 +68,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|eval] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -577,8 +577,14 @@ Int main(Int argc,const char* argv[]) {
             "unsafe-rectangle-2",solver,space,
             unsafe_rectangle_2_domain,barrier_literals);
     }
-    timed_solve(
-        "lie",solver,space,domain,lie_literals);
+    if(query=="lie-only") {
+        List<SmtTheoryPrimitiveLiteral> lie_only_literals({lie_violation});
+        timed_solve(
+            "lie-only",solver,space,domain,lie_only_literals);
+    } else {
+        timed_solve(
+            "lie",solver,space,domain,lie_literals);
+    }
 
     return 0;
 }

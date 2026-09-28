@@ -1559,3 +1559,22 @@ deeper unresolved frontier. If it remains negligible, a simple stable
 cost/effectiveness ordering may be worthwhile; if it becomes important, any
 generic reordering policy needs adaptive evidence rather than a fixed Barr3
 ordering.
+
+The 2,048-box Lie-first run shows that barrier non-negativity remains irrelevant
+to pruning even on the deeper established frontier. With 2,048 processed boxes
+and two literals, a full evaluation of both literals would require 4,096 fused
+literal evaluations. The run reports 3,076, so exactly 1,020 boxes short-circuit
+after the first Lie-violation literal. This exactly matches the total pruned
+count of 1,020. Therefore every pruned box is excluded by the Lie literal and
+none requires barrier non-negativity for rejection. The search outcome remains
+1,020 pruned / 1,028 split with no epsilon certification.
+
+The benchmark now adds a diagnostic `lie-only` query containing only the Lie
+violation literal. This is intentionally not treated as equivalent to the
+original counterexample query: removing barrier non-negativity enlarges the
+counterexample set, so UNSAT of the Lie-only query would prove the original
+query but SAT/UNKNOWN would not decide it. The purpose is purely diagnostic.
+If the Lie-only run follows the same pruning/split curve while reducing cost
+substantially, then barrier non-negativity is not merely failing to prune first;
+it is operationally irrelevant to the observed search frontier and should not
+drive further Barr3 heuristic design.

@@ -258,28 +258,28 @@ struct ThirdArgumentTag { };
 struct Add : OperatorObject<Add> {
     static constexpr OperatorCode code() { return OperatorCode::ADD; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(add(a1,a2)) { return add(a1,a2); }
-    template<class X> X derivative(const X& a1, const X& a2, FirstArgumentTag) const { return a1.create(1); }
-    template<class X> X derivative(const X& a1, const X& a2, SecondArgumentTag) const { return a2.create(1); }
-    template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return d1+d2; }
+    template<class X> X derivative(const X& a1, const X&, FirstArgumentTag) const { return a1.create(1); }
+    template<class X> X derivative(const X&, const X& a2, SecondArgumentTag) const { return a2.create(1); }
+    template<class X,class D> D derivative(const X&, const D& d1, const X&, const D& d2) const { return d1+d2; }
 };
 struct Sub : OperatorObject<Sub> {
     static constexpr OperatorCode code() { return OperatorCode::SUB; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(sub(a1,a2)) { return sub(a1,a2); }
-    template<class X> X derivative(const X& a1, const X& a2, FirstArgumentTag) const { return a1.create(+1); }
-    template<class X> X derivative(const X& a1, const X& a2, SecondArgumentTag) const { return a2.create(-1); }
-    template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return d1-d2; }
+    template<class X> X derivative(const X& a1, const X&, FirstArgumentTag) const { return a1.create(+1); }
+    template<class X> X derivative(const X&, const X& a2, SecondArgumentTag) const { return a2.create(-1); }
+    template<class X,class D> D derivative(const X&, const D& d1, const X&, const D& d2) const { return d1-d2; }
 };
 struct Mul : OperatorObject<Mul> {
     static constexpr OperatorCode code() { return OperatorCode::MUL; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(mul(a1,a2)) { return mul(a1,a2); }
-    template<class X> X derivative(const X& a1, const X& a2, FirstArgumentTag) const { return a2; }
-    template<class X> X derivative(const X& a1, const X& a2, SecondArgumentTag) const { return a1; }
+    template<class X> X derivative(const X&, const X& a2, FirstArgumentTag) const { return a2; }
+    template<class X> X derivative(const X& a1, const X&, SecondArgumentTag) const { return a1; }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return a2*d1+a1*d2; }
 };
 struct Div : OperatorObject<Div> {
     static constexpr OperatorCode code() { return OperatorCode::DIV; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(div(a1,a2)) { return div(a1,a2); }
-    template<class X> X derivative(const X& a1, const X& a2, FirstArgumentTag) const { return rec(a2); }
+    template<class X> X derivative(const X&, const X& a2, FirstArgumentTag) const { return rec(a2); }
     template<class X> X derivative(const X& a1, const X& a2, SecondArgumentTag) const { return div(neg(a1),sqr(a2)); }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return (d1-d2*(a1/a2))/a2; }
 };
@@ -298,10 +298,10 @@ struct Root : OperatorObject<Root> {
 struct Fma : OperatorObject<Fma> {
     static constexpr OperatorCode code() { return OperatorCode::FMA; } static constexpr OperatorKind kind() { return OperatorKind::TERNARY; }
     template<class A1, class A2, class A3> auto operator()(A1&& a1, A2&& a2, A3&& a3) const -> decltype(fma(a1,a2,a3)) { return fma(a1,a2,a3); }
-    template<class X> X derivative(const X& a1, const X& a2, const X& a3, FirstArgumentTag) const { return a2; }
-    template<class X> X derivative(const X& a1, const X& a2, const X& a3, SecondArgumentTag) const { return a1; }
-    template<class X> X derivative(const X& a1, const X& a2, const X& a3, ThirdArgumentTag) const { return nul(a3)+1; }
-    template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2, const X& a3, const D& d3) const {
+    template<class X> X derivative(const X&, const X& a2, const X&, FirstArgumentTag) const { return a2; }
+    template<class X> X derivative(const X& a1, const X&, const X&, SecondArgumentTag) const { return a1; }
+    template<class X> X derivative(const X&, const X&, const X& a3, ThirdArgumentTag) const { return nul(a3)+1; }
+    template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2, const X&, const D& d3) const {
         return a2*d1+a1*d2+d3; }
 };
 
@@ -309,25 +309,25 @@ struct Nul : OperatorObject<Nul> {
     static constexpr OperatorCode code() { return OperatorCode::NUL; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(nul(a)) { return nul(a); }
     template<class X> X derivative(const X& a) const { return nul(a); }
-    template<class X,class D> D derivative(const X& a, const D& d) const { return nul(d); }
+    template<class X,class D> D derivative(const X&, const D& d) const { return nul(d); }
 };
 struct Pos : OperatorObject<Pos> {
     static constexpr OperatorCode code() { return OperatorCode::POS; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(pos(a)) { return pos(a); }
     template<class X> X derivative(const X& a) const { return nul(a)+1; }
-    template<class X,class D> D derivative(const X& a, const D& d) const { return d; }
+    template<class X,class D> D derivative(const X&, const D& d) const { return d; }
 };
 struct Neg : OperatorObject<Neg> {
     static constexpr OperatorCode code() { return OperatorCode::NEG; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(neg(a)) { return neg(a); }
     template<class X> X derivative(const X& a) const { return nul(a)-1; }
-    template<class X,class D> D derivative(const X& a, const D& d) const { return -d; }
+    template<class X,class D> D derivative(const X&, const D& d) const { return -d; }
 };
 struct Hlf : OperatorObject<Hlf> {
     static constexpr OperatorCode code() { return OperatorCode::HLF; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(hlf(a)) { return hlf(a); }
     template<class X> X derivative(const X& a) const { return hlf(a); }
-    template<class X,class D> D derivative(const X& a, const D& d) const { return hlf(d); }
+    template<class X,class D> D derivative(const X&, const D& d) const { return hlf(d); }
 };
 struct Rec : OperatorObject<Rec> {
     static constexpr OperatorCode code() { return OperatorCode::REC; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
@@ -411,7 +411,7 @@ struct Min : OperatorObject<Min> {
 struct Abs : OperatorObject<Abs> {
     static constexpr OperatorCode code() { return OperatorCode::ABS; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A> auto operator()(A&& a) const -> decltype(abs(a)) { return abs(a); }
-    template<class X,class D> D derivative(const X& a, const D& d) const { return a>=0 ? a : -a; }
+    template<class X,class D> D derivative(const X& a, const D&) const { return a>=0 ? a : -a; }
 };
 
 struct Sgn : ComparisonObject<Sgn> {

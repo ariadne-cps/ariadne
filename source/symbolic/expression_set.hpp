@@ -122,7 +122,7 @@ template<class UB> class VariableInterval {
 
 //! \ingroup ExpressionSetSubModule
 //! \brief An interval range for a real variable.
-template<class T> template<class XL, class XU> inline VariableInterval<XU> Variable<T>::in(const XL& l, const XU& u) {
+template<class T> template<class XL, class XU> inline VariableInterval<XU> Variable<T>::in(const XL&, const XU&) {
     //static_assert(Same<XL,Real>,"Can only make box in Real variables.");
     ARIADNE_FAIL_MESSAGE("Can't create interval in non-real variable "<<*this);
     assert(false);
@@ -274,7 +274,7 @@ template<class IVL> VariablesBox<IVL>::VariablesBox(const RealSpace& spc, const 
     }
 }
 
-template<class T> template<class IVL> inline VariablesBox<IVL> Variables<T>::in(const List<IVL>& bx) const {
+template<class T> template<class IVL> inline VariablesBox<IVL> Variables<T>::in(const List<IVL>&) const {
     static_assert(Same<T,Real>,"Can only make box in Real variables.");
     assert(false);
 }

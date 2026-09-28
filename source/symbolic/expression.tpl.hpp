@@ -49,7 +49,7 @@ struct CatOp {
     static constexpr OperatorCode code() { return OperatorCode::ADD; }
     static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     String operator()(String const& s1, String const& s2) const { return s1+s2; }
-    friend OutputStream& operator<<(OutputStream& os, CatOp op) { return os << "cat"; }
+    friend OutputStream& operator<<(OutputStream& os, CatOp) { return os << "cat"; }
 };
 inline String pos(String s) { return s; }
 
@@ -328,14 +328,12 @@ template<class T> Bool is_constant_in(const Vector<Expression<T>>& ve, const Set
     for (SizeType i=0; i!=ve.size(); ++i) { if (not is_constant_in(ve[i],spc)) { return false; } } return true;
 }
 
-template<class T> Bool component_is_constant_in(Expression<Vector<T>> const& e, SizeType i, const Set<Variable<T>>& spc) {
-    return e.node_ref().accept([&spc](auto en){return is_constant_in(en,spc);});
-}
+template<class T> Bool component_is_constant_in(Expression<Vector<T>> const& e, SizeType i, const Set<Variable<T>>& spc);
 
 namespace {
 template<class E, class I, class VARS> inline Bool _component_is_constant_in_impl(Vector<E> const& ve, I i, VARS const& vars) {
     return is_constant_in(ve[i],vars); }
-template<class A, class I, class VARS> inline Bool _component_is_constant_in_impl(Constant<A> const& c, I i, VARS const& vars) {
+template<class A, class I, class VARS> inline Bool _component_is_constant_in_impl(Constant<A> const&, I, VARS const&) {
     return true; }
 template<class A, class I, class VARS> inline Bool _component_is_constant_in_impl(Variable<Vector<A>> const& vv, I i, VARS const& vars) {
     auto vs=Variables<A>(vv.name(),vv.size()); return is_constant_in(vs[i],vars); }
@@ -343,6 +341,10 @@ template<class OP, class A, class I, class VARS> inline Bool _component_is_const
     return component_is_constant_in(s._arg,i,vars); }
 template<class OP, class A1, class A2, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,A1,A2> const& s, I i, VARS const& vars) {
     return component_is_constant_in(s._arg1,i,vars) && component_is_constant_in(s._arg2,i,vars); }
+}
+
+template<class T> Bool component_is_constant_in(Expression<Vector<T>> const& e, SizeType i, const Set<Variable<T>>& spc) {
+    return e.node_ref().accept([i,&spc](auto const& en){return _component_is_constant_in_impl(en,i,spc);});
 }
 
 namespace {
@@ -356,8 +358,8 @@ namespace {
 }
 
 namespace {
-template<class X, class Y> Expression<X> _substitute_impl(const Constant<X>& c, const Variable<Y>& v, const Expression<Y>& s) { return c; }
-template<class X, class Y> Expression<X> _substitute_impl(const Variable<X>& var, const Variable<Y>& v, const Expression<Y>& s) { return var; }
+template<class X, class Y> Expression<X> _substitute_impl(const Constant<X>& c, const Variable<Y>&, const Expression<Y>&) { return c; }
+template<class X, class Y> Expression<X> _substitute_impl(const Variable<X>& var, const Variable<Y>&, const Expression<Y>&) { return var; }
 template<class X> Expression<X> _substitute_impl(const Variable<X>& var, const Variable<X>& v, const Expression<X>& s) {
     if (var==v) { return s; } else { return var; } }
 template<class X, class Y, class OP, class E> Expression<X> _substitute_impl(const Symbolic<OP,E>& e, const Variable<Y>& v, const Expression<Y>& s) {
@@ -625,15 +627,15 @@ template<class T, class CMP, Bool distinct> class NodeCounter {
     SizeType count_nodes (Expression<T> const& e);
     SizeType count_nodes (Expression<Vector<T>> const& ve);
   private: public:
-    Void operator() (ConstantExpressionNode<T> const& e) { }
-    Void operator() (VariableExpressionNode<T> const& e) { }
+    Void operator() (ConstantExpressionNode<T> const&) { }
+    Void operator() (VariableExpressionNode<T> const&) { }
     Void operator() (BinaryExpressionNode<T> const& e) { this->count_nodes(e.arg1()); this->count_nodes(e.arg2()); }
     Void operator() (UnaryExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
     Void operator() (GradedExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
 
-    Void operator() (Constant<Vector<T>> const& e) { }
-    Void operator() (Variable<Vector<T>> const& e) { }
-    Void operator() (Vector<Expression<Real>> const& e) { }
+    Void operator() (Constant<Vector<T>> const&) { }
+    Void operator() (Variable<Vector<T>> const&) { }
+    Void operator() (Vector<Expression<Real>> const&) { }
     Void operator() (Symbolic<OperatorVariant<Nul,Pos,Neg>, Expression<Vector<Real>>> const& e) { this->count_nodes(e.arg()); }
     Void operator() (Symbolic<OperatorVariant<Add,Sub>, Expression<Vector<Real>>, Expression<Vector<Real>>> const& e) { this->count_nodes(e.arg1()); this->count_nodes(e.arg2()); }
     Void operator() (Symbolic<OperatorVariant<Mul>, Expression<Real>, Expression<Vector<Real>>> const& e) { this->count_nodes(e.arg2()); }

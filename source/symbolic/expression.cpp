@@ -167,7 +167,7 @@ Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
-Expression<Real> nul(Expression<Real> const& e) {
+Expression<Real> nul(Expression<Real> const&) {
     return make_expression<Real>(Real(0)); }
 Expression<Real> pos(Expression<Real> const& e) {
     return make_expression<Real>(Pos(),e); }
@@ -317,8 +317,8 @@ RE _indicator(Geq, RE e1, RE e2, Sign sign) { if(sign==Sign::POSITIVE) { return 
 RE _indicator(Gtr, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,sign); }
 RE _indicator(Leq, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,-sign); }
 RE _indicator(Less, RE e1, RE e2, Sign sign) { return _indicator(Leq(),e1,e2,sign); }
-RE _indicator(Equal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
-RE _indicator(Unequal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+RE _indicator(Equal op, RE e1, RE e2, Sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+RE _indicator(Unequal op, RE e1, RE e2, Sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
 
 RE _indicator(AndOp, KE e1, KE e2, Sign sign) { return min(indicator(e1,sign),indicator(e2,sign)); }
 RE _indicator(OrOp, KE e1, KE e2, Sign sign) { return max(indicator(e1,sign),indicator(e2,sign)); }
@@ -330,7 +330,7 @@ Expression<Real> indicator(ConstantExpressionNode<Kleenean> e, Sign sign) {
     if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
     else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
     else { return Expression<Real>::constant(0); } }
-Expression<Real> indicator(VariableExpressionNode<Kleenean> e, Sign sign) {
+Expression<Real> indicator(VariableExpressionNode<Kleenean> e, Sign) {
     ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e); }
 Expression<Real> indicator(UnaryExpressionNode<Kleenean> e, Sign sign) {
     return e.op().accept([&](auto op){return _indicator(op,e.arg(),sign);}); }
@@ -394,16 +394,16 @@ inline Bool _is_additive_in_impl(Add, REcr e1, REcr e2, RVcr var) {
     return (is_additive_in(e1,var) && is_constant_in(e2,var)) || (is_constant_in(e1,var) && is_additive_in(e2,var)); }
 inline Bool _is_additive_in_impl(Sub, REcr e1, REcr e2, RVcr var) {
     return is_additive_in(e1,var) && is_constant_in(e2,var); }
-inline Bool _is_additive_in_impl(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
+inline Bool _is_additive_in_impl(Variant<Mul,Div,Max,Min>, REcr, REcr, RVcr) { return false; }
 template<class... OPS> inline Bool _is_additive_in_impl(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
     return ops.accept([&](auto op){return _is_additive_in_impl(op,e1,e2,var);}); }
 
-inline Bool _is_additive_in(RCcr c, RVcr var) { return true; }
-inline Bool _is_additive_in(RVcr v, RVcr var) { return true; }
-template<class OP> inline Bool _is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
+inline Bool _is_additive_in(RCcr, RVcr) { return true; }
+inline Bool _is_additive_in(RVcr, RVcr) { return true; }
+template<class OP> inline Bool _is_additive_in(Symbolic<OP,RE> const&, RVcr) { return false; }
 template<class OP> inline Bool _is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in_impl(e._op,e._arg1,e._arg2,var); }
-template<class OP> requires AGraded<OP> inline Bool _is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
-template<class OP> requires AGetter<OP> inline Bool _is_additive_in(Symbolic<OP,Expression<RealVector>,SizeType> const&, RVcr var) {
+template<class OP> requires AGraded<OP> inline Bool _is_additive_in(Symbolic<OP,RE,Int> const&, RVcr) { return false; }
+template<class OP> requires AGetter<OP> inline Bool _is_additive_in(Symbolic<OP,Expression<RealVector>,SizeType> const&, RVcr) {
     ARIADNE_NOT_IMPLEMENTED; }
 }
 
@@ -481,7 +481,7 @@ Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
 
 namespace {
-Expression<Real> derivative(const Constant<Real>& e, Variable<Real> v) { return Expression<Real>(Real(0)); }
+Expression<Real> derivative(const Constant<Real>&, Variable<Real>) { return Expression<Real>(Real(0)); }
 Expression<Real> derivative(const Variable<Real>& e, Variable<Real> v) { return Expression<Real>(Real(e==v ?1:0)); }
 }
 
@@ -498,9 +498,9 @@ typedef Real R; typedef EffectiveNumber Y; typedef Map<Identifier,SizeType> VM; 
 const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache);
 Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& cache);
 
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Constant<Real>& e, const SPC& spc, CACHE& cache) {
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Constant<Real>& e, const SPC&, CACHE&) {
     return Formula<Y>::constant(e.value()); }
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Variable<Real>& e, const SPC& spc, CACHE& cache) {
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Variable<Real>& e, const SPC& spc, CACHE&) {
     return Formula<Y>::coordinate(spc[e.name()]); }
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const UnaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache)); }
@@ -509,7 +509,7 @@ template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Binar
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
 
-template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>& e, const SPC& spc, CACHE& cache) {
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>&, const SPC&, CACHE&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 

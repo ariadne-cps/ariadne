@@ -1539,11 +1539,11 @@ _apply_evolution_step(WorkloadType::Access& workload,
 
 TimingData
 HybridEvolverBase::
-_estimate_timing(Set<DiscreteEvent>& active_events,
+_estimate_timing(Set<DiscreteEvent>&,
                 Real final_time,
                 FlowFunctionModel const& flow,
-                Map<DiscreteEvent,CrossingData>& crossings,
-                Map<DiscreteEvent,TransitionData> const& transitions,
+                Map<DiscreteEvent,CrossingData>&,
+                Map<DiscreteEvent,TransitionData> const&,
                 HybridEnclosure const& initial_set) const
 {
     // Compute the evolution time for the given step.
@@ -1613,7 +1613,7 @@ GeneralHybridEvolver::GeneralHybridEvolver(
 
 TimingData
 GeneralHybridEvolver::
-_estimate_timing(Set<DiscreteEvent>& active_events,
+_estimate_timing(Set<DiscreteEvent>&,
                 Real final_time,
                 FlowFunctionModel const& flow,
                 Map<DiscreteEvent,CrossingData>& crossings,

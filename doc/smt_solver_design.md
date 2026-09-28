@@ -2198,3 +2198,26 @@ making structural comparisons terminate immediately on canonical shared
 children. The next measurement must retain the 51,715-instruction result while
 reducing the CSE preprocessing time; otherwise a hash-consed key representation
 will be required.
+
+
+The first bottom-up CSE optimisation did not reduce preprocessing cost. It
+preserved the same 51,715-instruction result but increased Barr3 CSE time from
+about 45.2 s to about 65.5 s. The added node-pointer memo used Ariadne's
+`Map`, which is a `std::map`, and most source nodes in this workload are
+already pointer-distinct (about 917k distinct pointers for about 1.02M node
+occurrences), so the logarithmic memo lookup mostly added work. More
+importantly, the canonical cache still ordered full `Expression` objects with
+recursive structural comparison.
+
+The CSE cache now uses a canonical local comparator instead. Children are
+canonicalised first; for unary, binary and graded internal nodes the cache
+ordering compares only the operator and canonical child pointers (plus the
+graded payload), so it does not recursively traverse already-canonical
+subtrees. Constants and variables retain the existing payload ordering, while
+vector getter nodes retain the previous structural fallback because vector
+subexpressions are not yet canonicalised by this scalar CSE path. The
+pointer-map memo is removed. This preserves the same structural equivalence
+criterion for the scalar arithmetic used by Barr3 while making each internal
+cache comparison local. The next structural profile must still produce 90,698
+distinct CSE node pointers and 51,715 procedure instructions; only the
+preprocessing time is expected to change.

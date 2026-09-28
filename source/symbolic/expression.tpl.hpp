@@ -550,6 +550,71 @@ struct ExpressionComparator {
     template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return before(std::forward<A1>(a1),std::forward<A2>(a2)); }
 };
 
+template<class T> inline Bool _canonical_before(Constant<T> const& c1, Constant<T> const& c2) {
+    return _before(c1,c2);
+}
+template<class T> inline Bool _canonical_before(Variable<T> const& v1, Variable<T> const& v2) {
+    return _before(v1,v2);
+}
+template<class OP, class A> inline Bool _canonical_before(Symbolic<OP,A> const& s1, Symbolic<OP,A> const& s2) {
+    if(s1.op().code()!=s2.op().code()) {
+        return s1.op().code()<s2.op().code();
+    }
+    auto const* p1=s1.arg().node_raw_ptr();
+    auto const* p2=s2.arg().node_raw_ptr();
+    if(p1==p2) { return false; }
+    return std::less<const Void*>()(
+        static_cast<const Void*>(p1),static_cast<const Void*>(p2));
+}
+template<class OP, class A1, class A2> inline Bool _canonical_before(
+        Symbolic<OP,A1,A2> const& s1, Symbolic<OP,A1,A2> const& s2) {
+    if(s1.op().code()!=s2.op().code()) {
+        return s1.op().code()<s2.op().code();
+    }
+    auto const* p11=s1.arg1().node_raw_ptr();
+    auto const* p21=s2.arg1().node_raw_ptr();
+    if(p11!=p21) {
+        return std::less<const Void*>()(
+            static_cast<const Void*>(p11),static_cast<const Void*>(p21));
+    }
+    auto const* p12=s1.arg2().node_raw_ptr();
+    auto const* p22=s2.arg2().node_raw_ptr();
+    if(p12==p22) { return false; }
+    return std::less<const Void*>()(
+        static_cast<const Void*>(p12),static_cast<const Void*>(p22));
+}
+template<class OP, class A, class N> requires AGraded<OP> inline Bool _canonical_before(
+        Symbolic<OP,A,N> const& s1, Symbolic<OP,A,N> const& s2) {
+    if(s1.op().code()!=s2.op().code()) {
+        return s1.op().code()<s2.op().code();
+    }
+    if(s1.num()!=s2.num()) { return s1.num()<s2.num(); }
+    auto const* p1=s1.arg().node_raw_ptr();
+    auto const* p2=s2.arg().node_raw_ptr();
+    if(p1==p2) { return false; }
+    return std::less<const Void*>()(
+        static_cast<const Void*>(p1),static_cast<const Void*>(p2));
+}
+template<class OP, class V, class I> requires AGetter<OP> inline Bool _canonical_before(
+        Symbolic<OP,V,I> const& s1, Symbolic<OP,V,I> const& s2) {
+    // Vector subexpressions are not yet canonicalised by the scalar CSE path,
+    // so preserve the existing structural comparison for getters.
+    return _before(s1,s2);
+}
+
+struct CanonicalExpressionComparator {
+    template<class T> Bool operator() (Expression<T> const& e1, Expression<T> const& e2) const {
+        if(e1.node_raw_ptr()==e2.node_raw_ptr()) { return false; }
+        if(e1.node_ref().index()!=e2.node_ref().index()) {
+            return e1.node_ref().index()<e2.node_ref().index();
+        }
+        return e1.node_ref().accept([&e2](auto e1n) {
+            return _canonical_before(
+                e1n,std::get<decltype(e1n)>(e2.node_ref()));
+        });
+    }
+};
+
 template<class T, class CMP=ExpressionComparator> using ExpressionSet = std::set<Expression<T>,CMP>;
 
 template<class T> Expression<Vector<T>> eliminate_common_vector_subexpressions(const Expression<Vector<T>>& e) {
@@ -557,18 +622,14 @@ template<class T> Expression<Vector<T>> eliminate_common_vector_subexpressions(c
 }
 
 template<class T> class CommonSubroutineEliminator {
-    ExpressionSet<T> _cache;
-    Map<const Void*,Expression<T>> _memo;
+    ExpressionSet<T,CanonicalExpressionComparator> _cache;
   public:
-    CommonSubroutineEliminator() : _cache(), _memo() { }
+    CommonSubroutineEliminator() : _cache() { }
     Expression<T> eliminate_common_subexpressions(const Expression<T>& e);
   private:
-    Expression<T> _intern(const Expression<T>& original, const Expression<T>& candidate) {
+    Expression<T> _intern(const Expression<T>&, const Expression<T>& candidate) {
         auto iter=_cache.find(candidate);
-        Expression<T> result =
-            iter!=_cache.end() ? *iter : *(_cache.insert(candidate).first);
-        _memo.insert(original.node_raw_ptr(),result);
-        return result;
+        return iter!=_cache.end() ? *iter : *(_cache.insert(candidate).first);
     }
   public:
     Expression<T> operator()(const ConstantExpressionNode<T>&, const Expression<T>& e) {
@@ -609,9 +670,6 @@ template<class T> class CommonSubroutineEliminator {
     }
 };
 template<class T> Expression<T> CommonSubroutineEliminator<T>::eliminate_common_subexpressions(const Expression<T>& e) {
-    if(_memo.has_key(e.node_raw_ptr())) {
-        return _memo.get(e.node_raw_ptr());
-    }
     return e.node_ref().accept([&](auto en){return this->operator()(en,e);});
 }
 

@@ -245,14 +245,14 @@ class NonlinearInteriorPointOptimiser
                      const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const;
 
   public: // Deprecated
-    Void compute_tz(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatDPApproximationVector& x, FloatDPApproximation& t, FloatDPApproximationVector& z) const { }
-    Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& violation) const { };
-    Void linearised_feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                     FloatDPApproximation& slack, FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const { };
-    Void linearised_feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                     FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& t) const { };
+    Void compute_tz(const ExactBoxType&, const ApproximateVectorMultivariateFunction&, const ExactBoxType&,
+                          FloatDPApproximationVector&, FloatDPApproximation&, FloatDPApproximationVector&) const { }
+    Void feasibility_step(const ExactBoxType&, const ApproximateVectorMultivariateFunction&, const ExactBoxType&,
+                          FloatDPApproximationVector&, FloatDPApproximationVector&, FloatDPApproximationVector&, FloatDPApproximation&) const { };
+    Void linearised_feasibility_step(const ExactBoxType&, const ApproximateVectorMultivariateFunction&, const ExactBoxType&,
+                                     FloatDPApproximation&, FloatDPApproximationVector&, FloatDPApproximationVector&) const { };
+    Void linearised_feasibility_step(const ExactBoxType&, const ApproximateVectorMultivariateFunction&, const ExactBoxType&,
+                                     FloatDPApproximationVector&, FloatDPApproximationVector&, FloatDPApproximationVector&, FloatDPApproximation&) const { };
   private:
     FloatDPApproximation compute_mu(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
                      const FloatDPApproximationVector& x, const FloatDPApproximationVector& y) const;

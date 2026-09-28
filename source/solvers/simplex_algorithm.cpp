@@ -596,7 +596,7 @@ SizeType
 compute_s(const SizeType m, const Array<SizeType>& p, const Vector<X>& z)
 {
     const SizeType n=z.size();
-    for(SizeType k=0; k!=n; ++k) {
+    for(SizeType k=m; k!=n; ++k) {
         if(z[p[k]]< -PROGRESS_THRESHOLD) { return k; }
     }
     return n;
@@ -863,7 +863,7 @@ update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vec
 
 template<class X, class XX>
 Void
-update_y(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vector<XX>& y, const SizeType s, const Vector<XX>& d, const XX& t)
+update_y(const Vector<X>&, const Vector<X>&, const Array<SizeType>&, Vector<XX>&, const SizeType, const Vector<XX>&, const XX&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

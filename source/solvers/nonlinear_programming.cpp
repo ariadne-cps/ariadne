@@ -287,7 +287,7 @@ template<class X> inline Bool all_greater(const Vector<X>& x, const X& e) {
 
 
 template<class X> Vector< Differential<X> > second_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<X>& x) {
-    Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2);
+    Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2,x);
     return f.evaluate(d);
 }
 
@@ -433,7 +433,7 @@ class ConstrainedFeasibilityMatrix {
 
     template<class RR> Tuple< Vector<RR>,Vector<RR>,Vector<RR> >
     mul(const Vector<RR>& x, const Vector<RR>& yt, const Vector<RR>& z) const {
-        Vector<RR> nx=Z*x+X*x;
+        Vector<RR> nx=Z*x+X*z;
         Vector<RR> nyt=H*yt-A*x;
         Vector<RR> nz=H*yt-A*x;
         return make_tuple(nx,nyt,nz);
@@ -579,7 +579,7 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, E
 
 Bool OptimiserBase::
 validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                     ExactVectorType x0, ExactVectorType y0) const
+                     ExactVectorType x0, ExactVectorType) const
 {
     return this->validate_feasibility(D,g,C,x0);
 }
@@ -894,7 +894,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
+setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction&, const ExactBoxType& C,
                   StepData& v) const
 {
     ExactIntervalType I(-1,+1);
@@ -1406,8 +1406,8 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
 
 Void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
-    FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
+    const ExactBoxType&, const ApproximateVectorMultivariateFunction&, const ExactBoxType&,
+    FloatDPApproximationVector&, FloatDPApproximationVector&) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -1552,7 +1552,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 }
 
 FloatDPApproximation NonlinearInteriorPointOptimiser::
-compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
+compute_mu(const ExactBoxType&, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
            const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const
 {
     // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
@@ -1574,7 +1574,7 @@ compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g
 
 
 Void NonlinearInteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
+setup_feasibility(const ExactBoxType& d, const ApproximateVectorMultivariateFunction&, const ExactBoxType& c,
                   FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
 {
     const SizeType l=2*(d.size()+c.size());
@@ -1595,7 +1595,7 @@ clone() const
 }
 
 ValidatedVectorType PenaltyFunctionOptimiser::
-minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+minimise(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -1716,8 +1716,8 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunct
 
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                 FloatDPBoundsVector& x, FloatDPBoundsVector& w) const
+feasibility_step(const ExactBoxType&, const ValidatedVectorMultivariateFunction&, const ExactBoxType&,
+                 FloatDPBoundsVector&, FloatDPBoundsVector&) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

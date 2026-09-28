@@ -571,7 +571,7 @@ Void profile_lie_correlation_frontier(
         }
 
         auto children=box.split();
-        if(children.first==children.second) {
+        if(definitely(children.first==children.second)) {
             continue;
         }
 
@@ -590,9 +590,9 @@ Void profile_lie_correlation_frontier(
             ++counts.split_both_sign_definite;
         }
 
-        counts.split_db_dy_width_sum+=db_dy_image.width().raw();
-        counts.split_dy_width_sum+=dy_image.width().raw();
-        counts.split_lie_width_sum+=lie_image.width().raw();
+        counts.split_db_dy_width_sum+=db_dy_image.width().raw().get_d();
+        counts.split_dy_width_sum+=dy_image.width().raw().get_d();
+        counts.split_lie_width_sum+=lie_image.width().raw().get_d();
 
         pending.push_back(std::move(children.second));
         pending.push_back(std::move(children.first));

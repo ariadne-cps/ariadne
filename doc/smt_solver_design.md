@@ -1326,3 +1326,25 @@ and the unfused Lie term separately for both the compact expression-derived
 Procedure and the hand-written direct evaluator. This diagnostic is intended to
 identify the first stage at which the otherwise algebraically equivalent
 evaluations diverge, before making any further solver or arithmetic change.
+
+The intermediate Barr3 diagnostic now closes the residual enclosure question.
+On the full initial domain, the compact expression-derived Procedure and the
+hand-written direct evaluator produce the same FloatDPBounds images at every
+reported stage: `db/dx=[-60.4,60.9]`, `db/dy=[-57.7,59.5]`,
+`lie=[-864.9,863.9]`, and `lie+barrier=[-889.3,888.3]`. The barrier image
+also agrees at `[-24.4,24.5]`.
+
+This establishes that, after native tanh, DAG-preserving expression conversion,
+and use of `sqr(h)` in the activation derivative, the generic symbolic
+Expression -> Formula -> Procedure path is no longer losing numerical quality
+relative to the Barr3-specific direct forward evaluator. On the same Mac Studio
+run, eight Lie-plus-barrier evaluations take about 0.015 s through the compact
+generic Procedure and about 0.015 s through the direct evaluator; this
+same-machine comparison is meaningful, whereas absolute timings from earlier
+MacBook runs are not directly comparable.
+
+The evaluator/enclosure investigation is therefore complete. Further Barr3 work
+should return to actual SMT decision power: rerun the cheap
+geometric/no-witness/no-shaving/no-hull Lie query at increasing box budgets on a
+single machine, record pruning and split counts, and only then decide whether
+stronger contractors or search heuristics are still warranted.

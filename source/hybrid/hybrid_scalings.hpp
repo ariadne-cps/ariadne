@@ -86,7 +86,7 @@ class SimpleHybridScalings
     Void set_scaling(const RealVariable& var, ApproximateDouble scal) {
         ARIADNE_ASSERT(decide(scal>0)); _scalings[var.name()]=cast_exact(scal); }
     virtual SimpleHybridScalings* clone() const { return new SimpleHybridScalings(*this); }
-    virtual ExactDouble scaling(const DiscreteLocation& loc, const RealVariable& var) const {
+    virtual ExactDouble scaling(const DiscreteLocation&, const RealVariable& var) const {
         return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : this->_default_scaling; }
     virtual Void _write(OutputStream& os) const { os << "HybridScalings( " << this->_scalings << " )"; }
 };

@@ -157,7 +157,7 @@ class HybridEvolverBase
     const ConfigurationType& configuration() const;
 
     //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
-    virtual Void reconfigure(const HybridExactBoxes& domain, const HybridExactFloatVector& lengths) { }
+    virtual Void reconfigure(const HybridExactBoxes&, const HybridExactFloatVector&) { }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType function_factory() const;

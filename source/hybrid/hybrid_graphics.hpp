@@ -111,7 +111,7 @@ inline Void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.
 
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
-inline Void draw(HybridFigure& g) { }
+inline Void draw(HybridFigure&) { }
 
 template<class SET, class... CSETS>
 inline Void draw(HybridFigure& g, const Colour& fc1, const SET& set1, CSETS const&... csets) {

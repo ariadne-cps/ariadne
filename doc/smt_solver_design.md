@@ -1452,3 +1452,28 @@ rejected by the first barrier literal is 2*64-E, and the remaining pruned boxes
 were rejected only after evaluating the Lie literal. This identifies which
 constraint drives the observed pruning plateau before paying for a new
 coordinate-selection heuristic.
+
+
+The 64-box fused-literal diagnostic attributes the cheap-path pruning completely
+to the Lie-violation literal. The contractor-free run processes 64 boxes, prunes
+27 and splits 37, with 128 fused literal evaluations. Because the conjunction
+contains two literals ordered as barrier non-negativity followed by Lie
+violation, evaluating both literals on all 64 boxes means that barrier
+non-negativity rejects no processed box at this frontier. All 27 pruned boxes
+are therefore rejected only by the second literal. The current pruning plateau
+is specifically a Lie-expression decision problem rather than a barrier-domain
+classification problem.
+
+The next controlled experiment revisits sensitivity-guided splitting on the
+current evaluator, with witness probing, shaving, hull and monotone reduction
+disabled. The older sensitivity measurements were collected before the
+DAG-preserving expression conversion, native tanh support and the subsequent
+Barr3 expression fixes, so their absolute derivative-evaluation cost is no
+longer a reliable basis for rejecting sensitivity on the current revision. A
+64-box sensitivity run can now be compared directly with the current geometric
+baseline (27 pruned, 37 split, about 2.835 s) while reporting sensitivity-guided
+splits, overrides, derivative build time and derivative evaluation time. If the
+updated sensitivity path remains expensive and rarely overrides the geometric
+choice, it should be excluded from the Barr3 cheap-first schedule. If it changes
+the split sequence materially at acceptable cost, its pruning gain can then be
+measured at the same frontier before designing a new heuristic.

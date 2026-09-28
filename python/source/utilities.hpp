@@ -401,7 +401,7 @@ template<class F, class T> void define_conversion(pybind11::class_<T>& pyclass) 
     }
 }
 
-template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, pybind11::class_<A>& pyclass) {
+template<class A> pybind11::class_<A>& define_logical(pybind11::module&, pybind11::class_<A>& pyclass) {
     pyclass.def("__and__", &__and__<A,A>);
     pyclass.def("__or__", &__or__<A,A>);
     pyclass.def("__invert__", &__not__<A>);
@@ -423,7 +423,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_lattice(pybind11::m
     return pyclass;
 }
 
-template<class X> pybind11::class_<X>& define_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X> pybind11::class_<X>& define_comparisons(pybind11::module&, pybind11::class_<X>& pyclass) {
     pyclass.def("__eq__", &__eq__<X,X>, pybind11::is_operator());
     pyclass.def("__ne__", &__ne__<X,X>, pybind11::is_operator());
     pyclass.def("__le__", &__le__<X,X>, pybind11::is_operator());
@@ -433,7 +433,7 @@ template<class X> pybind11::class_<X>& define_comparisons(pybind11::module& modu
     return pyclass;
 }
 
-template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
     pyclass.def("__eq__", &__eq__<X,Y>, pybind11::is_operator());
     pyclass.def("__ne__", &__ne__<X,Y>, pybind11::is_operator());
     pyclass.def("__le__", &__le__<X,Y>, pybind11::is_operator());
@@ -449,7 +449,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind1
     return pyclass;
 }
 
-template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module&, pybind11::class_<X>& pyclass) {
     pyclass.def("__pos__", &__pos__<X>, pybind11::is_operator());
     pyclass.def("__neg__", &__neg__<X>, pybind11::is_operator());
     pyclass.def("__add__", &__add__<X,X>, pybind11::is_operator());
@@ -469,7 +469,7 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
     return pyclass;
 }
 
-template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
     pyclass.def("__add__", &__add__<X,Y>, pybind11::is_operator());
     pyclass.def("__radd__", &__radd__<X,Y>, pybind11::is_operator());
     pyclass.def("__sub__", &__sub__<X,Y>, pybind11::is_operator());
@@ -535,7 +535,7 @@ template<class X> pybind11::class_<X>& define_monotonic(pybind11::module& module
     return pyclass;
 }
 
-template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
     using NY = decltype(-declval<Y>());
     pyclass.def("__add__", &__add__<X,Y>, pybind11::is_operator());
     pyclass.def("__radd__", &__radd__<X,Y>, pybind11::is_operator());
@@ -591,7 +591,7 @@ pybind11::class_<V>& define_vector_operations(pybind11::module& module, pybind11
 }
 
 template<class V, class X=typename V::ScalarType>
-pybind11::class_<V>& define_vector_arithmetic(pybind11::module& module, pybind11::class_<V>& pyclass, Tag<X> = Tag<X>()) {
+pybind11::class_<V>& define_vector_arithmetic(pybind11::module&, pybind11::class_<V>& pyclass, Tag<X> = Tag<X>()) {
     pyclass.def("__pos__", &__pos__<V>, pybind11::is_operator());
     pyclass.def("__neg__", &__neg__<V>, pybind11::is_operator());
     pyclass.def("__add__", &__add__<V,V>, pybind11::is_operator());
@@ -654,7 +654,7 @@ pybind11::class_<V>& define_vector_concept(pybind11::module& module, pybind11::c
 
 
 template<class VA, class A=typename VA::ScalarType, class X=typename A::NumericType>
-pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module& module, pybind11::class_<VA>& pyclass) {
+pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module&, pybind11::class_<VA>& pyclass) {
     typedef Vector<X> VX;
 
     pyclass.def("__pos__", &__pos__<VA>, pybind11::is_operator());

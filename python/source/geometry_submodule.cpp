@@ -160,9 +160,9 @@ template<class T> class BoundedSetWrapper<EffectiveTag,T>
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     BoundedSetInterface<EffectiveTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 template<class T> class CompactSetWrapper<EffectiveTag,T>
@@ -173,11 +173,11 @@ template<class T> class CompactSetWrapper<EffectiveTag,T>
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     CompactSetInterface<EffectiveTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    LowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(); }
-    LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    LowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(r); }
+    LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 template<class T> class RegularSetWrapper<EffectiveTag,T>
@@ -256,9 +256,9 @@ template<class T> class BoundedSetWrapper<ValidatedTag,T>
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     BoundedSetInterface<ValidatedTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -270,11 +270,11 @@ template<class T> class CompactSetWrapper<ValidatedTag,T>
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     CompactSetInterface<ValidatedTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
-    ValidatedLowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(); }
-    ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    ValidatedLowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(r); }
+    ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 template<class T> class RegularSetWrapper<ValidatedTag,T>
@@ -460,7 +460,7 @@ Void export_points(pybind11::module& module) {
     point_template.instantiate<FloatDPApproximation>();
 }
 
-template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
+template<class IVL> Void export_interval_arithmetic(pybind11::module&, pybind11::class_<IVL>&) {
 }
 
 template<> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<UpperIntervalType>& interval_class) {
@@ -487,7 +487,7 @@ template<template<class>class T,class F> Void export_conversions(pybind11::class
 template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Bounds<F>>>& cls) {
     cls.def(pybind11::init<T<F>>());
 }
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<F>>& cls) {
+template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<F>>&) {
 }
 
 

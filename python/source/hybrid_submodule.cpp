@@ -222,7 +222,7 @@ Void export_hybrid_bounded_constraint_set(pybind11::module& module) {
     hybrid_bounded_constraint_set_class.def("__repr__", &__cstr__<HybridBoundedConstraintSet>);
 }
 
-template<class HBS> Void export_hybrid_basic_set(pybind11::module& module,pybind11::class_<HBS>& hybrid_basic_set_class) {
+template<class HBS> Void export_hybrid_basic_set(pybind11::module&,pybind11::class_<HBS>& hybrid_basic_set_class) {
     //typedef typename HBS::ContinuousSetType EBS;
     hybrid_basic_set_class.def("location", &HBS::location);
     hybrid_basic_set_class.def("variables", &HBS::variables);
@@ -243,7 +243,7 @@ template<class HBS> Void export_hybrid_basic_set(pybind11::module& module,pybind
     hybrid_basic_set_class.def("__repr__", __cstr__<HBS>);
 }
 
-template<class HDS> Void export_hybrid_denotable_set(pybind11::module& module,pybind11::class_<HDS>& hybrid_denotable_set_class) {
+template<class HDS> Void export_hybrid_denotable_set(pybind11::module&,pybind11::class_<HDS>& hybrid_denotable_set_class) {
     typedef typename HDS::ContinuousSetType EDS;
 
     hybrid_denotable_set_class.def("insert", pybind11::overload_cast<DiscreteLocation const&, LabelledSet<EDS> const&>(&HDS::insert));

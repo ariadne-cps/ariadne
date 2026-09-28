@@ -163,7 +163,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 
 
 template<class X>
-Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
+Void define_vector_constructors(pybind11::module&, pybind11::class_<Vector<X>>& vector_class)
 {
     vector_class.def(pybind11::init<Vector<X>>());
     if constexpr (DefaultConstructible<X>) {
@@ -200,7 +200,7 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
 }
 
 template<class Y, class X>
-Void define_vector_conversion(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
+Void define_vector_conversion(pybind11::module&, pybind11::class_<Vector<X>>& vector_class)
 {
     vector_class.def(pybind11::init<Vector<Y>>());
     pybind11::implicitly_convertible<Vector<Y>,Vector<X>>();
@@ -369,11 +369,11 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
 }
 
 template<class X>
-Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<X>>& covector_class) {
+Void define_covector_conversions(pybind11::module&, pybind11::class_<Covector<X>>&) {
 }
 
 template<class F>
-Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<Approximation<F>>>& covector_class) {
+Void define_covector_conversions(pybind11::module&, pybind11::class_<Covector<Approximation<F>>>& covector_class) {
     covector_class.def(pybind11::init<Covector<Bounds<F>>>());
     pybind11::implicitly_convertible<Covector<Bounds<F>>,Covector<Approximation<F>>>();
 }
@@ -438,13 +438,13 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
 
 
 template<class Y, class X>
-Void define_matrix_conversion(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
+Void define_matrix_conversion(pybind11::module&, pybind11::class_<Matrix<X>>& matrix_class)
 {
     matrix_class.def(pybind11::init<Matrix<Y>>());
 }
 
 template<class X, class Y>
-Void define_matrix_arithmetic(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
+Void define_matrix_arithmetic(pybind11::module&, pybind11::class_<Matrix<X>>& matrix_class)
 {
     matrix_class.def("__pos__", &__pos__<Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
     matrix_class.def("__neg__", &__neg__<Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
@@ -462,7 +462,7 @@ Void define_matrix_arithmetic(pybind11::module& module, pybind11::class_<Matrix<
 }
 
 template<class X>
-Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
+Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<X>>&)
 {
     module.def("norm", &_norm_<Matrix<X>>);
     module.def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);

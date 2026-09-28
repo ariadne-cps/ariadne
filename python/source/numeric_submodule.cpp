@@ -189,14 +189,14 @@ template<class A> auto _is_inf_(A const& a) -> Bool { return is_inf(a); }
 template<class A> auto _is_finite_(A const& a) -> Bool { return is_finite(a); }
 template<class A> auto _is_zero_(A const& a) -> Bool { return is_zero(a); }
 
-template<class X> Void define_validated_operations(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X> Void define_validated_operations(pybind11::module& module, pybind11::class_<X>&) {
     module.def("coarsening", &_coarsening_<X,X>);
     module.def("refinement", &_refinement_<X,X>);
     module.def("refines", &_refines_<X,X>);
     module.def("inconsistent", &_inconsistent_<X,X>);
 }
 
-template<class X> Void define_infinitary_checks(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X> Void define_infinitary_checks(pybind11::module& module, pybind11::class_<X>&) {
     module.def("is_nan", &_is_nan_<X>);
     module.def("is_inf", &_is_inf_<X>);
     module.def("is_finite", &_is_finite_<X>);
@@ -1303,7 +1303,7 @@ template<class PR> Void export_user_floats(pymodule& module) {
 }
 
 
-template<class PR> Void export_float_to_number_conversions(pymodule& module) {
+template<class PR> Void export_float_to_number_conversions(pymodule&) {
     if constexpr(ALLOW_CONCRETE_TO_GENERIC_NUMBER_CONVERSIONS) {
         implicitly_convertible<Float<PR>,ExactNumber>();
         implicitly_convertible<Float<PR>,ValidatedNumber>();

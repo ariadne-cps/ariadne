@@ -333,7 +333,7 @@ template<class S> inline LabelledFigure& operator<<(LabelledFigure& g, const Lab
 
 Projection2d projection(const RealSpace& space, const Variables2d& variables);
 
-inline Void draw(Figure& g) { }
+inline Void draw(Figure&) { }
 
 template<class SET, class... CSETS> inline Void
 draw(Figure& g, const Colour& fc, const SET& set, CSETS const& ... csets) {

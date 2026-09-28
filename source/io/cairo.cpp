@@ -47,7 +47,7 @@ static const Int BOTTOM_MARGIN = 40;
 static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
-SharedPointer<CanvasInterface> CairoGraphicsBackend::make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const {
+SharedPointer<CanvasInterface> CairoGraphicsBackend::make_canvas(const char*, Nat drawing_width, Nat drawing_height, Bool) const {
     return std::make_shared<CairoCanvas>(ImageSize2d(drawing_width,drawing_height));
 }
 
@@ -106,7 +106,7 @@ Void CairoCanvas::set_fill_colour(double r, double g, double b) { fc.red=r; fc.g
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
 // into CairoCanvas class.
-Void CairoCanvas::initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz) {
+Void CairoCanvas::initialise(StringType, StringType, StringType, double, double, double, double, double, double) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, double xu, double yl, double yu)
@@ -236,7 +236,7 @@ Void CairoCanvas::finalise()
 
 Void CairoCanvas::set_colour_palette() {  }
 Void CairoCanvas::fill_3d() {  }
-Void CairoCanvas::set_heat_map(Bool b) {  }
+Void CairoCanvas::set_heat_map(Bool) {  }
 
 #endif
 

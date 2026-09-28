@@ -106,7 +106,7 @@ void GnuplotCanvas::initialise(StringType x, StringType y, double xl, double xu,
 }
 
 void GnuplotCanvas::finalise() { }
-void GnuplotCanvas::circle(double x, double y, double r) { }
+void GnuplotCanvas::circle(double, double, double) { }
 void GnuplotCanvas::stroke() {
     char hex_string[20];
 
@@ -288,7 +288,7 @@ Void GnuplotCanvas::fill_3d(){
     this->dim = 0; 
 }
 
-void GnuplotCanvas::write(const char* filename) const
+void GnuplotCanvas::write(const char*) const
 {
     *gnuplot << "quit\n";
 }

@@ -81,7 +81,7 @@ struct Polytope2d
     virtual Polytope2d* clone() const { return new Polytope2d(*this); }
     virtual DimensionType dimension() const { return 2u; }
 
-    virtual Void draw(CanvasInterface& canvas, const Projection2d& p) const {
+    virtual Void draw(CanvasInterface& canvas, const Projection2d&) const {
         if(boundary.size()==1) { canvas.dot(boundary[0].x,boundary[0].y); return; }
         canvas.move_to(boundary[0].x,boundary[0].y);
         for(SizeType i=1; i!=boundary.size(); ++i) {

@@ -38,27 +38,27 @@ namespace Ariadne {
 class NullCanvas : public CanvasInterface
 {
 public:
-    virtual Void initialise(StringType x, StringType y, StringType z, double lx, double ux, double ly, double uy, double lz, double uz) { };
-    virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) { }
+    virtual Void initialise(StringType, StringType, StringType, double, double, double, double, double, double) { };
+    virtual Void initialise(StringType, StringType, double, double, double, double) { }
     virtual Void finalise() { }
 
-    virtual Void write(const char* filename) const { }
+    virtual Void write(const char*) const { }
 
-    virtual Void move_to(double x, double y) { }
-    virtual Void line_to(double x, double y) { }
-    virtual Void circle(double x, double y, double r) { }
-    virtual Void dot(double x, double y) { }
+    virtual Void move_to(double, double) { }
+    virtual Void line_to(double, double) { }
+    virtual Void circle(double, double, double) { }
+    virtual Void dot(double, double) { }
     virtual Void stroke() { }
     virtual Void fill() { }
 
-    virtual Void fill_boundary(List<Point2d> const& boundary) { }
+    virtual Void fill_boundary(List<Point2d> const&) { }
 
-    virtual Void set_line_width(double lw) { }
-    virtual Void set_line_colour(double r, double g, double b) { }
-    virtual Void set_fill_opacity(double fo) { }
-    virtual Void set_fill_colour(double r, double g, double b) { }
+    virtual Void set_line_width(double) { }
+    virtual Void set_line_colour(double, double, double) { }
+    virtual Void set_fill_opacity(double) { }
+    virtual Void set_fill_colour(double, double, double) { }
 
-    virtual Void set_heat_map(Bool b) { }
+    virtual Void set_heat_map(Bool) { }
     virtual Void set_colour_palette() { }
     virtual Void fill_3d() { }
 
@@ -68,13 +68,13 @@ public:
 
 class NullGraphicsBackend : public GraphicsBackendInterface {
   public:
-    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const override { return std::make_shared<NullCanvas>(); }
+    SharedPointer<CanvasInterface> make_canvas(const char*, Nat, Nat, Bool) const override { return std::make_shared<NullCanvas>(); }
 };
 
 class NullDrawer : public DrawerInterface
 {
   public:
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { }
+    Void draw(CanvasInterface&, const Projection2d&, const ValidatedConstrainedImageSet&) const { }
     OutputStream& _write(OutputStream& os) const { return os << "NullDrawer()"; }
 };
 

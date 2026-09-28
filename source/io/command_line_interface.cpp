@@ -231,7 +231,7 @@ class HelpArgumentParser : public UnvaluedArgumentParserBase {
     HelpArgumentParser() : UnvaluedArgumentParserBase(
             "h","help","Show this list of supported arguments") { }
 
-    VoidFunction create_processor(ArgumentStream& stream) const override {
+    VoidFunction create_processor(ArgumentStream&) const override {
         return []{};
     }
 };

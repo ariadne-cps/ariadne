@@ -77,6 +77,7 @@ template<class A> class NormedAlgebraOperations {
     static A apply(Sin, const A& a);
     static A apply(Cos, const A& a);
     static A apply(Tan, const A& a);
+    static A apply(Tanh, const A& a);
     static A apply(Asin, const A& a);
     static A apply(Acos, const A& a);
     static A apply(Atan, const A& a);
@@ -167,6 +168,7 @@ template<class A, class X> struct DeclareTranscendentalAlgebraOperations : Decla
     friend A sin(A const& a);
     friend A cos(A const& a);
     friend A tan(A const& a);
+    friend A tanh(A const& a);
     friend A asin(A const& a);
     friend A acos(A const& a);
     friend A atan(A const& a);
@@ -286,6 +288,7 @@ template<class A, class X> struct DispatchTranscendentalAlgebraOperations : Disp
     friend A sin(A const& a) { return OperationsType::apply(Sin(),a); }
     friend A cos(A const& a) { return OperationsType::apply(Cos(),a); }
     friend A tan(A const& a) { return OperationsType::apply(Tan(),a); }
+    friend A tanh(A const& a) { return OperationsType::apply(Tanh(),a); }
     friend A asin(A const& a) { return OperationsType::apply(Asin(),a); }
     friend A acos(A const& a) { return OperationsType::apply(Acos(),a); }
     friend A atan(A const& a) { return OperationsType::apply(Atan(),a); }

@@ -325,6 +325,7 @@ template<class X> Void backpropagate(X const& r, Log, X& a) {
 template<class X> Void backpropagate(X const& r, Sin, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Cos, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Tan, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
+template<class X> Void backpropagate(X const& r, Tanh, X& a) { if(definitely(r.is_empty())) { restrict(a,r); } }
 template<class X> Void backpropagate(X const& r, Asin, X& a) {
     if(definitely(r.is_empty())) { restrict(a,r); return; }
     restrict(a,sin(r));

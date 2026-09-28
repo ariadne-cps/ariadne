@@ -96,6 +96,13 @@ template<class X> inline X next_series_coefficient(Asin, DegreeType, X const&, X
 template<class X> inline X next_series_coefficient(Acos, DegreeType, X const&, X const*) {
     ARIADNE_NOT_IMPLEMENTED; }
 
+template<class X> inline X next_series_coefficient(Tanh, DegreeType d, X const& c, X const* y) {
+    if(d==0) { return tanh(c); }
+    X convolution=y[0]*y[d-1];
+    for(DegreeType i=1; i!=d; ++i) { convolution+=y[i]*y[d-1-i]; }
+    return d==1 ? 1-convolution : -convolution/d;
+}
+
 template<class X> inline X next_series_coefficient(Atan, DegreeType d, X const& c, X const* y) {
     switch(d) { case 0: return atan(c); case 1: return rec(1+sqr(c)); case 2: return -c*sqr(y[1]);
         default: return -y[1]*((d-2)*y[d-2]+2*(d-1)*c*y[d-1])/d; } }

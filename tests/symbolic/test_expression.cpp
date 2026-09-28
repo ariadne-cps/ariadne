@@ -99,6 +99,7 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(to_string(sub(div(x,y),z)),"x/y-z");
         ARIADNE_TEST_EQUALS(to_string(max(x,sub(y,z))),"max(x,y-z)");
         ARIADNE_TEST_EQUALS(to_string(sub(x,max(y,z))),"x-max(y,z)");
+        ARIADNE_TEST_EQUALS(to_string(tanh(x)),"tanh(x)");
     }
 
     Void test_assignment() {
@@ -169,6 +170,10 @@ class TestExpression {
         ARIADNE_TEST_PRINT(derivative(expr,x));
         ARIADNE_TEST_PRINT(simplify(derivative(expr,x)));
         ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
+        RealExpression tanh_expr=tanh(x);
+        ARIADNE_TEST_ASSERT(identical(
+            derivative(tanh_expr,x),
+            1-sqr(tanh(x))));
         RealExpression expr2 = pow(x,3);
         ARIADNE_TEST_PRINT(derivative(expr2,x));
         ARIADNE_TEST_PRINT(simplify(derivative(expr2,x)));

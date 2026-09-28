@@ -193,6 +193,8 @@ Expression<Real> cos(Expression<Real> const& e) {
     return make_expression<Real>(Cos(),e); }
 Expression<Real> tan(Expression<Real> const& e) {
     return make_expression<Real>(Tan(),e); }
+Expression<Real> tanh(Expression<Real> const& e) {
+    return make_expression<Real>(Tanh(),e); }
 Expression<Real> asin(Expression<Real> const& e) {
     return make_expression<Real>(Asin(),e); }
 Expression<Real> acos(Expression<Real> const& e) {

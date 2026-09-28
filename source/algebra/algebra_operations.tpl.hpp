@@ -437,6 +437,12 @@ template<class A> A NormedAlgebraOperations<A>::apply(Tan, const A& x)
     return sin(x)*rec(cos(x));
 }
 
+template<class A> A NormedAlgebraOperations<A>::apply(Tanh, const A& x)
+{
+    A e=exp(2*x);
+    return (e-1)/(e+1);
+}
+
 template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;

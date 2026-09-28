@@ -1539,3 +1539,23 @@ without evaluating the barrier. Under the same search tree the expected fused
 literal-evaluation count is 64 Lie evaluations plus 37 barrier evaluations, i.e.
 101 instead of 128. This test measures the available benefit from cheap literal
 scheduling before implementing any generic adaptive ordering in the solver.
+
+The 64-box literal-order experiment confirms the expected short-circuiting but
+shows that its absolute value is modest. Evaluating the Lie-violation literal
+before barrier non-negativity preserves the search outcome exactly at 27 pruned
+and 37 split boxes, while fused literal evaluations fall from 128 to 101.
+Elapsed time falls from about 2.835 s to 2.738 s and direct-classification time
+from about 2.233 s to 2.130 s. Thus literal ordering is a valid cheap-path
+optimization, but the barrier evaluation is inexpensive enough that the current
+64-box gain is only a few percent.
+
+Before promoting adaptive literal ordering into the solver core, the next
+measurement repeats the established 2,048-box geometric frontier with Lie first.
+Besides timing, the fused literal-evaluation count can attribute pruning at
+depth: with B processed boxes and E evaluations, Lie-first short-circuits
+`2*B-E` boxes before the barrier is evaluated. Comparing that number with total
+pruned boxes shows whether barrier non-negativity starts contributing on the
+deeper unresolved frontier. If it remains negligible, a simple stable
+cost/effectiveness ordering may be worthwhile; if it becomes important, any
+generic reordering policy needs adaptive evidence rather than a fixed Barr3
+ordering.

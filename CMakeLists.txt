@@ -22,8 +22,8 @@ else()
 endif()
 
 set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
-                  init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
-set(ANY_TARGET_DONT_WARN strict-aliasing unused-parameter)
+                  init-self missing-include-dirs sign-promo switch-default undef redundant-decls unused-parameter)
+set(ANY_TARGET_DONT_WARN strict-aliasing)
 set(LIBRARY_EXCLUSIVE_WARN shadow)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")

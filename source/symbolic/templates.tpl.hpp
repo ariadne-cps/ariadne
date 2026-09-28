@@ -560,6 +560,7 @@ template<class E, class VARS> inline Bool _is_polynomial_in_impl(Asin, E const& 
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Cos, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Sin, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Tan, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Tanh, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Abs, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Log, E const& e, VARS const& vars) { return is_constant_in(e,vars); }
 template<class E, class VARS> inline Bool _is_polynomial_in_impl(Sqrt, E const& e, VARS const& vars) { return is_constant_in(e,vars); }

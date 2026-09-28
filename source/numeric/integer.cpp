@@ -149,7 +149,7 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
     return z1;
 }
 
-Integer nul(Integer const& z) {
+Integer nul(Integer const&) {
     Integer r;
     mpz_set_si(r._mpz,0);
     return r;
@@ -234,15 +234,15 @@ Natural min(Natural const& z1,Natural const& z2) {
 }
 
 
-Bool is_nan(Integer const& z) {
+Bool is_nan(Integer const&) {
     return false;
 }
 
-Bool is_inf(Integer const& z) {
+Bool is_inf(Integer const&) {
     return false;
 }
 
-Bool is_finite(Integer const& z) {
+Bool is_finite(Integer const&) {
     return true;
 }
 

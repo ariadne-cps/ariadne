@@ -312,7 +312,7 @@ double sin_rnd(double x) {
 
 inline double max(double x1, double x2) { return std::max(x1,x2); }
 
-double nul_rnd(double x) { return 0.0; }
+double nul_rnd(double) { return 0.0; }
 double pos_rnd(double x) { return +x; }
 double neg_rnd(double x) { return -x; }
 double hlf_rnd(double x) { return x/2; }

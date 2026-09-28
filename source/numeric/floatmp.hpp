@@ -68,7 +68,7 @@ class MultiplePrecision {
     //! \brief
     explicit MultiplePrecision(Bits pr) : prec(static_cast<mpfr_prec_t>(pr)) { }
     //! \brief
-    explicit MultiplePrecision(DoublePrecision const& pr) : prec(53u) { }
+    explicit MultiplePrecision(DoublePrecision const&) : prec(53u) { }
     //! \brief The number of binary digits of precision requested.
     unsigned_mpfr_prec_t bits() const { return static_cast<unsigned_mpfr_prec_t>(prec); }
     operator mpfr_prec_t () const { return prec; }

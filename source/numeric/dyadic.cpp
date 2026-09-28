@@ -82,7 +82,7 @@ template<> class FiniteOperations<Dyadic> {
     static Void pos(Dyadic& r, Dyadic const& x) { mpf_set(r._mpf,x._mpf); }
     static Void neg(Dyadic& r, Dyadic const& x) { mpf_neg(r._mpf,x._mpf); }
     static Void hlf(Dyadic& r, Dyadic const& x) { mpf_div_2exp(r._mpf,x._mpf,1u); }
-    static Void rec(Dyadic& r, Dyadic const& x) { assert(false); }
+    static Void rec(Dyadic&, Dyadic const&) { assert(false); }
     static Void pow(Dyadic& r, Dyadic const& x, Nat m) { return mpf_pow_ui(r._mpf, x._mpf, m); }
 
     static Void max(Dyadic& r, Dyadic const& x1, Dyadic const& x2) {
@@ -109,7 +109,7 @@ Dyadic::Dyadic() {
 
 Dyadic::Dyadic(mpf_t mpf) {
     mpf_init2(_mpf,maximum_precision);
-    mpf_set(_mpf,_mpf);
+    mpf_set(_mpf,mpf);
 }
 
 Dyadic::Dyadic(Integer const& p, Natural q) {
@@ -326,7 +326,7 @@ Integer ceil(Dyadic const& x) {
 }
 
 
-Dyadic nul(Dyadic const& x) {
+Dyadic nul(Dyadic const&) {
     Dyadic r; mpf_set_si(r._mpf,0); return r;
 }
 

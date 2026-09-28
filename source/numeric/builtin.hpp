@@ -71,7 +71,7 @@ class ApproximateDouble {
     friend ApproximateDouble operator""_a (long double lx) { double x=lx; return ApproximateDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ApproximateDouble x) { return os << x._d; }
 
-    friend ApproximateDouble nul(ApproximateDouble x) { return ApproximateDouble(0.0); }
+    friend ApproximateDouble nul(ApproximateDouble) { return ApproximateDouble(0.0); }
     friend ApproximateDouble pos(ApproximateDouble x) { return ApproximateDouble(+x._d); }
     friend ApproximateDouble neg(ApproximateDouble x) { return ApproximateDouble(-x._d); }
     friend ApproximateDouble add(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d+x2._d); }
@@ -124,7 +124,7 @@ class ExactDouble {
     template<BuiltinFloatingPoint X> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
-    friend ExactDouble nul(ExactDouble x) { return ExactDouble(0.0); }
+    friend ExactDouble nul(ExactDouble) { return ExactDouble(0.0); }
     friend ExactDouble abs(ExactDouble x) { return ExactDouble(std::abs(x._d)); }
     static ExactDouble inf() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     static ExactDouble nan() { return ExactDouble(std::numeric_limits<double>::quiet_NaN()); }

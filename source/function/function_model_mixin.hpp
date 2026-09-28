@@ -133,13 +133,13 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _concrete_partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const override {
         return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
 
-    ScalarFunctionModelInterface<P,ARG,PR,PRE>* _compose(const ScalarUnivariateFunction<P>& f) const override {
+    ScalarFunctionModelInterface<P,ARG,PR,PRE>* _compose(const ScalarUnivariateFunction<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModelInterface<P,ARG,PR,PRE>* _compose(const VectorUnivariateFunction<P>& f) const override {
+    VectorFunctionModelInterface<P,ARG,PR,PRE>* _compose(const VectorUnivariateFunction<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    ScalarFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const ScalarUnivariateFunction<P>& f) const override {
+    ScalarFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const ScalarUnivariateFunction<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const VectorUnivariateFunction<P>& f) const override {
+    VectorFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const VectorUnivariateFunction<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
 
 
@@ -205,7 +205,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
         return static_cast<const FM&>(*this).error(); }
     NormType const _concrete_norm() const override {
          return norm(static_cast<const FM&>(*this)); }
-    virtual VectorFunctionModelInterface<P,ARG,PR,PRE>* _derivative(SizeType j) const override {
+    virtual VectorFunctionModelInterface<P,ARG,PR,PRE>* _derivative(SizeType) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual VectorFunctionModelInterface<P,ARG,PR,PRE>* _antiderivative(SizeType j) const override {
         return new FM(antiderivative(static_cast<const FM&>(*this),j)); }
@@ -305,24 +305,24 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
 
     virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const override {
         return this->upcast().create(number); }
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType& domain, const ScalarUnivariateFunctionInterface<P>& function) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType&, const ScalarUnivariateFunctionInterface<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create(domain,function)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType& domain, const VectorUnivariateFunctionInterface<P>& function) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType&, const VectorUnivariateFunctionInterface<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create(domain,function)); };
     virtual ScalarFunctionModelInterface<P,VARG,PR,PRE>* _create(const VectorDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const override {
         return heap_move(this->upcast().create(domain,function)); };
     virtual VectorFunctionModelInterface<P,VARG,PR,PRE>* _create(const VectorDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const override {
          return heap_move(this->upcast().create(domain,function)); };
 
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_zero(const ScalarDomainType& domain) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_zero(const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_zero(domain)); };
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_constant(const ScalarDomainType& domain, const Number<P>& value) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_constant(const ScalarDomainType&, const Number<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_constant(domain,value)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create_zeros(SizeType rsize, const ScalarDomainType& domain) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create_zeros(SizeType, const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_zeros(rsize,domain)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create_constants(const ScalarDomainType& domain, const Vector<Number<P>>& values) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create_constants(const ScalarDomainType&, const Vector<Number<P>>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_constants(domain,values)); };
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_identity(const ScalarDomainType& domain) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_identity(const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_identity(domain)); };
 
 

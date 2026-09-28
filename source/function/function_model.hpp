@@ -102,7 +102,7 @@ template<class P, class PR, class PRE> class FunctionModelFactory
     // FIXME: Should return a univariate model
     ScalarFunctionModel<P,VARG,PR,PRE> create_identity(ScalarDomainType const& dom) const {
         return ScalarFunctionModel<P,VARG,PR,PRE>(this->_ptr->_create_coordinate(VectorDomainType(1u,dom),0u)); }
-    VectorFunctionModel<P,SARG,PR,PRE> create_zeros(SizeType n, ScalarDomainType const& dom) const {
+    VectorFunctionModel<P,SARG,PR,PRE> create_zeros(SizeType, ScalarDomainType const&) const {
         ARIADNE_NOT_IMPLEMENTED; }
 
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactory<P,PR,PRE> const& factory) { return factory._ptr->_write(os); }
@@ -162,10 +162,10 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,RealScalar> {
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const { return this->_factory.create(c); }
-    ScalarFunctionModel<P,ARG,PR,PRE> create(ScalarFunction<P,ARG> const& f) { ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModel<P,ARG,PR,PRE> create(VectorFunction<P,ARG> const& f) { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunctionModel<P,ARG,PR,PRE> create(ScalarFunction<P,ARG> const&) { ARIADNE_NOT_IMPLEMENTED; }
+    VectorFunctionModel<P,ARG,PR,PRE> create(VectorFunction<P,ARG> const&) { ARIADNE_NOT_IMPLEMENTED; }
     ScalarFunctionModel<P,ARG,PR,PRE> create_zero() { ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModel<P,ARG,PR,PRE> create_zeros(SizeType n) { ARIADNE_NOT_IMPLEMENTED; }
+    VectorFunctionModel<P,ARG,PR,PRE> create_zeros(SizeType) { ARIADNE_NOT_IMPLEMENTED; }
     ScalarFunctionModel<P,ARG,PR,PRE> create_identity() { ARIADNE_NOT_IMPLEMENTED; }
 
     CanonicalNumericType<P,PR,PRE> const& create(CanonicalNumericType<P,PR,PRE> const& c) const { return c; }

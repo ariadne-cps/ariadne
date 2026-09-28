@@ -45,18 +45,18 @@ template<class SIG> class FunctionArchetype<ApproximateTag,SIG>
     ArgumentSizeType argument_size() const { assert(false); }
     ResultSizeType result_size() const { assert(false); }
 
-    Result<FloatDPApproximation> operator() (const Argument<FloatDPApproximation>& x) const { assert(false); }
-    Result<FloatMPApproximation> operator() (const Argument<FloatMPApproximation>& x) const { assert(false); }
-    Result<Differential<FloatDPApproximation>> operator() (const Argument< Differential<FloatDPApproximation> >& x) const { assert(false); }
-    Result<Differential<FloatMPApproximation>> operator() (const Argument< Differential<FloatMPApproximation> >& x) const { assert(false); }
-    Result<TaylorModel<ApproximateTag,FloatDP>> operator() (const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const { assert(false); }
-    Result<TaylorModel<ApproximateTag,FloatMP>> operator() (const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const { assert(false); }
-    Result<Formula<ApproximateNumber>> operator() (const Argument< Formula<ApproximateNumber> >& x) const { assert(false); }
-    Result<ElementaryAlgebra<ApproximateNumber>> operator() (const Argument< ElementaryAlgebra<ApproximateNumber> >& x) const { assert(false); }
+    Result<FloatDPApproximation> operator() (const Argument<FloatDPApproximation>&) const { assert(false); }
+    Result<FloatMPApproximation> operator() (const Argument<FloatMPApproximation>&) const { assert(false); }
+    Result<Differential<FloatDPApproximation>> operator() (const Argument< Differential<FloatDPApproximation> >&) const { assert(false); }
+    Result<Differential<FloatMPApproximation>> operator() (const Argument< Differential<FloatMPApproximation> >&) const { assert(false); }
+    Result<TaylorModel<ApproximateTag,FloatDP>> operator() (const Argument< TaylorModel<ApproximateTag,FloatDP> >&) const { assert(false); }
+    Result<TaylorModel<ApproximateTag,FloatMP>> operator() (const Argument< TaylorModel<ApproximateTag,FloatMP> >&) const { assert(false); }
+    Result<Formula<ApproximateNumber>> operator() (const Argument< Formula<ApproximateNumber> >&) const { assert(false); }
+    Result<ElementaryAlgebra<ApproximateNumber>> operator() (const Argument< ElementaryAlgebra<ApproximateNumber> >&) const { assert(false); }
 
     friend FunctionArchetype<P,SIG> derivative(FunctionArchetype<P,SIG>, SizeType) { assert(false); }
 
-    friend OutputStream& operator<<(OutputStream& os, FunctionArchetype<P,SIG> const& f) { assert(false); }
+    friend OutputStream& operator<<(OutputStream&, FunctionArchetype<P,SIG> const&) { assert(false); }
 
     template<class X> Result<X> _call(Argument<X> const& x) const { return (*this)(x); }
 };
@@ -72,22 +72,22 @@ template<class SIG> class FunctionArchetype<ValidatedTag,SIG>
     using FunctionArchetype<ApproximateTag,SIG>::operator();
     using FunctionArchetype<ApproximateTag,SIG>::_call;
 
-    Scalar<FloatDPBounds> operator() (const Vector<FloatDPBounds>& x) const { assert(false); }
-    Scalar<FloatMPBounds> operator() (const Vector<FloatMPBounds>& x) const { assert(false); }
-    Scalar<Differential<FloatDPBounds>> operator() (const Vector< Differential<FloatDPBounds> >& x) const { assert(false); }
-    Scalar<Differential<FloatMPBounds>> operator() (const Vector< Differential<FloatMPBounds> >& x) const { assert(false); }
-    Scalar<TaylorModel<ValidatedTag,FloatDP>> operator() (const Vector< TaylorModel<ValidatedTag,FloatDP> >& x) const { assert(false); }
-    Scalar<TaylorModel<ValidatedTag,FloatMP>> operator() (const Vector< TaylorModel<ValidatedTag,FloatMP> >& x) const { assert(false); }
-    Scalar<TaylorModel<ValidatedTag,FloatDPUpperInterval>> operator() (const Vector<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const { assert(false); }
-    Scalar<TaylorModel<ValidatedTag,FloatMPUpperInterval>> operator() (const Vector<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const { assert(false); }
+    Scalar<FloatDPBounds> operator() (const Vector<FloatDPBounds>&) const { assert(false); }
+    Scalar<FloatMPBounds> operator() (const Vector<FloatMPBounds>&) const { assert(false); }
+    Scalar<Differential<FloatDPBounds>> operator() (const Vector< Differential<FloatDPBounds> >&) const { assert(false); }
+    Scalar<Differential<FloatMPBounds>> operator() (const Vector< Differential<FloatMPBounds> >&) const { assert(false); }
+    Scalar<TaylorModel<ValidatedTag,FloatDP>> operator() (const Vector< TaylorModel<ValidatedTag,FloatDP> >&) const { assert(false); }
+    Scalar<TaylorModel<ValidatedTag,FloatMP>> operator() (const Vector< TaylorModel<ValidatedTag,FloatMP> >&) const { assert(false); }
+    Scalar<TaylorModel<ValidatedTag,FloatDPUpperInterval>> operator() (const Vector<TaylorModel<ValidatedTag,FloatDPUpperInterval>>&) const { assert(false); }
+    Scalar<TaylorModel<ValidatedTag,FloatMPUpperInterval>> operator() (const Vector<TaylorModel<ValidatedTag,FloatMPUpperInterval>>&) const { assert(false); }
 
-    Scalar<Formula<ValidatedNumber>> operator() (const Vector< Formula<ValidatedNumber> >& x) const { assert(false); }
-    Scalar<ElementaryAlgebra<ValidatedNumber>> operator() (const Vector< ElementaryAlgebra<ValidatedNumber> >& x) const { assert(false); }
+    Scalar<Formula<ValidatedNumber>> operator() (const Vector< Formula<ValidatedNumber> >&) const { assert(false); }
+    Scalar<ElementaryAlgebra<ValidatedNumber>> operator() (const Vector< ElementaryAlgebra<ValidatedNumber> >&) const { assert(false); }
 
-    Scalar<Function<ValidatedTag,SIG>> operator() (const Vector< Function<ValidatedTag,SIG> >& x) const { assert(false); }
+    Scalar<Function<ValidatedTag,SIG>> operator() (const Vector< Function<ValidatedTag,SIG> >&) const { assert(false); }
 
-    inline Scalar<FloatDPBounds> operator() (const Vector<FloatDP>& x) const { assert(false); }
-    inline Scalar<FloatMPBounds> operator() (const Vector<FloatMP>& x) const { assert(false); }
+    inline Scalar<FloatDPBounds> operator() (const Vector<FloatDP>&) const { assert(false); }
+    inline Scalar<FloatMPBounds> operator() (const Vector<FloatMP>&) const { assert(false); }
 
     friend FunctionArchetype<P,SIG> derivative(FunctionArchetype<P,SIG>, SizeType) { assert(false); }
 };
@@ -100,11 +100,11 @@ template<class SIG> class FunctionArchetype<EffectiveTag,SIG>
     using FunctionArchetype<ValidatedTag,SIG>::operator();
     using FunctionArchetype<ValidatedTag,SIG>::_call;
 
-    Scalar<Real> operator() (const Vector<Real>& x) const { assert(false); }
-    Scalar<ElementaryAlgebra<Real>> operator() (const Vector<ElementaryAlgebra<Real>>& x) const { assert(false); }
-    Scalar<Formula<Real>> operator() (const Vector<Formula<Real>>& x) const { assert(false); }
-    Scalar<ElementaryAlgebra<EffectiveNumber>> operator() (const Vector<ElementaryAlgebra<EffectiveNumber>>& x) const { assert(false); }
-    Scalar<Formula<EffectiveNumber>> operator() (const Vector<Formula<EffectiveNumber>>& x) const { assert(false); }
+    Scalar<Real> operator() (const Vector<Real>&) const { assert(false); }
+    Scalar<ElementaryAlgebra<Real>> operator() (const Vector<ElementaryAlgebra<Real>>&) const { assert(false); }
+    Scalar<Formula<Real>> operator() (const Vector<Formula<Real>>&) const { assert(false); }
+    Scalar<ElementaryAlgebra<EffectiveNumber>> operator() (const Vector<ElementaryAlgebra<EffectiveNumber>>&) const { assert(false); }
+    Scalar<Formula<EffectiveNumber>> operator() (const Vector<Formula<EffectiveNumber>>&) const { assert(false); }
 
     friend FunctionArchetype<P,SIG> derivative(FunctionArchetype<P,SIG>, SizeType) { assert(false); }
 };

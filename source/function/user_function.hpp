@@ -92,7 +92,7 @@ template<class F> class ScalarUserFunction
         virtual SizeType parameter_size() const { return F::parameter_size(); }
 
 
-        virtual EffectiveScalarMultivariateFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction derivative(SizeType) const { ARIADNE_NOT_IMPLEMENTED; }
 
         virtual Covector<FloatDPApproximation> gradient(const Vector<FloatDPApproximation>& x) const {
             return this->evaluate(Differential<FloatDPApproximation>::variables(1u,x)).gradient(); }
@@ -170,8 +170,8 @@ template<class F> class VectorUserFunction
         virtual Matrix<FloatDPBounds> jacobian(const Vector<FloatDPBounds>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<FloatDPBounds>::variables(1u,x))); }
 
-        virtual EffectiveScalarMultivariateFunction::Interface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
-        virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction::Interface* _get(SizeType) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction operator[](SizeType) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
         // _write() method or operator<<.

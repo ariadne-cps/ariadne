@@ -182,11 +182,11 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
         if(!dynamic_cast<const typename FP::ScalarMultivariateFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionPatch "<<*this<<" to "<<sf<<"\n"); }
         static_cast<FP&>(*this).FP::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
-    virtual VectorFunctionPatchInterface<P,ARGS...>* _derivative(SizeType j) const override {
+    virtual VectorFunctionPatchInterface<P,ARGS...>* _derivative(SizeType) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType j) const override {
+    virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType j, Number<P> c) const override {
+    virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType, Number<P>) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     RangeType const _range() const override {
         return RangeType(static_cast<const FP&>(*this).range()); }
@@ -234,9 +234,9 @@ template<class FCTRY, class P> class FunctionPatchFactoryMixin
     template<class T> static inline T* heap_move(T&& t) { return new T(std::forward<T>(t)); }
     inline FCTRY const& upcast() const { return static_cast<FCTRY const&>(*this); }
 
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType& domain, const ScalarUnivariateFunctionInterface<P>& function) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType&, const ScalarUnivariateFunctionInterface<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create(domain,function)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType& domain, const VectorUnivariateFunctionInterface<P>& function) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create(const ScalarDomainType&, const VectorUnivariateFunctionInterface<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create(domain,function)); };
 
     virtual ScalarMultivariateFunctionPatchInterface<P>* _create(const VectorDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const override {
@@ -244,15 +244,15 @@ template<class FCTRY, class P> class FunctionPatchFactoryMixin
     virtual VectorMultivariateFunctionPatchInterface<P>* _create(const VectorDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const override {
         return heap_move(this->upcast().create(domain,function)); };
 
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_zero(const ScalarDomainType& domain) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_zero(const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_zero(domain)); };
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_constant(const ScalarDomainType& domain, const Number<P>& value) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_constant(const ScalarDomainType&, const Number<P>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_constant(domain,value)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create_zeros(SizeType rsize, const ScalarDomainType& domain) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create_zeros(SizeType, const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_zeros(rsize,domain)); };
-    virtual VectorUnivariateFunctionPatchInterface<P>* _create_constants(const ScalarDomainType& domain, const Vector<Number<P>>& values) const override {
+    virtual VectorUnivariateFunctionPatchInterface<P>* _create_constants(const ScalarDomainType&, const Vector<Number<P>>&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_constants(domain,values)); };
-    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_identity(const ScalarDomainType& domain) const override {
+    virtual ScalarUnivariateFunctionPatchInterface<P>* _create_identity(const ScalarDomainType&) const override {
         ARIADNE_NOT_IMPLEMENTED; } // return heap_move(this->upcast().create_identity(domain)); };
 
     virtual ScalarMultivariateFunctionPatchInterface<P>* _create_zero(const VectorDomainType& domain) const override {

@@ -70,7 +70,7 @@ class ScalarUnivariateFormulaFunction
     SizeOne argument_size() const { return SizeOne(); }
     SizeOne result_size() const { return SizeOne(); }
     template<class X> X operator() (const X& x) const { return Ariadne::evaluate(_formula,Vector<X>({x})); }
-    friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, IndexZero j) {
+    friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, IndexZero) {
         return ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(f._formula,0)); }
     friend OutputStream& operator<<(OutputStream& os, ScalarUnivariateFormulaFunction<Y> const& f) {
         return Formula<Y>::_write_univariate(os,f); }
@@ -257,7 +257,7 @@ class ConstantFunction
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
         return _make_constant(this->_value,x); }
-    friend ConstantFunction<Y,ARGS...> derivative(ConstantFunction<Y,ARGS...> const& f, ElementIndexType<D> j) {
+    friend ConstantFunction<Y,ARGS...> derivative(ConstantFunction<Y,ARGS...> const& f, ElementIndexType<D>) {
         return ConstantFunction<Y,ARGS...>(f._domain,Y(0)); }
     friend OutputStream& operator<<(OutputStream& os, ConstantFunction<Y,ARGS...> const& f) {
         return os << f._value; }
@@ -544,7 +544,7 @@ class FunctionElement
     friend OutputStream& operator<<(OutputStream& os, FunctionElement<P,ARGS...> const& f) {
         return os<<f._vf<<"["<<f._i<<"]"; }
 
-    friend FunctionElement<P,ARGS...> derivative(FunctionElement<P,ARGS...> const& f, ArgumentIndexType j) {
+    friend FunctionElement<P,ARGS...> derivative(FunctionElement<P,ARGS...> const&, ArgumentIndexType) {
         ARIADNE_NOT_IMPLEMENTED; }
   private:
     VectorFunction<P,ARGS...> _vf;
@@ -578,7 +578,7 @@ class EmbeddedFunction
         Vector<X> px=project(x,Range(_dom1.dimension(),_dom1.dimension()+_f2.argument_size()));
         return _f2.evaluate(px); }
     template<class I> inline decltype(auto) operator[](I i) const { return EmbeddedFunction<P,D1,D2,D3,RealDomain>(_dom1,_f2[i],_dom3); }
-    friend EmbeddedFunction<P,D1,D2,D3,C> derivative(EmbeddedFunction<P,D1,D2,D3,C> const& f, ArgumentSizeType j) {
+    friend EmbeddedFunction<P,D1,D2,D3,C> derivative(EmbeddedFunction<P,D1,D2,D3,C> const&, ArgumentSizeType) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, EmbeddedFunction<P,D1,D2,D3,C> const& f) {
         return os << "EmbeddedFunction( dom1="<<f._dom1<<", f2="<<f._f2<<", dom3="<<f._dom3<<" )"; }
@@ -671,7 +671,7 @@ class JoinedFunction
     ArgumentSizeType argument_size() const { return _f1.argument_size(); }
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return join(_f1.evaluate(x),_f2.evaluate(x)); }
-    friend JoinedFunction<P,D,C1,C2> derivative(JoinedFunction<P,D,C1,C2> const& f, ArgumentIndexType j) {
+    friend JoinedFunction<P,D,C1,C2> derivative(JoinedFunction<P,D,C1,C2> const&, ArgumentIndexType) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, JoinedFunction<P,D,C1,C2> const& f) {
         return os << "JoinedFunction( f1="<<f._f1<<", f2="<<f._f2<<" )"; }
@@ -706,7 +706,7 @@ class CombinedFunction
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return join(_f1.evaluate(project(x,range(0,_f1.argument_size()))),
                     _f2.evaluate(project(x,range(_f1.argument_size(),this->argument_size())))); }
-    CombinedFunction<P,D1,D2,C1,C2> derivative(CombinedFunction<P,D1,D2,C1,C2> const& f, ArgumentIndexType j) {
+    CombinedFunction<P,D1,D2,C1,C2> derivative(CombinedFunction<P,D1,D2,C1,C2> const&, ArgumentIndexType) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, CombinedFunction<P,D1,D2,C1,C2> const& f) {
         return os << "CombinedFunction( f1="<<f._f1<<", f2="<<f._f2<<" )"; }
@@ -731,7 +731,7 @@ class ProjectedFunction
 
     template<class X> inline Vector<X> operator() (const ElementType<D,X>& x) const {
         return _prj(_f(x)); }
-    friend ProjectedFunction<P,D> derivative(ProjectedFunction<P,D> const& f, ArgumentIndexType j) {
+    friend ProjectedFunction<P,D> derivative(ProjectedFunction<P,D> const&, ArgumentIndexType) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, ProjectedFunction<P,D>const& f) {
         return os << "ProjectedFunction( f="<<f._f<<", prj="<<f._prj<<" )"; }
@@ -767,7 +767,7 @@ class LieDerivativeFunction
         }
         return r;
     }
-    friend LieDerivativeFunction<P> derivative(LieDerivativeFunction<P> const& f, SizeType j) {
+    friend LieDerivativeFunction<P> derivative(LieDerivativeFunction<P> const&, SizeType) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, LieDerivativeFunction<P> const& f) {
         return os << "LieDerivativeFunction( g="<<f._g<<", f="<<f._f<<" )"; }

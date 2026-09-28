@@ -67,7 +67,7 @@ template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatchElementReference;
 
-inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation& e) { return FloatDPApproximation(0.0,dp); }
+inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation&) { return FloatDPApproximation(0.0,dp); }
 inline FloatDPBounds convert_error_to_bounds(const PositiveFloatDPUpperBound& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 inline FloatDPBounds convert_error_to_bounds(const FloatDPError& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 
@@ -445,7 +445,7 @@ template<class M> class ScaledFunctionPatch
         return min(f1,f1.create_constant(c2)); }
     friend ScaledFunctionPatch<M> max(const ValidatedNumber& c1, const ScaledFunctionPatch<M>& f2) {
         return max(f2.create_constant(c1),f2); }
-    friend ScaledFunctionPatch<M> min(const ValidatedNumber& c1, const ScaledFunctionPatch<M>& f2) {
+    friend ScaledFunctionPatch<M> min(const ValidatedNumber&, const ScaledFunctionPatch<M>&) {
         ARIADNE_NOT_IMPLEMENTED; }
 
 };

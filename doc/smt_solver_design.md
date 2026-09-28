@@ -1904,3 +1904,28 @@ interval, so the combined range can never be weaker than either source alone.
 If even this targeted local form fails to remove zero at reasonable cost, the
 remaining dependency is unlikely to be recoverable by the generic first-order
 machinery already present in Ariadne.
+
+
+The targeted local mean-value experiment recovers some sign information but is
+not competitive enough for integration. At the 256-box frontier, 126 unresolved
+boxes have direct `db/dy` ranges containing zero. The local mean-value
+enclosure alone is sign-definite in 28 of them, and intersecting it with the
+ordinary direct interval remains sign-definite in the same 28 boxes. The direct
+range has average width about 5.86; the mean-value range is much worse at about
+106.53, while the intersection improves the average to about 4.80. The run
+takes about 33.9 s, with 126 midpoint and 252 derivative evaluations. Thus the
+intersection extracts a modest amount of extra information, but only by paying
+for a very weak first-order enclosure.
+
+The final cheap local dependency test is
+`lie-gradient-quadrant-profile`. For each unresolved box whose direct
+`db/dy` range contains zero, it bisects x and then y, evaluates the same
+validated derivative on the resulting four quadrants, and takes the hull of
+those four images. This preserves exact coverage of the parent box and uses
+only ordinary interval evaluation. The diagnostic reports whether the
+four-quadrant hull becomes sign-definite, whether all four individual
+quadrants are sign-definite, whether validated positive and negative quadrants
+coexist, and the average width reduction relative to direct evaluation. This
+tests whether one small layer of internal domain subdivision can recover
+dependency information more cost-effectively than derivative-based
+mean-value bounds.

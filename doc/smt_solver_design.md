@@ -1757,3 +1757,15 @@ as evidence for the rewrite. The next search measurement is the 64-box
 contractor-free geometric Lie query, which will show whether the tighter root
 and descendant enclosures translate into additional exact pruning rather than
 only a narrower initial interval.
+
+Deferred direction: dependency-aware algebraic expression optimization.
+The Barr3 dynamics rewrite suggests a broader mechanism that should be revisited
+only after the current local search/enclosure investigation is exhausted.
+Rather than merely minimizing syntactic variable occurrences, such a pass would
+generate or recognize algebraically equivalent forms that reduce interval
+dependency inflation, for example by preferring native `sqr`, factoring common
+terms, Horner-like polynomial forms and other correlation-preserving rewrites.
+Candidate forms could eventually be scored on the current box by enclosure
+width and evaluation cost. This is deliberately deferred: the current work
+continues with direct measurements of the factored Barr3 dynamics before any
+general expression optimizer is designed or integrated.

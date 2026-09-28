@@ -72,6 +72,10 @@ template<class UB> inline decltype(auto) characteristics(Interval<UB> const& x) 
     else { return Tuple<>(); }
 }
 
+template<class F> inline Interval<UpperBound<F>> tanh(Interval<UpperBound<F>> const& ivl) {
+    return Interval<UpperBound<F>>(tanh(ivl.lower_bound()),tanh(ivl.upper_bound()));
+}
+
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower_bound()) { return ivl.lower_bound(); }
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper_bound()) { return ivl.upper_bound(); }
 template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre()) { return ivl.centre(); }

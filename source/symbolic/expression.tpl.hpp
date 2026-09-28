@@ -337,10 +337,14 @@ template<class A, class I, class VARS> inline Bool _component_is_constant_in_imp
     return true; }
 template<class A, class I, class VARS> inline Bool _component_is_constant_in_impl(Variable<Vector<A>> const& vv, I i, VARS const& vars) {
     auto vs=Variables<A>(vv.name(),vv.size()); return is_constant_in(vs[i],vars); }
-template<class OP, class A, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,A> const& s, I i, VARS const& vars) {
+template<class OP, class T, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,Expression<Vector<T>>> const& s, I i, VARS const& vars) {
     return component_is_constant_in(s._arg,i,vars); }
-template<class OP, class A1, class A2, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,A1,A2> const& s, I i, VARS const& vars) {
+template<class OP, class T, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,Expression<Vector<T>>,Expression<Vector<T>>> const& s, I i, VARS const& vars) {
     return component_is_constant_in(s._arg1,i,vars) && component_is_constant_in(s._arg2,i,vars); }
+template<class OP, class T, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,Expression<T>,Expression<Vector<T>>> const& s, I i, VARS const& vars) {
+    return is_constant_in(s._arg1,vars) && component_is_constant_in(s._arg2,i,vars); }
+template<class OP, class T, class I, class VARS> inline Bool _component_is_constant_in_impl(Symbolic<OP,Expression<Vector<T>>,Expression<T>> const& s, I i, VARS const& vars) {
+    return component_is_constant_in(s._arg1,i,vars) && is_constant_in(s._arg2,vars); }
 }
 
 template<class T> Bool component_is_constant_in(Expression<Vector<T>> const& e, SizeType i, const Set<Variable<T>>& spc) {

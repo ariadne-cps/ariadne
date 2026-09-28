@@ -35,7 +35,6 @@
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -40,7 +40,6 @@
 #include "io/progress_indicator.hpp"
 #include "io/graphics_manager.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

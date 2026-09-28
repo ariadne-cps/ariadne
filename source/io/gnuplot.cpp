@@ -39,7 +39,6 @@
 #include "io/gnuplot.hpp"
 #include "logging/logging.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

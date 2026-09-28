@@ -55,7 +55,6 @@
 
 #include "algebra/expansion.inl.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

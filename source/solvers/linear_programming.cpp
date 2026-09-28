@@ -36,7 +36,6 @@
 #include "utility/macros.hpp"
 #include "logging/logging.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

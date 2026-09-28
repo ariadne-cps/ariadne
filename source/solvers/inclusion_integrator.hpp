@@ -41,7 +41,6 @@
 #include "logging/logging.hpp"
 #include "solvers/integrator_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

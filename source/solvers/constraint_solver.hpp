@@ -40,7 +40,6 @@
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

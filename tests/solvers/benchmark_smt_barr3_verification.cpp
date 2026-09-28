@@ -43,12 +43,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -60,7 +60,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -71,7 +71,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -83,7 +83,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -625,6 +625,122 @@ Void profile_lie_correlation_frontier(
               << std::endl;
 }
 
+struct GradientSignSampleCounts {
+    SizeType processed = 0u;
+    SizeType pruned = 0u;
+    SizeType split = 0u;
+    SizeType db_dy_cross_zero = 0u;
+    SizeType sampled_mixed_sign = 0u;
+    SizeType sampled_positive_only = 0u;
+    SizeType sampled_negative_only = 0u;
+    SizeType sampled_ambiguous = 0u;
+    SizeType point_evaluations = 0u;
+};
+
+Int point_sign(
+    ValidatedScalarMultivariateFunction const& function,
+    UpperBoxType const& point)
+{
+    UpperIntervalType image=apply(function,point);
+    if(definitely(image.lower_bound()>0)) { return 1; }
+    if(definitely(image.upper_bound()<0)) { return -1; }
+    return 0;
+}
+
+Void profile_lie_gradient_sign_frontier(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    ValidatedScalarMultivariateFunction const& db_dy_function,
+    ValidatedScalarMultivariateFunction const& lie_function)
+{
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+    GradientSignSampleCounts counts;
+
+    Stopwatch<Milliseconds> stopwatch;
+    while(not pending.empty() && counts.processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++counts.processed;
+
+        UpperIntervalType lie_image=apply(lie_function,box);
+        if(definitely(lie_image.lower_bound()>=0)) {
+            ++counts.pruned;
+            continue;
+        }
+
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++counts.split;
+
+        UpperIntervalType db_dy_image=apply(db_dy_function,box);
+        if(crosses_zero(db_dy_image)) {
+            ++counts.db_dy_cross_zero;
+            Bool positive=false;
+            Bool negative=false;
+            Bool ambiguous=false;
+
+            UpperBoxType midpoint_box(box);
+            for(SizeType i=0u;i!=box.dimension();++i) {
+                auto midpoint=box[i].midpoint();
+                midpoint_box[i]=UpperIntervalType(midpoint.raw(),midpoint.raw());
+            }
+            Int sign=point_sign(db_dy_function,midpoint_box);
+            ++counts.point_evaluations;
+            positive=positive || sign>0;
+            negative=negative || sign<0;
+            ambiguous=ambiguous || sign==0;
+
+            SizeType const corner_count=SizeType(1u)<<box.dimension();
+            for(SizeType corner=0u;corner!=corner_count;++corner) {
+                UpperBoxType point(box);
+                for(SizeType i=0u;i!=box.dimension();++i) {
+                    auto const endpoint=((corner>>i)&SizeType(1u))==0u
+                        ? box[i].lower_bound().raw()
+                        : box[i].upper_bound().raw();
+                    point[i]=UpperIntervalType(endpoint,endpoint);
+                }
+                sign=point_sign(db_dy_function,point);
+                ++counts.point_evaluations;
+                positive=positive || sign>0;
+                negative=negative || sign<0;
+                ambiguous=ambiguous || sign==0;
+            }
+
+            if(positive && negative) {
+                ++counts.sampled_mixed_sign;
+            } else if(ambiguous) {
+                ++counts.sampled_ambiguous;
+            } else if(positive) {
+                ++counts.sampled_positive_only;
+            } else if(negative) {
+                ++counts.sampled_negative_only;
+            } else {
+                ++counts.sampled_ambiguous;
+            }
+        }
+
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
+    }
+    stopwatch.click();
+
+    std::cout << "[lie-gradient-sign-profile]"
+              << " time=" << stopwatch.elapsed_seconds()
+              << " processed=" << counts.processed
+              << " pruned=" << counts.pruned
+              << " split=" << counts.split
+              << " db/dy-cross-zero=" << counts.db_dy_cross_zero
+              << " sampled-mixed-sign=" << counts.sampled_mixed_sign
+              << " sampled-positive-only=" << counts.sampled_positive_only
+              << " sampled-negative-only=" << counts.sampled_negative_only
+              << " sampled-ambiguous=" << counts.sampled_ambiguous
+              << " point-evals=" << counts.point_evaluations
+              << std::endl;
+}
+
 TestBarr3Full64::NetworkAndLie reassociated_network_and_lie(
     RealExpression const& x0,
     RealExpression const& x1)
@@ -969,6 +1085,16 @@ Int main(Int argc,const char* argv[]) {
         profile_interval_expression(
             "lie+barrier-reassociated",
             reassociated.lie+reassociated.barrier,space,upper_domain);
+        return 0;
+    }
+
+    if(query=="lie-gradient-sign-profile") {
+        ValidatedScalarMultivariateFunction db_dy_function=
+            make_function(space,network.db_dy);
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_lie_gradient_sign_frontier(
+            box_limit,UpperBoxType(domain),db_dy_function,lie_function);
         return 0;
     }
 

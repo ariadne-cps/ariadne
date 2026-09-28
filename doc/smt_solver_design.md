@@ -1839,3 +1839,23 @@ reverse/backprop construction of the same network derivative. The purpose is
 not to change differentiation semantics, but to test whether reassociating the
 same products and sums yields a tighter natural interval extension before any
 new split policy or contractor is designed.
+
+
+The gradient-reassociation diagnostic is negative. Reassociating the same neural
+gradient in a reverse/backprop-like form widens the initial `db/dy` enclosure
+from approximately [-57.674,59.448] to [-64.116,66.063] and increases its
+evaluation time from about 0.011 s to 0.326 s. The final Lie-plus-barrier
+enclosure likewise widens from approximately [-562.252,561.305] to
+[-616.745,615.567], with evaluation time rising from about 0.028 s to 0.657 s.
+The current forward derivative construction is therefore retained.
+
+The remaining question is whether the frequent zero crossing of the validated
+`db/dy` range represents real sign variation or mainly dependency inflation.
+Query `lie-gradient-sign-profile` replays the same geometric DFS and, only on
+unresolved boxes whose `db/dy` interval contains zero, evaluates `db/dy` at
+the midpoint and all four corners. Observing both positive and negative
+validated point values proves a real sign change somewhere in the connected
+box by continuity. Same-sign samples do not prove sign-definiteness, but a high
+same-sign fraction would indicate substantial room for a stronger enclosure.
+The first run should use the 256-box frontier to keep this five-point sampling
+diagnostic inexpensive.

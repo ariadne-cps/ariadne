@@ -1348,3 +1348,26 @@ should return to actual SMT decision power: rerun the cheap
 geometric/no-witness/no-shaving/no-hull Lie query at increasing box budgets on a
 single machine, record pruning and split counts, and only then decide whether
 stronger contractors or search heuristics are still warranted.
+
+The cheap Barr3 Lie-query budget curve was rerun on a single Mac Studio after
+the evaluator fixes, using geometric splitting with witness probing, shaving and
+hull reduction disabled. At 64 processed boxes the solver prunes 27 and splits
+37; at 256 boxes it prunes 123 and splits 133; at 512 boxes it prunes 251 and
+splits 261. No whole-box epsilon certification occurs at any of these budgets,
+and the fused direct-classification path handles every processed box.
+
+Compared structurally with the earlier pre-native-tanh curve, pruning improves
+from 22/64 to 27/64, from 119/256 to 123/256, and from 248/512 to 251/512.
+Thus the stronger activation/derivative enclosure improves early direct
+classification, but the gain diminishes under subdivision and the pruning
+fraction still approaches roughly one half. The remaining difficulty is
+therefore no longer an evaluator-quality defect; it is search/constraint
+decision power on the unresolved half of the Lie domain.
+
+Absolute runtimes from older MacBook measurements must not be compared with
+these Mac Studio timings. Within the Mac Studio curve, elapsed time scales
+approximately linearly with processed boxes: about 2.77 s at 64 boxes, 9.24 s at
+256 boxes and 18.91 s at 512 boxes, with almost all post-compilation time spent
+in fused direct validated rejection. This makes larger-budget geometric runs
+cheap enough to characterize the unresolved frontier before reintroducing any
+contractor.

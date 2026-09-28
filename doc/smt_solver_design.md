@@ -1803,3 +1803,21 @@ Lie-plus-barrier. The replay also reports processed/pruned/split counts so its
 frontier can be checked against the solver baseline. This diagnostic is meant
 to determine whether sign partitioning of the dominant product has realistic
 leverage before any new contractor or split policy is implemented.
+
+
+The 256-box correlation diagnostic reproduces the geometric search frontier:
+256 processed, 123 pruned and 133 split. Among the 133 boxes that still require
+splitting, the validated range of `db/dy` contains zero in 126 cases (94.7%),
+while the factored y dynamics contains zero in only 15 cases (11.3%). Both
+contain zero in those same 15 cases, and only 7 split boxes make both factors
+sign-definite. The average widths on split boxes are about 5.59 for `db/dy`,
+1.32 for y-dot, and 41.26 for Lie-plus-barrier.
+
+This makes y-dot sign partitioning a poor next target: ordinary geometric
+splitting already makes the dynamics sign-definite on most unresolved boxes.
+The residual ambiguity is concentrated in the neural derivative `db/dy`.
+Before changing its enclosure representation, repeat the same diagnostic at the
+established 2048-box frontier. If the fraction of unresolved boxes whose
+`db/dy` enclosure contains zero remains close to the 256-box value, ordinary
+geometric depth is not resolving that derivative efficiently and the next work
+should target the derivative representation rather than the dynamics.

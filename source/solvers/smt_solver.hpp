@@ -666,7 +666,6 @@ class SmtSolver {
     UpperBoxType _epsilon_candidate_witness(
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
-    template<class Conjunction>
     struct SplitBoxResult {
         Pair<UpperBoxType,UpperBoxType> children;
         Bool sensitivity_guided = false;

@@ -106,7 +106,7 @@ template<class Y> class OperatorUnivariateFormulaWriter {
   public:
     template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
         OperatorSymbolicWriter<OperatorUnivariateFormulaWriter<Y>>(*this)._write(os,s); }
-    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const& s) const {
+    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const&) const {
         os << 'x'; }
     Void _write(OutputStream& os, Formula<Y> const& f) const {
         f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }
@@ -116,7 +116,7 @@ template<class Y> class OperationUnivariateFormulaWriter {
   public:
     template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
         OperationSymbolicWriter<OperationUnivariateFormulaWriter<Y>>(*this)._write(os,s); }
-    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const& s) const {
+    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const&) const {
         os << 'x'; }
     Void _write(OutputStream& os, Formula<Y> const& f) const {
         f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }

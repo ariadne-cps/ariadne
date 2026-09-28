@@ -106,7 +106,7 @@ template<class W> class OperatorSymbolicWriter {
 
     template<class E> void _write_impl(OutputStream& os, Pos, E const& e) {
         os << '+' << make_writable(_w,e); }
-    template<class E> void _write_impl(OutputStream& os, Neg op, E const& e) {
+    template<class E> void _write_impl(OutputStream& os, Neg, E const& e) {
         os << '-'; switch(e.op()) { case Cnst::code(): case Var::code(): os << make_writable(_w,e); break; default: os << '(' << make_writable(_w,e) << ')'; } }
     template<class OP, class E> void _write_impl(OutputStream& os, OP op, E const& e) {
         os << op << '(' << make_writable(_w,e) << ')'; }
@@ -209,9 +209,9 @@ template<class F1, class F2, class J> inline decltype(auto) _derivative_impl(Mul
     return derivative(f1,j)*f2+f1*derivative(f2,j); }
 template<class F1, class F2, class J> inline decltype(auto) _derivative_impl(Div, F1 const& f1, F2 const& f2, J j) {
     return (derivative(f1,j)-derivative(f2,j)*(f1/f2))/f2; }
-template<class F1, class F2, class J> inline auto _derivative_impl(Max, F1 const& f1, F2 const& f2, J j) -> decltype(max(f1,f2)){
+template<class F1, class F2, class J> inline auto _derivative_impl(Max, F1 const& f1, F2 const& f2, J) -> decltype(max(f1,f2)){
     ARIADNE_THROW(std::runtime_error,"derivative(max(f1,f2))","Cannot take derivative of non-smooth function."); }
-template<class F1, class F2, class J> inline auto _derivative_impl(Min, F1 const& f1, F2 const& f2, J j) -> decltype(min(f1,f2)) {
+template<class F1, class F2, class J> inline auto _derivative_impl(Min, F1 const& f1, F2 const& f2, J) -> decltype(min(f1,f2)) {
     ARIADNE_THROW(std::runtime_error,"derivative(min(f1,f2))","Cannot take derivative of non-smooth function."); }
 
 template<class VF, class I, class J> inline auto _derivative_impl(Get const&, VF const& vf, I const& i, J j) -> decltype(vf[i]) {

@@ -538,6 +538,7 @@ template<class T> inline Bool _before(Vector<Expression<T>> const& ve1, Vector<E
     return _vector_before(ve1,ve2); }
 
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) {
+    if (e1.node_raw_ptr() == e2.node_raw_ptr()) { return false; }
     if (e1.node_ref().index() == e2.node_ref().index()) {
         return e1.node_ref().accept([&e2](auto e1n){return _before(e1n,std::get<decltype(e1n)>(e2.node_ref()));});
     } else {
@@ -557,56 +558,61 @@ template<class T> Expression<Vector<T>> eliminate_common_vector_subexpressions(c
 
 template<class T> class CommonSubroutineEliminator {
     ExpressionSet<T> _cache;
+    Map<const Void*,Expression<T>> _memo;
   public:
-    CommonSubroutineEliminator() : _cache() { }
+    CommonSubroutineEliminator() : _cache(), _memo() { }
     Expression<T> eliminate_common_subexpressions(const Expression<T>& e);
-    Expression<T> operator()(const ConstantExpressionNode<T>&, const Expression<T>& e) { _cache.insert(e); return e; }
-    Expression<T> operator()(const VariableExpressionNode<T>&, const Expression<T>& e) { _cache.insert(e); return e; }
+  private:
+    Expression<T> _intern(const Expression<T>& original, const Expression<T>& candidate) {
+        auto iter=_cache.find(candidate);
+        Expression<T> result =
+            iter!=_cache.end() ? *iter : *(_cache.insert(candidate).first);
+        _memo.insert(original.node_raw_ptr(),result);
+        return result;
+    }
+  public:
+    Expression<T> operator()(const ConstantExpressionNode<T>&, const Expression<T>& e) {
+        return _intern(e,e);
+    }
+    Expression<T> operator()(const VariableExpressionNode<T>&, const Expression<T>& e) {
+        return _intern(e,e);
+    }
     Expression<T> operator()(const BinaryExpressionNode<T>& s, const Expression<T>& e) {
-        auto new_arg1 = eliminate_common_subexpressions(s.arg1());
-        auto new_arg2 = eliminate_common_subexpressions(s.arg2());
-        if(new_arg1.node_raw_ptr() == s.arg1().node_raw_ptr() && new_arg2.node_raw_ptr() == s.arg2().node_raw_ptr()) {
-            _cache.insert(e); return e;
-        } else {
-            Expression<T> new_e=make_expression<T>(s.op(),new_arg1,new_arg2);
-            _cache.insert(new_e); return new_e;
-        }
+        auto new_arg1=eliminate_common_subexpressions(s.arg1());
+        auto new_arg2=eliminate_common_subexpressions(s.arg2());
+        Expression<T> candidate=
+            new_arg1.node_raw_ptr()==s.arg1().node_raw_ptr()
+            && new_arg2.node_raw_ptr()==s.arg2().node_raw_ptr()
+            ? e : make_expression<T>(s.op(),new_arg1,new_arg2);
+        return _intern(e,candidate);
     }
     Expression<T> operator()(const UnaryExpressionNode<T>& s, const Expression<T>& e) {
-        auto new_arg = eliminate_common_subexpressions(s.arg());
-        if(new_arg.node_raw_ptr() == s.arg().node_raw_ptr()) {
-            _cache.insert(e); return e;
-        } else {
-            Expression<T> new_e=make_expression<T>(s.op(),new_arg);
-            _cache.insert(new_e); return new_e;
-        }
+        auto new_arg=eliminate_common_subexpressions(s.arg());
+        Expression<T> candidate=
+            new_arg.node_raw_ptr()==s.arg().node_raw_ptr()
+            ? e : make_expression<T>(s.op(),new_arg);
+        return _intern(e,candidate);
     }
     Expression<T> operator()(const GradedExpressionNode<T>& s, const Expression<T>& e) {
-        auto new_arg = eliminate_common_subexpressions(s.arg());
-        if(new_arg.node_raw_ptr() == s.arg().node_raw_ptr()) {
-            _cache.insert(e); return e;
-        } else {
-            Expression<T> new_e=make_expression<T>(s.op(),new_arg,s.num());
-            _cache.insert(new_e); return new_e;
-        }
+        auto new_arg=eliminate_common_subexpressions(s.arg());
+        Expression<T> candidate=
+            new_arg.node_raw_ptr()==s.arg().node_raw_ptr()
+            ? e : make_expression<T>(s.op(),new_arg,s.num());
+        return _intern(e,candidate);
     }
     Expression<T> operator()(const Symbolic<OperatorVariant<Get>,Expression<RealVector>,SizeType>& s, const Expression<T>& e) {
-        auto new_vec = eliminate_common_vector_subexpressions(s.vec());
-        if(new_vec.node_raw_ptr() == s.vec().node_raw_ptr()) {
-            _cache.insert(e); return e;
-        } else {
-            Expression<T> new_e=make_expression<T>(s.op(),new_vec,s.ind());
-            _cache.insert(new_e); return new_e;
-        }
+        auto new_vec=eliminate_common_vector_subexpressions(s.vec());
+        Expression<T> candidate=
+            new_vec.node_raw_ptr()==s.vec().node_raw_ptr()
+            ? e : make_expression<T>(s.op(),new_vec,s.ind());
+        return _intern(e,candidate);
     }
 };
 template<class T> Expression<T> CommonSubroutineEliminator<T>::eliminate_common_subexpressions(const Expression<T>& e) {
-    auto iter=this->_cache.find(e);
-    if (iter!=_cache.end()) {
-        return *iter; }
-    else {
-        return e.node_ref().accept([&](auto en){return this->operator()(en,e);});
+    if(_memo.has_key(e.node_raw_ptr())) {
+        return _memo.get(e.node_raw_ptr());
     }
+    return e.node_ref().accept([&](auto en){return this->operator()(en,e);});
 }
 
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e)

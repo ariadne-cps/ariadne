@@ -2170,3 +2170,31 @@ and approximately 4.797 average combined width while reducing repeated
 derivative-evaluation cost substantially; the 40 s CSE construction cost is
 then a separate optimization/caching problem rather than a range-quality
 failure.
+
+
+The validated CSE frontier run confirms that the compressed symbolic evaluator
+preserves the established first-order enclosure quality while making repeated
+evaluation cheap. On the same 256-box frontier it resolves 28 of the 126
+natural `db/dy` zero crossings, with average centered width about 106.53,
+average monotonicity width about 5.82, and average combined width about 4.797,
+exactly matching the earlier symbolic-derivative profiles. The 51,715-
+instruction CSE procedure evaluates all three outputs on the 126 ambiguous
+boxes in about 0.378 s; midpoint evaluations take about 0.126 s and the 20
+monotonicity endpoint evaluations about 0.020 s. By comparison, evaluating the
+two separately compiled symbolic derivatives previously took about 18.0 s.
+The frontier replay itself takes about 9.07 s, so the second-tier range work is
+now a small addition to the natural Lie evaluation cost.
+
+The remaining obstacle is preprocessing: symbolic derivative construction
+takes about 1.97 s and vector-wide CSE about 45.18 s in this prototype. The
+current `CommonSubroutineEliminator` performs structural ordered-set lookup
+before child canonicalization, so comparisons repeatedly recurse through large
+subtrees. It is now changed to bottom-up interning: original node pointers are
+memoized, children are canonicalized first, and only the resulting canonical
+candidate is looked up in the structural set. The expression ordering also has
+a pointer-identity fast path. These changes preserve the existing structural
+CSE semantics while avoiding repeated work on already visited DAG nodes and
+making structural comparisons terminate immediately on canonical shared
+children. The next measurement must retain the 51,715-instruction result while
+reducing the CSE preprocessing time; otherwise a hash-consed key representation
+will be required.

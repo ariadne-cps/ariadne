@@ -296,7 +296,16 @@ class TestExpression {
 
         // Cross-output CSE must survive Expression -> Formula conversion.
         Vector<RealExpression> expressions({x+y,x+y});
+        ARIADNE_TEST_ASSERT(
+            expressions[0].node_raw_ptr()!=expressions[1].node_raw_ptr());
         eliminate_common_subexpressions(expressions);
+        ARIADNE_TEST_ASSERT(
+            expressions[0].node_raw_ptr()==expressions[1].node_raw_ptr());
+        auto first_root=expressions[0].node_raw_ptr();
+        eliminate_common_subexpressions(expressions);
+        ARIADNE_TEST_ASSERT(expressions[0].node_raw_ptr()==first_root);
+        ARIADNE_TEST_ASSERT(
+            expressions[0].node_raw_ptr()==expressions[1].node_raw_ptr());
         Vector<Formula<EffectiveNumber>> formulae=
             make_formula(expressions,RealSpace({x,y,z}));
         Vector<EffectiveProcedure> procedure(argument_size=3u,formulae);

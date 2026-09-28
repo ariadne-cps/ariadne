@@ -110,6 +110,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not no_candidate_configuration.candidate_search_enabled());
         ARIADNE_TEST_ASSERT(not configuration.monotone_reduction_enabled());
         ARIADNE_TEST_ASSERT(configuration.sensitivity_split_enabled());
+        ARIADNE_TEST_ASSERT(not configuration.interval_lookahead_split_enabled());
         ARIADNE_TEST_ASSERT(configuration.deterministic_witness_probing_enabled());
         ARIADNE_TEST_ASSERT(configuration.shaving_reduction_enabled());
         ARIADNE_TEST_ASSERT(configuration.hull_reduction_enabled());
@@ -173,6 +174,22 @@ class TestSmtSolver {
             true,
             false);
         ARIADNE_TEST_ASSERT(not no_hull_configuration.hull_reduction_enabled());
+
+        std::cout << "[smt-config] enable interval lookahead splitting" << std::endl;
+        SmtSolverConfiguration lookahead_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true);
+        ARIADNE_TEST_ASSERT(
+            lookahead_configuration.interval_lookahead_split_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -399,6 +416,10 @@ class TestSmtSolver {
         no_conflict.sensitivity_derivative_evaluation_seconds=0.5;
         no_conflict.fused_direct_classification_boxes=6u;
         no_conflict.fused_direct_literal_evaluations=13u;
+        no_conflict.interval_lookahead_guided_splits=4u;
+        no_conflict.interval_lookahead_overrides_geometric_splits=3u;
+        no_conflict.interval_lookahead_function_evaluations=12u;
+        no_conflict.interval_lookahead_evaluation_seconds=0.75;
         no_conflict.last_learned_clause_literals=99u;
         no_conflict.last_learned_current_level_literals=99u;
         no_conflict.last_backjump_level=99u;
@@ -417,6 +438,11 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluation_seconds,0.5);
         ARIADNE_TEST_EQUAL(target.fused_direct_classification_boxes,6u);
         ARIADNE_TEST_EQUAL(target.fused_direct_literal_evaluations,13u);
+        ARIADNE_TEST_EQUAL(target.interval_lookahead_guided_splits,4u);
+        ARIADNE_TEST_EQUAL(
+            target.interval_lookahead_overrides_geometric_splits,3u);
+        ARIADNE_TEST_EQUAL(target.interval_lookahead_function_evaluations,12u);
+        ARIADNE_TEST_EQUAL(target.interval_lookahead_evaluation_seconds,0.75);
         ARIADNE_TEST_EQUAL(target.last_learned_clause_literals,11u);
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
@@ -1132,6 +1158,42 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(split.is_unknown());
             ARIADNE_TEST_EQUAL(
                 split.statistics().fused_direct_literal_evaluations,2u);
+        }
+
+        {
+            std::cout << "[smt-lookahead] interval lookahead overrides geometric split" << std::endl;
+            RealVariable sy("lookahead_y");
+            RealSpace lookahead_space({sx,sy});
+            RealExpression ey=sy;
+            SmtSolver lookahead_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true));
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ey,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            SmtResult solve_result=lookahead_solver.solve(
+                lookahead_space,
+                ExactBoxType({
+                    ExactIntervalType(-2,2),
+                    ExactIntervalType(-1,1)}),
+                literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_lookahead_guided_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_lookahead_overrides_geometric_splits,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_lookahead_function_evaluations,4u);
         }
 
         {

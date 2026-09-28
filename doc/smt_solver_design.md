@@ -1500,3 +1500,21 @@ contractors and derivative-guided split heuristic tested so far do not improve
 the split sequence enough to justify their cost. Further work should therefore
 target the Lie expression itself or a genuinely cheaper split signal, rather
 than recombining the rejected eager mechanisms.
+
+
+An opt-in interval-lookahead split policy is now available for the next Barr3
+experiment. It does not build symbolic derivatives and it does not contract the
+current box. For each splittable coordinate it bisects the box, evaluates the
+currently epsilon-unresolved constraint functions on both candidate children,
+and scores the coordinate by the sum of the resulting interval-image widths.
+The coordinate with the smallest score is selected. Geometric splitting remains
+the fallback and the production default is unchanged; the standalone Barr3
+benchmark accepts `lookahead` as a third split-policy value.
+
+The policy reports guided splits, overrides of the geometrically widest
+coordinate, function-evaluation count and evaluation time separately. A
+two-dimensional regression verifies that lookahead overrides a wider geometric
+coordinate when the constraint depends only on the narrower coordinate. This
+experiment is deliberately bounded: if the extra child evaluations do not
+improve Barr3 pruning enough to compensate for their cost at 64 boxes, the
+heuristic should be discarded rather than generalized further.

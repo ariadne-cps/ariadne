@@ -75,7 +75,8 @@ class SmtSolverConfiguration {
         Bool sensitivity_split_enabled=true,
         Bool deterministic_witness_probing_enabled=true,
         Bool shaving_reduction_enabled=true,
-        Bool hull_reduction_enabled=true);
+        Bool hull_reduction_enabled=true,
+        Bool interval_lookahead_split_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -99,6 +100,11 @@ class SmtSolverConfiguration {
     //! \brief Whether sensitivity-guided splitting is enabled.
     Bool sensitivity_split_enabled() const { return _sensitivity_split_enabled; }
 
+    //! \brief Whether interval lookahead splitting is enabled.
+    Bool interval_lookahead_split_enabled() const {
+        return _interval_lookahead_split_enabled;
+    }
+
     //! \brief Whether deterministic midpoint/endpoint/corner witness probing is enabled.
     Bool deterministic_witness_probing_enabled() const {
         return _deterministic_witness_probing_enabled;
@@ -118,6 +124,7 @@ class SmtSolverConfiguration {
     Bool _candidate_search_enabled;
     Bool _monotone_reduction_enabled;
     Bool _sensitivity_split_enabled;
+    Bool _interval_lookahead_split_enabled;
     Bool _deterministic_witness_probing_enabled;
     Bool _shaving_reduction_enabled;
     Bool _hull_reduction_enabled;
@@ -152,6 +159,9 @@ struct SmtSearchStatistics {
     SizeType sensitivity_overrides_geometric_splits = 0u;
     SizeType sensitivity_derivatives_built = 0u;
     SizeType sensitivity_derivative_evaluations = 0u;
+    SizeType interval_lookahead_guided_splits = 0u;
+    SizeType interval_lookahead_overrides_geometric_splits = 0u;
+    SizeType interval_lookahead_function_evaluations = 0u;
     SizeType epsilon_box_certifications = 0u;
     SizeType fused_direct_classification_boxes = 0u;
     SizeType fused_direct_literal_evaluations = 0u;
@@ -164,6 +174,7 @@ struct SmtSearchStatistics {
     double split_seconds = 0.0;
     double sensitivity_derivative_build_seconds = 0.0;
     double sensitivity_derivative_evaluation_seconds = 0.0;
+    double interval_lookahead_evaluation_seconds = 0.0;
     double candidate_search_seconds = 0.0;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
@@ -552,6 +563,9 @@ class SmtSolver {
         Bool sensitivity_overrode_geometric_split = false;
         SizeType sensitivity_derivatives_built = 0u;
         SizeType sensitivity_derivative_evaluations = 0u;
+        Bool interval_lookahead_guided_split = false;
+        Bool interval_lookahead_overrode_geometric_split = false;
+        SizeType interval_lookahead_function_evaluations = 0u;
         Bool epsilon_box_certification = false;
         Bool fused_direct_classification = false;
         SizeType fused_direct_literal_evaluations = 0u;
@@ -565,6 +579,7 @@ class SmtSolver {
         double split_seconds = 0.0;
         double sensitivity_derivative_build_seconds = 0.0;
         double sensitivity_derivative_evaluation_seconds = 0.0;
+        double interval_lookahead_evaluation_seconds = 0.0;
         double candidate_search_seconds = 0.0;
     };
 
@@ -652,7 +667,18 @@ class SmtSolver {
         UpperBoxType const& domain,
         Conjunction const& conjunction) const;
     template<class Conjunction>
-    Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>> _split_box(
+    struct SplitBoxResult {
+        Pair<UpperBoxType,UpperBoxType> children;
+        Bool sensitivity_guided = false;
+        Bool sensitivity_overrode_geometric = false;
+        Bool interval_lookahead_guided = false;
+        Bool interval_lookahead_overrode_geometric = false;
+        SizeType interval_lookahead_function_evaluations = 0u;
+        double interval_lookahead_evaluation_seconds = 0.0;
+    };
+
+    template<class Conjunction>
+    SplitBoxResult _split_box(
         UpperBoxType const& domain,
         Conjunction const& conjunction,
         SizeType& derivatives_built,

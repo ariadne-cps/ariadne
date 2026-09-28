@@ -43,7 +43,7 @@ String query_from_argument(Int argc,const char* argv[]) {
     if(argument=="all" || argument=="lie" || argument=="eval") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|eval]");
 }
@@ -55,7 +55,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-monotone") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|eval] [monotone|no-monotone]");
 }
@@ -67,7 +67,7 @@ Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-hull") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull]");
 }
 
@@ -78,7 +78,7 @@ Bool shaving_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-shaving") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving]");
 }
 
@@ -89,18 +89,19 @@ Bool witness_probing_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-witness") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness]");
 }
 
-Bool sensitivity_from_argument(Int argc,const char* argv[]) {
-    if(argc<=2) { return true; }
+String split_policy_from_argument(Int argc,const char* argv[]) {
+    if(argc<=2) { return "sensitivity"; }
     String argument(argv[2]);
-    if(argument=="sensitivity") { return true; }
-    if(argument=="geometric") { return false; }
+    if(argument=="sensitivity" || argument=="geometric" || argument=="lookahead") {
+        return argument;
+    }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|geometric]");
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead]");
 }
 
 SmtTheoryPrimitiveLiteral primitive(ContinuousPredicate const& predicate) {
@@ -159,6 +160,14 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << result.statistics().sensitivity_derivative_build_seconds
               << " sensitivity-eval-time="
               << result.statistics().sensitivity_derivative_evaluation_seconds
+              << " lookahead-splits="
+              << result.statistics().interval_lookahead_guided_splits
+              << " lookahead-overrides="
+              << result.statistics().interval_lookahead_overrides_geometric_splits
+              << " lookahead-evals="
+              << result.statistics().interval_lookahead_function_evaluations
+              << " lookahead-eval-time="
+              << result.statistics().interval_lookahead_evaluation_seconds
               << " candidate=" << result.statistics().candidate_search_seconds
               << std::endl;
 }
@@ -424,7 +433,9 @@ SmtResult timed_solve(
 
 Int main(Int argc,const char* argv[]) {
     SizeType const box_limit=box_limit_from_argument(argc,argv);
-    Bool const sensitivity_enabled=sensitivity_from_argument(argc,argv);
+    String const split_policy=split_policy_from_argument(argc,argv);
+    Bool const sensitivity_enabled=split_policy=="sensitivity";
+    Bool const lookahead_enabled=split_policy=="lookahead";
     Bool const witness_probing_enabled=witness_probing_from_argument(argc,argv);
     Bool const shaving_enabled=shaving_from_argument(argc,argv);
     Bool const hull_enabled=hull_from_argument(argc,argv);
@@ -438,8 +449,7 @@ Int main(Int argc,const char* argv[]) {
     } else {
         std::cout << box_limit;
     }
-    std::cout << " split-policy="
-              << (sensitivity_enabled ? "sensitivity" : "geometric")
+    std::cout << " split-policy=" << split_policy
               << " witness-probing="
               << (witness_probing_enabled ? "enabled" : "disabled")
               << " shaving="
@@ -527,7 +537,8 @@ Int main(Int argc,const char* argv[]) {
         sensitivity_enabled,
         witness_probing_enabled,
         shaving_enabled,
-        hull_enabled));
+        hull_enabled,
+        lookahead_enabled));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

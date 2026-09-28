@@ -169,6 +169,55 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     return {coordinate,{guided,overrode}};
 }
 
+Pair<SizeType,Bool> interval_lookahead_split_coordinate(
+    UpperBoxType const& domain,
+    std::vector<ValidatedScalarMultivariateFunction> const& functions,
+    SizeType* function_evaluations=nullptr,
+    double* evaluation_seconds=nullptr)
+{
+    auto widths=domain.widths();
+    SizeType geometric=0u;
+    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
+        if(widths[variable].raw()>widths[geometric].raw()) {
+            geometric=variable;
+        }
+    }
+
+    Bool selected=false;
+    SizeType selected_coordinate=geometric;
+    PositiveFloatDPUpperBound selected_score(0u,dp);
+    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+        auto children=domain.split(variable);
+        if(same_box(children.first,children.second)) {
+            continue;
+        }
+
+        PositiveFloatDPUpperBound score(0u,dp);
+        for(auto const& function:functions) {
+            auto const start=std::chrono::steady_clock::now();
+            UpperIntervalType first_image=apply(function,children.first);
+            UpperIntervalType second_image=apply(function,children.second);
+            double const seconds=elapsed_seconds(start);
+            if(function_evaluations!=nullptr) {
+                *function_evaluations+=2u;
+            }
+            if(evaluation_seconds!=nullptr) {
+                *evaluation_seconds+=seconds;
+            }
+            score+=first_image.width();
+            score+=second_image.width();
+        }
+
+        if(not selected || score.raw()<selected_score.raw()) {
+            selected=true;
+            selected_coordinate=variable;
+            selected_score=score;
+        }
+    }
+
+    return {selected_coordinate,selected && selected_coordinate!=geometric};
+}
+
 UpperBoxType singleton_box(
     ConstraintSolverInterface::ExactPointType const& point)
 {
@@ -250,7 +299,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool sensitivity_split_enabled,
     Bool deterministic_witness_probing_enabled,
     Bool shaving_reduction_enabled,
-    Bool hull_reduction_enabled)
+    Bool hull_reduction_enabled,
+    Bool interval_lookahead_split_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -258,6 +308,7 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _candidate_search_enabled(candidate_search_enabled),
       _monotone_reduction_enabled(monotone_reduction_enabled),
       _sensitivity_split_enabled(sensitivity_split_enabled),
+      _interval_lookahead_split_enabled(interval_lookahead_split_enabled),
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
       _shaving_reduction_enabled(shaving_reduction_enabled),
       _hull_reduction_enabled(hull_reduction_enabled)
@@ -621,7 +672,7 @@ SmtSolver::_epsilon_candidate_witness(
 }
 
 template<class Conjunction>
-Pair<Pair<UpperBoxType,UpperBoxType>,Pair<Bool,Bool>>
+SmtSolver::SplitBoxResult
 SmtSolver::_split_box(
     UpperBoxType const& domain,
     Conjunction const& conjunction,
@@ -630,8 +681,11 @@ SmtSolver::_split_box(
     double& derivative_build_seconds,
     double& derivative_evaluation_seconds) const
 {
-    if(not _configuration.sensitivity_split_enabled()) {
-        return {domain.split(),{false,false}};
+    SplitBoxResult result;
+    if(not _configuration.sensitivity_split_enabled()
+       && not _configuration.interval_lookahead_split_enabled()) {
+        result.children=domain.split();
+        return result;
     }
 
     std::vector<ValidatedScalarMultivariateFunction> functions;
@@ -641,13 +695,28 @@ SmtSolver::_split_box(
             functions.push_back(this->_function(item));
         }
     }
+
+    if(_configuration.interval_lookahead_split_enabled()) {
+        auto selection=interval_lookahead_split_coordinate(
+            domain,functions,
+            &result.interval_lookahead_function_evaluations,
+            &result.interval_lookahead_evaluation_seconds);
+        result.children=domain.split(selection.first);
+        result.interval_lookahead_guided=true;
+        result.interval_lookahead_overrode_geometric=selection.second;
+        return result;
+    }
+
     auto selection=sensitivity_split_coordinate(
         domain,functions,
         &derivatives_built,
         &derivative_evaluations,
         &derivative_build_seconds,
         &derivative_evaluation_seconds);
-    return {domain.split(selection.first),selection.second};
+    result.children=domain.split(selection.first);
+    result.sensitivity_guided=selection.second.first;
+    result.sensitivity_overrode_geometric=selection.second.second;
+    return result;
 }
 
 template<class Conjunction>
@@ -719,7 +788,14 @@ SmtSolver::_process_box(
         result.sensitivity_derivative_build_seconds,
         result.sensitivity_derivative_evaluation_seconds);
     result.split_seconds=elapsed_seconds(phase_start);
-    Pair<UpperBoxType,UpperBoxType> children=split_result.first;
+    result.interval_lookahead_guided_split=split_result.interval_lookahead_guided;
+    result.interval_lookahead_overrode_geometric_split=
+        split_result.interval_lookahead_overrode_geometric;
+    result.interval_lookahead_function_evaluations=
+        split_result.interval_lookahead_function_evaluations;
+    result.interval_lookahead_evaluation_seconds=
+        split_result.interval_lookahead_evaluation_seconds;
+    Pair<UpperBoxType,UpperBoxType> children=split_result.children;
 
     Bool const splittable=not same_box(children.first,children.second);
 
@@ -754,8 +830,9 @@ SmtSolver::_process_box(
 
     result.status=BoxProcessingStatus::SPLIT;
     result.children=children;
-    result.sensitivity_guided_split=split_result.second.first;
-    result.sensitivity_overrode_geometric_split=split_result.second.second;
+    result.sensitivity_guided_split=split_result.sensitivity_guided;
+    result.sensitivity_overrode_geometric_split=
+        split_result.sensitivity_overrode_geometric;
     result.candidate_witness_search=candidate_outcome.attempted;
     return result;
 }
@@ -804,6 +881,16 @@ SmtSolver::_accumulate_box_processing_statistics(
         processing.sensitivity_derivative_build_seconds;
     statistics.sensitivity_derivative_evaluation_seconds+=
         processing.sensitivity_derivative_evaluation_seconds;
+    if(processing.interval_lookahead_guided_split) {
+        ++statistics.interval_lookahead_guided_splits;
+    }
+    if(processing.interval_lookahead_overrode_geometric_split) {
+        ++statistics.interval_lookahead_overrides_geometric_splits;
+    }
+    statistics.interval_lookahead_function_evaluations+=
+        processing.interval_lookahead_function_evaluations;
+    statistics.interval_lookahead_evaluation_seconds+=
+        processing.interval_lookahead_evaluation_seconds;
     statistics.shaving_function_evaluations+=
         processing.reductions.shaving_function_evaluations;
     statistics.candidate_search_seconds+=processing.candidate_search_seconds;
@@ -1183,6 +1270,13 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.sensitivity_derivative_evaluations+=source.sensitivity_derivative_evaluations;
     target.sensitivity_derivative_build_seconds+=source.sensitivity_derivative_build_seconds;
     target.sensitivity_derivative_evaluation_seconds+=source.sensitivity_derivative_evaluation_seconds;
+    target.interval_lookahead_guided_splits+=source.interval_lookahead_guided_splits;
+    target.interval_lookahead_overrides_geometric_splits+=
+        source.interval_lookahead_overrides_geometric_splits;
+    target.interval_lookahead_function_evaluations+=
+        source.interval_lookahead_function_evaluations;
+    target.interval_lookahead_evaluation_seconds+=
+        source.interval_lookahead_evaluation_seconds;
     target.epsilon_box_certifications+=source.epsilon_box_certifications;
     target.fused_direct_classification_boxes+=
         source.fused_direct_classification_boxes;

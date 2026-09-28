@@ -155,12 +155,12 @@ _evolution(EnclosureListType& final_sets,
 Void
 IteratedMapEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
-                EnclosureListType& final_sets,
+                EnclosureListType&,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
                 const TimedEnclosureType& current_set,
-                const TimeType& maximum_time,
-                Semantics semantics) const
+                const TimeType&,
+                Semantics) const
 {
     LOGGING_SCOPE_CREATE;
 

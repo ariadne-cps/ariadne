@@ -349,7 +349,7 @@ Bool LohnerReconditioner::must_reduce_parameters(InclusionEvolverState const& st
     return (state.step()%_number_of_steps_between_simplifications == _number_of_steps_between_simplifications-1);
 }
 
-Bool LohnerReconditioner::must_incorporate_errors(InclusionEvolverState const& state) const {
+Bool LohnerReconditioner::must_incorporate_errors(InclusionEvolverState const&) const {
     return true;
 }
 

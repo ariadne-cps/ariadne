@@ -237,8 +237,8 @@ Void
 VectorFieldEvolver::
 _process_timed_enclosure_step(WorkloadType::Access& workload,
                               TimedEnclosureType const& working_timed_set_model,
-                              TimeType const& maximum_time,
-                              Semantics semantics,
+                              TimeType const&,
+                              Semantics,
                               SharedPointer<SynchronisedOrbit> result) const
 {
     LOGGING_SCOPE_CREATE

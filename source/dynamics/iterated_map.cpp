@@ -40,7 +40,6 @@
 
 #include "dynamics/iterated_map.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -45,7 +45,6 @@
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

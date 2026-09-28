@@ -63,7 +63,6 @@
 
 #include "dynamics/reachability_analyser.tpl.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

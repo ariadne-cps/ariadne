@@ -41,7 +41,6 @@
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

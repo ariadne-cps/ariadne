@@ -56,7 +56,6 @@
 #include "io/progress_indicator.hpp"
 #include "solvers/linear_programming.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -1518,3 +1518,24 @@ coordinate when the constraint depends only on the narrower coordinate. This
 experiment is deliberately bounded: if the extra child evaluations do not
 improve Barr3 pruning enough to compensate for their cost at 64 boxes, the
 heuristic should be discarded rather than generalized further.
+
+The 64-box interval-lookahead experiment is negative. It produces the same
+27 pruned / 37 split boxes as geometric splitting and no epsilon certification.
+Lookahead guides all 37 splits but overrides the geometrically widest coordinate
+only three times. Those three changes do not alter aggregate search progress.
+Elapsed time rises from about 2.835 s for geometric splitting to 8.483 s, with
+5.701 s spent in the split phase. The heuristic performs 188 extra validated
+function evaluations, accounting for 4.443 s of measured lookahead evaluation
+time. Interval lookahead is therefore excluded from the Barr3 cheap-first path;
+the small number of changed split decisions does not repay its evaluation cost.
+
+Before designing another split heuristic, the benchmark now supports one
+zero-semantics-change scheduling diagnostic for the fused two-literal Lie query:
+an optional final argument selects `barrier-first` (the historical order) or
+`lie-first`. The previous literal-attribution run established that the barrier
+literal rejects none of the first 64 processed boxes, while the Lie literal
+rejects 27. Therefore, if Lie is evaluated first, those 27 boxes can short-circuit
+without evaluating the barrier. Under the same search tree the expected fused
+literal-evaluation count is 64 Lie evaluations plus 37 barrier evaluations, i.e.
+101 instead of 128. This test measures the available benefit from cheap literal
+scheduling before implementing any generic adaptive ordering in the solver.

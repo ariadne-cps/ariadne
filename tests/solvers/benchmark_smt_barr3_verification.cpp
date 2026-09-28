@@ -60,6 +60,18 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "[all|lie|eval] [monotone|no-monotone]");
 }
 
+String lie_literal_order_from_argument(Int argc,const char* argv[]) {
+    if(argc<=8) { return "barrier-first"; }
+    String argument(argv[8]);
+    if(argument=="barrier-first" || argument=="lie-first") { return argument; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
+        "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
+        "[all|lie|eval] [monotone|no-monotone] "
+        "[barrier-first|lie-first]");
+}
+
 Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argc<=5) { return true; }
     String argument(argv[5]);
@@ -441,6 +453,7 @@ Int main(Int argc,const char* argv[]) {
     Bool const hull_enabled=hull_from_argument(argc,argv);
     String const query=query_from_argument(argc,argv);
     Bool const monotone_enabled=monotone_from_argument(argc,argv);
+    String const lie_literal_order=lie_literal_order_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -459,6 +472,7 @@ Int main(Int argc,const char* argv[]) {
               << " query=" << query
               << " monotone="
               << (monotone_enabled ? "enabled" : "disabled")
+              << " lie-literal-order=" << lie_literal_order
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -544,8 +558,14 @@ Int main(Int argc,const char* argv[]) {
         sphere_inside,barrier_nonnegative});
     List<SmtTheoryPrimitiveLiteral> barrier_literals({
         barrier_nonnegative});
-    List<SmtTheoryPrimitiveLiteral> lie_literals({
-        barrier_nonnegative,lie_violation});
+    List<SmtTheoryPrimitiveLiteral> lie_literals;
+    if(lie_literal_order=="lie-first") {
+        lie_literals.append(lie_violation);
+        lie_literals.append(barrier_nonnegative);
+    } else {
+        lie_literals.append(barrier_nonnegative);
+        lie_literals.append(lie_violation);
+    }
 
     if(query=="all") {
         timed_solve(

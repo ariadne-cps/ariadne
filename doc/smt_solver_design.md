@@ -1665,3 +1665,22 @@ construction time and range on the same initial Lie-plus-barrier function. If
 this is not substantially cheaper than the full Taylor model or does not beat
 the ordinary interval enclosure, affine/Taylor function models should be
 excluded from further Barr3 SMT work.
+
+The validated affine-model follow-up is also negative. On the same initial
+Lie-plus-barrier domain it takes about 0.622 s to build and reports a range of
+approximately [-5097.330, 5099.938]. It is much cheaper than the 16.32 s full
+Taylor model, but its enclosure is still roughly 5.7 times wider than the
+ordinary interval image. The affine/Taylor function-model route is therefore
+closed for Barr3: neither representation improves the enclosure used for
+validated rejection.
+
+The next isolated diagnostic is a first-order mean-value enclosure rather than
+a function model or contractor. For a box X with midpoint m it computes the
+validated enclosure `f(m) + sum_i D_i f(X) * (X_i-m_i)`. This preserves the
+first-order dependency between the box displacement and interval gradient
+without invoking Newton contraction, sensitivity-guided splitting or Taylor
+polynomial construction. The benchmark query `mean-value` reports ordinary
+interval evaluation, midpoint evaluation, derivative construction/evaluation
+times and the resulting mean-value image on the initial Lie-plus-barrier box.
+Only if this enclosure is materially tighter at acceptable cost should it be
+considered for per-box SMT classification.

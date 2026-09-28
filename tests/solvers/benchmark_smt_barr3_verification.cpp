@@ -42,12 +42,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -59,7 +59,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -70,7 +70,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -82,7 +82,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -488,6 +488,56 @@ Void profile_affine_range(
               << std::endl;
 }
 
+Void profile_mean_value_range(
+    String const& name,
+    ValidatedScalarMultivariateFunction const& function,
+    ExactBoxType const& domain)
+{
+    UpperBoxType upper_domain(domain);
+
+    Stopwatch<Milliseconds> interval_stopwatch;
+    UpperIntervalType interval_image=apply(function,upper_domain);
+    interval_stopwatch.click();
+
+    UpperBoxType midpoint_box(upper_domain);
+    for(SizeType i=0u; i!=midpoint_box.dimension(); ++i) {
+        auto midpoint=upper_domain[i].midpoint();
+        midpoint_box[i]=UpperIntervalType(midpoint.raw(),midpoint.raw());
+    }
+
+    Stopwatch<Milliseconds> midpoint_stopwatch;
+    UpperIntervalType mean_value_image=apply(function,midpoint_box);
+    midpoint_stopwatch.click();
+
+    std::vector<ValidatedScalarMultivariateFunction> derivatives;
+    derivatives.reserve(upper_domain.dimension());
+    Stopwatch<Milliseconds> derivative_build_stopwatch;
+    for(SizeType i=0u; i!=upper_domain.dimension(); ++i) {
+        derivatives.push_back(function.derivative(i));
+    }
+    derivative_build_stopwatch.click();
+
+    Stopwatch<Milliseconds> derivative_eval_stopwatch;
+    for(SizeType i=0u; i!=upper_domain.dimension(); ++i) {
+        UpperIntervalType derivative_image=apply(derivatives[i],upper_domain);
+        auto midpoint=upper_domain[i].midpoint();
+        UpperIntervalType midpoint_interval(midpoint.raw(),midpoint.raw());
+        mean_value_image+=derivative_image*(upper_domain[i]-midpoint_interval);
+    }
+    derivative_eval_stopwatch.click();
+
+    std::cout << "[mean-value-profile] " << name
+              << " interval-time=" << interval_stopwatch.elapsed_seconds()
+              << " interval-image=" << interval_image
+              << " midpoint-eval-time=" << midpoint_stopwatch.elapsed_seconds()
+              << " derivative-build-time="
+              << derivative_build_stopwatch.elapsed_seconds()
+              << " derivative-eval-time="
+              << derivative_eval_stopwatch.elapsed_seconds()
+              << " mean-value-image=" << mean_value_image
+              << std::endl;
+}
+
 SmtResult timed_solve(
     String const& name,
     SmtSolver const& solver,
@@ -614,6 +664,14 @@ Int main(Int argc,const char* argv[]) {
         ValidatedScalarMultivariateFunction lie_function=
             make_function(space,network.lie+network.barrier);
         profile_affine_range(
+            "lie+barrier",lie_function,domain);
+        return 0;
+    }
+
+    if(query=="mean-value") {
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_mean_value_range(
             "lie+barrier",lie_function,domain);
         return 0;
     }

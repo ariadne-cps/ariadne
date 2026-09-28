@@ -1270,3 +1270,24 @@ The key comparison remains the initial full-box `eval` profile: generic
 function, Formula and expression-derived Procedure images should be compared
 with the Barr3-only direct reference evaluator, with particular attention to
 whether the generic barrier and Lie-plus-barrier images become finite.
+
+The first Barr3 run with native `tanh` confirms that activation representation
+was the enclosure blocker. On the full initial box, all generic paths now return
+finite intervals. The barrier image is approximately
+`[-24.323104,24.437737]` through the validated-function and Formula paths and
+`[-24.4,24.5]` through FloatDPBounds Procedure evaluation, matching the
+Barr3-specific direct reference `[-24.4,24.5]` to the expected backend
+rounding granularity. Eight compact expression-derived Procedure evaluations
+take about 0.028 s for the barrier, versus 0.034 s for the complete direct
+Barr3 evaluator.
+
+For Lie-plus-barrier the generic image is finite but still substantially wider:
+approximately `[-3244.6,3239.4]` on FloatDPBounds versus
+`[-971.8,970.6]` in the direct reference. Inspection of the two otherwise
+equivalent derivative propagations shows that the fixture computes the
+activation derivative factor as `1-h*h`, while the direct evaluator uses
+`1-sqr(h)`. For interval-valued `h` crossing zero, generic multiplication
+loses the self-correlation that `sqr(h)` preserves. The fixture now uses
+`1-sqr(h)` in both hidden layers. This algebraically equivalent representation
+change should be benchmarked before pursuing stronger contractors or evaluator
+changes.

@@ -473,24 +473,17 @@ template<class A> Void tanh(Graded<A>& r, const Graded<A>& a) {
     DegreeType d=r.degree();
     if(d==0u) { r[0]=tanh(a[0]); return; }
 
-    A convolution=create(a[0]);
-    for(DegreeType i=0u; i<d; ++i) {
-        convolution += r[i]*r[cast_sign<DegreeType>(d-1u-i)];
-    }
-
-    A rhs=create(a[0]);
-    if(d==1u) { rhs += 1; }
-    rhs -= convolution;
-
-    A weighted=create(a[0]);
-    for(DegreeType k=2u; k<=d; ++k) {
-        A inner=create(a[0]);
-        for(DegreeType i=0u; i<=d-k; ++i) {
-            inner += r[i]*r[cast_sign<DegreeType>(d-k-i)];
+    A coefficient=create(a[0]);
+    for(DegreeType k=1u; k<=d; ++k) {
+        DegreeType n=cast_sign<DegreeType>(d-k);
+        A q=create(a[0]);
+        if(n==0u) { q+=1; }
+        for(DegreeType i=0u; i<=n; ++i) {
+            q-=r[i]*r[cast_sign<DegreeType>(n-i)];
         }
-        weighted += k*a[k]*inner;
+        coefficient += k*a[k]*q;
     }
-    r[d]=(a[1]*rhs-weighted)/d;
+    r[d]=coefficient/d;
 }
 
 template<class A> Void asin(Graded<A>&, const Graded<A>&) {

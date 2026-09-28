@@ -68,7 +68,7 @@ template<class P, class D> ScalarFunctionInterface<P,D>* heap_copy(ScalarFunctio
 
 
 template<class D> D make_domain(SizeType d);
-template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
+template<> inline IntervalDomainType make_domain(SizeType d) { static_cast<void>(d); assert(d==1u); return IntervalDomainType(-inf,+inf); }
 template<> inline BoxDomainType make_domain(SizeType d) { return BoxDomainType(d,IntervalDomainType(-inf,+inf)); }
 
 template<class F, class SIG>

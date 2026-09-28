@@ -1386,3 +1386,17 @@ query selector; the default is `no-monotone`, so existing benchmark commands
 are unchanged. This isolates whether sign-definite cached derivatives can
 contract the unresolved frontier cheaply before reconsidering the much more
 expensive hull contractor.
+
+The isolated monotone/Newton experiment is not competitive on Barr3 at the
+measured budgets. With all other expensive features disabled, enabling monotone
+reduction leaves the 64-box result unchanged at 27 pruned and 37 split boxes,
+but increases elapsed time from about 2.77 s to 24.44 s. At 256 boxes it leaves
+the result unchanged at 123 pruned and 133 split boxes while increasing elapsed
+time from about 9.24 s to 99.10 s. The additional cost appears almost entirely
+inside reduction.
+
+The benchmark now prints the existing monotone-effective-reduction counter as
+well as monotone rounds. A final small-budget rerun can therefore distinguish
+between a contractor that changes boxes without affecting aggregate pruning and
+one that performs no effective contraction at all. If the effective count is
+zero, monotone reduction should be excluded from the Barr3 cheap-first path.

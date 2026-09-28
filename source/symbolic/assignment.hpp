@@ -37,7 +37,6 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
-#include "utility/functional.hpp"
 #include "utility/stlio.hpp"
 #include "utility/string.hpp"
 

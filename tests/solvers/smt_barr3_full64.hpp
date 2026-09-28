@@ -150,8 +150,11 @@ inline NetworkAndLie network_and_lie(
     // Published Barr3 dynamics:
     //   x_dot = y
     //   y_dot = -x-y+x^3/3
+    //
+    // Use an algebraically equivalent factored form for y_dot so validated
+    // interval evaluation preserves the self-correlation in x^2 through sqr.
     RealExpression dx=x1;
-    RealExpression dy=-x0-x1+(x0*x0*x0)/3;
+    RealExpression dy=x0*(sqr(x0)/3-1)-x1;
     RealExpression lie=db_dx*dx+db_dy*dy;
     return {barrier,lie,db_dx,db_dy};
 }

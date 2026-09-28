@@ -1738,3 +1738,22 @@ equivalent Horner-like form `x*(sqr(x)/3-1)-y`. This uses the existing native
 compares the original and factored dy images, the corresponding `db/dy*dy`
 images, and final Lie-plus-barrier images. The main Barr3 query remains
 unchanged until this isolated comparison demonstrates a material improvement.
+
+The dynamics rewrite diagnostic is strongly positive. On the initial Barr3
+domain, the published polynomial dynamics `-x-y+x^3/3` evaluates to
+[-12.5,12.5] in its original syntactic form, while the algebraically equivalent
+`x*(sqr(x)/3-1)-y` evaluates to [-7,7]. The dominant product `db/dy*dy` shrinks
+from approximately [-743.103,743.103] to [-416.137,416.137]. Consequently the
+full Lie-plus-barrier image shrinks from approximately [-889.218,888.270] to
+[-562.252,561.305], while evaluation time remains essentially unchanged
+(about 0.029 s versus 0.028 s in the isolated diagnostic).
+
+This is not a Barr3-specific relaxation or approximation: the two dynamics
+expressions are algebraically identical over the reals. The improvement comes
+from retaining the repeated-x correlation through the existing native `sqr`
+operator. The published Barr3 fixture therefore now constructs y-dot as
+`x*(sqr(x)/3-1)-y`. The original-vs-factored benchmark diagnostic is retained
+as evidence for the rewrite. The next search measurement is the 64-box
+contractor-free geometric Lie query, which will show whether the tighter root
+and descendant enclosures translate into additional exact pruning rather than
+only a narrower initial interval.

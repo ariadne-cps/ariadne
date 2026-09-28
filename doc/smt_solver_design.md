@@ -1684,3 +1684,20 @@ interval evaluation, midpoint evaluation, derivative construction/evaluation
 times and the resulting mean-value image on the initial Lie-plus-barrier box.
 Only if this enclosure is materially tighter at acceptable cost should it be
 considered for per-box SMT classification.
+
+The initial-box mean-value enclosure is decisively worse than direct interval
+evaluation. The direct Lie-plus-barrier image is approximately
+[-889.218, 888.270] in 0.032 s. The mean-value construction evaluates the
+midpoint in about 0.030 s, builds two derivatives in about 0.094 s and evaluates
+them over the box in about 0.489 s, but returns approximately
+[-48303.826, 48310.506]. The first-order derivative enclosure therefore
+amplifies dependency by roughly two orders of magnitude and is excluded from
+per-box SMT classification.
+
+Rather than trying another generic enclosure representation, the next
+diagnostic decomposes the Barr3 Lie expression itself. The published dynamics
+are `dx=y` and `dy=-x-y+x^3/3`, so the benchmark query `lie-components` reports
+validated interval images and evaluation times for `db/dx`, `db/dy`, both
+dynamics, the products `db/dx*dx` and `db/dy*dy`, their sum, the barrier, and
+the final Lie-plus-barrier expression. The goal is to locate the dominant
+source of interval width before changing evaluator mathematics again.

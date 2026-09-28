@@ -42,12 +42,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -59,7 +59,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -70,7 +70,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -82,7 +82,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -488,6 +488,22 @@ Void profile_affine_range(
               << std::endl;
 }
 
+Void profile_interval_expression(
+    String const& name,
+    RealExpression const& expression,
+    RealSpace const& space,
+    UpperBoxType const& domain)
+{
+    ValidatedScalarMultivariateFunction function=make_function(space,expression);
+    Stopwatch<Milliseconds> stopwatch;
+    UpperIntervalType image=apply(function,domain);
+    stopwatch.click();
+    std::cout << "[lie-component] " << name
+              << " time=" << stopwatch.elapsed_seconds()
+              << " image=" << image
+              << std::endl;
+}
+
 Void profile_mean_value_range(
     String const& name,
     ValidatedScalarMultivariateFunction const& function,
@@ -673,6 +689,25 @@ Int main(Int argc,const char* argv[]) {
             make_function(space,network.lie+network.barrier);
         profile_mean_value_range(
             "lie+barrier",lie_function,domain);
+        return 0;
+    }
+
+    if(query=="lie-components") {
+        RealExpression dx=ey;
+        RealExpression dy=-ex-ey+(ex*ex*ex)/3;
+        RealExpression term_x=network.db_dx*dx;
+        RealExpression term_y=network.db_dy*dy;
+        profile_interval_expression("db/dx",network.db_dx,space,UpperBoxType(domain));
+        profile_interval_expression("db/dy",network.db_dy,space,UpperBoxType(domain));
+        profile_interval_expression("dx=y",dx,space,UpperBoxType(domain));
+        profile_interval_expression("dy=-x-y+x^3/3",dy,space,UpperBoxType(domain));
+        profile_interval_expression("db/dx*dx",term_x,space,UpperBoxType(domain));
+        profile_interval_expression("db/dy*dy",term_y,space,UpperBoxType(domain));
+        profile_interval_expression("lie",term_x+term_y,space,UpperBoxType(domain));
+        profile_interval_expression("barrier",network.barrier,space,UpperBoxType(domain));
+        profile_interval_expression(
+            "lie+barrier",term_x+term_y+network.barrier,
+            space,UpperBoxType(domain));
         return 0;
     }
 

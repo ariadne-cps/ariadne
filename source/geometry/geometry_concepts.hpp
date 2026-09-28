@@ -55,7 +55,8 @@ template<class S, class T> concept ASetBase = CopyConstructible<T> and Writable<
 };
 
 template<class S, class P, class T> concept ABoundedSet = ASetBase<S,T> and requires(S s, BasicSetType<T> bs) {
-    { s.bounding_box() } -> CastableTo<BoundingSetType<T>>;
+    { s.bounding_box() };
+    requires Constructible<BoundingSetType<T>,decltype(s.bounding_box())>;
     { s.inside(bs) } -> Convertible<LowerLogicalType<P>>;
 };
 

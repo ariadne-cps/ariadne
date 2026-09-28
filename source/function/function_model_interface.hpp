@@ -129,6 +129,7 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface
     virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _clone() const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _create() const = 0;
+    inline FunctionModelInterface<P,SIG,PR,PRE>* clone() const { return this->_clone(); }
     inline FunctionModelInterface<P,SIG,PR,PRE>* _copy() const { return this->_clone(); }
 
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _restriction(const DomainType& d) const = 0;

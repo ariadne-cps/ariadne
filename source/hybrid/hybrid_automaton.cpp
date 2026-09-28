@@ -159,7 +159,7 @@ DiscreteTransition(DiscreteLocation source,
                    const ContinuousPredicate& guard,
                    EventKind kind)
     : _source(source), _event(event), _target(target),
-      _guard(guard), _reset(reset)
+      _guard(guard), _reset(reset), _kind(kind)
 {
 }
 
@@ -287,7 +287,7 @@ HybridAutomaton::HybridAutomaton(Identifier name)
 
 HybridAutomaton::HybridAutomaton(
 		Identifier name,
-		const List<StringVariable>& discrete_variables)
+		const List<StringVariable>&)
     : _name(name),_modes()
 {
 }

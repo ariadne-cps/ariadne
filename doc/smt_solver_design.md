@@ -1721,3 +1721,20 @@ coordinate preference that the ordinary widest-coordinate geometric split is
 missing. If the y split materially reduces the dominant and final images, a
 specialized cheap split score can be tested; otherwise split selection is not
 where the missing correlation should be addressed.
+
+The root split-profile confirms that geometric splitting already chooses the
+better coordinate. Splitting x gives a width sum of about 1,912 for the dominant
+`db/dy*dy` term and about 2,454 for Lie-plus-barrier, whereas splitting y gives
+about 2,704 and 3,156 respectively. Since the initial x interval is also wider
+than y, the existing geometric policy already makes this choice. This result
+does not justify another split heuristic.
+
+The remaining obvious dependency loss is inside the polynomial dynamics
+`dy=-x-y+x^3/3` itself. Direct interval evaluation treats the repeated x
+occurrences independently and produces [-12.5,12.5]. Before adding any
+polynomial range machinery, the benchmark now tests the algebraically
+equivalent Horner-like form `x*(sqr(x)/3-1)-y`. This uses the existing native
+`sqr` operation to retain self-correlation in x. Query `lie-dynamics-rewrite`
+compares the original and factored dy images, the corresponding `db/dy*dy`
+images, and final Lie-plus-barrier images. The main Barr3 query remains
+unchanged until this isolated comparison demonstrates a material improvement.

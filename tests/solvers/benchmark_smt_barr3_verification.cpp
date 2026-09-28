@@ -154,6 +154,9 @@ FloatDPBounds stable_tanh(FloatDPBounds const& x)
 
 struct DirectBarr3Evaluation {
     FloatDPBounds barrier;
+    FloatDPBounds db_dx;
+    FloatDPBounds db_dy;
+    FloatDPBounds lie;
     FloatDPBounds lie_plus_barrier;
 };
 
@@ -211,7 +214,7 @@ DirectBarr3Evaluation direct_barr3_evaluate(Vector<FloatDPBounds> const& x)
     FloatDPBounds dx=x[1];
     FloatDPBounds dy=-x[0]-x[1]+(x[0]*x[0]*x[0])/FloatDPBounds(3,dp);
     FloatDPBounds lie=db_dx*dx+db_dy*dy;
-    return {barrier,lie+barrier};
+    return {barrier,db_dx,db_dy,lie,lie+barrier};
 }
 
 Void profile_direct_barr3(UpperBoxType const& domain, SizeType repetitions)
@@ -234,6 +237,9 @@ Void profile_direct_barr3(UpperBoxType const& domain, SizeType repetitions)
     std::cout << "[direct-profile] repetitions=" << repetitions
               << " evaluate=" << stopwatch.elapsed_seconds()
               << " barrier=" << result.barrier
+              << " db/dx=" << result.db_dx
+              << " db/dy=" << result.db_dy
+              << " lie=" << result.lie
               << " lie+barrier=" << result.lie_plus_barrier
               << std::endl;
 }
@@ -304,6 +310,28 @@ Void profile_formula_evaluator(
               << " upper-image=" << upper_image
               << " bounds-image=" << bounds_image
               << " expression-procedure-image=" << expression_procedure_image
+              << std::endl;
+}
+
+Void profile_expression_bounds(
+    String const& name,
+    RealExpression const& expression,
+    RealSpace const& space,
+    UpperBoxType const& domain)
+{
+    Formula<EffectiveNumber> formula=make_formula(expression,space);
+    EffectiveProcedure procedure(space.dimension(),formula);
+    Vector<FloatDPBounds> arguments(
+        domain.size(),FloatDPBounds(DoublePrecision()));
+    for(SizeType i=0u;i!=domain.size();++i) {
+        arguments[i]=FloatDPBounds(
+            domain[i].lower_bound().raw(),
+            domain[i].upper_bound().raw());
+    }
+    FloatDPBounds image=evaluate(procedure,arguments);
+    std::cout << "[bounds-diagnostic] " << name
+              << " instructions=" << procedure._instructions.size()
+              << " image=" << image
               << std::endl;
 }
 
@@ -458,6 +486,9 @@ Int main(Int argc,const char* argv[]) {
         profile_formula_evaluator(
             "lie+barrier",network.lie+network.barrier,
             space,UpperBoxType(domain),8u);
+        profile_expression_bounds("db/dx",network.db_dx,space,UpperBoxType(domain));
+        profile_expression_bounds("db/dy",network.db_dy,space,UpperBoxType(domain));
+        profile_expression_bounds("lie",network.lie,space,UpperBoxType(domain));
         profile_direct_barr3(UpperBoxType(domain),8u);
         return 0;
     }

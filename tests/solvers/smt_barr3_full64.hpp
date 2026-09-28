@@ -95,6 +95,8 @@ inline RealExpression network(RealExpression const& x0, RealExpression const& x1
 struct NetworkAndLie {
     RealExpression barrier;
     RealExpression lie;
+    RealExpression db_dx;
+    RealExpression db_dy;
 };
 
 inline NetworkAndLie network_and_lie(
@@ -151,7 +153,7 @@ inline NetworkAndLie network_and_lie(
     RealExpression dx=x1;
     RealExpression dy=-x0-x1+(x0*x0*x0)/3;
     RealExpression lie=db_dx*dx+db_dy*dy;
-    return {barrier,lie};
+    return {barrier,lie,db_dx,db_dy};
 }
 
 } // namespace Ariadne::TestBarr3Full64

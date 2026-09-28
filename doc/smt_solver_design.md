@@ -1313,3 +1313,16 @@ validated tanh now computes a monotone endpoint image, that old helper makes the
 direct reference artificially wider than the generic path. The diagnostic now
 uses the native `tanh(FloatDPBounds)` as well, so the next run compares
 execution structure rather than two different activation enclosures.
+
+A subsequent same-machine rerun showed that replacing the direct diagnostic's
+cross-zero tanh fallback by native validated tanh did not change its final
+interval: the direct Lie-plus-barrier enclosure remained approximately
+`[-971.8,970.6]`, while the expression-derived Procedure remained tighter at
+about `[-889.3,888.3]`. The earlier attribution of that residual difference
+to the direct tanh fallback was therefore incorrect.
+
+The benchmark now reports the barrier-gradient components `db/dx`, `db/dy`
+and the unfused Lie term separately for both the compact expression-derived
+Procedure and the hand-written direct evaluator. This diagnostic is intended to
+identify the first stage at which the otherwise algebraically equivalent
+evaluations diverge, before making any further solver or arithmetic change.

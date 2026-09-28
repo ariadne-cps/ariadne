@@ -43,12 +43,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -60,7 +60,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -71,7 +71,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -83,7 +83,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -625,6 +625,62 @@ Void profile_lie_correlation_frontier(
               << std::endl;
 }
 
+TestBarr3Full64::NetworkAndLie reassociated_network_and_lie(
+    RealExpression const& x0,
+    RealExpression const& x1)
+{
+    auto const& p=TestBarr3Full64::parameters();
+    constexpr SizeType width=TestBarr3Full64::width;
+    auto c=[&](SizeType i) {
+        return TestBarr3Full64::constant(p[i]);
+    };
+
+    std::array<RealExpression,width> h1;
+    std::array<RealExpression,width> a1;
+    for(SizeType j=0u;j!=width;++j) {
+        RealExpression z=c(TestBarr3Full64::b1_offset+j)
+            + c(TestBarr3Full64::w1_offset+2u*j)*x0
+            + c(TestBarr3Full64::w1_offset+2u*j+1u)*x1;
+        h1[j]=tanh(z);
+        a1[j]=1-sqr(h1[j]);
+    }
+
+    std::array<RealExpression,width> h2;
+    std::array<RealExpression,width> a2;
+    for(SizeType i=0u;i!=width;++i) {
+        RealExpression z=c(TestBarr3Full64::b2_offset+i);
+        for(SizeType j=0u;j!=width;++j) {
+            z=z+c(TestBarr3Full64::w2_offset+width*i+j)*h1[j];
+        }
+        h2[i]=tanh(z);
+        a2[i]=1-sqr(h2[i]);
+    }
+
+    RealExpression barrier=c(TestBarr3Full64::b3_offset);
+    for(SizeType i=0u;i!=width;++i) {
+        barrier=barrier+c(TestBarr3Full64::w3_offset+i)*h2[i];
+    }
+
+    RealExpression db_dx=RealExpression(0);
+    RealExpression db_dy=RealExpression(0);
+    for(SizeType j=0u;j!=width;++j) {
+        RealExpression accumulated=RealExpression(0);
+        for(SizeType i=0u;i!=width;++i) {
+            accumulated=accumulated
+                + c(TestBarr3Full64::w3_offset+i)
+                    * a2[i]
+                    * c(TestBarr3Full64::w2_offset+width*i+j);
+        }
+        RealExpression local=accumulated*a1[j];
+        db_dx=db_dx+local*c(TestBarr3Full64::w1_offset+2u*j);
+        db_dy=db_dy+local*c(TestBarr3Full64::w1_offset+2u*j+1u);
+    }
+
+    RealExpression dx=x1;
+    RealExpression dy=x0*(sqr(x0)/3-1)-x1;
+    return {barrier,db_dx*dx+db_dy*dy,db_dx,db_dy};
+}
+
 Void profile_mean_value_range(
     String const& name,
     ValidatedScalarMultivariateFunction const& function,
@@ -888,6 +944,31 @@ Int main(Int argc,const char* argv[]) {
         profile_lie_correlation_frontier(
             box_limit,UpperBoxType(domain),
             db_dy_function,dy_function,lie_function);
+        return 0;
+    }
+
+    if(query=="lie-gradient-reassociation") {
+        Stopwatch<Milliseconds> reassociation_stopwatch;
+        auto reassociated=reassociated_network_and_lie(ex,ey);
+        reassociation_stopwatch.click();
+        std::cout << "[gradient-reassociation] construction="
+                  << reassociation_stopwatch.elapsed_seconds()
+                  << " s" << std::endl;
+        UpperBoxType upper_domain(domain);
+        profile_interval_expression(
+            "db/dx-forward",network.db_dx,space,upper_domain);
+        profile_interval_expression(
+            "db/dx-reassociated",reassociated.db_dx,space,upper_domain);
+        profile_interval_expression(
+            "db/dy-forward",network.db_dy,space,upper_domain);
+        profile_interval_expression(
+            "db/dy-reassociated",reassociated.db_dy,space,upper_domain);
+        profile_interval_expression(
+            "lie+barrier-forward",
+            network.lie+network.barrier,space,upper_domain);
+        profile_interval_expression(
+            "lie+barrier-reassociated",
+            reassociated.lie+reassociated.barrier,space,upper_domain);
         return 0;
     }
 

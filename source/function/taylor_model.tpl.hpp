@@ -1660,7 +1660,6 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
 
 template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Tanh, const TaylorModel<P,F>& x) {
     if constexpr (Same<P,ValidatedTag>) {
-        typedef TaylorModel<P,F> ModelType;
         typedef typename ModelType::RangeType RangeType;
         RangeType xr=x.range();
 

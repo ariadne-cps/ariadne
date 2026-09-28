@@ -14,6 +14,7 @@
 #include "function/procedure.hpp"
 #include "function/procedure.tpl.hpp"
 #include "function/taylor_function.hpp"
+#include "function/affine_model.hpp"
 #include "symbolic/expression.hpp"
 #include "solvers/smt_solver.hpp"
 
@@ -41,12 +42,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor]");
+        "[all|lie|lie-only|eval|taylor|affine]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -58,7 +59,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -69,7 +70,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -81,7 +82,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -467,7 +468,28 @@ Void profile_taylor_range(
               << std::endl;
 }
 
-SmtResult timed_solve(    String const& name,
+Void profile_affine_range(
+    String const& name,
+    ValidatedScalarMultivariateFunction const& function,
+    ExactBoxType const& domain)
+{
+    Stopwatch<Milliseconds> build_stopwatch;
+    ValidatedAffineModelDP model=affine_model(domain,function,dp);
+    build_stopwatch.click();
+
+    Stopwatch<Milliseconds> range_stopwatch;
+    auto model_range=model.range();
+    range_stopwatch.click();
+
+    std::cout << "[affine-profile] " << name
+              << " model-build=" << build_stopwatch.elapsed_seconds()
+              << " model-range-time=" << range_stopwatch.elapsed_seconds()
+              << " model-range=" << model_range
+              << std::endl;
+}
+
+SmtResult timed_solve(
+    String const& name,
     SmtSolver const& solver,
     RealSpace const& space,
     ExactBoxType const& domain,
@@ -584,6 +606,14 @@ Int main(Int argc,const char* argv[]) {
         ValidatedScalarMultivariateFunction lie_function=
             make_function(space,network.lie+network.barrier);
         profile_taylor_range(
+            "lie+barrier",lie_function,domain);
+        return 0;
+    }
+
+    if(query=="affine") {
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_affine_range(
             "lie+barrier",lie_function,domain);
         return 0;
     }

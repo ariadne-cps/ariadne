@@ -1641,3 +1641,27 @@ A focused Taylor-model regression exercises a wide cross-zero input as well as
 positive and negative one-sided inputs. The standalone `taylor` Barr3
 diagnostic should now be rerun before deciding whether Taylor enclosure is
 worth integrating into SMT classification.
+
+The rerun after stabilizing validated Taylor `tanh` is finite but decisively
+negative for Barr3. On the initial domain the ordinary interval evaluation of
+Lie-plus-barrier is approximately [-889.218, 888.270] and takes 0.032 s. The
+validated Taylor function model takes 16.32 s to construct and its reported
+range is approximately [-4789.778, 4785.336], more than five times wider than
+the ordinary interval enclosure. Taylor-model construction therefore loses both
+on enclosure strength and cost for this workload. It is not integrated into the
+SMT classifier.
+
+The Taylor-specific `tanh` patch also triggered `-Wshadow` because its local
+`ModelType` typedef duplicated the existing typedef in
+`AlgebraOperations<TaylorModel<P,F>>`; the redundant local typedef has been
+removed.
+
+One bounded follow-up tests the existing validated affine model before closing
+the function-model route entirely. Ariadne's `affine_model(domain,function,dp)`
+constructs a Taylor model with `AffineSweeper`, discarding non-affine terms into
+the validated remainder as they arise, and converts the result to an affine
+model. The standalone benchmark now accepts query `affine` and reports model
+construction time and range on the same initial Lie-plus-barrier function. If
+this is not substantially cheaper than the full Taylor model or does not beat
+the ordinary interval enclosure, affine/Taylor function models should be
+excluded from further Barr3 SMT work.

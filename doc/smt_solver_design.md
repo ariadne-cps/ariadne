@@ -1881,3 +1881,26 @@ child `db/dy` widths. This directly tests whether a very cheap
 derivative-targeted split signal could recover the missing sign information
 more efficiently than generic geometric splitting, without evaluating the full
 constraint on all candidate children.
+
+
+The derivative-targeted one-step split profile is negative. On the 126
+unresolved boxes whose direct `db/dy` interval contains zero, an x split
+produces only 10 sign-definite children in total and makes both children
+sign-definite in 5 boxes; a y split produces 13 sign-definite children and
+makes both children sign-definite in 6 boxes. The width-score preference is
+essentially balanced (x wins 60 boxes, y wins 66), with average child-width
+sums about 9.38 for x and 9.17 for y. There is therefore no hidden coordinate
+preference that would justify a derivative-specific split heuristic.
+
+One final local enclosure test remains before escalating to a more structural
+representation. The earlier mean-value experiment was performed on the complete
+Lie-plus-barrier expression over the initial domain and was extremely poor.
+Query `lie-gradient-mean-value-profile` instead applies a centered first-order
+enclosure only to `db/dy`, and only on the much smaller unresolved frontier
+boxes where its direct interval contains zero. The two derivative functions are
+built once, then each box uses the midpoint value plus interval derivative
+terms. The diagnostic also intersects this enclosure with the ordinary direct
+interval, so the combined range can never be weaker than either source alone.
+If even this targeted local form fails to remove zero at reasonable cost, the
+remaining dependency is unlikely to be recoverable by the generic first-order
+machinery already present in Ariadne.

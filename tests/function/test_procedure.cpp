@@ -209,6 +209,14 @@ Void TestProcedure::test_evaluate()
     ARIADNE_TEST_PRINT(x);
 
     ARIADNE_TEST_EQUALS(evaluate(p,x),15.0_x);
+
+    ValidatedProcedure tanh_procedure(1);
+    tanh_procedure.new_instruction(Var(),0u);
+    tanh_procedure.new_instruction(Tanh(),0u);
+    Vector<FloatDPBounds> tanh_argument({FloatDPBounds(-1,1,dp)});
+    ARIADNE_TEST_SAME(
+        evaluate(tanh_procedure,tanh_argument),
+        tanh(tanh_argument[0]));
 }
 
 Void TestProcedure::test_propagate()
@@ -425,6 +433,7 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     check_unary(Sin(), S(0), S(0), S(0));
     check_unary(Cos(), S(0), S(1), S(0));
     check_unary(Tan(), S(0), S(0), S(0));
+    check_unary(Tanh(), S(0), S(0), S(0));
     check_unary(Sin(), E(3.125_x,3.25_x), S(0), E(3.125_x,3.25_x));
     check_unary(Cos(), E(4.5_x,5.0_x), S(0), E(4.5_x,5.0_x));
     check_unary(Tan(), E(3.125_x,3.25_x), S(0), E(3.125_x,3.25_x));
@@ -781,6 +790,11 @@ Void TestProcedure::test_elementary_empty_backpropagation()
     {
         UpperIntervalType argument=ExactIntervalType(-1,1);
         backpropagate(empty,Log(),argument);
+        ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
+    }
+    {
+        UpperIntervalType argument=ExactIntervalType(-1,1);
+        backpropagate(empty,Tanh(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
 }

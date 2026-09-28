@@ -2042,3 +2042,34 @@ second-tier range evaluator. If the runtime remains high, the next useful
 directions are improving polynomial/Taylor range extraction or returning to
 dependency-aware expression rewriting rather than further elaborating this
 first-order scheme.
+
+
+The compiled symbolic-derivative profile reproduces the quality of the earlier
+symbolic mean-value bound exactly enough to isolate evaluation cost. At the
+256-box frontier it resolves 28 of the 126 natural `db/dy` zero crossings;
+the average centered width is about 106.53 and the intersection with the
+natural interval has average width about 4.797. Symbolic derivative ranges also
+identify 11 sign-definite coordinate instances across 10 boxes, but the
+monotonicity endpoint bound is independently sign-definite in only 3 cases and
+does not increase the combined resolution beyond the same 28 boxes. Runtime
+falls from about 33.9 s for generic function application to about 27.9 s, but
+252 derivative-procedure evaluations still consume about 18.0 s. Procedure
+construction itself is only about 0.51 s and symbolic derivative construction
+about 0.04 s. Therefore the bottleneck is repeated derivative evaluation, not
+derivative construction.
+
+A further inspection of `Procedure` corrects an initially pessimistic
+assumption: Ariadne already has a multi-output `Vector<Procedure<Y>>`. Its
+constructor converts all output formulas using one node cache, so common
+Formula DAG nodes shared by multiple outputs become one instruction stream,
+and a vector evaluation executes that stream once. Query
+`lie-gradient-shared-procedure-profile` therefore constructs the vector
+`[db/dy, d(db/dy)/dx, d(db/dy)/dy]`, compiles it as one validated vector
+procedure, and uses one shared evaluation per frontier box. It reports the sum
+of instruction counts from the three separately compiled scalar procedures and
+the instruction count of the shared vector procedure, in addition to the same
+centered/monotonicity quality metrics and timing. This directly measures how
+much common structure symbolic differentiation preserves and whether Ariadne's
+existing multi-output procedure machinery can turn the 28-box centered bound
+into a practical second-tier range evaluator without introducing a new range
+algebra.

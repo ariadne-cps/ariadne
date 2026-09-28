@@ -1597,3 +1597,25 @@ explicit and tests both branches. If the 2,048-box pruning fraction changes
 materially under upper-first traversal, the apparent plateau is partly a
 budget/frontier-order effect; if it remains near one half, search order alone
 is not the missing decision mechanism.
+
+The 2,048-box upper-first DFS diagnostic is also negative. Reversing child
+visit order changes the Lie-only result only from 1,020 pruned / 1,028 split
+to 1,021 pruned / 1,027 split boxes, with no epsilon certification. The pruning
+fraction therefore remains essentially one half. The measured elapsed time
+drops from 62.567 s to 59.847 s, but the search-progress difference is one box
+and is not evidence of improved decision power. Sequential child order is
+therefore not pursued as a Barr3 search mechanism.
+
+Work now moves from scheduling heuristics back to enclosure strength. Ariadne
+already provides validated multivariate Taylor function models, which preserve
+polynomial correlation over a bounded box. The standalone Barr3 benchmark adds
+a `taylor` diagnostic that constructs a
+`ValidatedScalarMultivariateTaylorFunctionModelDP` for Lie-plus-barrier on the
+initial domain using a threshold sweeper of 1e-8. It reports the ordinary
+validated interval image and evaluation time, Taylor-model construction time,
+and the model range. This is intentionally not integrated into SMT search yet.
+The first question is whether the existing Taylor representation yields a
+materially tighter finite enclosure at tolerable construction cost. Its generic
+`tanh` path currently uses the normed-algebra exp-ratio identity, so this
+diagnostic also reveals whether the numerical stability issue previously fixed
+for interval evaluation reappears in Taylor arithmetic.

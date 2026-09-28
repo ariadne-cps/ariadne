@@ -13,6 +13,7 @@
 #include "utility/stopwatch.hpp"
 #include "function/procedure.hpp"
 #include "function/procedure.tpl.hpp"
+#include "function/taylor_function.hpp"
 #include "symbolic/expression.hpp"
 #include "solvers/smt_solver.hpp"
 
@@ -40,12 +41,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval]");
+        "[all|lie|lie-only|eval|taylor]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -57,7 +58,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -68,7 +69,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -80,7 +81,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -437,8 +438,36 @@ Void profile_evaluator(
               << std::endl;
 }
 
-SmtResult timed_solve(
+Void profile_taylor_range(
     String const& name,
+    ValidatedScalarMultivariateFunction const& function,
+    ExactBoxType const& domain)
+{
+    UpperBoxType upper_domain(domain);
+    Stopwatch<Milliseconds> interval_stopwatch;
+    UpperIntervalType interval_image=apply(function,upper_domain);
+    interval_stopwatch.click();
+
+    ThresholdSweeper<FloatDP> sweeper(dp,1e-8);
+    Stopwatch<Milliseconds> build_stopwatch;
+    ValidatedScalarMultivariateTaylorFunctionModelDP model(
+        domain,function,sweeper);
+    build_stopwatch.click();
+
+    Stopwatch<Milliseconds> range_stopwatch;
+    auto model_range=model.range();
+    range_stopwatch.click();
+
+    std::cout << "[taylor-profile] " << name
+              << " interval-time=" << interval_stopwatch.elapsed_seconds()
+              << " interval-image=" << interval_image
+              << " model-build=" << build_stopwatch.elapsed_seconds()
+              << " model-range-time=" << range_stopwatch.elapsed_seconds()
+              << " model-range=" << model_range
+              << std::endl;
+}
+
+SmtResult timed_solve(    String const& name,
     SmtSolver const& solver,
     RealSpace const& space,
     ExactBoxType const& domain,
@@ -548,6 +577,14 @@ Int main(Int argc,const char* argv[]) {
         profile_expression_bounds("db/dy",network.db_dy,space,UpperBoxType(domain));
         profile_expression_bounds("lie",network.lie,space,UpperBoxType(domain));
         profile_direct_barr3(UpperBoxType(domain),8u);
+        return 0;
+    }
+
+    if(query=="taylor") {
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_taylor_range(
+            "lie+barrier",lie_function,domain);
         return 0;
     }
 

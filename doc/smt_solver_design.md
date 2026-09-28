@@ -1859,3 +1859,25 @@ box by continuity. Same-sign samples do not prove sign-definiteness, but a high
 same-sign fraction would indicate substantial room for a stronger enclosure.
 The first run should use the 256-box frontier to keep this five-point sampling
 diagnostic inexpensive.
+
+
+The 256-box gradient-sign profile gives mixed evidence rather than showing that
+the interval zero crossings are mostly real. It reproduces the established
+frontier (256 processed, 123 pruned, 133 split) and finds 126 unresolved boxes
+whose validated `db/dy` image contains zero. Midpoint-plus-corner sampling
+proves both positive and negative values in only 34 of those boxes (27.0%).
+The remaining 92 boxes have all five validated samples on one side of zero:
+35 positive-only and 57 negative-only, with no point-evaluation ambiguity.
+This does not prove those 92 boxes are sign-definite, but it is strong evidence
+that dependency inflation may account for a substantial part of the residual
+interval ambiguity.
+
+Before introducing a new derivative enclosure, query
+`lie-gradient-split-profile` performs one validated candidate bisection in
+each state coordinate on every unresolved box whose `db/dy` interval contains
+zero. For x and y separately it records how many child boxes become
+sign-definite, how often both children become sign-definite, and the sum of
+child `db/dy` widths. This directly tests whether a very cheap
+derivative-targeted split signal could recover the missing sign information
+more efficiently than generic geometric splitting, without evaluating the full
+constraint on all candidate children.

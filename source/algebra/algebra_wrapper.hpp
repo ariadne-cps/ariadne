@@ -63,11 +63,11 @@ template<class A, class X> requires AnAlgebraOver<A,X> class AlgebraWrapper<A,X>
         return heap_move(op(static_cast<const A&>(*this))); }
     virtual AlgebraInterface<X>* _apply(BinaryRingOperator op, AlgebraInterface<X> const& a) const override {
         return heap_move(op(static_cast<const A&>(*this),dynamic_cast<AlgebraWrapper<A,X>const&>(a))); }
-    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator op, X const& c) const override {
+    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator, X const&) const override {
         return heap_move(op(static_cast<const A&>(*this),c)); }
-    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator op, X const& c) const override {
+    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator, X const&) const override {
         return heap_move(op(c,static_cast<const A&>(*this))); };
-    virtual AlgebraInterface<X>* _apply(GradedRingOperator op, Nat m) const override {
+    virtual AlgebraInterface<X>* _apply(GradedRingOperator, Nat) const override {
         return heap_move(op(static_cast<const A&>(*this),m)); };
     virtual OutputStream& _write(OutputStream& os) const override { os << static_cast<const A&>(*this); return os; }
 };
@@ -92,9 +92,9 @@ template<class A, class X> requires AnInplaceAlgebraOver<A,X> class AlgebraWrapp
         static_cast<A*>(this)->A::isma(c,dynamic_cast<const A&>(x)); }
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) override {
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
-    virtual AlgebraInterface<X>* _apply(Neg op) const override {
+    virtual AlgebraInterface<X>* _apply(Neg) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual AlgebraInterface<X>* _apply(BinaryRingOperator op, AlgebraInterface<X> const& c) const override {
+    virtual AlgebraInterface<X>* _apply(BinaryRingOperator, AlgebraInterface<X> const&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual AlgebraInterface<X>* _apply(BinaryFieldOperator op, X const& c) const override {
         ARIADNE_NOT_IMPLEMENTED; }

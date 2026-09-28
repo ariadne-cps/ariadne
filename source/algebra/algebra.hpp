@@ -302,7 +302,7 @@ template<class T> class PrototypeCharacteristics {
   public:
     PrototypeCharacteristics(T prototype) : _prototype(prototype.create_zero()) { }
     operator T const& () const { return _prototype; }
-    friend Bool operator==(PrototypeCharacteristics<T> const& prs1, PrototypeCharacteristics<T> const& prs2) {
+    friend Bool operator==(PrototypeCharacteristics<T> const&, PrototypeCharacteristics<T> const&) {
         ARIADNE_NOT_IMPLEMENTED; }
 };
 

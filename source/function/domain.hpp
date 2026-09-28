@@ -51,11 +51,11 @@ class RealDomain {
     constexpr RealDomain(SizeOne) { } //!< .
     constexpr SizeOne dimension() const { return SizeOne(); } //!< .
     operator IntervalDomainType() const { return IntervalDomainType(-inf,+inf); } //!< .
-    friend RealDomain intersection(RealDomain const& dom1, RealDomain const& dom2) { return RealDomain(); } //!< .
-    friend Bool operator==(RealDomain const& dom1, RealDomain const& dom2) { return true; } //!< .
+    friend RealDomain intersection(RealDomain const&, RealDomain const&) { return RealDomain(); } //!< .
+    friend Bool operator==(RealDomain const&, RealDomain const&) { return true; } //!< .
     friend Bool operator==(RealDomain const& dom1, IntervalDomainType const& dom2) { return IntervalDomainType(dom1)==dom2; } //!< .
     friend Bool operator==(IntervalDomainType const& dom1, RealDomain const& dom2) { return dom1==IntervalDomainType(dom2); } //!< .
-    friend OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; } //!< .
+    friend OutputStream& operator<<(OutputStream& os, RealDomain const&) { return os << "R"; } //!< .
 };
 
 //! \ingroup FunctionModule \brief The domain of an entire multivariate function.
@@ -68,9 +68,9 @@ class EuclideanDomain {
     constexpr EuclideanDomain(SizeType dim) : _dim(dim) { } //!< .
     constexpr EuclideanDomain(SizeType dim, RealDomain) : _dim(dim) { } //!< .
     constexpr SizeType dimension() const { return this->_dim; } //!< .
-    constexpr RealDomain operator[](SizeType ind) { return RealDomain(); } //!< .
+    constexpr RealDomain operator[](SizeType) { return RealDomain(); } //!< .
     operator BoxDomainType() const { return BoxDomainType(this->dimension(),IntervalDomainType(RealDomain())); } //!< .
-    friend EuclideanDomain intersection(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { assert(dom1==dom2); return dom1; } //!< .
+    friend EuclideanDomain intersection(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { static_cast<void>(dom2); assert(dom1==dom2); return dom1; } //!< .
     friend EuclideanDomain product(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); } //!< .
     friend EuclideanDomain product(EuclideanDomain const& dom1, RealDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); } //!< .
     friend Bool operator==(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return dom1.dimension() == dom2.dimension(); } //!< .
@@ -85,9 +85,9 @@ class UnitInterval {
     constexpr UnitInterval() { } //!< .
     constexpr SizeOne dimension() const { return SizeOne(); } //!< .
     operator IntervalDomainType() const { return IntervalDomainType(-1,+1); } //!< .
-    friend UnitInterval intersection(UnitInterval const& dom1, UnitInterval const& dom2) { return UnitInterval(); } //!< .
-    friend Bool operator==(UnitInterval const& dom1, UnitInterval const& dom2) { return true; } //!< .
-    friend OutputStream& operator<<(OutputStream& os, UnitInterval const& dom) { return os << "[-1:+1]"; } //!< .
+    friend UnitInterval intersection(UnitInterval const&, UnitInterval const&) { return UnitInterval(); } //!< .
+    friend Bool operator==(UnitInterval const&, UnitInterval const&) { return true; } //!< .
+    friend OutputStream& operator<<(OutputStream& os, UnitInterval const&) { return os << "[-1:+1]"; } //!< .
 };
 
 //! \ingroup FunctionModule \brief The signed unit interval \f$[-1:+1]^n\f$.
@@ -97,9 +97,9 @@ class UnitBox {
     constexpr UnitBox(SizeType dim) : _dim(dim) { } //!< .
     constexpr UnitBox(SizeType dim, UnitInterval) : _dim(dim) { } //!< .
     constexpr SizeType dimension() const { return this->_dim; } //!< .
-    constexpr UnitInterval operator[](SizeType ind) { return UnitInterval(); } //!< .
+    constexpr UnitInterval operator[](SizeType) { return UnitInterval(); } //!< .
     operator BoxDomainType() const { return BoxDomainType(this->dimension(),IntervalDomainType(UnitInterval())); } //!< .
-    friend UnitBox intersection(UnitBox const& dom1, UnitBox const& dom2) { assert(dom1==dom2); return dom1; } //!< .
+    friend UnitBox intersection(UnitBox const& dom1, UnitBox const& dom2) { static_cast<void>(dom2); assert(dom1==dom2); return dom1; } //!< .
     friend UnitBox product(UnitBox const& dom1, UnitBox const& dom2) { return UnitBox(dom1.dimension()+dom2.dimension()); } //!< .
     friend UnitBox product(UnitBox const& dom1, UnitInterval const& dom2) { return UnitBox(dom1.dimension()+dom2.dimension()); } //!< .
     friend Bool operator==(UnitBox const& dom1, UnitBox const& dom2) { return dom1.dimension() == dom2.dimension(); } //!< .

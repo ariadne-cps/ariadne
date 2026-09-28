@@ -1246,3 +1246,27 @@ still return an unbounded interval on the initial Barr3 box, while the stable
 direct network evaluation returns finite enclosures. Work can therefore move to
 a general stable representation of tanh without using a Barr3-specific execution
 path as a solver optimization.
+
+
+### Native tanh validation stage
+
+A general `Tanh` unary elementary operator has now been added across the
+numeric, algebraic, symbolic and Procedure layers. Its validated
+`Bounds<F>` implementation evaluates the monotone endpoint image with
+sign-stable formulae rather than the dependency-prone
+`(exp(2*x)-1)/(exp(2*x)+1)` quotient. Support was also completed for the
+rounded and geometric interval types used by differential algebra, for
+`Graded` propagation through the identity `y' = x'*(1-y^2)`, and for the
+symbolic affine/polynomial classifiers. The focused numeric, expression and
+Procedure regressions are green.
+
+The published Barr3 fixture now represents each hidden activation with the
+native `tanh` expression. Its explicit forward derivative propagation is
+otherwise unchanged, so this experiment isolates activation representation
+from the already-resolved expression-DAG sharing issue. The fast Full64 neural
+smoke test and the standalone evaluator benchmark must be rerun on this exact
+revision before drawing conclusions about enclosure quality or performance.
+The key comparison remains the initial full-box `eval` profile: generic
+function, Formula and expression-derived Procedure images should be compared
+with the Barr3-only direct reference evaluator, with particular attention to
+whether the generic barrier and Lie-plus-barrier images become finite.

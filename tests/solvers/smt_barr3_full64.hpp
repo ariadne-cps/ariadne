@@ -64,8 +64,7 @@ inline RealExpression constant(double value) {
 }
 
 inline RealExpression tanh_expression(RealExpression const& value) {
-    RealExpression e=exp(2*value);
-    return (e-1)/(e+1);
+    return tanh(value);
 }
 
 inline RealExpression network(RealExpression const& x0, RealExpression const& x1) {

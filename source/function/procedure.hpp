@@ -195,7 +195,7 @@ template<class X, class Y> inline X evaluate(const Procedure<Y>& p, const Vector
 template<class X, class Y> inline Vector<X> evaluate(const Vector<Procedure<Y>>& p, const Vector<X>& x) {
     List<X> t(p._instructions.size(),x.zero_element());
     _execute(t,p._instructions,p._constants,x);
-    Vector<X> r(p.result_size());
+    Vector<X> r(p.result_size(),x.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=std::move(t[p._results[i]]); }
     return r;
 }

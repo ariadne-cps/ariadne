@@ -78,7 +78,7 @@ template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, UnknownError<F
 template<class F> UnknownError<F> operator+(UnknownError<F>, PositiveApproximation<F> const&) { return UnknownError<F>(); }
 template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
 template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
-template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const& e) { return os << "???"; }
+template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const&) { return os << "???"; }
 template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, ExactDouble const&) { return e; }
 
 
@@ -188,7 +188,7 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-inline Interval<FloatDP> convert_interval(Interval<FloatDP> const& ivl, DoublePrecision pr) {
+inline Interval<FloatDP> convert_interval(Interval<FloatDP> const& ivl, DoublePrecision) {
     return ivl; }
 inline Interval<FloatMP> convert_interval(Interval<FloatDP> const& ivl, MultiplePrecision pr) {
     return Interval<FloatMP>(FloatMP(ivl.lower_bound().raw(),pr),FloatMP(ivl.upper_bound().raw(),pr)); }
@@ -538,7 +538,7 @@ template<class P, class F> DegreeType TaylorModel<P,F>::degree() const {
 }
 
 
-template<class F> UpperInterval<F> set_err(UpperInterval<F> const& x, Error<F>& e) {
+template<class F> UpperInterval<F> set_err(UpperInterval<F> const& x, Error<F>&) {
     return x;
 }
 
@@ -546,7 +546,7 @@ template<class F> F set_err(Bounds<F> const& x, Error<F>& e) {
      e+=x.error(); return x.value();
 }
 
-template<class F> Approximation<F> const& set_err(Approximation<F> const& x, UnknownError<F>& e) {
+template<class F> Approximation<F> const& set_err(Approximation<F> const& x, UnknownError<F>&) {
     return x;
 }
 
@@ -643,19 +643,19 @@ template<class F> F add_err(F const& x, Bounds<F> const& c, Error<F>& e) {
     return add_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class F> Bounds<F> add_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+template<class F> Bounds<F> add_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>&) {
     return add(x1,x2);
 }
 
-template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>&) {
     return add(x1,x2);
 }
 
-template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, Nat n2, Error<F>&) {
     return add(x1,n2);
 }
 
-template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>&) {
     return add(x1,x2);
 }
 
@@ -670,19 +670,19 @@ template<class F> F sub_err(F const& x1, F const& x2, Error<F>& e) {
     return r;
 }
 
-template<class F> Bounds<F> sub_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+template<class F> Bounds<F> sub_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>&) {
     return sub(x1,x2);
 }
 
-template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>&) {
     return sub(x1,x2);
 }
 
-template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, Nat n2, Error<F>&) {
     return sub(x1,n2);
 }
 
-template<class F> Approximation<F> sub_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+template<class F> Approximation<F> sub_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>&) {
     return sub(x1,x2);
 }
 
@@ -739,27 +739,27 @@ template<class F> F mul_err(F const& x1, Nat n2, Error<F>& e) {
     return mul_err(x1,F(n2,x1.precision()),e);
 }
 
-template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>&) {
     return mul(x1,x2);
 }
 
-template<class F> Bounds<F> mul_err(Bounds<F> const& x1, ValidatedApproximation<F> const& x2, Error<F>& e) {
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, ValidatedApproximation<F> const& x2, Error<F>&) {
     return mul(x1,static_cast<Bounds<F>>(x2));
 }
 
-template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Nat const& n2, Error<F>& e) {
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Nat const& n2, Error<F>&) {
     return mul(x1,n2);
 }
 
-template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>&) {
     return mul(x1,x2);
 }
 
-template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, Nat n2, Error<F>&) {
     return mul(x1,n2);
 }
 
-template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>&) {
     return mul(x1,x2);
 }
 
@@ -782,23 +782,23 @@ template<class F> F div_err(F const& x1, Nat n2, Error<F>& e) {
     return div_err(x1,F(n2,x1.precision()),e);
 }
 
-template<class F> Bounds<F> div_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+template<class F> Bounds<F> div_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>&) {
     return div(x1,x2);
 }
 
-template<class F> Bounds<F> div_err(Bounds<F> const& x1, Nat n2, Error<F>& e) {
+template<class F> Bounds<F> div_err(Bounds<F> const& x1, Nat n2, Error<F>&) {
     return div(x1,n2);
 }
 
-template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>&) {
     return div(x1,x2);
 }
 
-template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, Nat n2, Error<F>&) {
     return div(x1,n2);
 }
 
-template<class F> Approximation<F> div_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+template<class F> Approximation<F> div_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>&) {
     return div(x1,x2);
 }
 
@@ -853,19 +853,19 @@ template<class F> F fma_err(Bounds<F> const& c, F const& x, F y, Error<F>& e) {
     return fma_err(ValidatedApproximation<F>(c),x,y,e);
 }
 
-template<class F> Bounds<F> fma_err(Bounds<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>& e) {
+template<class F> Bounds<F> fma_err(Bounds<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>&) {
     return fma(x,y,z);
 }
 
-template<class F> UpperInterval<F> fma_err(UpperInterval<F> const& x, UpperInterval<F> const& y, UpperInterval<F> z, Error<F>& e) {
+template<class F> UpperInterval<F> fma_err(UpperInterval<F> const& x, UpperInterval<F> const& y, UpperInterval<F> z, Error<F>&) {
     return fma(x,y,z);
 }
 
-template<class F> Bounds<F> fma_err(ValidatedApproximation<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>& e) {
+template<class F> Bounds<F> fma_err(ValidatedApproximation<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>&) {
     return fma(static_cast<Bounds<F>>(x),y,z);
 }
 
-template<class F> Approximation<F> fma_err(Approximation<F> const& x, Approximation<F> const& y, Approximation<F> z, UnknownError<F>& e) {
+template<class F> Approximation<F> fma_err(Approximation<F> const& x, Approximation<F> const& y, Approximation<F> z, UnknownError<F>&) {
     return fma(x,y,z);
 }
 
@@ -918,32 +918,32 @@ template<class X> X const& add(X const& x, Zero) { return x; }
 template<class X> X const& add(Zero, X const& x) { return x; }
 template<class X> X const& sub(X const& x, Zero) { return x; }
 template<class X> X sub(Zero, X const& x) { return neg(x); }
-template<class X> Zero mul(X const& x, Zero) { return zero; }
-template<class X> Zero mul(Zero, X const& x) { return zero; }
+template<class X> Zero mul(X const&, Zero) { return zero; }
+template<class X> Zero mul(Zero, X const&) { return zero; }
 
 
 struct NegErr {
-    template<class V, class E> decltype(auto) operator()(V&& v, E& e) const { return neg(std::forward<V>(v)); }
+    template<class V, class E> decltype(auto) operator()(V&& v, E&) const { return neg(std::forward<V>(v)); }
 };
 struct AddErr {
     template<class V, class E> inline V operator() (V const& xv, V const& yv, E& e) const { return add_err(xv,yv,e); }
-    template<class V, class E> inline V const& operator() (V const& xv, Zero, E& e) const { return xv; }
-    template<class V, class E> inline V const& operator() (Zero, V const& yv, E& e) const { return yv; }
+    template<class V, class E> inline V const& operator() (V const& xv, Zero, E&) const { return xv; }
+    template<class V, class E> inline V const& operator() (Zero, V const& yv, E&) const { return yv; }
 };
 struct SubErr {
     template<class V, class E> inline V operator() (V const& xv, V const& yv, E& e) const { return sub_err(xv,yv,e); }
-    template<class V, class E> inline V const& operator() (V const& xv, Zero, E& e) const { return xv; }
-    template<class V, class E> inline V operator() (Zero, V const& yv, E& e) const { return neg(yv); }
+    template<class V, class E> inline V const& operator() (V const& xv, Zero, E&) const { return xv; }
+    template<class V, class E> inline V operator() (Zero, V const& yv, E&) const { return neg(yv); }
 };
 struct MulErr {
     template<class VX, class VY, class E> inline decltype(auto) operator() (VX const& xv, VY const& yv, E& e) const { return mul_err(xv,yv,e); }
-    template<class V, class E> inline Zero operator() (V const& xv, Zero, E& e) const { return zero; }
-    template<class V, class E> inline Zero operator() (Zero, V const& yv, E& e) const { return zero; }
+    template<class V, class E> inline Zero operator() (V const&, Zero, E&) const { return zero; }
+    template<class V, class E> inline Zero operator() (Zero, V const&, E&) const { return zero; }
 };
 struct FmaErr {
     template<class C, class VX, class VY, class E> inline decltype(auto) operator() (C const& c, VX const& xv, VY const& yv, E& e) const { return fma_err(c,xv,yv,e); }
     template<class C, class V, class E> inline V operator() (C const& c, V const& xv, Zero, E& e) const { return mul_err(c,xv,e); }
-    template<class C, class V, class E> inline V const& operator() (C const&, Zero, V const& yv, E& e) const { return yv; }
+    template<class C, class V, class E> inline V const& operator() (C const&, Zero, V const& yv, E&) const { return yv; }
 };
 
 // Inplace negation

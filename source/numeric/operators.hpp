@@ -535,21 +535,21 @@ class UnaryOperator {
 };
 
 
-inline OutputStream& operator<<(OutputStream& os, const Less& v) { return os << "<"; }
-inline OutputStream& operator<<(OutputStream& os, const Gtr& v) { return os << ">"; }
-inline OutputStream& operator<<(OutputStream& os, const Leq& v) { return os << "<="; }
-inline OutputStream& operator<<(OutputStream& os, const Geq& v) { return os << ">="; }
-inline OutputStream& operator<<(OutputStream& os, const Equal& v) { return os << "=="; }
-inline OutputStream& operator<<(OutputStream& os, const Unequal& v) { return os << "!="; }
+inline OutputStream& operator<<(OutputStream& os, const Less&) { return os << "<"; }
+inline OutputStream& operator<<(OutputStream& os, const Gtr&) { return os << ">"; }
+inline OutputStream& operator<<(OutputStream& os, const Leq&) { return os << "<="; }
+inline OutputStream& operator<<(OutputStream& os, const Geq&) { return os << ">="; }
+inline OutputStream& operator<<(OutputStream& os, const Equal&) { return os << "=="; }
+inline OutputStream& operator<<(OutputStream& os, const Unequal&) { return os << "!="; }
 
-inline OutputStream& operator<<(OutputStream& os, const AndOp& v) { return os << "&&"; }
-inline OutputStream& operator<<(OutputStream& os, const OrOp& v) { return os << "||"; }
-inline OutputStream& operator<<(OutputStream& os, const NotOp& v) { return os << "!"; }
+inline OutputStream& operator<<(OutputStream& os, const AndOp&) { return os << "&&"; }
+inline OutputStream& operator<<(OutputStream& os, const OrOp&) { return os << "||"; }
+inline OutputStream& operator<<(OutputStream& os, const NotOp&) { return os << "!"; }
 
-inline OutputStream& operator<<(OutputStream& os, const Plus& v) { return os << "+"; }
-inline OutputStream& operator<<(OutputStream& os, const Minus& v) { return os << "-"; }
-inline OutputStream& operator<<(OutputStream& os, const Times& v) { return os << "*"; }
-inline OutputStream& operator<<(OutputStream& os, const Divides& v) { return os << "/"; }
+inline OutputStream& operator<<(OutputStream& os, const Plus&) { return os << "+"; }
+inline OutputStream& operator<<(OutputStream& os, const Minus&) { return os << "-"; }
+inline OutputStream& operator<<(OutputStream& os, const Times&) { return os << "*"; }
+inline OutputStream& operator<<(OutputStream& os, const Divides&) { return os << "/"; }
 
 
 } // namespace Ariadne

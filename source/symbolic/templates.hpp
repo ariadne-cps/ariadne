@@ -43,14 +43,14 @@ struct Get {
     static constexpr OperatorCode code() { return OperatorCode::GET; }
     static OperatorKind kind() { return OperatorKind::COORDINATE; }
     template<class V, class I> decltype(auto) operator() (V const& v, I i) { return v.operator[](i); }
-    friend OutputStream& operator<<(OutputStream& os, Get const& op) { return os << "get"; }
+    friend OutputStream& operator<<(OutputStream& os, Get const&) { return os << "get"; }
 };
 
 struct Vec {
     static constexpr OperatorCode code() { return OperatorCode::VEC; }
     static OperatorKind kind() { return OperatorKind::NULLARY; }
     template<class X> decltype(auto) operator() (Array<X> const& a) { return Vector<X>(a); }
-    friend OutputStream& operator<<(OutputStream& os, Vec const& op) { return os << "Vector"; }
+    friend OutputStream& operator<<(OutputStream& os, Vec const&) { return os << "Vector"; }
 };
 
 /************ Symbolic ************************************************/
@@ -63,7 +63,7 @@ template<class C> struct Symbolic<Cnst,C> {
     Symbolic(Cnst o, C c) : _op(o), _val(c) { }
     C val() const { return _val; }
     template<class T> explicit operator T() const { return static_cast<T>(_val); }
-    template<class... AS> auto operator() (AS... vals) const -> C { return _val; }
+    template<class... AS> auto operator() (AS...) const -> C { return _val; }
     friend OutputStream& operator<<(OutputStream& os, Symbolic<Cnst,C> const& expr) { return os << expr._val; }
 };
 
@@ -114,7 +114,7 @@ template<class O, class A, class N> requires AGraded<O> struct Symbolic<O,A,N> {
 
 template<class O, class A1, class A2, class A3> struct Symbolic<O,A1,A2,A3> {
     O _op; A1 _arg1; A2 _arg2; A3 _arg3;
-    Symbolic(O o, A1 a1, A2 a2, A3 a3) : _op(o), _arg1(a1), _arg3(a3) { }
+    Symbolic(O o, A1 a1, A2 a2, A3 a3) : _op(o), _arg1(a1), _arg2(a2), _arg3(a3) { }
     template<class T> explicit operator T() const { return _op(static_cast<T>(_arg1),static_cast<T>(_arg2),static_cast<T>(_arg3)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg1(vals...),_arg2(vals...),_arg3(vals...))) {
         return _op(_arg1(vals...),_arg2(vals...),_arg3(vals...)); }
@@ -168,7 +168,7 @@ template<class C, class F> struct Symbolic<While,C,F> {
 
 template<class F> struct Symbolic<Iterate,F> {
     F _fn;
-    Symbolic(Iterate op, F fn) : _fn(fn) { }
+    Symbolic(Iterate, F fn) : _fn(fn) { }
     template<class S> Sequence<S> operator () (S const& s) const {
         // TODO: Use cache so that sequence does not always have to be recomputed
         return Sequence<S>([&](Natural const& n){ S t=s; for(Natural i=0u; i!=n; ++i) { t=_fn(t); } return t; }); }
@@ -192,7 +192,7 @@ template<class O, class A1, class A2> struct TemporaryExpression<O,A1,A2> {
 
 template<class O, class A1, class A2, class A3> struct TemporaryExpression<O,A1,A2,A3> {
     O _op; A1 const& _arg1; A2 const& _arg2; A3 const& _arg3;
-    TemporaryExpression(O o, A1 const& a1, A2 const& a2, A3 const& a3) : _op(o), _arg1(a1), _arg3(a3) { }
+    TemporaryExpression(O o, A1 const& a1, A2 const& a2, A3 const& a3) : _op(o), _arg1(a1), _arg2(a2), _arg3(a3) { }
 };
 
 

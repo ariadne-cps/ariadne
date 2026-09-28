@@ -180,15 +180,15 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
                           Lambda, expLambda, expL);
 }
 
-ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
+ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {
     return min(n.pK*n.expLambda*h, (n.K*2u+n.pK)*h); }
-ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
+ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h, SizeType j) {
     return min(n.pKv*n.expL*h, min( (n.Kj[j]*2u+n.pKjv[j])*h, n.pKv*n.expLambda*h));
 }
 
-ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
+ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {
     return pow(h,2u)*((n.K+n.pKv)*n.pLv + n.pKv*(n.L+n.pLw)*n.expLambda)*2u; }
-ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
+ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h, SizeType j) {
     return pow(h,2u)*(n.pLjv[j]*(n.K+n.pKv)/2u + (n.Lj[j]+n.pLjw[j])*(n.pKv+n.pKw)*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
 template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {

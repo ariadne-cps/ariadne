@@ -31,6 +31,7 @@
 
 #include <iosfwd>
 
+#include "foundations/representation.hpp"
 #include "function/declarations.hpp"
 #include "function/function.decl.hpp"
 #include "function/function_traits.hpp"
@@ -39,7 +40,6 @@ namespace Ariadne {
 
 static const Int SMOOTH=255;
 
-template<class T> struct Representation;
 template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,SIG>>& f);
 
 template<class P, class SIG> class FunctionInterface;

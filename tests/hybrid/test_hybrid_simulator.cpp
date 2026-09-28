@@ -41,7 +41,6 @@
 
 #include "../test.hpp"
 
-using namespace Ariadne::Logging;
 
 using namespace Ariadne;
 using namespace std;

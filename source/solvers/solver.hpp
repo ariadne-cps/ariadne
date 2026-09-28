@@ -43,7 +43,6 @@
 #include "utility/container.hpp"
 #include "numeric/numeric.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

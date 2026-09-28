@@ -46,7 +46,6 @@
 #include "algebra/evaluate.hpp"
 #include "algebra/evaluate.tpl.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

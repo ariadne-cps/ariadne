@@ -2097,3 +2097,15 @@ also guarding the explicit-zero initialization fix made when the shared
 procedure experiment first instantiated this path. The shared-procedure
 consistency check must be rerun after this fix; only if all three output
 mismatch counters are zero should the performance profile be interpreted.
+
+
+After fixing the validated scalar-vector join fallback, the shared-procedure
+consistency check passes exactly on the full 256-box diagnostic frontier. It
+checks all 126 unresolved boxes whose natural `db/dy` range contains zero and
+reports zero mismatches for the natural value, x derivative and y derivative,
+zero negative raw widths, and zero maximum endpoint difference. The average
+separate/shared derivative widths also agree exactly: about 41.09 for the x
+derivative and 48.73 for the y derivative. This validates the semantics of the
+multi-output procedure path after the join fix. The earlier shared-performance
+numbers obtained before the fix remain invalid and must not be reused; the
+performance profile must now be rerun from the corrected branch.

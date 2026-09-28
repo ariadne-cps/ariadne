@@ -262,7 +262,7 @@ class TestPdes
         }
 };
 
-int main(int argc, const char** argv) {
+int main() {
 
     TestPdes testPdes;
 
@@ -270,6 +270,5 @@ int main(int argc, const char** argv) {
 
     return ARIADNE_TEST_FAILURES;
 }
-
 
 

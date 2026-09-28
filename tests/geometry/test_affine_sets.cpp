@@ -482,10 +482,9 @@ class TestAffineSet
 
 
 
-Int main(Int argc, const char* argv[])
+Int main()
 {
     TestAffineSet().test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
-

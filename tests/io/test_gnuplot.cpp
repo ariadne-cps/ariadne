@@ -76,7 +76,7 @@ class TestGnuplot
         }
 
         template< class PR>
-        void test_box(PR pr)
+        void test_box(PR)
         {
             Box<Interval<Float<PR>>> box({{1,4},{2,3}});
             Figure g1 = Figure(ApproximateBoxType({{0,5},{1,4}}), Projection2d(2,0,1));
@@ -271,7 +271,7 @@ class TestGnuplot
         }
 };
 
-int main(int argc, const char** argv) {
+int main() {
 
     TestGnuplot testGnuplot;
 
@@ -283,8 +283,7 @@ int main(int argc, const char** argv) {
 }
 
 #else
-int main(int arc, const char** argv)
+int main()
 {}
 
 #endif
-

@@ -221,10 +221,9 @@ class TestGraphics {
     }
 };
 
-Int main(Int argc, char **argv)
+Int main()
 {
     TestGraphics().test();
 
     return ARIADNE_TEST_FAILURES;
 }
-

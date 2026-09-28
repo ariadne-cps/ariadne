@@ -355,10 +355,9 @@ class TestValidatedConstrainedImageSet {
 };
 
 
-Int main(Int argc, const char* argv[])
+Int main()
 {
     TestConstrainedImageSet().test();
     TestValidatedConstrainedImageSet().test();
     return ARIADNE_TEST_FAILURES;
 }
-

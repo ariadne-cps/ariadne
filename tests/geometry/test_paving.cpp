@@ -256,9 +256,8 @@ Void TestPaving::test_approximation() const {
 }
 
 
-Int main(Int argc, const char* argv[])
+Int main()
 {
     TestPaving().test();
     return ARIADNE_TEST_FAILURES;
 }
-

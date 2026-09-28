@@ -184,7 +184,7 @@ class TestBounder
     }
 };
 
-Int main(Int argc, const char* argv[]) {
+Int main() {
 
     List<BounderHandle> bounders = { EulerBounder() };
 

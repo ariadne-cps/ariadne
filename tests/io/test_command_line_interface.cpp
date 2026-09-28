@@ -214,8 +214,7 @@ class TestCommandLineInterface {
 
 };
 
-Int main(Int argc, const char* argv[]) {
+Int main() {
     TestCommandLineInterface().test();
     return ARIADNE_TEST_FAILURES;
 }
-

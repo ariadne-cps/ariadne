@@ -1477,3 +1477,26 @@ updated sensitivity path remains expensive and rarely overrides the geometric
 choice, it should be excluded from the Barr3 cheap-first schedule. If it changes
 the split sequence materially at acceptable cost, its pruning gain can then be
 measured at the same frontier before designing a new heuristic.
+
+
+The current-evaluator 64-box sensitivity rerun closes that heuristic for Barr3.
+With witness probing, shaving, hull and monotone reduction disabled, sensitivity
+splitting produces exactly the same observed search outcome as geometric
+splitting: 27 boxes pruned and 37 split, with no epsilon certification. All 37
+splits are reported as sensitivity-guided but none overrides the geometrically
+widest coordinate. Elapsed time rises from about 2.835 s for the geometric
+baseline to 27.649 s. The sensitivity phase alone costs 24.866 s, including 94
+symbolic derivative builds in 3.376 s and 94 validated derivative evaluations
+in 18.576 s. Thus the post-DAG/native-tanh evaluator improvements do not change
+the qualitative conclusion: full derivative-based sensitivity is expensive and
+does not alter the Barr3 split sequence at this frontier. It is excluded from
+the Barr3 cheap-first path together with eager hull and monotone/Newton
+contraction.
+
+At this point the cheap Barr3 path is intentionally minimal: fused direct
+classification plus geometric splitting. The remaining pruning plateau is
+entirely driven by the Lie-violation literal, and the expensive generic
+contractors and derivative-guided split heuristic tested so far do not improve
+the split sequence enough to justify their cost. Further work should therefore
+target the Lie expression itself or a genuinely cheaper split signal, rather
+than recombining the rejected eager mechanisms.

@@ -2142,3 +2142,31 @@ structural compression only. A validated frontier benchmark is justified only
 if the instruction count falls substantially; otherwise first-order symbolic
 range evaluation should be considered exhausted and work should move to a
 different enclosure representation.
+
+
+The structural CSE gate is strongly positive. Building the symbolic
+`[db/dy,d(db/dy)/dx,d(db/dy)/dy]` expressions yields 917,441 distinct node
+pointers and a 917,441-instruction multi-output Procedure without CSE.
+Vector-wide common-subexpression elimination leaves the mathematical node
+count unchanged but reduces distinct node pointers to about 90,698 and, after
+the now-sharing-preserving Expression-to-Formula conversion, reduces the
+Procedure to 51,715 instructions. This is a reduction of about 94.4% in the
+executed instruction stream. CSE itself is expensive in this prototype
+(about 40.8 s), whereas compilation of the CSE DAG takes about 0.016 s versus
+0.309 s for the raw DAG. The result therefore separates a potentially very
+good repeated evaluator from a currently expensive one-time canonicalization
+step.
+
+Query `lie-gradient-expression-cse-frontier` now measures the repeated-use
+side directly. It retains the ordinary validated natural interval procedure as
+tier zero. Only when that range contains zero does it evaluate the CSE
+multi-output effective Procedure on `FloatDPBounds` to obtain the function
+and both symbolic derivative ranges in one shared instruction stream. It then
+forms the same centered and monotonicity endpoint bounds used by the previous
+symbolic profiles. The diagnostic reports the one-time derivative/CSE/build
+costs separately from frontier evaluation time. The acceptance criterion is
+that the CSE path must reproduce the established 28-of-126 sign resolution
+and approximately 4.797 average combined width while reducing repeated
+derivative-evaluation cost substantially; the 40 s CSE construction cost is
+then a separate optimization/caching problem rather than a range-quality
+failure.

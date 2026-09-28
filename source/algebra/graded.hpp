@@ -189,6 +189,7 @@ template<class X> Void compute(X& r, const Rec&, const X& a) { return rec(r,a); 
 template<class X> Void compute(X& r, const Sin&, const X& a) { return sin(r,a); }
 template<class X> Void compute(X& r, const Cos&, const X& a) { return cos(r,a); }
 template<class X> Void compute(X& r, const Tan&, const X& a) { return tan(r,a); }
+template<class X> Void compute(X& r, const Tanh&, const X& a) { return tanh(r,a); }
 template<class X> Void compute(X& r, const Asin&, const X& a) { return asin(r,a); }
 template<class X> Void compute(X& r, const Acos&, const X& a) { return acos(r,a); }
 template<class X> Void compute(X& r, const Atan&, const X& a) { return atan(r,a); }
@@ -262,6 +263,8 @@ template<class A> ClosureExpression<Cos,Graded<A>> cos(const Graded<A>& a) {
     return make_expression(Cos(),a); }
 template<class A> ClosureExpression<Tan,Graded<A>> tan(const Graded<A>& a) {
     return make_expression(Tan(),a); }
+template<class A> ClosureExpression<Tanh,Graded<A>> tanh(const Graded<A>& a) {
+    return make_expression(Tanh(),a); }
 template<class A> ClosureExpression<Asin,Graded<A>> asin(const Graded<A>& a) {
     return make_expression(Asin(),a); }
 template<class A> ClosureExpression<Acos,Graded<A>> acos(const Graded<A>& a) {
@@ -462,6 +465,32 @@ template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
 
 template<class A> Void tan(Graded<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class A> Void tanh(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.size()+1u <= a.size());
+    r.append(create(a[0]));
+    DegreeType d=r.degree();
+    if(d==0u) { r[0]=tanh(a[0]); return; }
+
+    A convolution=create(a[0]);
+    for(DegreeType i=0u; i<d; ++i) {
+        convolution += r[i]*r[cast_sign<DegreeType>(d-1u-i)];
+    }
+
+    A rhs=create(a[0]);
+    if(d==1u) { rhs += 1; }
+    rhs -= convolution;
+
+    A weighted=create(a[0]);
+    for(DegreeType k=2u; k<=d; ++k) {
+        A inner=create(a[0]);
+        for(DegreeType i=0u; i<=d-k; ++i) {
+            inner += r[i]*r[cast_sign<DegreeType>(d-k-i)];
+        }
+        weighted += k*a[k]*inner;
+    }
+    r[d]=(a[1]*rhs-weighted)/d;
 }
 
 template<class A> Void asin(Graded<A>&, const Graded<A>&) {

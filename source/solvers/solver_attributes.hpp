@@ -25,17 +25,6 @@ static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
 static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
 static const Generator<MaximumNumericTypeOfSteps> maximum_number_of_steps = Generator<MaximumNumericTypeOfSteps>();
 
-struct Capacity : Attribute<SizeType> { };
-static const Generator<Capacity> capacity = Generator<Capacity>();
-struct Size : Attribute<SizeType> { };
-static const Generator<Size> size = Generator<Size>();
-struct ResultSize : Attribute<SizeType> { };
-static const Generator<ResultSize> result_size = Generator<ResultSize>();
-struct ArgumentSize : Attribute<SizeType> { };
-static const Generator<ArgumentSize> argument_size = Generator<ArgumentSize>();
-struct Degree : Attribute<DegreeType> { };
-static const Generator<Degree> degree = Generator<Degree>();
-
 } // namespace Ariadne
 
 #endif /* ARIADNE_SOLVER_ATTRIBUTES_HPP */

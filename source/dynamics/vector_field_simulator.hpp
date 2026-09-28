@@ -65,6 +65,9 @@ class RealExpressionBoundedConstraintSet;
 
 template<class T> class Orbit;
 
+//! \brief The subdivision depth associated with each variable of a subspace grid.
+using subspace = Map<RealVariable,Nat>;
+
 /*! \brief A class for computing the simulated evolution of a continuous system.
  */
 class VectorFieldSimulator

@@ -53,7 +53,7 @@
 
 #include "logging/logging.hpp"
 #include "io/figure.hpp"
-#include "io/progress_indicator.hpp"
+#include "logging/progress_indicator.hpp"
 #include "solvers/linear_programming.hpp"
 
 

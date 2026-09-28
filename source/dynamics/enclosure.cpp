@@ -63,7 +63,7 @@
 
 #include "io/graphics_interface.hpp"
 #include "io/drawer.hpp"
-#include "io/progress_indicator.hpp"
+#include "logging/progress_indicator.hpp"
 
 #include "hybrid/discrete_event.hpp"
 
@@ -1663,5 +1663,4 @@ Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& 
 }
 
 } // namespace Ariadne
-
 

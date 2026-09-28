@@ -37,7 +37,7 @@
 #include "io/geometry2d.hpp"
 #include "io/figure.hpp"
 #include "logging/logging.hpp"
-#include "io/progress_indicator.hpp"
+#include "logging/progress_indicator.hpp"
 #include "io/graphics_manager.hpp"
 
 
@@ -717,5 +717,4 @@ Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType
 }
 
 } // namespace Ariadne
-
 

@@ -30,7 +30,7 @@
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
-#include "io/progress_indicator.hpp"
+#include "logging/progress_indicator.hpp"
 
 #include "differential_inclusion_evolver.hpp"
 #include "enclosure.hpp"

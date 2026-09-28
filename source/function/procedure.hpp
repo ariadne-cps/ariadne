@@ -31,6 +31,7 @@
 
 #include <iostream>
 
+#include "utility/attribute.hpp"
 #include "utility/container.hpp"
 #include "algebra/vector.hpp"
 #include "symbolic/templates.hpp"

@@ -126,6 +126,7 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " candidate-searches=" << result.statistics().candidate_witness_searches
               << " candidate-successes=" << result.statistics().candidate_witness_successes
               << " hull-rounds=" << result.statistics().hull_reduction_rounds
+              << " hull-effective=" << result.statistics().hull_effective_reductions
               << " hull-procedure-builds=" << result.statistics().hull_procedure_builds
               << " hull-procedure-build-time="
               << result.statistics().hull_procedure_build_seconds

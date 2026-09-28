@@ -1400,3 +1400,27 @@ well as monotone rounds. A final small-budget rerun can therefore distinguish
 between a contractor that changes boxes without affecting aggregate pruning and
 one that performs no effective contraction at all. If the effective count is
 zero, monotone reduction should be excluded from the Barr3 cheap-first path.
+
+
+The final requested 64-box monotone diagnostic closes that experiment
+decisively. With geometric splitting and witness probing, shaving and hull
+reduction disabled, the Lie query again processes 64 boxes, pruning 27 and
+splitting 37, but reports 37 monotone rounds and zero effective monotone
+reductions. Elapsed time is 25.347 s, of which 23.514 s is reduction. Thus the
+validated sign-definite derivative checks and Newton attempts do not contract a
+single processed Barr3 box at this frontier; the extra cost cannot be justified
+by latent box contraction that merely failed to change the aggregate pruning
+count. Monotone/Newton reduction is therefore excluded from the Barr3
+cheap-first path.
+
+The next controlled experiment reintroduces only hull reduction at the same
+64-box frontier, keeping geometric splitting, deterministic witness probing,
+coordinate shaving and monotone reduction disabled. This directly compares
+hull contraction against the established contractor-free 64-box result
+(27 pruned, 37 split after the evaluator fixes). The benchmark now also prints
+the existing hull-effective-reduction counter, so the run distinguishes useful
+box contraction from pure contractor overhead even if aggregate pruning is
+unchanged. If hull is again ineffective or its contractions do not materially
+alter pruning at this frontier, the next development step should move away from
+eager per-box contractors and toward a cheaper adaptive trigger or a different
+search heuristic.

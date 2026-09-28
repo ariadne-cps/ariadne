@@ -1748,12 +1748,20 @@ struct GradientSharedProcedureCheckCounts {
     SizeType natural_mismatch = 0u;
     SizeType dx_mismatch = 0u;
     SizeType dy_mismatch = 0u;
+    SizeType negative_raw_widths = 0u;
     double separate_dx_width_sum = 0.0;
     double shared_dx_width_sum = 0.0;
     double separate_dy_width_sum = 0.0;
     double shared_dy_width_sum = 0.0;
     double maximum_endpoint_difference = 0.0;
+    Bool printed_first_mismatch = false;
 };
+
+double raw_interval_width(UpperIntervalType const& interval)
+{
+    return interval.upper_bound().raw().get_d()
+        - interval.lower_bound().raw().get_d();
+}
 
 double endpoint_difference(
     UpperIntervalType const& first,
@@ -1835,24 +1843,45 @@ Void profile_lie_gradient_shared_procedure_check(
             UpperIntervalType separate_dy=
                 make_interval(evaluate(derivative_y_procedure,arguments));
 
-            if(not same_endpoints(direct_image,shared_natural)) {
-                ++counts.natural_mismatch;
-            }
-            if(not same_endpoints(separate_dx,shared_dx)) {
-                ++counts.dx_mismatch;
-            }
-            if(not same_endpoints(separate_dy,shared_dy)) {
-                ++counts.dy_mismatch;
+            Bool const natural_mismatch=
+                not same_endpoints(direct_image,shared_natural);
+            Bool const dx_mismatch=
+                not same_endpoints(separate_dx,shared_dx);
+            Bool const dy_mismatch=
+                not same_endpoints(separate_dy,shared_dy);
+
+            if(natural_mismatch) { ++counts.natural_mismatch; }
+            if(dx_mismatch) { ++counts.dx_mismatch; }
+            if(dy_mismatch) { ++counts.dy_mismatch; }
+
+            double const separate_dx_width=raw_interval_width(separate_dx);
+            double const shared_dx_width=raw_interval_width(shared_dx);
+            double const separate_dy_width=raw_interval_width(separate_dy);
+            double const shared_dy_width=raw_interval_width(shared_dy);
+
+            if(separate_dx_width<0.0 || shared_dx_width<0.0
+                    || separate_dy_width<0.0 || shared_dy_width<0.0) {
+                ++counts.negative_raw_widths;
             }
 
-            counts.separate_dx_width_sum+=
-                separate_dx.width().raw().get_d();
-            counts.shared_dx_width_sum+=
-                shared_dx.width().raw().get_d();
-            counts.separate_dy_width_sum+=
-                separate_dy.width().raw().get_d();
-            counts.shared_dy_width_sum+=
-                shared_dy.width().raw().get_d();
+            counts.separate_dx_width_sum+=separate_dx_width;
+            counts.shared_dx_width_sum+=shared_dx_width;
+            counts.separate_dy_width_sum+=separate_dy_width;
+            counts.shared_dy_width_sum+=shared_dy_width;
+
+            if((natural_mismatch || dx_mismatch || dy_mismatch)
+                    && not counts.printed_first_mismatch) {
+                counts.printed_first_mismatch=true;
+                std::cout << "[lie-gradient-shared-procedure-check-first-mismatch]"
+                          << " box=" << box
+                          << " natural-separate=" << direct_image
+                          << " natural-shared=" << shared_natural
+                          << " dx-separate=" << separate_dx
+                          << " dx-shared=" << shared_dx
+                          << " dy-separate=" << separate_dy
+                          << " dy-shared=" << shared_dy
+                          << std::endl;
+            }
 
             counts.maximum_endpoint_difference=std::max(
                 counts.maximum_endpoint_difference,
@@ -1883,6 +1912,7 @@ Void profile_lie_gradient_shared_procedure_check(
               << " natural-mismatch=" << counts.natural_mismatch
               << " dx-mismatch=" << counts.dx_mismatch
               << " dy-mismatch=" << counts.dy_mismatch
+              << " negative-raw-widths=" << counts.negative_raw_widths
               << " avg-separate-dx-width="
               << average(counts.separate_dx_width_sum,counts.checked)
               << " avg-shared-dx-width="

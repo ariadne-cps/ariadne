@@ -41,7 +41,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
 template<class P, class ARG, class PR, class PRE> class FunctionModelCreatorInterface;

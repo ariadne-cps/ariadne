@@ -39,7 +39,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 template<class X> class AlgebraInterface;
 template<class X> class Algebra;

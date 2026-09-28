@@ -27,7 +27,6 @@
 #include "threading/thread_manager.hpp"
 
 using namespace Ariadne;
-using Threading::ThreadManager;
 
 Void export_task_manager(pybind11::module& module)
 {

@@ -46,12 +46,9 @@
 #include "solvers/configuration_interface.hpp"
 #include "differential_inclusion.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
-using Utility::Attribute;
-using Utility::Generator;
 
 class Real;
 

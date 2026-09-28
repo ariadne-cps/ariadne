@@ -34,7 +34,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 class PavingInterface;
 class ValidatedConstrainedImageSet;

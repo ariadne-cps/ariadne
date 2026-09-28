@@ -47,7 +47,6 @@
 
 #include "logging/logging.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
@@ -56,7 +55,6 @@ template<class ES> class Orbit;
 
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
-using Threading::DynamicWorkload;
 
 class VectorFieldEvolverConfiguration;
 class PreconditionedTaylorSeriesState;

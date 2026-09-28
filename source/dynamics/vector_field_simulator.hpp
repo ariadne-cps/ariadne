@@ -40,7 +40,6 @@
 #include "threading/workload.hpp"
 #include "threading/using.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
@@ -90,7 +89,7 @@ class VectorFieldSimulator
       private:
         std::mutex _mux;
     };
-    typedef Threading::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.

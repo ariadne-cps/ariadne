@@ -224,6 +224,7 @@ HybridEnclosure::state_time_auxiliary_function() const
 
 Void HybridEnclosure::set_time_function(const ValidatedScalarMultivariateFunctionPatch& time_function)
 {
+    static_cast<void>(time_function);
     ARIADNE_NOT_IMPLEMENTED;
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
                        "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());

@@ -39,7 +39,7 @@ namespace Ariadne {
 
 inline SizeType word_size(SizeType as) { return (1u+as)/sizeof(int)+1; }
 
-inline double nul(double d) { return 0.0; }
+inline double nul(double) { return 0.0; }
 inline double abs(double d) { return std::fabs(d); }
 
 
@@ -601,8 +601,8 @@ template<class I, class X, class CMP> void SortedExpansion<I,X,CMP>::sort() {
     std::sort(this->begin(),this->end(),CMP());
 }
 
-inline OutputStream& operator<<(OutputStream& os, GradedIndexLess cmp) { return os << "GradedIndexLess"; }
-inline OutputStream& operator<<(OutputStream& os, ReverseLexicographicIndexLess cmp) { return os << "ReverseLexicographicIndexLess"; }
+inline OutputStream& operator<<(OutputStream& os, GradedIndexLess) { return os << "GradedIndexLess"; }
+inline OutputStream& operator<<(OutputStream& os, ReverseLexicographicIndexLess) { return os << "ReverseLexicographicIndexLess"; }
 
 template<class I, class X, class CMP> void SortedExpansion<I,X,CMP>::check() const {
     CMP cmp;

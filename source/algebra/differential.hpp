@@ -357,7 +357,9 @@ Differential<X>::Differential(const Differential<Y>& x, PRS... prs)
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,ExactDouble> > lst, PRS... prs)
     : Differential<X>(Expansion<MultiIndex,X>(lst,prs...),deg)
-{ }
+{
+    ARIADNE_ASSERT(this->argument_size()==as);
+}
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs) : _expansion(as,X(prs...)), _degree(deg) {

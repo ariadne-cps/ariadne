@@ -49,10 +49,10 @@ inline DegreeType degree_of(MultiIndex const& a) { return a.degree(); }
 inline DegreeType degree_of(UniIndex const& a) { return a; }
 
 inline SizeType size_of(MultiIndex const& a) { return a.size(); }
-inline SizeOne size_of(UniIndex const& a) { return SizeOne(); }
+inline SizeOne size_of(UniIndex const&) { return SizeOne(); }
 
 inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
-inline SizeOne argument_size_of(UniformList<UniIndex> const& a) { return SizeOne(); }
+inline SizeOne argument_size_of(UniformList<UniIndex> const&) { return SizeOne(); }
 
 
 template<class T> using UniformReference = typename UniformList<T>::Reference;

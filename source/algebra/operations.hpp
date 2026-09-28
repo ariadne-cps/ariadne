@@ -42,15 +42,15 @@ template<class A> class GradedAlgebraOperations {
   private:
     static A _compose(const Series<X>& f, const A& a) { return A::_compose(f,a); }
   public:
-    static A apply(Hlf op, A const& a) {
+    static A apply(Hlf, A const& a) {
         return a/2; }
-    static A apply(Sqr op, A const& a) {
+    static A apply(Sqr, A const& a) {
         return a*a; }
-    static A apply(Div op, A const& a1, A const& a2) {
+    static A apply(Div, A const& a1, A const& a2) {
         return mul(a1,rec(a2)); }
-    static A apply(Pow op, A const& a, Nat m) {
+    static A apply(Pow, A const& a, Nat m) {
         A s=a; A r=s.create_constant(1); while(m) { if(m%2) { r*=s; } s=sqr(s); m/=2; } return r; }
-    static A apply(Pow op, A const& a, Int n) {
+    static A apply(Pow, A const& a, Int n) {
         if(n>=0) { return pow(a,Nat(n)); } else { return rec(pow(a,Nat(-n))); } }
 
     template<class OP> static A apply(OP op, const A& a) { return _compose(Series<X>(op,a.value()),a); }

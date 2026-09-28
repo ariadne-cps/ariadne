@@ -330,10 +330,10 @@ class UnivariateSecondDifferential
     }
   public:
     typedef Number<Paradigm<X>> Y;
-    friend UnivariateSecondDifferential<X> max(const UnivariateSecondDifferential<X>& x1, const Y& c2) { ARIADNE_NOT_IMPLEMENTED; }
-    friend UnivariateSecondDifferential<X> min(const UnivariateSecondDifferential<X>& x1, const Y& c2) { ARIADNE_NOT_IMPLEMENTED; }
-    friend UnivariateSecondDifferential<X> max(const Y& c1, const UnivariateSecondDifferential<X>& x2) { ARIADNE_NOT_IMPLEMENTED; }
-    friend UnivariateSecondDifferential<X> min(const Y& c1, const UnivariateSecondDifferential<X>& x2) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> max(const UnivariateSecondDifferential<X>&, const Y&) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> min(const UnivariateSecondDifferential<X>&, const Y&) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> max(const Y&, const UnivariateSecondDifferential<X>&) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> min(const Y&, const UnivariateSecondDifferential<X>&) { ARIADNE_NOT_IMPLEMENTED; }
 
     friend decltype(auto) operator>=(const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y) {
         return x._value>=y._value; }

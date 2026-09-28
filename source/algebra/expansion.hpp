@@ -32,6 +32,7 @@
 #define ARIADNE_EXPANSION_HPP
 
 #include "multi_index.hpp"
+#include "algebra/linear_algebra.decl.hpp"
 
 #include "utility/typedefs.hpp"
 #include "utility/iterator.hpp"

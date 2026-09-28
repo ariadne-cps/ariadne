@@ -40,7 +40,6 @@
 namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A&);
-template<class T, class CMP> class Set;
 
 struct Vector2d;
 struct Point2d;

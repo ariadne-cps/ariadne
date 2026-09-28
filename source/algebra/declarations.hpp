@@ -24,6 +24,7 @@ namespace Ariadne {
 
 template<class X> class Algebra;
 template<class X> class ElementaryAlgebra;
+template<class X> class Series;
 
 } // namespace Ariadne
 

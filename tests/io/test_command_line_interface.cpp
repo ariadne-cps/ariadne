@@ -27,11 +27,9 @@
 #include "threading/thread_manager.hpp"
 #include "../test.hpp"
 
-using namespace Ariadne::Logging;
 
 using namespace Ariadne;
 
-using Threading::ThreadManager;
 
 class TestCommandLineInterface {
   public:

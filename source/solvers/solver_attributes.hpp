@@ -13,8 +13,6 @@
 
 namespace Ariadne {
 
-using Utility::Attribute;
-using Utility::Generator;
 
 struct MaximumError : Attribute<ApproximateDouble> {
     MaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }

@@ -830,7 +830,7 @@ inline Vector<FloatDP>const& cast_exact(Vector<FloatDPApproximation>const& v) {
     return reinterpret_cast<Vector<FloatDP>const&>(v); }
 //template<class T> concept HasMemberCharacteristics = requires (T const& t) { t.characteristics(); };
 
-inline decltype(auto) characteristics(Rational const& x) { return Tuple<>(); }
+inline decltype(auto) characteristics(Rational const&) { return Tuple<>(); }
 template<class PR> decltype(auto) characteristics(Float<PR> const& x) { return x.precision(); }
 template<class FLT> decltype(auto) characteristics(Rounded<FLT> const& x) { return x.precision(); }
 template<class X> decltype(auto) characteristics(Covector<X> const& x) {

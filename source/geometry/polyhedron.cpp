@@ -99,7 +99,7 @@ Polyhedron::Polyhedron(const ExactBoxType& bx)
     }
 }
 
-Polyhedron::Polyhedron(const Polytope& p)
+Polyhedron::Polyhedron(const Polytope&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -146,22 +146,22 @@ Polyhedron::is_bounded() const
 
 
 Polyhedron
-Polyhedron::halfspace(SizeType i) const
+Polyhedron::halfspace(SizeType) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
-ValidatedKleenean Polyhedron::overlaps(const ExactBoxType& bx) const {
+ValidatedKleenean Polyhedron::overlaps(const ExactBoxType&) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ValidatedKleenean Polyhedron::covers(const ExactBoxType& bx) const {
+ValidatedKleenean Polyhedron::covers(const ExactBoxType&) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-ValidatedKleenean Polyhedron::separated(const ExactBoxType& bx) const {
+ValidatedKleenean Polyhedron::separated(const ExactBoxType&) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -192,7 +192,7 @@ polyhedron(const ExactBoxType& bx)
 }
 
 Polyhedron
-polyhedron(const Polytope& pltp)
+polyhedron(const Polytope&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -200,7 +200,7 @@ polyhedron(const Polytope& pltp)
 
 
 Polytope
-polytope(const Polyhedron& pltp)
+polytope(const Polyhedron&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

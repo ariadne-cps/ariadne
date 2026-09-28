@@ -64,7 +64,7 @@ class ListSet
     virtual ~ListSet() = default;
 
     ListSet() { };
-    explicit ListSet(DimensionType d) { };
+    explicit ListSet(DimensionType) { };
     explicit ListSet(const BS& bs) { this->adjoin(bs); }
     template<class BST> ListSet(const ListSet<BST>& ls) {
         this->_data.insert(this->end(),ls.begin(),ls.end()); }

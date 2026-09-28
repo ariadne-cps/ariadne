@@ -239,7 +239,7 @@ class PavingInterface
   public:
     virtual PavingInterface* clone() const = 0;
     virtual GridCell smallest_enclosing_primary_cell(const UpperBoxType& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
-    virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat fineness) { ARIADNE_ABSTRACT_METHOD; }
+    virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>&, const Nat) { ARIADNE_ABSTRACT_METHOD; }
     virtual Void adjoin_outer_approximation(const EffectiveEuclideanCompactSetInterface& set, const Nat fineness) = 0;
     virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat fineness) = 0;
     virtual Void adjoin_inner_approximation(const EffectiveEuclideanOpenSetInterface& set, const Nat extent, const Nat fineness) = 0;

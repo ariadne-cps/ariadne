@@ -51,7 +51,7 @@ inline Vector<FloatDP> sub(approx,const Vector<FloatDP>& v1, const Vector<FloatD
 
 template<class X> class LinearProgram {
   public:
-    LinearProgram(const Matrix<X>& A) { ARIADNE_NOT_IMPLEMENTED; }
+    LinearProgram(const Matrix<X>&) { ARIADNE_NOT_IMPLEMENTED; }
     Bool is_feasible() { ARIADNE_NOT_IMPLEMENTED; }
 };
 
@@ -365,14 +365,14 @@ Zonotope::_write(OutputStream& os) const
 
 
 ValidatedKleenean
-empty(const Zonotope& z)
+empty(const Zonotope&)
 {
     return false;
 }
 
 
 ValidatedKleenean
-is_bounded(const Zonotope& z)
+is_bounded(const Zonotope&)
 {
     return true;
 }
@@ -624,7 +624,7 @@ orthogonal_over_approximation(const Zonotope& z)
 Tuple< Matrix<FloatDP>, Matrix<FloatDP>, PivotMatrix > orthogonal_decomposition(const Matrix<FloatDP>& A, Bool allow_pivoting=true) {
     Matrix<FloatDPApproximation> approximate_matrix=reinterpret_cast<Matrix<FloatDPApproximation>const&>(A);
     Tuple< Matrix<FloatDPApproximation>, Matrix<FloatDPApproximation>, PivotMatrix >
-        approximate_decomposition=orthogonal_decomposition(approximate_matrix);
+        approximate_decomposition=orthogonal_decomposition(approximate_matrix,allow_pivoting);
     return reinterpret_cast<Tuple<Matrix<FloatDP>, Matrix<FloatDP>, PivotMatrix >const&>(approximate_decomposition);
 }
 

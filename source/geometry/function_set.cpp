@@ -340,21 +340,21 @@ ConstraintSet::covers(const ExactBoxType& bx) const
 }
 
 ValidatedLowerKleenean
-ConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::separated(const ExactBoxType& bx, Effort) const
 {
     ExactBoxType codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
 ValidatedLowerKleenean
-ConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::overlaps(const ExactBoxType& bx, Effort) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
 ValidatedLowerKleenean
-ConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::covers(const ExactBoxType& bx, Effort) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return UpperBoxType(apply(this->constraint_function(),bx)).inside(codomain);
@@ -444,7 +444,7 @@ BoundedConstraintSet::inside(const ExactBoxType& bx) const
 }
 
 ValidatedLowerKleenean
-BoundedConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::separated(const ExactBoxType& bx, Effort) const
 {
     ExactBoxType domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
@@ -454,7 +454,7 @@ BoundedConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
 
 
 ValidatedLowerKleenean
-BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     if(this->codomain().dimension() == 0 && Ariadne::intersect(under_approximation(this->domain()),bx)) { return true; }
@@ -465,7 +465,7 @@ BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 
 
 ValidatedLowerKleenean
-BoundedConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::covers(const ExactBoxType& bx, Effort) const
 {
     ExactBoxType domain=under_approximation(this->domain());
     ExactBoxType codomain=under_approximation(this->codomain());
@@ -474,7 +474,7 @@ BoundedConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 }
 
 ValidatedLowerKleenean
-BoundedConstraintSet::inside(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::inside(const ExactBoxType& bx, Effort) const
 {
     return Ariadne::inside(UpperBoxType(over_approximation(this->domain())),bx);
 }
@@ -608,7 +608,7 @@ ConstrainedImageSet::affine_approximation() const
 }
 
 
-ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, Effort eff) const
+ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, Effort) const
 {
     if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
@@ -655,11 +655,11 @@ ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 }
 
 //! \brief Test if the set is contained in (the interior of) a box.
-ValidatedLowerKleenean ConstrainedImageSet::inside(const ExactBoxType& bx, Effort eff) const {
+ValidatedLowerKleenean ConstrainedImageSet::inside(const ExactBoxType& bx, Effort) const {
     return this->bounding_box().inside(bx);
 }
 
-ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Effort eff) const
+ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Effort) const
 {
     UpperBoxType subdomain = over_approximation(this->_domain);
     EffectiveVectorMultivariateFunction function = join(this->function(),this->constraint_function());
@@ -669,7 +669,7 @@ ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Ef
     return subdomain.is_empty();
 }
 
-ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Effort eff) const
+ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Effort) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
 }
@@ -988,8 +988,8 @@ ValidatedConstrainedImageSet::split() const
 }
 
 
-inline ValidatedScalarMultivariateFunction const& _restriction(ValidatedScalarMultivariateFunction const& f, ExactBoxType dom) { return f; }
-inline ValidatedVectorMultivariateFunction const& _restriction(ValidatedVectorMultivariateFunction const& f, ExactBoxType dom) { return f; }
+inline ValidatedScalarMultivariateFunction const& _restriction(ValidatedScalarMultivariateFunction const& f, ExactBoxType) { return f; }
+inline ValidatedVectorMultivariateFunction const& _restriction(ValidatedVectorMultivariateFunction const& f, ExactBoxType) { return f; }
 
 
 ValidatedConstrainedImageSet

@@ -892,9 +892,9 @@ ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction con
     } else if(f2ptr) {
         ValidatedVectorMultivariateFunctionPatch f2ptch(f2ptr); ValidatedScalarMultivariateFunctionPatch f1ptch=factory(f2ptch).create(f1); return join(f1ptch,f2ptch);
     } else {
-        VectorOfScalarMultivariateFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+        VectorOfScalarMultivariateFunction<ValidatedTag> r(f2.result_size()+1u,f1.domain());
         r[0u]=f1;
-        for(SizeType i=0; i!=f1.result_size(); ++i) { r[i+1]=f2[i]; }
+        for(SizeType i=0; i!=f2.result_size(); ++i) { r[i+1]=f2[i]; }
         return r;
     }
 }

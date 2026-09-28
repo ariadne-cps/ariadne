@@ -206,6 +206,23 @@ Void TestFunction::test_vector_function()
     Vector<EffectiveNumber> e0={1,0};
     ARIADNE_TEST_EQUAL((x1*e0)(v)[0],v[1]);
     ARIADNE_TEST_EQUAL((x1*e0)(v)[1],0);
+
+    // Regression test for validated scalar-vector join preserving every
+    // component of the vector tail.
+    ValidatedScalarMultivariateFunction vx=
+        ValidatedScalarMultivariateFunction::coordinate(2,0);
+    ValidatedScalarMultivariateFunction vy=
+        ValidatedScalarMultivariateFunction::coordinate(2,1);
+    ValidatedVectorMultivariateFunction tail=join(vx+vy,vx-vy);
+    ValidatedVectorMultivariateFunction joined=join(vx,tail);
+    Vector<FloatDPBounds> point({
+        FloatDPBounds(2,dp),FloatDPBounds(3,dp)
+    });
+    Vector<FloatDPBounds> joined_value=joined(point);
+    ARIADNE_TEST_EQUAL(joined.result_size(),3u);
+    ARIADNE_TEST_EQUAL(joined_value[0],FloatDPBounds(2,dp));
+    ARIADNE_TEST_EQUAL(joined_value[1],FloatDPBounds(5,dp));
+    ARIADNE_TEST_EQUAL(joined_value[2],FloatDPBounds(-1,dp));
 }
 
 

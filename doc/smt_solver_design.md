@@ -2073,3 +2073,27 @@ much common structure symbolic differentiation preserves and whether Ariadne's
 existing multi-output procedure machinery can turn the 28-box centered bound
 into a practical second-tier range evaluator without introducing a new range
 algebra.
+
+
+The first shared-procedure performance result (63 of 126 ambiguous boxes made
+sign-definite) is invalid and must not be used as evidence for the range
+evaluator. The consistency check exposed a pre-existing bug in the validated
+fallback overload `join(ValidatedScalarMultivariateFunction,
+ValidatedVectorMultivariateFunction)`: it allocated and copied the vector tail
+using `f1.result_size()`, i.e. the scalar's result size, rather than
+`f2.result_size()`. For a three-output vector
+`[db/dy,d(db/dy)/dx,d(db/dy)/dy]`, only the first derivative was copied and
+the final derivative component remained the default zero function. The check
+therefore reported exact agreement for the natural value and x derivative,
+but disagreement for the y derivative on all 126 checked boxes; the shared y
+derivative had essentially zero width while the separately compiled derivative
+had average width about 48.73.
+
+The validated scalar-vector join fallback now allocates
+`f2.result_size()+1` outputs and copies all `f2` components. Regression tests
+cover both the three-component validated scalar-vector join and
+`Vector<ValidatedProcedure>` evaluation with `FloatDPBounds`, the latter
+also guarding the explicit-zero initialization fix made when the shared
+procedure experiment first instantiated this path. The shared-procedure
+consistency check must be rerun after this fix; only if all three output
+mismatch counters are zero should the performance profile be interpreted.

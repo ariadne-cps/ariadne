@@ -217,6 +217,19 @@ Void TestProcedure::test_evaluate()
     ARIADNE_TEST_SAME(
         evaluate(tanh_procedure,tanh_argument),
         tanh(tanh_argument[0]));
+
+    // Regression test: vector procedure evaluation must support validated
+    // numeric types that require an explicit precision at construction.
+    ValidatedFormula px(ValidatedFormula::coordinate(0));
+    ValidatedFormula py(ValidatedFormula::coordinate(1));
+    Vector<ValidatedFormula> formulas={px+py,px-py};
+    Vector<ValidatedProcedure> procedures(argument_size=2u,formulas);
+    Vector<FloatDPBounds> arguments({
+        FloatDPBounds(2,dp),FloatDPBounds(3,dp)
+    });
+    Vector<FloatDPBounds> values=evaluate(procedures,arguments);
+    ARIADNE_TEST_EQUAL(values[0],FloatDPBounds(5,dp));
+    ARIADNE_TEST_EQUAL(values[1],FloatDPBounds(-1,dp));
 }
 
 Void TestProcedure::test_propagate()

@@ -730,11 +730,10 @@ The concatenated raw float32 bytes of the extracted tensors have SHA-256
 The C++ fixture stores every parameter as a hexadecimal binary floating-point
 literal, so each source float32 is promoted exactly to DP.
 
-Ariadne currently has no primitive symbolic `tanh` expression node. The
-fixture therefore uses the exact real identity
-`tanh(z)=(exp(2*z)-1)/(exp(2*z)+1)`. This preserves the mathematical network
-function but makes the expression graph somewhat larger than a native tanh
-node would. Benchmark conclusions must keep that distinction explicit.
+Ariadne now has a primitive symbolic `tanh` expression node with validated
+numeric support. The Barr3 fixtures use this native operator directly rather
+than expanding `tanh(z)` through exponentials. This avoids the interval
+dependency and overflow problems of the former quotient representation.
 
 The regression has two purposes. First, it evaluates the frozen network at the
 origin and checks a tight validated output interval, catching tensor-layout or
@@ -1291,3 +1290,26 @@ loses the self-correlation that `sqr(h)` preserves. The fixture now uses
 `1-sqr(h)` in both hidden layers. This algebraically equivalent representation
 change should be benchmarked before pursuing stronger contractors or evaluator
 changes.
+
+The rebuilt Barr3 run after replacing `1-h*h` by `1-sqr(h)` confirms that
+the change is present structurally: Lie-plus-barrier recursive expression visits
+fall from 497,492 to 308,820 while the distinct-node-pointer count remains
+30,672. On FloatDPBounds the Lie-plus-barrier enclosure contracts from about
+`[-3244.6,3239.4]` to about `[-889.3,888.3]`. The native-tanh barrier remains
+about `[-24.4,24.5]`.
+
+Absolute timing values from this run must not be compared with the immediately
+preceding measurements because they were collected on different machines
+(Mac Studio versus MacBook). Only within-run timing ratios and structural or
+enclosure data are comparable across those reports. On the Mac Studio run,
+eight expression-derived Procedure evaluations take about 0.015 s for
+Lie-plus-barrier versus 0.013 s for the Barr3-specific direct evaluator, again
+showing that DAG-preserved generic Procedure execution is in the same cost
+class as the hand-written forward evaluator.
+
+The direct diagnostic previously used a deliberately conservative tanh helper
+that returned `[-1,1]` whenever its input crossed zero. Since the native
+validated tanh now computes a monotone endpoint image, that old helper makes the
+direct reference artificially wider than the generic path. The diagnostic now
+uses the native `tanh(FloatDPBounds)` as well, so the next run compares
+execution structure rather than two different activation enclosures.

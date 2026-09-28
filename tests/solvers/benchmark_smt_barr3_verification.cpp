@@ -149,17 +149,7 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
 
 FloatDPBounds stable_tanh(FloatDPBounds const& x)
 {
-    FloatDPBounds one(1,dp);
-    FloatDPBounds two(2,dp);
-    if(x.lower_raw()>=FloatDP(0,dp)) {
-        FloatDPBounds e=exp(two*x);
-        return one-two/(e+one);
-    }
-    if(x.upper_raw()<=FloatDP(0,dp)) {
-        FloatDPBounds e=exp(-two*x);
-        return two/(e+one)-one;
-    }
-    return FloatDPBounds(-1,1,dp);
+    return tanh(x);
 }
 
 struct DirectBarr3Evaluation {

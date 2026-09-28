@@ -53,19 +53,19 @@ template<class OP, class X> class SeriesGenerator : public SeriesGeneratorInterf
 template<class X> inline X next_series_coefficient(Pow, DegreeType d, X const& c, DegreeType n, X const* y) {
     return (d==0) ? pow(c,n) : (d>n) ? nul(c) : y[d-1]/c*(n-d+1)/d; }
 
-template<class X> inline X next_series_coefficient(Pos, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Pos, DegreeType d, X const& c, X const*) {
     return (d==0) ? c : (d==1) ? nul(c)+1 : nul(c); }
 
-template<class X> inline X next_series_coefficient(Nul, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Nul, DegreeType, X const& c, X const*) {
     return nul(c); }
 
-template<class X> inline X next_series_coefficient(Neg, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Neg, DegreeType d, X const& c, X const*) {
     return (d==0) ? -c : (d==1) ? nul(c)-1 : nul(c); }
 
-template<class X> inline X next_series_coefficient(Hlf, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Hlf, DegreeType d, X const& c, X const*) {
     return (d==0) ? hlf(c) : (d==1) ? hlf(nul(c)+1) : nul(c); }
 
-template<class X> inline X next_series_coefficient(Sqr, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Sqr, DegreeType d, X const& c, X const*) {
     switch(d) { case 0: return sqr(c); case 1: return 2*c; case 2: return nul(c)+1; default: return nul(c); } }
 
 template<class X> inline X next_series_coefficient(Rec, DegreeType d, X const& c, X const* y) {
@@ -90,17 +90,17 @@ template<class X> inline X next_series_coefficient(Tan, DegreeType d, X const& c
     switch(d) { case 0: return tan(c); case 1: return 1+sqr(y[0]); case 2: return y[0]*y[1];
         default: { X r=y[0]*y[d-1]; for(DegreeType i=1; i!=d; ++i) { r+=y[i]*y[d-1-i]; } return r/d; } } }
 
-template<class X> inline X next_series_coefficient(Asin, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Asin, DegreeType, X const&, X const*) {
     ARIADNE_NOT_IMPLEMENTED; }
 
-template<class X> inline X next_series_coefficient(Acos, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Acos, DegreeType, X const&, X const*) {
     ARIADNE_NOT_IMPLEMENTED; }
 
 template<class X> inline X next_series_coefficient(Atan, DegreeType d, X const& c, X const* y) {
     switch(d) { case 0: return atan(c); case 1: return rec(1+sqr(c)); case 2: return -c*sqr(y[1]);
         default: return -y[1]*((d-2)*y[d-2]+2*(d-1)*c*y[d-1])/d; } }
 
-template<class X> inline X next_series_coefficient(Abs, DegreeType d, X const& c, X const* y) {
+template<class X> inline X next_series_coefficient(Abs, DegreeType, X const&, X const*) {
     ARIADNE_NOT_IMPLEMENTED; }
 
 
@@ -117,7 +117,7 @@ class Series
     Void _compute(DegreeType n) const;
     OutputStream& _write(OutputStream& os) const;
   public:
-    template<class OP> Series(OP op, X const& x);
+    template<class OP> Series(OP, X const& x);
     template<class OP, class XX> requires Constructible<X,XX> Series(OP op, XX const& x) : Series(op,X(x)) { }
     const X& operator[](DegreeType n) const;
     const List<X>& coefficients(DegreeType n) const;
@@ -135,7 +135,7 @@ template<class X, DegreeType D> class FiniteSeries {
     friend OutputStream& operator<<(OutputStream& os, FiniteSeries<X,D> const& s) { return s._write(os); }
 };
 
-template<class X> template<class OP> Series<X>::Series(OP op, X const& x)
+template<class X> template<class OP> Series<X>::Series(OP, X const& x)
     : Series(std::make_shared<SeriesGenerator<OP,X>>(),x, nullptr) {
 }
 
@@ -159,7 +159,7 @@ template<class X> inline Void Series<X>::_compute(DegreeType n) const {
 template<class X> inline OutputStream& Series<X>::_write(OutputStream& os) const {
     this->_compute(2); return os << "Series( centre=" << this->_centre << ", terms=" << this->_data << " )"; }
 
-template<class OP, class X> inline Series<X> make_series(OP op, DegreeType d, const X& x) { return Series<X>(op,x); }
+template<class OP, class X> inline Series<X> make_series(OP op, DegreeType, const X& x) { return Series<X>(op,x); }
 template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { return Series<X>(op,x); }
 
 

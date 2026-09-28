@@ -48,6 +48,7 @@ template<class X> class GradedAlgebra;
 template<class X> class SymbolicAlgebra;
 template<class X> class TranscendentalAlgebra;
 template<class X> class ElementaryAlgebra;
+template<class X> class Series;
 
 template<class X> struct AlgebraTraits;
 

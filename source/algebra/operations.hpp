@@ -31,6 +31,7 @@
 
 #include "numeric/operators.hpp"
 #include "numeric/arithmetic.hpp"
+#include "algebra/series.hpp"
 
 namespace Ariadne {
 

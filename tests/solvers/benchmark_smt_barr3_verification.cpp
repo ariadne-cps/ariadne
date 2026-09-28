@@ -42,12 +42,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -59,7 +59,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -70,7 +70,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -82,7 +82,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -504,6 +504,30 @@ Void profile_interval_expression(
               << std::endl;
 }
 
+Void profile_split_candidate(
+    String const& name,
+    ValidatedScalarMultivariateFunction const& function,
+    UpperBoxType const& domain,
+    SizeType coordinate)
+{
+    auto children=domain.split(coordinate);
+
+    Stopwatch<Milliseconds> stopwatch;
+    UpperIntervalType first_image=apply(function,children.first);
+    UpperIntervalType second_image=apply(function,children.second);
+    stopwatch.click();
+
+    std::cout << "[lie-split-profile] " << name
+              << " coordinate=" << coordinate
+              << " time=" << stopwatch.elapsed_seconds()
+              << " first=" << first_image
+              << " first-width=" << first_image.width()
+              << " second=" << second_image
+              << " second-width=" << second_image.width()
+              << " width-sum=" << (first_image.width()+second_image.width())
+              << std::endl;
+}
+
 Void profile_mean_value_range(
     String const& name,
     ValidatedScalarMultivariateFunction const& function,
@@ -708,6 +732,23 @@ Int main(Int argc,const char* argv[]) {
         profile_interval_expression(
             "lie+barrier",term_x+term_y+network.barrier,
             space,UpperBoxType(domain));
+        return 0;
+    }
+
+    if(query=="lie-split-profile") {
+        RealExpression dy=-ex-ey+(ex*ex*ex)/3;
+        RealExpression dominant_term=network.db_dy*dy;
+        ValidatedScalarMultivariateFunction dominant_function=
+            make_function(space,dominant_term);
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        UpperBoxType upper_domain(domain);
+        for(SizeType coordinate=0u; coordinate!=upper_domain.dimension(); ++coordinate) {
+            profile_split_candidate(
+                "db/dy*dy",dominant_function,upper_domain,coordinate);
+            profile_split_candidate(
+                "lie+barrier",lie_function,upper_domain,coordinate);
+        }
         return 0;
     }
 

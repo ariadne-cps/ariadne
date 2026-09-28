@@ -1701,3 +1701,23 @@ validated interval images and evaluation times for `db/dx`, `db/dy`, both
 dynamics, the products `db/dx*dx` and `db/dy*dy`, their sum, the barrier, and
 the final Lie-plus-barrier expression. The goal is to locate the dominant
 source of interval width before changing evaluator mathematics again.
+
+The Lie-component decomposition localizes the initial-box interval width very
+clearly. `db/dx` is about [-60.365, 60.896] and `db/dy` about
+[-57.674, 59.448]. With the published dynamics, `dx=y` is [-2,1] while
+`dy=-x-y+x^3/3` is [-12.5,12.5]. Consequently `db/dx*dx` contributes only
+about [-121.792,120.729], whereas `db/dy*dy` contributes about
+[-743.103,743.103]. Their sum is the Lie image [-864.894,863.832]; the barrier
+adds only about [-24.323,24.438]. Thus the dominant source of width is the
+`db/dy*dy` product, not the barrier or the x-direction term.
+
+The next diagnostic therefore compares one geometric bisection in each state
+coordinate using only the already identified dominant term and the final
+Lie-plus-barrier expression. Query `lie-split-profile` evaluates both children
+for an x split and for a y split, reporting each child image and the sum of
+their widths. This is not yet a search heuristic: it is a single-root
+measurement to determine whether the dominant-term structure suggests a cheap
+coordinate preference that the ordinary widest-coordinate geometric split is
+missing. If the y split materially reduces the dominant and final images, a
+specialized cheap split score can be tested; otherwise split selection is not
+where the missing correlation should be addressed.

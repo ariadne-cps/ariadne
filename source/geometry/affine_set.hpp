@@ -42,7 +42,6 @@
 #include "function/affine_model.hpp"
 #include "function/constraint.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -37,7 +37,6 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 
-using namespace Ariadne::Logging;
 
 /* \brief Top-level namespace. */
 namespace Ariadne {

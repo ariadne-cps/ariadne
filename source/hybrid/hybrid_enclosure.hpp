@@ -50,7 +50,6 @@
 #include "geometry/box.hpp"
 #include "dynamics/enclosure.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

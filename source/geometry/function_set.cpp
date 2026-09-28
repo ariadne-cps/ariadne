@@ -45,7 +45,6 @@
 #include "io/graphics_manager.hpp"
 #include "io/drawer.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

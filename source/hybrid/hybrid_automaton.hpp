@@ -44,7 +44,6 @@
 
 #include "hybrid/hybrid_automaton_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

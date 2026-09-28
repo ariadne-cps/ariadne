@@ -42,7 +42,6 @@
 #include "geometry/affine_set.hpp"
 #include "algebra/algebra.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

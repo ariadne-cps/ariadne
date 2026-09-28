@@ -50,7 +50,6 @@
 #include "symbolic/assignment.hpp"
 #include "symbolic/expression_set.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

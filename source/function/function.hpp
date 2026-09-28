@@ -546,7 +546,7 @@ VectorFunctionElementReference<P,ARGS...>::operator ScalarFunction<WP,ARGS...> (
     return this->_vf.get(this->_i);
 }
 
-template<class P, class... ARGS> inline VectorFunctionElementReference<P,ARGS...> make_element_reference(ScalarFunction<P,ARGS...>& sf, SizeType i) {
+template<class P, class... ARGS> inline VectorFunctionElementReference<P,ARGS...> make_element_reference(ScalarFunction<P,ARGS...>&, SizeType) {
     throw std::runtime_error(""); }
 template<class P, class... ARGS> inline VectorFunctionElementReference<P,ARGS...> make_element_reference(VectorFunction<P,ARGS...>& vf, SizeType i) {
     return VectorFunctionElementReference<P,ARGS...>(vf,i); }

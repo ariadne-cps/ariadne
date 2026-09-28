@@ -215,9 +215,9 @@ template<class X, class Y> X make_constant(const Y& c, const Vector<X>& v);
 template<class X, class Y> inline X make_constant(const Y& c, X r) {
     r=c; return r; }
 
-inline Real make_constant(const EffectiveNumber& c, const Real& x) {
+inline Real make_constant(const EffectiveNumber& c, const Real&) {
     return Real(c); }
-inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>& x) {
+inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>&) {
     return Formula<Real>::constant(Real(c)); }
 template<SameAs<Real> X> Algebra<X> make_constant(const EffectiveNumber& c, const Algebra<X>& x) {
     return make_constant(Real(c),x); }

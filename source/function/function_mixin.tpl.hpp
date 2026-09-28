@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-template<class X> Scalar<X> create_result(SizeOne n, X z) { return z; }
+template<class X> Scalar<X> create_result(SizeOne, X z) { return z; }
 template<class X> Vector<X> create_result(SizeType n, X z) { return Vector<X>(n,z); }
 
 template<class F, class SIG> template<class X> auto

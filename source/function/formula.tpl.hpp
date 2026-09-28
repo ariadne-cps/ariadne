@@ -64,9 +64,9 @@ class FormulaNode
 
 template<class Y> inline Formula<Y> make_formula(const Y& c) {
     return Formula<Y>::constant(c); }
-template<class Y> inline Formula<Y> make_formula(Cnst op, const Y& c) {
+template<class Y> inline Formula<Y> make_formula(Cnst, const Y& c) {
     return Formula<Y>::constant(c); }
-template<class Y> inline Formula<Y> make_formula(Ind op, SizeType j) {
+template<class Y> inline Formula<Y> make_formula(Ind, SizeType j) {
     return Formula<Y>::index(j); }
 template<class Y> inline Formula<Y> make_formula(const UnaryElementaryOperator& op, const Formula<Y>& arg) {
     return Formula<Y>::unary(op,arg); }
@@ -106,24 +106,24 @@ template<class X, class OP, class A> decltype(auto) evaluate(Symbolic<OP,A,Formu
 template<class X, class OP, class A> decltype(auto) evaluate(Symbolic<OP,A,Int> s, Vector<X> const& v) {
     return s._op(evaluate(s._arg,v),s._num); }
 
-template<class X, class Y> decltype(auto) _cached_evaluate(Symbolic<Cnst,Y> const& c, Vector<X> const& v, Map<const Void*,X>& cache) {
+template<class X, class Y> decltype(auto) _cached_evaluate(Symbolic<Cnst,Y> const& c, Vector<X> const& v, Map<const Void*,X>&) {
     return make_constant(c._val,v); }
-template<class X, class I> decltype(auto) _cached_evaluate(Symbolic<Var,I> const& i, Vector<X> const& v, Map<const Void*,X>& cache) {
+template<class X, class I> decltype(auto) _cached_evaluate(Symbolic<Var,I> const& i, Vector<X> const& v, Map<const Void*,X>&) {
     return v[i._ind]; }
 template<class X, class OP, class A> decltype(auto) _cached_evaluate(Symbolic<OP,A> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(cached_evaluate(s._arg,v)); }
+    return s._op(cached_evaluate(s._arg,v,cache)); }
 template<class X, class OP, class A> decltype(auto) _cached_evaluate(Symbolic<OP,A,Formula<A>> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(evaluate(ConstantFormulaNode<A>(s._cnst),v),cached_evaluate(s._arg,v)); }
+    return s._op(evaluate(ConstantFormulaNode<A>(s._cnst),v),cached_evaluate(s._arg,v,cache)); }
 template<class X, class OP, class A> decltype(auto) _cached_evaluate(Symbolic<OP,Formula<A>,A> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(s._cnst,cached_evaluate(s._arg,v)); }
+    return s._op(s._cnst,cached_evaluate(s._arg,v,cache)); }
 template<class X, class OP, class A> decltype(auto) _cached_evaluate(Symbolic<OP,A,Int> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(cached_evaluate(s._arg,v),s._num); }
+    return s._op(cached_evaluate(s._arg,v,cache),s._num); }
 template<class X, class OP, class A1, class A2> decltype(auto) _cached_evaluate(Symbolic<OP,A1,A2> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(cached_evaluate(s._arg1,v),cached_evaluate(s._arg2,v)); }
+    return s._op(cached_evaluate(s._arg1,v,cache),cached_evaluate(s._arg2,v,cache)); }
 template<class X, class OP, class A1, class A2, class A3> decltype(auto) _cached_evaluate(Symbolic<OP,A1,A2,A3> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
-    return s._op(cached_evaluate(s._arg1,v),cached_evaluate(s._arg2,v),cached_evaluate(s._arg3,v)); }
+    return s._op(cached_evaluate(s._arg1,v,cache),cached_evaluate(s._arg2,v,cache),cached_evaluate(s._arg3,v,cache)); }
 
-template<class X, class OP, class... AS> decltype(auto) _cached_evaluate(Symbolic<OP,AS...> const& s, Vector<X> const& v, Map<const Void*,X>& cache) {
+template<class X, class OP, class... AS> decltype(auto) _cached_evaluate(Symbolic<OP,AS...> const&, Vector<X> const& v, Map<const Void*,X>&) {
     return v[0]; }
 
 } // namespace

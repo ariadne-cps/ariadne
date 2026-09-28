@@ -67,11 +67,11 @@ template<class R, class A> R checked_construct(A const& a) {
 
 //------------------------ Formula Function ----------------------------------//
 
-template<class P, class Y> ScalarUnivariateFunction<P> make_formula_function(RealDomain dom, Scalar<Formula<Y>> const& e) {
+template<class P, class Y> ScalarUnivariateFunction<P> make_formula_function(RealDomain, Scalar<Formula<Y>> const& e) {
     return ScalarUnivariateFunction<P>(ScalarUnivariateFormulaFunction<Y>(e));
 }
 
-template<class P, class Y> VectorUnivariateFunction<P> make_formula_function(RealDomain dom, Vector<Formula<Y>> const& e) {
+template<class P, class Y> VectorUnivariateFunction<P> make_formula_function(RealDomain, Vector<Formula<Y>> const& e) {
     return VectorUnivariateFunction<P>(VectorUnivariateFormulaFunction<Y>(e));
 }
 
@@ -87,7 +87,7 @@ template<class P, class Y> VectorMultivariateFunction<P> make_formula_function(E
 
 namespace {
 
-template<class P, class D> ScalarFunction<P,ElementKind<D>> make_zero_function(SizeOne rs, D dom) {
+template<class P, class D> ScalarFunction<P,ElementKind<D>> make_zero_function(SizeOne, D dom) {
     return FunctionConstructors<P>::zero(dom); }
 template<class P, class D> VectorFunction<P,ElementKind<D>> make_zero_function(SizeType rs, D dom) {
     return  FunctionConstructors<P>::zeros(rs,dom); }
@@ -125,7 +125,7 @@ template<class P, class SIG> Function<P,SIG>::Function(typename SignatureTraits<
 
 template<class P, class SIG> struct MakeVectorFunction;
 template<class P, class... ARGS> struct MakeVectorFunction<P,Real(ARGS...)> {
-    ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
+    ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const&) {
         ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
 };
 /*
@@ -332,9 +332,9 @@ template<class X> class Space;
 SizeType dimension(const Space<Real>& spc);
 
 
-inline EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
+inline EffectiveScalarUnivariateFunction make_formula_function(SizeOne, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
-inline EffectiveVectorUnivariateFunction make_formula_function(SizeOne as, const Vector<Formula<EffectiveNumber>>& fm) {
+inline EffectiveVectorUnivariateFunction make_formula_function(SizeOne, const Vector<Formula<EffectiveNumber>>& fm) {
     return EffectiveVectorUnivariateFunction(RealDomain(),fm); }
 inline EffectiveScalarMultivariateFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarMultivariateFunction(EuclideanDomain(as),fm); }

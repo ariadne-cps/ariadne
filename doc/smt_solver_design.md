@@ -2004,3 +2004,41 @@ diagnostic reports the separate and combined sign resolutions, average widths,
 and time spent in gradient, midpoint, and monotonicity evaluations. This tests
 the most promising existing Ariadne machinery before designing a new range
 algebra or resuming dependency-aware symbolic rewriting.
+
+
+The reverse-AD composite diagnostic confirms that a tiered range evaluator can
+extract additional information, but also shows that reverse interval AD is not
+the right derivative enclosure for this Barr3 frontier. With 256 processed
+boxes the replay remains identical to the solver frontier
+(`processed=256`, `pruned=123`, `split=133`) and again 126 split boxes
+have a natural `db/dy` range crossing zero. The centered reverse-AD bound is
+sign-definite on 19 of those 126 boxes. Intersecting it with the natural range
+reduces average width from about 5.86 to 5.24, roughly 10.6%. The centered
+bound itself is very wide, about 152 on average. No validated reverse-AD
+gradient component is sign-definite on any of these boxes, so the monotonicity
+endpoint evaluator is never activated. The full diagnostic takes about
+13.0 s; the 126 reverse-gradient evaluations account for about 3.33 s and the
+126 midpoint evaluations for about 1.01 s.
+
+This is stronger than four-quadrant subdivision in sign resolution
+(19 versus 11 parent boxes) at slightly lower total diagnostic time, but it is
+weaker than the earlier symbolic-derivative mean-value experiment, which
+resolved 28 boxes and produced an average direct/mean-value intersection width
+of about 4.80. The difference matters: the centered formula is useful, but the
+reverse-AD interval gradient is materially wider than the interval ranges of
+the separately differentiated functions. Consequently, spending more effort
+on reverse-AD monotonicity is not justified at this point.
+
+The next diagnostic, `lie-gradient-symbolic-procedure-profile`, separates
+derivative representation from derivative evaluation cost. It differentiates
+`db/dy` symbolically once, compiles the original function and both derivative
+functions into `ValidatedProcedure` objects once, and then evaluates those
+procedures on the same 256-box frontier. It forms the same centered and
+monotonicity endpoint bounds and intersects them with the natural range. If it
+recovers the 28-box resolution and approximately 4.80 average intersected
+width of the previous symbolic mean-value profile while substantially reducing
+runtime, then compiled symbolic derivative procedures are a credible
+second-tier range evaluator. If the runtime remains high, the next useful
+directions are improving polynomial/Taylor range extraction or returning to
+dependency-aware expression rewriting rather than further elaborating this
+first-order scheme.

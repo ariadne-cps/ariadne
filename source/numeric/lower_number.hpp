@@ -131,9 +131,9 @@ template<class P> class LowerNumber
     friend OutputStream& operator<<(OutputStream& os, LowerNumber<P> const& y) { return y.ref()._write(os); }
 
     struct Zero { };
-    friend LowerLogicalType<P> operator>(LowerNumber<P> const& y, Zero const& z) {
+    friend LowerLogicalType<P> operator>(LowerNumber<P> const& y, Zero const&) {
         return LowerLogicalType<P>(y.ref()._is_pos()); }
-    friend UpperLogicalType<P> operator<(LowerNumber<P> const& y, Zero const& z) {
+    friend UpperLogicalType<P> operator<(LowerNumber<P> const& y, Zero const&) {
         return UpperLogicalType<P>(not y.ref()._is_pos()); }
 
 };

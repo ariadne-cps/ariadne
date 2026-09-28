@@ -274,7 +274,7 @@ Real mul(Real const& x1, Real const& x2) { return make_real(Mul(),x1,x2); }
 Real div(Real const& x1, Real const& x2) { return make_real(Div(),x1,x2); }
 Real pow(Real const& x1, Nat m2) { return make_real(Pow(),x1,Int(m2)); }
 Real pow(Real const& x1, Int n2) { return make_real(Pow(),x1,n2); }
-Real nul(Real const& x) { return Real(0); }
+Real nul(Real const&) { return Real(0); }
 Real pos(Real const& x) { return make_real(Pos(),x); }
 Real neg(Real const& x) { return make_real(Neg(),x); }
 Real hlf(Real const& x) { return make_real(Hlf(),x); }
@@ -307,8 +307,8 @@ class WhenRealExpression : public RealBase {
     WhenRealExpression(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2)
         : WhenRealExpression(c1.condition(),c1.term(),c2.condition(),c2.term()) { }
     virtual DyadicBounds _compute_get(Effort eff) const;
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return this->_compute(Effort(0u)).get(pr); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return this->_compute(Effort(pr.bits())).get(pr); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision pr) const { return this->_compute(Effort(0u)).get(pr); }
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision pr) const { return this->_compute(Effort(pr.bits())).get(pr); }
     friend OutputStream& operator<<(OutputStream& os, WhenRealExpression const& r) { return r._write(os); }
   public:
     virtual OutputStream& _write(OutputStream& os) const;
@@ -437,12 +437,12 @@ Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<
 
 Kleenean sgn(Real const& x) { return make_logical<Kleenean>(Sgn(),x); }
 
-ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-ValidatedSierpinskian operator!=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator< (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator> (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
-Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedNegatedSierpinskian operator==(Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
+ValidatedSierpinskian operator!=(Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator< (Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator> (Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator<=(Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
+Kleenean operator>=(Real const&, Int64) { ARIADNE_NOT_IMPLEMENTED; }
 
 Integer round(Real const& r) {
     DyadicBounds wb=r.compute(Accuracy(1_bits)).get();

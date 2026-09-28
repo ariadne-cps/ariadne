@@ -88,7 +88,7 @@ FloatDP::Float(Integer const& x, RoundingModeType rnd, PrecisionType pr)
 {
 }
 
-FloatDP::Float(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Dyadic const& w, RoundingModeType rnd, PrecisionType)
     : FloatDP(w.get_d())
 {
     if (is_finite(w)) {
@@ -113,7 +113,7 @@ FloatDP::Float(Decimal const& dec, RoundingModeType rnd, PrecisionType pr)
 
 inline Rational cast_rational(double d) { return Rational(ExactDouble(d)); }
 
-FloatDP::Float(Rational const& q, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Rational const& q, RoundingModeType rnd, PrecisionType)
     : FloatDP(q.get_d())
 {
     if (is_finite(q)) {
@@ -131,7 +131,7 @@ FloatDP::Float(Rational const& q, RoundingModeType rnd, PrecisionType pr)
     }
 }
 
-FloatDP::Float(FloatDP const& x, RoundingModeType rnd, PrecisionType)
+FloatDP::Float(FloatDP const& x, RoundingModeType, PrecisionType)
     : FloatDP(x)
 {
 }
@@ -202,7 +202,7 @@ FloatDP atan_rnd(FloatDP x)
     return FloatDP(atan_rnd(x.dbl));
 }
 
-FloatDP FloatDP::pi(BuiltinRoundingModeType rnd, DoublePrecision pr) {
+FloatDP FloatDP::pi(BuiltinRoundingModeType rnd, DoublePrecision) {
     switch(rnd) {
         case FloatDP::ROUND_UPWARD: return FloatDP(_pi_up);
         case FloatDP::ROUND_DOWNWARD: return FloatDP(_pi_down);
@@ -231,7 +231,7 @@ FloatDP FloatDP::min(PrecisionType) { return FloatDP(std::numeric_limits<double>
 FloatDP FloatDP::max(PrecisionType) { return FloatDP(std::numeric_limits<double>::max()); }
 FloatDP FloatDP::eps(PrecisionType) { return FloatDP(std::numeric_limits<double>::epsilon()); }
 
-FloatDP FloatDP::inf(Sign sgn, PrecisionType pr) {
+FloatDP FloatDP::inf(Sign sgn, PrecisionType) {
     switch (sgn) {
     case Sign::POSITIVE: return FloatDP(std::numeric_limits<double>::infinity());
     case Sign::NEGATIVE: return FloatDP(-std::numeric_limits<double>::infinity());

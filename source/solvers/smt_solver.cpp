@@ -300,7 +300,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool deterministic_witness_probing_enabled,
     Bool shaving_reduction_enabled,
     Bool hull_reduction_enabled,
-    Bool interval_lookahead_split_enabled)
+    Bool interval_lookahead_split_enabled,
+    Bool upper_child_first)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -309,6 +310,7 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _monotone_reduction_enabled(monotone_reduction_enabled),
       _sensitivity_split_enabled(sensitivity_split_enabled),
       _interval_lookahead_split_enabled(interval_lookahead_split_enabled),
+      _upper_child_first(upper_child_first),
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
       _shaving_reduction_enabled(shaving_reduction_enabled),
       _hull_reduction_enabled(hull_reduction_enabled)
@@ -944,8 +946,11 @@ SmtSolver::_solve_sequential_conjunction(
             return SmtResult::epsilon_sat(*processing.witness,statistics);
         }
         if(processing.status==BoxProcessingStatus::SPLIT) {
-            pending.push(std::move(processing.children->second));
-            pending.push(std::move(processing.children->first));
+            auto children=SmtSolverTestSupport::sequential_children_to_push(
+                _configuration.upper_child_first(),*processing.children);
+            for(auto& child:children) {
+                pending.push(std::move(child));
+            }
         } else if(processing.status==BoxProcessingStatus::UNKNOWN) {
             unknown_reason=SmtSolverTestSupport::combine_unknown_reasons(
                 unknown_reason,SmtUnknownReason::DP_RESOLUTION_EXHAUSTED);
@@ -1220,6 +1225,16 @@ std::vector<UpperBoxType> parallel_children_to_append(
         return {};
     }
     return {children.first,children.second};
+}
+
+std::vector<UpperBoxType> sequential_children_to_push(
+    Bool upper_child_first,
+    Pair<UpperBoxType,UpperBoxType> const& children)
+{
+    if(upper_child_first) {
+        return {children.first,children.second};
+    }
+    return {children.second,children.first};
 }
 
 Pair<Bool,Bool> parallel_witness_claim_sequence()

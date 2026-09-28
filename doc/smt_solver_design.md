@@ -1578,3 +1578,22 @@ If the Lie-only run follows the same pruning/split curve while reducing cost
 substantially, then barrier non-negativity is not merely failing to prune first;
 it is operationally irrelevant to the observed search frontier and should not
 drive further Barr3 heuristic design.
+
+The 2,048-box Lie-only diagnostic confirms that barrier non-negativity is
+operationally irrelevant on the established cheap-search frontier. Removing the
+barrier literal leaves the search outcome exactly unchanged at 1,020 pruned and
+1,028 split boxes, with no epsilon certification. Fused literal evaluations
+fall to exactly 2,048, one per processed box. Elapsed time decreases only from
+64.911 s for the two-literal Lie-first query to 62.567 s for Lie-only, so the
+barrier contributes little runtime and no observed decision power.
+
+The next zero-evaluation-cost diagnostic varies only sequential DFS child order.
+The existing stack visits the lower/first split child before the upper/second
+child. An opt-in `upper-first` configuration reverses that visit order while
+preserving the same geometric split boxes, solver semantics and box budget.
+The benchmark accepts a final `lower-first` or `upper-first` argument and keeps
+`lower-first` as the default. A test-support helper makes the stack push order
+explicit and tests both branches. If the 2,048-box pruning fraction changes
+materially under upper-first traversal, the apparent plateau is partly a
+budget/frontier-order effect; if it remains near one half, search order alone
+is not the missing decision mechanism.

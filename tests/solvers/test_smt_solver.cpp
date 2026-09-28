@@ -111,6 +111,7 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(not configuration.monotone_reduction_enabled());
         ARIADNE_TEST_ASSERT(configuration.sensitivity_split_enabled());
         ARIADNE_TEST_ASSERT(not configuration.interval_lookahead_split_enabled());
+        ARIADNE_TEST_ASSERT(not configuration.upper_child_first());
         ARIADNE_TEST_ASSERT(configuration.deterministic_witness_probing_enabled());
         ARIADNE_TEST_ASSERT(configuration.shaving_reduction_enabled());
         ARIADNE_TEST_ASSERT(configuration.hull_reduction_enabled());
@@ -190,6 +191,22 @@ class TestSmtSolver {
             true);
         ARIADNE_TEST_ASSERT(
             lookahead_configuration.interval_lookahead_split_enabled());
+
+        std::cout << "[smt-config] enable upper child first" << std::endl;
+        SmtSolverConfiguration upper_first_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true);
+        ARIADNE_TEST_ASSERT(upper_first_configuration.upper_child_first());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -479,6 +496,20 @@ class TestSmtSolver {
     }
 
     Void test_parallel_state_transitions() {
+        {
+            UpperBoxType box(ExactBoxType({ExactIntervalType(-1,1)}));
+            auto children=box.split();
+            auto lower_first=SmtSolverTestSupport::sequential_children_to_push(
+                false,children);
+            auto upper_first=SmtSolverTestSupport::sequential_children_to_push(
+                true,children);
+            ARIADNE_TEST_EQUAL(
+                lower_first.back()[0].upper_bound().raw(),
+                children.first[0].upper_bound().raw());
+            ARIADNE_TEST_EQUAL(
+                upper_first.back()[0].lower_bound().raw(),
+                children.second[0].lower_bound().raw());
+        }
         std::cout << "[smt-parallel] deterministic shared-state transitions" << std::endl;
         ARIADNE_TEST_ASSERT(not SmtSolverTestSupport::parallel_stop_condition(false,false));
         ARIADNE_TEST_ASSERT(SmtSolverTestSupport::parallel_stop_condition(true,false));

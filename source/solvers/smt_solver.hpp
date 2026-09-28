@@ -76,7 +76,8 @@ class SmtSolverConfiguration {
         Bool deterministic_witness_probing_enabled=true,
         Bool shaving_reduction_enabled=true,
         Bool hull_reduction_enabled=true,
-        Bool interval_lookahead_split_enabled=false);
+        Bool interval_lookahead_split_enabled=false,
+        Bool upper_child_first=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -105,6 +106,9 @@ class SmtSolverConfiguration {
         return _interval_lookahead_split_enabled;
     }
 
+    //! \brief Whether sequential DFS visits the upper split child first.
+    Bool upper_child_first() const { return _upper_child_first; }
+
     //! \brief Whether deterministic midpoint/endpoint/corner witness probing is enabled.
     Bool deterministic_witness_probing_enabled() const {
         return _deterministic_witness_probing_enabled;
@@ -125,6 +129,7 @@ class SmtSolverConfiguration {
     Bool _monotone_reduction_enabled;
     Bool _sensitivity_split_enabled;
     Bool _interval_lookahead_split_enabled;
+    Bool _upper_child_first;
     Bool _deterministic_witness_probing_enabled;
     Bool _shaving_reduction_enabled;
     Bool _hull_reduction_enabled;
@@ -299,6 +304,9 @@ Void record_parallel_processing_thread();
 Bool parallel_stop_condition(Bool found, Bool limit_reached);
 std::vector<UpperBoxType> parallel_children_to_append(
     Bool found,
+    Pair<UpperBoxType,UpperBoxType> const& children);
+std::vector<UpperBoxType> sequential_children_to_push(
+    Bool upper_child_first,
     Pair<UpperBoxType,UpperBoxType> const& children);
 Pair<Bool,Bool> parallel_witness_claim_sequence();
 

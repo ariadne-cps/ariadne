@@ -72,6 +72,18 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "[barrier-first|lie-first]");
 }
 
+String child_order_from_argument(Int argc,const char* argv[]) {
+    if(argc<=9) { return "lower-first"; }
+    String argument(argv[9]);
+    if(argument=="lower-first" || argument=="upper-first") { return argument; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
+        "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
+        "[all|lie|lie-only|eval] [monotone|no-monotone] "
+        "[barrier-first|lie-first] [lower-first|upper-first]");
+}
+
 Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argc<=5) { return true; }
     String argument(argv[5]);
@@ -454,6 +466,8 @@ Int main(Int argc,const char* argv[]) {
     String const query=query_from_argument(argc,argv);
     Bool const monotone_enabled=monotone_from_argument(argc,argv);
     String const lie_literal_order=lie_literal_order_from_argument(argc,argv);
+    String const child_order=child_order_from_argument(argc,argv);
+    Bool const upper_child_first=child_order=="upper-first";
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -473,6 +487,7 @@ Int main(Int argc,const char* argv[]) {
               << " monotone="
               << (monotone_enabled ? "enabled" : "disabled")
               << " lie-literal-order=" << lie_literal_order
+              << " child-order=" << child_order
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -552,7 +567,8 @@ Int main(Int argc,const char* argv[]) {
         witness_probing_enabled,
         shaving_enabled,
         hull_enabled,
-        lookahead_enabled));
+        lookahead_enabled,
+        upper_child_first));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

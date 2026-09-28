@@ -34,7 +34,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 /*! \brief Configuration altering the model of a class.
  *

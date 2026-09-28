@@ -37,12 +37,9 @@
 #include "logging/logging.hpp"
 #include "integrator_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
-using Utility::Attribute;
-using Utility::Generator;
 
 //! \brief An argument is a suggestion or hint, which is allowed to be ignored or used approximately.
 template<class T> class Suggestion {

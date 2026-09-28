@@ -33,11 +33,9 @@
 #include "logging/logging.hpp"
 #include "command_line_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
-using Threading::ThreadManager;
 
 
 ArgumentStream::ArgumentStream(List<String> const& args) {

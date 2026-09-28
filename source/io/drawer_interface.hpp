@@ -34,7 +34,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 typedef Void Void;
 class CanvasInterface;

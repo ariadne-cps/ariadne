@@ -56,7 +56,6 @@
 
 namespace Ariadne {
 
-using Threading::StaticWorkload;
 
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);

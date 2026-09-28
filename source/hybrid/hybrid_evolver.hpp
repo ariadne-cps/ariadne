@@ -50,7 +50,6 @@
 
 #include "logging/logging.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 
@@ -59,7 +58,6 @@ typedef Dyadic StepSizeType;
 
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
-using Threading::DynamicWorkload;
 
 class IntegratorInterface;
 class SolverInterface;

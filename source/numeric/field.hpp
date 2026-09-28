@@ -31,7 +31,6 @@
 
 namespace Ariadne {
 
-using Utility::WritableInterface;
 
 //! \brief Interface for a ring.
 template<class T> class RingInterface

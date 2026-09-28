@@ -474,7 +474,7 @@ Void profile_affine_range(
     ExactBoxType const& domain)
 {
     Stopwatch<Milliseconds> build_stopwatch;
-    ValidatedAffineModelDP model=affine_model(domain,function,dp);
+    auto model=affine_model(domain,function,dp);
     build_stopwatch.click();
 
     Stopwatch<Milliseconds> range_stopwatch;

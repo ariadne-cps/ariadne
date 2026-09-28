@@ -233,10 +233,11 @@ RealSpace HybridBoxSet::space() const {
     return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
 }
 RealSpace HybridBoxSet::space(DiscreteLocation loc) const {
+    static_cast<void>(loc);
     ARIADNE_ASSERT(this->location()==loc);
     return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
 }
-EffectiveEuclideanSetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+EffectiveEuclideanSetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation, RealSpace) const {
     ARIADNE_NOT_IMPLEMENTED; // FIXME: Box does not inherit from SetInterface...
 }
 

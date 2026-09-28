@@ -288,31 +288,31 @@ Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMult
     this->_set.set_auxiliary(vars,aux);
 }
 
-Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
+Void HybridEnclosure::new_state_time_bound(DiscreteEvent, ValidatedScalarMultivariateFunction gamma) {
     this->_set.new_state_time_bound(gamma);
 }
 
-Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
+Void HybridEnclosure::new_invariant(DiscreteEvent, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
 
-Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
+Void HybridEnclosure::new_activation(DiscreteEvent, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
 }
 
-Void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
+Void HybridEnclosure::new_guard(DiscreteEvent, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
-Void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_parameter_constraint(DiscreteEvent, ValidatedConstraint constraint) {
     this->_set.new_parameter_constraint(constraint);
 }
 
-Void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_state_constraint(DiscreteEvent, ValidatedConstraint constraint) {
     this->_set.new_state_constraint(constraint);
 }
 
-Void HybridEnclosure::new_state_time_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_state_time_constraint(DiscreteEvent, ValidatedConstraint constraint) {
     this->_set.new_state_time_constraint(constraint);
 }
 
@@ -542,8 +542,10 @@ HybridEnclosure::_check() const
 
 Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
-    Projection2d proj=Ariadne::projection(this->state_time_auxiliary_space(),axes);
-    this->continuous_set().draw(canvas,proj);
+    if(locations.empty() || locations.contains(this->location())) {
+        Projection2d proj=Ariadne::projection(this->state_time_auxiliary_space(),axes);
+        this->continuous_set().draw(canvas,proj);
+    }
 }
 
 

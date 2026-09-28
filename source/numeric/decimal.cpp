@@ -136,7 +136,7 @@ Decimal& operator+=(Decimal& d1, Decimal const& d2)
     return d1=d1+d2;
 }
 
-Decimal nul(Decimal const& d)
+Decimal nul(Decimal const&)
 {
     return Decimal(0,0u);
 }

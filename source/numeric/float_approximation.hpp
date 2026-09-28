@@ -274,7 +274,7 @@ template<class F> class Approximation
     //! <p/>
     static Void set_output_places(Nat p) { output_places=p; }
     //! <p/>
-    Approximation<F> pm(Approximation<F> _e) { return *this; }
+    Approximation<F> pm(Approximation<F>) { return *this; }
   public:
     RawType _a;
 };

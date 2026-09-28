@@ -222,7 +222,7 @@ template<class F> class UpperBound
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
         return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},upward); } //!< Write to an output stream.
-    friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
+    friend InputStream& operator>>(InputStream&, UpperBound<F>&) {
         ARIADNE_NOT_IMPLEMENTED; } //!< Read from an input stream.
     //!@}
   public:

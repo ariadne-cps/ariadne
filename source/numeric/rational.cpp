@@ -52,7 +52,7 @@ namespace Ariadne {
 
 class InvalidRationalLiteralException {
   public:
-    InvalidRationalLiteralException(StringType what) { }
+    InvalidRationalLiteralException(StringType) { }
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
@@ -319,7 +319,7 @@ Rational mig(Rational const& q) {
     Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
 }
 
-Rational nul(Rational const& q) {
+Rational nul(Rational const&) {
     return Rational(0);
 }
 
@@ -529,7 +529,7 @@ OutputStream& write(OutputStream& os, mpz_t const z) {
     return os << str;
 }
 
-InputStream& operator>>(InputStream& is, Rational& q1) {
+InputStream& operator>>(InputStream&, Rational&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 

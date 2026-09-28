@@ -129,15 +129,15 @@ template<class O, class... AS> struct RealWrapper;
 template<class O, class A> struct RealWrapper<O,A> : virtual RealExpressionBase, Symbolic<O,A>, FloatDPBounds {
     RealWrapper(O o, A a) : Symbolic<O,A>(o,a)
         , FloatDPBounds(this->_op(this->_arg.get(dp))) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const {  return static_cast<FloatDPBounds>(*this); }
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A> const&>(*this); }
 };
 
 template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealExpressionBase, Symbolic<O,A1,A2>, FloatDPBounds {
     RealWrapper(O o, A1 a1, A2 a2) : Symbolic<O,A1,A2>(o,a1,a2)
         , FloatDPBounds(this->_op(this->_arg1.get(dp),this->_arg2.get(dp))) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg1.compute_get(eff,pr),this->_arg2.compute_get(eff,pr)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A1,A2> const&>(*this); }
 };
@@ -145,7 +145,7 @@ template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual Real
 template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealExpressionBase, Symbolic<Pow,A,N>, FloatDPBounds {
     RealWrapper(Pow o, A a, N n) : Symbolic<Pow,A,N>(o,a,n)
         , FloatDPBounds(this->_op(this->_arg.get(dp),n)) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg.compute_get(eff,pr),this->_num); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<Pow,A,N> const&>(*this); }
 };
@@ -154,8 +154,8 @@ template<class X> struct RealWrapper<Cnst,X> : RealExpressionBase, FloatDPBounds
     X _c;
   public:
     RealWrapper(X const& x) : FloatDPBounds(x,dp), _c(x) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const { return static_cast<FloatDPBounds const&>(*this); }
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
@@ -163,9 +163,9 @@ template<> struct RealWrapper<Cnst,FloatDPBounds> : RealExpressionBase, FloatDPB
     typedef FloatDPBounds X;
   public:
     RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
-    virtual DyadicBounds _compute_get(Effort eff) const { return DyadicBounds(static_cast<FloatDPBounds const&>(*this)); }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(*this,pr); }
+    virtual DyadicBounds _compute_get(Effort) const { return DyadicBounds(static_cast<FloatDPBounds const&>(*this)); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const { return static_cast<FloatDPBounds const&>(*this); }
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision pr) const { return FloatMPBounds(*this,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
 };
 
@@ -174,8 +174,8 @@ template<> struct RealWrapper<Cnst,EffectiveNumber> : RealExpressionBase, FloatD
     X _c;
   public:
     RealWrapper(X const& x) : FloatDPBounds(x,dp), _c(x) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const { return static_cast<FloatDPBounds const&>(*this); }
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 

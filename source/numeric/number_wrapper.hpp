@@ -431,7 +431,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual Rational _get_q() const override {
         return this->_get_as<Rational>(); }
 
-    virtual FloatDPBall _get(MetricTag,DoublePrecision pr,DoublePrecision pre) const override {
+    virtual FloatDPBall _get(MetricTag,DoublePrecision pr,DoublePrecision) const override {
         return this->_get_as<FloatDPBall>(pr); }
     virtual FloatDPBounds _get(OrderTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPBounds>(pr); }

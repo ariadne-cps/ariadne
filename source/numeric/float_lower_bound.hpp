@@ -228,7 +228,7 @@ template<class F> class LowerBound
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, LowerBound<F> const& x) {
         return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},downward); } //!< Write to an output stream.
-    friend InputStream& operator>>(InputStream& is, LowerBound<F>& x) {
+    friend InputStream& operator>>(InputStream&, LowerBound<F>&) {
         ARIADNE_NOT_IMPLEMENTED; } //!< Read from an input stream.
     //!@}
   public:

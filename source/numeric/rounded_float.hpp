@@ -81,12 +81,12 @@ template<> class Rounded<FloatDP>
   private:
     explicit Rounded(double d) : _flt(d) { }
   public:
-    explicit Rounded(PrecisionType pr) : _flt() { }
+    explicit Rounded(PrecisionType) : _flt() { }
     Rounded(FloatType x) : _flt(x.dbl) { }
 
     template<BuiltinIntegral N>
-        Rounded(N n, PrecisionType pr) : _flt(n) { }
-    Rounded(ExactDouble d, PrecisionType pr) : _flt(d.get_d()) { }
+        Rounded(N n, PrecisionType) : _flt(n) { }
+    Rounded(ExactDouble d, PrecisionType) : _flt(d.get_d()) { }
     Rounded(Dyadic const& w, PrecisionType pr) : Rounded(FloatType(w,pr)) { }
     Rounded(FloatType x, PrecisionType) : _flt(x.dbl) { }
     Rounded(Rounded<FloatType> x, PrecisionType) : _flt(x._flt) { }
@@ -139,7 +139,7 @@ template<> class Rounded<FloatDP>
     friend Rounded<FloatDP> asin(Rounded<FloatDP> x) { return Rounded<FloatDP>(asin_rnd(x._flt.dbl)); }
     friend Rounded<FloatDP> acos(Rounded<FloatDP> x) { return Rounded<FloatDP>(acos_rnd(x._flt.dbl)); }
     friend Rounded<FloatDP> atan(Rounded<FloatDP> x) { return Rounded<FloatDP>(atan_rnd(x._flt.dbl)); }
-    static Rounded<FloatDP> pi(PrecisionType pr) { return Rounded<FloatDP>(pi_rnd()); }
+    static Rounded<FloatDP> pi(PrecisionType) { return Rounded<FloatDP>(pi_rnd()); }
 
     friend Rounded<FloatDP> abs(Rounded<FloatDP> x) { return Rounded<FloatDP>(abs_rnd(x._flt.dbl)); }
     friend Rounded<FloatDP> max(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(max_rnd(x1._flt.dbl,x2._flt.dbl)); }

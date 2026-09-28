@@ -97,7 +97,7 @@ OutputStream& operator<<(OutputStream& os, ScalarProcedureInstruction const& s) 
 OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri) { pri.accept([&os](auto s){os<<s;}); return os; }
 
 template<class Y>
-Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<Y>& c)
+Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<Y>&)
 {
     for(SizeType i=0; i!=p.size(); ++i) {
         os << "v[" << i << "]=" << p[i] << "; ";
@@ -281,6 +281,7 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }
 template<class X> Void backpropagate(X const& r, Leq, X& a1, X& a2) {
+    static_cast<void>(r);
     restrict(a1,X(-inf,a2.upper())); restrict(a1,X(a2.lower(),+inf)); }
 
 template<class X> Void backpropagate(X const& r, UnaryElementaryOperator eop, X& a) {
@@ -297,7 +298,7 @@ template<class X, class Y> Void backpropagate(X const& r, BinaryElementaryOperat
 template<class X, class Y> Void _backpropagate(SizeType r, Vector<X>& x, List<X>& v, ProcedureInstruction pri, List<Y> const& c) {
     struct Visitor {
         SizeType r; Vector<X>& x; List<X>& v; List<Y> const& c;
-        Void operator()(ConstantProcedureInstruction s) { }
+        Void operator()(ConstantProcedureInstruction) { }
         Void operator()(IndexProcedureInstruction s) { restrict(x[s._ind],v[r]); }
         Void operator()(UnaryProcedureInstruction s) { backpropagate(v[r],s._op,v[s._arg]); }
         Void operator()(BinaryProcedureInstruction s) { backpropagate(v[r],s._op,v[s._arg1],v[s._arg2]); }
@@ -326,22 +327,22 @@ template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const L
 
 
 
-template<class X, class D> void back_gradient(D const& dr, Add, X const& a1, D& da1, X const& a2, D& da2) { da1+=dr; da2+=dr; }
-template<class X, class D> void back_gradient(D const& dr, Sub, X const& a1, D& da1, X const& a2, D& da2) { da1+=dr; da2-=dr; }
+template<class X, class D> void back_gradient(D const& dr, Add, X const&, D& da1, X const&, D& da2) { da1+=dr; da2+=dr; }
+template<class X, class D> void back_gradient(D const& dr, Sub, X const&, D& da1, X const&, D& da2) { da1+=dr; da2-=dr; }
 template<class X, class D> void back_gradient(D const& dr, Mul, X const& a1, D& da1, X const& a2, D& da2) { da1+=dr*a2; da2+=a1*dr; }
 template<class X, class D> void back_gradient(D const& dr, Div, X const& a1, D& da1, X const& a2, D& da2) { da1+=dr/a2; da2-=dr/a2*(a1/a2); }
-template<class X, class D> void back_gradient(D const& dr, Max, X const& a1, D& da1, X const& a2, D& da2) { assert(false); }
-template<class X, class D> void back_gradient(D const& dr, Min, X const& a1, D& da1, X const& a2, D& da2) { assert(false); }
+template<class X, class D> void back_gradient(D const&, Max, X const&, D&, X const&, D&) { assert(false); }
+template<class X, class D> void back_gradient(D const&, Min, X const&, D&, X const&, D&) { assert(false); }
 
-template<class Y, class X, class D> void back_gradient(D const& dr, Add op, Y const& c1, X const& a2, D& da2) { da2+=dr; }
-template<class Y, class X, class D> void back_gradient(D const& dr, Sub op, Y const& c1, X const& a2, D& da2) { da2-=dr; }
-template<class Y, class X, class D> void back_gradient(D const& dr, Mul op, Y const& c1, X const& a2, D& da2) { da2+=c1*dr; }
-template<class Y, class X, class D> void back_gradient(D const& dr, Div op, Y const& c1, X const& a2, D& da2) { da2-=(dr/a2)*(c1/a2); }
-template<class Y, class X, class D> void back_gradient(D const& dr, Max op, Y const& c1, X const& a2, D& da2) { assert(false); }
-template<class Y, class X, class D> void back_gradient(D const& dr, Min op, Y const& c1, X const& a2, D& da2) { assert(false); }
+template<class Y, class X, class D> void back_gradient(D const& dr, Add, Y const&, X const&, D& da2) { da2+=dr; }
+template<class Y, class X, class D> void back_gradient(D const& dr, Sub, Y const&, X const&, D& da2) { da2-=dr; }
+template<class Y, class X, class D> void back_gradient(D const& dr, Mul, Y const& c1, X const&, D& da2) { da2+=c1*dr; }
+template<class Y, class X, class D> void back_gradient(D const& dr, Div, Y const& c1, X const& a2, D& da2) { da2-=(dr/a2)*(c1/a2); }
+template<class Y, class X, class D> void back_gradient(D const&, Max, Y const&, X const&, D&) { assert(false); }
+template<class Y, class X, class D> void back_gradient(D const&, Min, Y const&, X const&, D&) { assert(false); }
 
 template<class OP, class X, class D> void back_gradient(D const& dr, OP op, X const& a, D& da) { da+=op.derivative(a,dr); }
-template<class X, class D> void back_gradient(D const& dr, Abs op, X const& a, D& da) { assert(false); }
+template<class X, class D> void back_gradient(D const&, Abs, X const&, D&) { assert(false); }
 
 template<class N, class X, class D> void back_gradient(D const& dr, Pow op, X const& a, D& da, N n) { da+=op.derivative(a,dr,n); }
 
@@ -362,7 +363,7 @@ namespace {
 template<class X, class Y> void _back_gradient_impl(SizeType r, ProcedureInstruction const& pri, Vector<X> const& x, List<Y> const& c, List<X>& v, List<X>& dv, Covector<X>& dfx) {
     struct Visitor {
         SizeType r; Vector<X> const& x; List<Y> const& c; List<X>& v; List<X>& dv; Covector<X>& dfx;
-        void operator()(ConstantProcedureInstruction const& s) { }
+        void operator()(ConstantProcedureInstruction const&) { }
         void operator()(IndexProcedureInstruction const& s) { dfx[s._ind]+=dv[r]; }
         void operator()(UnaryProcedureInstruction const& s) { back_gradient(dv[r],s._op,v[s._arg],dv[s._arg]); }
         void operator()(BinaryProcedureInstruction const& s) { back_gradient(dv[r],s._op,v[s._arg1],dv[s._arg1],v[s._arg2],dv[s._arg2]); }

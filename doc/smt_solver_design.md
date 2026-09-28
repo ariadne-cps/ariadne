@@ -1371,3 +1371,18 @@ approximately linearly with processed boxes: about 2.77 s at 64 boxes, 9.24 s at
 in fused direct validated rejection. This makes larger-budget geometric runs
 cheap enough to characterize the unresolved frontier before reintroducing any
 contractor.
+
+The geometric-only Lie curve continues to 1,024 and 2,048 processed boxes with
+508 and 1,020 pruned boxes respectively, i.e. 49.6% and 49.8%. No epsilon box
+is certified. Together with the 512-box point, this confirms a stable pruning
+plateau near one half; further brute-force geometric budget increases are not
+expected to change the qualitative result.
+
+The next controlled experiment re-enables only validated monotone/Newton
+contraction while keeping sensitivity splitting, deterministic witness probing,
+coordinate shaving and hull reduction disabled. The standalone benchmark now
+accepts an optional seventh argument, `monotone` or `no-monotone`, after the
+query selector; the default is `no-monotone`, so existing benchmark commands
+are unchanged. This isolates whether sign-definite cached derivatives can
+contract the unresolved frontier cheaply before reconsidering the much more
+expensive hull contractor.

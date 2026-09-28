@@ -1821,3 +1821,21 @@ established 2048-box frontier. If the fraction of unresolved boxes whose
 `db/dy` enclosure contains zero remains close to the 256-box value, ordinary
 geometric depth is not resolving that derivative efficiently and the next work
 should target the derivative representation rather than the dynamics.
+
+
+The 2048-box correlation profile shows that ordinary geometric splitting does
+eventually make the neural derivative more informative, but only gradually.
+The replay processes 2048 boxes, pruning 1019 and splitting 1029. Among those
+1029 unresolved boxes, `db/dy` still contains zero in 755 cases (about 73.4%),
+while the factored y dynamics contains zero in only 63 cases (about 6.1%).
+Both contain zero in those same 63 cases; 274 split boxes make both factors
+sign-definite. Average widths fall from the 256-box profile to about 3.89 for
+`db/dy`, 0.60 for y-dot, and 18.36 for Lie-plus-barrier.
+
+Thus geometric depth is helping, but the derivative enclosure remains the
+dominant slow-to-resolve term. The next isolated experiment compares the current
+forward-propagated symbolic gradient with an algebraically equivalent
+reverse/backprop construction of the same network derivative. The purpose is
+not to change differentiation semantics, but to test whether reassociating the
+same products and sums yields a tighter natural interval extension before any
+new split policy or contractor is designed.

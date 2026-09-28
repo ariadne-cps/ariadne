@@ -1783,3 +1783,23 @@ pre-rewrite reference was 123 pruned / 133 split in about 9.24 s. If the
 factored dynamics starts changing pruning only at deeper boxes, that run should
 reveal it; if the outcome remains identical, the rewrite should be retained for
 its enclosure quality but not credited as a search-power improvement.
+
+The factored-dynamics search remains neutral at 256 boxes. The run again
+produces exactly 123 pruned and 133 split boxes, with 389 fused literal
+evaluations and no epsilon certification. Elapsed time improves modestly from
+the pre-rewrite reference of about 9.24 s to about 8.714 s, but there is still
+no additional decision power. The rewrite is retained because it is exact and
+strictly improves the root enclosure, but current evidence does not credit it
+with stronger search pruning.
+
+The dominant remaining dependency is between `db/dy` and the factored y
+dynamics, since both ranges can cross zero independently even after the
+dynamics range is tightened. The benchmark therefore adds
+`lie-correlation-profile`, a benchmark-only replay of the same lower-first
+geometric DFS using the Lie-plus-barrier literal. On every split box it records
+whether `db/dy` crosses zero, whether y-dot crosses zero, whether both cross
+zero, whether both are sign-definite, and average widths of `db/dy`, y-dot and
+Lie-plus-barrier. The replay also reports processed/pruned/split counts so its
+frontier can be checked against the solver baseline. This diagnostic is meant
+to determine whether sign partitioning of the dominant product has realistic
+leverage before any new contractor or split policy is implemented.

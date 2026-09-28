@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "utility/stopwatch.hpp"
 #include "function/procedure.hpp"
@@ -42,12 +43,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -59,7 +60,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -70,7 +71,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -82,7 +83,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -528,6 +529,102 @@ Void profile_split_candidate(
               << std::endl;
 }
 
+struct SignProfileCounts {
+    SizeType processed = 0u;
+    SizeType pruned = 0u;
+    SizeType split = 0u;
+    SizeType split_db_dy_crosses_zero = 0u;
+    SizeType split_dy_crosses_zero = 0u;
+    SizeType split_both_cross_zero = 0u;
+    SizeType split_both_sign_definite = 0u;
+    double split_db_dy_width_sum = 0.0;
+    double split_dy_width_sum = 0.0;
+    double split_lie_width_sum = 0.0;
+};
+
+Bool crosses_zero(UpperIntervalType const& interval) {
+    return possibly(interval.lower_bound()<=0)
+        && possibly(interval.upper_bound()>=0);
+}
+
+Void profile_lie_correlation_frontier(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    ValidatedScalarMultivariateFunction const& db_dy_function,
+    ValidatedScalarMultivariateFunction const& dy_function,
+    ValidatedScalarMultivariateFunction const& lie_function)
+{
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+    SignProfileCounts counts;
+
+    Stopwatch<Milliseconds> stopwatch;
+    while(not pending.empty() && counts.processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++counts.processed;
+
+        UpperIntervalType lie_image=apply(lie_function,box);
+        if(definitely(lie_image.lower_bound()>=0)) {
+            ++counts.pruned;
+            continue;
+        }
+
+        auto children=box.split();
+        if(children.first==children.second) {
+            continue;
+        }
+
+        ++counts.split;
+        UpperIntervalType db_dy_image=apply(db_dy_function,box);
+        UpperIntervalType dy_image=apply(dy_function,box);
+        Bool const db_dy_crosses=crosses_zero(db_dy_image);
+        Bool const dy_crosses=crosses_zero(dy_image);
+
+        if(db_dy_crosses) { ++counts.split_db_dy_crosses_zero; }
+        if(dy_crosses) { ++counts.split_dy_crosses_zero; }
+        if(db_dy_crosses && dy_crosses) {
+            ++counts.split_both_cross_zero;
+        }
+        if(not db_dy_crosses && not dy_crosses) {
+            ++counts.split_both_sign_definite;
+        }
+
+        counts.split_db_dy_width_sum+=db_dy_image.width().raw();
+        counts.split_dy_width_sum+=dy_image.width().raw();
+        counts.split_lie_width_sum+=lie_image.width().raw();
+
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
+    }
+    stopwatch.click();
+
+    auto average=[](double sum,SizeType count) {
+        return count==0u ? 0.0 : sum/static_cast<double>(count);
+    };
+
+    std::cout << "[lie-correlation-profile]"
+              << " time=" << stopwatch.elapsed_seconds()
+              << " processed=" << counts.processed
+              << " pruned=" << counts.pruned
+              << " split=" << counts.split
+              << " split-db/dy-cross-zero="
+              << counts.split_db_dy_crosses_zero
+              << " split-dy-cross-zero="
+              << counts.split_dy_crosses_zero
+              << " split-both-cross-zero="
+              << counts.split_both_cross_zero
+              << " split-both-sign-definite="
+              << counts.split_both_sign_definite
+              << " avg-split-db/dy-width="
+              << average(counts.split_db_dy_width_sum,counts.split)
+              << " avg-split-dy-width="
+              << average(counts.split_dy_width_sum,counts.split)
+              << " avg-split-lie-width="
+              << average(counts.split_lie_width_sum,counts.split)
+              << std::endl;
+}
+
 Void profile_mean_value_range(
     String const& name,
     ValidatedScalarMultivariateFunction const& function,
@@ -777,6 +874,20 @@ Int main(Int argc,const char* argv[]) {
         profile_interval_expression(
             "lie+barrier-factored",
             lie_factored+network.barrier,space,upper_domain);
+        return 0;
+    }
+
+    if(query=="lie-correlation-profile") {
+        RealExpression dy=ex*(sqr(ex)/3-1)-ey;
+        ValidatedScalarMultivariateFunction db_dy_function=
+            make_function(space,network.db_dy);
+        ValidatedScalarMultivariateFunction dy_function=
+            make_function(space,dy);
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        profile_lie_correlation_frontier(
+            box_limit,UpperBoxType(domain),
+            db_dy_function,dy_function,lie_function);
         return 0;
     }
 

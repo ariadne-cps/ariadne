@@ -51,7 +51,6 @@
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -68,7 +68,6 @@
 
 #include "hybrid/hybrid_graphics.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

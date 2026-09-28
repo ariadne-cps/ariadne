@@ -35,7 +35,6 @@
 #include "hybrid/hybrid_paving.hpp"
 
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

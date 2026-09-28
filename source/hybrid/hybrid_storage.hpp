@@ -51,7 +51,6 @@
 #include "geometry/box.hpp"
 #include "dynamics/storage.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

@@ -43,7 +43,6 @@
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/hybrid_graphics_interface.hpp"
 
-using namespace Ariadne::Logging;
 
 namespace Ariadne {
 

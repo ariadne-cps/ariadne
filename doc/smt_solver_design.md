@@ -1929,3 +1929,78 @@ coexist, and the average width reduction relative to direct evaluation. This
 tests whether one small layer of internal domain subdivision can recover
 dependency information more cost-effectively than derivative-based
 mean-value bounds.
+
+
+The four-quadrant local subdivision diagnostic tightens the neural derivative
+range substantially but resolves relatively few parent boxes. At the 256-box
+frontier it again finds 126 unresolved boxes whose direct `db/dy` range
+contains zero. Evaluating the derivative on four x/y quadrants and taking the
+hull reduces average width from about 5.86 to 3.79, a reduction of roughly 35%.
+However, the quadrant hull becomes sign-definite in only 11 boxes, all four
+quadrants are individually sign-definite in those same 11 boxes, and 115 parent
+boxes remain ambiguous. The run performs 504 extra direct evaluations and takes
+about 14.85 s. No box contains both a rigorously positive quadrant and a
+rigorously negative quadrant at this resolution.
+
+This result motivates an explicit audit of Ariadne's range-evaluation machinery
+before investing in general symbolic expression rewriting. The main findings
+are:
+
+* Natural validated interval evaluation through `Formula`/`Procedure` is the
+  appropriate tier-zero evaluator for SMT. A `Procedure` compiles the DAG into
+  an instruction sequence and evaluates it with outward-rounded interval
+  arithmetic. It is cheap and already competitive with direct function
+  application, but it inherits the usual dependency problem.
+* `Procedure` also implements reverse automatic differentiation. A validated
+  gradient over a box is obtained from one forward execution followed by one
+  backward sweep, and the DP validated instantiation is already exported. This
+  can support centered and monotonicity-aware range bounds without constructing
+  and evaluating a separate symbolic derivative function per coordinate.
+* The generic function API also provides `gradient_range`,
+  `derivative_range`, and `jacobian_range` through differential arithmetic.
+  These are useful validated building blocks, but a precompiled `Procedure`
+  is the more natural low-overhead representation for repeated SMT box
+  evaluation.
+* The current validated affine model is not a lightweight affine-arithmetic
+  evaluator. `affine_model(domain,function,...)` first constructs a Taylor
+  function model using an affine sweeper and then converts it to an affine
+  model. Its range is center plus the absolute gradient sum and accumulated
+  error. This explains why the Barr3 affine diagnostic can be both more costly
+  and much wider than the natural interval extension.
+* Validated Taylor models preserve polynomial dependence explicitly and support
+  exact domain splitting/restriction without rebuilding the source expression.
+  However, their current `range()` keeps special structure only for the
+  constant term, linear terms, and pure quadratic terms; mixed quadratic and
+  higher-degree terms are accumulated by magnitude into a residual bound.
+  Thus a model may retain more correlation than its range routine exploits.
+  Strengthening this polynomial range step, for example by intersecting the
+  current bound with a validated Horner evaluation of the retained polynomial,
+  is a plausible general Ariadne improvement. It does not remove the separate
+  cost of constructing the model.
+* Taylor patches can be split/restricted algebraically, so a future experiment
+  could build a model once and propagate restricted child models down a search
+  tree. This is materially different from rebuilding a Taylor model per SMT
+  box. The very poor Barr3 root Taylor range means this is not the first
+  candidate, but it should not be dismissed solely from the per-root
+  construction benchmark.
+* Ariadne's Chebyshev polynomial classes currently provide approximate
+  polynomial machinery rather than a validated function model with a rigorous
+  remainder suitable for SMT exclusion. They are therefore not a drop-in
+  validated range evaluator.
+* Hull reduction, shaving, monotone/Newton reduction, and interval-Newton-style
+  machinery are contractors or equation solvers rather than general scalar
+  range evaluators. Their Barr3 cost/effectiveness has already been measured
+  separately and should not be used as the baseline range mechanism.
+
+The immediate candidate is therefore a tiered composite evaluator rather than
+a wholesale replacement of interval arithmetic. Query
+`lie-gradient-composite-profile` compiles the current `db/dy` function to a
+`ValidatedProcedure` once. On a box whose natural procedure range still
+contains zero, it computes a reverse-AD gradient, a centered mean-value range,
+and a monotonicity endpoint range obtained by pinning every coordinate whose
+validated derivative is sign-definite to the appropriate endpoint for the
+lower and upper evaluations. It intersects all three rigorous enclosures. The
+diagnostic reports the separate and combined sign resolutions, average widths,
+and time spent in gradient, midpoint, and monotonicity evaluations. This tests
+the most promising existing Ariadne machinery before designing a new range
+algebra or resuming dependency-aware symbolic rewriting.

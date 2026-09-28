@@ -505,7 +505,7 @@ String print(const mpfr_t x, int fdgts, mpfr_rnd_t rnd) {
     return String(cstr);
 }
 
-String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
+String print(const mpfr_t x, int, int fdgts, mpfr_rnd_t rnd) {
     // zdgts is the number of places allocated for the integer part (currently unused)
     // fdgts is the number of places allocated for the fractional part
     return print(x,fdgts,rnd);
@@ -602,7 +602,7 @@ FloatMP round(FloatMP const& x) {
 }
 
 FloatMP abs(FloatMP::RoundingModeType rnd, FloatMP const& x) {
-    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return r;
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,rnd); return r;
 }
 
 FloatMP max(FloatMP::RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2) {
@@ -614,7 +614,7 @@ FloatMP min(FloatMP::RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2)
 }
 
 FloatMP mag(FloatMP::RoundingModeType rnd, FloatMP const& x) {
-    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return r;
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,rnd); return r;
 }
 
 FloatMP nul(FloatMP::RoundingModeType rnd, FloatMP const& x) {
@@ -894,7 +894,7 @@ mpfr_rnd_t to_mpfr_rnd_t(rounding_mode_t rnd) {
 
 }
 
-FloatDP::Float(FloatMP const& d, RoundingModeType rnd, PrecisionType pr) : FloatDP(mpfr_get_d(d.get_mpfr(),to_mpfr_rnd_t(rnd)))
+FloatDP::Float(FloatMP const& d, RoundingModeType rnd, PrecisionType) : FloatDP(mpfr_get_d(d.get_mpfr(),to_mpfr_rnd_t(rnd)))
 {
 
 }

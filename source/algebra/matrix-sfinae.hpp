@@ -58,9 +58,9 @@ template<class X> class Matrix {
     SizeType column_size() const { return _cs; }
     MatrixRow<const Matrix<X>> operator[](SizeType i) const { return MatrixRow<const Matrix<X>>{this,i}; }
     MatrixRow<Matrix<X>> operator[](SizeType i) { return MatrixRow<Matrix<X>>{this,i}; }
-    const X& at(SizeType i, SizeType j) const { return this->_ary[i*this->_rs+this->_cs]; }
-    X& at(SizeType i, SizeType j) { return this->_ary[i*this->_rs+this->_cs]; }
-    Void set(SizeType i, SizeType j, const X& c) const { this->_ary[i*this->_rs+this->_cs]=c; }
+    const X& at(SizeType i, SizeType j) const { return this->_ary[i*this->_cs+j]; }
+    X& at(SizeType i, SizeType j) { return this->_ary[i*this->_cs+j]; }
+    Void set(SizeType i, SizeType j, const X& c) const { this->_ary[i*this->_cs+j]=c; }
     X zero_element() const { return _zero; }
     OutputStream& _write(OutputStream& os) const;
 };

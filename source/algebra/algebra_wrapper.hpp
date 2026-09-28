@@ -63,11 +63,11 @@ template<class A, class X> requires AnAlgebraOver<A,X> class AlgebraWrapper<A,X>
         return heap_move(op(static_cast<const A&>(*this))); }
     virtual AlgebraInterface<X>* _apply(BinaryRingOperator op, AlgebraInterface<X> const& a) const override {
         return heap_move(op(static_cast<const A&>(*this),dynamic_cast<AlgebraWrapper<A,X>const&>(a))); }
-    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator, X const&) const override {
+    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator op, X const& c) const override {
         return heap_move(op(static_cast<const A&>(*this),c)); }
-    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator, X const&) const override {
+    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator op, X const& c) const override {
         return heap_move(op(c,static_cast<const A&>(*this))); };
-    virtual AlgebraInterface<X>* _apply(GradedRingOperator, Nat) const override {
+    virtual AlgebraInterface<X>* _apply(GradedRingOperator op, Nat m) const override {
         return heap_move(op(static_cast<const A&>(*this),m)); };
     virtual OutputStream& _write(OutputStream& os) const override { os << static_cast<const A&>(*this); return os; }
 };
@@ -96,11 +96,11 @@ template<class A, class X> requires AnInplaceAlgebraOver<A,X> class AlgebraWrapp
         ARIADNE_NOT_IMPLEMENTED; }
     virtual AlgebraInterface<X>* _apply(BinaryRingOperator, AlgebraInterface<X> const&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator op, X const& c) const override {
+    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator, X const&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator op, X const& c) const override {
+    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator, X const&) const override {
         ARIADNE_NOT_IMPLEMENTED; }
-    virtual AlgebraInterface<X>* _apply(GradedRingOperator op, Nat m) const override {
+    virtual AlgebraInterface<X>* _apply(GradedRingOperator, Nat) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const override { os << static_cast<const A&>(*this); return os; }
 };

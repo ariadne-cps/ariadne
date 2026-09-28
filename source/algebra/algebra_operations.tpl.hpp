@@ -160,7 +160,7 @@ template<class F> Error<F> error_bound(Bounds<F> const& b, Bounds<F> const& c) {
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
-template<ANormedAlgebra A> A _compose3(const AnalyticFunction& fn, const A& tm, FloatDP eps)
+template<ANormedAlgebra A> A _compose3(const AnalyticFunction& fn, const A& tm, FloatDP)
 {
     static const Nat DEGREE=20;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
@@ -437,7 +437,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Tan, const A& x)
     return sin(x)*rec(cos(x));
 }
 
-template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -450,7 +450,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -463,7 +463,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*

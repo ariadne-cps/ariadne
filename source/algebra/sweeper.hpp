@@ -194,7 +194,7 @@ template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<
         : _coefficient_precision(precision), _sweep_threshold(cast_exact(sweep_threshold),precision) { ARIADNE_ASSERT(cast_exact(sweep_threshold)>=0); }
     inline PR precision() const { return _coefficient_precision; }
     inline F sweep_threshold() const { return _sweep_threshold; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->_sweep_threshold; }
+    inline Bool discard(const MultiIndex&, const F& x) const { return abs(x) < this->_sweep_threshold; }
   private:
     virtual Void _write(OutputStream& os) const { os << "ThresholdSweeper( sweep_threshold="<<this->_sweep_threshold<<" )"; };
 };
@@ -249,10 +249,10 @@ template<class F> class TrivialSweeper : public SweeperMixin<TrivialSweeper<F>,F
   public:
     TrivialSweeper(PR precision) : _coefficient_precision(precision) { }
     inline PR precision() const { return _coefficient_precision; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return false; }
+    inline Bool discard(const MultiIndex&, const F&) const { return false; }
   private:
-    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const final { }
-    virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const final { }
+    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>&, FloatError<PR>&) const final { }
+    virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>&) const final { }
     virtual Void _write(OutputStream& os) const { os << "TrivialSweeper"; }
 };
 
@@ -263,7 +263,7 @@ template<class F> class NullSweeper : public SweeperMixin<NullSweeper<F>,F> {
   public:
     NullSweeper(PR precision) : _coefficient_precision(precision) { }
     inline PR precision() const { return _coefficient_precision; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return x==0.0; }
+    inline Bool discard(const MultiIndex&, const F& x) const { return x==0.0; }
   private:
     virtual Void _write(OutputStream& os) const { os << "NullSweeper"; }
 };
@@ -275,7 +275,7 @@ template<class F> class AffineSweeper : public SweeperMixin<AffineSweeper<F>,F> 
   public:
     AffineSweeper(PR precision) : _coefficient_precision(precision) { }
     inline PR precision() const { return _coefficient_precision; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>1; }
+    inline Bool discard(const MultiIndex& a, const F&) const { return a.degree()>1; }
   private:
     virtual Void _write(OutputStream& os) const { os << "AffineSweeper"; }
 };
@@ -288,7 +288,7 @@ template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> 
     GradedSweeper(PR precision, DegreeType degree) : _coefficient_precision(precision), _degree(degree) { }
     DegreeType degree() const { return this->_degree; }
     inline PR precision() const { return _coefficient_precision; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree; }
+    inline Bool discard(const MultiIndex& a, const F&) const { return a.degree()>this->_degree; }
   private:
     virtual Void _write(OutputStream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
   private:

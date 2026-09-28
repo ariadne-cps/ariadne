@@ -56,26 +56,26 @@ template<class Op, class A1, class A2, class A3> struct ClosureExpression<Op,A1,
 };
 
 template<class Op, class A> ClosureExpression<Op,A>
-make_expression(Op op, const A& a) {
+make_expression(Op, const A& a) {
     return ClosureExpression<Op,A>(a);
 }
 
 template<class Op, class A1, class A2> ClosureExpression<Op,A1,A2>
-make_expression(Op op, const A1& a1, const A2& a2) {
+make_expression(Op, const A1& a1, const A2& a2) {
     return ClosureExpression<Op,A1,A2>(a1,a2);
 }
 
 template<class Op, class A1, class A2, class A3> ClosureExpression<Op,A1,A2,A3>
-make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
+make_expression(Op, const A1& a1, const A2& a2, const A3& a3) {
     return ClosureExpression<Op,A1,A2,A3>(a1,a2,a3);
 }
 
 
 
-inline Bool compatible(const FloatDP& x1, const FloatDP& x2) { return true; }
+inline Bool compatible(const FloatDP&, const FloatDP&) { return true; }
 template<class X> inline Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
-inline FloatDP create(const FloatDP& x) { return FloatDP(0,dp); }
+inline FloatDP create(const FloatDP&) { return FloatDP(0,dp); }
 //inline ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
 template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree(),x.zero_coefficient()); }
 
@@ -221,11 +221,11 @@ template<class A, class B> Graded<A> mul(const Graded<A>& a, const B& c) {
 
 template<class A> Graded<A> add(const GenericNumericType<A>& c, const Graded<A>& a) {
     Graded<A> r(a); r[0]+=c; return r;  }
-template<class A> Graded<A> sub(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> sub(const GenericNumericType<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> mul(const GenericNumericType<A>& c, const Graded<A>& a) {
     Graded<A> r(a); r[0]*=c; return r;  }
-template<class A> Graded<A> div(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> div(const GenericNumericType<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED; }
 
 template<class A> ClosureExpression<Add,Graded<A>,Graded<A>> add(const Graded<A>& a1, const Graded<A>& a2) {
@@ -460,38 +460,38 @@ template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
     r=c;
 }
 
-template<class A> Void tan(Graded<A>& r, const Graded<A>& a) {
+template<class A> Void tan(Graded<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class A> Void asin(Graded<A>& r, const Graded<A>& a) {
+template<class A> Void asin(Graded<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class A> Void acos(Graded<A>& r, const Graded<A>& a) {
+template<class A> Void acos(Graded<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class A> Void atan(Graded<A>& r, const Graded<A>& a) {
+template<class A> Void atan(Graded<A>&, const Graded<A>&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
-template<class A> Graded<A> max(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> max(const GenericNumericType<A>&, const Graded<A>&) {
     ARIADNE_THROW(std::runtime_error, "max(GenericNumericType<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.");
 }
-template<class A> Graded<A> min(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> min(const GenericNumericType<A>&, const Graded<A>&) {
     ARIADNE_THROW(std::runtime_error, "min(GenericNumericType<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.");
 }
 
-template<class A> Graded<A> max(Graded<A> const& ga1, Graded<A> const& ga2) {
+template<class A> Graded<A> max(Graded<A> const&, Graded<A> const&) {
     ARIADNE_THROW(std::runtime_error, "max(Graded<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.")
 }
-template<class A> Graded<A> min(Graded<A> const& ga1, Graded<A> const& ga2) {
+template<class A> Graded<A> min(Graded<A> const&, Graded<A> const&) {
     ARIADNE_THROW(std::runtime_error, "min(Graded<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.")
 }
-template<class A> Graded<A> abs(Graded<A> const& ga) {
+template<class A> Graded<A> abs(Graded<A> const&) {
     ARIADNE_THROW(std::runtime_error, "abs(Graded<A>)","Cannot apply non-analytic operation to Graded.")
 }
 

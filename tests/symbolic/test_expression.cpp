@@ -172,7 +172,7 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
         RealExpression tanh_expr=tanh(x);
         ARIADNE_TEST_ASSERT(identical(
-            derivative(tanh_expr,x),
+            simplify(derivative(tanh_expr,x)),
             1-sqr(tanh(x))));
         RealExpression expr2 = pow(x,3);
         ARIADNE_TEST_PRINT(derivative(expr2,x));

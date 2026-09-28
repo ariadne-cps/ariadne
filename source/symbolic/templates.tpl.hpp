@@ -30,6 +30,21 @@
 namespace Ariadne {
 
 
+template<class W, class T> class WritableWithWriter {
+    W const& _writer;
+    T const& _value;
+  public:
+    WritableWithWriter(W const& writer, T const& value) : _writer(writer), _value(value) { }
+    friend OutputStream& operator<<(OutputStream& os, WritableWithWriter const& writable) {
+        writable._writer._write(os,writable._value);
+        return os;
+    }
+};
+
+template<class W, class T> inline WritableWithWriter<W,T> make_writable(W const& writer, T const& value) {
+    return WritableWithWriter<W,T>(writer,value);
+}
+
 template<class T> class Variable;
 
 template<class... OPS> class OperatorVariant;

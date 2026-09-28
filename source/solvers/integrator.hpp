@@ -74,7 +74,9 @@ struct StepMaximumError : Attribute<ApproximateDouble> {
     StepMaximumError(double x) : Attribute<ApproximateDouble>(x) { }
 };
 
-struct StepSweepThreshold : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
+struct StepSweepThreshold : Attribute<ApproximateDouble> {
+    explicit StepSweepThreshold(ApproximateDouble const& value) : Attribute<ApproximateDouble>(value) { }
+};
 struct Order : Attribute<DegreeType> { Order(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct TemporalOrder : Attribute<DegreeType> { TemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };

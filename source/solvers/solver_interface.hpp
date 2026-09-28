@@ -33,11 +33,12 @@
 #include <stdexcept>
 #include <string>
 
+namespace Ariadne { template<class T> class Set; }
+
 #include "numeric/declarations.hpp"
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
-#include "utility/container.hpp"
 #include "logging/logging.hpp"
 
 

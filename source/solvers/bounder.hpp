@@ -60,10 +60,14 @@ class BoundingNotFoundException : public std::runtime_error {
     BoundingNotFoundException(const String& str) : std::runtime_error(str) { }
 };
 
-struct LipschitzTolerance : Attribute<ExactDouble> { using Attribute<ExactDouble>::Attribute; };
+struct LipschitzTolerance : Attribute<ExactDouble> {
+    explicit LipschitzTolerance(ExactDouble const& value) : Attribute<ExactDouble>(value) { }
+};
 static const Generator<LipschitzTolerance> lipschitz_tolerance = Generator<LipschitzTolerance>();
 static const LipschitzTolerance DEFAULT_LIPSCHITZ_TOLERANCE(0.5_x);
-struct MinimumStepSize : Attribute<ExactDouble> { using Attribute<ExactDouble>::Attribute; };
+struct MinimumStepSize : Attribute<ExactDouble> {
+    explicit MinimumStepSize(ExactDouble const& value) : Attribute<ExactDouble>(value) { }
+};
 static const Generator<MinimumStepSize> minimum_step_size = Generator<MinimumStepSize>();
 static const MinimumStepSize DEFAULT_MINIMUM_STEP_SIZE(0.00000095367431640625_x);
 

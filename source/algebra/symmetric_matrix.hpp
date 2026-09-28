@@ -239,6 +239,7 @@ template<class X> inline X SymmetricMatrix<X>::zero_element() const {
 }
 
 template<class X> inline Void SymmetricMatrix<X>::_check_data_access(SizeType i, SizeType j) const {
+    static_cast<void>(i); static_cast<void>(j);
     assert(i<this->row_size() && j<this->column_size());
 }
 

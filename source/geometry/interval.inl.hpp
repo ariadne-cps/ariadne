@@ -29,7 +29,7 @@ template<class F> inline F make_split_point(Approximation<F> const& am) { return
 template<class F> inline F make_split_point(Bounds<F> const& bm) { return bm.value(); }
 template<class F> inline F make_split_point(Ball<F> const& bm) { return bm.value(); }
 
-template<class U, class Y> inline U create_u(Y const& y) { assert(false); }
+template<class U, class Y> inline U create_u(Y const&) { assert(false); }
 
 template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
 template<class U> Interval<U>::Interval(EmptyInterval const&)

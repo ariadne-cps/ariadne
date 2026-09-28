@@ -216,7 +216,7 @@ class InputApproximation : public Handle<const InputApproximationInterface> {
   public:
     using Handle<const InputApproximationInterface>::Handle;
     bool is_reach_rigorous() const { return this->_ptr->is_reach_rigorous(); }
-    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
+    template<class A> Bool handles(A const&) const { return instance_of<A>(&*this->_ptr); }
 };
 
 template<class A> constexpr Nat const_num_params_per_input();
@@ -367,7 +367,7 @@ class InclusionIntegrator : public Handle<const InclusionIntegratorInterface> {
   public:
     using Handle<const InclusionIntegratorInterface>::Handle;
     virtual ~InclusionIntegrator() = default;
-    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
+    template<class A> Bool handles(A const&) const { return instance_of<A>(&*this->_ptr); }
 
     friend Bool operator==(const InclusionIntegrator& lhs, const InclusionIntegrator& rhs) {
         return lhs._ptr->operator==(*rhs._ptr); }

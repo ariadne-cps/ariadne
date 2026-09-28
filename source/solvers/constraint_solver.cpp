@@ -487,7 +487,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
 }
 
 
-Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c) const
+Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorMultivariateFunction&, const ExactBoxType&) const
 {
     return d.split();
 }

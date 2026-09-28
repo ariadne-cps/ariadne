@@ -55,11 +55,11 @@ ErrorType vstar(BoxDomainType const& inputs) {
     return result;
 }
 
-ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h);
-ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h);
+ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h);
+ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h);
 template<class R> ErrorType twoparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h);
-ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j);
-ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j);
+ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h, SizeType j);
+ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h, SizeType j);
 template<class R> ErrorType twoparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j);
 
 template<class A, class R> ErrorType worstcase_error(ErrorConstants const& n, BoxDomainType const& inputs, PositiveFloatDP const& h) {
@@ -191,16 +191,16 @@ ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& v, 
 ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
     return pow(h,2u)*(n.pLjv[j]*(n.K+n.pKv)/2u + (n.Lj[j]+n.pLjw[j])*(n.pKv+n.pKw)*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
-template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
+template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {
     return (n.pLv*n.pKv + n.pLw*n.pKw +
             h*(n.pKv+n.pKw)*((n.pHw*2u + n.H)*(n.K+n.pKw)+sqr(n.L)+(n.L*3u+n.pLw*2u)*n.pLw)*n.expLambda +
             (n.K+n.pKv)*h/6u*((n.H*(n.pKv+n.pKw)+n.L*(n.pLv+n.pLw))*3u+((n.pHv+n.pHw)*n.K+n.L*(n.pLv+n.pLw))*4u)
            )/cast_positive(+1u-h*n.L/2u-h*n.pLw)*pow(h,2u)/4u; }
-template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
+template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {
     return (n.H*(n.K+n.pKv)/2u +
             (pow(n.L,2u)+n.H*(n.K+n.pKv))*n.expLambda
            )/cast_positive(+1u-h*n.L/2u)*(n.pKv+n.pKw)*pow(h,3u)/4u; }
-template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
+template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorConstants const& n, ErrorType const&, ErrorType const&, PositiveFloatDP const& h) {
     return ((n.pKv+n.pKw)*((n.pHw*2u+n.H)*(n.K+n.pKw)+sqr(n.L)+(n.L*3u+2u*n.pLw)*n.pLw)*n.expLambda +
             (n.K+n.pKv)/6u*(((n.H*(n.pKv+n.pKw)+n.L*(n.pLv+n.pLw))*3u +((n.pHv+n.pHw)*n.K+n.L*(n.pLv+n.pLw))*4u) +
                            (n.pHv*n.pKv+sqr(n.pLv)+n.pHw*n.pKw+sqr(n.pLw))*8u)
@@ -208,7 +208,7 @@ template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorConstants cons
 template<> ErrorType twoparam_worstcase_error<DualInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h) {
     return twoparam_worstcase_error<AffineInputs>(n, v, w, h); }
 
-template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
+template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const& n, ErrorType const&, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
     return (
             pow(h,2u) * (n.pKv*n.pLjv[j] + n.pKw*n.pLjw[j]) +
             pow(h,3u) * (((
@@ -220,7 +220,7 @@ template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const
 template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
     return pow(h,3u)*(v+w)*(n.Hj[j]*(n.K+v)/8u + (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*psi0(n.Lambda*h)
            ) / cast_positive(+1u-h*n.Lj[j]/2u); }
-template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
+template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants const& n, ErrorType const&, ErrorType const& w, PositiveFloatDP const& h, SizeType j) {
     return pow(h,3u)*(((n.pHj[j]*n.pK*(n.K+n.pKv)+n.pL*n.pLj[j]*(n.K+n.pKw))/6u +
                           (n.Hj[j]*(n.pKv+n.pKw) + n.Lj[j]*(n.pLv+n.pLw))*(n.K+n.pKv)/8u +
                           ((n.pHjv[j] + n.pHjw[j])*n.K*(n.K+n.pKv) + n.L*(n.pLjv[j] + n.pLjw[j])*(n.K + n.pKw))/6u) +
@@ -303,7 +303,7 @@ InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMult
     return result;
 }
 
-template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegratorImpl<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegratorImpl<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const&, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -415,7 +415,7 @@ template<class A> BoxDomainType InclusionIntegratorImpl<A>::build_parameter_doma
     return result;
 }
 
-template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApproximation>(Interval<TimeStepType> const&, BoxDomainType const&, SizeType n, SizeType m) {
     auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::zero(n+1);
@@ -423,7 +423,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApp
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ConstantApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ConstantApproximation>(Interval<TimeStepType> const&, BoxDomainType const&, SizeType n, SizeType m) {
     auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+m);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
@@ -470,7 +470,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Sinusoi
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<PiecewiseApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<PiecewiseApproximation>(Interval<TimeStepType> const&, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 

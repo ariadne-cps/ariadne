@@ -598,7 +598,7 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
                Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp,
                Vector<GradedValidatedDifferential>& yta,
                const Vector<ValidatedNumericType>& x, const ValidatedNumericType& t0, const Vector<ValidatedNumericType>& a,
-               DegreeType so, DegreeType to)
+               DegreeType so, DegreeType)
 {
     LOGGING_SCOPE_CREATE;
     const SizeType xs=x.size();
@@ -1463,7 +1463,7 @@ graded_series_flow_step(const ValidatedVectorMultivariateFunction& f,
 
 
 // FIXME: Should not be necessary, as should be able to construct FloatBounds<DP> from (Float<DP>,DP)
-FloatBounds<DoublePrecision> cast_singleton(ExactIntervalType const& ivl, DoublePrecision pr) {
+FloatBounds<DoublePrecision> cast_singleton(ExactIntervalType const& ivl, DoublePrecision) {
     return FloatBounds<DoublePrecision>(ivl.lower_bound(),ivl.upper_bound()); }
 
 
@@ -1548,7 +1548,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f,
                  Vector<Differential<Bounds<FloatDP>>> cdphi,
                  DegreeType deg,
                  Sweeper<FloatDP> swp,
-                 Nat verbosity=0)
+                 Nat=0)
 {
     using FLT=FloatDP;
     using X=Bounds<FLT>;
@@ -2617,7 +2617,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 }
 
 FlowStepModelType
-AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const Interval<StepSizeType>&, const ExactBoxType&, const UpperBoxType&) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

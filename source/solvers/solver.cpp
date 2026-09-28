@@ -380,10 +380,10 @@ SolverBase::implicit(const ValidatedScalarMultivariateFunction& f,
     return res[0];
 }
 
-auto SolverBase::continuation(const ValidatedVectorMultivariateFunction& f,
-                              const Vector<ApproximateNumericType>& p,
-                              const ExactBoxType& ix,
-                              const ExactBoxType& ip) const
+auto SolverBase::continuation(const ValidatedVectorMultivariateFunction&,
+                              const Vector<ApproximateNumericType>&,
+                              const ExactBoxType&,
+                              const ExactBoxType&) const
     -> ValidatedVectorMultivariateFunctionModelType
 {
     ARIADNE_NOT_IMPLEMENTED;

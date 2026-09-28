@@ -290,11 +290,17 @@ if(COVERAGE)
         append_gcc_coverage_compiler_flags()
     endif()
 
+    set(_ariadne_coverage_filter_args)
+    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+        list(APPEND _ariadne_coverage_filter_args
+            EXCLUDE_REGEX ".*/(tests|python|submodules)/.*")
+    endif()
+
     setup_project_coverage(
         TARGET ariadne
         TEST_TARGET tests
         SOURCES "${PROJECT_SOURCE_DIR}/source"
-        EXCLUDE_REGEX ".*/(tests|python|submodules)/.*"
+        ${_ariadne_coverage_filter_args}
     )
 endif()
 

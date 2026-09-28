@@ -111,7 +111,7 @@ inline NetworkAndLie network_and_lie(
             + constant(p[w1_offset+2u*i])*x0
             + constant(p[w1_offset+2u*i+1u])*x1;
         h1[i]=tanh_expression(z);
-        RealExpression factor=1-h1[i]*h1[i];
+        RealExpression factor=1-sqr(h1[i]);
         dh1_dx[i]=factor*constant(p[w1_offset+2u*i]);
         dh1_dy[i]=factor*constant(p[w1_offset+2u*i+1u]);
     }
@@ -130,7 +130,7 @@ inline NetworkAndLie network_and_lie(
             dz_dy=dz_dy+weight*dh1_dy[j];
         }
         h2[i]=tanh_expression(z);
-        RealExpression factor=1-h2[i]*h2[i];
+        RealExpression factor=1-sqr(h2[i]);
         dh2_dx[i]=factor*dz_dx;
         dh2_dy[i]=factor*dz_dy;
     }

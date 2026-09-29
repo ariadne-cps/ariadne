@@ -21,8 +21,8 @@ Void TestLogicalSequence::test() {
     ARIADNE_TEST_ASSERT(possibly(not some.check(2_eff)));
     ARIADNE_TEST_ASSERT(definitely(some.check(3_eff)));
     ARIADNE_TEST_ASSERT(definitely(some.check(4_eff)));
-    ARIADNE_TEST_ASSIGN_CONSTRUCT(
-        UpperKleenean, all, conjunction(Sequence<UpperKleenean>([](Natural n){return n==2 ? UpperKleenean(false) : UpperKleenean(indeterminate);}));
+    Sequence<UpperKleenean> upper_seq([](Natural n){return n==2 ? UpperKleenean(false) : UpperKleenean(indeterminate);});
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(UpperKleenean, all, conjunction(upper_seq));
     ARIADNE_TEST_ASSERT(possibly(all.check(2_eff)));
     ARIADNE_TEST_ASSERT(not possibly(all.check(3_eff)));
     ARIADNE_TEST_ASSERT(definitely(not all.check(4_eff)));

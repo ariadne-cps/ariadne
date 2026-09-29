@@ -3441,3 +3441,47 @@ gradient, corners and LP only for selected boxes. The acceptance target is
 linearization time than the ungated direct-gradient/corner-cache profile
 (34.83 s total, 27.38 s linearization). If this cost reduction is large enough,
 the 0.20 gate is the candidate for the first changed-tree X-Taylor search.
+
+
+The published 256-box `lie-xtaylor-gated-profile` run accepts the 0.20
+natural-range gate. With geometric splitting, Lie-first literal order and
+lower-first child order, the profile takes about 23.775 s total and 16.4529 s
+in X-Taylor linearization, down from about 34.83 s and 27.38 s respectively
+for the ungated direct-gradient/corner-cache profile. The fixed natural
+frontier remains 123 natural prunes and 133 split candidates. The gate selects
+77 boxes and skips 56; all 77 selected relaxations are definitely infeasible.
+There are no LP failures and, importantly, `lp-minimisations=0`: every
+selected box is rejected by the initial validated LP feasibility check before
+coordinate contraction would be attempted. Gradient-range work accounts for
+about 13.8073 s, while exact corner caching reduces the 308 logical corner
+lookups to 93 validated corner evaluations and 215 cache hits, taking about
+2.64543 s.
+
+This result changes the intended role of the mechanism for Barr3. The useful
+operation is not polytope-hull coordinate contraction but a second-tier
+validated infeasibility classifier, scheduled only when the natural image has
+a shallow negative tail. Coordinate LP minimisation would add work without
+benefit under the accepted 0.20 gate.
+
+The next experiment is therefore a changed-tree search rather than another
+fixed-frontier profile. Query `lie-xtaylor-gated-search` reuses the dynamic DFS
+shape of the earlier CSE/quadrant search diagnostics. For the Lie literal it
+performs natural evaluation, applies the `r<=0.20` gate, builds the same
+gradient-range/four-corner X-Taylor outer relaxation, and runs only the
+validated LP feasibility check. A definitely infeasible relaxation prunes the
+box immediately; otherwise no coordinate minimisation or contraction is
+performed. The surviving box then follows the normal barrier classification,
+epsilon whole-box test and geometric split path. Exact corner values are cached
+across the changed tree. The diagnostic supports the existing literal-order
+and child-order arguments, but the first comparison remains Lie-first and
+lower-first to match the accepted Barr3 profile. No X-Taylor code is added to
+the production `SmtSolver` yet.
+
+The first changed-tree acceptance question is whether these gated feasibility
+prunes remove enough descendants to amortize their linearization cost. The
+diagnostic therefore reports natural, X-Taylor and barrier prunes separately,
+the number of splits and pending boxes at the processing limit, gate
+selection/skips, gradient and corner timing/cache counters, LP feasibility
+checks, LP minimisations and total search time. The expected invariant is
+`lp-minimisations=0`; any nonzero value would mean the classifier-only policy
+was violated.

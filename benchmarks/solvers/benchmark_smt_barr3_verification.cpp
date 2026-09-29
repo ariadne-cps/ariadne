@@ -46,12 +46,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-xtaylor-profile" || argument=="lie-xtaylor-gradient-range-profile" || argument=="lie-xtaylor-gate-profile" || argument=="lie-xtaylor-gated-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile" || argument=="lie-directional-propagation-profile" || argument=="lie-layer2-directional-profile" || argument=="lie-gradient-block-reassociation-profile" || argument=="lie-gradient-width-attribution-profile" || argument=="lie-gradient-correlation-attribution-profile" || argument=="lie-gradient-local-factor-profile" || argument=="lie-gradient-local-product-profile" || argument=="lie-gradient-quadrant-prune-profile" || argument=="lie-gradient-quadrant-search") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-xtaylor-profile" || argument=="lie-xtaylor-gradient-range-profile" || argument=="lie-xtaylor-gate-profile" || argument=="lie-xtaylor-gated-profile" || argument=="lie-xtaylor-gated-search" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile" || argument=="lie-directional-propagation-profile" || argument=="lie-layer2-directional-profile" || argument=="lie-gradient-block-reassociation-profile" || argument=="lie-gradient-width-attribution-profile" || argument=="lie-gradient-correlation-attribution-profile" || argument=="lie-gradient-local-factor-profile" || argument=="lie-gradient-local-product-profile" || argument=="lie-gradient-quadrant-prune-profile" || argument=="lie-gradient-quadrant-search") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -63,7 +63,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -74,7 +74,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -86,7 +86,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -849,6 +849,26 @@ Bool xtaylor_contract_2d(
     }
 }
 
+Bool xtaylor_feasible_2d(
+    XTaylorRelaxation const& relaxation,
+    XTaylorProfileCounts& counts)
+{
+    SimplexSolver<FloatDP> solver;
+
+    try {
+        auto lp_start=std::chrono::steady_clock::now();
+        ValidatedKleenean feasible=solver.feasible(
+            relaxation.lower,relaxation.upper,relaxation.A,relaxation.b);
+        counts.lp_seconds+=std::chrono::duration<double>(
+            std::chrono::steady_clock::now()-lp_start).count();
+        return not definitely(not feasible);
+    }
+    catch(const std::exception&) {
+        ++counts.lp_failures;
+        return true;
+    }
+}
+
 Void profile_lie_xtaylor_frontier(
     SizeType box_limit,
     UpperBoxType const& domain,
@@ -1356,6 +1376,191 @@ Void profile_lie_xtaylor_gated_frontier(
               << " lp-minimisations=" << counts.lp_minimisations
               << " linearization-time=" << counts.linearization_seconds
               << " lp-time=" << counts.lp_seconds
+              << std::endl;
+}
+
+struct XTaylorGatedSearchCounts {
+    SizeType processed = 0u;
+    SizeType natural_lie_pruned = 0u;
+    SizeType xtaylor_lie_pruned = 0u;
+    SizeType barrier_pruned = 0u;
+    SizeType split = 0u;
+    SizeType epsilon_certified = 0u;
+    SizeType natural_lie_evaluations = 0u;
+    SizeType gate_selected = 0u;
+    SizeType gate_skipped = 0u;
+    SizeType barrier_evaluations = 0u;
+    double natural_lie_seconds = 0.0;
+    double barrier_seconds = 0.0;
+};
+
+Void profile_lie_xtaylor_gated_search(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    ValidatedScalarMultivariateFunction const& lie_function,
+    ValidatedScalarMultivariateFunction const& barrier_function,
+    double threshold,
+    String const& literal_order,
+    Bool upper_child_first)
+{
+    if(domain.dimension()!=2u) {
+        throw std::runtime_error("Gated X-Taylor Barr3 search expects dimension 2");
+    }
+
+    FloatDP epsilon(0.00001_x,dp);
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+    std::vector<XTaylorCornerCacheEntry> corner_cache;
+    XTaylorGatedSearchCounts counts;
+    XTaylorProfileCounts xtaylor_counts;
+
+    Stopwatch<Milliseconds> search_stopwatch;
+    while(not pending.empty() && counts.processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++counts.processed;
+
+        Bool pruned=false;
+        Bool lie_epsilon_satisfied=false;
+        Bool barrier_epsilon_satisfied=false;
+
+        auto classify_lie=[&]() {
+            auto natural_start=std::chrono::steady_clock::now();
+            UpperIntervalType natural_image=apply(lie_function,box);
+            counts.natural_lie_seconds+=std::chrono::duration<double>(
+                std::chrono::steady_clock::now()-natural_start).count();
+            ++counts.natural_lie_evaluations;
+
+            if(definitely(natural_image.lower_bound()>=0)) {
+                ++counts.natural_lie_pruned;
+                pruned=true;
+                return;
+            }
+
+            lie_epsilon_satisfied=
+                definitely(natural_image.upper_bound()<epsilon);
+
+            double const lower=natural_image.lower_bound().raw().get_d();
+            double const width=natural_image.width().raw().get_d();
+            double const ratio=
+                (width>0.0) ? std::max(0.0,-lower/width) : 0.0;
+            if(ratio>threshold) {
+                ++counts.gate_skipped;
+                return;
+            }
+
+            ++counts.gate_selected;
+            ++xtaylor_counts.relaxation_checked;
+
+            auto linearization_start=std::chrono::steady_clock::now();
+            auto gradient_start=std::chrono::steady_clock::now();
+            Covector<UpperIntervalType> gradient=
+                gradient_range(lie_function,cast_vector(box));
+            xtaylor_counts.derivative_evaluation_seconds+=
+                std::chrono::duration<double>(
+                    std::chrono::steady_clock::now()-gradient_start).count();
+            ++xtaylor_counts.gradient_range_evaluations;
+
+            XTaylorRelaxation relaxation=
+                build_xtaylor_relaxation_from_gradient_2d(
+                    box,lie_function,gradient[0u],gradient[1u],
+                    xtaylor_counts,&corner_cache);
+            xtaylor_counts.linearization_seconds+=
+                std::chrono::duration<double>(
+                    std::chrono::steady_clock::now()-linearization_start).count();
+
+            if(not xtaylor_feasible_2d(relaxation,xtaylor_counts)) {
+                ++xtaylor_counts.relaxation_infeasible;
+                ++counts.xtaylor_lie_pruned;
+                pruned=true;
+            }
+        };
+
+        auto classify_barrier=[&]() {
+            auto barrier_start=std::chrono::steady_clock::now();
+            UpperIntervalType image=apply(barrier_function,box);
+            counts.barrier_seconds+=std::chrono::duration<double>(
+                std::chrono::steady_clock::now()-barrier_start).count();
+            ++counts.barrier_evaluations;
+
+            if(definitely(image.upper_bound()<0)) {
+                ++counts.barrier_pruned;
+                pruned=true;
+                return;
+            }
+            auto relaxed_lower=sub(down,FloatDP(0,dp),epsilon);
+            barrier_epsilon_satisfied=
+                definitely(image.lower_bound()>=relaxed_lower);
+        };
+
+        if(literal_order=="lie-first") {
+            classify_lie();
+            if(not pruned) { classify_barrier(); }
+        } else {
+            classify_barrier();
+            if(not pruned) { classify_lie(); }
+        }
+
+        if(pruned) {
+            continue;
+        }
+        if(lie_epsilon_satisfied && barrier_epsilon_satisfied) {
+            ++counts.epsilon_certified;
+            continue;
+        }
+
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++counts.split;
+        if(upper_child_first) {
+            pending.push_back(std::move(children.first));
+            pending.push_back(std::move(children.second));
+        } else {
+            pending.push_back(std::move(children.second));
+            pending.push_back(std::move(children.first));
+        }
+    }
+    search_stopwatch.click();
+
+    std::cout << "[lie-xtaylor-gated-search]"
+              << " threshold=" << threshold
+              << " search-time=" << search_stopwatch.elapsed_seconds()
+              << " processed=" << counts.processed
+              << " natural-lie-pruned=" << counts.natural_lie_pruned
+              << " xtaylor-lie-pruned=" << counts.xtaylor_lie_pruned
+              << " barrier-pruned=" << counts.barrier_pruned
+              << " total-pruned="
+              << counts.natural_lie_pruned
+                    +counts.xtaylor_lie_pruned
+                    +counts.barrier_pruned
+              << " split=" << counts.split
+              << " epsilon-certified=" << counts.epsilon_certified
+              << " remaining=" << pending.size()
+              << " natural-lie-evals=" << counts.natural_lie_evaluations
+              << " natural-lie-time=" << counts.natural_lie_seconds
+              << " gate-selected=" << counts.gate_selected
+              << " gate-skipped=" << counts.gate_skipped
+              << " gradient-range-evals="
+              << xtaylor_counts.gradient_range_evaluations
+              << " gradient-range-time="
+              << xtaylor_counts.derivative_evaluation_seconds
+              << " corner-evals=" << xtaylor_counts.corner_evaluations
+              << " corner-cache-hits=" << xtaylor_counts.corner_cache_hits
+              << " corner-cache-misses=" << xtaylor_counts.corner_cache_misses
+              << " corner-cache-size=" << corner_cache.size()
+              << " corner-eval-time="
+              << xtaylor_counts.corner_evaluation_seconds
+              << " xtaylor-linearization-time="
+              << xtaylor_counts.linearization_seconds
+              << " lp-feasibility-checks="
+              << xtaylor_counts.relaxation_checked
+              << " lp-minimisations=" << xtaylor_counts.lp_minimisations
+              << " lp-failures=" << xtaylor_counts.lp_failures
+              << " lp-time=" << xtaylor_counts.lp_seconds
+              << " barrier-evals=" << counts.barrier_evaluations
+              << " barrier-time=" << counts.barrier_seconds
               << std::endl;
 }
 
@@ -5566,6 +5771,18 @@ Int main(Int argc,const char* argv[]) {
             make_function(space,network.lie+network.barrier);
         profile_lie_xtaylor_gated_frontier(
             box_limit,UpperBoxType(domain),lie_function,0.20);
+        return 0;
+    }
+
+    if(query=="lie-xtaylor-gated-search") {
+        ValidatedScalarMultivariateFunction lie_function=
+            make_function(space,network.lie+network.barrier);
+        ValidatedScalarMultivariateFunction barrier_function=
+            make_function(space,network.barrier);
+        profile_lie_xtaylor_gated_search(
+            box_limit,UpperBoxType(domain),
+            lie_function,barrier_function,0.20,
+            lie_literal_order,upper_child_first);
         return 0;
     }
 

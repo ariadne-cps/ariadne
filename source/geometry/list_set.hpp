@@ -35,7 +35,6 @@
 #include "utility/macros.hpp"
 
 #include "io/graphics_interface.hpp"
-#include "hybrid/discrete_location.hpp"
 
 #include "geometry/box.hpp"
 

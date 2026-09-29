@@ -2319,3 +2319,32 @@ literal order, whole-box epsilon certification, geometric splitting and the
 selected child order. This provides an end-to-end estimate of the changed
 search tree and repeated-evaluation cost without yet adding CSE-specific state
 to `CompiledTheoryLiteral`.
+
+
+The 4,096-box changed-tree comparison closes the root-CSE search experiment.
+The post-rebase natural baseline processes all 4,096 allowed boxes, pruning
+2,043 and splitting 2,053, with no epsilon certification and about 130.98 s
+elapsed. The root-CSE diagnostic processes the same 4,096-box budget, pruning
+2,045 and splitting 2,051. Thus the stronger root range avoids only two splits,
+exactly the same net split reduction already observed at the 2,048-box gate.
+The implied residual frontier remains about 11 boxes for the natural search
+versus 7 for the CSE search; the gap does not widen with depth.
+
+The changed pruning attribution is also revealing. At 4,096 boxes the CSE
+search reports 478 CSE-Lie prunes and 1,567 barrier prunes, compared with 469
+and 552 respectively at the 2,048-box point. The CSE-Lie contribution therefore
+barely grows while the barrier absorbs almost all additional pruning deeper in
+the changed tree. This supports the interpretation that the stronger root
+enclosure mostly moves pruning earlier and changes which literal eventually
+rejects descendants, rather than materially reducing total search complexity.
+
+The cost is decisively unfavorable. Natural search takes about 130.98 s. The
+CSE changed-tree search alone takes about 165.59 s, roughly 26% slower, and its
+one-time derivative/CSE/Procedure preparation adds about 13.57 s more, for an
+effective total near 179.2 s, roughly 37% above baseline. Root-level
+CSE/centered range evaluation is therefore retained as a useful validated range
+technique and diagnostic, but rejected as an eager second-tier Barr3 search
+mechanism. The next development direction returns to dependency-aware
+algebraic expression optimization, whose goal is to strengthen the natural
+interval extension itself without paying a second evaluator on every unresolved
+box.

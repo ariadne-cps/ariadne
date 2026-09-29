@@ -99,16 +99,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
 endif()
 
-if(COVERAGE)
-    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-        enable_project_coverage()
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        include(GCCCodeCoverage)
-    else()
-        message(FATAL_ERROR
-            "Coverage is supported only with GCC or macOS AppleClang/Clang.")
-    endif()
-endif()
+enable_project_coverage()
 
 
 find_package(Threads)
@@ -223,13 +214,6 @@ if(APPLE)
 endif()
 
 if(COVERAGE)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        # Ariadne deliberately instruments only the library code on GCC.
-        # Enabling coverage before the subdirectories would also instrument
-        # tests and Python bindings, changing the gcov dataset.
-        append_gcc_coverage_compiler_flags()
-    endif()
-
     set(_ariadne_coverage_filter_args)
     if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
         list(APPEND _ariadne_coverage_filter_args

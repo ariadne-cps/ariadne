@@ -1,4 +1,5 @@
 set(UNIT_TESTS
+    test_logical_sequence
     test_integer
     test_dyadic
     test_rational

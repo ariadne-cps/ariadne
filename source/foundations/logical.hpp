@@ -39,8 +39,6 @@
 namespace Ariadne {
 
 
-template<class X> class Sequence;
-
 template<class T> String class_name();
 
 //! \ingroup LogicSubModule
@@ -399,8 +397,6 @@ class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> 
     //! \brief Logical disjunction.
     friend LowerKleenean operator||(LowerKleenean const& l1, LowerKleenean const& l2);
 
-    //! \brief Disjunction of an infinte sequence of logical values.
-    friend LowerKleenean disjunction(Sequence<LowerKleenean> const& k);
 };
 
 //! \ingroup LogicSubModule
@@ -428,12 +424,7 @@ class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> 
     //! \brief Logical disjunction.
     friend UpperKleenean operator||(UpperKleenean const& l1, UpperKleenean const& l2);
 
-    //! \brief Conjunction of an infinte sequence of logical values.
-    friend UpperKleenean conjunction(Sequence<UpperKleenean> const& k);
 };
-
-LowerKleenean disjunction(Sequence<LowerKleenean> const& lk);
-UpperKleenean conjunction(Sequence<UpperKleenean> const& uk);
 
 //! \ingroup LogicSubModule
 //! \brief A logical class representing the result of a undecidable predicate

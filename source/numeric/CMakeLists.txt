@@ -22,6 +22,7 @@ add_library(${LIBRARY_NAME} OBJECT
     float_literals.cpp
 
     concepts.cpp
+    logical_sequence.cpp
 )
 
 

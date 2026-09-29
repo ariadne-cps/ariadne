@@ -29,14 +29,15 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-overdetermined-infeasible"
        || mode=="smt-underdetermined"
        || mode=="smt-first-subsystem-singular"
-       || mode=="smt-boolean-contract") {
+       || mode=="smt-boolean-contract"
+       || mode=="smt-search-compare") {
         return mode;
     }
     throw std::runtime_error(
         "Usage: benchmark_smt_interval_newton "
         "[contract|infeasible|singular|smt-contract|smt-infeasible|smt-singular|"
         "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined|"
-        "smt-first-subsystem-singular|smt-boolean-contract]");
+        "smt-first-subsystem-singular|smt-boolean-contract|smt-search-compare]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -59,6 +60,75 @@ double width_sum(Vector<SolverInterface::ValidatedNumericType> const& box)
 Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
+
+    if(mode=="smt-search-compare") {
+        RealVariable rx("newton_search_x"), ry("newton_search_y");
+        RealExpression ex=rx;
+        RealExpression ey=ry;
+        RealSpace space({rx,ry});
+        List<SmtTheoryPrimitiveLiteral> literals({
+            SmtTheoryPrimitiveLiteral(
+                sqr(ex)+sqr(ey)-1,
+                SmtTheoryPrimitiveRelation::EQ_ZERO),
+            SmtTheoryPrimitiveLiteral(
+                ex-ey,
+                SmtTheoryPrimitiveRelation::EQ_ZERO)
+        });
+        ExactBoxType domain({
+            ExactIntervalType(0.5_x,1.0_x),
+            ExactIntervalType(0.5_x,1.0_x)
+        });
+
+        auto run=[&](Bool interval_newton_enabled,String const& label) {
+            SmtSolver solver(SmtSolverConfiguration(
+                1e-5_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                4096u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                interval_newton_enabled));
+
+            auto const start=std::chrono::steady_clock::now();
+            SmtResult result=solver.solve(space,domain,literals);
+            double const seconds=elapsed_seconds(start);
+            auto const& statistics=result.statistics();
+
+            std::cout << "[smt-interval-newton-search]"
+                      << " variant=" << label
+                      << " status=" << result.status();
+            if(result.is_unknown()) {
+                std::cout << " reason=" << result.unknown_reason();
+            }
+            std::cout << " time=" << seconds
+                      << " boxes=" << statistics.boxes_processed
+                      << " pruned=" << statistics.boxes_pruned
+                      << " split=" << statistics.boxes_split
+                      << " epsilon-certified="
+                      << statistics.epsilon_box_certifications
+                      << " newton-attempts="
+                      << statistics.interval_newton_attempts
+                      << " newton-effective="
+                      << statistics.interval_newton_effective_reductions
+                      << " newton-infeasible="
+                      << statistics.interval_newton_infeasible
+                      << " newton-singular="
+                      << statistics.interval_newton_singular
+                      << " newton-time="
+                      << statistics.interval_newton_seconds
+                      << std::endl;
+        };
+
+        run(false,"baseline");
+        run(true,"newton");
+        return 0;
+    }
 
     if(mode=="smt-boolean-contract") {
         RealVariable rx("newton_boolean_x"), ry("newton_boolean_y");

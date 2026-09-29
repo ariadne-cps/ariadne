@@ -3812,3 +3812,31 @@ Newton attempt and one effective contraction from the nested theory solver,
 then return `UNKNOWN/RESOURCE_EXHAUSTED` after the contracted root is split.
 A unit regression also fixes the default/opt-in configuration flag and the
 DPLL propagation behavior.
+
+
+The Boolean/DPLL propagation gate also passes. Mode
+`smt-boolean-contract` performs one theory check and the nested bounded theory
+solver records exactly one Interval Newton attempt and one effective
+contraction, with no Newton infeasibility proof or singular skip. It processes
+one box, splits once, and returns `UNKNOWN/RESOURCE_EXHAUSTED` under the
+one-box budget. Total runtime is about 0.352 ms, with about 0.144 ms attributed
+to Newton. This confirms that the complete parent solver configuration,
+including the opt-in Newton flag, now survives the Boolean/DPLL theory-solving
+boundary.
+
+Functional correctness is therefore sufficient to move to the changed-tree
+utility gate. New benchmark mode `smt-search-compare` runs the regular
+two-equation system `x^2+y^2-1=0, x-y=0` on `[0.5,1]^2` twice with
+epsilon `1e-5` and a 4096-box budget. Candidate search, deterministic witness
+probing, hull reduction, shaving, monotone reduction, sensitivity splitting and
+interval-lookahead splitting are all disabled. The baseline and Newton runs are
+identical except for `interval_newton_reduction_enabled`.
+
+This comparison is intentionally search-level rather than another local
+contraction measurement. The acceptance criterion is material reduction in
+processed boxes/splits and/or wall-clock time to the same logical outcome.
+A contractor that merely changes attribution or narrows individual boxes
+without reducing the search, as happened with eager X-Taylor on Barr3, should
+not be promoted further. The benchmark reports status, total time, processed
+boxes, prunes, splits, whole-box epsilon certifications and all Newton counters
+for both variants in one invocation.

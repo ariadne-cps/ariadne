@@ -4,6 +4,7 @@
  *  Copyright  2026  Luca Geretti
  ****************************************************************************/
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <limits>
@@ -39,7 +40,8 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-search-compare-3d-propagation"
        || mode=="smt-search-compare-3d-coupled"
        || mode=="smt-search-compare-2d-coupled"
-       || mode=="smt-staged-2d-coupled") {
+       || mode=="smt-staged-2d-coupled"
+       || mode=="smt-search-repeat-2d-coupled") {
         return mode;
     }
     throw std::runtime_error(
@@ -50,7 +52,8 @@ String mode_from_argument(Int argc,const char* argv[])
         "smt-search-compare-wide|smt-search-compare-4d|"
         "smt-search-compare-4d-propagation|smt-search-compare-2d-propagation|"
         "smt-search-compare-3d-propagation|smt-search-compare-3d-coupled|"
-        "smt-search-compare-2d-coupled|smt-staged-2d-coupled]");
+        "smt-search-compare-2d-coupled|smt-staged-2d-coupled|"
+        "smt-search-repeat-2d-coupled]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -73,6 +76,106 @@ double width_sum(Vector<SolverInterface::ValidatedNumericType> const& box)
 Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
+
+    if(mode=="smt-search-repeat-2d-coupled") {
+        RealVariable x0("newton_2d_repeat_x0");
+        RealVariable x1("newton_2d_repeat_x1");
+        RealExpression e0=x0, e1=x1;
+        RealSpace space({x0,x1});
+        List<SmtTheoryPrimitiveLiteral> literals({
+            SmtTheoryPrimitiveLiteral(
+                e0*e1-0.12_x,
+                SmtTheoryPrimitiveRelation::EQ_ZERO),
+            SmtTheoryPrimitiveLiteral(
+                e0+e1-0.7_x,
+                SmtTheoryPrimitiveRelation::EQ_ZERO)
+        });
+        ExactBoxType domain({
+            ExactIntervalType(0.36_x,0.8_x),
+            ExactIntervalType(0.15_x,0.34_x)
+        });
+
+        constexpr SizeType warmup_runs=10u;
+        constexpr SizeType measured_runs=101u;
+
+        auto run=[&](Bool interval_newton_enabled,String const& label) {
+            auto solve_once=[&]() {
+                SmtSolver solver(SmtSolverConfiguration(
+                    1e-5_x,
+                    std::numeric_limits<SizeType>::max(),
+                    std::numeric_limits<SizeType>::max(),
+                    4096u,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    false,
+                    false,
+                    interval_newton_enabled));
+                auto const start=std::chrono::steady_clock::now();
+                SmtResult result=solver.solve(space,domain,literals);
+                double const seconds=elapsed_seconds(start);
+                return std::make_pair(seconds,result.statistics());
+            };
+
+            for(SizeType i=0u;i!=warmup_runs;++i) {
+                solve_once();
+            }
+
+            std::vector<double> samples;
+            std::vector<double> newton_samples;
+            samples.reserve(measured_runs);
+            newton_samples.reserve(measured_runs);
+            SmtSearchStatistics last_statistics;
+            for(SizeType i=0u;i!=measured_runs;++i) {
+                auto sample=solve_once();
+                samples.push_back(sample.first);
+                newton_samples.push_back(
+                    sample.second.interval_newton_seconds);
+                last_statistics=sample.second;
+            }
+
+            std::sort(samples.begin(),samples.end());
+            std::sort(newton_samples.begin(),newton_samples.end());
+            double total=0.0;
+            for(double sample:samples) {
+                total+=sample;
+            }
+            double const median=samples[samples.size()/2u];
+            double const mean=total/static_cast<double>(samples.size());
+            double const median_newton=
+                newton_samples[newton_samples.size()/2u];
+
+            std::cout << "[smt-interval-newton-repeat]"
+                      << " variant=" << label
+                      << " dimension=2"
+                      << " family=coupled"
+                      << " propagation=enabled"
+                      << " runs=" << measured_runs
+                      << " median-time=" << median
+                      << " mean-time=" << mean
+                      << " min-time=" << samples.front()
+                      << " max-time=" << samples.back()
+                      << " boxes=" << last_statistics.boxes_processed
+                      << " split=" << last_statistics.boxes_split
+                      << " hull-rounds="
+                      << last_statistics.hull_reduction_rounds
+                      << " hull-effective="
+                      << last_statistics.hull_effective_reductions
+                      << " newton-attempts="
+                      << last_statistics.interval_newton_attempts
+                      << " newton-effective="
+                      << last_statistics.interval_newton_effective_reductions
+                      << " median-newton-time=" << median_newton
+                      << std::endl;
+        };
+
+        run(false,"baseline");
+        run(true,"newton");
+        return 0;
+    }
 
     if(mode=="smt-staged-2d-coupled") {
         auto coordinates=ValidatedScalarMultivariateFunction::coordinates(2u);

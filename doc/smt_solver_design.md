@@ -4097,3 +4097,27 @@ All pre-sweep statistics are accumulated into the normal SMT reduction
 statistics. The immediate regression target is the 2D coupled end-to-end
 comparison, where the old eager placement recorded an ineffective Newton step
 and left all 120 hull rounds unchanged.
+
+
+After moving Newton behind one HC4 sweep, the coupled 2D end-to-end run changes
+from an ineffective Newton attempt to an effective one, as predicted by the
+staged diagnostic. The Newton variant still reports 120 total hull rounds and
+119 effective hull rounds, however: the pre-sweep plus the restarted full
+propagation fixed point do not reduce the round count reported at this level.
+The observed wall-clock time is about 2.684 ms with Newton versus 3.314 ms for
+the baseline, while the Newton step itself is reported at about 0.747 ms.
+
+This single timing sample is not sufficient evidence for a runtime win. The
+same benchmark previously measured around 2.13 ms for the baseline, and all
+times are in a range where process scheduling, caches and frequency scaling can
+materially change the ratio. The qualitative result is solid
+(`newton-effective` changes from 0 to 1); the timing attribution is not.
+
+Mode `smt-search-repeat-2d-coupled` therefore repeats the exact same
+hull+shaving comparison with 10 warm-up solves followed by 101 measured solves
+per variant. It reports median, mean, minimum and maximum end-to-end time,
+alongside deterministic tree/hull counters and median Newton time. The median
+is the primary acceptance metric. Only a stable median improvement should be
+used to claim that one-sweep staging pays off in 2D; otherwise the change is
+retained only for contraction quality and must be rechecked on the 3D/4D cases
+before any scheduling conclusion.

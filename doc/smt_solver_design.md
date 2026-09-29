@@ -3244,3 +3244,11 @@ after LP contraction, derivative/corner evaluation counts, LP minimisations,
 and separate linearization/LP timings. The first gate uses 256 processed boxes,
 matching the established frontier where natural evaluation leaves 133 split
 boxes.
+
+
+The first X-Taylor profile build failed before execution because
+`std::array<FloatDP,2>` was default-constructed for the contracted lower and
+upper bounds, while Ariadne's `FloatDP` type has no accessible default
+constructor. This is a benchmark implementation error, not a failure of the
+linear relaxation or LP formulation. Both arrays are now explicitly
+initialised with `FloatDP(0,dp)`; no X-Taylor or validation semantics change.

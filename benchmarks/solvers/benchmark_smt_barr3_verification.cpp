@@ -844,8 +844,10 @@ Void profile_lie_xtaylor_frontier(
         counts.linearization_seconds+=std::chrono::duration<double>(
             std::chrono::steady_clock::now()-linearization_start).count();
 
-        std::array<FloatDP,2u> contracted_lower;
-        std::array<FloatDP,2u> contracted_upper;
+        std::array<FloatDP,2u> contracted_lower{
+            FloatDP(0,dp),FloatDP(0,dp)};
+        std::array<FloatDP,2u> contracted_upper{
+            FloatDP(0,dp),FloatDP(0,dp)};
         Bool const relaxation_feasible=xtaylor_contract_2d(
             relaxation,box,counts,contracted_lower,contracted_upper);
 

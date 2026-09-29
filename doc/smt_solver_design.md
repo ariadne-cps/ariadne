@@ -2897,3 +2897,24 @@ from 4,160 to O(N). Because every constraint is initially visited once and the
 contracts, approximately 127 calls are expected rather than an unrealistically
 ideal 64. A materially different final box would reject the implementation
 regardless of the call-count improvement.
+
+
+### Benchmark source-tree organisation
+
+Performance and experimental executables are no longer kept under the unit-test
+tree. Ariadne now has a top-level `benchmark/` hierarchy, initially organised
+by module as `benchmark/solvers/`. The solver benchmark directory owns
+`benchmark_smt_barr3_verification`, `benchmark_constraint_propagation`, and
+the published Barr3 fixture and binary payload used by the Barr3 benchmark.
+The fast `test_smt_neural_benchmarks` regression continues to reuse that
+published fixture explicitly through its target include path and data-path
+definition, but the benchmark implementation itself no longer lives under
+`tests/`.
+
+The top-level CMake configuration adds `benchmark` with
+`EXCLUDE_FROM_ALL`. A dedicated `benchmarks` target builds all benchmark
+executables without registering them as CTest tests or making them part of the
+ordinary test targets. Executable target names are unchanged; only their build
+tree location moves from `tests/solvers/` to `benchmark/solvers/`.
+Historical command examples in this design log have been updated to the new
+path.

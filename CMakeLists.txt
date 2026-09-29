@@ -83,6 +83,7 @@ include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
 
+add_subdirectory(benchmark EXCLUDE_FROM_ALL)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)

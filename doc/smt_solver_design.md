@@ -2459,3 +2459,30 @@ separate first-layer structure has been preserved, but before the final
 \`sum_i w3_i\`. As in the previous gates, the baseline expression alone
 determines the DFS frontier, and each candidate remains a single ordinary
 natural interval evaluator.
+
+
+The 256-box layer-2 directional gate is also negative, but it localises the
+damage more precisely. Combining the two gradient components only at each
+second-layer neuron recovers much of the enclosure quality lost by first-layer
+directional propagation: the factored candidate prunes 89 boxes rather than 9.
+It nevertheless remains strictly weaker than the established baseline, which
+again prunes 123 boxes. The factored layer-2 form loses 34 baseline prunes,
+gains none, widens the root from about 1123.56 to 1525.54 and raises average
+frontier width from about 24.325 to 28.823. It is somewhat cheaper to evaluate
+(about 6.03 s versus 7.36 s), but the decision-power loss is still material.
+The grouped layer-2 form is worse again: 35 prunes, root width about 1494.79,
+average width about 31.773 and about 7.75 s evaluation time. Together with the
+root and first-layer experiments, this closes the search for a better location
+at which to merge `db/dx` and `db/dy`: preserving the two derivatives
+separately through the final output aggregation is part of the useful natural
+interval structure, not an avoidable source of dependency inflation.
+
+Dependency-aware optimisation therefore moves inside the dominant `db/dy`
+expression itself while leaving the outer Lie structure unchanged. The current
+forward derivative and the previously tested full reverse/backprop
+reassociation are two extreme parenthesisations of the same double sum. The
+next gate tests intermediate blockwise reassociations of second-layer neurons,
+so that shared first-layer derivative terms are factored only within small
+blocks rather than across the whole layer. This directly asks whether there is
+a useful granularity between the strong forward form and the weak full reverse
+form, while retaining one ordinary natural interval evaluation.

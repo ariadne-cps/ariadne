@@ -77,7 +77,8 @@ class SmtSolverConfiguration {
         Bool shaving_reduction_enabled=true,
         Bool hull_reduction_enabled=true,
         Bool interval_lookahead_split_enabled=false,
-        Bool upper_child_first=false);
+        Bool upper_child_first=false,
+        Bool interval_newton_reduction_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -120,6 +121,11 @@ class SmtSolverConfiguration {
     //! \brief Whether hull reduction is enabled during validated propagation.
     Bool hull_reduction_enabled() const { return _hull_reduction_enabled; }
 
+    //! \brief Whether square EQ_ZERO conjunctions use Interval Newton contraction.
+    Bool interval_newton_reduction_enabled() const {
+        return _interval_newton_reduction_enabled;
+    }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -133,6 +139,7 @@ class SmtSolverConfiguration {
     Bool _deterministic_witness_probing_enabled;
     Bool _shaving_reduction_enabled;
     Bool _hull_reduction_enabled;
+    Bool _interval_newton_reduction_enabled;
 };
 
 //! \ingroup Solvers
@@ -155,6 +162,11 @@ struct SmtSearchStatistics {
     double hull_temporary_allocation_seconds = 0.0;
     double hull_forward_execution_seconds = 0.0;
     double hull_backward_propagation_seconds = 0.0;
+    SizeType interval_newton_attempts = 0u;
+    SizeType interval_newton_effective_reductions = 0u;
+    SizeType interval_newton_infeasible = 0u;
+    SizeType interval_newton_singular = 0u;
+    double interval_newton_seconds = 0.0;
     SizeType shaving_reduction_rounds = 0u;
     SizeType shaving_effective_reductions = 0u;
     SizeType shaving_coordinate_attempts = 0u;
@@ -562,6 +574,11 @@ class SmtSolver {
         double hull_temporary_allocation_seconds = 0.0;
         double hull_forward_execution_seconds = 0.0;
         double hull_backward_propagation_seconds = 0.0;
+        SizeType interval_newton_attempts = 0u;
+        SizeType interval_newton_effective = 0u;
+        SizeType interval_newton_infeasible = 0u;
+        SizeType interval_newton_singular = 0u;
+        double interval_newton_seconds = 0.0;
         SizeType shaving_rounds = 0u;
         SizeType shaving_effective = 0u;
         SizeType shaving_coordinate_attempts = 0u;

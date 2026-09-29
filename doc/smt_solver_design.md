@@ -3602,3 +3602,39 @@ infeasibility proof.
 The remaining prerequisite is the singular-Jacobian guard. A box on which the
 interval Jacobian cannot be inverted must be treated as Newton not applicable;
 it must never be converted into an infeasibility result.
+
+
+The `benchmark_smt_interval_newton singular` guard passes. On
+`[-1,1]^2` the interval Jacobian contains singular matrices and inversion
+raises `SingularMatrixException`; the benchmark reports `singular=true`
+rather than `disjoint=true`. This completes the three primitive semantic
+gates: regular systems can contract, a disjoint Newton image can reject a box,
+and a singular interval Jacobian is treated only as contractor
+non-applicability.
+
+The first SMT integration is consequently enabled only by a new opt-in
+`interval_newton_reduction_enabled` configuration flag, false by default.
+It applies only to compiled theory conjunctions whose number of literals equals
+the domain dimension and whose every literal has the closed zero bound
+corresponding to `EQ_ZERO`. No equality-subsystem selection is attempted yet.
+When eligible, the solver forms the square validated vector function, performs
+one existing `IntervalNewtonSolver::step`, rejects a box only when the
+validated Newton image is disjoint, otherwise intersects the image with the
+current box, and catches `SingularMatrixException` as a no-op. Statistics
+separate attempts, effective contractions, infeasibility proofs, singular
+skips and Newton time.
+
+Enabling Interval Newton also disables the fused-direct shortcut for that box,
+because otherwise the cheap no-hull/no-shaving/no-monotone configuration would
+bypass the contractor entirely. After Newton, the established propagation,
+epsilon and split logic remains unchanged. Existing configurations retain their
+previous behavior because the new flag defaults to false.
+
+The standalone Newton benchmark now has three SMT-integrated modes. Each uses
+the same two-equation system with a one-box search budget and all other
+contractors/witness heuristics disabled. `smt-contract` should record one
+effective Newton contraction and then normally split before the budget is
+exhausted; `smt-infeasible` should be pruned by Newton at the root; and
+`smt-singular` should record one singular skip and continue without a Newton
+prune. These are the acceptance gates before considering non-square equality
+subsystem extraction.

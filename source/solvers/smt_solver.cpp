@@ -42,6 +42,7 @@
 
 #include "function/procedure.hpp"
 #include "solvers/constraint_solver.hpp"
+#include "solvers/solver.hpp"
 #include "solvers/nonlinear_programming.hpp"
 #include "utility/exceptions.hpp"
 
@@ -302,7 +303,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool shaving_reduction_enabled,
     Bool hull_reduction_enabled,
     Bool interval_lookahead_split_enabled,
-    Bool upper_child_first)
+    Bool upper_child_first,
+    Bool interval_newton_reduction_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -314,7 +316,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _upper_child_first(upper_child_first),
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
       _shaving_reduction_enabled(shaving_reduction_enabled),
-      _hull_reduction_enabled(hull_reduction_enabled)
+      _hull_reduction_enabled(hull_reduction_enabled),
+      _interval_newton_reduction_enabled(interval_newton_reduction_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -510,6 +513,68 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  CompiledTheoryLiterals const& literals,
                                  ReductionStatistics& statistics) const
 {
+    if(_configuration.interval_newton_reduction_enabled()
+       && literals.size()==domain.dimension()) {
+        Bool square_equalities=not literals.empty();
+        ExactIntervalType const zero_bounds(0,0);
+        for(auto const& literal:literals) {
+            if(literal.strict_lower
+               || literal.strict_upper
+               || not definitely(literal.bounds==zero_bounds)) {
+                square_equalities=false;
+                break;
+            }
+        }
+
+        if(square_equalities) {
+            ++statistics.interval_newton_attempts;
+            auto const newton_start=std::chrono::steady_clock::now();
+            try {
+                ValidatedVectorMultivariateFunction function(
+                    literals.size(),literals[0u].function.domain());
+                for(SizeType i=0u;i!=literals.size();++i) {
+                    function[i]=literals[i].function;
+                }
+
+                Vector<SolverInterface::ValidatedNumericType> current=
+                    cast_singleton(cast_exact_box(domain));
+                IntervalNewtonSolver newton_solver(1e-12,1u);
+                Vector<SolverInterface::ValidatedNumericType> image=
+                    newton_solver.step(function,current);
+
+                if(not consistent(image,current)) {
+                    ++statistics.interval_newton_infeasible;
+                    statistics.interval_newton_seconds+=
+                        elapsed_seconds(newton_start);
+                    return true;
+                }
+
+                Bool effective=false;
+                for(SizeType i=0u;i!=domain.dimension();++i) {
+                    auto contracted=refinement(image[i],current[i]);
+                    UpperIntervalType next(
+                        contracted.lower(),contracted.upper());
+                    Bool const same_lower=
+                        next.lower_bound().raw()==domain[i].lower_bound().raw();
+                    Bool const same_upper=
+                        next.upper_bound().raw()==domain[i].upper_bound().raw();
+                    if(not (same_lower && same_upper)) {
+                        effective=true;
+                    }
+                    domain[i]=next;
+                }
+                if(effective) {
+                    ++statistics.interval_newton_effective;
+                }
+            }
+            catch(const SingularMatrixException&) {
+                ++statistics.interval_newton_singular;
+            }
+            statistics.interval_newton_seconds+=
+                elapsed_seconds(newton_start);
+        }
+    }
+
     ConstraintSolver contractor;
     ConstraintPropagationStatistics propagation_statistics;
     Bool const empty=contractor.propagate(
@@ -604,7 +669,8 @@ SmtSolver::_direct_classification(
     DirectClassification result;
     if(_configuration.hull_reduction_enabled()
        || _configuration.shaving_reduction_enabled()
-       || _configuration.monotone_reduction_enabled()) {
+       || _configuration.monotone_reduction_enabled()
+       || _configuration.interval_newton_reduction_enabled()) {
         return result;
     }
 
@@ -901,6 +967,16 @@ SmtSolver::_accumulate_box_processing_statistics(
         processing.reductions.hull_forward_execution_seconds;
     statistics.hull_backward_propagation_seconds+=
         processing.reductions.hull_backward_propagation_seconds;
+    statistics.interval_newton_attempts+=
+        processing.reductions.interval_newton_attempts;
+    statistics.interval_newton_effective_reductions+=
+        processing.reductions.interval_newton_effective;
+    statistics.interval_newton_infeasible+=
+        processing.reductions.interval_newton_infeasible;
+    statistics.interval_newton_singular+=
+        processing.reductions.interval_newton_singular;
+    statistics.interval_newton_seconds+=
+        processing.reductions.interval_newton_seconds;
     statistics.epsilon_check_seconds+=processing.epsilon_check_seconds;
     statistics.witness_probe_seconds+=processing.witness_probe_seconds;
     statistics.split_seconds+=processing.split_seconds;
@@ -1316,6 +1392,12 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.hull_temporary_allocation_seconds+=source.hull_temporary_allocation_seconds;
     target.hull_forward_execution_seconds+=source.hull_forward_execution_seconds;
     target.hull_backward_propagation_seconds+=source.hull_backward_propagation_seconds;
+    target.interval_newton_attempts+=source.interval_newton_attempts;
+    target.interval_newton_effective_reductions+=
+        source.interval_newton_effective_reductions;
+    target.interval_newton_infeasible+=source.interval_newton_infeasible;
+    target.interval_newton_singular+=source.interval_newton_singular;
+    target.interval_newton_seconds+=source.interval_newton_seconds;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
     target.shaving_coordinate_attempts+=source.shaving_coordinate_attempts;

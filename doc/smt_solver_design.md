@@ -2867,3 +2867,33 @@ so Procedure construction is removed from the comparison. A new
 executions. The baseline run at N=64 establishes the call count and final box
 before introducing any agenda scheduling; the later agenda implementation must
 reach the same final width while materially reducing this count.
+
+
+The N=64 sparse-chain full-scan baseline behaves exactly as intended. It reaches
+the fully contracted box (`final-width-sum=0`) in 65 hull rounds, of which 64
+change the domain, and executes 4,160 hull contractors. The equality
+`4160 = 64*65` shows that the current fixed-point loop scans all 64
+constraints on every round while the deliberately reversed chain exposes only
+one new coordinate contraction per pass. Runtime is already small (about
+5.27 ms), so contractor-call count rather than wall-clock time is the primary
+metric for this synthetic test.
+
+The first agenda implementation is intentionally narrow. When hull reduction is
+enabled, shaving and monotone contraction are disabled, and every propagation
+constraint has a cached Procedure, `ConstraintSolver::propagate` builds
+variable-to-contractor watcher lists from the Procedure's variable
+instructions. All contractors are queued once initially. After a contractor
+runs, only constraints watching coordinates whose interval endpoints actually
+changed are queued again; duplicate queue entries are suppressed. The
+established full-scan path remains untouched for generic uncached constraints
+and for configurations using shaving or monotone contraction. This isolates the
+agenda experiment from other contractor semantics.
+
+The benchmark now reports agenda pushes, pops and effective calls in addition to
+the total hull-contractor count. For the reversed 64-variable chain an
+IBEX-style agenda should preserve `final-width-sum=0` while reducing calls
+from 4,160 to O(N). Because every constraint is initially visited once and the
+63 chain equalities must then be woken after the preceding coordinate
+contracts, approximately 127 calls are expected rather than an unrealistically
+ideal 64. A materially different final box would reject the implementation
+regardless of the call-count improvement.

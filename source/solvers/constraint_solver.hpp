@@ -71,6 +71,9 @@ struct ConstraintPropagationStatistics {
     SizeType hull_rounds = 0u;
     SizeType hull_effective = 0u;
     SizeType hull_contractor_calls = 0u;
+    SizeType hull_agenda_pushes = 0u;
+    SizeType hull_agenda_pops = 0u;
+    SizeType hull_agenda_effective_calls = 0u;
     SizeType hull_procedure_builds = 0u;
     double hull_procedure_build_seconds = 0.0;
     double hull_contraction_seconds = 0.0;

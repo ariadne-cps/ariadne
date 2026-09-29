@@ -95,6 +95,9 @@ Int main(Int argc,const char* argv[])
               << " hull-rounds=" << statistics.hull_rounds
               << " hull-effective=" << statistics.hull_effective
               << " hull-contractor-calls=" << statistics.hull_contractor_calls
+              << " agenda-pushes=" << statistics.hull_agenda_pushes
+              << " agenda-pops=" << statistics.hull_agenda_pops
+              << " agenda-effective=" << statistics.hull_agenda_effective_calls
               << " hull-procedure-builds=" << statistics.hull_procedure_builds
               << " hull-contract-time=" << statistics.hull_contraction_seconds
               << " hull-forward-time=" << statistics.hull_forward_execution_seconds

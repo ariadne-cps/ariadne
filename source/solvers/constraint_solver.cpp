@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include <chrono>
+#include <deque>
 
 #include "utility/macros.hpp"
 #include "utility/tuple.hpp"
@@ -278,6 +279,57 @@ Bool propagation_monotone_coordinate_is_safe(
         || definitely(derivative_image.upper_bound()<0);
 }
 
+std::vector<SizeType> propagation_procedure_dependencies(
+    ValidatedProcedure const& procedure)
+{
+    std::vector<SizeType> dependencies;
+    std::vector<Bool> seen(procedure.argument_size(),false);
+    for(SizeType i=0u;i!=procedure._instructions.size();++i) {
+        auto const* variable=
+            std::get_if<IndexProcedureInstruction>(
+                &procedure._instructions[i].base());
+        if(variable==nullptr) {
+            continue;
+        }
+        SizeType const index=variable->_ind;
+        if(index<seen.size() && not seen[index]) {
+            seen[index]=true;
+            dependencies.push_back(index);
+        }
+    }
+    return dependencies;
+}
+
+std::vector<SizeType> propagation_changed_variables(
+    UpperBoxType const& before,
+    UpperBoxType const& after)
+{
+    std::vector<SizeType> changed;
+    for(SizeType variable=0u;variable!=before.dimension();++variable) {
+        Bool const same_lower=
+            before[variable].lower_bound().raw()
+                ==after[variable].lower_bound().raw();
+        Bool const same_upper=
+            before[variable].upper_bound().raw()
+                ==after[variable].upper_bound().raw();
+        if(not (same_lower && same_upper)) {
+            changed.push_back(variable);
+        }
+    }
+    return changed;
+}
+
+Bool propagation_has_cached_procedures(
+    std::vector<ConstraintPropagationConstraint> const& constraints)
+{
+    for(auto const& constraint:constraints) {
+        if(not constraint.hull_procedure) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 Bool ConstraintSolver::propagate(
@@ -288,6 +340,100 @@ Bool ConstraintSolver::propagate(
     Bool shaving_reduction_enabled,
     Bool hull_reduction_enabled) const
 {
+    // First incremental vertical slice: use an IBEX-style propagation agenda
+    // only for the pure cached hull-contraction phase. Shaving and monotone
+    // contraction retain the established full-scan implementation below until
+    // their wake-up semantics are measured separately.
+    if(hull_reduction_enabled
+       && not shaving_reduction_enabled
+       && not monotone_reduction_enabled
+       && propagation_has_cached_procedures(constraints)) {
+        ++statistics.hull_rounds;
+
+        std::vector<std::vector<SizeType>> dependencies(constraints.size());
+        std::vector<std::vector<SizeType>> watchers(domain.dimension());
+        for(SizeType constraint_index=0u;
+            constraint_index!=constraints.size();
+            ++constraint_index) {
+            dependencies[constraint_index]=
+                propagation_procedure_dependencies(
+                    *constraints[constraint_index].hull_procedure);
+            for(SizeType variable:dependencies[constraint_index]) {
+                if(variable<watchers.size()) {
+                    watchers[variable].push_back(constraint_index);
+                }
+            }
+        }
+
+        std::deque<SizeType> agenda;
+        std::vector<Bool> queued(constraints.size(),false);
+        auto enqueue=[&](SizeType constraint_index) {
+            if(not queued[constraint_index]) {
+                queued[constraint_index]=true;
+                agenda.push_back(constraint_index);
+                ++statistics.hull_agenda_pushes;
+            }
+        };
+        for(SizeType i=0u;i!=constraints.size();++i) {
+            enqueue(i);
+        }
+
+        Bool any_effective=false;
+        while(not agenda.empty()) {
+            SizeType const constraint_index=agenda.front();
+            agenda.pop_front();
+            queued[constraint_index]=false;
+            ++statistics.hull_agenda_pops;
+
+            auto const& constraint=constraints[constraint_index];
+            UpperBoxType before=domain;
+
+            ProcedureHullReductionStatistics hull_statistics;
+            auto phase_start=std::chrono::steady_clock::now();
+            ++statistics.hull_contractor_calls;
+            Bool const hull_empty=this->hull_reduce(
+                domain,*constraint.hull_procedure,
+                constraint.bounds,hull_statistics);
+            statistics.hull_contraction_seconds+=
+                constraint_elapsed_seconds(phase_start);
+            statistics.hull_temporary_allocation_seconds+=
+                hull_statistics.temporary_allocation_seconds;
+            statistics.hull_forward_execution_seconds+=
+                hull_statistics.forward_execution_seconds;
+            statistics.hull_backward_propagation_seconds+=
+                hull_statistics.backward_propagation_seconds;
+            if(hull_empty) {
+                return true;
+            }
+
+            phase_start=std::chrono::steady_clock::now();
+            Bool const infeasible=
+                propagation_constraint_infeasible(constraint,domain);
+            statistics.hull_direct_rejection_seconds+=
+                constraint_elapsed_seconds(phase_start);
+            if(infeasible) {
+                return true;
+            }
+
+            auto changed=propagation_changed_variables(before,domain);
+            if(changed.empty()) {
+                continue;
+            }
+            any_effective=true;
+            ++statistics.hull_agenda_effective_calls;
+            for(SizeType variable:changed) {
+                for(SizeType dependent:watchers[variable]) {
+                    enqueue(dependent);
+                }
+            }
+        }
+
+        if(any_effective) {
+            ++statistics.hull_effective;
+        }
+        return false;
+    }
+
     Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;

@@ -2376,3 +2376,23 @@ Chebyshev-to-Bernstein conversion for range certification and subdivision.
 This direction remains deferred while work returns to dependency-aware
 algebraic expression optimisation, whose immediate goal is to improve the
 natural interval extension itself without the cost of a second evaluator.
+
+
+Dependency-aware algebraic optimisation resumes after closing the eager root-CSE
+search experiment. Ariadne's current symbolic `simplify(Expression)` is not an
+algebraic optimiser: it primarily performs constant folding and structural
+simplification and does not systematically factor, expand, choose Horner forms,
+or score equivalent forms by validated interval quality.
+
+The first gate therefore avoids designing a general rewrite engine prematurely.
+Query `lie-algebraic-form-profile` compares three exactly equivalent outer
+forms of the Barr3 Lie expression on the same baseline DFS frontier: the
+current factored-dynamics form, an expanded product form, and a form that
+groups the repeated y dependence as
+`y*(db_dx-db_dy) + db_dy*x*(sqr(x)/3-1) + barrier`. It reports root widths,
+average frontier widths, pruning counts and evaluation times. If one equivalent
+form improves validated natural interval bounds materially, it supplies a
+concrete rewrite pattern and scoring target for a generic dependency-aware
+optimizer. If all outer forms are effectively equivalent, optimisation effort
+should move inside the network derivative expression rather than adding broad
+symbolic rewriting machinery without evidence.

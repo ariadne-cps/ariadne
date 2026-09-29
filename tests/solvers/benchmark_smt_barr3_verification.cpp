@@ -43,12 +43,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -60,7 +60,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -71,7 +71,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -83,7 +83,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -2406,7 +2406,7 @@ Void profile_lie_gradient_cse_pruning(
         return count==0u ? 0.0 : sum/static_cast<double>(count);
     };
 
-    std::cout << "[lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search]"
+    std::cout << "[lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile]"
               << " time=" << stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2609,7 +2609,7 @@ Void profile_lie_root_cse_range(
         return count==0u ? 0.0 : sum/static_cast<double>(count);
     };
 
-    std::cout << "[lie-root-cse-range-profile|lie-root-cse-search]"
+    std::cout << "[lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile]"
               << " time=" << stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2806,7 +2806,7 @@ Void profile_lie_root_cse_search(
     }
     search_stopwatch.click();
 
-    std::cout << "[lie-root-cse-search]"
+    std::cout << "[lie-root-cse-search|lie-algebraic-form-profile]"
               << " search-time=" << search_stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2831,6 +2831,116 @@ Void profile_lie_root_cse_search(
               << " midpoint-time=" << counts.midpoint_seconds
               << " barrier-evals=" << counts.barrier_evaluations
               << " barrier-time=" << counts.barrier_seconds
+              << std::endl;
+}
+
+struct LieAlgebraicFormCounts {
+    SizeType processed = 0u;
+    SizeType baseline_pruned = 0u;
+    SizeType expanded_pruned = 0u;
+    SizeType grouped_y_pruned = 0u;
+    SizeType split = 0u;
+    double baseline_width_sum = 0.0;
+    double expanded_width_sum = 0.0;
+    double grouped_y_width_sum = 0.0;
+    double baseline_seconds = 0.0;
+    double expanded_seconds = 0.0;
+    double grouped_y_seconds = 0.0;
+};
+
+Void profile_lie_algebraic_forms(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    ValidatedScalarMultivariateFunction const& baseline_function,
+    ValidatedScalarMultivariateFunction const& expanded_function,
+    ValidatedScalarMultivariateFunction const& grouped_y_function)
+{
+    UpperIntervalType baseline_root=apply(baseline_function,domain);
+    UpperIntervalType expanded_root=apply(expanded_function,domain);
+    UpperIntervalType grouped_y_root=apply(grouped_y_function,domain);
+
+    std::cout << "[lie-algebraic-form-root]"
+              << " baseline=" << baseline_root
+              << " baseline-width=" << baseline_root.width().raw().get_d()
+              << " expanded=" << expanded_root
+              << " expanded-width=" << expanded_root.width().raw().get_d()
+              << " grouped-y=" << grouped_y_root
+              << " grouped-y-width=" << grouped_y_root.width().raw().get_d()
+              << std::endl;
+
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+    LieAlgebraicFormCounts counts;
+
+    Stopwatch<Milliseconds> stopwatch;
+    while(not pending.empty() && counts.processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++counts.processed;
+
+        Stopwatch<Milliseconds> baseline_stopwatch;
+        UpperIntervalType baseline_image=apply(baseline_function,box);
+        baseline_stopwatch.click();
+        counts.baseline_seconds+=baseline_stopwatch.elapsed_seconds();
+
+        Stopwatch<Milliseconds> expanded_stopwatch;
+        UpperIntervalType expanded_image=apply(expanded_function,box);
+        expanded_stopwatch.click();
+        counts.expanded_seconds+=expanded_stopwatch.elapsed_seconds();
+
+        Stopwatch<Milliseconds> grouped_y_stopwatch;
+        UpperIntervalType grouped_y_image=apply(grouped_y_function,box);
+        grouped_y_stopwatch.click();
+        counts.grouped_y_seconds+=grouped_y_stopwatch.elapsed_seconds();
+
+        if(definitely(baseline_image.lower_bound()>=0)) {
+            ++counts.baseline_pruned;
+        }
+        if(definitely(expanded_image.lower_bound()>=0)) {
+            ++counts.expanded_pruned;
+        }
+        if(definitely(grouped_y_image.lower_bound()>=0)) {
+            ++counts.grouped_y_pruned;
+        }
+
+        counts.baseline_width_sum+=baseline_image.width().raw().get_d();
+        counts.expanded_width_sum+=expanded_image.width().raw().get_d();
+        counts.grouped_y_width_sum+=grouped_y_image.width().raw().get_d();
+
+        if(definitely(baseline_image.lower_bound()>=0)) {
+            continue;
+        }
+
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++counts.split;
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
+    }
+    stopwatch.click();
+
+    auto average=[](double sum,SizeType count) {
+        return count==0u ? 0.0 : sum/static_cast<double>(count);
+    };
+
+    std::cout << "[lie-algebraic-form-profile]"
+              << " time=" << stopwatch.elapsed_seconds()
+              << " processed=" << counts.processed
+              << " baseline-pruned=" << counts.baseline_pruned
+              << " expanded-pruned=" << counts.expanded_pruned
+              << " grouped-y-pruned=" << counts.grouped_y_pruned
+              << " split=" << counts.split
+              << " avg-baseline-width="
+              << average(counts.baseline_width_sum,counts.processed)
+              << " avg-expanded-width="
+              << average(counts.expanded_width_sum,counts.processed)
+              << " avg-grouped-y-width="
+              << average(counts.grouped_y_width_sum,counts.processed)
+              << " baseline-time=" << counts.baseline_seconds
+              << " expanded-time=" << counts.expanded_seconds
+              << " grouped-y-time=" << counts.grouped_y_seconds
               << std::endl;
 }
 
@@ -3320,6 +3430,35 @@ Int main(Int argc,const char* argv[]) {
             lie_barrier,x,y,space,
             lie_function,barrier_function,
             lie_literal_order,upper_child_first);
+        return 0;
+    }
+
+    if(query=="lie-algebraic-form-profile") {
+        RealExpression polynomial=x*(sqr(x)/3-1);
+        RealExpression baseline=
+            network.db_dx*y
+            + network.db_dy*(polynomial-y)
+            + network.barrier;
+        RealExpression expanded=
+            network.db_dx*y
+            + network.db_dy*polynomial
+            - network.db_dy*y
+            + network.barrier;
+        RealExpression grouped_y=
+            y*(network.db_dx-network.db_dy)
+            + network.db_dy*polynomial
+            + network.barrier;
+
+        ValidatedScalarMultivariateFunction baseline_function=
+            make_function(space,baseline);
+        ValidatedScalarMultivariateFunction expanded_function=
+            make_function(space,expanded);
+        ValidatedScalarMultivariateFunction grouped_y_function=
+            make_function(space,grouped_y);
+
+        profile_lie_algebraic_forms(
+            box_limit,UpperBoxType(domain),
+            baseline_function,expanded_function,grouped_y_function);
         return 0;
     }
 

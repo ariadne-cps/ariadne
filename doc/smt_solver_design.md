@@ -2602,3 +2602,32 @@ the baseline. If an intermediate block improves the validated Lie range, it
 provides a concrete local factor-placement rule for dependency-aware
 optimisation; if all smaller blocks degrade monotonically toward block 1, the
 fully factored current form is already the best endpoint of this family.
+
+
+The 256-box local factor-placement gate is decisively negative and internally
+consistent. Block size 64 reproduces the established baseline exactly: 123
+pruned boxes, no pruning differences, average Lie-plus-barrier width about
+24.325, root width about 1123.56 and essentially identical evaluation time.
+Every earlier placement of the common activation-derivative factor is weaker.
+Pruning rises monotonically from only 11 boxes at block size 1 through
+37, 59, 85, 101 and 115 for blocks 2, 4, 8, 16 and 32, reaching the baseline
+only at block 64. Average width and runtime follow the same monotone trend:
+block 1 has average width about 31.52, roughly 3.14 million Procedure
+instructions and about 68.2 s evaluation time, whereas block 64 has average
+width 24.325, about 268 thousand instructions and about 5.25 s.
+
+This closes factor placement as the explanation for the intra-neuron recovery
+seen under quadrant subdivision. The successful forward structure already
+delays multiplication by `a2_i` until the complete 64-term `dzdy_i` sum is
+formed; distributing that factor over smaller partial sums only duplicates the
+state-dependent factor and loses dependency information.
+
+The next gate therefore keeps the complete `dzdy_i` sum intact and changes
+only the algebraic representation of the local product
+`(1-h2_i^2)*dzdy_i`. Query `lie-gradient-local-product-profile` compares
+the current direct form with two exactly equivalent alternatives:
+`q-h*(h*q)` and `(1-h)*(1+h)*q`, where `h=h2_i` and `q=dzdy_i`.
+Barrier, db/dx, dynamics and the outer Lie factorisation remain unchanged. This
+tests the dependency identified by the attribution profile directly, without
+moving the activation factor across the weighted sum or introducing any second
+range evaluator.

@@ -74,7 +74,7 @@ int main() {
     auto tau=solution.tau;
     auto uts=solution.uts;
     auto error=solution.error;
-    std::cout << "uts="<<uts<<"\n";
+    std::cout << "uts.sizes()="<<uts.sizes()<<"\n";
     std::cout << "h="<<h<<", tau="<<tau<<", error="<<error<<"\n";
 
     // Check derivatives

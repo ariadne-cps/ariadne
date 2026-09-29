@@ -31,8 +31,6 @@
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "diagonal_matrix.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/figure.hpp"
 
 namespace Ariadne {
 
@@ -47,11 +45,7 @@ template<class T> class TensorRow {
 
 //! \ingroup LinearAlgebraSubModule
 //! \brief A rank-\a N tensor with elements of type \a X.
-template<SizeType N, class X> class Tensor :
-                      public LabelledDrawable2d3dInterface,
-                      public Drawable2d3dInterface
- 
- {
+template<SizeType N, class X> class Tensor {
 //   TODO: Also provide a version which is not templated on rank.
     Array<SizeType> _ns;
     Array<X> _a;
@@ -68,16 +62,6 @@ template<SizeType N, class X> class Tensor :
 
     TensorRow<Tensor<N,X>const&> operator[] (SizeType const& i) const { return TensorRow<Tensor<N,X>const&>(*this,i); }
     TensorRow<Tensor<N,X>&> operator[] (SizeType const& i) { return TensorRow<Tensor<N,X>&>(*this,i); }
-    friend OutputStream& operator<<(OutputStream& os, Tensor<N,X> const& t) { return t._write(os); }
-    
-    Tensor<N, X>* clone() const { return new Tensor(*this); /*new Tensor(_ns, _a[0]*0)*/;}
-    Tensor<N, X>* clone2d3d() const { return new Tensor(*this); /*new Tensor(_ns, _a[0]*0)*/;}
-    DimensionType dimension() const { return _ns.size(); }
-    Void draw(CanvasInterface& canvas, const Projection2d& p) const;
-    Void draw(CanvasInterface& c, const Variables2d& p) const;
-    Void draw(CanvasInterface& canvas, const Projection3d& p) const;
-    Void draw(CanvasInterface& c, const Variables3d& p) const;
-
   private: public:
     SizeType _index(Array<SizeType> is) const { SizeType k=0; SizeType r=is[k]; ++k; while(k!=is.size()) { r*=_ns[k]; r+=is[k]; ++k; } return r; }
     SizeType _total_size() const { SizeType r=1; for(SizeType i=0; i!=N; ++i) { r*=_ns[i]; } return r; }
@@ -102,67 +86,6 @@ Tensor<N,X>::Tensor(Array<SizeType> const& ns, G const& g)
     }
 }
 
-template<SizeType N, class X> OutputStream& write_tensor(OutputStream& os, Tensor<N,X> const& t);
-
-template<SizeType N, class X> OutputStream& Tensor<N,X>::_write(OutputStream& os) const {
-    return write_tensor(os,*this);
-}
-
-template<class X> OutputStream& write_tensor(OutputStream& os, Tensor<2,X> const& t) {
-    os << "Tensor<" << t.sizes() << ">";
-    os << '{';
-    for(SizeType i0=0; i0!=t.size(0); ++i0) {
-        if(i0!=0) { os << ','; }
-        os << '{';
-        for(SizeType i1=0; i1!=t.size(1); ++i1) {
-            if(i1!=0) { os << ','; }
-            os << t[i0][i1];
-        }
-        os << '}';
-    }
-    os << '}';
-    return os;
-}
-
-template<class X> OutputStream& write_tensor(OutputStream& os, Tensor<3,X> const& t) {
-    os << "Tensor<" << t.sizes() << ">";
-    os << '{';
-    for(SizeType i0=0; i0!=t.size(0); ++i0) {
-        if(i0!=0) { os << ','; }
-        os << '{';
-        for(SizeType i1=0; i1!=t.size(1); ++i1) {
-            if(i1!=0) { os << ','; }
-            os << '{';
-            for(SizeType i2=0; i2!=t.size(2); ++i2) {
-                if(i2!=0) { os << ','; }
-                os << t[{i0,i1,i2}];
-            }
-            os << '}';
-        }
-        os << '}';
-    }
-    os << '}';
-    return os;
-}
-
-template<SizeType N, class X> OutputStream& write_tensor(OutputStream& os, Tensor<N,X> const& t) {
-    SizeType M=t.rank();
-    Array<SizeType> is(M,0);
-    SizeType m=M;
-    X const* p=t._a.begin();
-    while (m!=0) {
-        m=m-1;
-        while(is[m]!=t._ns[m]) {
-            os << is << " " << *p << ",\n";
-            ++p;
-            ++is[m];
-        }
-        for(SizeType k=m; k!=M; ++k) {
-            is[k]=0;
-        }
-    }
-    return os;
-}
 
 
 } // namespace Ariadne

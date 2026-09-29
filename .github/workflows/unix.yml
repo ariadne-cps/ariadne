@@ -19,9 +19,9 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 26 AppleClang 21 [Release]",
-            os: macos-26,
-            cxx-cmd: "/usr/bin/clang++",
+            name: "macOS 15 AppleClang [Release]",
+            os: macos-15,
+            cxx-cmd: "clang++",
             pyld: "DY"
           }
           - {
@@ -31,10 +31,10 @@ jobs:
             cxx-cmd: "clang++-16"
           }
           - {
-            name: "Ubuntu 24.04 GCC 12 [Release]",
+            name: "Ubuntu 24.04 GCC 13 [Release]",
             os: ubuntu-24.04,
-            cxx-pkg: "g++-12",
-            cxx-cmd: "g++-12"
+            cxx-pkg: "g++-13",
+            cxx-cmd: "g++-13"
           }
 
     steps:

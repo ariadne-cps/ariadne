@@ -2275,3 +2275,20 @@ evaluator would change the search tree, so they must not be extrapolated
 directly into a final solver pruning rate. The next step after the planned
 rebase is to integrate or emulate the tier in the actual search loop and
 measure the resulting frontier and total runtime.
+
+
+Before integrating the CSE range tier into the SMT search loop, one distinction
+must be resolved. The strong 65-box replay gain comes from tightening the
+internal neural factor `db/dy` and then recomposing the Lie expression. A
+generic SMT literal compiler normally sees only the complete primitive
+expression, so a root-level first-order evaluator is not automatically
+equivalent to the successful subexpression experiment.
+
+Query `lie-root-cse-range-profile` therefore applies the same validated
+CSE/centered/monotonicity construction directly to the complete
+`lie+barrier` expression. It replays the established geometric frontier and
+counts additional boxes whose improved root range has lower bound at least
+zero. If this root evaluator recovers significant pruning, it can be introduced
+as a generic optional compiled-literal tier. If it does not, the range-evaluator
+architecture must preserve or discover useful internal subexpressions instead
+of applying first-order range analysis only at the literal root.

@@ -3897,3 +3897,34 @@ The comparison uses epsilon `1e-5`, a 65536-box budget, and disables all
 other optional contractors, witness heuristics and guided splitting. This asks
 whether Newton's cross-variable contraction starts to amortize when ordinary
 branching must narrow four coupled coordinates rather than two.
+
+
+The four-dimensional changed-tree gate crosses the runtime threshold. On the
+regular coupled system over `[0.5,1]^4`, the baseline reaches
+`EPSILON_SAT` after 2,058 processed boxes, 1,008 prunes and 1,049 splits in
+about 4.97 ms. With Interval Newton enabled, the same logical result is reached
+after only 12 boxes, 4 prunes and 7 splits. All 12 Newton attempts are
+effective, with no singular skips or direct Newton infeasibility proofs. The
+Newton run takes about 1.04 ms total, of which about 0.90 ms is Newton work.
+
+Thus this case shows both a structural and an amortized runtime win: about
+171-fold fewer processed boxes, 150-fold fewer splits, and roughly a 4.8-fold
+wall-clock speedup. Unlike the Barr3 X-Taylor experiments, the stronger
+contractor is not merely moving pruning earlier; it collapses the search enough
+to pay for itself. This is sufficient evidence to retain Interval Newton as a
+serious opt-in equality contractor.
+
+The next gate tests overlap with the solver's established propagation rather
+than making the equality system harder. Mode
+`smt-search-compare-4d-propagation` repeats the same 4D system, epsilon and
+65536-box budget, but enables both hull reduction and coordinate shaving in
+both variants. Candidate search, deterministic witness probing, monotone
+reduction, sensitivity splitting and interval lookahead remain disabled. The
+only difference between the two runs is Interval Newton.
+
+This comparison asks whether Newton contributes information that the existing
+HC4-style hull propagation plus shaving do not already provide. It reports
+hull rounds/effective contractions and timing, shaving rounds/effective
+contractions and timing, and the Newton counters. A strong Newton win here
+would justify integrating it into the contractor architecture rather than
+treating it as a substitute for disabled propagation.

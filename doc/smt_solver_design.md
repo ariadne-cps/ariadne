@@ -3421,3 +3421,23 @@ several thresholds on r, how many boxes would invoke X-Taylor, how many of the
 95 X-Taylor infeasibility proofs would be retained, and how many feasible
 relaxations would be unnecessarily evaluated. This is a fixed-frontier
 scheduler experiment only; no search behaviour changes.
+
+
+The natural-range gate profile shows strong separation on the 256-box Barr3
+frontier. The 95 X-Taylor-infeasible boxes have
+`r=max(0,-lower(f(X))/width(f(X)))` between about 0.0010 and 0.3409
+(mean 0.1258), while the 38 feasible relaxations have r between about 0.2285
+and 0.5276 (mean 0.3625). Threshold 0.20 selects 77 of 133 unresolved boxes,
+all 77 of which are X-Taylor-infeasible. This retains 81.1% of the 95
+infeasibility proofs while invoking X-Taylor on only 57.9% of the unresolved
+frontier, with no feasible relaxations selected in this sample. Threshold 0.35
+recovers all 95 proofs but selects 113 boxes and includes 18 feasible cases.
+
+The next gate therefore fixes the conservative threshold at 0.20 and actually
+skips X-Taylor work above it. Query `lie-xtaylor-gated-profile` preserves the
+same natural DFS so that timing remains fixed-frontier comparable, but computes
+gradient, corners and LP only for selected boxes. The acceptance target is
+77 additional infeasibility proofs with materially lower total and
+linearization time than the ungated direct-gradient/corner-cache profile
+(34.83 s total, 27.38 s linearization). If this cost reduction is large enough,
+the 0.20 gate is the candidate for the first changed-tree X-Taylor search.

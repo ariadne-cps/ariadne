@@ -3316,3 +3316,32 @@ now measure the two derivative evaluations per checked box and the four corner
 evaluations per checked box. The next run therefore distinguishes whether
 gradient-range evaluation or point/corner evaluation dominates before any
 further representation change is attempted.
+
+
+The repeated 256-box X-Taylor profile confirms the previous numerical counts
+exactly and localises the linearization cost. Natural evaluation again leaves
+133 boxes after 123 prunes; X-Taylor proves 95 of those 133 relaxations
+infeasible and contracts 19 of the 38 feasible relaxations, with no LP
+failures. Total time is about 87.68 s. Of the 80.27 s linearization cost,
+65.02 s is spent evaluating the two explicit derivative functions over the
+133 boxes, while 15.25 s is spent evaluating the Lie function at the four
+corners. LP work remains negligible at about 0.074 s.
+
+The feasible-only contraction statistic is much more modest than the aggregate
+number suggested: average x+y width falls from 1.02673 to 0.967703 on the 38
+feasible relaxations, about a 5.7% reduction. Thus the principal value of this
+X-Taylor relaxation on Barr3 is infeasibility detection, not coordinate
+contraction.
+
+The next experiment targets the dominant 65 s derivative-range cost without
+changing the corner construction or LP. Ariadne already exposes
+`gradient_range(f,X)`, which evaluates the full interval gradient of a
+validated scalar function in one operation. A parallel query
+`lie-xtaylor-gradient-range-profile` uses that API once per unresolved box
+instead of constructing and evaluating two scalar derivative functions. The
+fixed natural frontier, corner inequalities and polytope LP are otherwise
+unchanged. Unlike the failed compiled-Procedure experiment, this may change the
+gradient enclosure because it uses forward differential evaluation rather than
+separately transformed derivative expressions. Therefore acceptance is a
+cost/strength comparison: large runtime reduction is useful only if the
+X-Taylor infeasibility count remains close to the 95-box baseline.

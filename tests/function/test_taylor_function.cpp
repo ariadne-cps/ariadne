@@ -441,7 +441,7 @@ TestVectorTaylorFunction::test()
 }
 
 template<class I, class F> Expansion<I,F>const& cast_exact(Expansion<I,F> const& e) {
-    return reinterpret_cast<Expansion<I,F>const&>(e); }
+    return e; }
 
 Void TestVectorTaylorFunction::test_constructors()
 {
@@ -717,7 +717,9 @@ Void TestTaylorFunctionFactory::test_create()
     TaylorFunctionFactory factory(sweeper);
 
     Vector<ExactIntervalType> dom={{-1,+1},{0.5_x,3.5_x}};
-    Vector<FloatDPBounds> args=reinterpret_cast<Vector<FloatDPBounds>const&>(dom);
+    Vector<FloatDPBounds> args(dom.size(),[&](SizeType i) {
+        return FloatDPBounds(dom[i].lower_bound(),dom[i].upper_bound());
+    });
 
     ValidatedScalarMultivariateTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarMultivariateFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(sweeper);
@@ -749,4 +751,3 @@ Int main() {
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }
-

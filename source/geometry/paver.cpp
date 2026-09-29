@@ -245,8 +245,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
     // Try to prove disjointness
     const ExactBoxType& old_domain=domain;
-    ExactBoxType exact_new_domain=old_domain;
-    UpperBoxType& new_domain = reinterpret_cast<UpperBoxType&>(exact_new_domain);
+    UpperBoxType new_domain(old_domain);
     PositiveFloatDPUpperBound olddomwdth = average_width(domain);
     PositiveFloatDPUpperBound newdomwdth = olddomwdth;
 
@@ -311,7 +310,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
         Pair<SizeType,FloatDP> lipsch = lipschitz_index_and_error(f,new_domain);
         LOGGING_PRINTLN("Splitting domain on coordinate "<<lipsch.first);
-        Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);
+        Pair<ExactBoxType,ExactBoxType> sd=cast_exact_box(new_domain).split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
     } else if(cell.depth()>=max_dpth) {
@@ -358,10 +357,16 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     FloatDP t(dp);
     FloatDPApproximation one(1.0_x,dp);
 
-    Vector<FloatDPApproximation>& ax=reinterpret_cast<Vector<FloatDPApproximation>&>(x);
-    Vector<FloatDPApproximation>& ay=reinterpret_cast<Vector<FloatDPApproximation>&>(y);
-    Vector<FloatDPApproximation> az=reinterpret_cast<Vector<FloatDPApproximation>&>(z);
-    FloatDPApproximation at=reinterpret_cast<FloatDPApproximation&>(t);
+    Vector<FloatDPApproximation> ax(x);
+    Vector<FloatDPApproximation> ay(y);
+    Vector<FloatDPApproximation> az(z);
+    FloatDPApproximation at(t);
+    auto update_exact_values = [&]() {
+        static_cast<Vector<FloatDP>&>(x)=cast_exact(ax);
+        static_cast<Vector<FloatDP>&>(y)=cast_exact(ay);
+        static_cast<Vector<FloatDP>&>(z)=cast_exact(az);
+        t=at.raw();
+    };
 
     if(r.superset(b)) {
         LOGGING_PRINTLN("Cell already in set");
@@ -393,11 +398,13 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
             ARIADNE_FAIL_MSG(""<<err.what());
             break;
         }
+        update_exact_values();
         LOGGING_PRINTLN_AT(2,"x="<<ax<<", y="<<ay<<", z="<<az);
         LOGGING_PRINTLN_AT(2,"x.z="<<emulrng(x,z));
         if(t>0) { break; }
         if(definitely(emulrng(x,z).upper_bound()<XZMIN)) { break; }
     }
+    update_exact_values();
     LOGGING_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
     if(!(t<inf)) {
@@ -406,8 +413,10 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         at=0;
         ay=midpoint(d);
         ax=FloatDPApproximationVector(x.size(),one/x.size());
+        update_exact_values();
     }
     ax = FloatDPApproximation(1-XSIGMA)*ax + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size());
+    update_exact_values();
 
     //assert(t>=-1000);
 
@@ -466,8 +475,10 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
         ax = FloatDPApproximation(1-XSIGMA)*ax + Vector<FloatDPApproximation>(ax.size(),XSIGMA/x.size());
         ay=midpoint(sd.first);
+        update_exact_values();
         hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.first, f,g, c, b, x, y, e);
         ay = midpoint(sd.second);
+        update_exact_values();
         hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.second, f,g, c, b, x, y, e);
         return;
     }
@@ -510,10 +521,16 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     FloatDP t{pr};
     FloatDPPoint z(x.size(),dp);
 
-    FloatDPApproximationVector& ax=reinterpret_cast<FloatDPApproximationVector&>(x);
-    FloatDPApproximationVector& ay=reinterpret_cast<FloatDPApproximationVector&>(y);
-    FloatDPApproximationVector& az=reinterpret_cast<FloatDPApproximationVector&>(z);
-    FloatDPApproximation& at=reinterpret_cast<FloatDPApproximation&>(t);
+    FloatDPApproximationVector ax(x);
+    FloatDPApproximationVector ay(y);
+    FloatDPApproximationVector az(z);
+    FloatDPApproximation at(t);
+    auto update_exact_values = [&]() {
+        static_cast<Vector<FloatDP>&>(x)=cast_exact(ax);
+        static_cast<Vector<FloatDP>&>(y)=cast_exact(ay);
+        static_cast<Vector<FloatDP>&>(z)=cast_exact(az);
+        t=at.raw();
+    };
 
     if(r.superset(b)) {
         return;
@@ -525,8 +542,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     for(SizeType i=0; i!=12; ++i) {
         LOGGING_PRINTLN_AT(2,"t="<<t);
         optimiser.linearised_feasibility_step(d,fg,bx,ax,ay,az,at);
+        update_exact_values();
         if(t>0) { break; }
     }
+    update_exact_values();
     LOGGING_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
     if(t<TERR) {
@@ -683,5 +702,4 @@ Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving,
 }
 
 } // namespace Ariadne
-
 

@@ -3375,3 +3375,19 @@ the relaxation mathematically. The next gate keeps the same gradient_range,
 half-spaces and LP and reports cache hits/misses; acceptance requires the same
 95 infeasible and 19 contracted boxes with a material drop in corner evaluation
 time.
+
+
+The direct-gradient X-Taylor profile is now extended with exact corner-value
+memoization. The cache key is the exact pair of FloatDP endpoint values
+`(x,y)`; cached values are the validated Lie point images previously computed
+at that same singleton box. This is mathematically transparent: a cache hit
+reuses an identical validated point evaluation and does not alter any
+half-space coefficient, rounding direction, gradient enclosure or LP.
+
+The cache is applied only to the accepted
+`lie-xtaylor-gradient-range-profile`; the original explicit-derivative
+profile remains available as a historical baseline. New counters report corner
+cache hits, misses and cache size. The gate requires the same 123 natural
+prunes, 95 X-Taylor infeasible boxes and 19 contracted feasible boxes. Any
+difference in those counts would indicate an implementation error, since exact
+corner reuse should affect cost only.

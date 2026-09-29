@@ -653,6 +653,8 @@ struct XTaylorProfileCounts {
     SizeType derivative_evaluations = 0u;
     SizeType gradient_range_evaluations = 0u;
     SizeType corner_evaluations = 0u;
+    SizeType corner_cache_hits = 0u;
+    SizeType corner_cache_misses = 0u;
     SizeType lp_minimisations = 0u;
     double original_width_sum = 0.0;
     double contracted_width_sum = 0.0;
@@ -662,6 +664,12 @@ struct XTaylorProfileCounts {
     double corner_evaluation_seconds = 0.0;
     double linearization_seconds = 0.0;
     double lp_seconds = 0.0;
+};
+
+struct XTaylorCornerCacheEntry {
+    FloatDP x;
+    FloatDP y;
+    UpperIntervalType image;
 };
 
 struct XTaylorRelaxation {
@@ -682,7 +690,8 @@ XTaylorRelaxation build_xtaylor_relaxation_from_gradient_2d(
     ValidatedScalarMultivariateFunction const& function,
     UpperIntervalType const& gradient_x,
     UpperIntervalType const& gradient_y,
-    XTaylorProfileCounts& counts)
+    XTaylorProfileCounts& counts,
+    std::vector<XTaylorCornerCacheEntry>* corner_cache=nullptr)
 {
     constexpr SizeType corner_count=4u;
     XTaylorRelaxation relaxation(corner_count);
@@ -702,16 +711,33 @@ XTaylorRelaxation build_xtaylor_relaxation_from_gradient_2d(
             ? box[1u].upper_bound().raw()
             : box[1u].lower_bound().raw();
 
-        ExactBoxType exact_corner({
-            ExactIntervalType(px,px),
-            ExactIntervalType(py,py)
-        });
-        auto corner_start=std::chrono::steady_clock::now();
-        UpperIntervalType corner_image=apply(
-            function,UpperBoxType(exact_corner));
-        counts.corner_evaluation_seconds+=std::chrono::duration<double>(
-            std::chrono::steady_clock::now()-corner_start).count();
-        ++counts.corner_evaluations;
+        UpperIntervalType corner_image;
+        Bool cached=false;
+        if(corner_cache!=nullptr) {
+            for(auto const& entry:*corner_cache) {
+                if(entry.x==px && entry.y==py) {
+                    corner_image=entry.image;
+                    cached=true;
+                    ++counts.corner_cache_hits;
+                    break;
+                }
+            }
+        }
+        if(not cached) {
+            ExactBoxType exact_corner({
+                ExactIntervalType(px,px),
+                ExactIntervalType(py,py)
+            });
+            auto corner_start=std::chrono::steady_clock::now();
+            corner_image=apply(function,UpperBoxType(exact_corner));
+            counts.corner_evaluation_seconds+=std::chrono::duration<double>(
+                std::chrono::steady_clock::now()-corner_start).count();
+            ++counts.corner_evaluations;
+            if(corner_cache!=nullptr) {
+                corner_cache->push_back({px,py,corner_image});
+                ++counts.corner_cache_misses;
+            }
+        }
 
         FloatDP const ax=upper_x
             ? gradient_x.upper_bound().raw()
@@ -953,6 +979,7 @@ Void profile_lie_xtaylor_gradient_range_frontier(
 
     std::vector<UpperBoxType> pending;
     pending.push_back(domain);
+    std::vector<XTaylorCornerCacheEntry> corner_cache;
     XTaylorProfileCounts counts;
 
     Stopwatch<Milliseconds> total_stopwatch;
@@ -984,7 +1011,7 @@ Void profile_lie_xtaylor_gradient_range_frontier(
 
         XTaylorRelaxation relaxation=
             build_xtaylor_relaxation_from_gradient_2d(
-                box,function,gradient[0u],gradient[1u],counts);
+                box,function,gradient[0u],gradient[1u],counts,&corner_cache);
         counts.linearization_seconds+=std::chrono::duration<double>(
             std::chrono::steady_clock::now()-linearization_start).count();
 
@@ -1042,6 +1069,9 @@ Void profile_lie_xtaylor_gradient_range_frontier(
               << " gradient-range-time="
               << counts.derivative_evaluation_seconds
               << " corner-evals=" << counts.corner_evaluations
+              << " corner-cache-hits=" << counts.corner_cache_hits
+              << " corner-cache-misses=" << counts.corner_cache_misses
+              << " corner-cache-size=" << corner_cache.size()
               << " corner-eval-time=" << counts.corner_evaluation_seconds
               << " lp-minimisations=" << counts.lp_minimisations
               << " linearization-time=" << counts.linearization_seconds

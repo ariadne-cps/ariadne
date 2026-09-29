@@ -3561,3 +3561,18 @@ Mode `singular` starts from `[-1,1]^2` and is a guard for a Jacobian interval
 that cannot be inverted: the future SMT contractor must treat this as
 inapplicable, never as infeasibility. Only after these three semantics are
 confirmed should the implementation move into compiled SMT equality literals.
+
+
+The first build of `benchmark_smt_interval_newton` failed before execution
+because the diagnostic used `Vector<ValidatedNumber>` for the Newton box.
+This is the wrong abstraction for `IntervalNewtonSolver::step`, whose
+`SolverInterface::ValidatedNumericType` is the concrete DP interval type
+`Bounds<FloatDP>`. As a consequence the benchmark also attempted
+`upper()/lower()`, `consistent` and `refinement` on
+`ValidatedNumber`, producing five related compile errors. This is a benchmark
+typing error, not an Interval Newton numerical failure. The diagnostic now
+uses `Vector<SolverInterface::ValidatedNumericType>` consistently for the
+input, Newton image and contracted box, matching the existing implementation
+of `SolverBase::zero`, which itself starts from
+`Vector<FloatDPBounds> x=cast_singleton(bx)`. The solver construction is also
+kept explicit as `IntervalNewtonSolver(1e-12,1u)`.

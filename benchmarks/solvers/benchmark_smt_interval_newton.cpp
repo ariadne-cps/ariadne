@@ -35,7 +35,7 @@ double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
         std::chrono::steady_clock::now()-start).count();
 }
 
-double width_sum(Vector<ValidatedNumber> const& box)
+double width_sum(Vector<SolverInterface::ValidatedNumericType> const& box)
 {
     double result=0.0;
     for(SizeType i=0u;i!=box.size();++i) {
@@ -70,18 +70,18 @@ Int main(Int argc,const char* argv[])
                     ExactIntervalType(-1.0_x,1.0_x),
                     ExactIntervalType(-1.0_x,1.0_x)});
 
-    Vector<ValidatedNumber> current=cast_singleton(exact_domain);
-    IntervalNewtonSolver solver(
-        maximum_error=1e-12,
-        maximum_number_of_steps=1u);
+    Vector<SolverInterface::ValidatedNumericType> current=
+        cast_singleton(exact_domain);
+    IntervalNewtonSolver solver(1e-12,1u);
 
     auto const start=std::chrono::steady_clock::now();
     try {
-        Vector<ValidatedNumber> image=solver.step(function,current);
+        Vector<SolverInterface::ValidatedNumericType> image=
+            solver.step(function,current);
         double const seconds=elapsed_seconds(start);
         Bool const disjoint=not consistent(image,current);
 
-        Vector<ValidatedNumber> contracted=current;
+        Vector<SolverInterface::ValidatedNumericType> contracted=current;
         if(not disjoint) {
             contracted=refinement(image,current);
         }

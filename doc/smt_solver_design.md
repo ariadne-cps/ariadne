@@ -3869,3 +3869,31 @@ epsilon `1e-5`, 4096-box budget, and all other optional contractors, witness
 heuristics and guided splitting disabled. The acceptance question is whether
 the earlier tree collapse survives these singular regions without excessive
 Newton retries.
+
+
+The wide-domain 2D comparison preserves the structural advantage but still
+does not produce a runtime win. On `[-2,2]^2`, the baseline returns
+`EPSILON_SAT` after 112 processed boxes, 47 prunes and 64 splits. Interval
+Newton returns the same logical status after only 17 boxes, 6 prunes and 10
+splits: about 6.6 times fewer processed boxes and 6.4 times fewer splits.
+Newton makes 17 attempts, of which 7 contract effectively, 5 prove
+infeasibility and 5 encounter singular Jacobians. Thus the singular region does
+not erase the tree reduction.
+
+The runtime is nevertheless about 0.783 ms with Newton versus 0.270 ms for the
+baseline, roughly 2.9 times slower; about 0.649 ms is attributed directly to
+Newton. This reinforces the distinction between structural utility and
+amortized runtime. On these tiny two-variable expressions the natural evaluator
+and geometric search are simply too cheap for the saved boxes to pay back a
+matrix-valued validated contractor.
+
+The next utility gate therefore increases dimensionality without changing
+contractor policy. Mode `smt-search-compare-4d` uses four variables on
+`[0.5,1]^4` with the square equality system
+`x0^2+x1^2+x2^2+x3^2-2=0`, `x0-x1=0`, `x1-x2=0`,
+`x2-x3=0`. The positive root has all coordinates equal to
+`1/sqrt(2)`, and the Jacobian is regular throughout the chosen positive box.
+The comparison uses epsilon `1e-5`, a 65536-box budget, and disables all
+other optional contractors, witness heuristics and guided splitting. This asks
+whether Newton's cross-variable contraction starts to amortize when ordinary
+branching must narrow four coupled coordinates rather than two.

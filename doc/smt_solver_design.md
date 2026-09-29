@@ -2805,3 +2805,15 @@ while the one-time SMT build cost is naturally included in theory compile time.
 The initial benchmark should use hull reduction with shaving/monotonicity
 disabled so that any runtime change can be attributed to Procedure caching
 rather than to a changed contractor schedule.
+
+
+The initial Procedure-cache representation used
+`std::optional<ValidatedProcedure>` directly in
+`ConstraintPropagationConstraint`. This does not compile because
+`constraint_solver.hpp` intentionally forward-declares `Procedure`, while
+`std::optional<T>` requires `T` to be complete at instantiation. The cache
+is therefore stored as `std::shared_ptr<const ValidatedProcedure>`. This
+preserves the lightweight header boundary and keeps compiled propagation
+constraints copyable while allowing SMT theory compilation to construct the
+Procedure once. The local fallback inside `constraint_solver.cpp` still uses
+an optional local Procedure, where the complete type is available.

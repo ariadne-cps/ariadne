@@ -2992,3 +2992,31 @@ only its own coordinate can be productive. The baseline therefore exposes the
 fraction of useful work directly. An ACID-like policy will later be accepted
 only if it preserves the same final box while materially reducing coordinate
 attempts and validated function evaluations.
+
+
+The N=32 exhaustive sparse-shaving baseline exposes a structural inefficiency
+before any adaptive ACID policy is considered. It performs 538 shaving rounds,
+537 of them effective, for 550,912 coordinate attempts. This is exactly
+`538*32*32`: every one of the 32 constraints is tried against every one of
+the 32 coordinates on every round. Only 17,184 attempts change a coordinate,
+exactly `537*32`, so about 96.9% of coordinate attempts are structurally
+unproductive. Shaving accounts for about 0.753 s of the 0.771 s run and
+1,204,992 validated function evaluations. The final width sum is a tiny
+positive subnormal value rather than exact zero because the eight-slice shaving
+operator contracts toward the equality geometrically over many rounds.
+
+This benchmark therefore does not yet isolate ACID's adaptive-choice problem.
+Most wasted work comes from trying coordinates that the constraint does not
+read at all. The next prerequisite is dependency-filtered shaving. For compiled
+constraints with cached Procedures, the same variable-dependency information
+used by the hull agenda is reused to restrict shaving to coordinates occurring
+in the Procedure. Constraints without a cached Procedure retain the conservative
+all-coordinate behavior. This filtering is semantically safe: a constraint
+independent of a coordinate cannot shave only that coordinate; global
+infeasibility is already tested by the direct rejection step before shaving.
+The benchmark now caches each scalar Procedure and reports the number of
+structurally skipped coordinate attempts. The acceptance criterion is the same
+final box and effective-round behavior with attempts falling from 550,912
+toward the 17,184 actually dependent attempts. Only after this structural waste
+is removed will an ACID-like adaptive policy be evaluated among genuinely
+dependent coordinates.

@@ -450,6 +450,22 @@ Bool ConstraintSolver::propagate(
         return false;
     }
 
+    std::vector<std::vector<SizeType>> constraint_dependencies;
+    constraint_dependencies.reserve(constraints.size());
+    for(auto const& constraint:constraints) {
+        if(constraint.hull_procedure) {
+            constraint_dependencies.push_back(
+                propagation_procedure_dependencies(*constraint.hull_procedure));
+        } else {
+            std::vector<SizeType> all_variables;
+            all_variables.reserve(domain.dimension());
+            for(SizeType variable=0u;variable!=domain.dimension();++variable) {
+                all_variables.push_back(variable);
+            }
+            constraint_dependencies.push_back(std::move(all_variables));
+        }
+    }
+
     Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;
@@ -504,8 +520,14 @@ Bool ConstraintSolver::propagate(
             UpperBoxType before_shaving=domain;
             if(shaving_reduction_enabled) {
                 ++statistics.shaving_rounds;
-                for(auto const& constraint:constraints) {
-                    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                for(SizeType constraint_index=0u;
+                    constraint_index!=constraints.size();
+                    ++constraint_index) {
+                    auto const& constraint=constraints[constraint_index];
+                    statistics.shaving_dependency_skipped+=
+                        domain.dimension()
+                        -constraint_dependencies[constraint_index].size();
+                    for(SizeType variable:constraint_dependencies[constraint_index]) {
                         UpperIntervalType const before_coordinate=domain[variable];
                         auto shaving_start=std::chrono::steady_clock::now();
                         ++statistics.shaving_coordinate_attempts;

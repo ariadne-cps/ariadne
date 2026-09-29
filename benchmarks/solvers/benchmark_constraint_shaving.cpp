@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "function/function.hpp"
+#include "function/procedure.hpp"
 #include "geometry/box.hpp"
 #include "solvers/constraint_solver.hpp"
 
@@ -49,13 +50,14 @@ Int main(Int argc,const char* argv[])
     std::vector<ConstraintPropagationConstraint> constraints;
     constraints.reserve(n);
     for(SizeType i=0u;i!=n;++i) {
+        auto function=x[i];
         constraints.push_back({
-            x[i],
+            function,
             ExactIntervalType(0.0_x,0.0_x),
             {},
             false,
             false,
-            nullptr
+            std::make_shared<ValidatedProcedure>(function)
         });
     }
 
@@ -79,6 +81,7 @@ Int main(Int argc,const char* argv[])
               << " shaving-effective-rounds=" << statistics.shaving_effective
               << " shaving-attempts=" << statistics.shaving_coordinate_attempts
               << " shaving-effective-attempts=" << statistics.shaving_coordinate_effective
+              << " shaving-dependency-skipped=" << statistics.shaving_dependency_skipped
               << " shaving-evals=" << statistics.shaving_function_evaluations
               << " shaving-time=" << statistics.shaving_seconds
               << " final-width-sum=" << final_width_sum

@@ -154,7 +154,6 @@ Void TestMultifunction::test_taylor_evaluate()
 
 Void TestMultifunction::test_function_set()
 {
-    using ScalarIntervalFunctionModel = ValidatedIntervalTaylorFunctionModel<FloatMP>;
     using Ivl = Interval<FloatMPUpperBound>;
 
     MP pr(128);
@@ -174,8 +173,6 @@ Void TestMultifunction::test_function_set()
 
 Void TestMultifunction::test_inclusion_solutions()
 {
-    using ScalarIntervalFunctionModel = ValidatedIntervalTaylorFunctionModel<FloatMP>;
-    using VectorIntervalFunctionModel = ValidatedVectorIntervalTaylorFunctionModel<FloatMP>;
     using Ivl = Interval<FloatMPUpperBound>;
     using P=ValidatedTag;
 

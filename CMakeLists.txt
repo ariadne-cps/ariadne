@@ -5,63 +5,9 @@ project(Ariadne VERSION 2.5.3)
 
 include(CMakePackageConfigHelpers)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    message(WARNING "Intel compiler not supported.")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    message(WARNING "Microsoft compiler not supported.")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0)
-        message(FATAL_ERROR "GCC version must be at least 12!")
-    endif()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if ((NOT APPLE) AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0))
-        message(FATAL_ERROR "Clang version must be at least 16!")
-    endif()
-else()
-    message(WARNING "You are using an unidentified compiler! Compilation has only been tested with Clang and GCC.")
-endif()
-
-set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
-                  init-self missing-include-dirs sign-promo switch-default undef redundant-decls unused-parameter
-                  strict-aliasing)
-set(LIBRARY_EXCLUSIVE_WARN shadow)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set(CMAKE_MACOSX_RPATH 1)
-if(APPLE)
-    # Build-tree executables must load the just-built Ariadne dylibs rather
-    # than an older installation from CMAKE_INSTALL_PREFIX (e.g. /usr/local).
-    set(CMAKE_BUILD_RPATH "${PROJECT_BINARY_DIR}")
-endif()
-set(BUILD_SHARED_LIBS ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
-
-foreach(WARN ${ANY_TARGET_WARN})
-    add_compile_options(-W${WARN})
-endforeach()
-foreach(WARN ${ANY_TARGET_DONT_WARN})
-    add_compile_options(-Wno-${WARN})
-endforeach()
-if(WARNINGS_AS_ERRORS)
-    add_compile_options(-Werror)
-endif()
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-Wno-non-template-friend)
-endif()
-if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (NOT APPLE))
-    add_compile_options(-frounding-math)
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-fdiagnostics-color=always)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-fcolor-diagnostics)
-endif ()
-
-option(COVERAGE "Enable coverage reporting" OFF)
 
 enable_testing()
 include(CTest)
@@ -86,10 +32,15 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake/ProjectOptio
         "Run 'git submodule update --init --recursive' before configuring the project.")
 endif()
 
-list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/submodules/configuration/cmake")
 include("${PROJECT_SOURCE_DIR}/submodules/configuration/cmake/ProjectOptions.cmake")
 
 require_initialized_submodules()
+
+setup_project()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR NOT APPLE)
+    add_compile_options(-frounding-math)
+endif()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Configuration
@@ -98,8 +49,6 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
     )
 endif()
-
-enable_project_coverage()
 
 
 find_package(Threads)
@@ -201,17 +150,6 @@ target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threa
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-if(APPLE)
-    # Keep the dylib identity relocatable.  In the build tree, CMake's
-    # BUILD_RPATH above resolves @rpath to PROJECT_BINARY_DIR; installed
-    # consumers can supply their own install/runtime rpath independently.
-    set_target_properties(ariadne ariadne-kernel ariadne-core PROPERTIES
-        MACOSX_RPATH ON
-        INSTALL_NAME_DIR "@rpath"
-        BUILD_WITH_INSTALL_NAME_DIR OFF
-    )
-endif()
 
 if(COVERAGE)
     set(_ariadne_coverage_filter_args)

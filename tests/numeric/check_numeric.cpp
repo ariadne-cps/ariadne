@@ -564,8 +564,7 @@ void CheckNumeric::check_subtraction() {
 }
 
 void CheckNumeric::check_multiplication() {
-    using ExpectedProducts = ExpectedSums;
-    table_check_all<ExpectedProducts,Times,NumericTypes,NumericTypes>();
+    table_check_all<ExpectedSums,Times,NumericTypes,NumericTypes>();
 }
 
 void CheckNumeric::check_division() {

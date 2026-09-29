@@ -74,8 +74,8 @@ void geometry_demonstration() {
     // Plot an approximation to the set
     auto prj=Projection2d(2,0,1);  // The identity projection
     auto wnd=ApproximateBoxType({{0,3},{-2,+2}});  // The view window
-    auto green=Colour(0,1,0);
-    plot("geometry_demonstration", prj, wnd, { {green,cis} });
+    auto green_colour=Colour(0,1,0);
+    plot("geometry_demonstration", prj, wnd, { {green_colour,cis} });
 
     //! [Geometry demonstration]
 }

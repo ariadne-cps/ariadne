@@ -39,8 +39,6 @@
 
 using namespace Ariadne;
 
-typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarMultivariateFormulaFunction;
-
 class TestDifferentialInclusion {
   public:
 

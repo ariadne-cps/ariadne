@@ -162,11 +162,11 @@ class TestGraded
     }
 
     void test_log() {
-        const X zero(0,pr), one(1,pr), two(2,pr);
-        const X log2=log(two);
+        const X zero(0,pr), one(1,pr), two_value(2,pr);
+        const X log2=log(two_value);
         ARIADNE_TEST_EQUALS( apply(Log(),Graded<X>::variable(one,5u)),
                              (Graded<X>{zero,one,-one/2,one/3,-one/4,one/5}) );
-        ARIADNE_TEST_EQUALS( apply(Log(),Graded<X>::variable(two,5u)),
+        ARIADNE_TEST_EQUALS( apply(Log(),Graded<X>::variable(two_value,5u)),
                              (Graded<X>{log2,one/2,-one/8,one/24,-one/64,one/160}) );
     }
 

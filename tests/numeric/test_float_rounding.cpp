@@ -271,7 +271,7 @@ TestFloatRounding<PR>::test_limits()
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
-    Float two=Float(2,precision);
+    Float two_value=Float(2,precision);
 
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
@@ -285,7 +285,7 @@ TestFloatRounding<PR>::test_limits()
 
     ARIADNE_TEST_PRINT(eps);
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);
-    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two)),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two_value)),==,one);
 
     ARIADNE_TEST_ASSERT(min>zero);
     ARIADNE_TEST_ASSERT(max<inf_);
@@ -560,7 +560,7 @@ template<> Void
 TestFloatRounding<DoublePrecision>::test_double_rounding()
 {
     volatile double one   = 1;
-    volatile double two  = 2;
+    volatile double two_value = 2;
     volatile double three = 3;
     volatile double five  = 5;
     const double onethirddown    = 0.33333333333333331483;
@@ -586,16 +586,16 @@ TestFloatRounding<DoublePrecision>::test_double_rounding()
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
     Ariadne::set_builtin_rounding_downward();
-    double twofifthsrounddown=two/five;
+    double twofifthsrounddown=two_value/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
     Ariadne::set_builtin_rounding_upward();
-    double twofifthsroundup=two/five;
+    double twofifthsroundup=two_value/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
     Ariadne::set_builtin_rounding_toward_zero();
-    double twofifthsroundchop=two/five;
+    double twofifthsroundchop=two_value/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
     Ariadne::set_builtin_rounding_to_nearest();
-    double twofifthsroundnearest=two/five;
+    double twofifthsroundnearest=two_value/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
@@ -623,7 +623,7 @@ TestFloatRounding<PR>::test_arithmetic()
 
     const Float eps = Float::eps(precision);
     const Float one = Float(1.0_x,precision);
-    const Float two = Float(2.0_x,precision);
+    const Float two_value = Float(2.0_x,precision);
 
     // Set next_up some variables
     Float f1(1.25_x,precision); Float f2(2.25_x,precision); Float f3(-3.25_x,precision);
@@ -732,7 +732,7 @@ TestFloatRounding<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(div(rounded,five,nine),==,five_ninths_up);
 
     Float pi_down=Float::pi(down,precision);
-    ARIADNE_TEST_EQUAL(div(down,pi_down,two),hlf(pi_down));
+    ARIADNE_TEST_EQUAL(div(down,pi_down,two_value),hlf(pi_down));
 
     // Power (not exact; should catch errors here)
     f3=pow(down,f1,3);

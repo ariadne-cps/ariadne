@@ -35,7 +35,6 @@
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
-#include "function/procedure.hpp"
 #include "function/taylor_model.hpp"
 
 #include "algebra/matrix.tpl.hpp"
@@ -308,8 +307,8 @@ class TestExpression {
             expressions[0].node_raw_ptr()==expressions[1].node_raw_ptr());
         Vector<Formula<EffectiveNumber>> formulae=
             make_formula(expressions,RealSpace({x,y,z}));
-        Vector<EffectiveProcedure> procedure(argument_size=3u,formulae);
-        ARIADNE_TEST_EQUAL(procedure.temporaries_size(),3u);
+        ARIADNE_TEST_ASSERT(
+            formulae[0].node_ptr()==formulae[1].node_ptr());
     }
 
     Void test_substitute() {

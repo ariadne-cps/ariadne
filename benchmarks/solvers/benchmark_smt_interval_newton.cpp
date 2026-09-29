@@ -11,6 +11,7 @@
 #include <string>
 
 #include "function/function.hpp"
+#include "function/procedure.hpp"
 #include "geometry/box.hpp"
 #include "solvers/solver.hpp"
 #include "solvers/smt_solver.hpp"
@@ -37,7 +38,8 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-search-compare-2d-propagation"
        || mode=="smt-search-compare-3d-propagation"
        || mode=="smt-search-compare-3d-coupled"
-       || mode=="smt-search-compare-2d-coupled") {
+       || mode=="smt-search-compare-2d-coupled"
+       || mode=="smt-staged-2d-coupled") {
         return mode;
     }
     throw std::runtime_error(
@@ -48,7 +50,7 @@ String mode_from_argument(Int argc,const char* argv[])
         "smt-search-compare-wide|smt-search-compare-4d|"
         "smt-search-compare-4d-propagation|smt-search-compare-2d-propagation|"
         "smt-search-compare-3d-propagation|smt-search-compare-3d-coupled|"
-        "smt-search-compare-2d-coupled]");
+        "smt-search-compare-2d-coupled|smt-staged-2d-coupled]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -71,6 +73,73 @@ double width_sum(Vector<SolverInterface::ValidatedNumericType> const& box)
 Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
+
+    if(mode=="smt-staged-2d-coupled") {
+        auto coordinates=ValidatedScalarMultivariateFunction::coordinates(2u);
+        auto const f0=coordinates[0u]*coordinates[1u]-0.12_x;
+        auto const f1=coordinates[0u]+coordinates[1u]-0.7_x;
+        ValidatedProcedure p0(f0);
+        ValidatedProcedure p1(f1);
+        ExactIntervalType const zero(0,0);
+        ExactBoxType const initial_exact({
+            ExactIntervalType(0.36_x,0.8_x),
+            ExactIntervalType(0.15_x,0.34_x)
+        });
+        ValidatedVectorMultivariateFunction newton_function(
+            List<ValidatedScalarMultivariateFunction>({f0,f1}));
+        ConstraintSolver contractor;
+        IntervalNewtonSolver newton_solver(1e-12,1u);
+        std::vector<SizeType> const stages({0u,1u,2u,4u,8u,16u,32u});
+
+        for(SizeType stage:stages) {
+            UpperBoxType domain=initial_exact;
+            SizeType completed=0u;
+            Bool empty=false;
+            for(;completed<stage && not empty;++completed) {
+                empty=contractor.hull_reduce(domain,p0,zero);
+                if(not empty) {
+                    empty=contractor.hull_reduce(domain,p1,zero);
+                }
+            }
+
+            Vector<SolverInterface::ValidatedNumericType> current=
+                cast_singleton(cast_exact_box(domain));
+            double const before_newton_width=width_sum(current);
+            Bool singular=false;
+            Bool disjoint=false;
+            Bool effective=false;
+            double after_newton_width=before_newton_width;
+            auto const start=std::chrono::steady_clock::now();
+            try {
+                auto image=newton_solver.step(newton_function,current);
+                disjoint=not consistent(image,current);
+                if(disjoint) {
+                    effective=true;
+                    after_newton_width=0.0;
+                } else {
+                    auto contracted=refinement(image,current);
+                    after_newton_width=width_sum(contracted);
+                    effective=after_newton_width<before_newton_width;
+                }
+            }
+            catch(const SingularMatrixException&) {
+                singular=true;
+            }
+            double const newton_seconds=elapsed_seconds(start);
+
+            std::cout << "[smt-interval-newton-staged]"
+                      << " hull-sweeps=" << completed
+                      << " empty-before-newton=" << empty
+                      << " width-before-newton=" << before_newton_width
+                      << " newton-effective=" << effective
+                      << " newton-disjoint=" << disjoint
+                      << " newton-singular=" << singular
+                      << " width-after-newton=" << after_newton_width
+                      << " newton-time=" << newton_seconds
+                      << std::endl;
+        }
+        return 0;
+    }
 
     if(mode=="smt-search-compare-2d-coupled") {
         RealVariable x0("newton_2d_coupled_x0");

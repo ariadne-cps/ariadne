@@ -4035,3 +4035,31 @@ from zero. Hull reduction and shaving are enabled exactly as in the recent
 crossover tests. If Newton wins here, scheduling must account for propagation
 difficulty/cost rather than dimension alone; if it loses, dimensionality
 remains a useful coarse prior but still not a sufficient rule.
+
+
+The coupled 2D scheduling falsification is negative for eager Newton. On
+`x0*x1=0.12, x0+x1=0.7`, the hull+shaving baseline already certifies the
+root box without splitting but needs 120 hull rounds, 119 effective, taking
+about 2.129 ms. Enabling the current eager Newton placement adds one Newton
+attempt costing about 0.112 ms, but that attempt is ineffective:
+`newton-effective=0`. The subsequent propagation is unchanged at the same
+120 hull rounds / 119 effective contractions and one shaving round. Total time
+is essentially tied at about 2.093 ms versus 2.129 ms; this difference is too
+small and in the wrong attribution pattern to treat as a Newton win.
+
+This result is more informative than a simple 2D/3D threshold. Propagation can
+be expensive while Newton is useless on the initial wide box. The likely
+scheduling variable is therefore box maturity: after some inexpensive hull
+contraction, the same Newton system may become sharp enough to collapse the
+remaining fixed point.
+
+The current `ConstraintSolver::propagate` API runs its hull/shaving fixed point
+internally and exposes no hook after a bounded number of hull rounds. Before
+changing that API, benchmark mode `smt-staged-2d-coupled` isolates the
+question. Starting from the same 2D coupled box, it performs exactly
+0, 1, 2, 4, 8, 16 or 32 manual cached HC4 sweeps and then one validated
+Interval Newton step. For each stage it reports box-width sum before and after
+Newton, effectiveness, disjointness, singularity and Newton time. The first
+stage at which Newton becomes effective is the evidence needed for a bounded
+interleaving hook or agenda scheduler; if Newton remains ineffective even after
+many sweeps, interleaving is not justified for this case.

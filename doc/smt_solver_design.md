@@ -2945,3 +2945,26 @@ approximately linear contractor-call growth, while the historical full-scan
 algorithm grows quadratically. Only after that scaling check should the agenda
 be treated as the new hull-propagation baseline and the roadmap move to
 adaptive ACID-like shaving.
+
+
+The N=128 sparse-chain agenda run confirms the intended scaling. It reaches the
+same fully contracted box (`final-width-sum=0`) with 383 contractor calls,
+383 pushes/pops and 128 effective calls. Together with the N=64 result
+(191 calls, 64 effective), the measured call count is exactly `3N-1` at both
+sizes. Thus the dependency-driven agenda is linear on the deliberately adverse
+reversed sparse chain, while the previous full-scan implementation required
+`N(N+1)` calls (4,160 already at N=64). Runtime remains sub-millisecond in
+this micro-benchmark, so call count is the more robust scaling metric.
+
+This is sufficient to accept dependency-driven scheduling as the baseline for
+cached hull-only propagation. The remaining conservative self-wakeups are
+retained because the underlying forward/backward contractor is not documented
+or implemented as an internal fixpoint. Further agenda micro-optimisation is
+deferred until a real workload identifies it as material.
+
+The IBEX-inspired roadmap therefore advances to adaptive ACID-like shaving.
+The next step is not to enable a heuristic immediately, but to instrument the
+current exhaustive shaving phase per constraint/coordinate so that useful
+contractions, rejected slices and evaluation cost can be separated. A candidate
+adaptive policy will only be tested after a baseline quantifies how much of the
+current exhaustive work is productive.

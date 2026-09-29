@@ -2668,3 +2668,36 @@ sign-definite. A strong pruning gain at modest cost would justify testing this
 targeted subdomain tier in the changed search tree; a weak gain would close the
 subdivision detour and make the validated Chebyshev/Bernstein vertical slice
 the next development target.
+
+
+The 256-box compiled quadrant pruning gate is strongly positive on the fixed
+baseline frontier. The natural Lie range prunes the established 123 boxes and
+leaves 133 for the second tier. Evaluating the compiled db/dy Procedure on four
+common x/y quadrants for each of those boxes requires 532 quadrant evaluations
+and tightens average db/dy width from about 5.588 to about 3.612. Recomposition
+with the unchanged db/dx, dynamics and barrier ranges then reduces average
+Lie-plus-barrier width from about 41.259 to about 32.474, a reduction of about
+21.3%, and proves 56 of the 133 previously unresolved boxes infeasible. The
+natural recomposition alone proves none of those boxes, so the gain is
+specifically due to the quadrant-tightened db/dy range.
+
+The cost is material but much smaller than the earlier symbolic derivative/CSE
+machinery: the four quadrant evaluations take about 4.53 s and component
+recomposition about 1.60 s on the 133 checked boxes, with 14.64 s total profile
+time including the baseline replay. This fixed-frontier result is not yet
+sufficient to adopt the method. The earlier root-CSE experiment showed that
+large apparent gains on a frozen frontier can almost disappear once the
+tighter range is allowed to change the search tree.
+
+Query `lie-gradient-quadrant-search` therefore performs the required
+changed-tree gate. For each box it applies the ordinary natural Lie range first;
+only an unresolved box pays for the four compiled db/dy quadrant evaluations
+and component recomposition. The tightened Lie range can then prune the box or
+contribute to epsilon certification before the barrier literal and geometric
+split are processed. The query preserves the configured literal and child
+orders and reports natural, quadrant and barrier pruning separately together
+with the number and cost of quadrant evaluations. The first changed-tree gate
+is 2048 processed boxes. A substantial reduction in splits at acceptable total
+cost would justify a 4096-box comparison; otherwise the subdivision tier is
+rejected and the deferred validated Chebyshev/Bernstein model becomes the next
+development direction.

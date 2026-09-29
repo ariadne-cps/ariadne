@@ -296,8 +296,8 @@ Bool ConstraintSolver::propagate(
             if(hull_reduction_enabled) {
                 std::optional<ValidatedProcedure> local_procedure;
                 ValidatedProcedure const* procedure=nullptr;
-                if(constraint.hull_procedure.has_value()) {
-                    procedure=&*constraint.hull_procedure;
+                if(constraint.hull_procedure) {
+                    procedure=constraint.hull_procedure.get();
                 } else {
                     local_procedure.emplace(constraint.function);
                     procedure=&*local_procedure;

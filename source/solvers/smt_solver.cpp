@@ -486,7 +486,7 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
             relation==SmtTheoryPrimitiveRelation::GT_ZERO,
             false
         });
-        result.back().hull_procedure.emplace(function);
+        result.back().hull_procedure=std::make_shared<ValidatedProcedure>(function);
     }
     return result;
 }

@@ -29,6 +29,7 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -96,7 +97,7 @@ struct ConstraintPropagationConstraint {
     // Optional precompiled forward/backward procedure. SMT literals populate
     // this once during theory compilation so hot propagation rounds do not
     // rebuild the same instruction DAG for every box.
-    std::optional<ValidatedProcedure> hull_procedure;
+    std::shared_ptr<const ValidatedProcedure> hull_procedure;
 };
 
 

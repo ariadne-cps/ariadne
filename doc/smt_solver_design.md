@@ -3789,3 +3789,26 @@ square and first-subsystem-success cases remain one-attempt paths. Re-running
 `smt-first-subsystem-singular` should now yield two attempts, one singular
 skip, and one effective contraction from the second lexicographic pair
 `(x-y, x^2+y^2-1)`.
+
+
+The applicability-aware fallback passes its targeted regression. Re-running
+`smt-first-subsystem-singular` on the three-equality system now performs two
+Newton attempts: the first dependent pair is skipped as singular, and the
+second lexicographic pair is regular and contracts the box. The run reports
+`newton-attempts=2`, `newton-singular=1`,
+`newton-effective=1`, no Newton infeasibility proof, one split, and
+`UNKNOWN/RESOURCE_EXHAUSTED` under the one-box budget. Total runtime is about
+2.04 ms, with about 1.23 ms in the two Newton attempts. This accepts the
+bounded singular-only fallback policy; no rank scoring is justified yet.
+
+Before extending subsystem selection further, the Newton configuration path is
+now covered through Boolean/DPLL solving. The earlier integration changed the
+nested bounded theory solver to preserve the full parent
+`SmtSolverConfiguration`; this must be observable rather than assumed.
+Benchmark mode `smt-boolean-contract` solves the same two-equation regular
+system as a `ContinuousPredicate` conjunction over `[0.5,1]^2`, with a
+one-box theory budget and Interval Newton enabled. It should accumulate one
+Newton attempt and one effective contraction from the nested theory solver,
+then return `UNKNOWN/RESOURCE_EXHAUSTED` after the contracted root is split.
+A unit regression also fixes the default/opt-in configuration flag and the
+DPLL propagation behavior.

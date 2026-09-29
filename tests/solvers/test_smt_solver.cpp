@@ -208,6 +208,26 @@ class TestSmtSolver {
             true);
         ARIADNE_TEST_ASSERT(upper_first_configuration.upper_child_first());
 
+        std::cout << "[smt-config] enable interval Newton reduction" << std::endl;
+        SmtSolverConfiguration interval_newton_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true);
+        ARIADNE_TEST_ASSERT(
+            interval_newton_configuration.interval_newton_reduction_enabled());
+        ARIADNE_TEST_ASSERT(
+            not configuration.interval_newton_reduction_enabled());
+
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
 
@@ -2737,6 +2757,49 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_searches,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().candidate_witness_successes,0u);
+        }
+
+        {
+            std::cout << "[smt-dpll] Boolean theory solve preserves interval Newton" << std::endl;
+            RealVariable y("newton_boolean_y");
+            RealExpression ey=y;
+            RealSpace newton_space({x,y});
+            SmtSolver newton_solver(SmtSolverConfiguration(
+                1e-5_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true));
+            ContinuousPredicate formula=
+                ((sqr(ex)+sqr(ey)-1)==0) && ((ex-ey)==0);
+            SmtResult solve_result=newton_solver.solve(
+                newton_space,
+                ExactBoxType({
+                    ExactIntervalType(0.5_x,1.0_x),
+                    ExactIntervalType(0.5_x,1.0_x)
+                }),
+                formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_ASSERT(
+                solve_result.unknown_reason()
+                ==SmtUnknownReason::RESOURCE_EXHAUSTED);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_newton_attempts,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_newton_effective_reductions,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_newton_infeasible,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().interval_newton_singular,0u);
         }
 
         {

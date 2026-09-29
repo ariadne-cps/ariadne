@@ -3957,3 +3957,28 @@ overlap gate. If Newton remains slower in 2D despite reducing the tree, a
 dimension/cost-aware scheduling policy is justified; if it already wins, the
 earlier negative 2D result can be attributed mainly to the artificially cheap
 no-propagation baseline.
+
+
+The 2D propagation crossover remains slightly negative in wall-clock time.
+With hull reduction and shaving enabled, the baseline reaches
+`EPSILON_SAT` after 7 boxes, 3 prunes and 3 splits in about 0.431 ms.
+Adding Interval Newton reduces the tree to 5 boxes, 2 prunes and 2 splits, but
+takes about 0.448 ms, roughly 4% slower. Newton makes 5 attempts, with 4
+effective contractions and 1 infeasibility proof, costing about 0.256 ms.
+
+The result is useful because it isolates the scheduling tradeoff under the
+actual propagation stack: Newton still contributes structurally in 2D, but the
+saved hull/shaving/search work is not quite enough to pay for the matrix
+contractor. This differs from the 4D propagation case, where the same mechanism
+produces a clear runtime win.
+
+The next gate localizes the crossover in three dimensions before any scheduling
+rule is encoded. Mode `smt-search-compare-3d-propagation` uses
+`x0^2+x1^2+x2^2-1.5=0`, `x0-x1=0`, and `x1-x2=0` over
+`[0.5,1]^3`. The positive solution again has all coordinates equal to
+`1/sqrt(2)`. Hull reduction and shaving are enabled in both variants; all
+other optional contractors, witness heuristics and guided splitting remain
+disabled. The only difference is Interval Newton. A 3D runtime win together
+with the 2D loss and 4D win would support a simple dimension-based initial
+scheduler threshold at three variables; a 3D loss would place the threshold
+higher and argue against guessing from the current evidence.

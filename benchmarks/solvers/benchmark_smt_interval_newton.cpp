@@ -34,7 +34,8 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-search-compare-wide"
        || mode=="smt-search-compare-4d"
        || mode=="smt-search-compare-4d-propagation"
-       || mode=="smt-search-compare-2d-propagation") {
+       || mode=="smt-search-compare-2d-propagation"
+       || mode=="smt-search-compare-3d-propagation") {
         return mode;
     }
     throw std::runtime_error(
@@ -43,7 +44,8 @@ String mode_from_argument(Int argc,const char* argv[])
         "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined|"
         "smt-first-subsystem-singular|smt-boolean-contract|smt-search-compare|"
         "smt-search-compare-wide|smt-search-compare-4d|"
-        "smt-search-compare-4d-propagation|smt-search-compare-2d-propagation]");
+        "smt-search-compare-4d-propagation|smt-search-compare-2d-propagation|"
+        "smt-search-compare-3d-propagation]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -66,6 +68,93 @@ double width_sum(Vector<SolverInterface::ValidatedNumericType> const& box)
 Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
+
+    if(mode=="smt-search-compare-3d-propagation") {
+        RealVariable x0("newton_3d_prop_x0"), x1("newton_3d_prop_x1");
+        RealVariable x2("newton_3d_prop_x2");
+        RealExpression e0=x0, e1=x1, e2=x2;
+        RealSpace space({x0,x1,x2});
+        List<SmtTheoryPrimitiveLiteral> literals({
+            SmtTheoryPrimitiveLiteral(
+                sqr(e0)+sqr(e1)+sqr(e2)-1.5_x,
+                SmtTheoryPrimitiveRelation::EQ_ZERO),
+            SmtTheoryPrimitiveLiteral(
+                e0-e1,SmtTheoryPrimitiveRelation::EQ_ZERO),
+            SmtTheoryPrimitiveLiteral(
+                e1-e2,SmtTheoryPrimitiveRelation::EQ_ZERO)
+        });
+        ExactBoxType domain({
+            ExactIntervalType(0.5_x,1.0_x),
+            ExactIntervalType(0.5_x,1.0_x),
+            ExactIntervalType(0.5_x,1.0_x)
+        });
+
+        auto run=[&](Bool interval_newton_enabled,String const& label) {
+            SmtSolver solver(SmtSolverConfiguration(
+                1e-5_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                16384u,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                false,
+                false,
+                interval_newton_enabled));
+
+            auto const start=std::chrono::steady_clock::now();
+            SmtResult result=solver.solve(space,domain,literals);
+            double const seconds=elapsed_seconds(start);
+            auto const& statistics=result.statistics();
+
+            std::cout << "[smt-interval-newton-search]"
+                      << " variant=" << label
+                      << " dimension=3"
+                      << " propagation=enabled"
+                      << " status=" << result.status();
+            if(result.is_unknown()) {
+                std::cout << " reason=" << result.unknown_reason();
+            }
+            std::cout << " time=" << seconds
+                      << " boxes=" << statistics.boxes_processed
+                      << " pruned=" << statistics.boxes_pruned
+                      << " split=" << statistics.boxes_split
+                      << " epsilon-certified="
+                      << statistics.epsilon_box_certifications
+                      << " hull-rounds="
+                      << statistics.hull_reduction_rounds
+                      << " hull-effective="
+                      << statistics.hull_effective_reductions
+                      << " hull-contract-time="
+                      << statistics.hull_contraction_seconds
+                      << " hull-reject-time="
+                      << statistics.hull_direct_rejection_seconds
+                      << " shaving-rounds="
+                      << statistics.shaving_reduction_rounds
+                      << " shaving-effective="
+                      << statistics.shaving_effective_reductions
+                      << " shaving-time="
+                      << statistics.shaving_seconds
+                      << " newton-attempts="
+                      << statistics.interval_newton_attempts
+                      << " newton-effective="
+                      << statistics.interval_newton_effective_reductions
+                      << " newton-infeasible="
+                      << statistics.interval_newton_infeasible
+                      << " newton-singular="
+                      << statistics.interval_newton_singular
+                      << " newton-time="
+                      << statistics.interval_newton_seconds
+                      << std::endl;
+        };
+
+        run(false,"baseline");
+        run(true,"newton");
+        return 0;
+    }
 
     if(mode=="smt-search-compare-2d-propagation") {
         RealVariable rx("newton_2d_prop_x"), ry("newton_2d_prop_y");

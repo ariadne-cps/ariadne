@@ -4010,3 +4010,28 @@ test does not depend on singular-region fallback. Hull reduction and shaving
 remain enabled in both variants. If Newton also wins here, the case for a
 three-dimensional crossover becomes substantially less tied to the previous
 symmetry.
+
+
+The second 3D family strengthens the case for Interval Newton substantially.
+On the coupled bilinear/affine system with root `(0.4,0.3,0.5)`, the
+hull+shaving baseline reaches `EPSILON_SAT` after only 2 boxes and 1 split,
+but requires 75 hull rounds, 73 of them effective, and takes about 2.080 ms.
+With Interval Newton enabled the root box is contracted sufficiently to certify
+epsilon satisfaction without splitting: 1 processed box, 3 hull rounds, 2
+effective hull contractions and about 0.289 ms total. The single Newton step
+costs about 0.122 ms. This is roughly a 7.2-fold wall-clock speedup.
+
+This result shows that processed-box count alone is not a sufficient scheduling
+signal. Newton can pay off even when the ordinary search tree is already tiny
+if HC4-style propagation needs many fixed-point rounds. Consequently a hard
+`dimension>=3` rule would be an overfit to the earlier symmetric benchmarks.
+
+The next diagnostic tries to falsify dimension as the primary predictor with a
+two-dimensional coupled system:
+`x0*x1-0.12=0` and `x0+x1-0.7=0`, on
+`x0 in [0.36,0.8]`, `x1 in [0.15,0.34]`. The box isolates the
+`(0.4,0.3)` root and keeps the Jacobian determinant `x0-x1` bounded away
+from zero. Hull reduction and shaving are enabled exactly as in the recent
+crossover tests. If Newton wins here, scheduling must account for propagation
+difficulty/cost rather than dimension alone; if it loses, dimensionality
+remains a useful coarse prior but still not a sufficient rule.

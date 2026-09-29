@@ -3982,3 +3982,31 @@ disabled. The only difference is Interval Newton. A 3D runtime win together
 with the 2D loss and 4D win would support a simple dimension-based initial
 scheduler threshold at three variables; a 3D loss would place the threshold
 higher and argue against guessing from the current evidence.
+
+
+The first 3D propagation crossover is decisively positive. On the symmetric
+three-variable system, the baseline reaches `EPSILON_SAT` after 22 boxes,
+7 prunes and 14 splits in about 1.679 ms. Adding Interval Newton reduces the
+search to 4 boxes, 1 prune and 2 splits in about 0.538 ms, roughly a 3.1-fold
+speedup. All four Newton attempts contract effectively, with no singular or
+direct-infeasibility cases. Hull rounds fall from 48 to 10 and shaving rounds
+from 27 to 3, with shaving becoming completely ineffective after Newton has
+already narrowed the box.
+
+Together with the slightly negative 2D propagation result and the positive 4D
+result, this places the observed crossover between two and three dimensions for
+this symmetric family. That is not yet sufficient to hard-code a
+`dimension>=3` scheduling rule, because all three benchmarks share the same
+equal-coordinate structure.
+
+A second 3D gate therefore uses a qualitatively different coupled system with
+known root `(0.4,0.3,0.5)`:
+`x0*x1-0.12=0`, `x1*x2-0.15=0`, and
+`x0+x1+x2-1.2=0`, over
+`x0 in [0.25,0.55]`, `x1 in [0.2,0.4]`,
+`x2 in [0.4,0.6]`. Its Jacobian determinant is
+`x1*(x0-x1+x2)`, which remains positive on the whole initial box, so the
+test does not depend on singular-region fallback. Hull reduction and shaving
+remain enabled in both variants. If Newton also wins here, the case for a
+three-dimensional crossover becomes substantially less tied to the previous
+symmetry.

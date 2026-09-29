@@ -27,7 +27,7 @@
  */
 
 #include "utility/typedefs.hpp"
-#include "foundations/paradigm.hpp"
+#include "foundation/paradigm.hpp"
 #include "numeric/concepts.hpp"
 
 #ifndef ARIADNE_NUMERIC_ARCHETYPES_HPP

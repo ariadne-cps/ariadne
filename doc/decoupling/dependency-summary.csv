@@ -1,5 +1,5 @@
 provider,consumer,grade,raw_grade,I,F,H,T,P,W,relative,reason
-foundations,algebra,B,B,3,2,2,3,4.0,7,3.43,Paradigmi e dichiarazioni logiche concentrati nei contratti di base; separabili come piccolo contratto condiviso.
+foundation,algebra,B,B,3,2,2,3,4.0,7,3.43,Paradigmi e dichiarazioni logiche concentrati nei contratti di base; separabili come piccolo contratto condiviso.
 function,algebra,M,B,2,2,2,2,4.0,6,2.94,Graded calcola Procedure; le operazioni di algebra compongono TaylorSeries. Servono separazione delle estensioni e revisione dei template.
 geometry,algebra,M,M,6,6,3,2,12.0,12,5.88,"Interval entra in interfacce, differential, expansion e matrix; occorre estrarre una base per intervalli, non solo cambiare include."
 io,algebra,B,B,2,1,1,2,2.0,4,1.96,"Grafica concentrata in Tensor: estrarre interfacce minime/adattatore grafico, verificando ereditarietà e compatibilità."
@@ -12,15 +12,15 @@ io,dynamics,M,M,11,7,4,5,23.3,19,9.31,"Draw e interfacce grafiche sono presenti 
 numeric,dynamics,M,M,17,12,9,8,40.0,35,17.16,Scalari e bounds concreti attraversano header e implementazioni.
 solvers,dynamics,M,M,21,12,6,10,40.0,33,16.18,"Evolutori legati a integratori, solver di vincoli e configurazioni; occorrono contratti e factory più stretti."
 symbolic,dynamics,M,M,29,14,7,7,46.7,43,21.08,"Variabili, spazi, assegnamenti ed espressioni definiscono i sistemi continui e le enclosure."
-numeric,foundations,M,B,2,1,0,2,16.7,2,0.98,logical.cpp implementa congiunzioni/disgiunzioni su Sequence e usa Natural; ciclo sostanziale anche se limitato a un file.
-symbolic,foundations,M,B,1,1,0,1,16.7,1,0.49,LogicalExpression è costruita sui template Symbolic e sugli operatori numerici: estrarre il nucleo logico dei template insieme al riordino di numeric.
+numeric,foundation,M,B,2,1,0,2,16.7,2,0.98,logical.cpp implementa congiunzioni/disgiunzioni su Sequence e usa Natural; ciclo sostanziale anche se limitato a un file.
+symbolic,foundation,M,B,1,1,0,1,16.7,1,0.49,LogicalExpression è costruita sui template Symbolic e sugli operatori numerici: estrarre il nucleo logico dei template insieme al riordino di numeric.
 algebra,function,A,A,142,41,31,21,66.1,204,100.0,"Caso massimo: vettori, matrici, differenziali, espansioni, interfacce e mixin attraversano 41 file e 31 header."
-foundations,function,B,B,4,3,3,4,4.8,10,4.9,"Dichiarazioni, paradigmi e representation concentrati nei contratti; isolabili conservando un pacchetto di base."
+foundation,function,B,B,4,3,3,4,4.8,10,4.9,"Dichiarazioni, paradigmi e representation concentrati nei contratti; isolabili conservando un pacchetto di base."
 geometry,function,M,M,21,8,6,9,12.9,33,16.18,Domain usa Interval e Box; multifunction e funzioni misurabili usano set e function_set. Separare domini primitivi da insiemi funzionali.
 numeric,function,A,A,57,39,29,7,62.9,115,56.37,"Scalari, precisioni e aritmetica sono incorporati in API e template delle funzioni."
 symbolic,function,M,M,6,5,3,4,8.1,12,5.88,Formula e Procedure condividono template simbolici; function.cpp usa Expression. Occorre separare albero generico e conversioni.
 algebra,geometry,M,M,19,12,7,5,27.3,33,16.18,"Vettori, matrici e algebra sostengono punti, box, insiemi affini e vincoli."
-foundations,geometry,M,M,12,11,11,4,25.0,34,16.67,Predicati logici e paradigmi fanno parte delle interfacce di insiemi e paving.
+foundation,geometry,M,M,12,11,11,4,25.0,34,16.67,Predicati logici e paradigmi fanno parte delle interfacce di insiemi e paving.
 function,geometry,M,M,35,14,6,14,31.8,47,23.04,Insiemi funzionali/affini e curve memorizzano funzioni e modelli; anche box.cpp usa modelli Taylor.
 hybrid,geometry,B,B,1,1,1,1,2.3,3,1.47,Solo list_set.hpp include discrete_location.hpp; nel file resta una dichiarazione anticipata ma non un impiego concreto. Candidato a pulizia locale.
 io,geometry,M,M,17,14,10,5,31.8,37,18.14,Disegno ed ereditarietà da Drawable sono distribuiti in numerosi tipi geometrici; separare interfacce e renderer.
@@ -29,7 +29,7 @@ solvers,geometry,M,B,5,3,0,3,6.8,5,2.45,"Paver e insiemi affini/funzionali invoc
 symbolic,geometry,M,M,5,4,3,4,9.1,11,5.39,"Punti etichettati, curve e insiemi funzionali usano identificatori, spazi, assegnamenti e template simbolici."
 algebra,hybrid,M,M,11,9,5,4,25.7,21,10.29,Contenitori e strutture algebriche nei tipi ibridi; dipendenza diffusa ma più ristretta di function/algebra.
 dynamics,hybrid,M,M,9,8,6,7,22.9,21,10.29,HybridEnclosure contiene LabelledEnclosure; evolutori e reachability riusano infrastrutture continue. Non basta una forward declaration.
-foundations,hybrid,B,B,1,1,1,1,2.9,3,1.47,Una dipendenza diretta da Tribool; contratto minimo condivisibile.
+foundation,hybrid,B,B,1,1,1,1,2.9,3,1.47,Una dipendenza diretta da Tribool; contratto minimo condivisibile.
 function,hybrid,M,M,30,17,8,11,48.6,46,22.55,"Modelli, funzioni e vincoli entrano in automi, evoluzione ed enclosure."
 geometry,hybrid,A,A,43,14,8,11,40.0,59,28.92,"Set, paving, griglie e box sono incorporati nella rappresentazione ibrida."
 io,hybrid,M,M,14,8,3,5,22.9,20,9.8,"Grafica in moduli dedicati ma anche in set, paving, orbite ed enclosure; separare renderer e contratti."
@@ -41,16 +41,16 @@ function,io,M,M,7,7,3,3,35.0,13,6.37,Backend e figure conoscono funzioni concret
 geometry,io,M,M,12,7,3,6,35.0,18,8.82,"Drawer e backend manipolano box, punti, paving e insiemi funzionali; separare adattatori."
 numeric,io,M,M,8,6,3,3,30.0,14,6.86,GraphicsBoundingBoxType e API grafiche espongono tipi numerici; serve una rappresentazione grafica più neutra.
 symbolic,io,M,B,8,4,1,3,20.0,10,4.9,"Figure etichettate e backend usano Variable, Space ed expression_set; separare la grafica etichettata."
-foundations,numeric,A,A,53,40,33,3,45.5,119,58.33,Logical e paradigm entrano in 40 file e 33 header: forte dipendenza dei contratti numerici.
-symbolic,numeric,B,B,2,2,1,1,2.3,4,1.96,"Solo templates.hpp, da number_wrapper.hpp e real.cpp. Estrarre il sottoinsieme di expression template numerici; evitare di trasferire il ciclo in foundations."
+foundation,numeric,A,A,53,40,33,3,45.5,119,58.33,Logical e paradigm entrano in 40 file e 33 header: forte dipendenza dei contratti numerici.
+symbolic,numeric,B,B,2,2,1,1,2.3,4,1.96,"Solo templates.hpp, da number_wrapper.hpp e real.cpp. Estrarre il sottoinsieme di expression template numerici; evitare di trasferire il ciclo in foundation."
 algebra,solvers,A,A,46,17,9,13,81.0,64,31.37,"Algoritmi e API usano algebra, differenziali, vettori e matrici, anche template di implementazione."
-foundations,solvers,B,B,3,3,1,1,14.3,5,2.45,Tribool concentrato nei solver di vincoli/nonlineari; piccolo contratto logico condivisibile.
+foundation,solvers,B,B,3,3,1,1,14.3,5,2.45,Tribool concentrato nei solver di vincoli/nonlineari; piccolo contratto logico condivisibile.
 function,solvers,A,A,62,18,9,19,85.7,80,39.22,"Integratori, bounder e solver operano su modelli, formule, procedure e patch concrete."
 geometry,solvers,M,M,10,9,6,4,42.9,22,10.78,"Box, intervalli e grid_paving oltre alle dichiarazioni; separare primitivi e funzioni di paving."
 numeric,solvers,M,M,19,15,9,4,71.4,37,18.14,"Scalari e precisioni sono presenti in 15/21 file e 9/12 header; alta penetrazione relativa, volume inferiore al caso massimo."
 symbolic,solvers,B,B,1,1,1,1,4.8,3,1.47,Un include di expression_set.hpp in inclusion_integrator.hpp: isolare il ponte per le inclusioni simboliche.
 algebra,symbolic,M,M,9,5,4,6,27.8,17,8.33,"Valutazione delle espressioni su Algebra e predicate su vettori, matrici e differenziali."
-foundations,symbolic,B,B,4,3,3,2,16.7,10,4.9,Logical e Tribool in tre header; preservare un contratto comune minimo.
+foundation,symbolic,B,B,4,3,3,2,16.7,10,4.9,Logical e Tribool in tre header; preservare un contratto comune minimo.
 function,symbolic,M,M,13,7,5,10,38.9,23,11.27,"Conversioni Expression/Formula, vincoli e function_expression legano il livello simbolico ai modelli funzionali."
 geometry,symbolic,M,B,5,3,2,3,16.7,9,4.41,Expression_set espone Box e costruisce insiemi funzionali: la piccola superficie nasconde un ponte semantico da separare.
 numeric,symbolic,M,M,13,7,7,9,38.9,27,13.24,"Tipi di numero, operatori e sequenze compaiono nei template e nella valutazione simbolica."

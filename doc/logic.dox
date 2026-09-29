@@ -33,10 +33,10 @@ namespace Ariadne {
 
 \page logic_page %Logical Foundations
 
-This page describes the logical foundations of computable analysis.
+This page describes the logical foundation of computable analysis.
 For details on how this is implemented in %Ariadne, see the \ref LogicSubModule documentation.
 
-The foundations of computability theory underpinning this material is described on the \ref computable_analysis_page page.
+The foundation of computability theory underpinning this material is described on the \ref computable_analysis_page page.
 For information about computability theory for real numbers, see the \ref real_numbers_page page.
 
 

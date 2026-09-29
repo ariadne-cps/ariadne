@@ -25,7 +25,7 @@
 #include "utility/module.hpp"
 #include "config.hpp"
 
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/reals.hpp"
 

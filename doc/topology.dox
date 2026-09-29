@@ -33,7 +33,7 @@ namespace Ariadne {
 
 \page topology_page %Topological Foundations
 
-This page describes the topological foundations of the computable analysis described in the \ref computable_analysis_page page.
+This page describes the topological foundation of the computable analysis described in the \ref computable_analysis_page page.
 For details on how this is implemented in %Ariadne, see the \ref TopologyModule documentation.
 
 \section computable_topological_spaces_section Computable Topological Spaces

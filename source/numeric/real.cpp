@@ -30,7 +30,7 @@
 #include "numeric/operators.hpp"
 #include "symbolic/templates.hpp"
 
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 #include "reals.hpp"
 #include "integer.hpp"
 #include "rational.hpp"

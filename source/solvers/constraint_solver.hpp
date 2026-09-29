@@ -36,7 +36,7 @@
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
-#include "foundations/tribool.hpp"
+#include "foundation/tribool.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
 

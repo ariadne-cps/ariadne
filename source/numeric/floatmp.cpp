@@ -27,7 +27,7 @@
  */
 
 #include "utility/module.hpp"
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 #include "builtin.hpp"
 #include "twoexp.hpp"
 #include "floatmp.hpp"

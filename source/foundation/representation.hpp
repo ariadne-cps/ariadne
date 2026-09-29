@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations/representation.hpp
+ *            foundation/representation.hpp
  *
  *  Copyright  2026  Pieter Collins
  *

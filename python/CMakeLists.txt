@@ -30,7 +30,7 @@ if(Python3_FOUND)
             $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
             $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
             $<TARGET_OBJECTS:UTILITY_SRC>
-            $<TARGET_OBJECTS:ariadne-foundations>
+            $<TARGET_OBJECTS:ariadne-foundation>
             $<TARGET_OBJECTS:ariadne-numeric>
             )
     set_target_properties(pyariadne-numeric PROPERTIES OUTPUT_NAME "pyariadne_numeric")

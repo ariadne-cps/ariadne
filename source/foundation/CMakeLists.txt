@@ -1,4 +1,4 @@
-set(LIBRARY_NAME ariadne-foundations)
+set(LIBRARY_NAME ariadne-foundation)
 
 add_library(${LIBRARY_NAME} OBJECT
     logical.cpp

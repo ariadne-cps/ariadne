@@ -4,7 +4,7 @@ set(UNIT_TESTS
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
-    target_link_libraries(${TEST} ariadne-foundations utility)
+    target_link_libraries(${TEST} ariadne-foundation utility)
     add_test(${TEST} ${TEST})
     set_property(TEST ${TEST} PROPERTY LABELS "foundations;core;kernel")
 endforeach()

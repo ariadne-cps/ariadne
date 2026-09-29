@@ -24,10 +24,10 @@
 
 #include "pybind11.hpp"
 
-void foundations_submodule(pybind11::module& module);
+void foundation_submodule(pybind11::module& module);
 void numeric_submodule(pybind11::module& module);
 
 PYBIND11_MODULE(pyariadne_numeric, module) {
-    foundations_submodule(module);
+    foundation_submodule(module);
     numeric_submodule(module);
 }

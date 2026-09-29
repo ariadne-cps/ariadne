@@ -13,8 +13,8 @@
 #include "utility/metaprogramming.hpp"
 #include "utility/typedefs.hpp"
 
-#include "foundations/paradigm.hpp"
-#include "foundations/logical.decl.hpp"
+#include "foundation/paradigm.hpp"
+#include "foundation/logical.decl.hpp"
 
 #include "algebra/linear_algebra.decl.hpp"
 #include "algebra/differential.decl.hpp"

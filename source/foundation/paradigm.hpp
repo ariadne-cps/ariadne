@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations/paradigm.hpp
+ *            foundation/paradigm.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file foundations/paradigm.hpp
+/*! \file foundation/paradigm.hpp
  *  \brief
  */
 

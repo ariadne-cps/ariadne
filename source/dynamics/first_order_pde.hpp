@@ -33,7 +33,6 @@
 #include "algebra/tensor.hpp"
 #include "function/function.decl.hpp"
 
-#include "algebra/tensor.tpl.hpp"
 
 namespace Ariadne {
 

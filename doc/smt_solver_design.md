@@ -2244,3 +2244,34 @@ the improved recomposed/intersected pruning counts. This isolates whether the
 tighter neural derivative actually raises the lower bound of the SMT literal
 enough to exclude additional boxes; a range evaluator should not be integrated
 based only on narrower intermediate derivatives.
+
+
+The CSE pruning-impact diagnostic is strongly positive. On the established
+256-box geometric frontier, the ordinary direct Lie range prunes 123 boxes and
+leaves 133 boxes to split. Among those 133 unresolved boxes, 126 have a natural
+`db/dy` interval crossing zero. The CSE-centered/monotonicity evaluator makes
+28 of those derivative ranges sign-definite, but the more important result is
+the effect on the complete Lie literal: recomposing
+`db/dx*dx + db/dy*dy + barrier` with the improved `db/dy` enclosure rejects
+65 of the 133 boxes that the natural Lie range could not reject. This is about
+48.9% of the previously unresolved frontier boxes, or about 51.6% of the boxes
+whose natural `db/dy` range crossed zero.
+
+The natural recomposed Lie range has the same measured average width as the
+direct `lie+barrier` range on these boxes (about 43.32), so the decomposition
+itself does not introduce a measurable range penalty in this diagnostic. The
+improved recomposed range reduces average width to about 39.78, and intersecting
+it with the direct Lie range gives the same width and the same 65 rejections.
+Thus the extra pruning is attributable to the tighter validated `db/dy`
+range rather than to an unrelated change of expression decomposition.
+
+The repeated-use cost remains modest: 126 CSE evaluator calls take about
+0.535 s and the 378 component evaluations about 2.03 s. One-time preparation
+cost is about 1.79 s for symbolic derivatives, 3.53 s for CSE, and 0.053 s for
+Procedure construction. These results make the CSE-based first-order range
+evaluator a serious candidate for a second-tier SMT range mechanism. However,
+the 65 extra rejections come from replaying the old frontier; integrating the
+evaluator would change the search tree, so they must not be extrapolated
+directly into a final solver pruning rate. The next step after the planned
+rebase is to integrate or emulate the tier in the actual search loop and
+measure the resulting frontier and total runtime.

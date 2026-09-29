@@ -3840,3 +3840,32 @@ without reducing the search, as happened with eager X-Taylor on Barr3, should
 not be promoted further. The benchmark reports status, total time, processed
 boxes, prunes, splits, whole-box epsilon certifications and all Newton counters
 for both variants in one invocation.
+
+
+The first changed-tree comparison is strongly positive structurally. On the
+regular positive-root box `[0.5,1]^2`, both variants return
+`EPSILON_SAT`. The natural baseline processes 121 boxes, prunes 50 and splits
+70. With Interval Newton enabled the search processes only 5 boxes, prunes 1
+and splits 3, with four effective contractions and one Newton infeasibility
+proof. This is about a 24.2-fold reduction in processed boxes and a 23.3-fold
+reduction in splits.
+
+Wall-clock time on this microbenchmark is effectively tied: about 0.280 ms for
+the baseline and 0.297 ms with Newton, of which about 0.239 ms is inside Newton.
+The important distinction from Barr3 X-Taylor is that this is not merely a
+change in pruning attribution: the search tree itself collapses. At this scale,
+however, the baseline is already so cheap that the Newton overhead consumes the
+tree-saving benefit. The result therefore accepts Interval Newton as a
+structurally useful equality contractor but does not yet establish a runtime
+win.
+
+The next gate widens the same system to `[-2,2]^2`. This box contains both
+real roots on the diagonal and also includes the origin, where the circle-plus-
+diagonal Jacobian determinant `2(x+y)` is not bounded away from zero. Mode
+`smt-search-compare-wide` therefore tests a more realistic changed tree in
+which Newton is initially non-applicable on some boxes and becomes applicable
+after splitting. The configuration remains identical to the first comparison:
+epsilon `1e-5`, 4096-box budget, and all other optional contractors, witness
+heuristics and guided splitting disabled. The acceptance question is whether
+the earlier tree collapse survives these singular regions without excessive
+Newton retries.

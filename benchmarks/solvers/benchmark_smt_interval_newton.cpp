@@ -30,14 +30,16 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-underdetermined"
        || mode=="smt-first-subsystem-singular"
        || mode=="smt-boolean-contract"
-       || mode=="smt-search-compare") {
+       || mode=="smt-search-compare"
+       || mode=="smt-search-compare-wide") {
         return mode;
     }
     throw std::runtime_error(
         "Usage: benchmark_smt_interval_newton "
         "[contract|infeasible|singular|smt-contract|smt-infeasible|smt-singular|"
         "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined|"
-        "smt-first-subsystem-singular|smt-boolean-contract|smt-search-compare]");
+        "smt-first-subsystem-singular|smt-boolean-contract|smt-search-compare|"
+        "smt-search-compare-wide]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -61,7 +63,7 @@ Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
 
-    if(mode=="smt-search-compare") {
+    if(mode=="smt-search-compare" || mode=="smt-search-compare-wide") {
         RealVariable rx("newton_search_x"), ry("newton_search_y");
         RealExpression ex=rx;
         RealExpression ey=ry;
@@ -74,10 +76,15 @@ Int main(Int argc,const char* argv[])
                 ex-ey,
                 SmtTheoryPrimitiveRelation::EQ_ZERO)
         });
-        ExactBoxType domain({
-            ExactIntervalType(0.5_x,1.0_x),
-            ExactIntervalType(0.5_x,1.0_x)
-        });
+        ExactBoxType domain=
+            mode=="smt-search-compare-wide"
+                ? ExactBoxType({
+                    ExactIntervalType(-2.0_x,2.0_x),
+                    ExactIntervalType(-2.0_x,2.0_x)})
+                : ExactBoxType({
+                    ExactIntervalType(0.5_x,1.0_x),
+                    ExactIntervalType(0.5_x,1.0_x)});
+
 
         auto run=[&](Bool interval_newton_enabled,String const& label) {
             SmtSolver solver(SmtSolverConfiguration(

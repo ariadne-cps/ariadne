@@ -3928,3 +3928,32 @@ hull rounds/effective contractions and timing, shaving rounds/effective
 contractions and timing, and the Newton counters. A strong Newton win here
 would justify integrating it into the contractor architecture rather than
 treating it as a substitute for disabled propagation.
+
+
+The 4D propagation-overlap gate is positive. With hull reduction and shaving
+enabled in both variants, the baseline reaches `EPSILON_SAT` after 12 boxes,
+4 prunes and 7 splits in about 1.230 ms. Adding Interval Newton reduces this to
+5 boxes, 1 prune and 3 splits in about 0.975 ms, roughly a 21% wall-clock
+improvement. Newton is effective on all 5 attempts and incurs no singular or
+direct-infeasibility cases.
+
+The gain is complementary rather than a pure replacement for HC4/shaving.
+With Newton, hull work drops from 26 rounds / 15 effective reductions to
+17 rounds / 12 effective reductions; hull contraction time falls from about
+0.368 ms to 0.182 ms. Shaving drops from 11 rounds / 2 effective reductions
+and about 0.462 ms to 4 rounds / no effective reductions and about 0.161 ms.
+Newton itself costs about 0.480 ms, so its contraction pays back by shrinking
+both the tree and the downstream propagation workload. This is sufficient
+evidence that Interval Newton can add value on top of the established
+contractors.
+
+It is still premature to enable Newton by default. The earlier two-dimensional
+no-propagation comparisons showed structural tree reduction without a runtime
+win, while the 4D propagation case wins. The next measurement localizes this
+crossover under the actual hull+shaving stack. Mode
+`smt-search-compare-2d-propagation` repeats the regular 2D positive-root
+system on `[0.5,1]^2`, with the same hull and shaving settings as the 4D
+overlap gate. If Newton remains slower in 2D despite reducing the tree, a
+dimension/cost-aware scheduling policy is justified; if it already wins, the
+earlier negative 2D result can be attributed mainly to the artificially cheap
+no-propagation baseline.

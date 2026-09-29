@@ -3207,3 +3207,40 @@ Lie inequality and measure: (1) how often the relaxation alone proves the box
 infeasible, (2) how much LP minimisation/maximisation contracts x and y, and
 (3) construction plus LP cost. Only a positive fixed-frontier result justifies
 a changed-tree polytope-hull contractor.
+
+
+### First X-Taylor-like fixed-frontier diagnostic
+
+The first linear-relaxation implementation follows the outer RELAX/TAYLOR
+variant of IBEX's corner-based X-Taylor scheme, specialised deliberately to the
+two-dimensional Barr3 Lie inequality. For the violation constraint
+`f(x,y)<0`, the profile relaxes the closed necessary condition
+`f(x,y)<=0`; proving the closed relaxation infeasible is therefore sound for
+the strict violation as well.
+
+For each unresolved natural box, the validated derivative ranges
+`D_x f(X)` and `D_y f(X)` are computed once. At each of the four corners
+`p`, the coefficient for a coordinate uses the lower derivative bound when
+the corner is at that coordinate's lower endpoint and the upper derivative
+bound when it is at the upper endpoint. Together with a validated point
+evaluation `f(p)`, outward-rounded arithmetic forms the necessary half-space
+
+`a dot x <= a dot p - lower(f(p))`.
+
+The four inequalities are encoded in Ariadne's existing validated
+`SimplexSolver<FloatDP>` by adding one nonnegative slack variable per row.
+The LP is first checked for feasibility; a definitely infeasible relaxation is
+counted as an additional X-Taylor prune. Otherwise four validated
+minimisations (min/max for x and y) estimate the polytope-hull contraction.
+LP exceptions or degeneracies are counted and conservatively leave the box
+unchanged.
+
+Query `lie-xtaylor-profile` preserves the established natural DFS exactly.
+Natural Lie range rejection decides which boxes are already pruned; X-Taylor is
+only measured on the unresolved frontier and never changes the children pushed
+to the work list. The profile reports additional relaxation infeasibility,
+number of contracted frontier boxes, average sum of x/y widths before and
+after LP contraction, derivative/corner evaluation counts, LP minimisations,
+and separate linearization/LP timings. The first gate uses 256 processed boxes,
+matching the established frontier where natural evaluation leaves 133 split
+boxes.

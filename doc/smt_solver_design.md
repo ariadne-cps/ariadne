@@ -2396,3 +2396,37 @@ concrete rewrite pattern and scoring target for a generic dependency-aware
 optimizer. If all outer forms are effectively equivalent, optimisation effort
 should move inside the network derivative expression rather than adding broad
 symbolic rewriting machinery without evidence.
+
+
+The 256-box outer-form gate is decisively negative for the two alternative
+root rewrites. The established factored-dynamics baseline again prunes 123
+boxes and splits 133, with average Lie-plus-barrier width about 24.325 on the
+replayed frontier. Both the expanded-product and grouped-y root forms prune
+zero boxes. Their root widths increase from about 1123.56 to about 1228.26,
+and their average frontier widths increase to about 33.415 and 33.412
+respectively. They are also slower to evaluate (about 10.06 s and 10.04 s
+versus 7.17 s for the baseline over this diagnostic). This is strong evidence
+that dependency-aware optimisation cannot be reduced to syntactically grouping
+a repeated variable at the literal root: separating the network-dependent
+\`db/dy\` factor from the already successful \`polynomial-y\` dynamics destroys
+the useful interval correlation.
+
+The next gate moves the algebraic combination inside the network while retaining
+ordinary natural interval evaluation. Query
+\`lie-directional-propagation-profile\` propagates the directional derivative
+of the network directly along the Barr3 vector field rather than constructing
+\`db/dx\` and \`db/dy\` separately and combining them only at the root. It
+compares two exactly equivalent first-layer seeds on the unchanged baseline DFS
+frontier. The factored seed uses
+\`w_x*y + w_y*(polynomial-y)\`; the grouped seed uses
+\`y*(w_x-w_y) + w_y*polynomial\`, where the regrouping is performed only while
+\`w_x\` and \`w_y\` are constants. Both variants then propagate one directional
+quantity through the second layer and output weights. This remains a single
+natural interval evaluator per candidate expression; there is no CSE-centered,
+mean-value, Taylor, Chebyshev/Bernstein, or other second-tier range mechanism.
+The measurement reports root widths, average baseline-frontier widths, pruning
+overlap/differences, and evaluation cost. A positive result would identify
+early directional combination as a concrete dependency-aware rewrite pattern;
+a negative result would push the optimisation search further inside the
+network's weighted sums/activation factors rather than back toward a second
+evaluator.

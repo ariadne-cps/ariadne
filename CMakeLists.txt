@@ -208,8 +208,8 @@ target_include_directories(ariadne PUBLIC
 )
 target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threading>)
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PRIVATE $<BUILD_INTERFACE:threading> dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PRIVATE $<BUILD_INTERFACE:threading> dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(APPLE)
     # Keep the dylib identity relocatable.  In the build tree, CMake's

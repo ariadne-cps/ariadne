@@ -456,7 +456,7 @@ template<class F> Void TestTaylorModel<F>::test_functions()
     // Validated tanh must remain bounded and must not form a reciprocal whose
     // Taylor enclosure spuriously contains zero on a wide cross-zero input.
     ValidatedTaylorModelType wide_tanh=tanh(4*x);
-    FloatBounds<PR> unit_interval(-1,+1,pr);
+    auto unit_interval=decltype(wide_tanh.range()){UnitInterval()};
     ARIADNE_TEST_BINARY_PREDICATE(refines,wide_tanh.range(),unit_interval);
 
     // On one-sided ranges use the sign-stable exponential identity rather

@@ -1,5 +1,3 @@
-link_libraries(threading)
-
 set(Python3_FIND_VIRTUALENV FIRST)
 set(Python3_FIND_STRATEGY LOCATION)
 set(PYBIND11_FINDPYTHON ON)
@@ -16,6 +14,8 @@ if(Python3_FOUND)
     message(STATUS "Python SOABI:      ${Python3_SOABI}")
 
     add_subdirectory(pybind11)
+
+    link_libraries(threading)
     add_subdirectory(source)
 
     pybind11_add_module(pyariadne

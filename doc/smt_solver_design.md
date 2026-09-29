@@ -3285,3 +3285,18 @@ evaluations then use direct Procedure evaluation instead of repeated
 contracted boxes with a large reduction in linearization time. The profile will
 also report contraction averages separately on feasible relaxations so pruning
 does not artificially improve the width statistic.
+
+
+The next X-Taylor timing experiment changes only the evaluation mechanism.
+The Lie function and its x/y derivative functions are compiled once into three
+`ValidatedProcedure` objects before the frontier traversal. Natural range
+evaluation, the two derivative ranges per checked box, and the four corner
+values now use direct Procedure evaluation. The half-space formulas, outward
+rounding, LP representation, feasibility test and coordinate minimisations are
+unchanged. The acceptance criterion is therefore exact numerical agreement
+with the previous fixed frontier: 123 natural prunes, 133 checked boxes, 95
+X-Taylor-infeasible and 19 contracted boxes, with no LP failures.
+
+The output also separates average x+y width on the 38 feasible relaxations from
+the aggregate statistic that counts infeasible relaxations as zero. This avoids
+conflating additional pruning with true polytope contraction.

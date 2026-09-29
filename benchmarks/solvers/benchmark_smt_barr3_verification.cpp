@@ -655,6 +655,8 @@ struct XTaylorProfileCounts {
     SizeType lp_minimisations = 0u;
     double original_width_sum = 0.0;
     double contracted_width_sum = 0.0;
+    double feasible_original_width_sum = 0.0;
+    double feasible_contracted_width_sum = 0.0;
     double linearization_seconds = 0.0;
     double lp_seconds = 0.0;
 };
@@ -674,16 +676,19 @@ struct XTaylorRelaxation {
 
 XTaylorRelaxation build_xtaylor_relaxation_2d(
     UpperBoxType const& box,
-    ValidatedScalarMultivariateFunction const& function,
-    ValidatedScalarMultivariateFunction const& derivative_x,
-    ValidatedScalarMultivariateFunction const& derivative_y,
+    ValidatedProcedure const& function_procedure,
+    ValidatedProcedure const& derivative_x_procedure,
+    ValidatedProcedure const& derivative_y_procedure,
     XTaylorProfileCounts& counts)
 {
     constexpr SizeType corner_count=4u;
     XTaylorRelaxation relaxation(corner_count);
 
-    UpperIntervalType gradient_x=apply(derivative_x,box);
-    UpperIntervalType gradient_y=apply(derivative_y,box);
+    Vector<UpperIntervalType> box_arguments=cast_vector(box);
+    UpperIntervalType gradient_x=evaluate(
+        derivative_x_procedure,box_arguments);
+    UpperIntervalType gradient_y=evaluate(
+        derivative_y_procedure,box_arguments);
     counts.derivative_evaluations+=2u;
 
     relaxation.lower[0u]=box[0u].lower_bound().raw();
@@ -701,11 +706,12 @@ XTaylorRelaxation build_xtaylor_relaxation_2d(
             ? box[1u].upper_bound().raw()
             : box[1u].lower_bound().raw();
 
-        ExactBoxType exact_corner({
-            ExactIntervalType(px,px),
-            ExactIntervalType(py,py)
+        Vector<UpperIntervalType> corner_arguments({
+            UpperIntervalType(px,px),
+            UpperIntervalType(py,py)
         });
-        UpperIntervalType corner_image=apply(function,UpperBoxType(exact_corner));
+        UpperIntervalType corner_image=evaluate(
+            function_procedure,corner_arguments);
         ++counts.corner_evaluations;
 
         FloatDP const ax=upper_x
@@ -813,6 +819,9 @@ Void profile_lie_xtaylor_frontier(
     Stopwatch<Milliseconds> derivative_build_stopwatch;
     ValidatedScalarMultivariateFunction derivative_x=function.derivative(0u);
     ValidatedScalarMultivariateFunction derivative_y=function.derivative(1u);
+    ValidatedProcedure function_procedure(function);
+    ValidatedProcedure derivative_x_procedure(derivative_x);
+    ValidatedProcedure derivative_y_procedure(derivative_y);
     derivative_build_stopwatch.click();
 
     std::vector<UpperBoxType> pending;
@@ -825,7 +834,8 @@ Void profile_lie_xtaylor_frontier(
         pending.pop_back();
         ++counts.processed;
 
-        UpperIntervalType natural_image=apply(function,box);
+        UpperIntervalType natural_image=evaluate(
+            function_procedure,cast_vector(box));
         if(definitely(natural_image.lower_bound()>=0)) {
             ++counts.natural_pruned;
             continue;
@@ -840,7 +850,8 @@ Void profile_lie_xtaylor_frontier(
 
         auto linearization_start=std::chrono::steady_clock::now();
         XTaylorRelaxation relaxation=build_xtaylor_relaxation_2d(
-            box,function,derivative_x,derivative_y,counts);
+            box,function_procedure,
+            derivative_x_procedure,derivative_y_procedure,counts);
         counts.linearization_seconds+=std::chrono::duration<double>(
             std::chrono::steady_clock::now()-linearization_start).count();
 
@@ -867,6 +878,8 @@ Void profile_lie_xtaylor_frontier(
             counts.contracted_width_sum+=0.0;
         } else {
             counts.contracted_width_sum+=contracted_width;
+            counts.feasible_original_width_sum+=original_width;
+            counts.feasible_contracted_width_sum+=contracted_width;
             if(contracted_width<original_width) {
                 ++counts.relaxation_contracted;
             }
@@ -902,6 +915,14 @@ Void profile_lie_xtaylor_frontier(
               << average(counts.original_width_sum,counts.relaxation_checked)
               << " avg-contracted-width-sum="
               << average(counts.contracted_width_sum,counts.relaxation_checked)
+              << " avg-feasible-original-width-sum="
+              << average(
+                    counts.feasible_original_width_sum,
+                    counts.relaxation_checked-counts.relaxation_infeasible)
+              << " avg-feasible-contracted-width-sum="
+              << average(
+                    counts.feasible_contracted_width_sum,
+                    counts.relaxation_checked-counts.relaxation_infeasible)
               << std::endl;
 }
 

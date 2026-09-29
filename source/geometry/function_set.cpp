@@ -583,7 +583,7 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
 
 inline Matrix<FloatDP> cast_exact(Matrix<FloatDPBounds> vA) {
     Matrix<FloatDPApproximation> aA=vA;
-    return reinterpret_cast<Matrix<FloatDP>&>(aA);
+    return Ariadne::cast_exact(aA);
 }
 
 ValidatedAffineConstrainedImageSet
@@ -1010,8 +1010,9 @@ Void
 ValidatedConstrainedImageSet::reduce()
 {
     ConstraintSolver solver;
-    UpperBoxType& reduced_domain=reinterpret_cast<UpperBoxType&>(this->_reduced_domain);
+    UpperBoxType reduced_domain(this->_reduced_domain);
     solver.reduce(reduced_domain, this->constraint_function(), this->constraint_bounds());
+    this->_reduced_domain=cast_exact_box(reduced_domain);
 }
 
 ValidatedKleenean ValidatedConstrainedImageSet::is_empty() const

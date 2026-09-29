@@ -527,6 +527,14 @@ inline FloatDPExactBox cast_exact_box(FloatDPApproximateBox const& abx) {
     return FloatDPExactBox(reinterpret_cast<FloatDPExactBox const&>(abx));
 }
 
+inline FloatDPExactBox cast_exact_box(FloatDPUpperBox const& ubx) {
+    FloatDPExactBox result(ubx.dimension());
+    for(DimensionType i=0; i!=ubx.dimension(); ++i) {
+        result[i]=FloatDPExactInterval(ubx[i].lower_bound().raw(),ubx[i].upper_bound().raw());
+    }
+    return result;
+}
+
 inline Box<FloatDPExactInterval> cast_exact_box(Vector<FloatDPBounds> const& bv) {
     return Box<FloatDPExactInterval>(reinterpret_cast<Vector<FloatDPExactInterval>const&>(bv));
 }

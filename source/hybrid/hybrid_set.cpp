@@ -272,7 +272,7 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
     DiscreteLocation const& loc=this->location(); RealSpace spc(this->space()); RealBox bx=this->euclidean_set(spc);
     UpperBoxType bbx(bx,dp);
     HybridUpperBoxes res;
-    ExactBoxType exbbx=reinterpret_cast<ExactBoxType const&>(bbx);  // FIXME: Should not need to convert to ExactBoxType here
+    ExactBoxType exbbx=cast_exact_box(bbx);
     res.insert(loc,spc,exbbx);
     return res;
 }

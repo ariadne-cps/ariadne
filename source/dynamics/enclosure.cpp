@@ -814,7 +814,9 @@ ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
     ARIADNE_ASSERT_MSG(this->state_dimension()==bx.dimension(),"Enclosure::subset(ExactBoxType): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
+    UpperBoxType reduced_domain(this->_reduced_domain);
+    contractor.reduce(reduced_domain,constraints);
+    this->_reduced_domain=cast_exact_box(reduced_domain);
 
     if(_reduced_domain.is_empty()) { return true; }
 
@@ -832,7 +834,9 @@ Void Enclosure::reduce() const
 {
     List<ValidatedConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
-    contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
+    UpperBoxType reduced_domain(this->_reduced_domain);
+    contractor.reduce(reduced_domain,constraints);
+    this->_reduced_domain=cast_exact_box(reduced_domain);
 
     for(SizeType i=0; i!=this->number_of_parameters(); ++i) {
         FloatDP l=this->_reduced_domain[i].lower_bound();
@@ -1663,4 +1667,3 @@ Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& 
 }
 
 } // namespace Ariadne
-

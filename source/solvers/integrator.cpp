@@ -1894,8 +1894,7 @@ PreconditionedGradedTaylorSeriesIntegrator::precondition(
             }
         }
 
-        rotation=
-            reinterpret_cast<Matrix<FloatDP> const&>(approximate_Q);
+        rotation=cast_exact(approximate_Q);
     }
 
     Matrix<FloatDPBounds> const inverse_rotation=inverse(rotation);

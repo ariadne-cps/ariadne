@@ -214,8 +214,8 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<FloatDP> ev1(reinterpret_cast<Vector<FloatDP>const&>(v1));
-    FloatDP ex(reinterpret_cast<FloatDP const&>(x));
+    Vector<FloatDP> ev1(cast_exact(v1));
+    FloatDP ex(x.raw());
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;
@@ -277,4 +277,3 @@ Int main() {
 
     return ARIADNE_TEST_FAILURES;
 }
-

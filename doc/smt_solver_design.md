@@ -2430,3 +2430,32 @@ early directional combination as a concrete dependency-aware rewrite pattern;
 a negative result would push the optimisation search further inside the
 network's weighted sums/activation factors rather than back toward a second
 evaluator.
+
+
+The 256-box directional-propagation gate is negative. The established baseline
+again prunes 123 boxes and splits 133, with average width about 24.325. Direct
+directional propagation from the first layer prunes only 9 boxes with the
+factored dynamics seed and 12 with the constant-coefficient grouped seed; none
+of those prunes is additional to the baseline. The candidate root widths are
+about 2259.27 and 1994.06 versus 1123.56 for the baseline, and their average
+frontier widths are about 42.11 and 39.15. Both candidates are individually
+faster to evaluate (about 5.15 s each versus 7.22 s for the baseline), but the
+loss of enclosure strength is overwhelming. Combining the vector field with
+the network at the first layer therefore destroys more useful dependency
+structure than it recovers.
+
+The next gate tests the intermediate algebraic location rather than abandoning
+directional combination entirely. Query \`lie-layer2-directional-profile\`
+retains the baseline's separate \`dx\` and \`dy\` derivative propagation
+through the first-layer weighted sums. For each second-layer neuron it then
+forms the local directional term
+\`a2_i*(dzdx_i*y + dzdy_i*(polynomial-y))\` before multiplying by the output
+weight and performing the final output sum. A second candidate groups the
+local y dependence as
+\`a2_i*(y*(dzdx_i-dzdy_i) + dzdy_i*polynomial)\`.
+This tests whether the useful correlation is lost specifically by the global
+output aggregation: it combines the two gradient components only after their
+separate first-layer structure has been preserved, but before the final
+\`sum_i w3_i\`. As in the previous gates, the baseline expression alone
+determines the DFS frontier, and each candidate remains a single ordinary
+natural interval evaluator.

@@ -292,17 +292,12 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
     return candidates;
 }
 
-std::vector<SizeType> interval_newton_subsystem_indices(
-    std::vector<ConstraintPropagationConstraint> const& literals,
-    SizeType dimension)
+std::vector<SizeType> interval_newton_equality_indices(
+    std::vector<ConstraintPropagationConstraint> const& literals)
 {
     std::vector<SizeType> result;
-    if(dimension==0u) {
-        return result;
-    }
-    result.reserve(dimension);
     ExactIntervalType const zero_bounds(0,0);
-    for(SizeType i=0u;i!=literals.size() && result.size()<dimension;++i) {
+    for(SizeType i=0u;i!=literals.size();++i) {
         auto const& literal=literals[i];
         if(not literal.strict_lower
            && not literal.strict_upper
@@ -310,9 +305,62 @@ std::vector<SizeType> interval_newton_subsystem_indices(
             result.push_back(i);
         }
     }
-    if(result.size()!=dimension) {
-        result.clear();
+    return result;
+}
+
+std::vector<std::vector<SizeType>> interval_newton_subsystem_candidates(
+    std::vector<ConstraintPropagationConstraint> const& literals,
+    SizeType dimension)
+{
+    constexpr SizeType max_candidates=8u;
+
+    std::vector<std::vector<SizeType>> result;
+    if(dimension==0u) {
+        return result;
     }
+
+    std::vector<SizeType> const equalities=
+        interval_newton_equality_indices(literals);
+    if(equalities.size()<dimension) {
+        return result;
+    }
+
+    std::vector<SizeType> positions(dimension);
+    for(SizeType i=0u;i!=dimension;++i) {
+        positions[i]=i;
+    }
+
+    for(;;) {
+        std::vector<SizeType> candidate;
+        candidate.reserve(dimension);
+        for(SizeType position:positions) {
+            candidate.push_back(equalities[position]);
+        }
+        result.push_back(std::move(candidate));
+        if(result.size()>=max_candidates) {
+            break;
+        }
+
+        Bool advanced=false;
+        SizeType pivot=dimension;
+        while(pivot>0u) {
+            --pivot;
+            SizeType const maximum=
+                equalities.size()-dimension+pivot;
+            if(positions[pivot]<maximum) {
+                ++positions[pivot];
+                for(SizeType i=pivot+1u;i!=dimension;++i) {
+                    positions[i]=positions[i-1u]+1u;
+                }
+                advanced=true;
+                break;
+            }
+        }
+        if(not advanced) {
+            break;
+        }
+    }
+
     return result;
 }
 
@@ -537,11 +585,12 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  CompiledTheoryLiterals const& literals,
                                  ReductionStatistics& statistics) const
 {
-    std::vector<SizeType> const newton_subsystem=
+    auto const newton_candidates=
         _configuration.interval_newton_reduction_enabled()
-            ? interval_newton_subsystem_indices(literals,domain.dimension())
-            : std::vector<SizeType>();
-    if(not newton_subsystem.empty()) {
+            ? interval_newton_subsystem_candidates(
+                literals,domain.dimension())
+            : std::vector<std::vector<SizeType>>();
+    for(auto const& newton_subsystem:newton_candidates) {
         ++statistics.interval_newton_attempts;
         auto const newton_start=std::chrono::steady_clock::now();
         try {
@@ -582,12 +631,15 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
             if(effective) {
                 ++statistics.interval_newton_effective;
             }
+            statistics.interval_newton_seconds+=
+                elapsed_seconds(newton_start);
+            break;
         }
         catch(const SingularMatrixException&) {
             ++statistics.interval_newton_singular;
+            statistics.interval_newton_seconds+=
+                elapsed_seconds(newton_start);
         }
-        statistics.interval_newton_seconds+=
-            elapsed_seconds(newton_start);
     }
 
     ConstraintSolver contractor;
@@ -684,7 +736,7 @@ SmtSolver::_direct_classification(
     DirectClassification result;
     Bool const interval_newton_eligible=
         _configuration.interval_newton_reduction_enabled()
-        && not interval_newton_subsystem_indices(
+        && not interval_newton_subsystem_candidates(
             literals,domain.dimension()).empty();
     if(_configuration.hull_reduction_enabled()
        || _configuration.shaving_reduction_enabled()

@@ -3761,3 +3761,31 @@ domain. The current first-`n` policy should therefore report one singular
 Newton attempt and no effective contraction. Observing that failure will
 justify a rank-aware or applicability-aware subset selector without relying on
 a hypothetical weakness.
+
+
+The `smt-first-subsystem-singular` diagnostic confirms the expected weakness
+of deterministic first-`n` selection. On `[0.5,1]^2`, with equalities
+`x-y=0`, `2(x-y)=0`, and `x^2+y^2-1=0`, the current policy makes one
+Newton attempt on the first two dependent equations, records
+`newton-singular=1`, performs no contraction or infeasibility proof, splits
+once and returns `UNKNOWN/RESOURCE_EXHAUSTED`. Runtime is about 0.604 ms,
+with about 0.462 ms spent discovering that the selected interval Jacobian is
+singular. This is concrete evidence that an alternative eligible subsystem can
+be useful when the first one is not applicable.
+
+The next implementation is deliberately applicability-aware rather than a
+general rank optimiser. Eligible equality indices are enumerated in
+deterministic lexicographic combinations, capped at eight square subsystems per
+box. Newton tries the first candidate; only a `SingularMatrixException`
+causes the next candidate to be tried. The first non-singular candidate is
+accepted immediately whether or not its contraction is effective, and a
+validated disjoint Newton image still rejects the box immediately. Thus the
+fallback repairs avoidable singular selection without turning subsystem choice
+into an expensive search for the strongest contractor.
+
+`interval_newton_attempts` now counts actual subsystem attempts, while
+`interval_newton_singular` counts the singular candidates skipped. Existing
+square and first-subsystem-success cases remain one-attempt paths. Re-running
+`smt-first-subsystem-singular` should now yield two attempts, one singular
+skip, and one effective contraction from the second lexicographic pair
+`(x-y, x^2+y^2-1)`.

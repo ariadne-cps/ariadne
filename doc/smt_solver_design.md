@@ -3588,3 +3588,17 @@ existing Interval Newton primitive can produce substantial validated
 contraction on a regular square equality system. The next semantic gate is the
 infeasible box, where disjointness of the Newton image from the current box
 must provide a sound rejection.
+
+
+The `benchmark_smt_interval_newton infeasible` run passes the rejection gate.
+On the same square equality system over `[0.8,1]^2`, which excludes the
+positive root, one validated Interval Newton step produces an image disjoint
+from the current box. The benchmark reports `disjoint=true` and therefore a
+zero contracted width sum. Runtime is about 0.19 ms. This confirms the intended
+SMT contractor semantics for a regular square equality subsystem: disjointness
+of the validated Newton image from the current box is a sound local
+infeasibility proof.
+
+The remaining prerequisite is the singular-Jacobian guard. A box on which the
+interval Jacobian cannot be inverted must be treated as Newton not applicable;
+it must never be converted into an infeasibility result.

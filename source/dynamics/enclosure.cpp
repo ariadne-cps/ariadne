@@ -65,8 +65,6 @@
 #include "io/drawer.hpp"
 #include "logging/progress_indicator.hpp"
 
-#include "hybrid/discrete_event.hpp"
-
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
 #include "logging/logging.hpp"

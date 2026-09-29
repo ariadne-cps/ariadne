@@ -92,6 +92,11 @@ struct ConstraintPropagationConstraint {
     std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
     Bool strict_lower = false;
     Bool strict_upper = false;
+
+    // Optional precompiled forward/backward procedure. SMT literals populate
+    // this once during theory compilation so hot propagation rounds do not
+    // rebuild the same instruction DAG for every box.
+    std::optional<ValidatedProcedure> hull_procedure;
 };
 
 

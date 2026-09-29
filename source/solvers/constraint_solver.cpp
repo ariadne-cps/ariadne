@@ -294,15 +294,22 @@ Bool ConstraintSolver::propagate(
         for(auto const& constraint:constraints) {
             auto phase_start=std::chrono::steady_clock::now();
             if(hull_reduction_enabled) {
-                ValidatedProcedure procedure(constraint.function);
-                ++statistics.hull_procedure_builds;
-                statistics.hull_procedure_build_seconds+=
-                    constraint_elapsed_seconds(phase_start);
+                std::optional<ValidatedProcedure> local_procedure;
+                ValidatedProcedure const* procedure=nullptr;
+                if(constraint.hull_procedure.has_value()) {
+                    procedure=&*constraint.hull_procedure;
+                } else {
+                    local_procedure.emplace(constraint.function);
+                    procedure=&*local_procedure;
+                    ++statistics.hull_procedure_builds;
+                    statistics.hull_procedure_build_seconds+=
+                        constraint_elapsed_seconds(phase_start);
+                }
 
                 ProcedureHullReductionStatistics hull_statistics;
                 phase_start=std::chrono::steady_clock::now();
                 Bool const hull_empty=this->hull_reduce(
-                    domain,procedure,constraint.bounds,hull_statistics);
+                    domain,*procedure,constraint.bounds,hull_statistics);
                 statistics.hull_contraction_seconds+=
                     constraint_elapsed_seconds(phase_start);
                 statistics.hull_temporary_allocation_seconds+=

@@ -2725,3 +2725,83 @@ changed-tree baseline including the barrier literal. If it confirms a large
 runtime penalty for only the observed two-split reduction, the quadrant second
 tier is closed without a 4,096-box run and development proceeds to the deferred
 validated Chebyshev/Bernstein representation.
+
+
+## IBEX-inspired contractor roadmap after the Barr3 natural-range experiments
+
+The compiled four-quadrant db/dy second tier is rejected as an eager search
+mechanism. On the directly comparable 2,048-box setup, the ordinary solver
+takes about 66.13 s, prunes 1,019 boxes and splits 1,029. The changed-tree
+quadrant search takes about 154.77 s, prunes 1,021 boxes and splits 1,027.
+Thus it is about 2.34 times slower for only two net splits avoided. As with the
+earlier eager root-CSE experiment, strong fixed-frontier range improvements
+mostly move pruning earlier rather than materially shrinking the search tree.
+
+This closes the current Barr3 sequence of eager richer-range tiers and motivates
+a separate SMT-development line based on contractor architecture rather than a
+new function representation. The comparison with IBEX 2.9 suggests the
+following order of work, independent of any Chebyshev development:
+
+1. Incremental propagation and cached forward/backward Procedures.
+   Ariadne already has the essential HC4Revise-style primitive:
+   `simple_hull_reduce` executes a compiled Procedure forward and propagates
+   the target interval backward. The current `ConstraintSolver::propagate`,
+   however, scans every constraint on every round and rebuilds the Procedure
+   inside the hot loop. IBEX's `CtcPropag` instead keeps an agenda and
+   dependency bitsets, waking only contractors whose inputs intersect variables
+   changed by a previous contraction. The first vertical slice is deliberately
+   split into two measurements: cache the Procedure once at theory compilation,
+   then add dependency-driven scheduling. This keeps numerical semantics
+   unchanged and lets runtime effects be attributed cleanly.
+
+2. ACID-like adaptive shaving.
+   Ariadne already has `box_reduce`, but after hull propagation stalls it
+   currently attempts shaving across every constraint-variable pair. The IBEX
+   direction is to make shaving selective and adaptive, retaining effort only
+   where previous slices produced useful contraction relative to cost. A future
+   implementation should maintain per contractor/coordinate effectiveness and
+   cost statistics rather than enabling or disabling shaving globally.
+
+3. Linear relaxation / polytope-hull contraction.
+   IBEX's default solver composes HC4 and ACID with interval Newton where
+   applicable and a fixpoint involving polytope-hull contraction of validated
+   linear relaxations (including X-Taylor). This is the most interesting new
+   numerical contractor for Ariadne after the cheaper scheduling work: it may
+   preserve useful cross-variable information without creating explicit
+   subboxes. It should first be tested as an isolated diagnostic before any LP
+   machinery is integrated into the SMT hot path.
+
+4. Interval Newton on equality subsystems.
+   This is important for the general epsilon-SMT solver but is not the first
+   Barr3 target because the current benchmark is dominated by inequalities.
+   The natural architecture is to extract square or useful equality
+   subsystems, contract them, and feed the changed coordinates back into the
+   same propagation agenda.
+
+5. Smear-style branching refinements.
+   The existing sensitivity splitter already has the core smear idea:
+   coordinate width multiplied by derivative magnitude aggregated over active
+   literals. The main near-term improvement is therefore caching derivative
+   representations and considering relative normalization, rather than
+   replacing the branching policy wholesale.
+
+The broader architectural lesson is to move from a growing list of eager
+boolean features toward compiled contractor objects with explicit dependency
+masks, measured cost/effectiveness, and a scheduler. The Barr3 quadrant and
+root-CSE experiments show why: a stronger range operator is not automatically
+a useful eager search operator. Contractor scheduling should make the decision
+about when an expensive refinement is likely to pay for itself.
+
+### First vertical slice: cache the hull Procedure
+
+The first implementation step leaves the propagation algorithm and all
+validated mathematics unchanged. `ConstraintPropagationConstraint` now has an
+optional cached `ValidatedProcedure`. SMT theory compilation will populate it
+once; `ConstraintSolver::propagate` will reuse it for forward/backward hull
+reduction. Generic propagation callers that do not provide a cache retain the
+previous fallback and build a local Procedure. Consequently
+`hull_procedure_builds` continues to count only hot-loop fallback builds,
+while the one-time SMT build cost is naturally included in theory compile time.
+The initial benchmark should use hull reduction with shaving/monotonicity
+disabled so that any runtime change can be attributed to Procedure caching
+rather than to a changed contractor schedule.

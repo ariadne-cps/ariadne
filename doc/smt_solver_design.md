@@ -3725,3 +3725,19 @@ This confirms that equality-subsystem extraction scans for eligible
 form the Newton system. The next gate is the overdetermined case with three
 equalities in two variables: the deterministic first-two equality subset
 should still reject the root box by Newton disjointness.
+
+
+The `smt-overdetermined-infeasible` diagnostic passes. The compiled
+conjunction contains three `EQ_ZERO` literals in two variables. The
+deterministic extractor selects the first two equalities, performs one Interval
+Newton step, and rejects the root box by validated disjointness. The solver
+returns `UNSAT`, processes and prunes exactly one box, performs no split,
+records `newton-attempts=1`, `newton-infeasible=1`, and no singular skip.
+Total runtime is about 0.282 ms, with about 0.142 ms spent in Newton.
+
+This confirms the soundness of using a square equality subset from an
+overdetermined conjunction: any full-conjunction solution must satisfy the
+selected subset, so Newton rejection of the subset also rejects the full box.
+The remaining extraction guard is the underdetermined case, where fewer than
+`n` equalities are available. Newton must then perform zero attempts and the
+ordinary non-Newton theory path must remain unchanged.

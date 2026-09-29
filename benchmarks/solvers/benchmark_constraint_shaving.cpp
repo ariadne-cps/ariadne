@@ -102,6 +102,9 @@ Int main(Int argc,const char* argv[])
               << " shaving-attempts=" << statistics.shaving_coordinate_attempts
               << " shaving-effective-attempts=" << statistics.shaving_coordinate_effective
               << " shaving-dependency-skipped=" << statistics.shaving_dependency_skipped
+              << " shaving-adaptive-skipped=" << statistics.shaving_adaptive_skipped
+              << " shaving-refresh-rounds=" << statistics.shaving_refresh_rounds
+              << " shaving-active-rounds=" << statistics.shaving_active_rounds
               << " shaving-evals=" << statistics.shaving_function_evaluations
               << " shaving-time=" << statistics.shaving_seconds
               << " final-width-sum=" << final_width_sum

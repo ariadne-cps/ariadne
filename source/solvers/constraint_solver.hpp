@@ -86,6 +86,9 @@ struct ConstraintPropagationStatistics {
     SizeType shaving_coordinate_attempts = 0u;
     SizeType shaving_coordinate_effective = 0u;
     SizeType shaving_dependency_skipped = 0u;
+    SizeType shaving_adaptive_skipped = 0u;
+    SizeType shaving_refresh_rounds = 0u;
+    SizeType shaving_active_rounds = 0u;
     SizeType shaving_function_evaluations = 0u;
     double shaving_seconds = 0.0;
     SizeType monotone_rounds = 0u;

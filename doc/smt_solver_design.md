@@ -3050,3 +3050,35 @@ and the other nuisances can compensate it. This creates the required ACID
 baseline: wasted work that cannot be removed by syntactic dependency masks and
 must instead be identified from observed contraction effectiveness. No
 adaptive skipping is implemented yet.
+
+
+The first N=32 `selective` shaving baseline provides the missing adaptive
+signal. With dependency filtering already enabled, the run takes three shaving
+rounds, two effective, and attempts 384 genuinely dependent
+constraint/coordinate pairs. Only 64 attempts contract a coordinate, so the
+productive fraction is about 16.7%. The dependency filter separately skips
+2,976 syntactically independent pairs. The run uses 1,152 validated function
+evaluations, takes about 3.01 ms total (2.46 ms in shaving), and ends with
+`final-width-sum=10`.
+
+This is qualitatively different from the diagonal benchmark, where 99.8% of
+remaining dependent attempts are useful, and is therefore accepted as the
+first ACID-like scheduling gate.
+
+The first adaptive policy is deliberately conservative: a working-set plus
+refresh scheme. After a shaving round, only constraint/coordinate pairs that
+actually contracted their selected coordinate remain active for the next
+round. Pairs that were ineffective are temporarily skipped, not permanently
+disabled. If the active working set reaches a round with no contraction, the
+solver performs one complete refresh over every genuine dependency before it
+may declare the shaving fixed point. A refresh that finds new contraction
+relearns the active set and continues. This preserves the key safety property
+for scheduling: a pair that was ineffective on an earlier, wider box can still
+be retried after other contractions have made it useful.
+
+New statistics distinguish adaptive skips, full refresh rounds and active-set
+rounds. The acceptance criterion on the selective benchmark is unchanged final
+width with fewer than 384 shaving attempts and fewer than 1,152 validated
+function evaluations. The diagonal benchmark remains a regression guard:
+adaptivity should not materially penalise the case where nearly every genuine
+dependency is productive.

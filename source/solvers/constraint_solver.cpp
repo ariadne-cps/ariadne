@@ -212,6 +212,7 @@ Bool ConstraintSolver::propagate(
         }
         if(not same(domain,previous)) {
             ++statistics.hull_effective;
+            shaving_full_refresh=true;
         }
 
         if(same(domain,previous)) {
@@ -466,6 +467,18 @@ Bool ConstraintSolver::propagate(
         }
     }
 
+    std::vector<std::vector<unsigned char>> shaving_active(
+        constraints.size(),
+        std::vector<unsigned char>(domain.dimension(),0u));
+    for(SizeType constraint_index=0u;
+        constraint_index!=constraints.size();
+        ++constraint_index) {
+        for(SizeType variable:constraint_dependencies[constraint_index]) {
+            shaving_active[constraint_index][variable]=1u;
+        }
+    }
+    Bool shaving_full_refresh=true;
+
     Bool monotone_attempted=false;
     for(;;) {
         UpperBoxType previous=domain;
@@ -518,8 +531,19 @@ Bool ConstraintSolver::propagate(
 
         if(same(domain,previous)) {
             UpperBoxType before_shaving=domain;
+            Bool shaving_refresh_without_change=false;
             if(shaving_reduction_enabled) {
                 ++statistics.shaving_rounds;
+                if(shaving_full_refresh) {
+                    ++statistics.shaving_refresh_rounds;
+                } else {
+                    ++statistics.shaving_active_rounds;
+                }
+
+                std::vector<std::vector<unsigned char>> next_active(
+                    constraints.size(),
+                    std::vector<unsigned char>(domain.dimension(),0u));
+
                 for(SizeType constraint_index=0u;
                     constraint_index!=constraints.size();
                     ++constraint_index) {
@@ -528,6 +552,12 @@ Bool ConstraintSolver::propagate(
                         domain.dimension()
                         -constraint_dependencies[constraint_index].size();
                     for(SizeType variable:constraint_dependencies[constraint_index]) {
+                        if(not shaving_full_refresh
+                           && shaving_active[constraint_index][variable]==0u) {
+                            ++statistics.shaving_adaptive_skipped;
+                            continue;
+                        }
+
                         UpperIntervalType const before_coordinate=domain[variable];
                         auto shaving_start=std::chrono::steady_clock::now();
                         ++statistics.shaving_coordinate_attempts;
@@ -548,14 +578,29 @@ Bool ConstraintSolver::propagate(
                                 ==domain[variable].upper_bound().raw();
                         if(not (same_lower && same_upper)) {
                             ++statistics.shaving_coordinate_effective;
+                            next_active[constraint_index][variable]=1u;
                         }
                     }
                 }
+
                 if(not same(domain,before_shaving)) {
                     ++statistics.shaving_effective;
+                    shaving_active=std::move(next_active);
+                    shaving_full_refresh=false;
+                } else if(not shaving_full_refresh) {
+                    // The learned working set stalled. Before declaring a
+                    // fixed point, reactivate all genuine dependencies once:
+                    // a previously ineffective pair may have become useful
+                    // after contractions performed by other pairs.
+                    shaving_full_refresh=true;
+                    continue;
+                } else {
+                    shaving_refresh_without_change=true;
                 }
             }
-            if(same(domain,before_shaving)) {
+            if(same(domain,before_shaving)
+               && (not shaving_reduction_enabled
+                   || shaving_refresh_without_change)) {
                 if(not monotone_reduction_enabled) {
                     return false;
                 }

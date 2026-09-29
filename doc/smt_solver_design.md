@@ -2701,3 +2701,27 @@ is 2048 processed boxes. A substantial reduction in splits at acceptable total
 cost would justify a 4096-box comparison; otherwise the subdivision tier is
 rejected and the deferred validated Chebyshev/Bernstein model becomes the next
 development direction.
+
+
+The 2,048-box changed-tree quadrant gate largely collapses the apparent
+fixed-frontier gain. The search processes the full 2,048-box budget, with
+449 natural-Lie prunes, 538 additional quadrant-Lie prunes and 34 barrier
+prunes, for 1,021 total prunes and 1,027 splits. Thus the stronger db/dy range
+changes which stage rejects many boxes, but avoids only about two net splits
+relative to the established 2,048-box natural frontier of 1,029 splits. This is
+the same qualitative failure mode previously observed for eager root-CSE:
+large fixed-frontier pruning attribution does not translate into a materially
+smaller search tree.
+
+The repeated cost is substantial. The changed-tree run takes about 154.77 s;
+natural Lie evaluation alone accounts for about 58.54 s, 6,396 compiled
+quadrant evaluations for about 55.22 s, component recomposition for about
+19.41 s, and barrier evaluation for about 5.31 s. Before rejecting the
+quadrant tier solely from these absolute costs, the next measurement uses the
+existing standard `lie` query with exactly the same 2,048-box budget,
+geometric split, disabled witness/shaving/hull/monotonicity, lie-first literal
+order and lower-first child order. This gives a directly comparable natural
+changed-tree baseline including the barrier literal. If it confirms a large
+runtime penalty for only the observed two-split reduction, the quadrant second
+tier is closed without a 4,096-box run and development proceeds to the deferred
+validated Chebyshev/Bernstein representation.

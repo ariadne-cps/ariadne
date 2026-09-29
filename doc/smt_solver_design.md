@@ -2292,3 +2292,30 @@ zero. If this root evaluator recovers significant pruning, it can be introduced
 as a generic optional compiled-literal tier. If it does not, the range-evaluator
 architecture must preserve or discover useful internal subexpressions instead
 of applying first-order range analysis only at the literal root.
+
+
+The root-level CSE range profile is stronger than the earlier
+subexpression-specific experiment. On the established 256-box frontier, the
+natural `lie+barrier` range prunes 123 boxes and leaves 133 unresolved.
+Applying a CSE-centered first-order range directly to the complete root
+expression proves another 90 of those 133 boxes infeasible, about 67.7% of the
+old unresolved frontier. No coordinate derivative of the root is sign-definite
+on these boxes, so monotonicity contributes nothing. The centered range itself
+is wide on average (about 927), but its one-sided placement is useful; after
+intersection with the natural range the average width falls from about 41.26
+to 35.73. Repeated evaluation remains cheap: 133 CSE evaluations take about
+0.53 s and midpoint evaluations about 0.14 s. One-time preparation is about
+4.33 s for symbolic derivatives, 8.49 s for CSE and 0.03 s for Procedure
+construction on this larger root expression.
+
+This result means the second-tier evaluator need not depend on Barr3-specific
+knowledge of `db/dy`; it can operate generically on a compiled theory literal
+root. Before changing the core solver representation, query
+`lie-root-cse-search` runs a diagnostic DFS whose frontier is actually changed
+by the improved root range. It implements the same cheap setting used by the
+Barr3 baseline: natural Lie evaluation first, CSE-centered refinement only
+when natural evaluation does not reject, the barrier literal in the selected
+literal order, whole-box epsilon certification, geometric splitting and the
+selected child order. This provides an end-to-end estimate of the changed
+search tree and repeated-evaluation cost without yet adding CSE-specific state
+to `CompiledTheoryLiteral`.

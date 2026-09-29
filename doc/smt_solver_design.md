@@ -3345,3 +3345,33 @@ gradient enclosure because it uses forward differential evaluation rather than
 separately transformed derivative expressions. Therefore acceptance is a
 cost/strength comparison: large runtime reduction is useful only if the
 X-Taylor infeasibility count remains close to the 95-box baseline.
+
+
+The 256-box `lie-xtaylor-gradient-range-profile` result is strongly positive.
+It reproduces the fixed natural frontier exactly (123 natural prunes and 133
+checked boxes) and, crucially, preserves the X-Taylor strength exactly at the
+coarse decision level: 95 relaxations are definitely infeasible and 19 of the
+38 feasible relaxations contract, with no LP failures.
+
+Direct full-gradient evaluation is substantially cheaper than evaluating two
+separately transformed derivative functions. Gradient work falls from about
+65.02 s to 23.73 s, roughly a 2.74x improvement. Total profile time falls from
+about 87.68 s to 46.01 s, nearly a factor of two. Linearization time falls from
+80.27 s to 38.71 s. Corner evaluation remains about 14.98 s and LP work about
+0.0695 s. The feasible-only average x+y width changes only slightly, from
+1.02673 -> 0.967703 with separate derivatives to 1.02673 -> 0.970394 with
+`gradient_range`; this small loss does not affect infeasibility or contraction
+counts.
+
+The direct-gradient route is therefore accepted for subsequent X-Taylor work.
+The fixed-frontier experiment now establishes both the numerical premise and a
+better gradient implementation, but 46 s for 256 boxes is still too expensive
+for eager changed-tree integration. The next optimization target is corner
+evaluation. Geometric subdivision causes neighbouring and ancestor/descendant
+boxes to reuse many identical vertices, yet the current profile performs 532
+validated Lie point evaluations independently. A corner-value cache keyed by
+the exact FloatDP x/y endpoints can remove this repeated work without changing
+the relaxation mathematically. The next gate keeps the same gradient_range,
+half-spaces and LP and reports cache hits/misses; acceptance requires the same
+95 infeasible and 19 contracted boxes with a material drop in corner evaluation
+time.

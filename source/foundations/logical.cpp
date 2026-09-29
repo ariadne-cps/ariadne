@@ -177,6 +177,8 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     return os;
 }
 
+} // namespace Detail
+
 Nat Effort::_default = 0u;
 
 const Indeterminate indeterminate = Indeterminate();

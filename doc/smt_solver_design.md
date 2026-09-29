@@ -3391,3 +3391,33 @@ cache hits, misses and cache size. The gate requires the same 123 natural
 prunes, 95 X-Taylor infeasible boxes and 19 contracted feasible boxes. Any
 difference in those counts would indicate an implementation error, since exact
 corner reuse should affect cost only.
+
+
+The corner-cache X-Taylor result preserves the accepted numerical behaviour
+exactly: 123 natural prunes, 133 checked boxes, 95 X-Taylor-infeasible and 19
+contracted feasible relaxations, with no LP failures. Of 532 logical corner
+lookups, only 108 require a validated point evaluation and 424 are exact cache
+hits. Corner evaluation time falls from about 14.98 s to 3.11 s. Total profile
+time falls from about 46.01 s to 34.83 s, while gradient-range evaluation
+remains about 24.27 s and is now roughly 70% of total runtime.
+
+Inspection of Ariadne's function API shows that `gradient_range(f,X)` already
+uses the generic differential/gradient path to obtain the full interval
+gradient in one operation. A separate "value plus gradient" experiment is not
+promising on this fixed frontier: natural evaluation is intentionally cheap and
+prunes 123 of 256 boxes before any gradient is needed, whereas differential
+evaluation on all boxes would pay the dominant gradient cost even for boxes
+already rejected naturally.
+
+The next optimization therefore changes *when* X-Taylor is invoked rather than
+how its gradient is evaluated. The first gate is a cheap natural-range
+screening diagnostic. For each of the 133 unresolved boxes, define the
+dimensionless negative-tail fraction
+`r = max(0,-lower(f(X)) / width(f(X)))`.
+A small r means natural interval evaluation crosses zero only by a shallow
+negative tail, a plausible signature of dependency overestimation. The
+diagnostic reuses the existing X-Taylor result as ground truth and reports, for
+several thresholds on r, how many boxes would invoke X-Taylor, how many of the
+95 X-Taylor infeasibility proofs would be retained, and how many feasible
+relaxations would be unnecessarily evaluated. This is a fixed-frontier
+scheduler experiment only; no search behaviour changes.

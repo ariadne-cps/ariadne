@@ -2523,3 +2523,32 @@ forward derivative width, the next algebraic rewrite can target their local
 structure; if width is diffuse across the layer, local hand rewrites are
 unlikely to scale and the optimiser needs a more global scoring/search
 mechanism.
+
+
+The 2048-box width-attribution profile confirms that the 256-box pattern is
+stable with depth. Average db/dy width falls from about 5.588 to about 3.887,
+but the four leading contributors remain neurons 42, 49, 59 and 57. Their
+combined share rises slightly from about 25.3% to 26.2%, while the top twelve
+contributors rise from about 44.7% to 51.8%. The activation-derivative factor
+1-h2^2 still never touches zero for the reported dominant neurons, and dzdy
+crosses zero only on a small minority of the 1029 inspected boxes. Thus the
+observed dependency pattern is not a shallow-frontier artifact and does not
+reduce to sign ambiguity.
+
+One caution is important: equality between db/dy interval width and the sum of
+local term widths is a property of interval addition, not proof that the final
+sum introduces no dependency loss. The remaining inflation may arise inside
+each product (1-h2^2)*dzdy, across different neuron contributions in the final
+sum, or both.
+
+Query lie-gradient-correlation-attribution-profile therefore performs one
+validated two-coordinate quadrant subdivision of every baseline-surviving box.
+It compares three widths: the direct db/dy interval; the sum of per-neuron
+term hulls after evaluating each term on the four common quadrants; and the
+hull of the complete db/dy sum evaluated on those same quadrants. Reduction
+from the first to the second isolates dependency recoverable within individual
+terms. The additional reduction from the second to the third measures
+cross-neuron correlation/cancellation preserved by evaluating the whole sum on
+a common partition. This diagnostic decides whether the next algebraic search
+should target the local activation-derivative product or the structure of the
+neuron sum.

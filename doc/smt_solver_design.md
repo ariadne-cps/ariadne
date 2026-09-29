@@ -3252,3 +3252,36 @@ upper bounds, while Ariadne's `FloatDP` type has no accessible default
 constructor. This is a benchmark implementation error, not a failure of the
 linear relaxation or LP formulation. Both arrays are now explicitly
 initialised with `FloatDP(0,dp)`; no X-Taylor or validation semantics change.
+
+
+The first 256-box X-Taylor-like fixed-frontier result is numerically very
+strong but computationally dominated by linearization. Natural interval
+evaluation reproduces the established frontier exactly: 123 boxes are pruned
+and 133 remain split candidates. Of those 133 unresolved boxes, the four-corner
+linear relaxation is definitely infeasible on 95 boxes (about 71.4%). Of the
+38 relaxations that remain feasible, 19 produce a nonzero LP contraction.
+There are no LP failures. The average x+y width sum over all checked boxes is
+0.400317 before the relaxation and 0.276486 after counting infeasible
+relaxations as zero-width; this aggregate therefore mixes pruning and genuine
+contraction and must not be interpreted as the contraction factor of feasible
+polytopes alone.
+
+The cost breakdown identifies the actual bottleneck. Total profile time is
+about 87.44 s, of which about 80.03 s is spent constructing the X-Taylor
+half-spaces. The LP work takes only about 0.0752 s despite 133 feasibility
+checks and 152 validated minimisations (min/max x and y for the 38 feasible
+relaxations). Thus simplex/polytope-hull optimisation is about 0.086% of the
+total measured time; replacing or optimising the LP solver is not justified.
+The expensive part is repeated validated evaluation of the two gradient
+functions over each box and the Lie function at four corners.
+
+This result strongly supports the *numerical* premise of polytope-hull
+contraction on Barr3 while rejecting the current naive linearization path as an
+eager implementation. The next experiment keeps the relaxation and LP
+identical but compiles three `ValidatedProcedure` objects once for the Lie
+function and its x/y derivatives. The 266 derivative evaluations and 532 corner
+evaluations then use direct Procedure evaluation instead of repeated
+`apply(function,...)`. Acceptance requires the same 95 infeasible and 19
+contracted boxes with a large reduction in linearization time. The profile will
+also report contraction averages separately on feasible relaxations so pruning
+does not artificially improve the width statistic.

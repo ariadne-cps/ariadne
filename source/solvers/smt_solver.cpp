@@ -631,16 +631,71 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 literals,domain.dimension())
             : std::vector<std::vector<SizeType>>();
 
-    if(not newton_candidates.empty()
+    std::optional<std::vector<SizeType>> ineffective_newton_subsystem;
+    for(auto const& newton_subsystem:newton_candidates) {
+        ++statistics.interval_newton_attempts;
+        auto const newton_start=std::chrono::steady_clock::now();
+        try {
+            ValidatedVectorMultivariateFunction function(
+                domain.dimension(),
+                literals[newton_subsystem[0u]].function.domain());
+            for(SizeType i=0u;i!=newton_subsystem.size();++i) {
+                function[i]=literals[newton_subsystem[i]].function;
+            }
+
+            Vector<SolverInterface::ValidatedNumericType> current=
+                cast_singleton(cast_exact_box(domain));
+            IntervalNewtonSolver newton_solver(1e-12,1u);
+            Vector<SolverInterface::ValidatedNumericType> image=
+                newton_solver.step(function,current);
+
+            if(not consistent(image,current)) {
+                ++statistics.interval_newton_infeasible;
+                statistics.interval_newton_seconds+=
+                    elapsed_seconds(newton_start);
+                accumulate_propagation_statistics();
+                return true;
+            }
+
+            Bool effective=false;
+            for(SizeType i=0u;i!=domain.dimension();++i) {
+                auto contracted=refinement(image[i],current[i]);
+                UpperIntervalType next(
+                    contracted.lower(),contracted.upper());
+                Bool const same_lower=
+                    next.lower_bound().raw()==domain[i].lower_bound().raw();
+                Bool const same_upper=
+                    next.upper_bound().raw()==domain[i].upper_bound().raw();
+                if(not (same_lower && same_upper)) {
+                    effective=true;
+                }
+                domain[i]=next;
+            }
+            if(effective) {
+                ++statistics.interval_newton_effective;
+            } else {
+                ineffective_newton_subsystem=newton_subsystem;
+            }
+            statistics.interval_newton_seconds+=
+                elapsed_seconds(newton_start);
+            break;
+        }
+        catch(const SingularMatrixException&) {
+            ++statistics.interval_newton_singular;
+            statistics.interval_newton_seconds+=
+                elapsed_seconds(newton_start);
+        }
+    }
+
+    if(ineffective_newton_subsystem.has_value()
        && _configuration.hull_reduction_enabled()) {
         if(contractor.propagate_hull_once(
                 domain,literals,propagation_statistics)) {
             accumulate_propagation_statistics();
             return true;
         }
-    }
 
-    for(auto const& newton_subsystem:newton_candidates) {
+        auto const& newton_subsystem=*ineffective_newton_subsystem;
         ++statistics.interval_newton_attempts;
         auto const newton_start=std::chrono::steady_clock::now();
         try {
@@ -684,7 +739,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
             }
             statistics.interval_newton_seconds+=
                 elapsed_seconds(newton_start);
-            break;
         }
         catch(const SingularMatrixException&) {
             ++statistics.interval_newton_singular;

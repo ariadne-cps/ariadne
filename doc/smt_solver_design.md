@@ -4147,3 +4147,31 @@ ordering. The first regression is the 3D coupled benchmark, previously about
 staging as a general equality-contracting order despite its small 2D cost;
 a lost advantage would require a more selective scheduler rather than a global
 pre-sweep.
+
+
+Re-running the 3D coupled benchmark under unconditional one-sweep staging shows
+that the global ordering is too aggressive. The hull+shaving baseline is again
+about 2.015 ms with 2 boxes and 1 split. The staged Newton variant remains
+faster at about 0.982 ms, but its search degrades to 7 boxes and 3 splits,
+with 7 Newton attempts, 5 effective contractions and 2 Newton infeasibility
+proofs. Before staging, eager Newton had solved the same case at the root in
+about 0.289 ms with 1 box and no split. Therefore always forcing one HC4 sweep
+before Newton destroys a strong eager-Newton case even though it still beats
+the baseline.
+
+The scheduling policy is changed from unconditional staging to an adaptive
+retry. Newton is attempted eagerly first, retaining the bounded
+singular-subsystem fallback. If that first applicable Newton subsystem proves
+infeasibility or contracts the box, no pre-sweep is inserted. Only when the
+first applicable Newton step is non-singular but completely ineffective, and
+hull reduction is enabled, does the solver execute one cached HC4 sweep and
+retry the same Newton subsystem once. After that, ordinary full propagation
+continues regardless of whether the retry contracts. If all candidate
+subsystems are singular, no staged retry is performed.
+
+This policy directly matches the measured cases: the 3D coupled system should
+recover its eager root contraction with one Newton attempt and no forced hull
+sweep, while the 2D coupled system should make an ineffective eager attempt,
+perform one hull sweep, and then make an effective second Newton attempt. The
+first regression is the 3D coupled benchmark because it must recover the
+previous one-box behavior before the adaptive retry can be accepted.

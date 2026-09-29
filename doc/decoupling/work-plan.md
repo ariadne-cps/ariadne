@@ -46,8 +46,8 @@ A component is ready for extraction when:
 
 The precise package split remains a decision, but the intended direction is:
 
-1. a small common foundation for utility-independent paradigms and logical
-   contracts;
+1. the standalone `foundation` package, depending only on `utility`, for
+   computational paradigms and logical contracts;
 2. numeric types built on that foundation;
 3. algebra built on numeric types;
 4. primitive geometry built on numeric and algebra;
@@ -88,7 +88,8 @@ baseline build without relying on this document's author.
 - [ ] Add public-header compilation checks for every component.
 - [ ] Make each test directory link to its component target instead of an
       aggregate library.
-- [ ] Register the currently omitted `tests/foundation` directory.
+- [x] Extract Foundation tests into the standalone `ariadne-cps/foundation`
+      repository and remove the obsolete monorepo test directory.
 
 Exit criterion: removing an undeclared target dependency causes configuration
 or compilation to fail locally and in CI.
@@ -111,16 +112,17 @@ neither `dynamics` nor lower-level geometry depends on `hybrid`.
 
 ### M3 — Stabilise the mathematical core
 
-- [ ] Split generic logical/expression-template machinery from numeric and
-      high-level symbolic specialisations.
-- [ ] Resolve the `foundation ↔ numeric ↔ symbolic` cycles without moving the
-      same cycle into a nominally lower package.
+- [x] Remove numeric/symbolic implementation dependencies from Foundation's
+      logical machinery; keep Sequence integration in numeric.
+- [x] Break the backward `numeric → foundation` and `symbolic → foundation`
+      edges and extract Foundation as a lower-level standalone package.
+- [ ] Remove numeric's remaining dependency on high-level symbolic expression
+      templates.
 - [ ] Stabilise `algebra → function` as the primary direction by relocating the
       two function-specific algebra integrations.
 - [ ] Identify the smallest primitive-geometry API needed by algebra and
       function (`Interval`, `Box`, declarations, and associated operations).
-- [ ] Decide whether foundation and numeric initially ship as one repository
-      with separate targets or as independently versioned packages.
+- [x] Version Foundation independently from numeric.
 
 Exit criterion: the foundation/numeric/algebra/primitive-geometry subgraph is
 acyclic at package level and has standalone consumers.
@@ -141,11 +143,15 @@ rebuilding the primitive mathematical packages.
 
 ### M5 — Repository extraction
 
-- [ ] Select the first extraction candidate based on the verified graph.
+Foundation is the first completed extraction and serves as the reference pattern
+for subsequent repositories.
+
+- [x] Select and extract Foundation as the first repository.
 - [ ] Provide install/export rules and a versioned CMake package.
-- [ ] Add a standalone CI workflow and external-consumer test.
-- [ ] Replace the monorepo source directory with a pinned dependency during a
-      transition period.
+- [x] Add standalone Unix, Windows, and Coverage CI for Foundation.
+- [ ] Add a dedicated installed/external-consumer test.
+- [x] Replace the monorepo Foundation source/tests with the pinned
+      `ariadne-cps/foundation` submodule.
 - [ ] Document release compatibility and coordinated-change procedure.
 - [ ] Repeat one component at a time; keep an integration build spanning all
       released packages.
@@ -172,8 +178,8 @@ starts enforcing the dependencies needed for the core work.
 
 | Date | Change | Validation | Graph impact | Status |
 |---|---|---|---|---|
-| 2026-09-29 | Replaced the in-tree `foundation` module with the standalone `ariadne-cps/foundation` submodule; removed local source/tests copies and wired `FOUNDATION_SRC` plus the `foundation` interface into Ariadne aggregates. | Verified `configuration@6b90c981939253a6740e93b726137ea3b6934ecb` is identical in Ariadne, Threading, Foundation and Utility; verified `utility@d28ec8bfa0f176f948756b00ac9c14e8eb3b2de2` is identical in Threading and Foundation. CI validation required after integration. | `foundation` is now an external repository boundary; local duplicate implementation removed. | In progress |
-| 2026-09-29 | Made `foundation` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are now owned by foundation; infinite `Sequence` conjunction/disjunction moved to `numeric/logical_sequence`; registered foundation tests and linked them only to `ariadne-foundation` + `utility`. | Static dependency assertions completed; build/test validation still required. | Expected removal of backward `numeric → foundation` and `symbolic → foundation`, breaking both mutual pairs while retaining intended `foundation → numeric`. | In progress |
+| 2026-09-29 | Replaced the in-tree `foundation` module with the standalone `ariadne-cps/foundation` submodule; removed local source/tests copies and wired `FOUNDATION_SRC` plus the `foundation` interface into Ariadne aggregates. | Standalone Foundation Unix/Windows/Coverage CI passed. Ariadne integration was updated to inherit the Foundation interface in C++ and Python. `configuration@6b90c981939253a6740e93b726137ea3b6934ecb` is identical in Ariadne, Threading, Foundation, and Utility; `utility@d28ec8bfa0f176f948756b00ac9c14e8eb3b2de2` is identical in Threading and Foundation. | Foundation is now an external repository boundary; local duplicate implementation removed. | Done |
+| 2026-09-29 | Made `foundation` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are owned by Foundation and infinite `Sequence` conjunction/disjunction lives in numeric. | Standalone Foundation builds and tests pass on Unix, Windows, and Coverage CI. | Removed the backward `numeric → foundation` and `symbolic → foundation` edges while retaining the intended `foundation → numeric` direction. | Done |
 | 2026-09-29 | Removed graphics and whole-tensor stream output from `algebra/Tensor`; moved Tensor drawing to the `io` layer through `tensor_drawable`, and adjusted the acoustic PDE example. | Static source review only; build/test validation still required. | Expected removal of backward `io → algebra`; the existing forward `algebra → io` remains. | In progress |
 | 2026-09-29 | Removed the two low-volume backward includes from `geometry/list_set.hpp` and `dynamics/enclosure.cpp` into `hybrid`. | Static symbol inspection: neither consumer uses `DiscreteLocation`/`DiscreteEvent`; build and test validation still required. | Expected removal of `hybrid → geometry` and `hybrid → dynamics`; 55 → 53 direct edges pending regeneration. | In progress |
 | 2026-09-29 | Created `decoupling` from `master`; recorded the baseline analysis and initial plan. | Branch SHA matched `master` before the documentation commit. | Baseline: 55 edges, 13 mutual pairs, one strongly connected component; 9 A / 35 M / 11 B. | Done |
@@ -185,19 +191,17 @@ starts enforcing the dependencies needed for the core work.
 | D-001 | 2026-09-29 | Refactor boundaries in the monorepo before creating component repositories. | All ten directories are in one strongly connected component; immediate extraction would preserve cycles and add versioning overhead. | At least one component meets the extraction criteria. |
 | D-002 | 2026-09-29 | Weight header propagation when prioritising coupling. | Header dependencies affect downstream consumers and templates, so raw include counts understate their cost. | A regeneration tool provides a better semantic metric. |
 | D-003 | 2026-09-29 | Treat the proposed target dependency shape as provisional. | `geometry`, `symbolic`, and `io` mix responsibilities that must be separated before final package names are credible. | M3 and M4 produce tested boundaries. |
+| D-004 | 2026-09-29 | Version Foundation independently as `ariadne-cps/foundation`, depending only on Utility. | The backward numeric/symbolic implementation edges were removed, standalone CI passes on Unix/Windows/Coverage, and Ariadne can consume a pinned Foundation submodule. | If a future lower-level contract requires coordinated versioning with numeric. |
 
 ## Open questions
 
-- Should foundation and numeric be released together initially while retaining
-  separate targets?
 - Which interval and box types belong to primitive geometry, and which aliases
   belong to function or set packages?
 - Should drawing use free-function adapters, explicit renderer objects, or a
   small non-owning interface package?
-- Where should the generic expression-template machinery live so that numeric,
-  foundation, function, and symbolic do not form a cycle?
-- Which component should be the first real repository extraction: hybrid as a
-  high-level consumer, or a stable low-level core package?
+- Where should the generic numeric expression-template machinery live so that
+  numeric and symbolic do not retain a backward package dependency?
+- Which component should be extracted next after Foundation?
 
 ## Risks
 

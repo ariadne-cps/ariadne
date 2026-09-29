@@ -434,8 +434,21 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         propagation_statistics.hull_backward_propagation_seconds;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    statistics.shaving_coordinate_attempts+=
+        propagation_statistics.shaving_coordinate_attempts;
+    statistics.shaving_coordinate_effective+=
+        propagation_statistics.shaving_coordinate_effective;
+    statistics.shaving_dependency_skipped+=
+        propagation_statistics.shaving_dependency_skipped;
+    statistics.shaving_adaptive_skipped+=
+        propagation_statistics.shaving_adaptive_skipped;
+    statistics.shaving_refresh_rounds+=
+        propagation_statistics.shaving_refresh_rounds;
+    statistics.shaving_active_rounds+=
+        propagation_statistics.shaving_active_rounds;
     statistics.shaving_function_evaluations+=
         propagation_statistics.shaving_function_evaluations;
+    statistics.shaving_seconds+=propagation_statistics.shaving_seconds;
     return empty;
 }
 
@@ -524,8 +537,21 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         propagation_statistics.hull_backward_propagation_seconds;
     statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
     statistics.shaving_effective+=propagation_statistics.shaving_effective;
+    statistics.shaving_coordinate_attempts+=
+        propagation_statistics.shaving_coordinate_attempts;
+    statistics.shaving_coordinate_effective+=
+        propagation_statistics.shaving_coordinate_effective;
+    statistics.shaving_dependency_skipped+=
+        propagation_statistics.shaving_dependency_skipped;
+    statistics.shaving_adaptive_skipped+=
+        propagation_statistics.shaving_adaptive_skipped;
+    statistics.shaving_refresh_rounds+=
+        propagation_statistics.shaving_refresh_rounds;
+    statistics.shaving_active_rounds+=
+        propagation_statistics.shaving_active_rounds;
     statistics.shaving_function_evaluations+=
         propagation_statistics.shaving_function_evaluations;
+    statistics.shaving_seconds+=propagation_statistics.shaving_seconds;
     statistics.monotone_rounds+=propagation_statistics.monotone_rounds;
     statistics.monotone_effective+=propagation_statistics.monotone_effective;
     return empty;
@@ -896,8 +922,21 @@ SmtSolver::_accumulate_box_processing_statistics(
         processing.interval_lookahead_function_evaluations;
     statistics.interval_lookahead_evaluation_seconds+=
         processing.interval_lookahead_evaluation_seconds;
+    statistics.shaving_coordinate_attempts+=
+        processing.reductions.shaving_coordinate_attempts;
+    statistics.shaving_coordinate_effective+=
+        processing.reductions.shaving_coordinate_effective;
+    statistics.shaving_dependency_skipped+=
+        processing.reductions.shaving_dependency_skipped;
+    statistics.shaving_adaptive_skipped+=
+        processing.reductions.shaving_adaptive_skipped;
+    statistics.shaving_refresh_rounds+=
+        processing.reductions.shaving_refresh_rounds;
+    statistics.shaving_active_rounds+=
+        processing.reductions.shaving_active_rounds;
     statistics.shaving_function_evaluations+=
         processing.reductions.shaving_function_evaluations;
+    statistics.shaving_seconds+=processing.reductions.shaving_seconds;
     statistics.candidate_search_seconds+=processing.candidate_search_seconds;
     if(processing.fused_direct_classification) {
         ++statistics.fused_direct_classification_boxes;
@@ -1279,7 +1318,14 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
     target.hull_backward_propagation_seconds+=source.hull_backward_propagation_seconds;
     target.shaving_reduction_rounds+=source.shaving_reduction_rounds;
     target.shaving_effective_reductions+=source.shaving_effective_reductions;
+    target.shaving_coordinate_attempts+=source.shaving_coordinate_attempts;
+    target.shaving_coordinate_effective+=source.shaving_coordinate_effective;
+    target.shaving_dependency_skipped+=source.shaving_dependency_skipped;
+    target.shaving_adaptive_skipped+=source.shaving_adaptive_skipped;
+    target.shaving_refresh_rounds+=source.shaving_refresh_rounds;
+    target.shaving_active_rounds+=source.shaving_active_rounds;
     target.shaving_function_evaluations+=source.shaving_function_evaluations;
+    target.shaving_seconds+=source.shaving_seconds;
     target.monotone_reduction_rounds+=source.monotone_reduction_rounds;
     target.monotone_effective_reductions+=source.monotone_effective_reductions;
     target.sensitivity_guided_splits+=source.sensitivity_guided_splits;

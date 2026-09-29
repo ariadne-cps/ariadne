@@ -3117,3 +3117,33 @@ not create a material slowdown or alter the final box. If the diagonal case is
 stable, the working-set-plus-refresh policy is retained as the first ACID-like
 baseline; otherwise the policy is too eager and must be revised before moving
 to richer gain/cost scoring.
+
+
+The N=32 adaptive diagonal regression passes. Compared with dependency-filtered
+non-adaptive shaving, the adaptive scheduler preserves the same 17,184
+effective coordinate contractions and the same final subnormal width sum.
+It performs 17,248 attempts instead of 17,216 (+32, about 0.19%) and 137,728
+validated function evaluations instead of 137,600 (+128, about 0.09%). The
+extra work is one final full refresh: 539 total shaving rounds versus 538,
+with two refresh rounds and 537 active-set rounds. No dependent pair is
+adaptively skipped because nearly every genuine dependency remains productive.
+Measured wall time is slightly lower in this run, but the robust conclusion is
+the negligible structural overhead rather than that small timing difference.
+
+The working-set-plus-refresh scheduler is therefore accepted as the first
+ACID-like shaving baseline. Dependency filtering remains the larger structural
+gain; adaptive skipping is retained because it helps the selective case and is
+almost free when it cannot help.
+
+Before introducing richer gain/cost scoring, the next gate returns to Barr3.
+Historically coordinate shaving was one of the dominant costs and was disabled
+in the eventual cheap Barr3 baseline. The improved scheduler should now be
+measured end-to-end with shaving enabled but hull reduction disabled, so hull's
+known high forward-execution cost does not obscure the result. To make this
+diagnostic interpretable, the SMT statistics and Barr3 benchmark output now
+carry the detailed shaving counters: coordinate attempts/effective attempts,
+dependency and adaptive skips, refresh/active rounds, validated function
+evaluations and shaving time. The first real-workload gate uses a 64-box
+geometric, no-witness, shaving, no-hull Lie query. Search-tree changes are
+compared with the established no-shaving/no-hull 64-box structure before any
+larger run is attempted.

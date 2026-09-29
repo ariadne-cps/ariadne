@@ -171,7 +171,20 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " hull-backward-time="
               << result.statistics().hull_backward_propagation_seconds
               << " shaving-rounds=" << result.statistics().shaving_reduction_rounds
+              << " shaving-effective=" << result.statistics().shaving_effective_reductions
+              << " shaving-attempts=" << result.statistics().shaving_coordinate_attempts
+              << " shaving-effective-attempts="
+              << result.statistics().shaving_coordinate_effective
+              << " shaving-dependency-skipped="
+              << result.statistics().shaving_dependency_skipped
+              << " shaving-adaptive-skipped="
+              << result.statistics().shaving_adaptive_skipped
+              << " shaving-refresh-rounds="
+              << result.statistics().shaving_refresh_rounds
+              << " shaving-active-rounds="
+              << result.statistics().shaving_active_rounds
               << " shaving-evals=" << result.statistics().shaving_function_evaluations
+              << " shaving-time=" << result.statistics().shaving_seconds
               << " monotone-rounds=" << result.statistics().monotone_reduction_rounds
               << " monotone-effective=" << result.statistics().monotone_effective_reductions
               << " sensitivity-splits=" << result.statistics().sensitivity_guided_splits

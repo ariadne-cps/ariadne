@@ -292,6 +292,30 @@ std::vector<UpperBoxType> epsilon_witness_candidates(UpperBoxType const& domain)
     return candidates;
 }
 
+std::vector<SizeType> interval_newton_subsystem_indices(
+    std::vector<ConstraintPropagationConstraint> const& literals,
+    SizeType dimension)
+{
+    std::vector<SizeType> result;
+    if(dimension==0u) {
+        return result;
+    }
+    result.reserve(dimension);
+    ExactIntervalType const zero_bounds(0,0);
+    for(SizeType i=0u;i!=literals.size() && result.size()<dimension;++i) {
+        auto const& literal=literals[i];
+        if(not literal.strict_lower
+           && not literal.strict_upper
+           && definitely(literal.bounds==zero_bounds)) {
+            result.push_back(i);
+        }
+    }
+    if(result.size()!=dimension) {
+        result.clear();
+    }
+    return result;
+}
+
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
@@ -513,66 +537,57 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  CompiledTheoryLiterals const& literals,
                                  ReductionStatistics& statistics) const
 {
-    if(_configuration.interval_newton_reduction_enabled()
-       && literals.size()==domain.dimension()) {
-        Bool square_equalities=not literals.empty();
-        ExactIntervalType const zero_bounds(0,0);
-        for(auto const& literal:literals) {
-            if(literal.strict_lower
-               || literal.strict_upper
-               || not definitely(literal.bounds==zero_bounds)) {
-                square_equalities=false;
-                break;
+    std::vector<SizeType> const newton_subsystem=
+        _configuration.interval_newton_reduction_enabled()
+            ? interval_newton_subsystem_indices(literals,domain.dimension())
+            : std::vector<SizeType>();
+    if(not newton_subsystem.empty()) {
+        ++statistics.interval_newton_attempts;
+        auto const newton_start=std::chrono::steady_clock::now();
+        try {
+            ValidatedVectorMultivariateFunction function(
+                domain.dimension(),
+                literals[newton_subsystem[0u]].function.domain());
+            for(SizeType i=0u;i!=newton_subsystem.size();++i) {
+                function[i]=literals[newton_subsystem[i]].function;
+            }
+
+            Vector<SolverInterface::ValidatedNumericType> current=
+                cast_singleton(cast_exact_box(domain));
+            IntervalNewtonSolver newton_solver(1e-12,1u);
+            Vector<SolverInterface::ValidatedNumericType> image=
+                newton_solver.step(function,current);
+
+            if(not consistent(image,current)) {
+                ++statistics.interval_newton_infeasible;
+                statistics.interval_newton_seconds+=
+                    elapsed_seconds(newton_start);
+                return true;
+            }
+
+            Bool effective=false;
+            for(SizeType i=0u;i!=domain.dimension();++i) {
+                auto contracted=refinement(image[i],current[i]);
+                UpperIntervalType next(
+                    contracted.lower(),contracted.upper());
+                Bool const same_lower=
+                    next.lower_bound().raw()==domain[i].lower_bound().raw();
+                Bool const same_upper=
+                    next.upper_bound().raw()==domain[i].upper_bound().raw();
+                if(not (same_lower && same_upper)) {
+                    effective=true;
+                }
+                domain[i]=next;
+            }
+            if(effective) {
+                ++statistics.interval_newton_effective;
             }
         }
-
-        if(square_equalities) {
-            ++statistics.interval_newton_attempts;
-            auto const newton_start=std::chrono::steady_clock::now();
-            try {
-                ValidatedVectorMultivariateFunction function(
-                    literals.size(),literals[0u].function.domain());
-                for(SizeType i=0u;i!=literals.size();++i) {
-                    function[i]=literals[i].function;
-                }
-
-                Vector<SolverInterface::ValidatedNumericType> current=
-                    cast_singleton(cast_exact_box(domain));
-                IntervalNewtonSolver newton_solver(1e-12,1u);
-                Vector<SolverInterface::ValidatedNumericType> image=
-                    newton_solver.step(function,current);
-
-                if(not consistent(image,current)) {
-                    ++statistics.interval_newton_infeasible;
-                    statistics.interval_newton_seconds+=
-                        elapsed_seconds(newton_start);
-                    return true;
-                }
-
-                Bool effective=false;
-                for(SizeType i=0u;i!=domain.dimension();++i) {
-                    auto contracted=refinement(image[i],current[i]);
-                    UpperIntervalType next(
-                        contracted.lower(),contracted.upper());
-                    Bool const same_lower=
-                        next.lower_bound().raw()==domain[i].lower_bound().raw();
-                    Bool const same_upper=
-                        next.upper_bound().raw()==domain[i].upper_bound().raw();
-                    if(not (same_lower && same_upper)) {
-                        effective=true;
-                    }
-                    domain[i]=next;
-                }
-                if(effective) {
-                    ++statistics.interval_newton_effective;
-                }
-            }
-            catch(const SingularMatrixException&) {
-                ++statistics.interval_newton_singular;
-            }
-            statistics.interval_newton_seconds+=
-                elapsed_seconds(newton_start);
+        catch(const SingularMatrixException&) {
+            ++statistics.interval_newton_singular;
         }
+        statistics.interval_newton_seconds+=
+            elapsed_seconds(newton_start);
     }
 
     ConstraintSolver contractor;
@@ -667,10 +682,14 @@ SmtSolver::_direct_classification(
     ReductionStatistics& statistics) const
 {
     DirectClassification result;
+    Bool const interval_newton_eligible=
+        _configuration.interval_newton_reduction_enabled()
+        && not interval_newton_subsystem_indices(
+            literals,domain.dimension()).empty();
     if(_configuration.hull_reduction_enabled()
        || _configuration.shaving_reduction_enabled()
        || _configuration.monotone_reduction_enabled()
-       || _configuration.interval_newton_reduction_enabled()) {
+       || interval_newton_eligible) {
         return result;
     }
 
@@ -2567,7 +2586,15 @@ class SmtDpllSearch {
             _solver.configuration().theory_minimization_budget(),
             _solver.configuration().learned_clause_limit(),
             remaining,
-            _solver.configuration().candidate_search_enabled()));
+            _solver.configuration().candidate_search_enabled(),
+            _solver.configuration().monotone_reduction_enabled(),
+            _solver.configuration().sensitivity_split_enabled(),
+            _solver.configuration().deterministic_witness_probing_enabled(),
+            _solver.configuration().shaving_reduction_enabled(),
+            _solver.configuration().hull_reduction_enabled(),
+            _solver.configuration().interval_lookahead_split_enabled(),
+            _solver.configuration().upper_child_first(),
+            _solver.configuration().interval_newton_reduction_enabled()));
         return _parallel
             ? theory_solver.solve_parallel(_space,_domain,literals)
             : theory_solver.solve(_space,_domain,literals);

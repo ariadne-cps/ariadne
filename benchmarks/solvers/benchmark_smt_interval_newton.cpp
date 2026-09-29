@@ -25,12 +25,15 @@ String mode_from_argument(Int argc,const char* argv[])
     String const mode(argv[1]);
     if(mode=="contract" || mode=="infeasible" || mode=="singular"
        || mode=="smt-contract" || mode=="smt-infeasible"
-       || mode=="smt-singular") {
+       || mode=="smt-singular" || mode=="smt-mixed-contract"
+       || mode=="smt-overdetermined-infeasible"
+       || mode=="smt-underdetermined") {
         return mode;
     }
     throw std::runtime_error(
         "Usage: benchmark_smt_interval_newton "
-        "[contract|infeasible|singular|smt-contract|smt-infeasible|smt-singular]");
+        "[contract|infeasible|singular|smt-contract|smt-infeasible|smt-singular|"
+        "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -54,26 +57,51 @@ Int main(Int argc,const char* argv[])
 {
     String const mode=mode_from_argument(argc,argv);
 
-    if(mode=="smt-contract" || mode=="smt-infeasible" || mode=="smt-singular") {
+    if(mode=="smt-contract" || mode=="smt-infeasible" || mode=="smt-singular"
+       || mode=="smt-mixed-contract"
+       || mode=="smt-overdetermined-infeasible"
+       || mode=="smt-underdetermined") {
         RealVariable rx("newton_x"), ry("newton_y");
         RealExpression ex=rx;
         RealExpression ey=ry;
         RealSpace space({rx,ry});
-        List<SmtTheoryPrimitiveLiteral> literals({
-            SmtTheoryPrimitiveLiteral(
-                sqr(ex)+sqr(ey)-1,
-                SmtTheoryPrimitiveRelation::EQ_ZERO),
-            SmtTheoryPrimitiveLiteral(
-                ex-ey,
-                SmtTheoryPrimitiveRelation::EQ_ZERO)
-        });
+
+        SmtTheoryPrimitiveLiteral circle(
+            sqr(ex)+sqr(ey)-1,
+            SmtTheoryPrimitiveRelation::EQ_ZERO);
+        SmtTheoryPrimitiveLiteral diagonal(
+            ex-ey,
+            SmtTheoryPrimitiveRelation::EQ_ZERO);
+        List<SmtTheoryPrimitiveLiteral> literals;
+        if(mode=="smt-mixed-contract") {
+            // Put a non-equality first to verify that subsystem extraction
+            // scans for EQ_ZERO literals rather than taking the first n.
+            literals.append(SmtTheoryPrimitiveLiteral(
+                ex,SmtTheoryPrimitiveRelation::GEQ_ZERO));
+            literals.append(circle);
+            literals.append(diagonal);
+        } else if(mode=="smt-overdetermined-infeasible") {
+            literals.append(circle);
+            literals.append(diagonal);
+            literals.append(SmtTheoryPrimitiveLiteral(
+                2*(ex-ey),SmtTheoryPrimitiveRelation::EQ_ZERO));
+        } else if(mode=="smt-underdetermined") {
+            literals.append(circle);
+            literals.append(SmtTheoryPrimitiveLiteral(
+                ex,SmtTheoryPrimitiveRelation::GEQ_ZERO));
+        } else {
+            literals.append(circle);
+            literals.append(diagonal);
+        }
 
         ExactBoxType domain=
-            mode=="smt-contract"
+            (mode=="smt-contract" || mode=="smt-mixed-contract"
+             || mode=="smt-underdetermined")
                 ? ExactBoxType({
                     ExactIntervalType(0.5_x,1.0_x),
                     ExactIntervalType(0.5_x,1.0_x)})
-                : mode=="smt-infeasible"
+                : (mode=="smt-infeasible"
+                   || mode=="smt-overdetermined-infeasible")
                     ? ExactBoxType({
                         ExactIntervalType(0.8_x,1.0_x),
                         ExactIntervalType(0.8_x,1.0_x)})

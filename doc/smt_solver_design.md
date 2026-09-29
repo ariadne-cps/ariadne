@@ -3669,3 +3669,43 @@ This confirms that validated Newton disjointness is correctly promoted to an
 SMT box prune for eligible square `EQ_ZERO` conjunctions. The remaining
 integration guard is `smt-singular`: it must record a singular skip, perform
 no Newton prune, and continue through the ordinary epsilon/split path.
+
+
+The SMT-integrated `smt-singular` run passes the final square-system guard.
+With a one-box budget it records exactly one Newton attempt and one singular
+skip, no effective contraction and no Newton infeasibility proof. The solver
+does not prune the box; it continues through the ordinary path, splits once,
+and returns `UNKNOWN/RESOURCE_EXHAUSTED`. Total runtime is about 0.660 ms,
+with about 0.508 ms in the failed Newton applicability check. The initial
+square-`EQ_ZERO` vertical slice is therefore semantically accepted.
+
+The next extension extracts a square equality subsystem from a larger compiled
+conjunction. The first policy is intentionally deterministic rather than
+rank-aware: scan the compiled literals in order and select the first `n`
+closed zero-bound literals for an `n`-dimensional domain. Other inequalities
+and extra equalities remain fully active in normal propagation and epsilon
+checking; they are ignored only when constructing the Newton vector function.
+This is sound because every solution of the full conjunction is necessarily a
+solution of any selected equality subset. If fewer than `n` equalities are
+available, Newton is not attempted and the fused-direct path remains available.
+
+This first-`n` policy has a deliberate known limitation: the selected
+Jacobian may be singular even when another subset of the available equalities
+would be regular. No combinatorial or rank-guided fallback is introduced yet;
+that case will be measured explicitly after basic extraction is validated.
+
+The Boolean SMT recursion now also preserves the complete parent
+`SmtSolverConfiguration` when constructing its bounded theory solver. This is
+required for the opt-in Newton flag to reach theory conjunctions obtained from
+a Boolean predicate, and also removes the pre-existing inconsistency whereby
+non-default monotone/sensitivity/witness/shaving/hull/lookahead/child-order
+settings were silently reset to constructor defaults inside Boolean theory
+checks.
+
+Three extraction diagnostics are added. `smt-mixed-contract` places a
+`GEQ_ZERO` literal before the two usable equalities and should still perform
+one effective Newton contraction. `smt-overdetermined-infeasible` supplies
+three equalities in two variables and should select the first two and reject the
+root box by Newton. `smt-underdetermined` supplies only one equality in two
+variables and must perform zero Newton attempts, exercising the unchanged
+non-Newton path. The mixed case is the first acceptance gate.

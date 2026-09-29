@@ -2571,3 +2571,34 @@ subdivision is now used only to evaluate local term and complete-sum hulls on
 the current box; traversal always continues through the retained geometric
 children. A valid 256-box rerun must reproduce `processed=256`,
 `pruned=123` and `split=133` before any attribution result is interpreted.
+
+
+The corrected 256-box correlation-attribution run is valid: it reproduces the
+established frontier with 256 processed boxes, 123 pruned and 133 split. On
+those 133 inspected boxes the direct db/dy width averages about 5.588. Taking
+the sum of per-neuron term hulls after a common four-quadrant subdivision
+reduces that to about 4.144, a 25.8% recovery attributable to dependency within
+the individual neuron contributions. Evaluating the complete db/dy sum on the
+same quadrants reduces the hull further to about 3.612, an additional 9.5% of
+the original width from cross-neuron correlation/cancellation. Total recovery
+at this diagnostic subdivision is about 35.4%.
+
+Thus roughly 73% of the width recovered by this coarse common partition comes
+from intra-neuron dependency and about 27% from correlation across different
+neuron contributions. The quadrant evaluator is only a diagnostic and these
+fractions are not directly available to a single natural interval evaluation,
+but they identify the local product as the first algebraic target while showing
+that the final sum still contains non-negligible lost correlation.
+
+Query `lie-gradient-local-factor-profile` therefore keeps the barrier,
+db/dx, dynamics and outer Lie form unchanged and varies only where the
+second-layer activation derivative factor is applied inside db/dy. The current
+forward form multiplies
+`a2_i=(1-h2_i^2)` by the complete 64-term `dzdy_i` sum. Algebraically
+equivalent candidates partition that sum into blocks of 1, 2, 4, 8, 16, 32 and
+64 first-layer terms and apply `a2_i` separately to each block before summing.
+Block 64 is intentionally included as a structural control and should reproduce
+the baseline. If an intermediate block improves the validated Lie range, it
+provides a concrete local factor-placement rule for dependency-aware
+optimisation; if all smaller blocks degrade monotonically toward block 1, the
+fully factored current form is already the best endpoint of this family.

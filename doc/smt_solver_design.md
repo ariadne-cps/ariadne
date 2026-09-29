@@ -2829,3 +2829,41 @@ Procedure type. The fix is deliberately local: `smt_solver.cpp` includes
 forward declaration. The aggregate initializer now also initializes the cache
 field explicitly to null before assigning the compiled Procedure, avoiding the
 missing-field warning. No propagation semantics are changed.
+
+
+### Cached-Procedure result and agenda benchmark baseline
+
+The first cached-Procedure Barr3 run succeeds structurally. With hull reduction
+enabled, shaving and monotonicity disabled, and a 256-box budget, the solver
+reports zero hot-loop Procedure builds. This confirms that SMT theory
+compilation now owns the reusable forward/backward Procedure. The search
+processes 256 boxes, prunes 124 and splits 132, compared with 123/133 for the
+natural no-hull baseline.
+
+The performance result is negative for Procedure construction as an
+optimisation target. Total time is about 143.98 s. Hull contraction consumes
+about 134.34 s, of which about 127.44 s is forward Procedure execution and
+6.79 s is backward propagation. Procedure-build time is zero in the hot loop.
+Thus repeated compilation was not the dominant hull cost; evaluating the large
+Barr3 expression is. Hull propagation is also ineffective as a surviving-box
+contractor on this benchmark: `hull_effective=0`. It can reject one additional
+box directly, but does not narrow any surviving domain.
+
+This result is important for interpreting the next IBEX-inspired step.
+Dependency-driven propagation should not be judged primarily on Barr3: the
+benchmark has only two theory literals and produces no effective hull
+contractions, so there are almost no dependency-triggered wakeups to exploit.
+The agenda is instead evaluated first on a sparse chain benchmark where its
+intended workload is explicit.
+
+Executable `benchmark_constraint_propagation` constructs N variables initially
+in [0,1] with the sparse equalities
+`x0=0, x1=x0, x2=x1, ..., x(N-1)=x(N-2)`. Constraints are deliberately
+stored in reverse dependency order. The current sequential full-scan fixed
+point can therefore expose only one new coordinate contraction per pass and
+must revisit many unrelated constraints. All constraints use cached Procedures,
+so Procedure construction is removed from the comparison. A new
+`hull_contractor_calls` statistic counts actual forward/backward contractor
+executions. The baseline run at N=64 establishes the call count and final box
+before introducing any agenda scheduling; the later agenda implementation must
+reach the same final width while materially reducing this count.

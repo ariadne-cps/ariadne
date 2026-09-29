@@ -185,6 +185,7 @@ Bool ConstraintSolver::propagate(
 
                 ProcedureHullReductionStatistics hull_statistics;
                 phase_start=std::chrono::steady_clock::now();
+                ++statistics.hull_contractor_calls;
                 Bool const hull_empty=this->hull_reduce(
                     domain,procedure,bounds,hull_statistics);
                 statistics.hull_contraction_seconds+=
@@ -308,6 +309,7 @@ Bool ConstraintSolver::propagate(
 
                 ProcedureHullReductionStatistics hull_statistics;
                 phase_start=std::chrono::steady_clock::now();
+                ++statistics.hull_contractor_calls;
                 Bool const hull_empty=this->hull_reduce(
                     domain,*procedure,constraint.bounds,hull_statistics);
                 statistics.hull_contraction_seconds+=

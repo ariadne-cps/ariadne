@@ -70,6 +70,7 @@ template<class X> struct FeasibilityState {
 struct ConstraintPropagationStatistics {
     SizeType hull_rounds = 0u;
     SizeType hull_effective = 0u;
+    SizeType hull_contractor_calls = 0u;
     SizeType hull_procedure_builds = 0u;
     double hull_procedure_build_seconds = 0.0;
     double hull_contraction_seconds = 0.0;
@@ -97,7 +98,7 @@ struct ConstraintPropagationConstraint {
     // Optional precompiled forward/backward procedure. SMT literals populate
     // this once during theory compilation so hot propagation rounds do not
     // rebuild the same instruction DAG for every box.
-    std::shared_ptr<const ValidatedProcedure> hull_procedure;
+    std::shared_ptr<const ValidatedProcedure> hull_procedure = nullptr;
 };
 
 

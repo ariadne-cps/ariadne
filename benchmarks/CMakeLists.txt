@@ -8,3 +8,5 @@ foreach(BENCHMARK ${BENCHMARKS})
 endforeach()
 
 add_dependencies(benchmarks ${BENCHMARKS})
+
+add_subdirectory(solvers)

@@ -2631,3 +2631,40 @@ Barrier, db/dx, dynamics and the outer Lie factorisation remain unchanged. This
 tests the dependency identified by the attribution profile directly, without
 moving the activation factor across the weighted sum or introducing any second
 range evaluator.
+
+
+The 256-box local-product gate closes the remaining manually motivated
+algebraic rewrites of the forward neural derivative. The direct reconstruction
+is exactly the established baseline: root width about 1123.56, 267,856
+Procedure instructions, 123 pruned boxes, average frontier width about 24.325
+and about 5.14 s evaluation time. The Horner-like local form
+`q-h*(h*q)` is dramatically weaker: root width about 2326.94, zero pruned
+boxes, average width about 54.04, 378,576 instructions and about 7.43 s.
+The complement-product form `(1-h)*(1+h)*q` is weaker still in root range
+(width about 3620.38) and prunes only 5 boxes, with average width about 57.57.
+Neither alternative gains a single prune unavailable to the baseline.
+
+Together with the outer-form, directional, reverse/block reassociation and
+factor-placement experiments, this is sufficient evidence to close the current
+dependency-aware algebraic natural-interval search. The existing forward form
+consistently wins when state-dependent factors are kept maximally factored and
+applied as late as possible. The correlation-attribution experiment still shows
+that materially tighter validated ranges exist on the same boxes, but the
+tested exact rewrites cannot expose that information to ordinary interval
+arithmetic.
+
+Before starting the larger validated Chebyshev/Bernstein model layer, one
+smaller evidence-driven second-tier gate is worthwhile. Query
+`lie-gradient-quadrant-prune-profile` compiles the existing db/dy expression
+to a Procedure and, on every baseline-unpruned box, evaluates db/dy on the same
+four x/y quadrants used by the successful correlation diagnostic. The four
+images are hulled and intersected with the natural db/dy range, then recomposed
+with the unchanged db/dx, dynamics and barrier ranges. The baseline alone still
+controls the DFS. The profile reports additional Lie pruning, range widths and
+the isolated cost of the four compiled quadrant evaluations. Unlike the earlier
+quadrant sign diagnostic, this test measures solver-relevant pruning and applies
+the tightened db/dy range even when its natural interval is already
+sign-definite. A strong pruning gain at modest cost would justify testing this
+targeted subdomain tier in the changed search tree; a weak gain would close the
+subdivision detour and make the validated Chebyshev/Bernstein vertical slice
+the next development target.

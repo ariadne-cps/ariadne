@@ -4121,3 +4121,29 @@ is the primary acceptance metric. Only a stable median improvement should be
 used to claim that one-sweep staging pays off in 2D; otherwise the change is
 retained only for contraction quality and must be rechecked on the 3D/4D cases
 before any scheduling conclusion.
+
+
+The repeated 2D coupled timing gate rejects a runtime-win claim for staged
+Newton. After 10 warm-up solves and 101 measured solves per variant, the
+hull+shaving baseline has median runtime about 1.40167 ms and mean runtime
+about 1.42534 ms. The staged Newton variant has median runtime about
+1.45488 ms and mean runtime about 1.46052 ms. Thus Newton is about 3.8% slower
+on the median and about 2.5% slower on the mean. The measured ranges also
+overlap substantially.
+
+The qualitative effect of staging is real but not amortized in this 2D case.
+The Newton step is now effective, unlike the eager-root attempt, but both
+variants still process one box with zero splits and report the same 120 hull
+rounds / 119 effective hull rounds. Median Newton time is only about 14.5 us,
+yet the end-to-end delta is larger, indicating that the pre-sweep/restarted
+propagation structure also carries overhead. Therefore the 2D coupled case is
+classified as: contraction-quality improvement, no search reduction, no stable
+runtime win.
+
+Before deciding whether one-sweep staging should remain the production ordering,
+the existing positive higher-dimensional cases must be rerun under the new
+ordering. The first regression is the 3D coupled benchmark, previously about
+7.2x faster with eager Newton. A large retained advantage there would support
+staging as a general equality-contracting order despite its small 2D cost;
+a lost advantage would require a more selective scheduler rather than a global
+pre-sweep.

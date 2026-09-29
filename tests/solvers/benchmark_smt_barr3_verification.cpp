@@ -5,6 +5,7 @@
  * counterexample queries using Ariadne's epsilon-SMT solver.
  ***************************************************************************/
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
@@ -43,12 +44,12 @@ SizeType box_limit_from_argument(Int argc,const char* argv[]) {
 String query_from_argument(Int argc,const char* argv[]) {
     if(argc<=6) { return "all"; }
     String argument(argv[6]);
-    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile" || argument=="lie-directional-propagation-profile" || argument=="lie-layer2-directional-profile" || argument=="lie-gradient-block-reassociation-profile") { return argument; }
+    if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile" || argument=="lie-directional-propagation-profile" || argument=="lie-layer2-directional-profile" || argument=="lie-gradient-block-reassociation-profile" || argument=="lie-gradient-width-attribution-profile") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile]");
 }
 
 Bool monotone_from_argument(Int argc,const char* argv[]) {
@@ -60,7 +61,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile] [monotone|no-monotone]");
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile] [monotone|no-monotone]");
 }
 
 String lie_literal_order_from_argument(Int argc,const char* argv[]) {
@@ -71,7 +72,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
 }
 
@@ -83,7 +84,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "Usage: benchmark_smt_barr3_verification "
         "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
-        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile] [monotone|no-monotone] "
+        "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
@@ -2406,7 +2407,7 @@ Void profile_lie_gradient_cse_pruning(
         return count==0u ? 0.0 : sum/static_cast<double>(count);
     };
 
-    std::cout << "[lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile]"
+    std::cout << "[lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile]"
               << " time=" << stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2609,7 +2610,7 @@ Void profile_lie_root_cse_range(
         return count==0u ? 0.0 : sum/static_cast<double>(count);
     };
 
-    std::cout << "[lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile]"
+    std::cout << "[lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile]"
               << " time=" << stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2806,7 +2807,7 @@ Void profile_lie_root_cse_search(
     }
     search_stopwatch.click();
 
-    std::cout << "[lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile]"
+    std::cout << "[lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile]"
               << " search-time=" << search_stopwatch.elapsed_seconds()
               << " derivative-build-time="
               << derivative_stopwatch.elapsed_seconds()
@@ -2946,6 +2947,200 @@ Void profile_lie_algebraic_forms(
 
 
 
+
+
+Vector<RealExpression> gradient_width_attribution_expressions(
+    RealExpression const& x0,
+    RealExpression const& x1)
+{
+    auto const& p=TestBarr3Full64::parameters();
+    constexpr SizeType width=TestBarr3Full64::width;
+    auto c=[&](SizeType i) { return TestBarr3Full64::constant(p[i]); };
+
+    std::array<RealExpression,width> h1;
+    std::array<RealExpression,width> a1;
+    std::array<RealExpression,width> dh1_dy;
+    for(SizeType j=0u;j!=width;++j) {
+        RealExpression z=c(TestBarr3Full64::b1_offset+j)
+            + c(TestBarr3Full64::w1_offset+2u*j)*x0
+            + c(TestBarr3Full64::w1_offset+2u*j+1u)*x1;
+        h1[j]=tanh(z);
+        a1[j]=1-sqr(h1[j]);
+        dh1_dy[j]=
+            a1[j]*c(TestBarr3Full64::w1_offset+2u*j+1u);
+    }
+
+    Vector<RealExpression> expressions(3u*width+1u);
+    RealExpression db_dy=RealExpression(0);
+    for(SizeType i=0u;i!=width;++i) {
+        RealExpression z=c(TestBarr3Full64::b2_offset+i);
+        RealExpression dz_dy=RealExpression(0);
+        for(SizeType j=0u;j!=width;++j) {
+            RealExpression w=c(TestBarr3Full64::w2_offset+width*i+j);
+            z=z+w*h1[j];
+            dz_dy=dz_dy+w*dh1_dy[j];
+        }
+        RealExpression h2=tanh(z);
+        RealExpression a2=1-sqr(h2);
+        RealExpression term=
+            c(TestBarr3Full64::w3_offset+i)*a2*dz_dy;
+
+        expressions[i]=a2;
+        expressions[width+i]=dz_dy;
+        expressions[2u*width+i]=term;
+        db_dy=db_dy+term;
+    }
+    expressions[3u*width]=db_dy;
+    return expressions;
+}
+
+Void profile_lie_gradient_width_attribution(
+    SizeType box_limit,
+    UpperBoxType const& domain,
+    RealSpace const& space,
+    RealExpression const& lie_expression,
+    Vector<RealExpression> const& expressions)
+{
+    constexpr SizeType width=TestBarr3Full64::width;
+    auto const& p=TestBarr3Full64::parameters();
+
+    Stopwatch<Milliseconds> build_stopwatch;
+    Vector<Formula<EffectiveNumber>> formulae=
+        make_formula(expressions,space);
+    Vector<EffectiveProcedure> procedure(
+        space.dimension(),formulae);
+    ValidatedProcedure lie_procedure(
+        make_function(space,lie_expression));
+    build_stopwatch.click();
+
+    std::array<double,width> a2_width_sum{};
+    std::array<double,width> dz_width_sum{};
+    std::array<double,width> term_width_sum{};
+    std::array<SizeType,width> a2_touches_zero{};
+    std::array<SizeType,width> dz_cross_zero{};
+    std::array<SizeType,width> term_cross_zero{};
+
+    SizeType processed=0u;
+    SizeType pruned=0u;
+    SizeType inspected=0u;
+    SizeType split=0u;
+    double db_dy_width_sum=0.0;
+    double term_width_total=0.0;
+    double evaluation_seconds=0.0;
+
+    std::vector<UpperBoxType> pending;
+    pending.push_back(domain);
+
+    Stopwatch<Milliseconds> total_stopwatch;
+    while(not pending.empty() && processed<box_limit) {
+        UpperBoxType box=std::move(pending.back());
+        pending.pop_back();
+        ++processed;
+
+        auto arguments=bounds_arguments(box);
+        UpperIntervalType lie_image=
+            make_interval(evaluate(lie_procedure,arguments));
+        if(definitely(lie_image.lower_bound()>=0)) {
+            ++pruned;
+            continue;
+        }
+
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++split;
+        ++inspected;
+
+        Stopwatch<Milliseconds> evaluation_stopwatch;
+        Vector<FloatDPBounds> images=evaluate(procedure,arguments);
+        evaluation_stopwatch.click();
+        evaluation_seconds+=evaluation_stopwatch.elapsed_seconds();
+
+        UpperIntervalType db_dy_image=
+            make_interval(images[3u*width]);
+        db_dy_width_sum+=db_dy_image.width().raw().get_d();
+
+        for(SizeType i=0u;i!=width;++i) {
+            UpperIntervalType a2=make_interval(images[i]);
+            UpperIntervalType dz=make_interval(images[width+i]);
+            UpperIntervalType term=make_interval(images[2u*width+i]);
+
+            double const a2_width=a2.width().raw().get_d();
+            double const dz_width=dz.width().raw().get_d();
+            double const term_width=term.width().raw().get_d();
+
+            a2_width_sum[i]+=a2_width;
+            dz_width_sum[i]+=dz_width;
+            term_width_sum[i]+=term_width;
+            term_width_total+=term_width;
+
+            if(definitely(a2.lower_bound()<=0)
+                    && definitely(a2.upper_bound()>=0)) {
+                ++a2_touches_zero[i];
+            }
+            if(crosses_zero(dz)) {
+                ++dz_cross_zero[i];
+            }
+            if(crosses_zero(term)) {
+                ++term_cross_zero[i];
+            }
+        }
+
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
+    }
+    total_stopwatch.click();
+
+    std::array<SizeType,width> order{};
+    for(SizeType i=0u;i!=width;++i) { order[i]=i; }
+    std::sort(
+        order.begin(),order.end(),
+        [&](SizeType lhs,SizeType rhs) {
+            return term_width_sum[lhs]>term_width_sum[rhs];
+        });
+
+    auto average=[&](double sum) {
+        return inspected==0u ? 0.0 : sum/static_cast<double>(inspected);
+    };
+
+    std::cout << "[lie-gradient-width-attribution-profile]"
+              << " time=" << total_stopwatch.elapsed_seconds()
+              << " build-time=" << build_stopwatch.elapsed_seconds()
+              << " evaluation-time=" << evaluation_seconds
+              << " procedure-instructions=" << procedure.temporaries_size()
+              << " processed=" << processed
+              << " pruned=" << pruned
+              << " split=" << split
+              << " inspected=" << inspected
+              << " avg-db-dy-width=" << average(db_dy_width_sum)
+              << " avg-sum-term-width=" << average(term_width_total)
+              << std::endl;
+
+    double cumulative=0.0;
+    SizeType const report_count=std::min(SizeType(12u),width);
+    for(SizeType rank=0u;rank!=report_count;++rank) {
+        SizeType const i=order[rank];
+        cumulative+=term_width_sum[i];
+        double const share=
+            term_width_total==0.0 ? 0.0 : term_width_sum[i]/term_width_total;
+        double const cumulative_share=
+            term_width_total==0.0 ? 0.0 : cumulative/term_width_total;
+        std::cout << "[lie-gradient-width-attribution-neuron]"
+                  << " rank=" << rank+1u
+                  << " neuron=" << i
+                  << " w3=" << p[TestBarr3Full64::w3_offset+i]
+                  << " avg-term-width=" << average(term_width_sum[i])
+                  << " width-share=" << share
+                  << " cumulative-share=" << cumulative_share
+                  << " avg-dz-width=" << average(dz_width_sum[i])
+                  << " dz-cross-zero=" << dz_cross_zero[i]
+                  << " avg-a2-width=" << average(a2_width_sum[i])
+                  << " a2-touches-zero=" << a2_touches_zero[i]
+                  << " term-cross-zero=" << term_cross_zero[i]
+                  << std::endl;
+    }
+}
 
 struct GradientBlockForms {
     RealExpression barrier;
@@ -4029,6 +4224,15 @@ Int main(Int argc,const char* argv[]) {
             lie_barrier,x,y,space,
             lie_function,barrier_function,
             lie_literal_order,upper_child_first);
+        return 0;
+    }
+
+    if(query=="lie-gradient-width-attribution-profile") {
+        Vector<RealExpression> expressions=
+            gradient_width_attribution_expressions(ex,ey);
+        profile_lie_gradient_width_attribution(
+            box_limit,UpperBoxType(domain),space,
+            network.lie+network.barrier,expressions);
         return 0;
     }
 

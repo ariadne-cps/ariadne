@@ -2486,3 +2486,40 @@ so that shared first-layer derivative terms are factored only within small
 blocks rather than across the whole layer. This directly asks whether there is
 a useful granularity between the strong forward form and the weak full reverse
 form, while retaining one ordinary natural interval evaluation.
+
+
+The 256-box blockwise reassociation profile is decisively negative for the
+entire tested family. The forward baseline again prunes 123 boxes and splits
+133, with average Lie-plus-barrier width about 24.325 and about 5.50 s of
+baseline evaluation time. Blocks of 2, 4, 8, 16 and 32 second-layer neurons
+prune only 11, 17, 21, 27 and 31 boxes respectively; none gains a single prune
+that the baseline misses. Average widths remain much worse than baseline,
+decreasing only from about 31.261 at block size 2 to about 30.129 at block size
+32. The root enclosure is identical across all five candidates
+(approximately [-608.557,607.609], width 1216.17), still wider than the
+baseline root width 1123.56.
+
+The computational profile is equally unfavorable. The baseline Procedure has
+267,856 instructions, whereas the block candidates contain roughly
+3.08--3.11 million instructions each and require about 69--70 s of evaluation
+time apiece on the 256-box diagnostic, versus about 5.5 s for the baseline.
+The monotone improvement in pruning as block size increases is not evidence for
+a useful intermediate granularity: even the largest tested block loses 92
+baseline prunes, and the whole family is both much wider and an order of
+magnitude larger. This closes the forward-to-reverse reassociation family as a
+practical dependency-aware optimisation target.
+
+The next step therefore stops guessing whole-expression parenthesisations and
+attributes the width of the successful forward `db/dy` form to its actual
+second-layer neuron contributions. Query
+`lie-gradient-width-attribution-profile` retains the established baseline DFS
+frontier and, on boxes that survive the Lie range test, measures for every
+second-layer neuron the validated width of its local
+`w3_i*(1-h2_i^2)*dzdy_i` contribution, together with the widths and
+zero-crossing frequency of `dzdy_i` and the activation derivative factor
+`1-h2_i^2`. It reports the highest-width contributors aggregated across the
+frontier. The purpose is diagnostic: if a small subset of neurons dominates the
+forward derivative width, the next algebraic rewrite can target their local
+structure; if width is diffuse across the layer, local hand rewrites are
+unlikely to scale and the optimiser needs a more global scoring/search
+mechanism.

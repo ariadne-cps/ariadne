@@ -95,19 +95,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Configuration
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/utility|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/logging|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-    )
-    require_same_dependency_commit(Utility
-        REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/utility"
-    )
-    require_same_dependency_commit(Logging
-        REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/logging"
-            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/logging"
     )
 endif()
 
@@ -166,9 +154,9 @@ add_subdirectory(submodules)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/source
-    ${PROJECT_SOURCE_DIR}/submodules/logging/include
+    ${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging/include
     ${PROJECT_SOURCE_DIR}/submodules/threading/include
-    ${PROJECT_SOURCE_DIR}/submodules/utility/include
+    ${PROJECT_SOURCE_DIR}/submodules/threading/submodules/utility/include
 )
 
 add_subdirectory(source)
@@ -292,6 +280,6 @@ install(FILES
     DESTINATION lib/cmake/Ariadne
 )
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/logging/include/logging DESTINATION include/ariadne)
+install(DIRECTORY submodules/threading/submodules/logging/include/logging DESTINATION include/ariadne)
 install(DIRECTORY submodules/threading/include/threading DESTINATION include/ariadne)
-install(DIRECTORY submodules/utility/include/utility DESTINATION include/ariadne)
+install(DIRECTORY submodules/threading/submodules/utility/include/utility DESTINATION include/ariadne)

@@ -1,15 +1,9 @@
 [submodule "python/pybind11"]
 	path = python/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "submodules/logging"]
-	path = submodules/logging
-	url = https://github.com/ariadne-cps/logging
 [submodule "submodules/threading"]
 	path = submodules/threading
 	url = https://github.com/ariadne-cps/threading
-[submodule "submodules/utility"]
-	path = submodules/utility
-	url = https://github.com/ariadne-cps/utility
 [submodule "submodules/configuration"]
 	path = submodules/configuration
 	url = https://github.com/ariadne-cps/configuration

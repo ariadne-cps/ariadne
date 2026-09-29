@@ -9,9 +9,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
-enable_testing()
-include(CTest)
-
 include(UseDoxygen OPTIONAL)
 
 include(CheckIncludeFile)
@@ -86,7 +83,6 @@ if(NOT CAIRO_FOUND AND NOT GNUPLOT_FOUND)
 endif()
 
 add_custom_target(everything)
-add_custom_target(tests)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
@@ -95,9 +91,7 @@ add_subdirectory(submodules)
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
-add_subdirectory(python)
 
-add_subdirectory(tests EXCLUDE_FROM_ALL)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
@@ -151,20 +145,22 @@ target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-if(COVERAGE)
-    set(_ariadne_coverage_filter_args)
-    if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
-        list(APPEND _ariadne_coverage_filter_args
-            EXCLUDE_REGEX ".*/(tests|python|submodules)/.*")
-    endif()
-
-    setup_project_coverage(
-        TARGET ariadne
-        TEST_TARGET tests
-        SOURCES "${PROJECT_SOURCE_DIR}/source"
-        ${_ariadne_coverage_filter_args}
-    )
+set(_ariadne_coverage_filter_args)
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+    list(APPEND _ariadne_coverage_filter_args
+        EXCLUDE_REGEX ".*/(tests|python|submodules)/.*")
 endif()
+
+setup_standalone_project_tests(
+    EXCLUDE_FROM_ALL
+    TARGET ariadne
+    TEST_DIRECTORY tests
+    TEST_TARGET tests
+    SOURCES "${PROJECT_SOURCE_DIR}/source"
+    ${_ariadne_coverage_filter_args}
+)
+
+add_subdirectory(python)
 
 if(CAIRO_FOUND)
     target_link_libraries(ariadne PUBLIC Cairo::Cairo)

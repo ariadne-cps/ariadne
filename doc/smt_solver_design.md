@@ -3741,3 +3741,23 @@ selected subset, so Newton rejection of the subset also rejects the full box.
 The remaining extraction guard is the underdetermined case, where fewer than
 `n` equalities are available. Newton must then perform zero attempts and the
 ordinary non-Newton theory path must remain unchanged.
+
+
+The `smt-underdetermined` extraction guard passes. With one equality and one
+inequality in two variables, the solver records zero Interval Newton attempts,
+zero effective Newton contractions, zero Newton infeasibility proofs and zero
+singular skips. It follows the ordinary theory path, splits once, and returns
+`UNKNOWN/RESOURCE_EXHAUSTED` under the one-box budget. Total runtime is about
+0.127 ms. This confirms that the opt-in Newton feature does not disable the
+fused-direct/non-Newton path when no square equality subsystem exists.
+
+The next diagnostic targets the known weakness of deterministic first-`n`
+selection. Mode `smt-first-subsystem-singular` uses three equalities in two
+variables over `[0.5,1]^2`: `x-y=0`, `2(x-y)=0`, and
+`x^2+y^2-1=0`. The first two selected rows are dependent, so their interval
+Jacobian is singular. However the pair `x-y=0` and
+`x^2+y^2-1=0` has determinant `2(x+y)`, bounded away from zero on this
+domain. The current first-`n` policy should therefore report one singular
+Newton attempt and no effective contraction. Observing that failure will
+justify a rank-aware or applicability-aware subset selector without relying on
+a hypothetical weakness.

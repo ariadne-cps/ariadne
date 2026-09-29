@@ -27,13 +27,15 @@ String mode_from_argument(Int argc,const char* argv[])
        || mode=="smt-contract" || mode=="smt-infeasible"
        || mode=="smt-singular" || mode=="smt-mixed-contract"
        || mode=="smt-overdetermined-infeasible"
-       || mode=="smt-underdetermined") {
+       || mode=="smt-underdetermined"
+       || mode=="smt-first-subsystem-singular") {
         return mode;
     }
     throw std::runtime_error(
         "Usage: benchmark_smt_interval_newton "
         "[contract|infeasible|singular|smt-contract|smt-infeasible|smt-singular|"
-        "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined]");
+        "smt-mixed-contract|smt-overdetermined-infeasible|smt-underdetermined|"
+        "smt-first-subsystem-singular]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -60,7 +62,8 @@ Int main(Int argc,const char* argv[])
     if(mode=="smt-contract" || mode=="smt-infeasible" || mode=="smt-singular"
        || mode=="smt-mixed-contract"
        || mode=="smt-overdetermined-infeasible"
-       || mode=="smt-underdetermined") {
+       || mode=="smt-underdetermined"
+       || mode=="smt-first-subsystem-singular") {
         RealVariable rx("newton_x"), ry("newton_y");
         RealExpression ex=rx;
         RealExpression ey=ry;
@@ -89,6 +92,14 @@ Int main(Int argc,const char* argv[])
             literals.append(circle);
             literals.append(SmtTheoryPrimitiveLiteral(
                 ex,SmtTheoryPrimitiveRelation::GEQ_ZERO));
+        } else if(mode=="smt-first-subsystem-singular") {
+            // The first two equalities are linearly dependent, while replacing
+            // the second by the circle equation yields a regular subsystem on
+            // [0.5,1]^2. This exposes the limitation of first-n selection.
+            literals.append(diagonal);
+            literals.append(SmtTheoryPrimitiveLiteral(
+                2*(ex-ey),SmtTheoryPrimitiveRelation::EQ_ZERO));
+            literals.append(circle);
         } else {
             literals.append(circle);
             literals.append(diagonal);
@@ -96,7 +107,8 @@ Int main(Int argc,const char* argv[])
 
         ExactBoxType domain=
             (mode=="smt-contract" || mode=="smt-mixed-contract"
-             || mode=="smt-underdetermined")
+             || mode=="smt-underdetermined"
+             || mode=="smt-first-subsystem-singular")
                 ? ExactBoxType({
                     ExactIntervalType(0.5_x,1.0_x),
                     ExactIntervalType(0.5_x,1.0_x)})

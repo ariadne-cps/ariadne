@@ -3147,3 +3147,37 @@ evaluations and shaving time. The first real-workload gate uses a 64-box
 geometric, no-witness, shaving, no-hull Lie query. Search-tree changes are
 compared with the established no-shaving/no-hull 64-box structure before any
 larger run is attempted.
+
+
+The 64-box Barr3 Lie query with adaptive shaving enabled and hull reduction
+disabled rejects shaving as an eager contractor for this workload. The run
+processes 64 boxes, prunes 28 and splits 36, compared with the established
+geometric/no-witness/no-shaving/no-hull baseline of 27 pruned and 37 split.
+Thus shaving avoids only one net split.
+
+The runtime cost is disproportionate. Total time is about 20.88 s, with
+16.22 s spent inside shaving, compared with about 2.77 s for the established
+64-box no-shaving/no-hull baseline on the same post-evaluator-fix machine.
+The run performs 85 shaving rounds, 18 effective rounds, 224 dependent
+coordinate attempts and 27 effective attempts. Adaptive scheduling skips
+48 dependent attempts, while dependency filtering skips none because both
+Barr3 variables are genuine dependencies of both active literals. Shaving
+requires 700 validated function evaluations.
+
+This is the key distinction between synthetic and real-workload results.
+Dependency filtering and the working-set-plus-refresh scheduler are accepted as
+general ConstraintSolver improvements because they preserve semantics and show
+clear benefits on sparse/selective systems with negligible regression cost.
+However, even after those improvements, Barr3 still pays a large validated
+evaluation cost for almost no search-tree reduction. ACID-like shaving is
+therefore rejected as an eager Barr3 contractor. No larger Barr3 shaving run is
+justified.
+
+The IBEX-inspired roadmap now advances to validated linear relaxation /
+polytope-hull contraction. Unlike shaving, this direction targets the specific
+failure mode repeatedly observed on Barr3: natural interval evaluation loses
+cross-variable/cross-term correlation, while explicit subdivision recovers some
+of it but is too expensive when applied eagerly. The first gate should therefore
+be an isolated fixed-frontier diagnostic that constructs a sound linear
+relaxation on the two-dimensional Barr3 boxes and measures contraction or
+pruning before any LP-based contractor is inserted into the search loop.

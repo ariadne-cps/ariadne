@@ -3638,3 +3638,20 @@ exhausted; `smt-infeasible` should be pruned by Newton at the root; and
 `smt-singular` should record one singular skip and continue without a Newton
 prune. These are the acceptance gates before considering non-square equality
 subsystem extraction.
+
+
+The first SMT-integrated Interval Newton run, `smt-contract`, passes the
+integration gate. With a one-box budget and all other contractors and witness
+heuristics disabled, the solver processes one box, performs exactly one Newton
+attempt, records one effective Newton contraction, and records neither
+infeasibility nor a singular-Jacobian skip. The contracted box is not yet an
+epsilon-certified whole-box witness, so the solver splits once and then returns
+`UNKNOWN/RESOURCE_EXHAUSTED` when the one-box budget is exhausted. Runtime is
+about 2.06 ms, with about 1.19 ms attributed to the Newton step.
+
+This confirms that the opt-in Newton contractor is actually on the SMT hot
+path, that the fused direct shortcut is correctly bypassed when Newton is
+enabled, and that a successful contraction is fed into the existing epsilon
+and split logic rather than being misclassified as a proof. The next gate is
+`smt-infeasible`: the same one-box configuration should be pruned at the root
+by Newton disjointness, with no split.

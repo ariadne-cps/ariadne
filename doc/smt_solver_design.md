@@ -2348,3 +2348,31 @@ mechanism. The next development direction returns to dependency-aware
 algebraic expression optimization, whose goal is to strengthen the natural
 interval extension itself without paying a second evaluator on every unresolved
 box.
+
+
+A separate polynomial-model direction is being retained for later rather than
+pursued immediately. The most promising architecture is not a pure Bernstein
+model, but a validated Chebyshev model used as the approximation/composition
+representation together with a Bernstein-form range bounder for the polynomial
+part. Chebyshev is the better fit for smooth analytic elementary functions such
+as tanh and for repeated composition through the network; Bernstein is the
+better fit for certified polynomial range bounds, positivity tests and cheap
+subdivision on the low-dimensional input box.
+
+A rigorous Chebyshev implementation would require a genuine model layer rather
+than merely changing the numeric type of the existing
+`ChebyshevPolynomial`: polynomial plus uniform remainder, explicit roundoff
+accounting, sweeping/truncation, validated elementary-function approximation,
+composition, scaling/restriction and a validated range routine. The existing
+Chebyshev polynomial code can likely serve as the algebraic kernel, but is
+currently approximate-only and lacks model semantics. A C0 model is sufficient
+for the Barr3 range-evaluation use case; derivative-aware parity with Taylor
+would require additional derivative remainder information rather than simply
+differentiating a polynomial-plus-uniform-error model.
+
+The preferred eventual vertical slice is therefore: validated C0 Chebyshev
+model on [-1,1]^n, validated tanh, polynomial/remainder propagation, then
+Chebyshev-to-Bernstein conversion for range certification and subdivision.
+This direction remains deferred while work returns to dependency-aware
+algebraic expression optimisation, whose immediate goal is to improve the
+natural interval extension itself without the cost of a second evaluator.

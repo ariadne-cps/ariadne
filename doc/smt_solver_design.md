@@ -3092,3 +3092,28 @@ belongs only in the precompiled propagation path and is now applied there when
 hull contraction changes the domain, because such a contraction invalidates
 the previously learned shaving working set. The generic propagation overload
 remains unchanged.
+
+
+The first adaptive `selective` run preserves the baseline final box exactly
+(`final-width-sum=10`) and keeps the same 64 effective coordinate
+contractions. Total shaving attempts fall from 384 to 320 (-16.7%), validated
+function evaluations from 1,152 to 1,024 (-11.1%), shaving time from about
+2.46 ms to 2.22 ms, and total runtime from about 3.01 ms to 2.55 ms. The run
+uses two full refresh rounds and two active-set rounds, with 192 dependent
+pairs skipped adaptively.
+
+The gain is real but modest because this selective system reaches its useful
+shaving fixed point after only two effective rounds. The conservative refresh
+rule adds one extra round: once the learned active set stalls, all genuine
+dependencies are retried before termination. This is the intended safety cost,
+not a semantic discrepancy.
+
+The working-set hypothesis is therefore only partially confirmed: it can avoid
+repeatedly trying poor dependent coordinates, but the benefit depends on those
+coordinates remaining poor across enough effective rounds to amortise the final
+refresh. The next acceptance gate is the diagonal regression. In that profile
+almost every genuine dependency is productive, so an adaptive scheduler should
+not create a material slowdown or alter the final box. If the diagonal case is
+stable, the working-set-plus-refresh policy is retained as the first ACID-like
+baseline; otherwise the policy is too eager and must be revised before moving
+to richer gain/cost scoring.

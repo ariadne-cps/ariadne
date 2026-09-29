@@ -3709,3 +3709,19 @@ three equalities in two variables and should select the first two and reject the
 root box by Newton. `smt-underdetermined` supplies only one equality in two
 variables and must perform zero Newton attempts, exercising the unchanged
 non-Newton path. The mixed case is the first acceptance gate.
+
+
+The `smt-mixed-contract` extraction diagnostic passes. The compiled
+conjunction starts with a `GEQ_ZERO` literal followed by the two square
+equalities. With a one-box budget and all other contractors and witness
+heuristics disabled, the solver still records exactly one Interval Newton
+attempt and one effective contraction, with no infeasibility proof and no
+singular skip. It then splits once and returns
+`UNKNOWN/RESOURCE_EXHAUSTED`. Total runtime is about 1.57 ms, with about
+0.92 ms attributed to Newton.
+
+This confirms that equality-subsystem extraction scans for eligible
+`EQ_ZERO` literals rather than assuming the first `n` compiled literals
+form the Newton system. The next gate is the overdetermined case with three
+equalities in two variables: the deterministic first-two equality subset
+should still reject the root box by Newton disjointness.

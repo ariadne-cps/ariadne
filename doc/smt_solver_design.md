@@ -3485,3 +3485,39 @@ selection/skips, gradient and corner timing/cache counters, LP feasibility
 checks, LP minimisations and total search time. The expected invariant is
 `lp-minimisations=0`; any nonzero value would mean the classifier-only policy
 was violated.
+
+
+The first 256-box changed-tree `lie-xtaylor-gated-search` run does not by
+itself establish a search win. With geometric splitting, Lie-first order and
+lower-first children it takes about 36.227 s, processes all 256 allowed boxes,
+prunes 1 box by the natural Lie range and 123 by gated X-Taylor feasibility,
+splits 132 boxes, certifies no epsilon witness, and leaves 9 boxes pending.
+The gate selects 123 boxes and skips 132. All 123 selected relaxations are
+definitely infeasible; `lp-minimisations=0` and there are no LP failures, so
+the classifier-only invariant is preserved.
+
+The changed-tree timing is expensive: X-Taylor linearization takes about
+27.9045 s, including about 22.979 s in `gradient_range` and about 4.925 s in
+166 validated corner evaluations. Exact corner caching produces 326 hits from
+492 logical corner lookups. LP feasibility itself remains negligible at about
+0.0357 s. Natural Lie evaluation takes about 7.583 s and the barrier about
+0.704 s. The dominant cost is therefore still construction of the validated
+linear relaxation, not simplex.
+
+The attribution change is much larger than the tree-size evidence. On the
+fixed natural frontier the natural range rejected 123 boxes; in the changed
+tree it rejects only 1 because X-Taylor removes ancestors before those natural
+descendants are generated. Consequently the 123 X-Taylor prune count must not
+be interpreted as 123 avoided splits. The relevant metric is the changed-tree
+split count and pending frontier against the ordinary solver under exactly the
+same 256-box, geometric, no-witness, no-shaving, no-hull, no-monotone,
+Lie-first, lower-first configuration.
+
+The next measurement is therefore the standard `lie` query at 256 boxes.
+No further X-Taylor implementation change is justified until that directly
+comparable natural baseline is known. If the baseline split count is close to
+132, the 36.227 s X-Taylor path has reproduced the same failure mode as eager
+root-CSE and quadrant refinement: earlier pruning attribution without material
+tree shrinkage. If it saves a substantial number of splits, the next question
+will be whether the reduction persists at 2048 boxes and is large enough to
+offset the roughly 28 s per-256-box linearization cost.

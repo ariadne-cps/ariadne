@@ -3576,3 +3576,15 @@ input, Newton image and contracted box, matching the existing implementation
 of `SolverBase::zero`, which itself starts from
 `Vector<FloatDPBounds> x=cast_singleton(bx)`. The solver construction is also
 kept explicit as `IntervalNewtonSolver(1e-12,1u)`.
+
+
+The first `benchmark_smt_interval_newton contract` run passes the contraction
+gate. On the square system `x^2+y^2-1=0, x-y=0` over `[0.5,1]^2`, one
+validated Interval Newton step is not disjoint from the input box and reduces
+the sum of coordinate widths from 1.0 to 0.28125. The returned Newton image is
+already contained in the input box, so intersection leaves the same 0.28125
+contracted width sum. Runtime is about 3.2 ms. This establishes that the
+existing Interval Newton primitive can produce substantial validated
+contraction on a regular square equality system. The next semantic gate is the
+infeasible box, where disjointness of the Newton image from the current box
+must provide a sound rejection.

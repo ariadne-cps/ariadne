@@ -26,9 +26,20 @@ SizeType size_from_argument(Int argc,const char* argv[])
     unsigned long long parsed=std::strtoull(argv[1],&end,10);
     if(end==argv[1] || *end!='\0' || parsed==0u) {
         throw std::runtime_error(
-            "Usage: benchmark_constraint_shaving [size>=1]");
+            "Usage: benchmark_constraint_shaving [size>=1] [diagonal|selective]");
     }
     return static_cast<SizeType>(parsed);
+}
+
+String mode_from_argument(Int argc,const char* argv[])
+{
+    if(argc<=2) { return "diagonal"; }
+    String mode(argv[2]);
+    if(mode=="diagonal" || mode=="selective") {
+        return mode;
+    }
+    throw std::runtime_error(
+        "Usage: benchmark_constraint_shaving [size>=1] [diagonal|selective]");
 }
 
 double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
@@ -42,15 +53,22 @@ double elapsed_seconds(std::chrono::steady_clock::time_point const& start)
 Int main(Int argc,const char* argv[])
 {
     SizeType const n=size_from_argument(argc,argv);
-    auto x=ValidatedScalarMultivariateFunction::coordinates(n);
+    String const mode=mode_from_argument(argc,argv);
+    SizeType const nuisance_count=(mode=="selective") ? 3u : 0u;
+    SizeType const dimension=n+nuisance_count;
+    auto x=ValidatedScalarMultivariateFunction::coordinates(dimension);
 
     UpperBoxType domain(
-        ExactBoxType(n,ExactIntervalType(-1.0_x,1.0_x)));
+        ExactBoxType(dimension,ExactIntervalType(-1.0_x,1.0_x)));
 
     std::vector<ConstraintPropagationConstraint> constraints;
     constraints.reserve(n);
     for(SizeType i=0u;i!=n;++i) {
-        auto function=x[i];
+        ValidatedScalarMultivariateFunction function=x[i];
+        if(mode=="selective") {
+            function=function
+                +(x[n]+x[n+1u]+x[n+2u])/64;
+        }
         constraints.push_back({
             function,
             ExactIntervalType(0.0_x,0.0_x),
@@ -69,12 +87,14 @@ Int main(Int argc,const char* argv[])
     double const seconds=elapsed_seconds(start);
 
     double final_width_sum=0.0;
-    for(SizeType i=0u;i!=n;++i) {
+    for(SizeType i=0u;i!=dimension;++i) {
         final_width_sum+=domain[i].width().raw().get_d();
     }
 
     std::cout << "[constraint-shaving-sparse]"
-              << " size=" << n
+              << " mode=" << mode
+              << " constraints=" << n
+              << " dimension=" << dimension
               << " time=" << seconds
               << " empty=" << empty
               << " shaving-rounds=" << statistics.shaving_rounds

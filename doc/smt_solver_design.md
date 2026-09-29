@@ -3020,3 +3020,33 @@ final box and effective-round behavior with attempts falling from 550,912
 toward the 17,184 actually dependent attempts. Only after this structural waste
 is removed will an ACID-like adaptive policy be evaluated among genuinely
 dependent coordinates.
+
+
+The N=32 dependency-filtered diagonal shaving run validates the structural
+filter exactly. The number of coordinate attempts falls from 550,912 to
+17,216, while 533,696 independent-coordinate attempts are skipped. The
+remaining count is exactly `538*32`: one genuinely dependent coordinate per
+constraint per round. The number of effective attempts remains 17,184, the
+same 538/537 total/effective rounds are observed, and the final width sum is
+unchanged at the same tiny positive subnormal value. Validated function
+evaluations fall from 1,204,992 to 137,600. Shaving time falls from about
+0.753 s to 0.0523 s and total runtime from about 0.771 s to 0.0553 s, roughly
+a fourteen-fold improvement.
+
+This closes dependency filtering as a successful structural optimisation, but
+the diagonal benchmark is now unsuitable for evaluating ACID-like adaptivity:
+17,184 of 17,216 remaining dependent attempts are effective, about 99.8%.
+There is essentially no poor dependent coordinate for an adaptive policy to
+learn to avoid.
+
+The shaving benchmark therefore gains a `selective` mode. It keeps N primary
+variables and adds three shared nuisance variables. Constraint i is
+`x_i + (z_0+z_1+z_2)/64 = 0`, with every coordinate initially in [-1,1].
+All four coordinates are genuine Procedure dependencies. Shaving the primary
+`x_i` should be useful because the nuisance contribution bounds it to a
+small neighbourhood of zero, while shaving an individual nuisance coordinate
+should remain largely or completely ineffective because the primary variable
+and the other nuisances can compensate it. This creates the required ACID
+baseline: wasted work that cannot be removed by syntactic dependency masks and
+must instead be identified from observed contraction effectiveness. No
+adaptive skipping is implemented yet.

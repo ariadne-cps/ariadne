@@ -3655,3 +3655,17 @@ enabled, and that a successful contraction is fed into the existing epsilon
 and split logic rather than being misclassified as a proof. The next gate is
 `smt-infeasible`: the same one-box configuration should be pruned at the root
 by Newton disjointness, with no split.
+
+
+The SMT-integrated `smt-infeasible` run passes the rejection gate exactly.
+With a one-box budget and all other contractors and witness heuristics disabled,
+the root box is rejected by one Interval Newton attempt: the solver returns
+`UNSAT`, processes and prunes exactly one box, performs no split, records
+`newton-infeasible=1`, and records neither an effective contraction nor a
+singular-Jacobian skip. Total runtime is about 0.394 ms, with about 0.209 ms in
+the Newton step.
+
+This confirms that validated Newton disjointness is correctly promoted to an
+SMT box prune for eligible square `EQ_ZERO` conjunctions. The remaining
+integration guard is `smt-singular`: it must record a singular skip, perform
+no Newton prune, and continue through the ordinary epsilon/split path.

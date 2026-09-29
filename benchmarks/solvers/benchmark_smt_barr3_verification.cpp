@@ -657,6 +657,8 @@ struct XTaylorProfileCounts {
     double contracted_width_sum = 0.0;
     double feasible_original_width_sum = 0.0;
     double feasible_contracted_width_sum = 0.0;
+    double derivative_evaluation_seconds = 0.0;
+    double corner_evaluation_seconds = 0.0;
     double linearization_seconds = 0.0;
     double lp_seconds = 0.0;
 };
@@ -676,19 +678,19 @@ struct XTaylorRelaxation {
 
 XTaylorRelaxation build_xtaylor_relaxation_2d(
     UpperBoxType const& box,
-    ValidatedProcedure const& function_procedure,
-    ValidatedProcedure const& derivative_x_procedure,
-    ValidatedProcedure const& derivative_y_procedure,
+    ValidatedScalarMultivariateFunction const& function,
+    ValidatedScalarMultivariateFunction const& derivative_x,
+    ValidatedScalarMultivariateFunction const& derivative_y,
     XTaylorProfileCounts& counts)
 {
     constexpr SizeType corner_count=4u;
     XTaylorRelaxation relaxation(corner_count);
 
-    Vector<UpperIntervalType> box_arguments=cast_vector(box);
-    UpperIntervalType gradient_x=evaluate(
-        derivative_x_procedure,box_arguments);
-    UpperIntervalType gradient_y=evaluate(
-        derivative_y_procedure,box_arguments);
+    auto derivative_start=std::chrono::steady_clock::now();
+    UpperIntervalType gradient_x=apply(derivative_x,box);
+    UpperIntervalType gradient_y=apply(derivative_y,box);
+    counts.derivative_evaluation_seconds+=std::chrono::duration<double>(
+        std::chrono::steady_clock::now()-derivative_start).count();
     counts.derivative_evaluations+=2u;
 
     relaxation.lower[0u]=box[0u].lower_bound().raw();
@@ -706,12 +708,15 @@ XTaylorRelaxation build_xtaylor_relaxation_2d(
             ? box[1u].upper_bound().raw()
             : box[1u].lower_bound().raw();
 
-        Vector<UpperIntervalType> corner_arguments({
-            UpperIntervalType(px,px),
-            UpperIntervalType(py,py)
+        ExactBoxType exact_corner({
+            ExactIntervalType(px,px),
+            ExactIntervalType(py,py)
         });
-        UpperIntervalType corner_image=evaluate(
-            function_procedure,corner_arguments);
+        auto corner_start=std::chrono::steady_clock::now();
+        UpperIntervalType corner_image=apply(
+            function,UpperBoxType(exact_corner));
+        counts.corner_evaluation_seconds+=std::chrono::duration<double>(
+            std::chrono::steady_clock::now()-corner_start).count();
         ++counts.corner_evaluations;
 
         FloatDP const ax=upper_x
@@ -819,9 +824,6 @@ Void profile_lie_xtaylor_frontier(
     Stopwatch<Milliseconds> derivative_build_stopwatch;
     ValidatedScalarMultivariateFunction derivative_x=function.derivative(0u);
     ValidatedScalarMultivariateFunction derivative_y=function.derivative(1u);
-    ValidatedProcedure function_procedure(function);
-    ValidatedProcedure derivative_x_procedure(derivative_x);
-    ValidatedProcedure derivative_y_procedure(derivative_y);
     derivative_build_stopwatch.click();
 
     std::vector<UpperBoxType> pending;
@@ -834,8 +836,7 @@ Void profile_lie_xtaylor_frontier(
         pending.pop_back();
         ++counts.processed;
 
-        UpperIntervalType natural_image=evaluate(
-            function_procedure,cast_vector(box));
+        UpperIntervalType natural_image=apply(function,box);
         if(definitely(natural_image.lower_bound()>=0)) {
             ++counts.natural_pruned;
             continue;
@@ -850,8 +851,7 @@ Void profile_lie_xtaylor_frontier(
 
         auto linearization_start=std::chrono::steady_clock::now();
         XTaylorRelaxation relaxation=build_xtaylor_relaxation_2d(
-            box,function_procedure,
-            derivative_x_procedure,derivative_y_procedure,counts);
+            box,function,derivative_x,derivative_y,counts);
         counts.linearization_seconds+=std::chrono::duration<double>(
             std::chrono::steady_clock::now()-linearization_start).count();
 
@@ -907,7 +907,10 @@ Void profile_lie_xtaylor_frontier(
               << " derivative-build-time="
               << derivative_build_stopwatch.elapsed_seconds()
               << " derivative-evals=" << counts.derivative_evaluations
+              << " derivative-eval-time="
+              << counts.derivative_evaluation_seconds
               << " corner-evals=" << counts.corner_evaluations
+              << " corner-eval-time=" << counts.corner_evaluation_seconds
               << " lp-minimisations=" << counts.lp_minimisations
               << " linearization-time=" << counts.linearization_seconds
               << " lp-time=" << counts.lp_seconds

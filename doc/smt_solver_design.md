@@ -3300,3 +3300,19 @@ X-Taylor-infeasible and 19 contracted boxes, with no LP failures.
 The output also separates average x+y width on the 38 feasible relaxations from
 the aggregate statistic that counts infeasible relaxations as zero. This avoids
 conflating additional pruning with true polytope contraction.
+
+
+The compiled-Procedure X-Taylor timing experiment is rejected before completion.
+On the same 256-box command it was still running after roughly ten minutes,
+where the previous function-apply implementation completed in about 87 s. This
+is already more than a six-fold regression and is sufficient to reject
+precompiling the large Lie/gradient Procedures as the next optimization path.
+The run was stopped; no numerical counts from the incomplete traversal are used.
+
+The benchmark is restored to the previous validated-function evaluation path,
+while retaining the corrected feasible-only width statistics. To localize the
+roughly 80 s linearization cost without changing mathematics, separate timers
+now measure the two derivative evaluations per checked box and the four corner
+evaluations per checked box. The next run therefore distinguishes whether
+gradient-range evaluation or point/corner evaluation dominates before any
+further representation change is attempted.

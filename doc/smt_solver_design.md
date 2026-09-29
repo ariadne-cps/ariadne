@@ -2918,3 +2918,30 @@ ordinary test targets. Executable target names are unchanged; only their build
 tree location moves from `tests/solvers/` to `benchmark/solvers/`.
 Historical command examples in this design log have been updated to the new
 path.
+
+
+The first N=64 agenda run is strongly positive. It reaches exactly the same
+fully contracted chain box as the full-scan baseline
+(`final-width-sum=0`) but reduces hull-contractor executions from 4,160 to
+191. Wall-clock time falls from about 5.27 ms to 0.414 ms on this synthetic
+case, roughly a 12.7x speedup, while contractor calls fall by about 95.4%.
+The run performs one outer hull round, 191 agenda pushes and pops, and 64
+effective contractor calls.
+
+The 191 calls are larger than the rough pre-run estimate of 127 for a sound
+reason. The current dependency graph conservatively wakes every contractor
+that reads a changed coordinate, including the contractor that just produced
+the contraction. In the reversed chain this gives 64 initial calls plus 127
+wakeups. This self-wakeup must not simply be removed: `simple_hull_reduce`
+performs one forward execution followed by one backward propagation and does
+not compute the contractor's internal fixpoint. A contractor may therefore
+need to be revisited when one of its own input coordinates changed. Any future
+input/output-mask refinement must prove when self-reactivation is unnecessary
+rather than assume idempotence.
+
+The next agenda gate is scaling rather than another algorithmic change. Runs
+at increasing chain sizes should preserve zero final width and show
+approximately linear contractor-call growth, while the historical full-scan
+algorithm grows quadratically. Only after that scaling check should the agenda
+be treated as the new hull-propagation baseline and the roadmap move to
+adaptive ACID-like shaving.

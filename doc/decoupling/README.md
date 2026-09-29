@@ -25,14 +25,18 @@ An arrow therefore points to the component that consumes the other component.
 
 ## Current conclusion
 
-All ten directories form one strongly connected component. Moving each
-directory to a repository now would preserve the cycles while adding version
-coordination overhead. The first stage is therefore to make dependencies
-explicit in CMake, add component-level tests, and remove or invert the small
-backward dependencies that close the cycles. Repository extraction follows
-only after those boundaries are verified in the monorepo.
+The baseline at `949d7e...` contained one strongly connected component across
+all ten source directories, with 55 direct dependency relations: 9 high,
+35 medium, and 11 low. Those measurements remain the historical reference.
 
-The baseline contains 55 direct dependency relations: 9 high, 35 medium, and
-11 low. The most extensive relation is `algebra → function`: `function`
-contains 142 includes of `algebra`, spread over 41 files and 31 headers.
+The current `decoupling` branch has progressed beyond that baseline. Foundation
+has been made dependent only on Utility, extracted to
+`ariadne-cps/foundation`, validated by standalone Unix/Windows/Coverage CI,
+and re-integrated into Ariadne as a pinned submodule. The two small backward
+includes from geometry/dynamics into hybrid have also been removed, and Tensor
+graphics support has been moved out of algebra.
+
+The remaining work follows the same pattern: remove backward implementation
+dependencies, make target boundaries explicit, validate components independently,
+and extract repositories only after those boundaries are enforced.
 

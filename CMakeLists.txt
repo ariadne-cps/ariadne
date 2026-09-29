@@ -246,7 +246,7 @@ endif()
 
 if(CAIRO_FOUND)
     target_link_libraries(ariadne PUBLIC Cairo::Cairo)
-    target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
+    target_link_libraries(ariadne-kernel PRIVATE ${CAIRO_LIBRARIES})
 endif()
 
 configure_package_config_file(

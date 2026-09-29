@@ -2817,3 +2817,15 @@ preserves the lightweight header boundary and keeps compiled propagation
 constraints copyable while allowing SMT theory compilation to construct the
 Procedure once. The local fallback inside `constraint_solver.cpp` still uses
 an optional local Procedure, where the complete type is available.
+
+
+The shared-pointer cache fixes the incomplete-type requirement in
+`constraint_solver.hpp`, but the first build still failed at the cache
+construction site: `smt_solver.cpp` invoked
+`make_shared<ValidatedProcedure>` while seeing only the forward declaration
+in `constraint_solver.hpp`. Construction necessarily requires the complete
+Procedure type. The fix is deliberately local: `smt_solver.cpp` includes
+`function/procedure.hpp`, while `constraint_solver.hpp` retains only the
+forward declaration. The aggregate initializer now also initializes the cache
+field explicitly to null before assigning the compiled Procedure, avoiding the
+missing-field warning. No propagation semantics are changed.

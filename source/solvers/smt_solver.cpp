@@ -40,6 +40,7 @@
 
 #include "betterthreads/workload.hpp"
 
+#include "function/procedure.hpp"
 #include "solvers/constraint_solver.hpp"
 #include "solvers/nonlinear_programming.hpp"
 #include "utility/exceptions.hpp"
@@ -484,7 +485,8 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
             this->_original_bounds(relation),
             std::move(derivatives),
             relation==SmtTheoryPrimitiveRelation::GT_ZERO,
-            false
+            false,
+            nullptr
         });
         result.back().hull_procedure=std::make_shared<ValidatedProcedure>(function);
     }

@@ -149,14 +149,14 @@ void TestRational::test_rounding() {
 }
 
 void TestRational::test_comparisons() {
-    ExactDouble inf=ExactDouble::inf();
+    ExactDouble infinity_value=ExactDouble::inf();
     ExactDouble max=ExactDouble(std::numeric_limits<double>::max());
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(+max));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(-4,5));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(2,3));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-4,5),Rational(-2,7));
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Rational(18,35));
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+inf);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-infinity_value,Rational(18,35));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+infinity_value);
 }
 
 void TestRational::test_infinity() {

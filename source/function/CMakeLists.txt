@@ -19,7 +19,4 @@ add_library(${LIBRARY_NAME} OBJECT
     symbolic_function.cpp
 )
 
-foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
-    target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
-endforeach()
 

@@ -113,11 +113,11 @@ template<class X> class TestSeries
     }
 
     void test_log() {
-        const X zero(0,pr), one(1,pr), two(2,pr);
-        const X log2=log(two);
+        const X zero(0,pr), one(1,pr), two_value(2,pr);
+        const X log2=log(two_value);
         ARIADNE_TEST_EQUALS( Series<X>(Log(),one).coefficients(5),
                              (List<X>{zero,one,-one/2,one/3,-one/4,one/5}) );
-        ARIADNE_TEST_EQUALS( Series<X>(Log(),two).coefficients(5),
+        ARIADNE_TEST_EQUALS( Series<X>(Log(),two_value).coefficients(5),
                              (List<X>{log2,one/2,-one/8,one/24,-one/64,one/160}) );
     }
 

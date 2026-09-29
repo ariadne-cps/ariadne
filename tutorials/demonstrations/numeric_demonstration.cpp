@@ -84,23 +84,23 @@ void numeric_demonstration() {
     w=Dyadic(d);
 
     // Specify precisions of floating-point number types
-    auto dp=DoublePrecision();
-    dp=double_precision;
+    auto precision_dp=DoublePrecision();
+    precision_dp=double_precision;
     auto mp=MultiplePrecision(128);
 
     // Create a raw double-precision number
-    auto xdp=FloatDP(1.75_x,dp);
+    auto xdp=FloatDP(1.75_x,precision_dp);
     print("FloatDP(1.75_x):",xdp);
     // Create a raw multiple-precision number
     auto xmp=FloatMP(1.75_x,mp);
     print("FloatMP(1.75_x):",xmp);
 
     // Create double-precision bounds for a value
-    auto xdpb=FloatDPBounds(Decimal(1.2),dp); // Creates the interval [1.19999999999999996:1.20000000000000018]
+    auto xdpb=FloatDPBounds(Decimal(1.2),precision_dp); // Creates the interval [1.19999999999999996:1.20000000000000018]
     print("FloatDPBounds(1.2):",xdpb);
 
     // Create double-precision bounds for a range of values
-    auto xmpb=FloatDPBounds(Rational(11,10),Rational(14,10),dp); // Creates the interval [1.09999999999999987:1.40000000000000013]
+    auto xmpb=FloatDPBounds(Rational(11,10),Rational(14,10),precision_dp); // Creates the interval [1.09999999999999987:1.40000000000000013]
     print("FloatDPBounds(11/10,14/10,dp):",xmpb);
 
     // Create multiple-precision bounds for a value

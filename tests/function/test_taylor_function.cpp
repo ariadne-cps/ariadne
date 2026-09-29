@@ -123,9 +123,9 @@ Void TestScalarTaylorFunction::test_concept()
     const Vector<FloatDPBounds> vx;
     const Vector<ValidatedNumber> vy;
     const BoxDomainType dom;
-    const SweeperDP swp;
-    ValidatedScalarMultivariateTaylorFunctionModelDP stf(dom,swp);
-    ValidatedScalarMultivariateTaylorFunctionModelDP stfr(dom,swp);
+    const SweeperDP concept_sweeper;
+    ValidatedScalarMultivariateTaylorFunctionModelDP stf(dom,concept_sweeper);
+    ValidatedScalarMultivariateTaylorFunctionModelDP stfr(dom,concept_sweeper);
 
     stfr=stf+w; stfr=stf-w; stfr=stf*w; stfr=stf/w;
     stfr=w+stf; stfr=w-stf; stfr=w*stf; stfr=w/stf;
@@ -153,7 +153,7 @@ Void TestScalarTaylorFunction::test_concept()
     stf(vy); stf(vy); evaluate(stf,vy); unchecked_evaluate(stf,vy); partial_evaluate(stf,k,y);
     stf.domain(); stf.range(); stf.expansion(); stf.error();
 
-    ScaledFunctionPatch<ValidatedTaylorModelDP> vstfp(dom,swp);
+    ScaledFunctionPatch<ValidatedTaylorModelDP> vstfp(dom,concept_sweeper);
 
 }
 

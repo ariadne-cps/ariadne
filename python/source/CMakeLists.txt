@@ -42,11 +42,3 @@ add_library(pyariadne-module-obj OBJECT
     ariadne_module.cpp
 )
 
-foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
-    target_compile_options(pyariadne-numeric-submodule-obj PUBLIC -W${WARN})
-    target_compile_options(pyariadne-numeric-module-obj PUBLIC -W${WARN})
-    target_compile_options(pyariadne-algebra-submodule-obj PUBLIC -W${WARN})
-    target_compile_options(pyariadne-algebra-module-obj PUBLIC -W${WARN})
-    target_compile_options(pyariadne-extra-submodule-obj PUBLIC -W${WARN})
-    target_compile_options(pyariadne-module-obj PUBLIC -W${WARN})
-endforeach()

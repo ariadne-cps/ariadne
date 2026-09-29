@@ -528,7 +528,7 @@ TestRounded<FLT>::test_function()
 
     RoundedFloatType zero=RoundedFloatType(0.0_x,precision);
     RoundedFloatType one=RoundedFloatType(1.0_x,precision);
-    RoundedFloatType two=RoundedFloatType(2.0_x,precision);
+    RoundedFloatType two_value=RoundedFloatType(2.0_x,precision);
     RoundedFloatType half=RoundedFloatType(0.5_x,precision);
 
     RoundedFloatType::set_rounding_mode(upward);
@@ -536,21 +536,21 @@ TestRounded<FLT>::test_function()
     ARIADNE_TEST_COMPARE(log(one),==,zero);
     ARIADNE_TEST_COMPARE(log(exp(one)),>,one);
     ARIADNE_TEST_COMPARE(log(exp(-one)),>,-one);
-    ARIADNE_TEST_COMPARE(log(exp(two)),>,two);
-    ARIADNE_TEST_COMPARE(log(exp(-two)),>,-two);
-    ARIADNE_TEST_COMPARE(mul(exp(two),exp(-two)),>,one);
-    ARIADNE_TEST_COMPARE(exp(log(two)),>,two);
-    ARIADNE_TEST_COMPARE(add(log(two),log(half)),>,zero);
+    ARIADNE_TEST_COMPARE(log(exp(two_value)),>,two_value);
+    ARIADNE_TEST_COMPARE(log(exp(-two_value)),>,-two_value);
+    ARIADNE_TEST_COMPARE(mul(exp(two_value),exp(-two_value)),>,one);
+    ARIADNE_TEST_COMPARE(exp(log(two_value)),>,two_value);
+    ARIADNE_TEST_COMPARE(add(log(two_value),log(half)),>,zero);
     RoundedFloatType::set_rounding_mode(downward);
     ARIADNE_TEST_COMPARE(exp(zero),==,one);
     ARIADNE_TEST_COMPARE(log(one),==,zero);
     ARIADNE_TEST_COMPARE(log(exp(one)),<,one);
     ARIADNE_TEST_COMPARE(log(exp(-one)),<,-one);
-    ARIADNE_TEST_COMPARE(log(exp(two)),<,two);
-    ARIADNE_TEST_COMPARE(log(exp(-two)),<,-two);
-    ARIADNE_TEST_COMPARE(mul(exp(two),exp(-two)),<,one);
-    ARIADNE_TEST_COMPARE(exp(log(two)),<,two);
-    ARIADNE_TEST_COMPARE(add(log(two),log(half)),<,zero);
+    ARIADNE_TEST_COMPARE(log(exp(two_value)),<,two_value);
+    ARIADNE_TEST_COMPARE(log(exp(-two_value)),<,-two_value);
+    ARIADNE_TEST_COMPARE(mul(exp(two_value),exp(-two_value)),<,one);
+    ARIADNE_TEST_COMPARE(exp(log(two_value)),<,two_value);
+    ARIADNE_TEST_COMPARE(add(log(two_value),log(half)),<,zero);
 
     if constexpr (Same<FLT,FloatDP>) {
         MultiplePrecision mp(128);

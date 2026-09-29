@@ -585,11 +585,61 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                                  CompiledTheoryLiterals const& literals,
                                  ReductionStatistics& statistics) const
 {
+    ConstraintSolver contractor;
+    ConstraintPropagationStatistics propagation_statistics;
+    auto accumulate_propagation_statistics=[&]() {
+        statistics.hull_rounds+=propagation_statistics.hull_rounds;
+        statistics.hull_effective+=propagation_statistics.hull_effective;
+        statistics.hull_procedure_builds+=
+            propagation_statistics.hull_procedure_builds;
+        statistics.hull_procedure_build_seconds+=
+            propagation_statistics.hull_procedure_build_seconds;
+        statistics.hull_contraction_seconds+=
+            propagation_statistics.hull_contraction_seconds;
+        statistics.hull_direct_rejection_seconds+=
+            propagation_statistics.hull_direct_rejection_seconds;
+        statistics.hull_temporary_allocation_seconds+=
+            propagation_statistics.hull_temporary_allocation_seconds;
+        statistics.hull_forward_execution_seconds+=
+            propagation_statistics.hull_forward_execution_seconds;
+        statistics.hull_backward_propagation_seconds+=
+            propagation_statistics.hull_backward_propagation_seconds;
+        statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
+        statistics.shaving_effective+=propagation_statistics.shaving_effective;
+        statistics.shaving_coordinate_attempts+=
+            propagation_statistics.shaving_coordinate_attempts;
+        statistics.shaving_coordinate_effective+=
+            propagation_statistics.shaving_coordinate_effective;
+        statistics.shaving_dependency_skipped+=
+            propagation_statistics.shaving_dependency_skipped;
+        statistics.shaving_adaptive_skipped+=
+            propagation_statistics.shaving_adaptive_skipped;
+        statistics.shaving_refresh_rounds+=
+            propagation_statistics.shaving_refresh_rounds;
+        statistics.shaving_active_rounds+=
+            propagation_statistics.shaving_active_rounds;
+        statistics.shaving_function_evaluations+=
+            propagation_statistics.shaving_function_evaluations;
+        statistics.shaving_seconds+=propagation_statistics.shaving_seconds;
+        statistics.monotone_rounds+=propagation_statistics.monotone_rounds;
+        statistics.monotone_effective+=propagation_statistics.monotone_effective;
+    };
+
     auto const newton_candidates=
         _configuration.interval_newton_reduction_enabled()
             ? interval_newton_subsystem_candidates(
                 literals,domain.dimension())
             : std::vector<std::vector<SizeType>>();
+
+    if(not newton_candidates.empty()
+       && _configuration.hull_reduction_enabled()) {
+        if(contractor.propagate_hull_once(
+                domain,literals,propagation_statistics)) {
+            accumulate_propagation_statistics();
+            return true;
+        }
+    }
+
     for(auto const& newton_subsystem:newton_candidates) {
         ++statistics.interval_newton_attempts;
         auto const newton_start=std::chrono::steady_clock::now();
@@ -611,6 +661,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
                 ++statistics.interval_newton_infeasible;
                 statistics.interval_newton_seconds+=
                     elapsed_seconds(newton_start);
+                accumulate_propagation_statistics();
                 return true;
             }
 
@@ -642,8 +693,6 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         }
     }
 
-    ConstraintSolver contractor;
-    ConstraintPropagationStatistics propagation_statistics;
     Bool const empty=contractor.propagate(
         domain,
         literals,
@@ -651,41 +700,7 @@ Bool SmtSolver::_original_reduce(UpperBoxType& domain,
         propagation_statistics,
         _configuration.shaving_reduction_enabled(),
         _configuration.hull_reduction_enabled());
-    statistics.hull_rounds+=propagation_statistics.hull_rounds;
-    statistics.hull_effective+=propagation_statistics.hull_effective;
-    statistics.hull_procedure_builds+=
-        propagation_statistics.hull_procedure_builds;
-    statistics.hull_procedure_build_seconds+=
-        propagation_statistics.hull_procedure_build_seconds;
-    statistics.hull_contraction_seconds+=
-        propagation_statistics.hull_contraction_seconds;
-    statistics.hull_direct_rejection_seconds+=
-        propagation_statistics.hull_direct_rejection_seconds;
-    statistics.hull_temporary_allocation_seconds+=
-        propagation_statistics.hull_temporary_allocation_seconds;
-    statistics.hull_forward_execution_seconds+=
-        propagation_statistics.hull_forward_execution_seconds;
-    statistics.hull_backward_propagation_seconds+=
-        propagation_statistics.hull_backward_propagation_seconds;
-    statistics.shaving_rounds+=propagation_statistics.shaving_rounds;
-    statistics.shaving_effective+=propagation_statistics.shaving_effective;
-    statistics.shaving_coordinate_attempts+=
-        propagation_statistics.shaving_coordinate_attempts;
-    statistics.shaving_coordinate_effective+=
-        propagation_statistics.shaving_coordinate_effective;
-    statistics.shaving_dependency_skipped+=
-        propagation_statistics.shaving_dependency_skipped;
-    statistics.shaving_adaptive_skipped+=
-        propagation_statistics.shaving_adaptive_skipped;
-    statistics.shaving_refresh_rounds+=
-        propagation_statistics.shaving_refresh_rounds;
-    statistics.shaving_active_rounds+=
-        propagation_statistics.shaving_active_rounds;
-    statistics.shaving_function_evaluations+=
-        propagation_statistics.shaving_function_evaluations;
-    statistics.shaving_seconds+=propagation_statistics.shaving_seconds;
-    statistics.monotone_rounds+=propagation_statistics.monotone_rounds;
-    statistics.monotone_effective+=propagation_statistics.monotone_effective;
+    accumulate_propagation_statistics();
     return empty;
 }
 

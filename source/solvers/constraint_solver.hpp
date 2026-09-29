@@ -173,6 +173,14 @@ class ConstraintSolver
         Bool shaving_reduction_enabled=true,
         Bool hull_reduction_enabled=true) const;
 
+    //! \brief Apply exactly one cached/full-scan hull propagation sweep.
+    //! \details Returns true iff the sweep proves the domain empty. No shaving
+    //! or monotone contraction is performed.
+    Bool propagate_hull_once(
+        UpperBoxType& domain,
+        const std::vector<ConstraintPropagationConstraint>& constraints,
+        ConstraintPropagationStatistics& statistics) const;
+
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
     Bool hull_reduce(UpperBoxType& bx, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;

@@ -4063,3 +4063,37 @@ Newton, effectiveness, disjointness, singularity and Newton time. The first
 stage at which Newton becomes effective is the evidence needed for a bounded
 interleaving hook or agenda scheduler; if Newton remains ineffective even after
 many sweeps, interleaving is not justified for this case.
+
+
+The staged 2D coupled diagnostic identifies the ordering problem precisely.
+Interval Newton on the original box is non-singular but completely ineffective:
+the width sum stays 0.63. After exactly one HC4 sweep, however, the box width
+sum is about 0.3667 and the same single Newton step contracts it to about
+0.1372, a further reduction of roughly 63%. Newton remains effective after all
+later sampled stages: after 2 sweeps it contracts 0.2182 to 0.0828, after
+4 sweeps 0.1026 to 0.0167, after 8 sweeps 0.02993 to 0.000722, after
+16 sweeps 0.002944 to about 4.25e-6, and after 32 sweeps 2.95e-5 to about
+3.95e-10.
+
+Thus the current eager ordering, Newton before any hull propagation, is
+demonstrably wrong for this workload. The smallest useful interleaving is one
+HC4 sweep before Newton; waiting for the full hull fixed point defeats the
+purpose because the baseline may spend tens or hundreds of rounds getting
+there.
+
+The contractor API now exposes `ConstraintSolver::propagate_hull_once` for
+precompiled propagation constraints. It executes exactly one full-scan hull
+sweep, reuses cached Procedures, preserves direct validated rejection, and
+updates the same hull statistics as ordinary propagation. It deliberately does
+not invoke shaving or monotone contraction.
+
+For compiled SMT theory literals, when Interval Newton is enabled and a square
+equality subsystem exists, the reduction order becomes:
+one hull sweep if hull reduction is enabled; bounded singular-fallback Interval
+Newton; then the established full propagation fixed point. If hull reduction
+is disabled, Newton retains its previous eager placement. A pre-Newton hull
+sweep that proves the box empty returns immediately without a Newton attempt.
+All pre-sweep statistics are accumulated into the normal SMT reduction
+statistics. The immediate regression target is the 2D coupled end-to-end
+comparison, where the old eager placement recorded an ineffective Newton step
+and left all 120 hull rounds unchanged.

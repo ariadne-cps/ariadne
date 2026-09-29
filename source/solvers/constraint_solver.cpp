@@ -348,6 +348,66 @@ Bool propagation_has_cached_procedures(
 
 } // namespace
 
+Bool ConstraintSolver::propagate_hull_once(
+    UpperBoxType& domain,
+    const std::vector<ConstraintPropagationConstraint>& constraints,
+    ConstraintPropagationStatistics& statistics) const
+{
+    UpperBoxType previous=domain;
+    ++statistics.hull_rounds;
+
+    for(auto const& constraint:constraints) {
+        auto phase_start=std::chrono::steady_clock::now();
+        std::optional<ValidatedProcedure> local_procedure;
+        ValidatedProcedure const* procedure=nullptr;
+        if(constraint.hull_procedure) {
+            procedure=constraint.hull_procedure.get();
+        } else {
+            local_procedure.emplace(constraint.function);
+            procedure=&*local_procedure;
+            ++statistics.hull_procedure_builds;
+            statistics.hull_procedure_build_seconds+=
+                constraint_elapsed_seconds(phase_start);
+        }
+
+        ProcedureHullReductionStatistics hull_statistics;
+        phase_start=std::chrono::steady_clock::now();
+        ++statistics.hull_contractor_calls;
+        Bool const hull_empty=this->hull_reduce(
+            domain,*procedure,constraint.bounds,hull_statistics);
+        statistics.hull_contraction_seconds+=
+            constraint_elapsed_seconds(phase_start);
+        statistics.hull_temporary_allocation_seconds+=
+            hull_statistics.temporary_allocation_seconds;
+        statistics.hull_forward_execution_seconds+=
+            hull_statistics.forward_execution_seconds;
+        statistics.hull_backward_propagation_seconds+=
+            hull_statistics.backward_propagation_seconds;
+        if(hull_empty) {
+            return true;
+        }
+
+        phase_start=std::chrono::steady_clock::now();
+        Bool const infeasible=
+            propagation_constraint_infeasible(constraint,domain);
+        statistics.hull_direct_rejection_seconds+=
+            constraint_elapsed_seconds(phase_start);
+        if(infeasible) {
+            return true;
+        }
+    }
+
+    if(not same(domain,previous)) {
+        ++statistics.hull_effective;
+        for(auto const& constraint:constraints) {
+            if(propagation_constraint_infeasible(constraint,domain)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 Bool ConstraintSolver::propagate(
     UpperBoxType& domain,
     const std::vector<ConstraintPropagationConstraint>& constraints,

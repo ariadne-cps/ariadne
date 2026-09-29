@@ -19,3 +19,15 @@ add_dependencies(
     benchmarks
     benchmark_smt_barr3_verification
     benchmark_constraint_propagation)
+
+
+add_executable(
+    benchmark_constraint_shaving
+    benchmark_constraint_shaving.cpp)
+target_link_libraries(
+    benchmark_constraint_shaving
+    ariadne-kernel)
+
+add_dependencies(
+    benchmarks
+    benchmark_constraint_shaving)

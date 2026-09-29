@@ -222,13 +222,29 @@ Bool ConstraintSolver::propagate(
             ++statistics.shaving_rounds;
             for(SizeType i=0u; i!=constraints.size(); ++i) {
                 for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                    UpperIntervalType const before_coordinate=domain[variable];
+                    auto shaving_start=std::chrono::steady_clock::now();
+                    ++statistics.shaving_coordinate_attempts;
                     if(this->box_reduce(
                             domain,
                             constraints[i].function(),
                             constraints[i].bounds(),
                             variable,
                             statistics.shaving_function_evaluations)) {
+                        statistics.shaving_seconds+=
+                            constraint_elapsed_seconds(shaving_start);
                         return true;
+                    }
+                    statistics.shaving_seconds+=
+                        constraint_elapsed_seconds(shaving_start);
+                    Bool const same_lower=
+                        before_coordinate.lower_bound().raw()
+                            ==domain[variable].lower_bound().raw();
+                    Bool const same_upper=
+                        before_coordinate.upper_bound().raw()
+                            ==domain[variable].upper_bound().raw();
+                    if(not (same_lower && same_upper)) {
+                        ++statistics.shaving_coordinate_effective;
                     }
                 }
             }
@@ -490,10 +506,26 @@ Bool ConstraintSolver::propagate(
                 ++statistics.shaving_rounds;
                 for(auto const& constraint:constraints) {
                     for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+                        UpperIntervalType const before_coordinate=domain[variable];
+                        auto shaving_start=std::chrono::steady_clock::now();
+                        ++statistics.shaving_coordinate_attempts;
                         if(this->box_reduce(
                                 domain,constraint.function,constraint.bounds,variable,
                                 statistics.shaving_function_evaluations)) {
+                            statistics.shaving_seconds+=
+                                constraint_elapsed_seconds(shaving_start);
                             return true;
+                        }
+                        statistics.shaving_seconds+=
+                            constraint_elapsed_seconds(shaving_start);
+                        Bool const same_lower=
+                            before_coordinate.lower_bound().raw()
+                                ==domain[variable].lower_bound().raw();
+                        Bool const same_upper=
+                            before_coordinate.upper_bound().raw()
+                                ==domain[variable].upper_bound().raw();
+                        if(not (same_lower && same_upper)) {
+                            ++statistics.shaving_coordinate_effective;
                         }
                     }
                 }

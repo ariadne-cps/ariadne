@@ -2968,3 +2968,27 @@ current exhaustive shaving phase per constraint/coordinate so that useful
 contractions, rejected slices and evaluation cost can be separated. A candidate
 adaptive policy will only be tested after a baseline quantifies how much of the
 current exhaustive work is productive.
+
+
+### Adaptive shaving baseline instrumentation
+
+After accepting dependency-driven hull scheduling, the next IBEX-inspired gate
+targets the exhaustive shaving phase. The current `box_reduce` loop tries
+every constraint/coordinate pair after hull propagation stalls, even if a
+constraint does not depend on that coordinate. A single attempt may evaluate
+up to eight slices from the lower side and then additional slices from the
+upper side.
+
+Propagation statistics now distinguish total shaving coordinate attempts,
+attempts that actually change the selected coordinate, validated function
+evaluations spent in shaving, and total shaving wall time. These measurements
+are intentionally collected before any adaptive policy is introduced.
+
+A dedicated executable `benchmark_constraint_shaving` constructs N variables
+in [-1,1] and N sparse equality constraints `x_i=0`. Hull contraction is
+disabled so that the benchmark isolates shaving. Under the current exhaustive
+implementation each constraint is tried against every coordinate, although
+only its own coordinate can be productive. The baseline therefore exposes the
+fraction of useful work directly. An ACID-like policy will later be accepted
+only if it preserves the same final box while materially reducing coordinate
+attempts and validated function evaluations.

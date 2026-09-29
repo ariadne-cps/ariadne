@@ -83,7 +83,10 @@ struct ConstraintPropagationStatistics {
     double hull_backward_propagation_seconds = 0.0;
     SizeType shaving_rounds = 0u;
     SizeType shaving_effective = 0u;
+    SizeType shaving_coordinate_attempts = 0u;
+    SizeType shaving_coordinate_effective = 0u;
     SizeType shaving_function_evaluations = 0u;
+    double shaving_seconds = 0.0;
     SizeType monotone_rounds = 0u;
     SizeType monotone_effective = 0u;
 };

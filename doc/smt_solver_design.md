@@ -3521,3 +3521,43 @@ root-CSE and quadrant refinement: earlier pruning attribution without material
 tree shrinkage. If it saves a substantial number of splits, the next question
 will be whether the reduction persists at 2048 boxes and is large enough to
 offset the roughly 28 s per-256-box linearization cost.
+
+
+The directly comparable 256-box natural baseline closes the gated X-Taylor
+changed-tree experiment. Under geometric splitting, disabled witness probing,
+shaving, hull and monotone contraction, Lie-first literal order and lower-first
+children, the ordinary solver processes 256 boxes in about 8.748 s, prunes 123
+and splits 133. The gated X-Taylor changed tree processes the same 256-box
+budget in about 36.227 s, prunes 124 in total and splits 132. Thus the richer
+classifier avoids only one net split while making the run about 4.14 times
+slower. The roughly 27.9 s X-Taylor linearization cost is not amortized by the
+changed tree.
+
+This reproduces the same failure mode previously seen with root-CSE and
+quadrant refinement: a strong fixed-frontier classifier mostly changes where
+and by which mechanism descendants are rejected, rather than materially
+shrinking the search tree. The X-Taylor work remains useful evidence that
+Ariadne's validated LP layer is cheap and that corner/gradient relaxations can
+be strong, but it is rejected as an eager Barr3 SMT contractor. No 2048-box
+X-Taylor run is justified and no X-Taylor code is added to the production
+`SmtSolver`.
+
+The IBEX-inspired roadmap therefore advances past polytope-hull relaxation to
+interval Newton on equality systems. Barr3 itself is inequality-dominated, so
+the first Newton gate is deliberately not another Barr3 benchmark. Ariadne
+already has a validated `IntervalNewtonSolver::step` implementing the square
+interval-Newton image. Before designing equality-subsystem extraction,
+rank/variable selection or SMT scheduling, a standalone
+`benchmark_smt_interval_newton` exercises that existing primitive as a
+contractor: compute `N(X)`, reject when `N(X)` is disjoint from `X`, and
+otherwise use `X intersect N(X)`.
+
+The first benchmark system is the two-equation square system
+`x^2+y^2-1=0, x-y=0`. Mode `contract` starts from
+`[0.5,1]^2`, containing the positive root, and measures whether one validated
+Newton step contracts the box. Mode `infeasible` starts from `[0.8,1]^2`,
+which excludes that root, and checks whether the Newton image is disjoint.
+Mode `singular` starts from `[-1,1]^2` and is a guard for a Jacobian interval
+that cannot be inverted: the future SMT contractor must treat this as
+inapplicable, never as infeasibility. Only after these three semantics are
+confirmed should the implementation move into compiled SMT equality literals.

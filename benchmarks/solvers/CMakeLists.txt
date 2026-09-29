@@ -31,3 +31,14 @@ target_link_libraries(
 add_dependencies(
     benchmarks
     benchmark_constraint_shaving)
+
+add_executable(
+    benchmark_smt_interval_newton
+    benchmark_smt_interval_newton.cpp)
+target_link_libraries(
+    benchmark_smt_interval_newton
+    ariadne-kernel)
+
+add_dependencies(
+    benchmarks
+    benchmark_smt_interval_newton)

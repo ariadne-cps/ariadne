@@ -3181,3 +3181,29 @@ of it but is too expensive when applied eagerly. The first gate should therefore
 be an isolated fixed-frontier diagnostic that constructs a sound linear
 relaxation on the two-dimensional Barr3 boxes and measures contraction or
 pruning before any LP-based contractor is inserted into the search loop.
+
+
+A clarification is required before the linear-relaxation vertical slice. The
+existing Ariadne `ValidatedAffineModel` route must not be reopened as a proxy
+for IBEX X-Taylor. It was already tested on the initial Barr3 Lie-plus-barrier
+box and rejected: its validated range was approximately [-5097.33,5099.94],
+far wider than the natural interval image approximately [-889.22,888.27].
+The first-order mean-value enclosure was worse still. Those experiments close
+generic affine/Taylor *range models* for this workload.
+
+IBEX's X-Taylor direction is structurally different. It constructs a
+box-dependent corner-based linear relaxation of nonlinear constraints, then the
+polytope-hull contractor solves linear optimisation problems over the
+intersection of that relaxation with the current box to tighten variable
+bounds. The useful object is therefore not a single scalar affine range for
+Lie-plus-barrier, but a set of validated linear inequalities coupling the state
+variables. Ariadne already has validated LP infrastructure; the missing layer
+is the sound nonlinear-to-linear relaxation.
+
+The next experiment should implement only that missing layer for the two-state
+Barr3 case and keep it outside the SMT hot path. On a fixed natural baseline
+frontier, construct an X-Taylor-like validated linear relaxation for the active
+Lie inequality and measure: (1) how often the relaxation alone proves the box
+infeasible, (2) how much LP minimisation/maximisation contracts x and y, and
+(3) construction plus LP cost. Only a positive fixed-frontier result justifies
+a changed-tree polytope-hull contractor.

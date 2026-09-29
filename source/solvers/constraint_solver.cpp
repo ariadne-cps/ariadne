@@ -212,7 +212,6 @@ Bool ConstraintSolver::propagate(
         }
         if(not same(domain,previous)) {
             ++statistics.hull_effective;
-            shaving_full_refresh=true;
         }
 
         if(same(domain,previous)) {
@@ -527,6 +526,7 @@ Bool ConstraintSolver::propagate(
         }
         if(not same(domain,previous)) {
             ++statistics.hull_effective;
+            shaving_full_refresh=true;
         }
 
         if(same(domain,previous)) {

@@ -3082,3 +3082,13 @@ width with fewer than 384 shaving attempts and fewer than 1,152 validated
 function evaluations. The diagonal benchmark remains a regression guard:
 adaptivity should not materially penalise the case where nearly every genuine
 dependency is productive.
+
+
+The first adaptive-working-set build exposed a mechanical placement error rather
+than an algorithmic issue. The `shaving_full_refresh` reset was accidentally
+inserted in the legacy `List<ValidatedConstraint>` propagation overload,
+where the adaptive state does not exist, producing a compile error. The reset
+belongs only in the precompiled propagation path and is now applied there when
+hull contraction changes the domain, because such a contraction invalidates
+the previously learned shaving working set. The generic propagation overload
+remains unchanged.

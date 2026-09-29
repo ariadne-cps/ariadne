@@ -3181,17 +3181,33 @@ Void profile_lie_gradient_correlation_attribution(
             continue;
         }
 
+        // Advance the replay exactly as the established geometric baseline.
+        // The x/y quadrants below are diagnostic only and must not alter the
+        // search frontier.
+        auto children=box.split();
+        if(definitely(children.first==children.second)) {
+            continue;
+        }
+        ++split;
+
         auto children_x=box.split(0u);
         if(definitely(children_x.first==children_x.second)) {
+            pending.push_back(std::move(children.second));
+            pending.push_back(std::move(children.first));
             continue;
         }
         auto low_y=children_x.first.split(1u);
         auto high_y=children_x.second.split(1u);
+        if(definitely(low_y.first==low_y.second)
+                || definitely(high_y.first==high_y.second)) {
+            pending.push_back(std::move(children.second));
+            pending.push_back(std::move(children.first));
+            continue;
+        }
         std::array<UpperBoxType,4u> quadrants={
             low_y.first,low_y.second,high_y.first,high_y.second
         };
 
-        ++split;
         ++inspected;
 
         Stopwatch<Milliseconds> evaluation_stopwatch;
@@ -3235,8 +3251,8 @@ Void profile_lie_gradient_correlation_attribution(
         term_quadrant_hull_width_sum+=term_hull_width;
         db_dy_quadrant_hull_width_sum+=db_dy_hull.width().raw().get_d();
 
-        pending.push_back(std::move(children_x.second));
-        pending.push_back(std::move(children_x.first));
+        pending.push_back(std::move(children.second));
+        pending.push_back(std::move(children.first));
     }
     total_stopwatch.click();
 

@@ -2552,3 +2552,22 @@ cross-neuron correlation/cancellation preserved by evaluating the whole sum on
 a common partition. This diagnostic decides whether the next algebraic search
 should target the local activation-derivative product or the structure of the
 neuron sum.
+
+
+The first 256-box run of
+`lie-gradient-correlation-attribution-profile` is invalid as a baseline-frontier
+measurement and its reported recovery fractions must not be used as evidence.
+It produced `pruned=0`, `split=256`, `inspected=256` instead of the
+established `123/133` baseline replay. Inspection found that the profile
+accidentally reused its diagnostic x-coordinate subdivision to advance the DFS,
+thereby replacing the normal geometric `box.split()` traversal with repeated
+x splitting. The measured values (about 39.7% local recovery, 12.2% additional
+cross-term recovery and 51.8% total recovery) therefore refer to a different
+frontier.
+
+The profile is corrected so the baseline replay first computes and retains the
+ordinary geometric children from `box.split()`. The x/y four-quadrant
+subdivision is now used only to evaluate local term and complete-sum hulls on
+the current box; traversal always continues through the retained geometric
+children. A valid 256-box rerun must reproduce `processed=256`,
+`pruned=123` and `split=133` before any attribution result is interpreted.

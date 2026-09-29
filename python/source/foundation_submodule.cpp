@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations_submodule.cpp
+ *            foundation_submodule.cpp
  *
  *  Copyright  2008-24  Pieter Collins
  *
@@ -32,7 +32,7 @@
 #endif
 
 #include "utility/string.hpp"
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 
 namespace Ariadne {
 
@@ -141,7 +141,7 @@ Void export_logicals(pymodule& module) {
 
 
 
-Void foundations_submodule(pymodule& module) {
+Void foundation_submodule(pymodule& module) {
     export_effort(module);
 
     export_logicals(module);

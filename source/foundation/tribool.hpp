@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations/tribool.hpp
+ *            foundation/tribool.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file foundations/tribool.hpp
+/*! \file foundation/tribool.hpp
  *  \brief Three-valued logic variable.
  */
 
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 
 /*
 #ifdef DOXYGEN

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations/logical.hpp
+ *            foundation/logical.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//! \file foundations/logical.hpp
+//! \file foundation/logical.hpp
 //! \brief Logical classes
 
 #ifndef ARIADNE_LOGICAL_HPP
@@ -32,7 +32,7 @@
 #include "utility/typedefs.hpp"
 #include "utility/handle.hpp"
 #include "utility/string.hpp"
-#include "foundations/paradigm.hpp"
+#include "foundation/paradigm.hpp"
 
 #include "logical.decl.hpp"
 

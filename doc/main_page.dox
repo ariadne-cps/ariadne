@@ -67,9 +67,9 @@ A guide on the differences between the Python interface and the documented C++ A
 
 The classes, methods, functions and associated type definitions are described in detail in the main documentation. Entities can be found either within the \ref Ariadne namespace documentation, the <A HREF="classes.html">Class Index</A> (also linked to at the top-left of this page) or through the search bar at the top-right. Probably the best way of getting a structured overview is via the <A HREF="modules.html">Modules</A> page.
 
-\section mainpage_mathematical_foundations Mathematical Foundations
+\section mainpage_mathematical_foundation Mathematical Foundations
 
-More information on the mathematical foundations of %Ariadne can be found on the following pages:
+More information on the mathematical foundation of %Ariadne can be found on the following pages:
 
  - \ref computable_analysis_page
  - \ref topology_page

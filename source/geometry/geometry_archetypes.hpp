@@ -27,7 +27,7 @@
 
 #include <iosfwd>
 
-#include "foundations/logical.decl.hpp"
+#include "foundation/logical.decl.hpp"
 
 namespace Ariadne {
 

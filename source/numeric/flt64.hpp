@@ -34,16 +34,16 @@
 
 #include "utility/metaprogramming.hpp"
 #include "utility/typedefs.hpp"
-#include "foundations/paradigm.hpp"
+#include "foundation/paradigm.hpp"
 
 #include "numeric/sign.hpp"
 #include "numeric/is_number.hpp"
 
-#include "foundations/logical.decl.hpp"
+#include "foundation/logical.decl.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/number.hpp"
 #include "numeric/real.hpp"
-#include "foundations/logical.hpp"
+#include "foundation/logical.hpp"
 
 namespace Ariadne {
 

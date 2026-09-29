@@ -1,5 +1,5 @@
 /***************************************************************************
- *            foundations/logical.cpp
+ *            foundation/logical.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file foundations/logical.cpp
+/*! \file foundation/logical.cpp
  *  \brief
  */
 
@@ -56,8 +56,8 @@ inline char const* operation_name(LogicalOperation op) {
         case LogicalOperation::OR: return "or";
         case LogicalOperation::XOR: return "xor";
         case LogicalOperation::EQUAL: return "equal";
+        default: return "logical";
     }
-    return "logical";
 }
 inline LogicalValue apply(LogicalOperation op, LogicalValue v) {
     return op==LogicalOperation::NOT ? !v : LogicalValue::INDETERMINATE;
@@ -69,6 +69,7 @@ inline LogicalValue apply(LogicalOperation op, LogicalValue l, LogicalValue r) {
         case LogicalOperation::XOR: return l^r;
         case LogicalOperation::EQUAL: return l==r;
         case LogicalOperation::NOT: break;
+        default: break;
     }
     return LogicalValue::INDETERMINATE;
 }

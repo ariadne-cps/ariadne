@@ -88,7 +88,7 @@ baseline build without relying on this document's author.
 - [ ] Add public-header compilation checks for every component.
 - [ ] Make each test directory link to its component target instead of an
       aggregate library.
-- [ ] Register the currently omitted `tests/foundations` directory.
+- [ ] Register the currently omitted `tests/foundation` directory.
 
 Exit criterion: removing an undeclared target dependency causes configuration
 or compilation to fail locally and in CI.
@@ -113,13 +113,13 @@ neither `dynamics` nor lower-level geometry depends on `hybrid`.
 
 - [ ] Split generic logical/expression-template machinery from numeric and
       high-level symbolic specialisations.
-- [ ] Resolve the `foundations ↔ numeric ↔ symbolic` cycles without moving the
+- [ ] Resolve the `foundation ↔ numeric ↔ symbolic` cycles without moving the
       same cycle into a nominally lower package.
 - [ ] Stabilise `algebra → function` as the primary direction by relocating the
       two function-specific algebra integrations.
 - [ ] Identify the smallest primitive-geometry API needed by algebra and
       function (`Interval`, `Box`, declarations, and associated operations).
-- [ ] Decide whether foundations and numeric initially ship as one repository
+- [ ] Decide whether foundation and numeric initially ship as one repository
       with separate targets or as independently versioned packages.
 
 Exit criterion: the foundation/numeric/algebra/primitive-geometry subgraph is
@@ -158,7 +158,7 @@ and released without checking out the Ariadne monorepo.
 The first implementation slice should be deliberately small and measurable:
 
 1. add component target dependency declarations without moving files;
-2. add public-header compilation checks for `foundations`, `numeric`, and
+2. add public-header compilation checks for `foundation`, `numeric`, and
    `algebra`;
 3. make their tests link to component-level targets;
 4. remove the two suspected unused backward includes after compile and test
@@ -172,7 +172,7 @@ starts enforcing the dependencies needed for the core work.
 
 | Date | Change | Validation | Graph impact | Status |
 |---|---|---|---|---|
-| 2026-09-29 | Made `foundations` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are now owned by foundations; infinite `Sequence` conjunction/disjunction moved to `numeric/logical_sequence`; registered foundations tests and linked them only to `ariadne-foundations` + `utility`. | Static dependency assertions completed; build/test validation still required. | Expected removal of backward `numeric → foundations` and `symbolic → foundations`, breaking both mutual pairs while retaining intended `foundations → numeric`. | In progress |
+| 2026-09-29 | Made `foundation` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are now owned by foundation; infinite `Sequence` conjunction/disjunction moved to `numeric/logical_sequence`; registered foundation tests and linked them only to `ariadne-foundation` + `utility`. | Static dependency assertions completed; build/test validation still required. | Expected removal of backward `numeric → foundation` and `symbolic → foundation`, breaking both mutual pairs while retaining intended `foundation → numeric`. | In progress |
 | 2026-09-29 | Removed graphics and whole-tensor stream output from `algebra/Tensor`; moved Tensor drawing to the `io` layer through `tensor_drawable`, and adjusted the acoustic PDE example. | Static source review only; build/test validation still required. | Expected removal of backward `io → algebra`; the existing forward `algebra → io` remains. | In progress |
 | 2026-09-29 | Removed the two low-volume backward includes from `geometry/list_set.hpp` and `dynamics/enclosure.cpp` into `hybrid`. | Static symbol inspection: neither consumer uses `DiscreteLocation`/`DiscreteEvent`; build and test validation still required. | Expected removal of `hybrid → geometry` and `hybrid → dynamics`; 55 → 53 direct edges pending regeneration. | In progress |
 | 2026-09-29 | Created `decoupling` from `master`; recorded the baseline analysis and initial plan. | Branch SHA matched `master` before the documentation commit. | Baseline: 55 edges, 13 mutual pairs, one strongly connected component; 9 A / 35 M / 11 B. | Done |
@@ -187,14 +187,14 @@ starts enforcing the dependencies needed for the core work.
 
 ## Open questions
 
-- Should foundations and numeric be released together initially while retaining
+- Should foundation and numeric be released together initially while retaining
   separate targets?
 - Which interval and box types belong to primitive geometry, and which aliases
   belong to function or set packages?
 - Should drawing use free-function adapters, explicit renderer objects, or a
   small non-owning interface package?
 - Where should the generic expression-template machinery live so that numeric,
-  foundations, function, and symbolic do not form a cycle?
+  foundation, function, and symbolic do not form a cycle?
 - Which component should be the first real repository extraction: hybrid as a
   high-level consumer, or a stable low-level core package?
 

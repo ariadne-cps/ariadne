@@ -33,12 +33,12 @@
 
 #include "utility/module.hpp"
 
-#include "foundations/logical.decl.hpp"
+#include "foundation/logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
-#include "foundations/paradigm.hpp"
-#include "foundations/logical.hpp"
+#include "foundation/paradigm.hpp"
+#include "foundation/logical.hpp"
 #include "integer.hpp"
 #include "dyadic.hpp"
 #include "decimal.hpp"

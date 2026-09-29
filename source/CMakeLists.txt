@@ -1,4 +1,4 @@
-add_subdirectory(foundations)
+add_subdirectory(foundation)
 
 link_libraries(threading)
 

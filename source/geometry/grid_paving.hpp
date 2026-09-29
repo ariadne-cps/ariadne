@@ -35,7 +35,7 @@
 
 #include <memory>
 
-#include "foundations/tribool.hpp"
+#include "foundation/tribool.hpp"
 #include "utility/array.hpp"
 #include "utility/iterator.hpp"
 

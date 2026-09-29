@@ -29,60 +29,75 @@
 #include "utility/stdlib.hpp"
 #include "utility/string.hpp"
 #include "utility/macros.hpp"
-#include "numeric/sequence.hpp"
-#include "symbolic/templates.hpp"
-
 #include "logical.hpp"
-#include "numeric/integer.hpp"
 
 namespace Ariadne {
 
 
 namespace Detail {
 
-inline LogicalValue check(LogicalValue l, Effort) { return l; }
-template<class OP, class ARG> decltype(auto) check(Symbolic<OP,ARG> const& s, Effort e) { return s._op(check(s._arg,e)); }
-template<class OP, class ARG1, class ARG2> decltype(auto) check(Symbolic<OP,ARG1,ARG2> const& s, Effort e) { return s._op(check(s._arg1,e),check(s._arg2,e)); }
-
-template<class L> class LogicalWrapper
-    : public virtual LogicalInterface, public L
-{
-    using L::L;
-  private:
-    virtual LogicalInterface* _copy() const { return new LogicalWrapper<L>(*this); }
-    virtual LogicalValue _check(Effort e) const { return check(static_cast<L const&>(*this),e); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<L const&>(*this); }
-};
-
-template<> class LogicalWrapper<LogicalValue>
-    : public virtual LogicalInterface
-{
-    LogicalValue _v;
+class LogicalConstant : public LogicalInterface {
+    LogicalValue _value;
   public:
-    LogicalWrapper(LogicalValue v) : _v(v) { }
-    operator LogicalValue() const { return this->_v; }
+    explicit LogicalConstant(LogicalValue value) : _value(value) { }
+    operator LogicalValue() const { return _value; }
   private:
-    virtual LogicalInterface* _copy() const { return new LogicalWrapper<LogicalValue>(*this); }
-    virtual LogicalValue _check(Effort) const { return this->_v; }
-    virtual OutputStream& _write(OutputStream& os) const { return os << this->_v; }
+    LogicalInterface* _copy() const override { return new LogicalConstant(*this); }
+    LogicalValue _check(Effort) const override { return _value; }
+    OutputStream& _write(OutputStream& os) const override { return os << _value; }
 };
 
+enum class LogicalOperation { NOT, AND, OR, XOR, EQUAL };
 
-class LogicalConstant : public LogicalWrapper<LogicalValue> {
-    using LogicalWrapper<LogicalValue>::LogicalWrapper;
+inline char const* operation_name(LogicalOperation op) {
+    switch(op) {
+        case LogicalOperation::NOT: return "not";
+        case LogicalOperation::AND: return "and";
+        case LogicalOperation::OR: return "or";
+        case LogicalOperation::XOR: return "xor";
+        case LogicalOperation::EQUAL: return "equal";
+    }
+    return "logical";
+}
+inline LogicalValue apply(LogicalOperation op, LogicalValue v) {
+    return op==LogicalOperation::NOT ? !v : LogicalValue::INDETERMINATE;
+}
+inline LogicalValue apply(LogicalOperation op, LogicalValue l, LogicalValue r) {
+    switch(op) {
+        case LogicalOperation::AND: return l&&r;
+        case LogicalOperation::OR: return l||r;
+        case LogicalOperation::XOR: return l^r;
+        case LogicalOperation::EQUAL: return l==r;
+        case LogicalOperation::NOT: break;
+    }
+    return LogicalValue::INDETERMINATE;
+}
+class UnaryLogicalExpression : public LogicalInterface {
+    LogicalOperation _op; LogicalHandle _arg;
+  public:
+    UnaryLogicalExpression(LogicalOperation op, LogicalHandle arg):_op(op),_arg(arg){}
+  private:
+    LogicalInterface* _copy() const override { return new UnaryLogicalExpression(*this); }
+    LogicalValue _check(Effort e) const override { return apply(_op,_arg.check(e)); }
+    OutputStream& _write(OutputStream& os) const override { return os<<operation_name(_op)<<"("<<_arg<<")"; }
 };
-
-template<class OP, class... ARGS> class LogicalExpression : public LogicalWrapper<Symbolic<OP,ARGS...>> {
-    using LogicalWrapper<Symbolic<OP,ARGS...>>::LogicalWrapper;
+class BinaryLogicalExpression : public LogicalInterface {
+    LogicalOperation _op; LogicalHandle _lhs; LogicalHandle _rhs;
+  public:
+    BinaryLogicalExpression(LogicalOperation op, LogicalHandle lhs, LogicalHandle rhs):_op(op),_lhs(lhs),_rhs(rhs){}
+  private:
+    LogicalInterface* _copy() const override { return new BinaryLogicalExpression(*this); }
+    LogicalValue _check(Effort e) const override { return apply(_op,_lhs.check(e),_rhs.check(e)); }
+    OutputStream& _write(OutputStream& os) const override { return os<<operation_name(_op)<<"("<<_lhs<<","<<_rhs<<")"; }
 };
 
 
 LogicalInterface* new_logical_pointer_from_value(LogicalValue v) {
-    return new LogicalWrapper<LogicalValue>(v);
+    return new LogicalConstant(v);
 }
 
 LogicalValue logical_value_from_pointer(LogicalInterface* ptr) {
-    auto vlptr=dynamic_cast<LogicalWrapper<LogicalValue>*>(ptr);
+    auto vlptr=dynamic_cast<LogicalConstant*>(ptr);
     if (!vlptr) { throw std::runtime_error("logical_type_from_pointer: No conversion from abstract to concrete logical value"); }
     return *vlptr;
 }
@@ -92,44 +107,44 @@ LogicalHandle LogicalHandle::constant(LogicalValue l) {
 }
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::AND,l1,l2));
 }
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::OR,l1,l2));
 }
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::EQUAL,l1,l2));
 }
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::XOR,l1,l2));
 }
 
 LogicalHandle operator!(LogicalHandle l) {
-    return LogicalHandle(make_handle<const LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<const UnaryLogicalExpression>(LogicalOperation::NOT,l));
 }
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::AND,l1,l2));
 }
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::OR,l1,l2));
 }
 
 LogicalHandle negation(LogicalHandle l) {
-    return LogicalHandle(make_handle<const LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<const UnaryLogicalExpression>(LogicalOperation::NOT,l));
 }
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::EQUAL,l1,l2));
 }
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<const LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<const BinaryLogicalExpression>(LogicalOperation::XOR,l1,l2));
 }
 
 
@@ -160,49 +175,6 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
         default: ARIADNE_FAIL_MSG("Unhandled LogicalValue for output streaming.");
     }
     return os;
-}
-
-template<> struct LogicalExpression<OrOp,Sequence<LowerKleenean>> : public LogicalInterface {
-    Sequence<LowerKleenean> _seq;
-  public:
-    LogicalExpression(OrOp, Sequence<LowerKleenean> seq) : _seq(seq) { }
-    LogicalInterface* _copy() const { return new LogicalExpression<OrOp,Sequence<LowerKleenean>>(*this); }
-    LogicalValue _check(Effort eff) const {
-        for(Natural k=0u; k!=eff.work(); ++k) {
-            if ( definitely(_seq[k].check(eff)) ) { return LogicalValue::TRUE; }
-        }
-        return LogicalValue::INDETERMINATE;
-    }
-    OutputStream& _write(OutputStream& os) const {
-        return os << "disjunction(" << _seq[0u] << "," << _seq[1u] << "," << _seq[2u] << ",...)";
-    }
-};
-
-
-template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public LogicalInterface {
-    Sequence<UpperKleenean> _seq;
-  public:
-    LogicalExpression(AndOp, Sequence<UpperKleenean> seq) : _seq(seq) { }
-    LogicalInterface* _copy() const { return new LogicalExpression<AndOp,Sequence<UpperKleenean>>(*this); }
-    LogicalValue _check(Effort eff) const {
-        for(Natural k=0u; k!=eff.work(); ++k) {
-            if ( definitely(not _seq[k].check(eff)) ) { return LogicalValue::FALSE; }
-        }
-        return LogicalValue::INDETERMINATE;
-    }
-    OutputStream& _write(OutputStream& os) const {
-        return os << "conjunction(" << _seq[0u] << "," << _seq[1u] << "," << _seq[2u] << ",...)";
-    }
-};
-
-} // namespace Detail
-
-
-LowerKleenean disjunction(Sequence<LowerKleenean> const& l) {
-    return LowerKleenean(LogicalHandle(make_handle<const Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
-}
-UpperKleenean conjunction(Sequence<UpperKleenean> const& l) {
-    return UpperKleenean(LogicalHandle(make_handle<const Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
 }
 
 Nat Effort::_default = 0u;

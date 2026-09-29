@@ -1,3 +1,5 @@
+link_libraries(threading)
+
 set(Python3_FIND_VIRTUALENV FIRST)
 set(Python3_FIND_STRATEGY LOCATION)
 set(PYBIND11_FINDPYTHON ON)

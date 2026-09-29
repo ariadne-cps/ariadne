@@ -152,12 +152,7 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 add_subdirectory(submodules)
 
-include_directories(
-    ${PROJECT_SOURCE_DIR}/source
-    ${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging/include
-    ${PROJECT_SOURCE_DIR}/submodules/threading/include
-    ${PROJECT_SOURCE_DIR}/submodules/threading/submodules/utility/include
-)
+include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
 add_subdirectory(python)
@@ -211,10 +206,10 @@ target_include_directories(ariadne PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>
     $<INSTALL_INTERFACE:include/ariadne>
 )
-target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR)
+target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threading>)
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PRIVATE $<BUILD_INTERFACE:threading> dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PRIVATE $<BUILD_INTERFACE:threading> dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(APPLE)
     # Keep the dylib identity relocatable.  In the build tree, CMake's
@@ -279,7 +274,11 @@ install(FILES
     ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
     DESTINATION lib/cmake/Ariadne
 )
+get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
+get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
+get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
+
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/threading/submodules/logging/include/logging DESTINATION include/ariadne)
-install(DIRECTORY submodules/threading/include/threading DESTINATION include/ariadne)
-install(DIRECTORY submodules/threading/submodules/utility/include/utility DESTINATION include/ariadne)
+install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
+install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
+install(DIRECTORY "${UTILITY_SOURCE_DIR}/include/utility" DESTINATION include/ariadne)

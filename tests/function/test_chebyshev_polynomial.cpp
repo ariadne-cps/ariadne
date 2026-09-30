@@ -40,7 +40,7 @@
 
 #include "algebra/sweeper.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;

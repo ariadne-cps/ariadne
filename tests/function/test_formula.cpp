@@ -36,7 +36,7 @@
 #include "function/formula.hpp"
 #include "function/formula.tpl.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "function/function.hpp"
 

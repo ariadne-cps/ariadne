@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 #include "utility.hpp"
 #include "algebra/check_algebra.hpp"
 

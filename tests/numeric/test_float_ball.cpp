@@ -39,7 +39,7 @@
 #include "numeric/float_error.hpp"
 #include "numeric/float_bounds.hpp"
 
-#include "test.hpp"
+#include "utility/test.hpp"
 #include "test_floats.hpp"
 
 using namespace Ariadne;

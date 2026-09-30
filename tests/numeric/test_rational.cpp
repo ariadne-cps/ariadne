@@ -32,7 +32,7 @@
 
 #include <iomanip>
 
-#include "test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

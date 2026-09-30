@@ -4563,3 +4563,37 @@ To isolate the actual wall-clock benefit, the next measurement must rerun the
 same current revision and Mac Studio with `no-preclassify`. The two runs then
 differ only in the new scheduler flag; search tree, Procedure cache, evaluator
 and all other contractor code are identical.
+
+
+The controlled same-revision Barr3 comparison confirms that contractor
+preclassification is a real scheduling win for hull propagation. With the
+current compiled Procedure cache and all other settings identical, disabling
+preclassification gives 64 processed boxes, 28 pruned and 36 split in about
+35.734 s. Enabling preclassification preserves exactly the same 28/36 search
+tree but reduces runtime to about 25.992 s, a 27.3% reduction.
+
+The structural change is direct. Without preclassification all 64 processed
+boxes enter hull propagation. With preclassification, all 64 boxes are checked
+cheaply, 27 are rejected there, and only the remaining 37 reach hull. Hull
+rounds therefore fall from 64 to 37, about 42.2%. Hull contraction time falls
+from about 32.707 s to 20.833 s, about 36.3%, and forward Procedure execution
+falls from about 31.034 s to 19.786 s. The preclassification itself costs about
+2.090 s, so the avoided contractor work comfortably repays the extra validated
+range checks.
+
+The result does not rehabilitate eager hull for Barr3: even 25.992 s remains far
+slower than the contractor-free cheap path at roughly 2.7--2.8 s for the same
+64-box frontier, and hull still provides only one additional prune beyond the
+27 natural-range rejections. The accepted conclusion is narrower and more
+general: when an expensive contractor is enabled for other reasons, cheap
+preclassification can avoid paying it on boxes that ordinary range evaluation
+already decides.
+
+Before considering this scheduler for broader/default use, the next gate tests
+a second expensive contractor stack: Barr3 shaving with hull disabled. The
+historical adaptive-shaving run processed the same 64-box frontier at 28 pruned
+/ 36 split and spent about 16.22 s in shaving. If preclassification again
+removes most contractor work while preserving the tree, the benefit is not
+HC4-specific. A later small-system Newton regression is still required before
+any default promotion, because on cheap equality systems an extra
+preclassification pass may cost more than the contractor it precedes.

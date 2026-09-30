@@ -233,6 +233,23 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << result.statistics().interval_lookahead_evaluation_seconds
               << " candidate=" << result.statistics().candidate_search_seconds
               << std::endl;
+    if(not result.statistics().preclassification_outcomes.empty()) {
+        std::cout << "[" << name << "] preclass-trace=";
+        for(auto const outcome:result.statistics().preclassification_outcomes) {
+            switch(outcome) {
+                case SmtPreclassificationOutcome::PRUNED:
+                    std::cout << 'P';
+                    break;
+                case SmtPreclassificationOutcome::EPSILON_SAT:
+                    std::cout << 'E';
+                    break;
+                case SmtPreclassificationOutcome::UNRESOLVED:
+                    std::cout << 'U';
+                    break;
+            }
+        }
+        std::cout << " (P=pruned,E=epsilon,U=unresolved)" << std::endl;
+    }
 }
 
 FloatDPBounds stable_tanh(FloatDPBounds const& x)

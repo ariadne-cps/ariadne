@@ -478,6 +478,9 @@ class TestSmtSolver {
         no_conflict.preclassification_pruned_boxes=3u;
         no_conflict.preclassification_epsilon_boxes=2u;
         no_conflict.preclassification_literal_evaluations=15u;
+        no_conflict.preclassification_outcomes={
+            SmtPreclassificationOutcome::UNRESOLVED,
+            SmtPreclassificationOutcome::PRUNED};
         no_conflict.preclassification_seconds=0.375;
         no_conflict.interval_lookahead_guided_splits=4u;
         no_conflict.interval_lookahead_overrides_geometric_splits=3u;
@@ -505,6 +508,13 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.preclassification_pruned_boxes,3u);
         ARIADNE_TEST_EQUAL(target.preclassification_epsilon_boxes,2u);
         ARIADNE_TEST_EQUAL(target.preclassification_literal_evaluations,15u);
+        ARIADNE_TEST_EQUAL(target.preclassification_outcomes.size(),2u);
+        ARIADNE_TEST_ASSERT(
+            target.preclassification_outcomes[0]
+            ==SmtPreclassificationOutcome::UNRESOLVED);
+        ARIADNE_TEST_ASSERT(
+            target.preclassification_outcomes[1]
+            ==SmtPreclassificationOutcome::PRUNED);
         ARIADNE_TEST_EQUAL(target.preclassification_seconds,0.375);
         ARIADNE_TEST_EQUAL(target.interval_lookahead_guided_splits,4u);
         ARIADNE_TEST_EQUAL(
@@ -1346,6 +1356,11 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().preclassification_literal_evaluations,1u);
             ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_outcomes.size(),1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().preclassification_outcomes[0]
+                ==SmtPreclassificationOutcome::PRUNED);
+            ARIADNE_TEST_EQUAL(
                 solve_result.statistics().hull_reduction_rounds,0u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().fused_direct_classification_boxes,0u);
@@ -1380,6 +1395,11 @@ class TestSmtSolver {
                 solve_result.statistics().preclassification_pruned_boxes,0u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().preclassification_epsilon_boxes,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_outcomes.size(),1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().preclassification_outcomes[0]
+                ==SmtPreclassificationOutcome::UNRESOLVED);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().hull_reduction_rounds>=1u);
         }

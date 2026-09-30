@@ -1290,6 +1290,12 @@ SmtSolver::_accumulate_box_processing_statistics(
         if(processing.preclassification_epsilon_satisfied) {
             ++statistics.preclassification_epsilon_boxes;
         }
+        statistics.preclassification_outcomes.push_back(
+            processing.preclassification_pruned
+                ? SmtPreclassificationOutcome::PRUNED
+                : processing.preclassification_epsilon_satisfied
+                    ? SmtPreclassificationOutcome::EPSILON_SAT
+                    : SmtPreclassificationOutcome::UNRESOLVED);
     }
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
@@ -1707,6 +1713,10 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
         source.preclassification_epsilon_boxes;
     target.preclassification_literal_evaluations+=
         source.preclassification_literal_evaluations;
+    target.preclassification_outcomes.insert(
+        target.preclassification_outcomes.end(),
+        source.preclassification_outcomes.begin(),
+        source.preclassification_outcomes.end());
     target.preclassification_seconds+=source.preclassification_seconds;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;

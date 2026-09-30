@@ -62,6 +62,14 @@ enum class SmtUnknownReason {
 };
 
 //! \ingroup Solvers
+//! \brief Outcome of a cheap preclassification attempt before contractors.
+enum class SmtPreclassificationOutcome {
+    PRUNED,
+    EPSILON_SAT,
+    UNRESOLVED
+};
+
+//! \ingroup Solvers
 //! \brief Configuration shared by bounded real epsilon-SMT solvers.
 class SmtSolverConfiguration {
   public:
@@ -200,6 +208,7 @@ struct SmtSearchStatistics {
     SizeType preclassification_pruned_boxes = 0u;
     SizeType preclassification_epsilon_boxes = 0u;
     SizeType preclassification_literal_evaluations = 0u;
+    std::vector<SmtPreclassificationOutcome> preclassification_outcomes;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     double theory_compile_seconds = 0.0;

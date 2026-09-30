@@ -27,7 +27,7 @@
 
 #include "config.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

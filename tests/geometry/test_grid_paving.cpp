@@ -39,7 +39,7 @@
 #include "geometry/grid_paving.hpp"
 #include "geometry/set_interface.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 using namespace std;

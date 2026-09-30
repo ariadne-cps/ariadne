@@ -25,7 +25,7 @@
 #include "numeric/module.hpp"
 #include "geometry/box.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;

@@ -23,7 +23,6 @@
  */
 
 #include "utility/module.hpp"
-#include "config.hpp"
 
 #include "foundation/logical.hpp"
 #include "numeric/builtin.hpp"
@@ -43,7 +42,7 @@
 
 #include "numeric/complex.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 

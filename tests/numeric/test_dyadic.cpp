@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.hpp"
 
 #include "utility/string.hpp"
 
@@ -35,7 +34,7 @@
 
 #include <iomanip>
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

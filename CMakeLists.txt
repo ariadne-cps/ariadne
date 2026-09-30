@@ -48,7 +48,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Utility
         REFERENCES
-            "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
             "${PROJECT_SOURCE_DIR}/submodules/foundation|submodules/utility"
     )
 endif()

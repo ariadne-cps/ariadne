@@ -29,7 +29,6 @@
 #include <sstream>
 #include <string>
 
-#include "config.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
@@ -41,7 +40,7 @@
 #include "numeric/float_upper_bound.hpp"
 #include "numeric/float_error.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 #include "test_floats.hpp"
 
 using namespace Ariadne;

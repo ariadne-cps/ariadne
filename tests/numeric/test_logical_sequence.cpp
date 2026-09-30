@@ -8,7 +8,7 @@
 #include "numeric/integer.hpp"
 #include "numeric/sequence.hpp"
 #include "numeric/logical_sequence.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 using namespace Ariadne;
 class TestLogicalSequence { public: Void test(); };
 Int main() {

@@ -26,8 +26,7 @@
 
 #include "numeric/rounding.hpp"
 
-#include "config.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 namespace Ariadne { }
 

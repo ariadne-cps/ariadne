@@ -29,7 +29,6 @@
 #include <sstream>
 #include <string>
 
-#include "config.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
@@ -37,7 +36,7 @@
 #include "numeric/rational.hpp"
 #include "numeric/float.decl.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 using namespace std;

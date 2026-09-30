@@ -30,7 +30,6 @@
 #include <stdexcept>
 #include <fenv.h>
 
-#include "config.hpp"
 #include "numeric/rounding.hpp"
 #include "numeric/floats.hpp"
 #include "numeric/floatdp.hpp"
@@ -39,7 +38,7 @@
 #include "numeric/numeric.hpp"
 #include "numeric/dyadic.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

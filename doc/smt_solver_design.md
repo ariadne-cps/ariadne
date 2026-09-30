@@ -4175,3 +4175,26 @@ sweep, while the 2D coupled system should make an ineffective eager attempt,
 perform one hull sweep, and then make an effective second Newton attempt. The
 first regression is the 3D coupled benchmark because it must recover the
 previous one-box behavior before the adaptive retry can be accepted.
+
+
+The adaptive retry policy restores the intended 3D coupled behavior. On the
+same hull+shaving benchmark, the Newton variant again solves the root box
+without splitting: 1 processed box, 0 splits, exactly 1 Newton attempt and
+1 effective Newton contraction, with no Newton infeasibility proof or singular
+skip. Hull work is back down to 3 rounds / 2 effective reductions and one
+shaving round. This confirms that effective eager Newton no longer pays the
+unconditional pre-sweep penalty.
+
+This run was executed on a MacBook rather than the Mac Studio used for earlier
+timing comparisons, so its absolute runtime is not compared against the prior
+machine. Within the same MacBook invocation the Newton variant is still much
+faster than the baseline, but the acceptance criterion here is structural:
+the adaptive scheduler has recovered the one-box, zero-split eager behavior.
+
+The complementary regression is now the 2D coupled case. There the adaptive
+policy should make two Newton attempts on the root processing path: the first
+eager attempt should be applicable but ineffective, triggering exactly one hull
+sweep, and the second attempt on the same subsystem should be effective. The
+search may still require the same overall hull fixed point, so timing is not the
+primary gate; the key evidence is `newton-attempts=2` with at least one
+effective reduction and unchanged sound search behavior.

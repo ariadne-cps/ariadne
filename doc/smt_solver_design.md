@@ -4597,3 +4597,33 @@ removes most contractor work while preserving the tree, the benefit is not
 HC4-specific. A later small-system Newton regression is still required before
 any default promotion, because on cheap equality systems an extra
 preclassification pass may cost more than the contractor it precedes.
+
+
+The first Barr3 shaving-only run with contractor preclassification does not
+show the same structural benefit as the hull-only case. With shaving enabled,
+hull disabled and all other optional mechanisms off, the solver again processes
+64 boxes and reaches 28 pruned / 36 split boxes. However, all 64 boxes are
+preclassified and none is rejected or epsilon-certified by the precheck:
+`preclass-pruned=0`, `preclass-epsilon=0`, with 128 literal evaluations
+and about 2.223 s spent in preclassification.
+
+The downstream shaving profile is essentially the established adaptive-shaving
+shape: 85 shaving rounds, 18 effective rounds, 224 dependent attempts, 27
+effective attempts, 48 adaptive skips and 700 validated function evaluations.
+Shaving itself costs about 16.545 s. Total runtime is about 23.475 s.
+
+This differs qualitatively from hull-only, where 27 of 28 eventual prunes were
+already visible to natural range evaluation before the contractor. With shaving,
+the preclassification sees no immediately decidable box on the actual
+shaving-modified search tree, so the extra check is pure overhead. The likely
+reason is not a semantic inconsistency but changed tree geometry: shaving
+contracts surviving boxes before they are split, so the later processed boxes
+differ from the hull-only frontier.
+
+As with the hull experiment, timing must still be isolated against a
+same-revision, same-machine `no-preclassify` shaving run before assigning the
+full wall-clock delta to preclassification. Structurally, however, the absence
+of any preclassification prune already shows that a universal
+"always preclassify before every expensive contractor" policy is not justified.
+A useful scheduler would need contractor/workload selectivity or evidence that
+the cheap precheck is likely to terminate the box.

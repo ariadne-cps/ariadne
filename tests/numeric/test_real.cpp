@@ -72,7 +72,7 @@ Decimal operator""_dec (const char* str, std::size_t) { return Decimal(String(st
 
 #include "numeric/floats.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

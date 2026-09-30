@@ -29,7 +29,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

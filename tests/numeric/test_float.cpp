@@ -44,7 +44,7 @@
 #include "numeric/float_upper_bound.hpp"
 #include "numeric/float_error.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 #include "test_floats.hpp"
 
 using namespace Ariadne;

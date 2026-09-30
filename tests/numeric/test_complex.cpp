@@ -42,7 +42,7 @@
 
 #include "numeric/complex.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace Ariadne;
 

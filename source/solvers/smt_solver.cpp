@@ -37,6 +37,7 @@
 #include <functional>
 #include <set>
 #include <thread>
+#include <type_traits>
 
 #include "betterthreads/workload.hpp"
 
@@ -152,6 +153,84 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
                 sensitivity+=candidate;
             }
         }
+        Bool const no_selection=not selected;
+        Bool const larger_score=sensitivity.raw()>selected_score.raw();
+        Bool const better_score=
+            static_cast<unsigned>(no_selection)
+            | static_cast<unsigned>(larger_score);
+        if(static_cast<unsigned>(active)
+           & static_cast<unsigned>(better_score)) {
+            selected=true;
+            selected_coordinate=variable;
+            selected_score=sensitivity;
+        }
+    }
+
+    Bool guided=selected;
+    SizeType coordinate=selected_coordinate;
+    Bool overrode=guided & (coordinate!=geometric);
+    return {coordinate,{guided,overrode}};
+}
+
+Pair<SizeType,Pair<Bool,Bool>> cached_sensitivity_split_coordinate(
+    UpperBoxType const& domain,
+    std::vector<ConstraintPropagationConstraint const*> const& literals,
+    SizeType* derivative_evaluations=nullptr,
+    double* derivative_evaluation_seconds=nullptr)
+{
+    auto widths=domain.widths();
+
+    SizeType geometric=0u;
+    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
+        if(widths[variable].raw()>widths[geometric].raw()) {
+            geometric=variable;
+        }
+    }
+
+    Bool selected=false;
+    SizeType selected_coordinate=geometric;
+    PositiveFloatDPUpperBound selected_score(0u,dp);
+    UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
+
+    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
+        PositiveFloatDPUpperBound sensitivity(0u,dp);
+        Bool active=false;
+        for(auto const* literal:literals) {
+            if(variable>=literal->derivatives.size()) {
+                continue;
+            }
+            auto const& derivative=literal->derivatives[variable];
+            if(not derivative.has_value()) {
+                continue;
+            }
+
+            auto const evaluation_start=std::chrono::steady_clock::now();
+            UpperIntervalType derivative_image=apply(*derivative,domain);
+            double const evaluation_seconds=
+                elapsed_seconds(evaluation_start);
+            if(derivative_evaluations!=nullptr) {
+                ++*derivative_evaluations;
+            }
+            if(derivative_evaluation_seconds!=nullptr) {
+                *derivative_evaluation_seconds+=evaluation_seconds;
+            }
+
+            Bool const lower_is_zero=
+                derivative_image.lower_bound().raw()
+                    ==zero_derivative.lower_bound().raw();
+            Bool const upper_is_zero=
+                derivative_image.upper_bound().raw()
+                    ==zero_derivative.upper_bound().raw();
+            Bool const derivative_is_exactly_zero=
+                static_cast<unsigned>(lower_is_zero)
+                & static_cast<unsigned>(upper_is_zero);
+            if(not derivative_is_exactly_zero) {
+                active=true;
+                sensitivity+=
+                    domain[variable].width()*mag(derivative_image);
+            }
+        }
+
         Bool const no_selection=not selected;
         Bool const larger_score=sensitivity.raw()>selected_score.raw();
         Bool const better_score=
@@ -559,7 +638,8 @@ SmtSolver::_compile_theory_literals(RealSpace const& space,
         }
         ValidatedScalarMultivariateFunction function(space,expression);
         std::vector<std::optional<ValidatedScalarMultivariateFunction>> derivatives;
-        if(_configuration.monotone_reduction_enabled()) {
+        if(_configuration.monotone_reduction_enabled()
+           || _configuration.sensitivity_split_enabled()) {
             derivatives.reserve(space.dimension());
             for(SizeType variable=0u; variable!=space.dimension(); ++variable) {
                 derivatives.push_back(
@@ -944,12 +1024,27 @@ SmtSolver::_split_box(
         return result;
     }
 
-    auto selection=sensitivity_split_coordinate(
-        domain,functions,
-        &derivatives_built,
-        &derivative_evaluations,
-        &derivative_build_seconds,
-        &derivative_evaluation_seconds);
+    Pair<SizeType,Pair<Bool,Bool>> selection;
+    if constexpr(std::is_same_v<Conjunction,CompiledTheoryLiterals>) {
+        std::vector<ConstraintPropagationConstraint const*> active_literals;
+        active_literals.reserve(conjunction.size());
+        for(auto const& item:conjunction) {
+            if(not this->_epsilon_satisfied(domain,item)) {
+                active_literals.push_back(&item);
+            }
+        }
+        selection=cached_sensitivity_split_coordinate(
+            domain,active_literals,
+            &derivative_evaluations,
+            &derivative_evaluation_seconds);
+    } else {
+        selection=sensitivity_split_coordinate(
+            domain,functions,
+            &derivatives_built,
+            &derivative_evaluations,
+            &derivative_build_seconds,
+            &derivative_evaluation_seconds);
+    }
     result.children=domain.split(selection.first);
     result.sensitivity_guided=selection.second.first;
     result.sensitivity_overrode_geometric=selection.second.second;

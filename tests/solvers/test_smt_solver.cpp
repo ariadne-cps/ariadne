@@ -580,16 +580,17 @@ class TestSmtSolver {
                 make_smt_theory_literal(expression>=0))[0][0]
         });
 
-        SmtSolver without_monotone(SmtSolverConfiguration(
+        SmtSolver without_derivative_users(SmtSolverConfiguration(
             0.01_x,
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             false,
+            false,
             false));
         ARIADNE_TEST_EQUAL(
             SmtSolverTestSupport::compiled_theory_derivative_count(
-                without_monotone,space,literals),
+                without_derivative_users,space,literals),
             0u);
 
         SmtSolver with_monotone(SmtSolverConfiguration(
@@ -598,10 +599,24 @@ class TestSmtSolver {
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             false,
-            true));
+            true,
+            false));
         ARIADNE_TEST_EQUAL(
             SmtSolverTestSupport::compiled_theory_derivative_count(
                 with_monotone,space,literals),
+            space.dimension());
+
+        SmtSolver with_sensitivity(SmtSolverConfiguration(
+            0.01_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            true));
+        ARIADNE_TEST_EQUAL(
+            SmtSolverTestSupport::compiled_theory_derivative_count(
+                with_sensitivity,space,literals),
             space.dimension());
     }
 

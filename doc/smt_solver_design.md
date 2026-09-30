@@ -4298,3 +4298,38 @@ on without further Newton heuristic tuning. The next unresolved architectural
 item is smear-style branching refinement: reuse/caching of derivative
 representations for the existing sensitivity splitter and evaluation of a
 relative-normalized score, rather than adding another eager contractor.
+
+
+After stabilizing Interval Newton, work resumes on smear-style branching. The
+existing sensitivity splitter is already a SmearSum-style heuristic: for each
+coordinate it sums `width(x_i) * mag(df_j/dx_i)` over active literals and
+chooses the largest score. Historical Barr3 profiling already provides the
+baseline needed for the first optimisation. On the one-box Lie query, four
+symbolic derivative constructions took about 0.560 s while four validated
+derivative evaluations took about 4.052 s. At an eight-box budget sensitivity
+did not improve observed search progress relative to geometric splitting and
+added about 40 s of split cost. Therefore derivative caching is expected to
+remove repeated symbolic construction but not the dominant validated
+evaluation cost.
+
+Compiled SMT literals already contain a coordinate-derivative cache used by
+monotone contraction. That cache is now populated when either monotone
+contraction or sensitivity-guided splitting is enabled. If neither feature is
+enabled, theory compilation still constructs no derivatives. This preserves
+the earlier cheap geometric configuration and avoids unconditional derivative
+precomputation.
+
+Sensitivity splitting of `CompiledTheoryLiterals` now consumes those cached
+derivatives directly. The generic `ValidatedConstraint` path retains the
+existing on-demand derivative construction because it has no expression-level
+compiled cache. Cached sensitivity still evaluates each derivative on the
+current box, so validated derivative-evaluation counts and semantics are
+unchanged; per-split symbolic derivative build counts/time should fall to zero,
+with the one-time construction cost moving into theory compilation.
+
+The derivative-compilation regression now covers all three configurations:
+neither derivative consumer enabled gives zero cached derivatives; monotone
+alone gives one derivative per coordinate; sensitivity alone gives the same
+cache. This is the first smear vertical slice only. Relative SmearSumRel
+normalisation is deliberately deferred until the cache change is measured in
+isolation.

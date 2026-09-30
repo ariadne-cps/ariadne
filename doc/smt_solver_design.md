@@ -4227,3 +4227,30 @@ hull+shaving comparison. It previously showed a positive Newton result with
 that benchmark under the adaptive scheduler checks that the new ineffective-
 only retry rule does not perturb an already-successful higher-dimensional
 case before the ordering is considered stable.
+
+
+The adaptive-ordering 4D regression also passes on the MacBook. With
+hull+shaving enabled, the baseline again processes 12 boxes and splits 7,
+while the Newton variant processes 5 boxes and splits 3. Newton performs
+exactly 5 attempts and all 5 are effective, with no singular or direct-
+infeasibility cases. Hull rounds remain 17 versus 26 for the baseline and
+shaving rounds 4 versus 11. These structural counts match the earlier Mac
+Studio run, so the adaptive retry has not perturbed the established 4D case.
+The MacBook absolute timings are recorded separately and are not compared
+against the Mac Studio timing series.
+
+The adaptive scheduler is now considered behaviorally stable across the
+targeted regressions: eager-effective 3D remains a one-attempt root solve;
+eager-ineffective 2D performs one hull sweep and one retry; the 4D propagation
+case retains its 5-box / 3-split tree. Interval Newton remains opt-in because
+the repeated 2D timing gate showed a small median slowdown despite improved
+contraction quality.
+
+These control-flow properties are now promoted from benchmark-only evidence to
+unit regressions in `test_smt_solver`. The 3D coupled test fixes the invariant
+that an effective eager Newton step does not trigger staging
+(`attempts=1`, `effective=1`, one processed box, no split). The 2D coupled
+test fixes the complementary invariant that an ineffective eager step triggers
+exactly one hull-sweep retry (`attempts=2`, `effective=1`, no Newton
+infeasibility or singular skip). This protects the scheduler against future
+refactoring without depending on wall-clock measurements.

@@ -66,6 +66,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_geometric_validated_constraint_split());
         ARIADNE_TEST_CALL(test_theory_solve());
+        ARIADNE_TEST_CALL(test_interval_newton_adaptive_retry());
         ARIADNE_TEST_CALL(test_boolean_theory_solve());
         ARIADNE_TEST_CALL(test_parallel_solve());
     }
@@ -2703,6 +2704,102 @@ class TestSmtSolver {
                 ARIADNE_TEST_EQUAL(sequential.status(),parallel.status());
                 ARIADNE_TEST_ASSERT(sequential.has_witness()==parallel.has_witness());
             }
+        }
+    }
+
+    Void test_interval_newton_adaptive_retry() {
+        auto make_solver=[](SizeType box_limit) {
+            return SmtSolver(SmtSolverConfiguration(
+                1e-5_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                box_limit,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                false,
+                false,
+                true));
+        };
+
+        {
+            std::cout << "[smt-newton] eager effective Newton does not stage" << std::endl;
+            RealVariable x0("newton_retry_3d_x0");
+            RealVariable x1("newton_retry_3d_x1");
+            RealVariable x2("newton_retry_3d_x2");
+            RealExpression e0=x0, e1=x1, e2=x2;
+            RealSpace space({x0,x1,x2});
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    e0*e1-0.12_x,
+                    SmtTheoryPrimitiveRelation::EQ_ZERO),
+                SmtTheoryPrimitiveLiteral(
+                    e1*e2-0.15_x,
+                    SmtTheoryPrimitiveRelation::EQ_ZERO),
+                SmtTheoryPrimitiveLiteral(
+                    e0+e1+e2-1.2_x,
+                    SmtTheoryPrimitiveRelation::EQ_ZERO)
+            });
+
+            SmtResult result=make_solver(16384u).solve(
+                space,
+                ExactBoxType({
+                    ExactIntervalType(0.25_x,0.55_x),
+                    ExactIntervalType(0.2_x,0.4_x),
+                    ExactIntervalType(0.4_x,0.6_x)
+                }),
+                literals);
+
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_attempts,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_effective_reductions,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_infeasible,0u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_singular,0u);
+        }
+
+        {
+            std::cout << "[smt-newton] ineffective eager Newton stages one hull sweep and retries" << std::endl;
+            RealVariable x0("newton_retry_2d_x0");
+            RealVariable x1("newton_retry_2d_x1");
+            RealExpression e0=x0, e1=x1;
+            RealSpace space({x0,x1});
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    e0*e1-0.12_x,
+                    SmtTheoryPrimitiveRelation::EQ_ZERO),
+                SmtTheoryPrimitiveLiteral(
+                    e0+e1-0.7_x,
+                    SmtTheoryPrimitiveRelation::EQ_ZERO)
+            });
+
+            SmtResult result=make_solver(4096u).solve(
+                space,
+                ExactBoxType({
+                    ExactIntervalType(0.36_x,0.8_x),
+                    ExactIntervalType(0.15_x,0.34_x)
+                }),
+                literals);
+
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_split,0u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_attempts,2u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_effective_reductions,1u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_infeasible,0u);
+            ARIADNE_TEST_EQUAL(
+                result.statistics().interval_newton_singular,0u);
         }
     }
 

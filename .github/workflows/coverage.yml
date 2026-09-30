@@ -67,11 +67,23 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --parallel $($NPROC) --target coverage
 
+    - name: Check Codecov Token
+      if: runner.os == 'macOS'
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        if [ -z "$CODECOV_TOKEN" ]; then
+          echo "CODECOV_TOKEN is not available"
+          exit 1
+        fi
+        echo "CODECOV_TOKEN is available"
+
     - name: Upload Code Coverage
       if: runner.os == 'macOS'
       uses: codecov/codecov-action@v7.1.1
       with:
         files: ${{runner.workspace}}/build/coverage.info
         disable_search: true
-        fail_ci_if_error: false
+        fail_ci_if_error: true
+        verbose: true
         token: ${{ secrets.CODECOV_TOKEN }}

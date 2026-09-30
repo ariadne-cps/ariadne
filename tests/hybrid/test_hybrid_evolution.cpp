@@ -43,7 +43,7 @@
 #include "hybrid/hybrid_graphics.hpp"
 #include "io/command_line_interface.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 using namespace std;

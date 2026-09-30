@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "foundation/logical.hpp"
 #include "numeric/real.hpp"

@@ -35,7 +35,7 @@
 #include "geometry/set_wrapper.hpp"
 #include "geometry/measurable_set.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

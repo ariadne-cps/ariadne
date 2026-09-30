@@ -33,7 +33,7 @@
 #include "numeric/rational.hpp"
 #include "geometry/interval.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 using namespace std;

@@ -1,4 +1,4 @@
-set(LIBRARY_NAME ariadne-numeric)
+set(LIBRARY_NAME NUMERIC_SRC)
 
 add_library(${LIBRARY_NAME} OBJECT
     operators.cpp
@@ -25,14 +25,34 @@ add_library(${LIBRARY_NAME} OBJECT
     logical_sequence.cpp
 )
 
-target_link_libraries(${LIBRARY_NAME}
-    PUBLIC
+if(NOT TARGET numeric)
+    add_library(numeric INTERFACE)
+    target_include_directories(numeric INTERFACE
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>
+        $<INSTALL_INTERFACE:include/ariadne-numeric>
+    )
+    target_link_libraries(numeric INTERFACE
         foundation
         utility
         GMP::GMP
         MPFR::MPFR
-)
+    )
+endif()
+
+target_link_libraries(${LIBRARY_NAME} PRIVATE numeric)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR NOT APPLE)
     target_compile_options(${LIBRARY_NAME} PRIVATE -frounding-math)
+endif()
+
+if(NOT TARGET ariadne-numeric)
+    setup_project_library(
+        TARGET ariadne-numeric
+        OBJECTS
+            NUMERIC_SRC
+            FOUNDATION_SRC
+            UTILITY_SRC
+        LINK_LIBRARIES
+            numeric
+    )
 endif()

@@ -78,7 +78,8 @@ class SmtSolverConfiguration {
         Bool hull_reduction_enabled=true,
         Bool interval_lookahead_split_enabled=false,
         Bool upper_child_first=false,
-        Bool interval_newton_reduction_enabled=false);
+        Bool interval_newton_reduction_enabled=false,
+        Bool preclassification_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -126,6 +127,11 @@ class SmtSolverConfiguration {
         return _interval_newton_reduction_enabled;
     }
 
+    //! \brief Whether compiled theory boxes are cheaply classified before contractors.
+    Bool preclassification_enabled() const {
+        return _preclassification_enabled;
+    }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -140,6 +146,7 @@ class SmtSolverConfiguration {
     Bool _shaving_reduction_enabled;
     Bool _hull_reduction_enabled;
     Bool _interval_newton_reduction_enabled;
+    Bool _preclassification_enabled;
 };
 
 //! \ingroup Solvers
@@ -189,6 +196,10 @@ struct SmtSearchStatistics {
     SizeType epsilon_box_certifications = 0u;
     SizeType fused_direct_classification_boxes = 0u;
     SizeType fused_direct_literal_evaluations = 0u;
+    SizeType preclassification_boxes = 0u;
+    SizeType preclassification_pruned_boxes = 0u;
+    SizeType preclassification_epsilon_boxes = 0u;
+    SizeType preclassification_literal_evaluations = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     double theory_compile_seconds = 0.0;
@@ -199,6 +210,7 @@ struct SmtSearchStatistics {
     double sensitivity_derivative_build_seconds = 0.0;
     double sensitivity_derivative_evaluation_seconds = 0.0;
     double interval_lookahead_evaluation_seconds = 0.0;
+    double preclassification_seconds = 0.0;
     double candidate_search_seconds = 0.0;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
@@ -608,6 +620,9 @@ class SmtSolver {
         Bool epsilon_box_certification = false;
         Bool fused_direct_classification = false;
         SizeType fused_direct_literal_evaluations = 0u;
+        Bool preclassification = false;
+        SizeType preclassification_literal_evaluations = 0u;
+        double preclassification_seconds = 0.0;
         Bool dp_resolution_exhausted = false;
         Bool candidate_witness_search = false;
         Bool candidate_witness_success = false;
@@ -681,6 +696,7 @@ class SmtSolver {
 
     struct DirectClassification {
         Bool used = false;
+        Bool preclassification = false;
         Bool pruned = false;
         Bool epsilon_satisfied = false;
         SizeType literal_evaluations = 0u;

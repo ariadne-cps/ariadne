@@ -228,6 +228,26 @@ class TestSmtSolver {
             interval_newton_configuration.interval_newton_reduction_enabled());
         ARIADNE_TEST_ASSERT(
             not configuration.interval_newton_reduction_enabled());
+        ARIADNE_TEST_ASSERT(not configuration.preclassification_enabled());
+
+        std::cout << "[smt-config] enable contractor preclassification" << std::endl;
+        SmtSolverConfiguration preclassification_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true);
+        ARIADNE_TEST_ASSERT(
+            preclassification_configuration.preclassification_enabled());
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -1283,6 +1303,74 @@ class TestSmtSolver {
                 space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().fused_direct_classification_boxes,0u);
+        }
+
+        {
+            std::cout << "[smt-preclassify] prune before hull" << std::endl;
+            SmtSolver preclassification_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true));
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex-2,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            SmtResult solve_result=preclassification_solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,1)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_pruned_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_literal_evaluations,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().hull_reduction_rounds,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().fused_direct_classification_boxes,0u);
+        }
+
+        {
+            std::cout << "[smt-preclassify] unresolved box continues to hull" << std::endl;
+            SmtSolver preclassification_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                1u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true));
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    ex,SmtTheoryPrimitiveRelation::GEQ_ZERO)
+            });
+            SmtResult solve_result=preclassification_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_boxes,1u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_pruned_boxes,0u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().hull_reduction_rounds>=1u);
         }
     }
 

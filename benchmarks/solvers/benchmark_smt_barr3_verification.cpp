@@ -90,6 +90,16 @@ String child_order_from_argument(Int argc,const char* argv[]) {
         "[barrier-first|lie-first] [lower-first|upper-first]");
 }
 
+Bool preclassification_from_argument(Int argc,const char* argv[]) {
+    if(argc<=10) { return false; }
+    String argument(argv[10]);
+    if(argument=="preclassify") { return true; }
+    if(argument=="no-preclassify") { return false; }
+    throw std::runtime_error(
+        "Usage: benchmark_smt_barr3_verification ... "
+        "[lower-first|upper-first] [preclassify|no-preclassify]");
+}
+
 Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argc<=5) { return true; }
     String argument(argv[5]);
@@ -156,6 +166,16 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
               << " fused-direct=" << result.statistics().fused_direct_classification_boxes
               << " fused-literal-evals="
               << result.statistics().fused_direct_literal_evaluations
+              << " preclass-boxes="
+              << result.statistics().preclassification_boxes
+              << " preclass-pruned="
+              << result.statistics().preclassification_pruned_boxes
+              << " preclass-epsilon="
+              << result.statistics().preclassification_epsilon_boxes
+              << " preclass-literal-evals="
+              << result.statistics().preclassification_literal_evaluations
+              << " preclass-time="
+              << result.statistics().preclassification_seconds
               << " candidate-searches=" << result.statistics().candidate_witness_searches
               << " candidate-successes=" << result.statistics().candidate_witness_successes
               << " hull-rounds=" << result.statistics().hull_reduction_rounds
@@ -5557,6 +5577,8 @@ Int main(Int argc,const char* argv[]) {
     String const lie_literal_order=lie_literal_order_from_argument(argc,argv);
     String const child_order=child_order_from_argument(argc,argv);
     Bool const upper_child_first=child_order=="upper-first";
+    Bool const preclassification_enabled=
+        preclassification_from_argument(argc,argv);
 
     std::cout << "=== Published Barr3 2-64-64-1 verification ===" << std::endl;
     std::cout << "epsilon=1e-5 box-limit=";
@@ -5577,6 +5599,8 @@ Int main(Int argc,const char* argv[]) {
               << (monotone_enabled ? "enabled" : "disabled")
               << " lie-literal-order=" << lie_literal_order
               << " child-order=" << child_order
+              << " preclassification="
+              << (preclassification_enabled ? "enabled" : "disabled")
               << std::endl;
 
     RealVariable x("barr3_x"), y("barr3_y");
@@ -6236,7 +6260,9 @@ Int main(Int argc,const char* argv[]) {
         shaving_enabled,
         hull_enabled,
         lookahead_enabled,
-        upper_child_first));
+        upper_child_first,
+        false,
+        preclassification_enabled));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

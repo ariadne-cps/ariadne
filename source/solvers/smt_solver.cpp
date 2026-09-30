@@ -455,7 +455,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool hull_reduction_enabled,
     Bool interval_lookahead_split_enabled,
     Bool upper_child_first,
-    Bool interval_newton_reduction_enabled)
+    Bool interval_newton_reduction_enabled,
+    Bool preclassification_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -468,7 +469,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
       _shaving_reduction_enabled(shaving_reduction_enabled),
       _hull_reduction_enabled(hull_reduction_enabled),
-      _interval_newton_reduction_enabled(interval_newton_reduction_enabled)
+      _interval_newton_reduction_enabled(interval_newton_reduction_enabled),
+      _preclassification_enabled(preclassification_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -887,15 +889,22 @@ SmtSolver::_direct_classification(
         _configuration.interval_newton_reduction_enabled()
         && not interval_newton_subsystem_candidates(
             literals,domain.dimension()).empty();
-    if(_configuration.hull_reduction_enabled()
-       || _configuration.shaving_reduction_enabled()
-       || _configuration.monotone_reduction_enabled()
-       || interval_newton_eligible) {
+    Bool const contractor_enabled=
+        _configuration.hull_reduction_enabled()
+        || _configuration.shaving_reduction_enabled()
+        || _configuration.monotone_reduction_enabled()
+        || interval_newton_eligible;
+    Bool const preclassification=
+        contractor_enabled && _configuration.preclassification_enabled();
+    if(contractor_enabled && not preclassification) {
         return result;
     }
 
     result.used=true;
-    ++statistics.hull_rounds;
+    result.preclassification=preclassification;
+    if(not preclassification) {
+        ++statistics.hull_rounds;
+    }
     Bool all_epsilon_satisfied=true;
     FloatDP epsilon(_configuration.epsilon(),dp);
     auto const start=std::chrono::steady_clock::now();
@@ -936,7 +945,9 @@ SmtSolver::_direct_classification(
     }
 
     result.seconds=elapsed_seconds(start);
-    statistics.hull_direct_rejection_seconds+=result.seconds;
+    if(not result.preclassification) {
+        statistics.hull_direct_rejection_seconds+=result.seconds;
+    }
     result.epsilon_satisfied=all_epsilon_satisfied && not result.pruned;
     return result;
 }
@@ -1065,12 +1076,19 @@ SmtSolver::_process_box(
         reductions};
 
     auto direct=this->_direct_classification(domain,conjunction,reductions);
-    auto phase_start=std::chrono::steady_clock::now();
     if(direct.used) {
-        result.fused_direct_classification=true;
-        result.fused_direct_literal_evaluations=direct.literal_evaluations;
+        if(direct.preclassification) {
+            result.preclassification=true;
+            result.preclassification_literal_evaluations=
+                direct.literal_evaluations;
+            result.preclassification_seconds=direct.seconds;
+        } else {
+            result.fused_direct_classification=true;
+            result.fused_direct_literal_evaluations=
+                direct.literal_evaluations;
+            result.reduction_seconds=direct.seconds;
+        }
         result.reductions=reductions;
-        result.reduction_seconds=direct.seconds;
         if(direct.pruned) {
             result.status=BoxProcessingStatus::PRUNED;
             return result;
@@ -1081,7 +1099,10 @@ SmtSolver::_process_box(
             result.epsilon_box_certification=true;
             return result;
         }
-    } else {
+    }
+
+    auto phase_start=std::chrono::steady_clock::now();
+    if(not direct.used || direct.preclassification) {
         Bool const pruned=this->_original_reduce(domain,conjunction,reductions);
         result.reductions=reductions;
         result.reduction_seconds=elapsed_seconds(phase_start);
@@ -1254,6 +1275,19 @@ SmtSolver::_accumulate_box_processing_statistics(
     }
     statistics.fused_direct_literal_evaluations+=
         processing.fused_direct_literal_evaluations;
+    if(processing.preclassification) {
+        ++statistics.preclassification_boxes;
+        statistics.preclassification_literal_evaluations+=
+            processing.preclassification_literal_evaluations;
+        statistics.preclassification_seconds+=
+            processing.preclassification_seconds;
+        if(processing.status==BoxProcessingStatus::PRUNED) {
+            ++statistics.preclassification_pruned_boxes;
+        }
+        if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
+            ++statistics.preclassification_epsilon_boxes;
+        }
+    }
     SmtSolverTestSupport::accumulate_box_processing_statistics(
         statistics,{
             processing.status,
@@ -1663,6 +1697,14 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
         source.fused_direct_classification_boxes;
     target.fused_direct_literal_evaluations+=
         source.fused_direct_literal_evaluations;
+    target.preclassification_boxes+=source.preclassification_boxes;
+    target.preclassification_pruned_boxes+=
+        source.preclassification_pruned_boxes;
+    target.preclassification_epsilon_boxes+=
+        source.preclassification_epsilon_boxes;
+    target.preclassification_literal_evaluations+=
+        source.preclassification_literal_evaluations;
+    target.preclassification_seconds+=source.preclassification_seconds;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;
     target.boolean_decisions+=source.boolean_decisions;
@@ -2810,7 +2852,8 @@ class SmtDpllSearch {
             _solver.configuration().hull_reduction_enabled(),
             _solver.configuration().interval_lookahead_split_enabled(),
             _solver.configuration().upper_child_first(),
-            _solver.configuration().interval_newton_reduction_enabled()));
+            _solver.configuration().interval_newton_reduction_enabled(),
+            _solver.configuration().preclassification_enabled()));
         return _parallel
             ? theory_solver.solve_parallel(_space,_domain,literals)
             : theory_solver.solve(_space,_domain,literals);

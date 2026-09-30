@@ -4445,3 +4445,45 @@ absolute nor relative smear changes the geometric split sequence on the measured
 frontier. Further branching work should therefore not add another derivative-
 based score unless it has a cheaper information source or a workload where
 geometric splitting is demonstrably deficient.
+
+
+The post-removal `test_smt_solver` run passes, closing the smear experiment
+with only compiled derivative caching retained. SmearSumRelative was removed
+without regression.
+
+The earlier "Current open work" list is now historical rather than literal:
+the UNKNOWN taxonomy, whole-box epsilon stopping, evaluator/DAG/tanh fixes,
+dependency-driven hull scheduling, adaptive shaving, X-Taylor diagnostics,
+Interval Newton and smear refinement have all been addressed later in this
+log. The next experiment therefore targets scheduling rather than another
+numerical operator.
+
+A new opt-in contractor-preclassification diagnostic tests a cheap-first
+ordering that has not previously been measured. The existing fused direct
+classifier is currently used only when hull, shaving, monotone contraction and
+eligible Interval Newton are all absent. When any contractor is enabled, the
+solver enters reduction first and can pay an expensive contractor even for a
+box that ordinary validated range evaluation would already reject.
+
+With `preclassification_enabled`, compiled theory boxes are first evaluated
+using the same original-infeasibility and whole-box epsilon tests as the fused
+classifier. A direct rejection returns immediately without running any
+contractor; a whole-box epsilon certificate likewise returns immediately. An
+unresolved box continues through the unchanged Newton/propagation path and
+therefore pays one extra cheap classification evaluation. Generic
+`ValidatedConstraint` solves are unchanged.
+
+Dedicated statistics record preclassified boxes, boxes pruned/certified before
+contractors, literal evaluations and preclassification time. The fused-fast-path
+statistics retain their existing meaning and are not incremented by this
+diagnostic. Unit coverage checks both important control-flow cases: a box
+rejected before hull must report zero hull rounds, while an unresolved
+preclassified box must continue into hull propagation.
+
+The first real-workload gate is Barr3 with hull enabled and all other optional
+heuristics disabled. The historical 64-box hull-only run cost about 44.439 s
+for 28 pruned / 36 split boxes, versus about 2.77 s and 27/37 for the
+contractor-free baseline. Cheap preclassification should be able to skip hull
+on the boxes already rejected by natural range evaluation while preserving
+hull access on the unresolved frontier. The feature remains disabled by
+default until that tradeoff is measured.

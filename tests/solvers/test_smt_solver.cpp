@@ -701,30 +701,6 @@ class TestSmtSolver {
             ARIADNE_TEST_EQUAL(selection.coordinate,0u);
             ARIADNE_TEST_ASSERT(not selection.overrode_geometric);
         }
-
-        {
-            std::cout << "[smt-split] relative sensitivity normalises per constraint" << std::endl;
-            UpperBoxType unit_box({
-                UpperIntervalType(ExactIntervalType(0,1)),
-                UpperIntervalType(ExactIntervalType(0,1))
-            });
-            std::vector<ValidatedScalarMultivariateFunction> functions({
-                100*xy[0]+xy[1],
-                xy[1]
-            });
-
-            auto absolute=SmtSolverTestSupport::sensitivity_split_selection(
-                unit_box,functions);
-            auto relative=
-                SmtSolverTestSupport::relative_sensitivity_split_selection(
-                    unit_box,functions);
-
-            ARIADNE_TEST_EQUAL(absolute.coordinate,0u);
-            ARIADNE_TEST_ASSERT(absolute.guided);
-            ARIADNE_TEST_EQUAL(relative.coordinate,1u);
-            ARIADNE_TEST_ASSERT(relative.guided);
-            ARIADNE_TEST_ASSERT(relative.overrode_geometric);
-        }
     }
 
     Void test_monotone_coordinate_gating() {

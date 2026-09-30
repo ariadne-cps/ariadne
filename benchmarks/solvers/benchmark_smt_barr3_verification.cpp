@@ -49,7 +49,7 @@ String query_from_argument(Int argc,const char* argv[]) {
     if(argument=="all" || argument=="lie" || argument=="lie-only" || argument=="eval" || argument=="taylor" || argument=="affine" || argument=="mean-value" || argument=="lie-components" || argument=="lie-split-profile" || argument=="lie-dynamics-rewrite" || argument=="lie-correlation-profile" || argument=="lie-xtaylor-profile" || argument=="lie-xtaylor-gradient-range-profile" || argument=="lie-xtaylor-gate-profile" || argument=="lie-xtaylor-gated-profile" || argument=="lie-xtaylor-gated-search" || argument=="lie-gradient-reassociation" || argument=="lie-gradient-sign-profile" || argument=="lie-gradient-split-profile" || argument=="lie-gradient-mean-value-profile" || argument=="lie-gradient-quadrant-profile" || argument=="lie-gradient-composite-profile" || argument=="lie-gradient-symbolic-procedure-profile" || argument=="lie-gradient-shared-procedure-profile" || argument=="lie-gradient-shared-procedure-check" || argument=="lie-gradient-expression-cse-profile" || argument=="lie-gradient-expression-cse-frontier" || argument=="lie-gradient-cse-prune-profile" || argument=="lie-root-cse-range-profile" || argument=="lie-root-cse-search" || argument=="lie-algebraic-form-profile" || argument=="lie-directional-propagation-profile" || argument=="lie-layer2-directional-profile" || argument=="lie-gradient-block-reassociation-profile" || argument=="lie-gradient-width-attribution-profile" || argument=="lie-gradient-correlation-attribution-profile" || argument=="lie-gradient-local-factor-profile" || argument=="lie-gradient-local-product-profile" || argument=="lie-gradient-quadrant-prune-profile" || argument=="lie-gradient-quadrant-search") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search]");
 }
@@ -61,7 +61,7 @@ Bool monotone_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-monotone") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone]");
 }
@@ -72,7 +72,7 @@ String lie_literal_order_from_argument(Int argc,const char* argv[]) {
     if(argument=="barrier-first" || argument=="lie-first") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
         "[barrier-first|lie-first]");
@@ -84,7 +84,7 @@ String child_order_from_argument(Int argc,const char* argv[]) {
     if(argument=="lower-first" || argument=="upper-first") { return argument; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull] "
         "[all|lie|lie-only|eval|taylor|affine|mean-value|lie-components|lie-split-profile|lie-dynamics-rewrite|lie-correlation-profile|lie-xtaylor-profile|lie-xtaylor-gradient-range-profile|lie-xtaylor-gate-profile|lie-xtaylor-gated-profile|lie-xtaylor-gated-search|lie-gradient-reassociation|lie-gradient-sign-profile|lie-gradient-split-profile|lie-gradient-mean-value-profile|lie-gradient-quadrant-profile|lie-gradient-composite-profile|lie-gradient-symbolic-procedure-profile|lie-gradient-shared-procedure-profile|lie-gradient-shared-procedure-check|lie-gradient-expression-cse-profile|lie-gradient-expression-cse-frontier|lie-gradient-cse-prune-profile|lie-root-cse-range-profile|lie-root-cse-search|lie-algebraic-form-profile|lie-directional-propagation-profile|lie-layer2-directional-profile|lie-gradient-block-reassociation-profile|lie-gradient-width-attribution-profile|lie-gradient-correlation-attribution-profile|lie-gradient-local-factor-profile|lie-gradient-local-product-profile|lie-gradient-quadrant-prune-profile|lie-gradient-quadrant-search] [monotone|no-monotone] "
         "[barrier-first|lie-first] [lower-first|upper-first]");
@@ -97,7 +97,7 @@ Bool hull_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-hull") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving] [hull|no-hull]");
 }
 
@@ -108,7 +108,7 @@ Bool shaving_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-shaving") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness] [shaving|no-shaving]");
 }
 
@@ -119,22 +119,19 @@ Bool witness_probing_from_argument(Int argc,const char* argv[]) {
     if(argument=="no-witness") { return false; }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead] "
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead] "
         "[witness|no-witness]");
 }
 
 String split_policy_from_argument(Int argc,const char* argv[]) {
     if(argc<=2) { return "sensitivity"; }
     String argument(argv[2]);
-    if(argument=="sensitivity"
-       || argument=="sensitivity-relative"
-       || argument=="geometric"
-       || argument=="lookahead") {
+    if(argument=="sensitivity" || argument=="geometric" || argument=="lookahead") {
         return argument;
     }
     throw std::runtime_error(
         "Usage: benchmark_smt_barr3_verification "
-        "[positive-box-limit|full] [sensitivity|sensitivity-relative|geometric|lookahead]");
+        "[positive-box-limit|full] [sensitivity|geometric|lookahead]");
 }
 
 SmtTheoryPrimitiveLiteral primitive(ContinuousPredicate const& predicate) {
@@ -5550,10 +5547,7 @@ SmtResult timed_solve(
 Int main(Int argc,const char* argv[]) {
     SizeType const box_limit=box_limit_from_argument(argc,argv);
     String const split_policy=split_policy_from_argument(argc,argv);
-    Bool const sensitivity_enabled=
-        split_policy=="sensitivity" || split_policy=="sensitivity-relative";
-    Bool const relative_sensitivity_enabled=
-        split_policy=="sensitivity-relative";
+    Bool const sensitivity_enabled=split_policy=="sensitivity";
     Bool const lookahead_enabled=split_policy=="lookahead";
     Bool const witness_probing_enabled=witness_probing_from_argument(argc,argv);
     Bool const shaving_enabled=shaving_from_argument(argc,argv);
@@ -6242,9 +6236,7 @@ Int main(Int argc,const char* argv[]) {
         shaving_enabled,
         hull_enabled,
         lookahead_enabled,
-        upper_child_first,
-        false,
-        relative_sensitivity_enabled));
+        upper_child_first));
 
     List<SmtTheoryPrimitiveLiteral> sphere_literals({
         sphere_inside,barrier_nonnegative});

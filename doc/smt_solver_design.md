@@ -4413,3 +4413,35 @@ constraints `100*x+y` and `y`, absolute smear selects x while relative
 smear selects y. The first Barr3 gate should use the same 64-box cheap
 configuration so tree shape, override count and derivative-evaluation cost can
 be compared directly with the accepted cached absolute run.
+
+
+The 64-box Barr3 SmearSumRelative diagnostic is negative. On the same Mac
+Studio and the same cheap Lie configuration, relative sensitivity produces
+exactly the same search structure as cached absolute sensitivity:
+27 pruned boxes, 37 split boxes, no epsilon certification, all 37 splits
+sensitivity-guided, and zero overrides of the geometrically widest coordinate.
+It also performs the same 94 validated derivative evaluations, with zero
+hot-path derivative builds.
+
+Runtime is effectively unchanged: about 24.097 s for relative sensitivity
+versus about 24.253 s for cached absolute sensitivity. Split-phase time is
+about 21.172 s versus 21.323 s, and derivative-evaluation time about 18.648 s
+versus 18.785 s. These small differences are consistent with normal run-to-run
+variation and provide no evidence of a useful algorithmic distinction on Barr3.
+
+Because relative normalisation changes no split decision on the target workload
+and adds a new public configuration dimension, the experimental
+`sensitivity-relative` mode is removed from the production SMT API and
+benchmark argument surface. The synthetic helper used to prove that absolute
+and relative smear can differ is also removed with that experimental mode.
+The accepted part of the smear work is derivative caching: it gives a measured
+same-machine speedup without altering search semantics. The existing absolute
+sensitivity policy remains available exactly as before, now using cached
+compiled derivatives for SMT theory literals.
+
+This closes the current smear-style branching refinement. Barr3 still shows
+that the dominant cost is validated derivative evaluation and that neither
+absolute nor relative smear changes the geometric split sequence on the measured
+frontier. Further branching work should therefore not add another derivative-
+based score unless it has a cheaper information source or a workload where
+geometric splitting is demonstrably deficient.

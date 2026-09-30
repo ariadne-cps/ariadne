@@ -172,100 +172,6 @@ Pair<SizeType,Pair<Bool,Bool>> sensitivity_split_coordinate(
     return {coordinate,{guided,overrode}};
 }
 
-Pair<SizeType,Pair<Bool,Bool>> relative_sensitivity_split_coordinate(
-    UpperBoxType const& domain,
-    std::vector<ValidatedScalarMultivariateFunction> const& functions,
-    SizeType* derivatives_built=nullptr,
-    SizeType* derivative_evaluations=nullptr,
-    double* derivative_build_seconds=nullptr,
-    double* derivative_evaluation_seconds=nullptr)
-{
-    auto widths=domain.widths();
-
-    SizeType geometric=0u;
-    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
-        if(widths[variable].raw()>widths[geometric].raw()) {
-            geometric=variable;
-        }
-    }
-
-    std::vector<std::vector<double>> impacts(
-        functions.size(),
-        std::vector<double>(domain.dimension(),0.0));
-    std::vector<double> totals(functions.size(),0.0);
-    UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
-
-    for(SizeType function_index=0u;
-        function_index!=functions.size();
-        ++function_index) {
-        auto const& function=functions[function_index];
-        for(SizeType variable=0u;
-            variable!=domain.dimension();
-            ++variable) {
-            auto const build_start=std::chrono::steady_clock::now();
-            auto derivative=function.derivative(variable);
-            double const build_seconds=elapsed_seconds(build_start);
-            if(derivatives_built!=nullptr) { ++*derivatives_built; }
-            if(derivative_build_seconds!=nullptr) {
-                *derivative_build_seconds+=build_seconds;
-            }
-
-            auto const evaluation_start=std::chrono::steady_clock::now();
-            UpperIntervalType derivative_image=apply(derivative,domain);
-            double const evaluation_seconds=elapsed_seconds(evaluation_start);
-            if(derivative_evaluations!=nullptr) { ++*derivative_evaluations; }
-            if(derivative_evaluation_seconds!=nullptr) {
-                *derivative_evaluation_seconds+=evaluation_seconds;
-            }
-
-            Bool const lower_is_zero=
-                derivative_image.lower_bound().raw()
-                    ==zero_derivative.lower_bound().raw();
-            Bool const upper_is_zero=
-                derivative_image.upper_bound().raw()
-                    ==zero_derivative.upper_bound().raw();
-            Bool const derivative_is_exactly_zero=
-                static_cast<unsigned>(lower_is_zero)
-                & static_cast<unsigned>(upper_is_zero);
-            if(not derivative_is_exactly_zero) {
-                PositiveFloatDPUpperBound const impact=
-                    domain[variable].width()*mag(derivative_image);
-                double const value=impact.raw().get_d();
-                impacts[function_index][variable]=value;
-                totals[function_index]+=value;
-            }
-        }
-    }
-
-    Bool selected=false;
-    SizeType selected_coordinate=geometric;
-    double selected_score=0.0;
-    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-        double score=0.0;
-        Bool active=false;
-        for(SizeType function_index=0u;
-            function_index!=functions.size();
-            ++function_index) {
-            double const impact=impacts[function_index][variable];
-            double const total=totals[function_index];
-            if(impact>0.0 && total>0.0) {
-                active=true;
-                score+=impact/total;
-            }
-        }
-        if(active && (not selected || score>selected_score)) {
-            selected=true;
-            selected_coordinate=variable;
-            selected_score=score;
-        }
-    }
-
-    Bool guided=selected;
-    SizeType coordinate=selected_coordinate;
-    Bool overrode=guided & (coordinate!=geometric);
-    return {coordinate,{guided,overrode}};
-}
-
 Pair<SizeType,Pair<Bool,Bool>> cached_sensitivity_split_coordinate(
     UpperBoxType const& domain,
     std::vector<ConstraintPropagationConstraint const*> const& literals,
@@ -335,100 +241,6 @@ Pair<SizeType,Pair<Bool,Bool>> cached_sensitivity_split_coordinate(
             selected=true;
             selected_coordinate=variable;
             selected_score=sensitivity;
-        }
-    }
-
-    Bool guided=selected;
-    SizeType coordinate=selected_coordinate;
-    Bool overrode=guided & (coordinate!=geometric);
-    return {coordinate,{guided,overrode}};
-}
-
-Pair<SizeType,Pair<Bool,Bool>> cached_relative_sensitivity_split_coordinate(
-    UpperBoxType const& domain,
-    std::vector<ConstraintPropagationConstraint const*> const& literals,
-    SizeType* derivative_evaluations=nullptr,
-    double* derivative_evaluation_seconds=nullptr)
-{
-    auto widths=domain.widths();
-
-    SizeType geometric=0u;
-    for(SizeType variable=1u; variable!=domain.dimension(); ++variable) {
-        if(widths[variable].raw()>widths[geometric].raw()) {
-            geometric=variable;
-        }
-    }
-
-    std::vector<std::vector<double>> impacts(
-        literals.size(),
-        std::vector<double>(domain.dimension(),0.0));
-    std::vector<double> totals(literals.size(),0.0);
-    UpperIntervalType const zero_derivative(ExactIntervalType(0,0));
-
-    for(SizeType literal_index=0u;
-        literal_index!=literals.size();
-        ++literal_index) {
-        auto const* literal=literals[literal_index];
-        for(SizeType variable=0u;
-            variable!=domain.dimension();
-            ++variable) {
-            if(variable>=literal->derivatives.size()) {
-                continue;
-            }
-            auto const& derivative=literal->derivatives[variable];
-            if(not derivative.has_value()) {
-                continue;
-            }
-
-            auto const evaluation_start=std::chrono::steady_clock::now();
-            UpperIntervalType derivative_image=apply(*derivative,domain);
-            double const evaluation_seconds=elapsed_seconds(evaluation_start);
-            if(derivative_evaluations!=nullptr) {
-                ++*derivative_evaluations;
-            }
-            if(derivative_evaluation_seconds!=nullptr) {
-                *derivative_evaluation_seconds+=evaluation_seconds;
-            }
-
-            Bool const lower_is_zero=
-                derivative_image.lower_bound().raw()
-                    ==zero_derivative.lower_bound().raw();
-            Bool const upper_is_zero=
-                derivative_image.upper_bound().raw()
-                    ==zero_derivative.upper_bound().raw();
-            Bool const derivative_is_exactly_zero=
-                static_cast<unsigned>(lower_is_zero)
-                & static_cast<unsigned>(upper_is_zero);
-            if(not derivative_is_exactly_zero) {
-                PositiveFloatDPUpperBound const impact=
-                    domain[variable].width()*mag(derivative_image);
-                double const value=impact.raw().get_d();
-                impacts[literal_index][variable]=value;
-                totals[literal_index]+=value;
-            }
-        }
-    }
-
-    Bool selected=false;
-    SizeType selected_coordinate=geometric;
-    double selected_score=0.0;
-    for(SizeType variable=0u; variable!=domain.dimension(); ++variable) {
-        double score=0.0;
-        Bool active=false;
-        for(SizeType literal_index=0u;
-            literal_index!=literals.size();
-            ++literal_index) {
-            double const impact=impacts[literal_index][variable];
-            double const total=totals[literal_index];
-            if(impact>0.0 && total>0.0) {
-                active=true;
-                score+=impact/total;
-            }
-        }
-        if(active && (not selected || score>selected_score)) {
-            selected=true;
-            selected_coordinate=variable;
-            selected_score=score;
         }
     }
 
@@ -643,8 +455,7 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool hull_reduction_enabled,
     Bool interval_lookahead_split_enabled,
     Bool upper_child_first,
-    Bool interval_newton_reduction_enabled,
-    Bool relative_sensitivity_split_enabled)
+    Bool interval_newton_reduction_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -652,7 +463,6 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _candidate_search_enabled(candidate_search_enabled),
       _monotone_reduction_enabled(monotone_reduction_enabled),
       _sensitivity_split_enabled(sensitivity_split_enabled),
-      _relative_sensitivity_split_enabled(relative_sensitivity_split_enabled),
       _interval_lookahead_split_enabled(interval_lookahead_split_enabled),
       _upper_child_first(upper_child_first),
       _deterministic_witness_probing_enabled(deterministic_witness_probing_enabled),
@@ -1215,8 +1025,6 @@ SmtSolver::_split_box(
     }
 
     Pair<SizeType,Pair<Bool,Bool>> selection;
-    Bool const relative=
-        _configuration.relative_sensitivity_split_enabled();
     if constexpr(std::is_same_v<Conjunction,CompiledTheoryLiterals>) {
         std::vector<ConstraintPropagationConstraint const*> active_literals;
         active_literals.reserve(conjunction.size());
@@ -1225,33 +1033,17 @@ SmtSolver::_split_box(
                 active_literals.push_back(&item);
             }
         }
-        if(relative) {
-            selection=cached_relative_sensitivity_split_coordinate(
-                domain,active_literals,
-                &derivative_evaluations,
-                &derivative_evaluation_seconds);
-        } else {
-            selection=cached_sensitivity_split_coordinate(
-                domain,active_literals,
-                &derivative_evaluations,
-                &derivative_evaluation_seconds);
-        }
+        selection=cached_sensitivity_split_coordinate(
+            domain,active_literals,
+            &derivative_evaluations,
+            &derivative_evaluation_seconds);
     } else {
-        if(relative) {
-            selection=relative_sensitivity_split_coordinate(
-                domain,functions,
-                &derivatives_built,
-                &derivative_evaluations,
-                &derivative_build_seconds,
-                &derivative_evaluation_seconds);
-        } else {
-            selection=sensitivity_split_coordinate(
-                domain,functions,
-                &derivatives_built,
-                &derivative_evaluations,
-                &derivative_build_seconds,
-                &derivative_evaluation_seconds);
-        }
+        selection=sensitivity_split_coordinate(
+            domain,functions,
+            &derivatives_built,
+            &derivative_evaluations,
+            &derivative_build_seconds,
+            &derivative_evaluation_seconds);
     }
     result.children=domain.split(selection.first);
     result.sensitivity_guided=selection.second.first;
@@ -1975,18 +1767,6 @@ SensitivitySplitSelection sensitivity_split_selection(
     std::vector<ValidatedScalarMultivariateFunction> const& functions)
 {
     auto selection=sensitivity_split_coordinate(domain,functions);
-    return {
-        selection.first,
-        selection.second.first,
-        selection.second.second
-    };
-}
-
-SensitivitySplitSelection relative_sensitivity_split_selection(
-    UpperBoxType const& domain,
-    std::vector<ValidatedScalarMultivariateFunction> const& functions)
-{
-    auto selection=relative_sensitivity_split_coordinate(domain,functions);
     return {
         selection.first,
         selection.second.first,
@@ -3030,8 +2810,7 @@ class SmtDpllSearch {
             _solver.configuration().hull_reduction_enabled(),
             _solver.configuration().interval_lookahead_split_enabled(),
             _solver.configuration().upper_child_first(),
-            _solver.configuration().interval_newton_reduction_enabled(),
-            _solver.configuration().relative_sensitivity_split_enabled()));
+            _solver.configuration().interval_newton_reduction_enabled()));
         return _parallel
             ? theory_solver.solve_parallel(_space,_domain,literals)
             : theory_solver.solve(_space,_domain,literals);

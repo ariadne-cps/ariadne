@@ -78,8 +78,7 @@ class SmtSolverConfiguration {
         Bool hull_reduction_enabled=true,
         Bool interval_lookahead_split_enabled=false,
         Bool upper_child_first=false,
-        Bool interval_newton_reduction_enabled=false,
-        Bool relative_sensitivity_split_enabled=false);
+        Bool interval_newton_reduction_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -106,11 +105,6 @@ class SmtSolverConfiguration {
     //! \brief Whether interval lookahead splitting is enabled.
     Bool interval_lookahead_split_enabled() const {
         return _interval_lookahead_split_enabled;
-    }
-
-    //! \brief Whether sensitivity uses per-constraint relative smear normalisation.
-    Bool relative_sensitivity_split_enabled() const {
-        return _relative_sensitivity_split_enabled;
     }
 
     //! \brief Whether sequential DFS visits the upper split child first.
@@ -140,7 +134,6 @@ class SmtSolverConfiguration {
     Bool _candidate_search_enabled;
     Bool _monotone_reduction_enabled;
     Bool _sensitivity_split_enabled;
-    Bool _relative_sensitivity_split_enabled;
     Bool _interval_lookahead_split_enabled;
     Bool _upper_child_first;
     Bool _deterministic_witness_probing_enabled;
@@ -355,10 +348,6 @@ struct SensitivitySplitSelection {
 };
 
 SensitivitySplitSelection sensitivity_split_selection(
-    UpperBoxType const& domain,
-    std::vector<ValidatedScalarMultivariateFunction> const& functions);
-
-SensitivitySplitSelection relative_sensitivity_split_selection(
     UpperBoxType const& domain,
     std::vector<ValidatedScalarMultivariateFunction> const& functions);
 

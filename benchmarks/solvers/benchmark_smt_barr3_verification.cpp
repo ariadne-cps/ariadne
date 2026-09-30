@@ -262,17 +262,19 @@ Void print_result(String const& name,SmtResult const& result,double seconds) {
             }
         }
         std::cout << " (P=pruned,E=epsilon,U=unresolved)" << std::endl;
-        auto const shadow=SmtSolverTestSupport::preclassification_shadow_summary(
-            result.statistics().preclassification_outcomes);
-        std::cout << "[" << name << "] preclass-shadow"
-                  << " initial-window=16 active-window=8 refresh-period=8"
-                  << " checks=" << shadow.checks
-                  << " skipped=" << shadow.skipped
-                  << " observed-hits=" << shadow.observed_hits
-                  << " skipped-hits=" << shadow.skipped_hits
-                  << " suspensions=" << shadow.suspensions
-                  << " reactivations=" << shadow.reactivations
-                  << std::endl;
+        if(result.statistics().preclassification_adaptive_skipped_boxes==0u) {
+            auto const shadow=SmtSolverTestSupport::preclassification_shadow_summary(
+                result.statistics().preclassification_outcomes);
+            std::cout << "[" << name << "] preclass-shadow"
+                      << " initial-window=16 active-window=8 refresh-period=8"
+                      << " checks=" << shadow.checks
+                      << " skipped=" << shadow.skipped
+                      << " observed-hits=" << shadow.observed_hits
+                      << " skipped-hits=" << shadow.skipped_hits
+                      << " suspensions=" << shadow.suspensions
+                      << " reactivations=" << shadow.reactivations
+                      << std::endl;
+        }
     }
 }
 

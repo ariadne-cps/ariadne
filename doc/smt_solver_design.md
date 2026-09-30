@@ -4759,3 +4759,42 @@ reduce preclassification checks from 64 to about 22 on the zero-hit 64-box
 shaving regimes, preserve logical result/search correctness, and recover most
 of the roughly 2.2 s useless preclassification cost there before any default
 promotion is considered.
+
+
+### Adaptive preclassification first real-scheduling comparison
+
+The first same-revision comparison between always-on and adaptive
+preclassification passes the structural acceptance gate. On the hull-only
+Barr3 runs, adaptive scheduling remains active for all 64 boxes in every query:
+the box/prune/split counts, preclassification hit counts and downstream
+contractor counters are unchanged. On the zero-hit shaving-only and
+hull+shaving regimes, adaptive scheduling performs 22 of 64 prechecks for the
+sphere and lie queries and 18 of 35 for the rectangle queries, with one
+suspension and no reactivation. The search structure and logical result remain
+unchanged.
+
+The shaving-only lie query gives the clearest positive timing signal so far:
+runtime changes from about 44.226 s with always-on preclassification to about
+42.994 s adaptively, while preclassification time falls from about 2.188 s to
+0.755 s. This is roughly a 2.8% total runtime improvement and recovers most of
+the avoided preclassification work.
+
+The hull+shaving lie query is timing-neutral in this first pair: about 90.401 s
+always-on versus 90.474 s adaptive. Preclassification time still falls from
+about 2.169 s to 0.782 s, but the downstream contractor timings vary by a
+similar amount. This does not falsify the scheduler, because the logical search
+tree and contractor counts are unchanged, but it means the performance gate is
+not yet statistically resolved for the combined case.
+
+The benchmark trace output is also tightened here: shadow-policy replay is no
+longer printed after adaptive scheduling has skipped boxes, because the recorded
+preclassification outcome vector then contains only executed probes and is a
+sparse trace. Replaying the scheduler over that sparse vector produced
+diagnostically misleading values. The actual adaptive counters remain the
+authoritative measurement in adaptive mode.
+
+The next step is therefore repeated timing of only the Barr3 lie query under
+always-on and adaptive preclassification, keeping the same 64-box budget and
+same solver revision. No new scheduling policy should be introduced until those
+replicates establish whether the combined hull+shaving case is genuinely
+neutral, mildly positive, or mildly negative.

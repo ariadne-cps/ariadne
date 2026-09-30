@@ -4254,3 +4254,15 @@ test fixes the complementary invariant that an ineffective eager step triggers
 exactly one hull-sweep retry (`attempts=2`, `effective=1`, no Newton
 infeasibility or singular skip). This protects the scheduler against future
 refactoring without depending on wall-clock measurements.
+
+
+The first compile of the new adaptive-scheduler unit regressions failed in the
+test source, not in the solver. Both new blocks used a local variable named
+`result` and then passed expressions such as
+`result.is_epsilon_sat()` to `ARIADNE_TEST_ASSERT`. That macro itself
+declares an internal `auto result=(expression)`, so macro expansion turned the
+expression into a self-reference in the initializer and Clang rejected it with
+"variable 'result' declared with deduced type 'auto' cannot appear in its own
+initializer". The new local variables are renamed to `solve_result`, matching
+the naming already used elsewhere in `test_smt_solver.cpp`. No solver or
+scheduler logic is changed by this fix.

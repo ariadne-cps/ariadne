@@ -2744,7 +2744,7 @@ class TestSmtSolver {
                     SmtTheoryPrimitiveRelation::EQ_ZERO)
             });
 
-            SmtResult result=make_solver(16384u).solve(
+            SmtResult solve_result=make_solver(16384u).solve(
                 space,
                 ExactBoxType({
                     ExactIntervalType(0.25_x,0.55_x),
@@ -2753,17 +2753,17 @@ class TestSmtSolver {
                 }),
                 literals);
 
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(result.statistics().boxes_split,0u);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_attempts,1u);
+                solve_result.statistics().interval_newton_attempts,1u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_effective_reductions,1u);
+                solve_result.statistics().interval_newton_effective_reductions,1u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_infeasible,0u);
+                solve_result.statistics().interval_newton_infeasible,0u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_singular,0u);
+                solve_result.statistics().interval_newton_singular,0u);
         }
 
         {
@@ -2781,7 +2781,7 @@ class TestSmtSolver {
                     SmtTheoryPrimitiveRelation::EQ_ZERO)
             });
 
-            SmtResult result=make_solver(4096u).solve(
+            SmtResult solve_result=make_solver(4096u).solve(
                 space,
                 ExactBoxType({
                     ExactIntervalType(0.36_x,0.8_x),
@@ -2789,17 +2789,17 @@ class TestSmtSolver {
                 }),
                 literals);
 
-            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
-            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,1u);
-            ARIADNE_TEST_EQUAL(result.statistics().boxes_split,0u);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_split,0u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_attempts,2u);
+                solve_result.statistics().interval_newton_attempts,2u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_effective_reductions,1u);
+                solve_result.statistics().interval_newton_effective_reductions,1u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_infeasible,0u);
+                solve_result.statistics().interval_newton_infeasible,0u);
             ARIADNE_TEST_EQUAL(
-                result.statistics().interval_newton_singular,0u);
+                solve_result.statistics().interval_newton_singular,0u);
         }
     }
 

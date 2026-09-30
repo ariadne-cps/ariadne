@@ -4652,3 +4652,31 @@ preclassification remains beneficial there, the minimal evidence-backed policy
 is to associate the precheck with the presence of hull rather than with the
 mere presence of any contractor. If the combined stack is negative, a more
 adaptive trigger is required instead of a static contractor-kind rule.
+
+
+The first combined hull+shaving Barr3 run with preclassification is also
+structurally negative for the cheap precheck. The solver processes 64 boxes,
+prunes 28 and splits 36, but all 64 preclassification attempts remain
+unresolved: `preclass-pruned=0`, `preclass-epsilon=0`, 128 literal
+evaluations and about 2.190 s of precheck time.
+
+The downstream search profile is the same shaving-shaped tree as the earlier
+shaving-only run: 85 shaving rounds, 18 effective rounds, 224 coordinate
+attempts, 27 effective attempts, 48 adaptive skips and 700 function
+evaluations. Hull is then paid on that same propagation stack, adding about
+46.567 s of hull contraction, including about 44.178 s of forward Procedure
+execution, while still reporting zero effective non-empty hull contractions.
+Total runtime is about 69.761 s.
+
+This already falsifies a static rule that enables preclassification merely
+because hull is present. In hull-only the precheck rejected 27 boxes because
+the processed frontier retained the natural DFS geometry. Once shaving is
+enabled, the contracted boxes that reach later search nodes no longer expose
+those natural-range rejections at entry, so the same precheck becomes pure
+overhead even though hull is also active.
+
+A same-revision `no-preclassify` run is still required to isolate the exact
+wall-clock penalty, but the structural conclusion is clear: contractor kind
+alone is not enough to predict whether preclassification will pay. Any default
+scheduler needs evidence from the actual propagation state or must remain
+explicitly opt-in.

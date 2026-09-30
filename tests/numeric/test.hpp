@@ -77,4 +77,53 @@
         }                                                               \
     }
 
+
+#undef ARIADNE_TEST_EQUAL
+#define ARIADNE_TEST_EQUAL(expression1,expression2)                     \
+    {                                                                   \
+        std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
+        bool ok = decide((expression1) == (expression2));               \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression1 << ":\n           " << (expression1) \
+                      << "\n     : " << #expression2 << ":\n           " << (expression2) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << ARIADNE_PRETTY_FUNCTION \
+                      << ": Equality `" << #expression1 << " == " << #expression2 << "' failed." << std::endl; \
+        }                                                               \
+    }
+
+#undef ARIADNE_TEST_UNARY_PREDICATE
+#define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)                \
+    {                                                                   \
+        std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
+        bool ok = decide(predicate((argument)));                        \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: false" << std::endl;                 \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << ARIADNE_PRETTY_FUNCTION \
+                      << ": Predicate `" << #predicate << "(" << #argument << ")' is false." << std::endl; \
+        }                                                               \
+    }
+
+#undef ARIADNE_TEST_COMPARE
+#define ARIADNE_TEST_COMPARE(expression,comparison,expected)            \
+    {                                                                   \
+        std::cout << #expression << ": " << (expression) << std::flush; \
+        bool ok = decide((expression) comparison (expected));           \
+        if(ok) {                                                        \
+            std::cout << " " << #comparison << " " << (expected) << ": true\n" << std::endl; \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: expected: " << #expression << #comparison << #expected \
+                      << "=" << (expected) << std::endl;                 \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << ARIADNE_PRETTY_FUNCTION \
+                      << ": Comparison `" << #expression << #comparison << #expected << "' failed; " \
+                      << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
+        }                                                               \
+    }
+
 #endif

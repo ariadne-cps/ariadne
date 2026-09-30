@@ -26,7 +26,7 @@
 #include "algebra/series.hpp"
 #include "function/taylor_series.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 namespace Ariadne {
 

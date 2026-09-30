@@ -31,7 +31,7 @@
 #include "numeric/floats.hpp"
 #include "algebra/vector.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

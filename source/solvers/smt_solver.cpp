@@ -1079,6 +1079,9 @@ SmtSolver::_process_box(
     if(direct.used) {
         if(direct.preclassification) {
             result.preclassification=true;
+            result.preclassification_pruned=direct.pruned;
+            result.preclassification_epsilon_satisfied=
+                direct.epsilon_satisfied;
             result.preclassification_literal_evaluations=
                 direct.literal_evaluations;
             result.preclassification_seconds=direct.seconds;
@@ -1281,10 +1284,10 @@ SmtSolver::_accumulate_box_processing_statistics(
             processing.preclassification_literal_evaluations;
         statistics.preclassification_seconds+=
             processing.preclassification_seconds;
-        if(processing.status==BoxProcessingStatus::PRUNED) {
+        if(processing.preclassification_pruned) {
             ++statistics.preclassification_pruned_boxes;
         }
-        if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
+        if(processing.preclassification_epsilon_satisfied) {
             ++statistics.preclassification_epsilon_boxes;
         }
     }

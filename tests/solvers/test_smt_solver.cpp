@@ -474,6 +474,11 @@ class TestSmtSolver {
         no_conflict.sensitivity_derivative_evaluation_seconds=0.5;
         no_conflict.fused_direct_classification_boxes=6u;
         no_conflict.fused_direct_literal_evaluations=13u;
+        no_conflict.preclassification_boxes=8u;
+        no_conflict.preclassification_pruned_boxes=3u;
+        no_conflict.preclassification_epsilon_boxes=2u;
+        no_conflict.preclassification_literal_evaluations=15u;
+        no_conflict.preclassification_seconds=0.375;
         no_conflict.interval_lookahead_guided_splits=4u;
         no_conflict.interval_lookahead_overrides_geometric_splits=3u;
         no_conflict.interval_lookahead_function_evaluations=12u;
@@ -496,6 +501,11 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.sensitivity_derivative_evaluation_seconds,0.5);
         ARIADNE_TEST_EQUAL(target.fused_direct_classification_boxes,6u);
         ARIADNE_TEST_EQUAL(target.fused_direct_literal_evaluations,13u);
+        ARIADNE_TEST_EQUAL(target.preclassification_boxes,8u);
+        ARIADNE_TEST_EQUAL(target.preclassification_pruned_boxes,3u);
+        ARIADNE_TEST_EQUAL(target.preclassification_epsilon_boxes,2u);
+        ARIADNE_TEST_EQUAL(target.preclassification_literal_evaluations,15u);
+        ARIADNE_TEST_EQUAL(target.preclassification_seconds,0.375);
         ARIADNE_TEST_EQUAL(target.interval_lookahead_guided_splits,4u);
         ARIADNE_TEST_EQUAL(
             target.interval_lookahead_overrides_geometric_splits,3u);

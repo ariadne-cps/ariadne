@@ -621,6 +621,8 @@ class SmtSolver {
         Bool fused_direct_classification = false;
         SizeType fused_direct_literal_evaluations = 0u;
         Bool preclassification = false;
+        Bool preclassification_pruned = false;
+        Bool preclassification_epsilon_satisfied = false;
         SizeType preclassification_literal_evaluations = 0u;
         double preclassification_seconds = 0.0;
         Bool dp_resolution_exhausted = false;

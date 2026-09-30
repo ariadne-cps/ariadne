@@ -4501,3 +4501,26 @@ is preclassified, the preclassification itself neither prunes nor certifies it,
 and hull propagation is subsequently executed. The final status is deliberately
 not constrained by this test because the downstream contractor is allowed to
 decide the box.
+
+
+The next unit run found a genuine statistics-attribution bug in the new
+preclassification diagnostic. The unresolved one-dimensional box was correctly
+sent through hull propagation, but hull later made the box epsilon-satisfied.
+Because the statistics accumulator inferred
+`preclassification_epsilon_boxes` from the box's final status, that downstream
+certificate was incorrectly credited to preclassification. The same design
+would also have misattributed a downstream contractor prune to
+`preclassification_pruned_boxes`.
+
+The fix records the precheck outcome directly in `BoxProcessingResult` at the
+moment the preclassification runs. The accumulator now increments
+`preclassification_pruned_boxes` and
+`preclassification_epsilon_boxes` only from those captured booleans, never
+from the final box-processing status. This preserves attribution even when an
+unresolved preclassified box is later decided by hull, shaving, monotone
+reduction, Newton, or an ordinary post-reduction epsilon check.
+
+The deterministic statistics-aggregation regression is also extended to cover
+all new preclassification counters and timing. The existing continuation test
+now checks the intended invariant: the box is preclassified, the precheck itself
+neither prunes nor certifies it, and hull still runs.

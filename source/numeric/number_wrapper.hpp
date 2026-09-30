@@ -52,7 +52,6 @@
 #include "float_approximation.hpp"
 #include "float_error.hpp"
 
-#include "symbolic/templates.hpp"
 #include "numeric/operators.hpp"
 
 namespace Ariadne {

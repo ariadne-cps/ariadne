@@ -4627,3 +4627,28 @@ of any preclassification prune already shows that a universal
 "always preclassify before every expensive contractor" policy is not justified.
 A useful scheduler would need contractor/workload selectivity or evidence that
 the cheap precheck is likely to terminate the box.
+
+
+The controlled same-revision shaving-only comparison confirms that
+preclassification is harmful when it cannot terminate boxes. With
+preclassification enabled, the 64-box Barr3 run takes about 23.475 s; with it
+disabled, the same 28 pruned / 36 split tree takes about 21.055 s. This is an
+11.5% slowdown.
+
+All downstream shaving counters are effectively identical: 85 shaving rounds,
+18 effective rounds, 224 coordinate attempts, 27 effective attempts, 48
+adaptive skips and 700 validated function evaluations. Shaving time changes
+only from about 16.545 s to 16.350 s, consistent with ordinary run variation.
+The extra work is the precheck itself: 128 literal evaluations and about
+2.223 s of preclassification time. The total runtime penalty of about 2.420 s
+is therefore almost entirely explained by the useless preclassification pass.
+
+This establishes that contractor preclassification must not be scheduled
+unconditionally. It is strongly beneficial before hull on this Barr3 frontier,
+where it rejects 27 boxes and avoids 27 expensive hull calls, but it is pure
+overhead before shaving-only, where it rejects none. The next gate tests the
+combined hull+shaving stack before encoding any contractor-specific rule. If
+preclassification remains beneficial there, the minimal evidence-backed policy
+is to associate the precheck with the presence of hull rather than with the
+mere presence of any contractor. If the combined stack is negative, a more
+adaptive trigger is required instead of a static contractor-kind rule.

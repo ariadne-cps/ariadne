@@ -104,7 +104,7 @@ add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:FOUNDATION_SRC>
-    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:THREADING_SRC>
     $<TARGET_OBJECTS:LOGGING_SRC>
@@ -114,7 +114,7 @@ add_library(ariadne-core SHARED
 
 add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:FOUNDATION_SRC>
-    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
@@ -128,7 +128,7 @@ add_library(ariadne-kernel SHARED
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:FOUNDATION_SRC>
-    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>

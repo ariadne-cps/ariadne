@@ -31,7 +31,7 @@ if(Python3_FOUND)
             $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
             $<TARGET_OBJECTS:UTILITY_SRC>
             $<TARGET_OBJECTS:FOUNDATION_SRC>
-            $<TARGET_OBJECTS:ariadne-numeric>
+            $<TARGET_OBJECTS:NUMERIC_SRC>
             )
     set_target_properties(pyariadne-numeric PROPERTIES OUTPUT_NAME "pyariadne_numeric")
     target_link_libraries(pyariadne-numeric PUBLIC ${MPFR_LIBRARIES} ${GMP_LIBRARIES})

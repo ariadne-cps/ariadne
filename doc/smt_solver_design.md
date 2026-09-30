@@ -4198,3 +4198,32 @@ sweep, and the second attempt on the same subsystem should be effective. The
 search may still require the same overall hull fixed point, so timing is not the
 primary gate; the key evidence is `newton-attempts=2` with at least one
 effective reduction and unchanged sound search behavior.
+
+
+The complementary 2D coupled adaptive-retry regression also passes. On the
+MacBook run, both variants still certify the root box without splitting and
+report the same 120 hull rounds / 119 effective hull reductions. The Newton
+variant performs exactly two Newton attempts: the eager attempt is ineffective,
+one HC4 sweep is therefore inserted, and the retry is effective. The run
+records `newton-effective=1`, no Newton infeasibility proof and no singular
+skip.
+
+This confirms the intended control-flow distinction between the two measured
+families. In the 3D coupled case, eager Newton is already effective and the
+adaptive policy performs one attempt with no staging. In the 2D coupled case,
+eager Newton is applicable but ineffective, so exactly one hull sweep and one
+retry are triggered. The adaptive policy therefore preserves the strong eager
+case while repairing the measured ineffective-root case.
+
+The single MacBook timing, about 1.723 ms with Newton versus 1.823 ms for the
+baseline, is not used as performance evidence because earlier repeated timing
+was collected on the Mac Studio and showed a small median slowdown for the 2D
+case. Cross-machine absolute timings are kept separate. The acceptance result
+here is structural and semantic.
+
+The remaining regression gate for the adaptive ordering is the established 4D
+hull+shaving comparison. It previously showed a positive Newton result with
+5 boxes and 3 splits versus 12 boxes and 7 splits for the baseline. Re-running
+that benchmark under the adaptive scheduler checks that the new ineffective-
+only retry rule does not perturb an already-successful higher-dimensional
+case before the ordering is considered stable.

@@ -4266,3 +4266,35 @@ expression into a self-reference in the initializer and Clang rejected it with
 initializer". The new local variables are renamed to `solve_result`, matching
 the naming already used elsewhere in `test_smt_solver.cpp`. No solver or
 scheduler logic is changed by this fix.
+
+
+The full `test_smt_solver` executable now passes with the adaptive Interval
+Newton regressions enabled. This closes the implementation gate for the current
+vertical slice: the new contractor compiles in the ordinary test configuration,
+preserves existing SMT regressions, and fixes the two scheduler invariants that
+were previously covered only by manual benchmarks.
+
+Interval Newton is therefore accepted as a stable opt-in SMT contractor in its
+current form. The accepted behavior is:
+* extract bounded square equality subsystems from compiled `EQ_ZERO` literals;
+* try candidates in deterministic lexicographic order, advancing only across
+  `SingularMatrixException`, with the bounded candidate cap retained;
+* prune only on validated disjointness of the Newton image;
+* otherwise intersect a successful Newton image with the current box;
+* if the first applicable eager Newton step is completely ineffective and hull
+  reduction is enabled, perform exactly one cached HC4 sweep and retry that same
+  subsystem once;
+* if eager Newton is effective, do not insert the pre-sweep;
+* preserve the ordinary propagation/epsilon/split path after contraction.
+
+The feature remains disabled by default. The reason is empirical rather than
+semantic: higher-dimensional and propagation-heavy equality systems show large
+tree and runtime wins, but repeated 2D timing still shows a small median
+slowdown even when adaptive retry makes Newton effective. No dimension-only or
+propagation-cost-only scheduler has been justified by the evidence so far.
+
+With the Newton vertical slice stabilized, the IBEX-inspired roadmap can move
+on without further Newton heuristic tuning. The next unresolved architectural
+item is smear-style branching refinement: reuse/caching of derivative
+representations for the existing sensitivity splitter and evaluation of a
+relative-normalized score, rather than adding another eager contractor.

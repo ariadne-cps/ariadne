@@ -4538,3 +4538,28 @@ monotone contraction and Interval Newton out of the experiment so the only
 difference from the established hull-only run is the new preclassification
 step. The acceptance question is whether natural range rejection can avoid
 enough HC4 work to outweigh the extra precheck on boxes that remain ambiguous.
+
+
+The first 64-box Barr3 hull-only run with contractor preclassification is
+structurally positive. It processes 64 boxes, prunes 28 and splits 36, matching
+the historical hull-only tree. All 64 boxes are preclassified. Of the 28 total
+prunes, 27 are proved by the cheap precheck before hull, with 101 literal
+evaluations and about 2.090 s of preclassification time. Only 37 boxes reach
+hull propagation. Hull reports zero effective non-empty contractions, so as in
+the earlier Barr3 hull experiments its only search benefit is one additional
+direct rejection beyond the 27 natural-range rejections.
+
+The run takes about 25.992 s, with 37 hull rounds, about 20.833 s of hull
+contraction and about 19.786 s in forward Procedure execution. This is much
+lower than the historical 44.439 s hull-only measurement, but that historical
+run predates the compiled Procedure cache and reported 128 hot-loop Procedure
+builds. The current run reports zero such builds. Therefore the full timing
+difference cannot be attributed to preclassification alone.
+
+The structural attribution is nevertheless unambiguous: preclassification
+removes hull work from 27 boxes that natural interval evaluation already
+rejects, leaving only the 37 unresolved boxes for the expensive contractor.
+To isolate the actual wall-clock benefit, the next measurement must rerun the
+same current revision and Mac Studio with `no-preclassify`. The two runs then
+differ only in the new scheduler flag; search tree, Procedure cache, evaluator
+and all other contractor code are identical.

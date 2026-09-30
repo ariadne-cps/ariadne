@@ -4680,3 +4680,41 @@ wall-clock penalty, but the structural conclusion is clear: contractor kind
 alone is not enough to predict whether preclassification will pay. Any default
 scheduler needs evidence from the actual propagation state or must remain
 explicitly opt-in.
+
+
+The controlled combined hull+shaving comparison confirms that
+preclassification is overhead on this propagation-shaped Barr3 tree. With
+preclassification enabled the run takes about 69.761 s; disabling it preserves
+exactly the same 64 processed / 28 pruned / 36 split structure and all downstream
+contractor counters, while reducing runtime to about 67.689 s. The preclassified
+run spends about 2.190 s in the precheck and performs 128 preclassification
+literal evaluations, with zero preclassification prunes or epsilon certificates.
+
+The downstream work is unchanged within run noise: 85 hull/shaving rounds, 18
+effective shaving rounds, 224 shaving attempts, 27 effective attempts, 48
+adaptive skips and 700 shaving evaluations. Hull contraction is about 46.6--46.8
+s in both runs and shaving about 16.2 s. The roughly 2.07 s total penalty is
+therefore consistent with paying an unproductive preclassification pass.
+
+This closes the static-scheduling hypothesis. Contractor preclassification is a
+real optimisation when its hit rate is high, as demonstrated by hull-only
+Barr3 where 27 of 64 boxes are rejected before hull and runtime falls by 27.3%.
+It is harmful when the hit rate is zero, as demonstrated by shaving-only and by
+the combined hull+shaving stack. A static rule based only on contractor kind
+would overfit these few workloads: even the presence of hull is not predictive
+once another contractor changes the geometry of the search tree.
+
+The next design direction is therefore adaptive scheduling based on observed
+preclassification productivity, not a hard-coded contractor combination. A
+reasonable vertical slice should be conservative: sample the precheck on an
+initial window, continue while it produces early terminations at a useful rate,
+suspend it after a sufficiently unproductive window, and periodically refresh
+so that later search regions can reactivate it. The mechanism must remain
+semantics-neutral because skipping a precheck only defers the same validated
+decision to the existing contractor path.
+
+Before implementing such a policy, the acceptance benchmarks should include
+both already-measured Barr3 regimes: hull-only as the positive case and
+shaving-only / hull+shaving as negative cases. An adaptive scheduler is useful
+only if it approaches the hull-only preclassification benefit while quickly
+disabling itself on the zero-hit regimes, with negligible structural overhead.

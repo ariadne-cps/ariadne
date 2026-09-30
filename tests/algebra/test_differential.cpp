@@ -38,7 +38,7 @@
 
 #include "algebra/expansion.tpl.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 
 using namespace Ariadne;

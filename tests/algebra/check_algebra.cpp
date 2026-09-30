@@ -31,7 +31,7 @@
 
 #include "numeric/float.decl.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 #include "check_algebra.hpp"
 
 using namespace Ariadne;

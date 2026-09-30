@@ -27,7 +27,7 @@
 #include "algebra/algebra.hpp"
 #include "algebra/differential.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 

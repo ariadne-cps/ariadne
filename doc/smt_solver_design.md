@@ -4333,3 +4333,21 @@ alone gives one derivative per coordinate; sensitivity alone gives the same
 cache. This is the first smear vertical slice only. Relative SmearSumRel
 normalisation is deliberately deferred until the cache change is measured in
 isolation.
+
+
+The full `test_smt_solver` suite passes after compiled sensitivity-derivative
+caching is enabled. This accepts the cache change semantically: existing SMT
+behavior is preserved, the derivative-compilation policy regression passes for
+the no-consumer, monotone-only and sensitivity-only configurations, and no
+other solver regression is introduced.
+
+The next measurement isolates the hot-path effect on Barr3. It uses the cheap
+Lie search configuration with sensitivity enabled but witness probing, shaving,
+hull reduction and monotone contraction disabled. The purpose is not to compare
+absolute runtime across machines; the current run is on a MacBook while older
+Barr3 timings were collected on a Mac Studio. The acceptance criteria are
+structural and attribution-based: the search tree must remain unchanged for the
+same configuration, `sensitivity-builds` and
+`sensitivity-build-time` must be zero during box splitting, while
+`sensitivity-evals` remains nonzero because validated derivative evaluation
+is intentionally still performed on each current box.

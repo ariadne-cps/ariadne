@@ -4487,3 +4487,17 @@ contractor-free baseline. Cheap preclassification should be able to skip hull
 on the boxes already rejected by natural range evaluation while preserving
 hull access on the unresolved frontier. The feature remains disabled by
 default until that tradeoff is measured.
+
+
+The first unit run of contractor preclassification exposed an over-specified
+test expectation, not a solver failure. In the "unresolved preclassification"
+case, the cheap precheck correctly reports neither prune nor epsilon
+certification and the box then enters hull propagation, as shown by a positive
+hull-round count. Hull subsequently decides the simple one-dimensional
+constraint, so requiring the final solve result to remain UNKNOWN was incorrect.
+
+The regression is narrowed to the actual scheduling invariant: exactly one box
+is preclassified, the preclassification itself neither prunes nor certifies it,
+and hull propagation is subsequently executed. The final status is deliberately
+not constrained by this test because the downstream contractor is allowed to
+decide the box.

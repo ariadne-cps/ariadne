@@ -1364,11 +1364,12 @@ class TestSmtSolver {
             });
             SmtResult solve_result=preclassification_solver.solve(
                 space,ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)}),literals);
-            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().preclassification_boxes,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().preclassification_pruned_boxes,0u);
+            ARIADNE_TEST_EQUAL(
+                solve_result.statistics().preclassification_epsilon_boxes,0u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().hull_reduction_rounds>=1u);
         }

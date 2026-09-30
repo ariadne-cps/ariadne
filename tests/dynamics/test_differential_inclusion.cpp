@@ -35,7 +35,7 @@
 #include "dynamics/differential_inclusion.hpp"
 
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 

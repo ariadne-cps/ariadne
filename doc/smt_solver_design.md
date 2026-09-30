@@ -4798,3 +4798,42 @@ always-on and adaptive preclassification, keeping the same 64-box budget and
 same solver revision. No new scheduling policy should be introduced until those
 replicates establish whether the combined hull+shaving case is genuinely
 neutral, mildly positive, or mildly negative.
+
+
+### Adaptive preclassification replicated timing closure
+
+A final three-run timing check was used only to determine whether wall-clock
+variance was large enough to change the adaptive-preclassification conclusion.
+It was not.
+
+For shaving-only `lie`, the always-on runs were 44.702 s, 45.047 s and
+44.980 s (mean about 44.910 s, range 0.345 s). The adaptive runs were
+44.255 s, 44.688 s and 44.048 s (mean about 44.330 s, range 0.640 s).
+The mean improvement is about 0.58 s, or 1.3%.
+
+For hull+shaving `lie`, the always-on runs were 93.091 s, 92.742 s and
+92.460 s (mean about 92.764 s, range 0.631 s). The adaptive runs were
+89.475 s, 91.218 s and 91.148 s (mean about 90.614 s, range 1.743 s).
+The mean improvement is about 2.15 s, or 2.3%. One adaptive run is visibly
+faster than the other two; even taking the two clustered adaptive runs alone,
+the gain remains only around 1.6 s on a roughly 93 s workload.
+
+The solver structure is deterministic across these comparisons: box, prune,
+split and contractor counters are unchanged. The observed variation is therefore
+wall-clock timing variation, not a change in the search path.
+
+For this project these 1--2% effects are not considered significant enough to
+drive further optimisation work. Adaptive preclassification remains a valid
+semantics-neutral opt-in mechanism and successfully suppresses unproductive
+prechecks, but it is not a major runtime improvement on the measured Barr3
+regimes. The adaptive-preclassification timing investigation is therefore
+closed.
+
+Profiling policy going forward: replicated runs are not a default requirement.
+A single controlled run is sufficient when the effect size is clearly larger
+than ordinary timing noise. Multiple repetitions should be requested only when
+there is concrete evidence that variance is large enough to change a conclusion
+about a materially significant speedup or regression. Sub-second and low
+single-digit-percent differences on tens-of-seconds workloads are not targets
+for additional measurement unless they accumulate into a larger architectural
+effect.

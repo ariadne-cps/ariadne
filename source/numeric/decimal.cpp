@@ -23,8 +23,6 @@
  */
 
 #include "utility/standard.hpp"
-#include "config.hpp"
-
 #include "utility/macros.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"

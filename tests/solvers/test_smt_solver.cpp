@@ -525,6 +525,44 @@ class TestSmtSolver {
         ARIADNE_TEST_EQUAL(target.last_learned_current_level_literals,7u);
         ARIADNE_TEST_EQUAL(target.last_backjump_level,5u);
 
+        {
+            std::cout << "[smt-preclassify] adaptive shadow scheduler" << std::endl;
+            std::vector<SmtPreclassificationOutcome> all_unresolved(
+                64u,SmtPreclassificationOutcome::UNRESOLVED);
+            auto negative=SmtSolverTestSupport::preclassification_shadow_summary(
+                all_unresolved);
+            ARIADNE_TEST_EQUAL(negative.checks,22u);
+            ARIADNE_TEST_EQUAL(negative.skipped,42u);
+            ARIADNE_TEST_EQUAL(negative.observed_hits,0u);
+            ARIADNE_TEST_EQUAL(negative.skipped_hits,0u);
+            ARIADNE_TEST_EQUAL(negative.suspensions,1u);
+            ARIADNE_TEST_EQUAL(negative.reactivations,0u);
+
+            std::vector<SmtPreclassificationOutcome> delayed_positive(
+                64u,SmtPreclassificationOutcome::UNRESOLVED);
+            delayed_positive[13]=SmtPreclassificationOutcome::PRUNED;
+            for(SizeType i=16u;i<64u;i+=8u) {
+                delayed_positive[i]=SmtPreclassificationOutcome::PRUNED;
+            }
+            auto positive=SmtSolverTestSupport::preclassification_shadow_summary(
+                delayed_positive);
+            ARIADNE_TEST_EQUAL(positive.checks,64u);
+            ARIADNE_TEST_EQUAL(positive.skipped,0u);
+            ARIADNE_TEST_EQUAL(positive.skipped_hits,0u);
+            ARIADNE_TEST_EQUAL(positive.suspensions,0u);
+
+            std::vector<SmtPreclassificationOutcome> reactivation(
+                32u,SmtPreclassificationOutcome::UNRESOLVED);
+            reactivation[23]=SmtPreclassificationOutcome::PRUNED;
+            auto refreshed=SmtSolverTestSupport::preclassification_shadow_summary(
+                reactivation);
+            ARIADNE_TEST_EQUAL(refreshed.checks,25u);
+            ARIADNE_TEST_EQUAL(refreshed.skipped,7u);
+            ARIADNE_TEST_EQUAL(refreshed.observed_hits,1u);
+            ARIADNE_TEST_EQUAL(refreshed.suspensions,2u);
+            ARIADNE_TEST_EQUAL(refreshed.reactivations,1u);
+        }
+
         SmtSearchStatistics empty_target;
         SmtSearchStatistics empty_source;
         SmtSolverTestSupport::accumulate_statistics(empty_target,empty_source);

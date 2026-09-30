@@ -1651,6 +1651,74 @@ Void record_first_minimization_candidate_trail_rank(
     }
 }
 
+PreclassificationShadowSummary preclassification_shadow_summary(
+    std::vector<SmtPreclassificationOutcome> const& outcomes,
+    SizeType initial_window,
+    SizeType active_window,
+    SizeType refresh_period)
+{
+    ARIADNE_PRECONDITION(initial_window>0u);
+    ARIADNE_PRECONDITION(active_window>0u);
+    ARIADNE_PRECONDITION(refresh_period>0u);
+
+    PreclassificationShadowSummary summary;
+    Bool active=true;
+    Bool initial=true;
+    SizeType active_checks=0u;
+    SizeType active_hits=0u;
+    SizeType suspended_boxes=0u;
+
+    auto is_hit=[](SmtPreclassificationOutcome outcome) {
+        return outcome!=SmtPreclassificationOutcome::UNRESOLVED;
+    };
+
+    for(auto const outcome:outcomes) {
+        if(active) {
+            ++summary.checks;
+            ++active_checks;
+            if(is_hit(outcome)) {
+                ++summary.observed_hits;
+                ++active_hits;
+            }
+
+            SizeType const window=initial ? initial_window : active_window;
+            if(active_checks==window) {
+                if(active_hits==0u) {
+                    active=false;
+                    initial=false;
+                    suspended_boxes=0u;
+                    ++summary.suspensions;
+                } else {
+                    initial=false;
+                    active_checks=0u;
+                    active_hits=0u;
+                }
+            }
+            continue;
+        }
+
+        ++suspended_boxes;
+        Bool const refresh=suspended_boxes==refresh_period;
+        if(refresh) {
+            ++summary.checks;
+            suspended_boxes=0u;
+            if(is_hit(outcome)) {
+                ++summary.observed_hits;
+                ++summary.reactivations;
+                active=true;
+                active_checks=0u;
+                active_hits=0u;
+            }
+        } else {
+            ++summary.skipped;
+            if(is_hit(outcome)) {
+                ++summary.skipped_hits;
+            }
+        }
+    }
+    return summary;
+}
+
 Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& source)
 {
     target.boxes_processed+=source.boxes_processed;

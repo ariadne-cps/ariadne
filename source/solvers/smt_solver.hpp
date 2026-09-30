@@ -327,6 +327,21 @@ Void accumulate_statistics(
     SmtSearchStatistics& target,
     SmtSearchStatistics const& source);
 
+struct PreclassificationShadowSummary {
+    SizeType checks = 0u;
+    SizeType skipped = 0u;
+    SizeType observed_hits = 0u;
+    SizeType skipped_hits = 0u;
+    SizeType suspensions = 0u;
+    SizeType reactivations = 0u;
+};
+
+PreclassificationShadowSummary preclassification_shadow_summary(
+    std::vector<SmtPreclassificationOutcome> const& outcomes,
+    SizeType initial_window=16u,
+    SizeType active_window=8u,
+    SizeType refresh_period=8u);
+
 Void record_first_minimization_candidate_trail_rank(
     SmtSearchStatistics& statistics,
     SizeType trail_rank);

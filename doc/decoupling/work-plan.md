@@ -116,8 +116,9 @@ neither `dynamics` nor lower-level geometry depends on `hybrid`.
       logical machinery; keep Sequence integration in numeric.
 - [x] Break the backward `numeric → foundation` and `symbolic → foundation`
       edges and extract Foundation as a lower-level standalone package.
-- [ ] Remove numeric's remaining dependency on high-level symbolic expression
-      templates.
+- [x] Remove numeric's remaining dependency on high-level symbolic expression
+      templates; Numeric now owns its private lazy Real/logical expression
+      storage.
 - [ ] Stabilise `algebra → function` as the primary direction by relocating the
       two function-specific algebra integrations.
 - [ ] Identify the smallest primitive-geometry API needed by algebra and
@@ -144,7 +145,9 @@ rebuilding the primitive mathematical packages.
 ### M5 — Repository extraction
 
 Foundation is the first completed extraction and serves as the reference pattern
-for subsequent repositories.
+for subsequent repositories. Numeric is now source/test isolated in the
+monorepo and ready for repository extraction once `ariadne-cps/numeric`
+exists.
 
 - [x] Select and extract Foundation as the first repository.
 - [ ] Provide install/export rules and a versioned CMake package.
@@ -153,6 +156,9 @@ for subsequent repositories.
 - [x] Replace the monorepo Foundation source/tests with the pinned
       `ariadne-cps/foundation` submodule.
 - [ ] Document release compatibility and coordinated-change procedure.
+- [ ] Extract Numeric to `ariadne-cps/numeric`, add standalone
+      Unix/Windows/Coverage CI, and replace the monorepo source/tests with a
+      pinned submodule.
 - [ ] Repeat one component at a time; keep an integration build spanning all
       released packages.
 
@@ -178,6 +184,7 @@ starts enforcing the dependencies needed for the core work.
 
 | Date | Change | Validation | Graph impact | Status |
 |---|---|---|---|---|
+| 2026-09-30 | Prepared Numeric for standalone extraction: removed the dependency on `symbolic/templates.hpp`; removed Numeric's production dependency on monorepo `config.hpp`; introduced `NUMERIC_SRC`, the `numeric` interface target, and standalone `ariadne-numeric`; made Numeric's dependencies explicit (`foundation`, `utility`, GMP, MPFR); retargeted Numeric tests from `ariadne-core` to `ariadne-numeric` and `utility/test.hpp`. | Static source/CMake checks completed. GitHub Actions had not yet registered runs for the latest branch head at the time of this update. | Removes the baseline `symbolic → numeric` edge and removes inherited `threading`/monorepo-config build dependencies from Numeric. | In progress |
 | 2026-09-29 | Replaced the in-tree `foundation` module with the standalone `ariadne-cps/foundation` submodule; removed local source/tests copies and wired `FOUNDATION_SRC` plus the `foundation` interface into Ariadne aggregates. | Standalone Foundation Unix/Windows/Coverage CI passed. Ariadne integration was updated to inherit the Foundation interface in C++ and Python. `configuration@6b90c981939253a6740e93b726137ea3b6934ecb` is identical in Ariadne, Threading, Foundation, and Utility; `utility@d28ec8bfa0f176f948756b00ac9c14e8eb3b2de2` is identical in Threading and Foundation. | Foundation is now an external repository boundary; local duplicate implementation removed. | Done |
 | 2026-09-29 | Made `foundation` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are owned by Foundation and infinite `Sequence` conjunction/disjunction lives in numeric. | Standalone Foundation builds and tests pass on Unix, Windows, and Coverage CI. | Removed the backward `numeric → foundation` and `symbolic → foundation` edges while retaining the intended `foundation → numeric` direction. | Done |
 | 2026-09-29 | Removed graphics and whole-tensor stream output from `algebra/Tensor`; moved Tensor drawing to the `io` layer through `tensor_drawable`, and adjusted the acoustic PDE example. | Static source review only; build/test validation still required. | Expected removal of backward `io → algebra`; the existing forward `algebra → io` remains. | In progress |
@@ -199,9 +206,7 @@ starts enforcing the dependencies needed for the core work.
   belong to function or set packages?
 - Should drawing use free-function adapters, explicit renderer objects, or a
   small non-owning interface package?
-- Where should the generic numeric expression-template machinery live so that
-  numeric and symbolic do not retain a backward package dependency?
-- Which component should be extracted next after Foundation?
+- Which component should be extracted after Numeric?
 
 ## Risks
 

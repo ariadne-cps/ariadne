@@ -29,8 +29,6 @@
 #ifndef ARIADNE_NUMERIC_HPP
 #define ARIADNE_NUMERIC_HPP
 
-#include "config.hpp"
-
 #include "utility/standard.hpp"
 #include "numeric/declarations.hpp"
 

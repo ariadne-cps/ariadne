@@ -31,8 +31,6 @@
 
 
 
-#include "config.hpp"
-
 #include "utility/macros.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/twoexp.hpp"

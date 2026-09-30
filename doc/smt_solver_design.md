@@ -4524,3 +4524,17 @@ The deterministic statistics-aggregation regression is also extended to cover
 all new preclassification counters and timing. The existing continuation test
 now checks the intended invariant: the box is preclassified, the precheck itself
 neither prunes nor certifies it, and hull still runs.
+
+
+The full `test_smt_solver` suite passes after fixing preclassification
+statistics attribution. This closes the semantic/unit-test gate for the
+cheap-first diagnostic: early prune attribution is correct, unresolved boxes
+continue into contractors, downstream decisions are no longer miscounted as
+preclassification decisions, and all existing SMT regressions remain green.
+
+The next gate is the same-machine Barr3 hull-only comparison on the Mac Studio.
+The target configuration keeps sensitivity, witness probing, shaving,
+monotone contraction and Interval Newton out of the experiment so the only
+difference from the established hull-only run is the new preclassification
+step. The acceptance question is whether natural range rejection can avoid
+enough HC4 work to outweigh the extra precheck on boxes that remain ambiguous.

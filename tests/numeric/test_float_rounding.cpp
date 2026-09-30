@@ -35,7 +35,7 @@
 #include "numeric/numeric.hpp"
 #include "numeric/dyadic.hpp"
 
-#include "test.hpp"
+#include "utility/test.hpp"
 
 namespace Ariadne {
 template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }

@@ -49,7 +49,9 @@
 using namespace std;
 using namespace Ariadne;
 
+namespace Ariadne {
 template<class X> decltype(auto) mag(Covector<X> const& u) { return norm(transpose(u)); }
+}
 
 class TestProcedure
 {

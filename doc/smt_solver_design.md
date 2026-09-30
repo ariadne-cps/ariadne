@@ -4351,3 +4351,27 @@ same configuration, `sensitivity-builds` and
 `sensitivity-build-time` must be zero during box splitting, while
 `sensitivity-evals` remains nonzero because validated derivative evaluation
 is intentionally still performed on each current box.
+
+
+The first Barr3 run after compiled sensitivity-derivative caching confirms the
+intended attribution change. On the 8-box Lie query with sensitivity enabled
+and witness probing, shaving, hull and monotone reduction disabled, the solver
+processes and splits all 8 boxes with no pruning or epsilon certification.
+All 8 splits are sensitivity-guided and none overrides the geometrically widest
+coordinate, matching the established behavior of this workload.
+
+The hot split path now reports `sensitivity-builds=0` and
+`sensitivity-build-time=0`, while it still performs 32 validated derivative
+evaluations. Sensitivity evaluation costs about 4.435 s and the complete split
+phase about 4.983 s. One-time theory compilation is about 0.806 s; this now
+contains the derivative construction that used to recur during splitting.
+Total runtime is about 6.142 s on the Mac Studio.
+
+The decisive cache measurement is the already-established 64-box
+same-configuration comparison on the same Mac Studio. Before caching, that run
+produced 27 pruned / 37 split boxes, no epsilon certification, 94 symbolic
+derivative builds taking about 3.376 s, 94 validated derivative evaluations
+taking about 18.576 s, and about 27.649 s total. Re-running exactly that
+frontier after caching should preserve the 27/37 tree and the 94 evaluations
+while eliminating all 94 hot-path builds. This isolates the actual amortized
+benefit of derivative caching before any relative smear score is introduced.

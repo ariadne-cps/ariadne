@@ -87,7 +87,8 @@ class SmtSolverConfiguration {
         Bool interval_lookahead_split_enabled=false,
         Bool upper_child_first=false,
         Bool interval_newton_reduction_enabled=false,
-        Bool preclassification_enabled=false);
+        Bool preclassification_enabled=false,
+        Bool adaptive_preclassification_enabled=false);
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -140,6 +141,11 @@ class SmtSolverConfiguration {
         return _preclassification_enabled;
     }
 
+    //! \brief Whether sequential theory search adaptively suspends unproductive preclassification.
+    Bool adaptive_preclassification_enabled() const {
+        return _adaptive_preclassification_enabled;
+    }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
@@ -155,6 +161,7 @@ class SmtSolverConfiguration {
     Bool _hull_reduction_enabled;
     Bool _interval_newton_reduction_enabled;
     Bool _preclassification_enabled;
+    Bool _adaptive_preclassification_enabled;
 };
 
 //! \ingroup Solvers
@@ -209,6 +216,9 @@ struct SmtSearchStatistics {
     SizeType preclassification_epsilon_boxes = 0u;
     SizeType preclassification_literal_evaluations = 0u;
     std::vector<SmtPreclassificationOutcome> preclassification_outcomes;
+    SizeType preclassification_adaptive_skipped_boxes = 0u;
+    SizeType preclassification_adaptive_suspensions = 0u;
+    SizeType preclassification_adaptive_reactivations = 0u;
     SizeType candidate_witness_searches = 0u;
     SizeType candidate_witness_successes = 0u;
     double theory_compile_seconds = 0.0;
@@ -680,10 +690,16 @@ class SmtSolver {
     template<class Conjunction>
     BoxProcessingResult _process_box(
         UpperBoxType domain,
-        Conjunction const& conjunction) const;
+        Conjunction const& conjunction,
+        Bool allow_preclassification=true) const;
 
     BoxProcessingResult _process_box(
         UpperBoxType domain,
+        ConjunctionReference const& conjunction,
+        Bool allow_preclassification=true) const;
+
+    Bool _preclassification_eligible(
+        UpperBoxType const& domain,
         ConjunctionReference const& conjunction) const;
 
     Void _accumulate_box_processing_statistics(
@@ -732,11 +748,13 @@ class SmtSolver {
     DirectClassification _direct_classification(
         UpperBoxType const& domain,
         List<ValidatedConstraint> const& constraints,
-        ReductionStatistics& statistics) const;
+        ReductionStatistics& statistics,
+        Bool allow_preclassification) const;
     DirectClassification _direct_classification(
         UpperBoxType const& domain,
         CompiledTheoryLiterals const& literals,
-        ReductionStatistics& statistics) const;
+        ReductionStatistics& statistics,
+        Bool allow_preclassification) const;
 
     template<class Conjunction>
     std::optional<UpperBoxType> _epsilon_witness(

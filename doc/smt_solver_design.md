@@ -4718,3 +4718,44 @@ both already-measured Barr3 regimes: hull-only as the positive case and
 shaving-only / hull+shaving as negative cases. An adaptive scheduler is useful
 only if it approaches the hull-only preclassification benefit while quickly
 disabling itself on the zero-hit regimes, with negligible structural overhead.
+
+
+### Adaptive contractor preclassification gate
+
+The per-box preclassification trace on Barr3 closes the first scheduling-design
+question. In the hull-only `lie` run the first cheap preclassification prune
+does not occur until box 14, so the earlier hypothetical eight-box initial
+sampling window would have disabled the optimisation before its first success.
+The 64-box trace nevertheless contains 27 preclassification prunes, and every
+subsequent eight-box active window contains at least one hit. The corresponding
+shadow scheduler therefore keeps preclassification active for all 64 boxes and
+misses no hit.
+
+With shaving enabled, both shaving-only and hull+shaving `lie` traces contain
+64 consecutive unresolved preclassification outcomes. With an initial window of
+16, an active window of 8 and a suspended refresh period of 8, shadow scheduling
+performs 22 checks and skips 42 while missing no hit. The 35-box rectangle runs
+perform 18 checks and skip 17, again with no missed hit. This is the desired
+separation between the measured positive and negative regimes.
+
+The solver now exposes adaptive preclassification as a separate opt-in from
+always-on preclassification. Always-on remains available as the experimental
+baseline. Sequential adaptive search samples 16 eligible boxes initially,
+suspends after a zero-hit window, probes every eighth eligible box while
+suspended, and uses eight-box active windows after the initial sample.
+A successful refresh probe reactivates preclassification. Skipping the cheap
+precheck remains semantics-neutral: the box proceeds directly to the existing
+validated contractor/reduction path.
+
+Adaptive scheduling is intentionally rejected by the parallel solve entry
+points for now. A parallel policy needs an explicit rule for in-flight probes
+and scheduling order rather than silently sharing a sequential state machine
+across workers.
+
+The next acceptance gate is a same-revision Barr3 timing comparison between
+`preclassify` and `adaptive-preclassify` for hull-only, shaving-only and
+hull+shaving. The adaptive mode should preserve the hull-only search benefit,
+reduce preclassification checks from 64 to about 22 on the zero-hit 64-box
+shaving regimes, preserve logical result/search correctness, and recover most
+of the roughly 2.2 s useless preclassification cost there before any default
+promotion is considered.

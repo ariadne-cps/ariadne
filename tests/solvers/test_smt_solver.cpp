@@ -248,6 +248,40 @@ class TestSmtSolver {
             true);
         ARIADNE_TEST_ASSERT(
             preclassification_configuration.preclassification_enabled());
+        ARIADNE_TEST_ASSERT(
+            not preclassification_configuration.adaptive_preclassification_enabled());
+
+        std::cout << "[smt-config] enable adaptive contractor preclassification" << std::endl;
+        SmtSolverConfiguration adaptive_preclassification_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            true);
+        ARIADNE_TEST_ASSERT(
+            adaptive_preclassification_configuration.preclassification_enabled());
+        ARIADNE_TEST_ASSERT(
+            adaptive_preclassification_configuration.adaptive_preclassification_enabled());
+
+        std::cout << "[smt-config] reject adaptive preclassification without preclassification" << std::endl;
+        ARIADNE_TEST_THROWS(
+            SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                false,false,false,false,false,true,false,false,false,false,true),
+            std::runtime_error);
 
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
@@ -481,6 +515,9 @@ class TestSmtSolver {
         no_conflict.preclassification_outcomes={
             SmtPreclassificationOutcome::UNRESOLVED,
             SmtPreclassificationOutcome::PRUNED};
+        no_conflict.preclassification_adaptive_skipped_boxes=12u;
+        no_conflict.preclassification_adaptive_suspensions=2u;
+        no_conflict.preclassification_adaptive_reactivations=1u;
         no_conflict.preclassification_seconds=0.375;
         no_conflict.interval_lookahead_guided_splits=4u;
         no_conflict.interval_lookahead_overrides_geometric_splits=3u;
@@ -515,6 +552,9 @@ class TestSmtSolver {
         ARIADNE_TEST_ASSERT(
             target.preclassification_outcomes[1]
             ==SmtPreclassificationOutcome::PRUNED);
+        ARIADNE_TEST_EQUAL(target.preclassification_adaptive_skipped_boxes,12u);
+        ARIADNE_TEST_EQUAL(target.preclassification_adaptive_suspensions,2u);
+        ARIADNE_TEST_EQUAL(target.preclassification_adaptive_reactivations,1u);
         ARIADNE_TEST_EQUAL(target.preclassification_seconds,0.375);
         ARIADNE_TEST_EQUAL(target.interval_lookahead_guided_splits,4u);
         ARIADNE_TEST_EQUAL(
@@ -1440,6 +1480,38 @@ class TestSmtSolver {
                 ==SmtPreclassificationOutcome::UNRESOLVED);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().hull_reduction_rounds>=1u);
+        }
+
+        {
+            std::cout << "[smt-preclassify] adaptive scheduler suspends zero-hit prechecks" << std::endl;
+            SmtSolver adaptive_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                24u,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true,
+                true));
+            List<SmtTheoryPrimitiveLiteral> literals({
+                SmtTheoryPrimitiveLiteral(
+                    sin(ex),SmtTheoryPrimitiveRelation::EQ_ZERO)
+            });
+            SmtResult solve_result=adaptive_solver.solve(
+                space,ExactBoxType({ExactIntervalType(3,4)}),literals);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().preclassification_adaptive_suspensions>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().preclassification_adaptive_skipped_boxes>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().preclassification_boxes<24u);
         }
     }
 

@@ -443,6 +443,86 @@ std::vector<std::vector<SizeType>> interval_newton_subsystem_candidates(
     return result;
 }
 
+class AdaptivePreclassificationScheduler {
+  public:
+    AdaptivePreclassificationScheduler(
+        SizeType initial_window=16u,
+        SizeType active_window=8u,
+        SizeType refresh_period=8u)
+        : _initial_window(initial_window),
+          _active_window(active_window),
+          _refresh_period(refresh_period)
+    {
+        ARIADNE_PRECONDITION(initial_window>0u);
+        ARIADNE_PRECONDITION(active_window>0u);
+        ARIADNE_PRECONDITION(refresh_period>0u);
+    }
+
+    Bool request()
+    {
+        if(_active) {
+            return true;
+        }
+        ++_suspended_boxes;
+        if(_suspended_boxes==_refresh_period) {
+            _suspended_boxes=0u;
+            return true;
+        }
+        ++_skipped;
+        return false;
+    }
+
+    Void observe(SmtPreclassificationOutcome outcome)
+    {
+        Bool const hit=outcome!=SmtPreclassificationOutcome::UNRESOLVED;
+        if(not _active) {
+            if(hit) {
+                _active=true;
+                _initial=false;
+                _active_checks=0u;
+                _active_hits=0u;
+                ++_reactivations;
+            }
+            return;
+        }
+
+        ++_active_checks;
+        if(hit) {
+            ++_active_hits;
+        }
+        SizeType const window=_initial ? _initial_window : _active_window;
+        if(_active_checks==window) {
+            if(_active_hits==0u) {
+                _active=false;
+                _initial=false;
+                _suspended_boxes=0u;
+                ++_suspensions;
+            } else {
+                _initial=false;
+                _active_checks=0u;
+                _active_hits=0u;
+            }
+        }
+    }
+
+    SizeType skipped() const { return _skipped; }
+    SizeType suspensions() const { return _suspensions; }
+    SizeType reactivations() const { return _reactivations; }
+
+  private:
+    SizeType _initial_window;
+    SizeType _active_window;
+    SizeType _refresh_period;
+    Bool _active = true;
+    Bool _initial = true;
+    SizeType _active_checks = 0u;
+    SizeType _active_hits = 0u;
+    SizeType _suspended_boxes = 0u;
+    SizeType _skipped = 0u;
+    SizeType _suspensions = 0u;
+    SizeType _reactivations = 0u;
+};
+
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
@@ -456,7 +536,8 @@ SmtSolverConfiguration::SmtSolverConfiguration(
     Bool interval_lookahead_split_enabled,
     Bool upper_child_first,
     Bool interval_newton_reduction_enabled,
-    Bool preclassification_enabled)
+    Bool preclassification_enabled,
+    Bool adaptive_preclassification_enabled)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
       _learned_clause_limit(learned_clause_limit),
@@ -470,9 +551,12 @@ SmtSolverConfiguration::SmtSolverConfiguration(
       _shaving_reduction_enabled(shaving_reduction_enabled),
       _hull_reduction_enabled(hull_reduction_enabled),
       _interval_newton_reduction_enabled(interval_newton_reduction_enabled),
-      _preclassification_enabled(preclassification_enabled)
+      _preclassification_enabled(preclassification_enabled),
+      _adaptive_preclassification_enabled(adaptive_preclassification_enabled)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
+    ARIADNE_PRECONDITION(
+        not adaptive_preclassification_enabled || preclassification_enabled);
 }
 
 SmtResult::SmtResult(SmtResultStatus status, SmtSearchStatistics statistics)
@@ -873,7 +957,8 @@ SmtSolver::DirectClassification
 SmtSolver::_direct_classification(
     UpperBoxType const&,
     List<ValidatedConstraint> const&,
-    ReductionStatistics&) const
+    ReductionStatistics&,
+    Bool) const
 {
     return {};
 }
@@ -882,7 +967,8 @@ SmtSolver::DirectClassification
 SmtSolver::_direct_classification(
     UpperBoxType const& domain,
     CompiledTheoryLiterals const& literals,
-    ReductionStatistics& statistics) const
+    ReductionStatistics& statistics,
+    Bool allow_preclassification) const
 {
     DirectClassification result;
     Bool const interval_newton_eligible=
@@ -895,7 +981,9 @@ SmtSolver::_direct_classification(
         || _configuration.monotone_reduction_enabled()
         || interval_newton_eligible;
     Bool const preclassification=
-        contractor_enabled && _configuration.preclassification_enabled();
+        contractor_enabled
+        && _configuration.preclassification_enabled()
+        && allow_preclassification;
     if(contractor_enabled && not preclassification) {
         return result;
     }
@@ -1066,7 +1154,8 @@ template<class Conjunction>
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(
     UpperBoxType domain,
-    Conjunction const& conjunction) const
+    Conjunction const& conjunction,
+    Bool allow_preclassification) const
 {
     ReductionStatistics reductions;
     BoxProcessingResult result{
@@ -1075,7 +1164,8 @@ SmtSolver::_process_box(
         std::nullopt,
         reductions};
 
-    auto direct=this->_direct_classification(domain,conjunction,reductions);
+    auto direct=this->_direct_classification(
+        domain,conjunction,reductions,allow_preclassification);
     if(direct.used) {
         if(direct.preclassification) {
             result.preclassification=true;
@@ -1196,14 +1286,35 @@ SmtSolver::_process_box(
 SmtSolver::BoxProcessingResult
 SmtSolver::_process_box(
     UpperBoxType domain,
-    ConjunctionReference const& conjunction) const
+    ConjunctionReference const& conjunction,
+    Bool allow_preclassification) const
 {
     if(conjunction.constraints!=nullptr) {
         return this->_process_box(
-            std::move(domain),*conjunction.constraints);
+            std::move(domain),*conjunction.constraints,allow_preclassification);
     }
     return this->_process_box(
-        std::move(domain),*conjunction.theory_literals);
+        std::move(domain),*conjunction.theory_literals,allow_preclassification);
+}
+
+Bool
+SmtSolver::_preclassification_eligible(
+    UpperBoxType const& domain,
+    ConjunctionReference const& conjunction) const
+{
+    if(not _configuration.preclassification_enabled()
+       || conjunction.theory_literals==nullptr) {
+        return false;
+    }
+    auto const& literals=*conjunction.theory_literals;
+    Bool const interval_newton_eligible=
+        _configuration.interval_newton_reduction_enabled()
+        && not interval_newton_subsystem_candidates(
+            literals,domain.dimension()).empty();
+    return _configuration.hull_reduction_enabled()
+        || _configuration.shaving_reduction_enabled()
+        || _configuration.monotone_reduction_enabled()
+        || interval_newton_eligible;
 }
 
 Void
@@ -1324,6 +1435,7 @@ SmtSolver::_solve_sequential_conjunction(
     SequentialSmtWorkQueue pending;
     pending.push(UpperBoxType(domain));
     SmtUnknownReason unknown_reason=SmtUnknownReason::NONE;
+    AdaptivePreclassificationScheduler preclassification_scheduler;
     while(not pending.empty()) {
         if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
             ++statistics.box_budget_exhaustions;
@@ -1334,9 +1446,34 @@ SmtSolver::_solve_sequential_conjunction(
         UpperBoxType current=pending.pop();
         ++statistics.boxes_processed;
 
+        Bool const adaptive_eligible=
+            _configuration.adaptive_preclassification_enabled()
+            && this->_preclassification_eligible(current,conjunction);
+        Bool const allow_preclassification=
+            not adaptive_eligible || preclassification_scheduler.request();
+
         BoxProcessingResult processing=this->_process_box(
-            std::move(current),conjunction);
+            std::move(current),conjunction,allow_preclassification);
         this->_accumulate_box_processing_statistics(statistics,processing);
+
+        if(adaptive_eligible && allow_preclassification) {
+            ARIADNE_ASSERT(processing.preclassification);
+            SmtPreclassificationOutcome const outcome=
+                processing.preclassification_pruned
+                    ? SmtPreclassificationOutcome::PRUNED
+                    : processing.preclassification_epsilon_satisfied
+                        ? SmtPreclassificationOutcome::EPSILON_SAT
+                        : SmtPreclassificationOutcome::UNRESOLVED;
+            preclassification_scheduler.observe(outcome);
+        }
+        if(_configuration.adaptive_preclassification_enabled()) {
+            statistics.preclassification_adaptive_skipped_boxes=
+                preclassification_scheduler.skipped();
+            statistics.preclassification_adaptive_suspensions=
+                preclassification_scheduler.suspensions();
+            statistics.preclassification_adaptive_reactivations=
+                preclassification_scheduler.reactivations();
+        }
 
         if(processing.status==BoxProcessingStatus::EPSILON_SAT) {
             return SmtResult::epsilon_sat(*processing.witness,statistics);
@@ -1534,6 +1671,7 @@ SmtResult SmtSolver::solve_parallel(
     ExactBoxType const& domain,
     List<ValidatedConstraint> const& constraints) const
 {
+    ARIADNE_PRECONDITION(not _configuration.adaptive_preclassification_enabled());
     ARIADNE_PRECONDITION(domain.is_bounded());
     for(SizeType i=0; i!=constraints.size(); ++i) {
         ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
@@ -1554,6 +1692,7 @@ SmtResult SmtSolver::solve_parallel(
     ExactBoxType const& domain,
     List<SmtTheoryPrimitiveLiteral> const& literals) const
 {
+    ARIADNE_PRECONDITION(not _configuration.adaptive_preclassification_enabled());
     ARIADNE_PRECONDITION(domain.is_bounded());
     ARIADNE_PRECONDITION(space.size()==domain.dimension());
 
@@ -1657,65 +1796,25 @@ PreclassificationShadowSummary preclassification_shadow_summary(
     SizeType active_window,
     SizeType refresh_period)
 {
-    ARIADNE_PRECONDITION(initial_window>0u);
-    ARIADNE_PRECONDITION(active_window>0u);
-    ARIADNE_PRECONDITION(refresh_period>0u);
-
+    AdaptivePreclassificationScheduler scheduler(
+        initial_window,active_window,refresh_period);
     PreclassificationShadowSummary summary;
-    Bool active=true;
-    Bool initial=true;
-    SizeType active_checks=0u;
-    SizeType active_hits=0u;
-    SizeType suspended_boxes=0u;
-
-    auto is_hit=[](SmtPreclassificationOutcome outcome) {
-        return outcome!=SmtPreclassificationOutcome::UNRESOLVED;
-    };
-
     for(auto const outcome:outcomes) {
-        if(active) {
+        if(scheduler.request()) {
             ++summary.checks;
-            ++active_checks;
-            if(is_hit(outcome)) {
+            if(outcome!=SmtPreclassificationOutcome::UNRESOLVED) {
                 ++summary.observed_hits;
-                ++active_hits;
             }
-
-            SizeType const window=initial ? initial_window : active_window;
-            if(active_checks==window) {
-                if(active_hits==0u) {
-                    active=false;
-                    initial=false;
-                    suspended_boxes=0u;
-                    ++summary.suspensions;
-                } else {
-                    initial=false;
-                    active_checks=0u;
-                    active_hits=0u;
-                }
-            }
-            continue;
-        }
-
-        ++suspended_boxes;
-        Bool const refresh=suspended_boxes==refresh_period;
-        if(refresh) {
-            ++summary.checks;
-            suspended_boxes=0u;
-            if(is_hit(outcome)) {
-                ++summary.observed_hits;
-                ++summary.reactivations;
-                active=true;
-                active_checks=0u;
-                active_hits=0u;
-            }
+            scheduler.observe(outcome);
         } else {
             ++summary.skipped;
-            if(is_hit(outcome)) {
+            if(outcome!=SmtPreclassificationOutcome::UNRESOLVED) {
                 ++summary.skipped_hits;
             }
         }
     }
+    summary.suspensions=scheduler.suspensions();
+    summary.reactivations=scheduler.reactivations();
     return summary;
 }
 
@@ -1785,6 +1884,12 @@ Void accumulate_statistics(SmtSearchStatistics& target, SmtSearchStatistics cons
         target.preclassification_outcomes.end(),
         source.preclassification_outcomes.begin(),
         source.preclassification_outcomes.end());
+    target.preclassification_adaptive_skipped_boxes+=
+        source.preclassification_adaptive_skipped_boxes;
+    target.preclassification_adaptive_suspensions+=
+        source.preclassification_adaptive_suspensions;
+    target.preclassification_adaptive_reactivations+=
+        source.preclassification_adaptive_reactivations;
     target.preclassification_seconds+=source.preclassification_seconds;
     target.candidate_witness_searches+=source.candidate_witness_searches;
     target.candidate_witness_successes+=source.candidate_witness_successes;
@@ -2934,7 +3039,8 @@ class SmtDpllSearch {
             _solver.configuration().interval_lookahead_split_enabled(),
             _solver.configuration().upper_child_first(),
             _solver.configuration().interval_newton_reduction_enabled(),
-            _solver.configuration().preclassification_enabled()));
+            _solver.configuration().preclassification_enabled(),
+            _solver.configuration().adaptive_preclassification_enabled()));
         return _parallel
             ? theory_solver.solve_parallel(_space,_domain,literals)
             : theory_solver.solve(_space,_domain,literals);

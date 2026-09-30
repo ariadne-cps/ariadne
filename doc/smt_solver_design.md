@@ -4375,3 +4375,41 @@ taking about 18.576 s, and about 27.649 s total. Re-running exactly that
 frontier after caching should preserve the 27/37 tree and the 94 evaluations
 while eliminating all 94 hot-path builds. This isolates the actual amortized
 benefit of derivative caching before any relative smear score is introduced.
+
+
+The 64-box same-machine cache comparison accepts compiled sensitivity
+derivatives as a real but bounded optimisation. Before caching, the current
+evaluator produced 27 pruned / 37 split boxes with 94 hot-path derivative
+builds taking about 3.376 s, 94 derivative evaluations taking about 18.576 s,
+a sensitivity split phase around 24.866 s and about 27.649 s total. After
+caching, the search tree is exactly unchanged at 27 pruned / 37 split with
+zero epsilon certification and zero sensitivity overrides. Hot-path derivative
+builds fall to zero while the same 94 derivative evaluations remain. Their
+measured evaluation time is about 18.785 s.
+
+Total runtime falls to about 24.253 s, a 12.3% improvement, and split-phase
+time falls to about 21.323 s, a 14.2% improvement. The roughly 3.54 s
+split-phase reduction is close to the previously measured 3.376 s symbolic
+build cost, confirming that the cache removes the intended work rather than
+changing the search. The dominant sensitivity cost remains validated derivative
+evaluation, so caching alone does not make derivative-guided splitting
+competitive with Barr3's geometric cheap path.
+
+The next smear diagnostic therefore changes only score aggregation, not
+derivative construction or evaluation. A new opt-in split policy
+`sensitivity-relative` implements the SmearSumRelative form used by IBEX.
+For each active constraint and coordinate it first computes the ordinary impact
+`m_ij = width(x_j) * mag(df_i/dx_j)`. Each constraint is normalised by
+`sum_k m_ik`, and coordinate j is scored by the sum across constraints of
+`m_ij / sum_k m_ik` for nonzero denominators. The coordinate with the largest
+relative score is split.
+
+The existing `sensitivity` mode remains the absolute SmearSum-like score and
+is unchanged. Both modes reuse exactly the same compiled derivative cache and
+perform the same derivative evaluations on a given set of active constraints;
+only the score arithmetic differs. A synthetic regression fixes a case where
+the two policies deliberately disagree: with unit-width variables and
+constraints `100*x+y` and `y`, absolute smear selects x while relative
+smear selects y. The first Barr3 gate should use the same 64-box cheap
+configuration so tree shape, override count and derivative-evaluation cost can
+be compared directly with the accepted cached absolute run.

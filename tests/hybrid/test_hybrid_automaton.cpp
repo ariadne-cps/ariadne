@@ -26,7 +26,7 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "symbolic/expression.hpp"
 #include "symbolic/valuation.hpp"

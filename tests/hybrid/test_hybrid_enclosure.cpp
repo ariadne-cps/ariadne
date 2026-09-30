@@ -25,7 +25,7 @@
 #include <iostream>
 
 #include "config.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "algebra/algebra.hpp"
 #include "function/taylor_function.hpp"

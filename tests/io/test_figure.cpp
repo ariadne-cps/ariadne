@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "function/function.hpp"
 #include "io/figure.hpp"

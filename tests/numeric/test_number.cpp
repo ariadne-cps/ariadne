@@ -37,7 +37,7 @@
 #include "numeric/float_approximation.hpp"
 #include "numeric/float_error.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

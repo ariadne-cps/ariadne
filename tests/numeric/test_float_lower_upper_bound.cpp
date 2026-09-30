@@ -37,7 +37,7 @@
 #include "numeric/float.decl.hpp"
 #include "numeric/floats.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 #include "test_floats.hpp"
 
 using namespace Ariadne;

@@ -38,7 +38,7 @@
 #include "numeric/numeric.hpp"
 #include "numeric/dyadic.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace std;
 using namespace Ariadne;

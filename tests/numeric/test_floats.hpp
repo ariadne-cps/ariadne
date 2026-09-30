@@ -36,7 +36,7 @@
 #include "numeric/rational.hpp"
 #include "numeric/float.decl.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 
 using namespace Ariadne;
 using namespace std;

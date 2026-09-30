@@ -45,7 +45,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "numeric/concepts.hpp"
 #include "numeric/archetypes.hpp"
 
-#include "utility/test.hpp"
+#include "test.hpp"
 #include "utility.hpp"
 #include "check_numeric.hpp"
 

@@ -40,7 +40,7 @@
 #include "algebra/evaluate.hpp"
 #include "function/formula.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 #include "algebra/covector.hpp"
 #include "function/function.hpp"

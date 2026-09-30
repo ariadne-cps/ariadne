@@ -42,7 +42,7 @@
 #include "symbolic/variable.hpp"
 #include "symbolic/expression.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace std;
 using namespace Ariadne;

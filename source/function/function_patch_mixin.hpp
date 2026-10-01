@@ -29,11 +29,11 @@
 #ifndef ARIADNE_FUNCTION_PATCH_MIXIN_HPP
 #define ARIADNE_FUNCTION_PATCH_MIXIN_HPP
 
-#include "../numeric/number.decl.hpp"
+#include "numeric/number.decl.hpp"
 #include "../function/function.decl.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../numeric/numeric.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
 
 #include "../algebra/vector.hpp"
 #include "../algebra/matrix.hpp"

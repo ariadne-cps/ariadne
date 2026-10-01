@@ -7,9 +7,9 @@
 [submodule "submodules/configuration"]
 	path = submodules/configuration
 	url = https://github.com/ariadne-cps/configuration
-[submodule "submodules/foundation"]
-	path = submodules/foundation
-	url = https://github.com/ariadne-cps/foundation
+[submodule "submodules/paradigm"]
+	path = submodules/paradigm
+	url = https://github.com/ariadne-cps/paradigm
 [submodule "submodules/numeric"]
 	path = submodules/numeric
 	url = https://github.com/ariadne-cps/numeric

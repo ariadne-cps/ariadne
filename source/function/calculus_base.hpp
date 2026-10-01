@@ -29,7 +29,7 @@
 #ifndef ARIADNE_CALCULUS_BASE_HPP
 #define ARIADNE_CALCULUS_BASE_HPP
 
-#include "foundation/tribool.hpp"
+#include "paradigm/logical.hpp"
 #include "logging/logging.hpp"
 #include "function/function_interface.hpp"
 #include "calculus_interface.hpp"

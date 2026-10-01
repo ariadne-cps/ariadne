@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 
-#include "foundation/tribool.hpp"
+#include "paradigm/logical.hpp"
 #include "geometry/box.hpp"
 #include "utility/handle.hpp"
 #include "geometry/set.decl.hpp"

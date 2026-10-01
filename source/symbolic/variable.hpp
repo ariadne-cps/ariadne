@@ -36,10 +36,10 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
-#include "foundation/tribool.hpp"
+#include "paradigm/logical.hpp"
 #include "utility/string.hpp"
 
-#include "foundation/logical.decl.hpp"
+#include "paradigm/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
 #include "symbolic/expression.decl.hpp"
 #include "symbolic/identifier.hpp"

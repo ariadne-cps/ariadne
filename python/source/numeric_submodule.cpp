@@ -32,7 +32,7 @@
 #  pragma GCC diagnostic ignored "-Wattributes"
 #endif
 
-#include "foundation/logical.hpp"
+#include "paradigm/logical.hpp"
 #include "numeric/accuracy.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"

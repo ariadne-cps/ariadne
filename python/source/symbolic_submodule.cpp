@@ -30,7 +30,7 @@
 #include <iomanip>
 #include <functional>
 
-#include "foundation/tribool.hpp"
+#include "paradigm/logical.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"

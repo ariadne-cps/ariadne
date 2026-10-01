@@ -25,7 +25,7 @@
 #include "config.hpp"
 #include "utility/test.hpp"
 
-#include "foundation/logical.hpp"
+#include "paradigm/logical.hpp"
 #include "numeric/real.hpp"
 #include "symbolic/variable.hpp"
 #include "symbolic/assignment.hpp"

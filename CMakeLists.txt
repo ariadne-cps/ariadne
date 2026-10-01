@@ -44,18 +44,18 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/foundation|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/paradigm|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/configuration"
     )
-    require_same_dependency_commit(Foundation
+    require_same_dependency_commit(Paradigm
         REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/foundation"
-            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/foundation"
+            "${PROJECT_SOURCE_DIR}|submodules/paradigm"
+            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/paradigm"
     )
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/foundation|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/paradigm|submodules/utility"
     )
 endif()
 
@@ -94,7 +94,7 @@ add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
-    $<TARGET_OBJECTS:FOUNDATION_SRC>
+    $<TARGET_OBJECTS:PARADIGM_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:THREADING_SRC>
@@ -104,7 +104,7 @@ add_library(ariadne-core SHARED
 )
 
 add_library(ariadne-kernel SHARED
-    $<TARGET_OBJECTS:FOUNDATION_SRC>
+    $<TARGET_OBJECTS:PARADIGM_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -118,7 +118,7 @@ add_library(ariadne-kernel SHARED
 )
 
 add_library(ariadne SHARED
-    $<TARGET_OBJECTS:FOUNDATION_SRC>
+    $<TARGET_OBJECTS:PARADIGM_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -139,14 +139,14 @@ target_include_directories(ariadne PUBLIC
 )
 target_link_libraries(ariadne PUBLIC
     $<BUILD_INTERFACE:threading>
-    $<BUILD_INTERFACE:foundation>
+    $<BUILD_INTERFACE:paradigm>
     $<BUILD_INTERFACE:numeric>
     $<INSTALL_INTERFACE:GMP::GMP>
     $<INSTALL_INTERFACE:MPFR::MPFR>
 )
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
@@ -197,13 +197,13 @@ install(FILES
     ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
     DESTINATION lib/cmake/Ariadne
 )
-get_target_property(FOUNDATION_SOURCE_DIR foundation SOURCE_DIR)
+get_target_property(PARADIGM_SOURCE_DIR paradigm SOURCE_DIR)
 get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
 get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
 get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
 
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY "${FOUNDATION_SOURCE_DIR}/include/foundation" DESTINATION include/ariadne)
+install(DIRECTORY "${PARADIGM_SOURCE_DIR}/include/paradigm" DESTINATION include/ariadne)
 install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
 install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)

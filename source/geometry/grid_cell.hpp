@@ -34,7 +34,7 @@
 #include <string>
 #include <memory>
 
-#include "foundation/tribool.hpp"
+#include "paradigm/logical.hpp"
 #include "utility/array.hpp"
 
 #include "utility/binary_word.hpp"

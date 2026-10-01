@@ -13,8 +13,8 @@
 #include "utility/metaprogramming.hpp"
 #include "utility/typedefs.hpp"
 
-#include "foundation/paradigm.hpp"
-#include "foundation/logical.decl.hpp"
+#include "paradigm/paradigm.hpp"
+#include "paradigm/logical.decl.hpp"
 
 #include "geometry/interval.decl.hpp"
 #include "geometry/box.decl.hpp"

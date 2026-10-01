@@ -42,7 +42,7 @@
 #include "utility/container.hpp"
 #include "utility/writable.hpp"
 
-#include "foundation/logical.decl.hpp"
+#include "paradigm/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
 
 #include "numeric/operators.hpp"

@@ -24,7 +24,7 @@
 
 #include "pybind11.hpp"
 
-void foundation_submodule(pybind11::module& module);
+void paradigm_submodule(pybind11::module& module);
 void numeric_submodule(pybind11::module& module);
 void linear_algebra_submodule(pybind11::module& module);
 void optimization_submodule(pybind11::module& module);
@@ -43,7 +43,7 @@ void graphics_submodule(pybind11::module& module);
 void hybrid_submodule(pybind11::module& module);
 
 PYBIND11_MODULE(pyariadne, module) {
-    foundation_submodule(module);
+    paradigm_submodule(module);
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);

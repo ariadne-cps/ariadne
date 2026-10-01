@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 
-#include "foundation/representation.hpp"
+#include "paradigm/representation.hpp"
 #include "function/declarations.hpp"
 #include "function/function.decl.hpp"
 #include "function/function_traits.hpp"

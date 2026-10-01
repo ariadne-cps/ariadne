@@ -76,9 +76,9 @@ Int main(Int argc, const char* argv[])
     for(MultiIndex a(3u); a.degree()<=9u; ++a) {
         const double di=static_cast<double>(i);
         if(i%7u<3u) {
-            w.expansion().append(a,1.0/(1.0+di*di*di*di*di));
+            w.expansion().append(a,FloatDP(1.0/(1.0+di*di*di*di*di)));
         } else if(i%7u<4u) {
-            w.expansion().append(a,1.0/(1.0+di));
+            w.expansion().append(a,FloatDP(1.0/(1.0+di)));
         }
         ++i;
     }
@@ -93,19 +93,19 @@ Int main(Int argc, const char* argv[])
     for(MultiIndex a(3u); a.degree()<=5u; ++a) {
         const double di=static_cast<double>(i);
         if(i%7u<4u) {
-            x.expansion().append(a,1.0/(1.0+di));
+            x.expansion().append(a,FloatDP(1.0/(1.0+di)));
         }
         if(i%3u<2u) {
-            y.expansion().append(a,1.0/(2.0+di));
+            y.expansion().append(a,FloatDP(1.0/(2.0+di)));
         }
         ++i;
     }
 
     TM z(3u,trivial_sweeper);
-    z.expansion().append(MultiIndex({0u,0u,0u}),1.0);
-    z.expansion().append(MultiIndex({1u,0u,0u}),0.5);
-    z.expansion().append(MultiIndex({0u,1u,0u}),-0.25);
-    z.expansion().append(MultiIndex({0u,0u,1u}),0.625);
+    z.expansion().append(MultiIndex({0u,0u,0u}),FloatDP(1.0));
+    z.expansion().append(MultiIndex({1u,0u,0u}),FloatDP(0.5));
+    z.expansion().append(MultiIndex({0u,1u,0u}),FloatDP(-0.25));
+    z.expansion().append(MultiIndex({0u,0u,1u}),FloatDP(0.625));
 
     const TM variable=TM::coordinate(2u,0u,trivial_sweeper);
     const TM one=TM::constant(2u,1,trivial_sweeper);

@@ -77,9 +77,9 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --parallel $($NPROC)
 
-    - name: Build Examples and Demonstrations
+    - name: Build Examples, Demonstrations and Benchmarks
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --parallel $($NPROC) --target examples demonstrations
+      run: cmake --build . --parallel $($NPROC) --target examples demonstrations benchmarks
 
     - name: Prepare Environment for Tutorials
       working-directory: ${{runner.workspace}}/build

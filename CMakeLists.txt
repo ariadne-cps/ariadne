@@ -80,7 +80,6 @@ if(NOT CAIRO_FOUND AND NOT GNUPLOT_FOUND)
     message(STATUS "No Cairo or Gnuplot backend support found: figures can't be written to file")
 endif()
 
-add_custom_target(everything)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 

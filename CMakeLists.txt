@@ -65,20 +65,6 @@ if(NOT Threads_FOUND)
     message(FATAL_ERROR "Unable to find Threads library")
 endif()
 
-find_package(GMP)
-if(GMP_FOUND)
-    include_directories(SYSTEM ${GMP_INCLUDES})
-else()
-    message(FATAL_ERROR "Unable to find GMP")
-endif()
-
-find_package(MPFR)
-if(MPFR_FOUND)
-    include_directories(SYSTEM ${MPFR_INCLUDES})
-else()
-    message(FATAL_ERROR "Unable to find MPFR")
-endif()
-
 find_package(Cairo)
 if(CAIRO_FOUND)
     set(HAVE_CAIRO_H ON)
@@ -152,10 +138,10 @@ target_include_directories(ariadne PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>
     $<INSTALL_INTERFACE:include/ariadne>
 )
-target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric>)
+target_link_libraries(ariadne PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric>)
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
@@ -199,8 +185,6 @@ install(EXPORT AriadneTargets
 install(FILES
     ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
     ${PROJECT_BINARY_DIR}/AriadneConfigVersion.cmake
-    ${PROJECT_SOURCE_DIR}/cmake/FindGMP.cmake
-    ${PROJECT_SOURCE_DIR}/cmake/FindMPFR.cmake
     ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
     DESTINATION lib/cmake/Ariadne
 )

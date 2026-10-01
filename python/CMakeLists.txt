@@ -34,7 +34,6 @@ if(Python3_FOUND)
             $<TARGET_OBJECTS:NUMERIC_SRC>
             )
     set_target_properties(pyariadne-numeric PROPERTIES OUTPUT_NAME "pyariadne_numeric")
-    target_link_libraries(pyariadne-numeric PUBLIC ${MPFR_LIBRARIES} ${GMP_LIBRARIES})
 
     pybind11_add_module(pyariadne-algebra
             $<TARGET_OBJECTS:pyariadne-algebra-module-obj>

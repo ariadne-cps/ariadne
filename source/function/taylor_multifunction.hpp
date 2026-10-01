@@ -35,7 +35,7 @@
 #include "multifunction.hpp"
 
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 #include "../algebra/vector.hpp"
 #include "../algebra/matrix.hpp"
 #include "../algebra/algebra.hpp"

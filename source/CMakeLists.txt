@@ -1,6 +1,4 @@
-add_subdirectory(numeric)
-
-link_libraries(threading foundation)
+link_libraries(threading foundation numeric)
 
 add_subdirectory(algebra)
 add_subdirectory(function)

@@ -44,18 +44,12 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/paradigm|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/configuration"
-    )
-    require_same_dependency_commit(Paradigm
-        REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/paradigm"
-            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/paradigm"
     )
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/paradigm|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/numeric/submodules/paradigm|submodules/utility"
     )
 endif()
 

@@ -15,7 +15,7 @@ if(Python3_FOUND)
 
     add_subdirectory(pybind11)
 
-    link_libraries(threading foundation)
+    link_libraries(threading foundation numeric)
     add_subdirectory(source)
 
     pybind11_add_module(pyariadne

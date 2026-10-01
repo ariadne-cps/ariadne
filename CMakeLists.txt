@@ -45,6 +45,12 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/foundation|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/configuration"
+    )
+    require_same_dependency_commit(Foundation
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/foundation"
+            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/foundation"
     )
     require_same_dependency_commit(Utility
         REFERENCES
@@ -146,10 +152,10 @@ target_include_directories(ariadne PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>
     $<INSTALL_INTERFACE:include/ariadne>
 )
-target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation>)
+target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric>)
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:foundation> $<BUILD_INTERFACE:numeric> PRIVATE dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
@@ -199,12 +205,14 @@ install(FILES
     DESTINATION lib/cmake/Ariadne
 )
 get_target_property(FOUNDATION_SOURCE_DIR foundation SOURCE_DIR)
+get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
 get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
 get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
 get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
 
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY "${FOUNDATION_SOURCE_DIR}/include/foundation" DESTINATION include/ariadne)
+install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
 install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
 install(DIRECTORY "${UTILITY_SOURCE_DIR}/include/utility" DESTINATION include/ariadne)

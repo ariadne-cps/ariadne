@@ -10,3 +10,6 @@
 [submodule "submodules/foundation"]
 	path = submodules/foundation
 	url = https://github.com/ariadne-cps/foundation
+[submodule "submodules/numeric"]
+	path = submodules/numeric
+	url = https://github.com/ariadne-cps/numeric

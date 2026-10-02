@@ -31,7 +31,7 @@
 
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
-#include "geometry/interval.decl.hpp"
+#include "interval/interval.decl.hpp"
 
 namespace Ariadne {
 

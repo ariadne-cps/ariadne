@@ -29,7 +29,7 @@
 #ifndef ARIADNE_UNION_OF_INTERVALS_HPP
 #define ARIADNE_UNION_OF_INTERVALS_HPP
 
-#include "interval.hpp"
+#include "interval/interval.hpp"
 
 namespace Ariadne {
 

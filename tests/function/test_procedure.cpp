@@ -36,7 +36,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "numeric/numeric.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 
 namespace Ariadne {
 

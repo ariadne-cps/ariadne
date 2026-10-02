@@ -16,7 +16,7 @@
 #include "paradigm/paradigm.hpp"
 #include "paradigm/logical.decl.hpp"
 
-#include "geometry/interval.decl.hpp"
+#include "interval/interval.decl.hpp"
 #include "geometry/box.decl.hpp"
 
 namespace Ariadne {

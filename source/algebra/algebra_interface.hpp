@@ -36,7 +36,7 @@
 #include "numeric/numeric.hpp"
 #include "utility/pointer.hpp"
 #include "numeric/operators.hpp"
-#include "geometry/interval.decl.hpp"
+#include "interval/interval.decl.hpp"
 
 namespace Ariadne {
 

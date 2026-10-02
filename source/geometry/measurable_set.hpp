@@ -36,7 +36,7 @@
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/twoexp.hpp"
-#include "interval.hpp"
+#include "interval/interval.hpp"
 
 namespace Ariadne {
 

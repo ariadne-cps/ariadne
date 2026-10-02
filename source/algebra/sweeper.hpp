@@ -31,7 +31,7 @@
 
 #include "utility/macros.hpp"
 #include "numeric/float.decl.hpp"
-#include "geometry/interval.decl.hpp"
+#include "interval/interval.decl.hpp"
 #include "algebra/multi_index.hpp"
 #include "algebra/expansion.hpp"
 

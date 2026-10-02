@@ -78,7 +78,6 @@ namespace Ariadne {
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
 #include "io/cairo.hpp"
-#include "io/gnuplot.hpp"
 #include "io/command_line_interface.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 

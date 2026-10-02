@@ -29,7 +29,6 @@
 #include "io/figure.hpp"
 #include "io/geometry2d.hpp"
 #include "io/cairo.hpp"
-#include "io/gnuplot.hpp"
 #include "io/drawer.hpp"
 #include "io/null_graphics.hpp"
 
@@ -38,8 +37,6 @@ namespace Ariadne {
 GraphicsBackend default_backend() {
     #if defined HAVE_CAIRO_H
         return CairoGraphicsBackend();
-    #elif defined HAVE_GNUPLOT_H
-        return GnuplotGraphicsBackend();
     #else
         return NullGraphicsBackend();
     #endif

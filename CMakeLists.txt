@@ -65,13 +65,8 @@ if(CAIRO_FOUND)
     include_directories(SYSTEM ${CAIRO_INCLUDE_DIRS})
 endif()
 
-find_package(Gnuplot 5.2.8)
-if(GNUPLOT_FOUND)
-    set(HAVE_GNUPLOT_H ON)
-endif()
-
-if(NOT CAIRO_FOUND AND NOT GNUPLOT_FOUND)
-    message(STATUS "No Cairo or Gnuplot backend support found: figures can't be written to file")
+if(NOT CAIRO_FOUND)
+    message(STATUS "No Cairo backend support found: figures can't be written to file")
 endif()
 
 

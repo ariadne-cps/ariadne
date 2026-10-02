@@ -5,6 +5,5 @@
 #cmakedefine ARIADNE_ENABLE_STACK_TRACE
 
 #cmakedefine HAVE_CAIRO_H
-#cmakedefine HAVE_GNUPLOT_H
 
 #endif /* ARIADNE_CONFIG_HPP */

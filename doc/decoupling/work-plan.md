@@ -134,7 +134,7 @@ acyclic at package level and has standalone consumers.
       algorithms.
 - [ ] Move linear/nonlinear programming integrations out of primitive geometry.
 - [ ] Separate graphics interfaces, mathematical drawing adapters, and
-      Cairo/Gnuplot backends.
+      Cairo backend.
 - [ ] Separate generic symbolic templates from conversions between
       `Expression`, `Formula`, functions, and sets.
 - [ ] Re-evaluate component names and package boundaries after these moves.

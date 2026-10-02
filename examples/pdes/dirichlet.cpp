@@ -75,7 +75,7 @@ template<class F> Bounds<F> fourier_norm_square(List<Bounds<F>> const& as) {
     return r;
 }
 
-template<class F> Void gnuplot(String filename, ValidatedScalarTaylorFunctionModel<F> const& tf) {
+template<class F> Void write_plot_data(String filename, ValidatedScalarTaylorFunctionModel<F> const& tf) {
     ARIADNE_ASSERT(tf.argument_size()==1);
     std::ofstream ofs(filename);
     auto pr=tf.properties().precision();
@@ -138,7 +138,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     // Convert f to a polynomial function model
     ValidatedScalarTaylorFunctionModel<F> tf(bxdom, f, swp);
     PRINT(tf);
-    gnuplot("dirichlet-f.dat",tf);
+    write_plot_data("dirichlet-f.dat",tf);
 
     // Set the number of terms to use for the Fourier series
     SizeType n=10;
@@ -205,7 +205,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     PRINTLN
 
     // Plot the solution
-    gnuplot("dirichlet-u.dat",tu);
+    write_plot_data("dirichlet-u.dat",tu);
 
     // Compute the error of the midpoint function
     auto ctu=tu;
@@ -216,7 +216,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     PRINT(norm(te.model()));
     PRINT(te(xv));
 
-    gnuplot("dirichlet-e.dat",te);
+    write_plot_data("dirichlet-e.dat",te);
 
 }
 

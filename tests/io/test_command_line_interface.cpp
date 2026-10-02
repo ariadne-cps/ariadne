@@ -134,8 +134,6 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(success2)
         Bool success3 = CommandLineInterface::instance().acquire({"", "-g", "wrong"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"", "-g", "gnuplot"});
-        ARIADNE_TEST_ASSERT(success4)
         Bool success5 = CommandLineInterface::instance().acquire({"", "-g", "none"});
         ARIADNE_TEST_ASSERT(success5)
         Bool success6 = CommandLineInterface::instance().acquire({"", "-g"});

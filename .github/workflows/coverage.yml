@@ -42,7 +42,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja mpfr cairo gnuplot pkg-config gnupg
+        brew install ninja mpfr cairo pkg-config gnupg
         python3 -m venv "$GITHUB_WORKSPACE/.venv"
         "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
@@ -51,7 +51,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake ninja-build pkg-config lcov g++-13 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt-get install -y cmake ninja-build pkg-config lcov g++-13 libcairo2-dev libmpfr-dev python3-pip python3-dev
         python3 -m venv "$GITHUB_WORKSPACE/.venv"
         "$GITHUB_WORKSPACE/.venv/bin/python" -m pip install --upgrade pip pytest
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"

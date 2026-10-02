@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_gnuplot.cpp
+ *            test_pdes.cpp
  *
  *  Copyright  2008-21  Mirko Albanese
  *

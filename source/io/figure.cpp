@@ -496,7 +496,7 @@ Figure::write(const Char* cfilename) const
 Void
 Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    #if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
+    #if not(defined(HAVE_CAIRO_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
@@ -693,7 +693,7 @@ LabelledFigure::write(const Char* cfilename) const
 Void
 LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    #if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
+    #if not(defined(HAVE_CAIRO_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);

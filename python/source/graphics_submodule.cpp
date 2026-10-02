@@ -30,7 +30,6 @@
 #include "io/graphics_interface.hpp"
 #include "io/graphics_manager.hpp"
 #include "io/drawer.hpp"
-#include "io/gnuplot.hpp"
 #include "io/cairo.hpp"
 #include "io/figure.hpp"
 #include "io/geometry2d.hpp"
@@ -152,12 +151,6 @@ Void export_plot(pybind11::module& module)
 Void export_backend(pybind11::module& module) {
     pybind11::class_<GraphicsBackend> backend_class(module,"GraphicsBackend");
 
-    #ifdef HAVE_GNUPLOT_H
-        pybind11::class_<GnuplotGraphicsBackend> gnuplot_backend_class(module,"GnuplotGraphicsBackend");
-        gnuplot_backend_class.def(pybind11::init<>());
-        pybind11::implicitly_convertible<GnuplotGraphicsBackend,GraphicsBackend>();
-        backend_class.def(pybind11::init<GnuplotGraphicsBackend>());
-    #endif
     #ifdef HAVE_CAIRO_H
         pybind11::class_<CairoGraphicsBackend> cairo_backend_class(module,"CairoGraphicsBackend");
         cairo_backend_class.def(pybind11::init<>());

@@ -182,7 +182,6 @@ algebra,numeric,algebra/vector.hpp,827,numeric/float.decl.hpp,numeric/float.decl
 @root,io,ariadne.hpp,78,io/figure.hpp,io/figure.hpp,True
 @root,io,ariadne.hpp,79,io/graphics_manager.hpp,io/graphics_manager.hpp,True
 @root,io,ariadne.hpp,80,io/cairo.hpp,io/cairo.hpp,True
-@root,io,ariadne.hpp,81,io/gnuplot.hpp,io/gnuplot.hpp,True
 @root,io,ariadne.hpp,82,io/command_line_interface.hpp,io/command_line_interface.hpp,True
 @root,hybrid,ariadne.hpp,83,hybrid/hybrid_graphics.hpp,hybrid/hybrid_graphics.hpp,True
 @root,@root,ariadne_main.hpp,32,ariadne.hpp,ariadne.hpp,True
@@ -1251,7 +1250,6 @@ io,io,io/cairo.cpp,37,io/cairo.hpp,io/cairo.hpp,False
 io,io,io/cairo.hpp,33,io/figure.hpp,io/figure.hpp,True
 io,io,io/command_line_interface.cpp,28,drawer.hpp,io/drawer.hpp,False
 io,io,io/command_line_interface.cpp,29,graphics_manager.hpp,io/graphics_manager.hpp,False
-io,io,io/command_line_interface.cpp,30,gnuplot.hpp,io/gnuplot.hpp,False
 io,io,io/command_line_interface.cpp,31,cairo.hpp,io/cairo.hpp,False
 io,io,io/command_line_interface.cpp,32,null_graphics.hpp,io/null_graphics.hpp,False
 io,io,io/command_line_interface.cpp,34,command_line_interface.hpp,io/command_line_interface.hpp,False
@@ -1284,18 +1282,6 @@ io,symbolic,io/figure.hpp,43,symbolic/variable.hpp,symbolic/variable.hpp,True
 io,io,io/figure.hpp,44,colour.hpp,io/colour.hpp,True
 io,io,io/figure.hpp,45,graphics_base.hpp,io/graphics_base.hpp,True
 io,io,io/figure.hpp,46,graphics_backend_interface.hpp,io/graphics_backend_interface.hpp,True
-io,numeric,io/gnuplot.cpp,30,numeric/numeric.hpp,numeric/numeric.hpp,False
-io,function,io/gnuplot.cpp,31,function/function.hpp,function/function.hpp,False
-io,geometry,io/gnuplot.cpp,32,geometry/point.hpp,geometry/point.hpp,False
-io,geometry,io/gnuplot.cpp,33,geometry/box.hpp,geometry/box.hpp,False
-io,symbolic,io/gnuplot.cpp,34,symbolic/variable.hpp,symbolic/variable.hpp,False
-io,symbolic,io/gnuplot.cpp,35,symbolic/space.hpp,symbolic/space.hpp,False
-io,symbolic,io/gnuplot.cpp,36,symbolic/expression_set.hpp,symbolic/expression_set.hpp,False
-io,io,io/gnuplot.cpp,37,io/geometry2d.hpp,io/geometry2d.hpp,False
-io,io,io/gnuplot.cpp,38,io/figure.hpp,io/figure.hpp,False
-io,io,io/gnuplot.cpp,39,io/gnuplot.hpp,io/gnuplot.hpp,False
-io,io,io/gnuplot.hpp,31,io/figure.hpp,io/figure.hpp,True
-io,io,io/gnuplot.hpp,32,io/gnuplot-iostream.hpp,io/gnuplot-iostream.hpp,True
 io,io,io/graphics_base.hpp,32,graphics_interface.hpp,io/graphics_interface.hpp,True
 io,io,io/graphics_base.hpp,33,geometry2d.hpp,io/geometry2d.hpp,True
 io,numeric,io/graphics_interface.hpp,33,numeric/declarations.hpp,numeric/declarations.hpp,True
@@ -1309,7 +1295,6 @@ io,io,io/graphics_manager.cpp,28,io/graphics_manager.hpp,io/graphics_manager.hpp
 io,io,io/graphics_manager.cpp,29,io/figure.hpp,io/figure.hpp,False
 io,io,io/graphics_manager.cpp,30,io/geometry2d.hpp,io/geometry2d.hpp,False
 io,io,io/graphics_manager.cpp,31,io/cairo.hpp,io/cairo.hpp,False
-io,io,io/graphics_manager.cpp,32,io/gnuplot.hpp,io/gnuplot.hpp,False
 io,io,io/graphics_manager.cpp,33,io/drawer.hpp,io/drawer.hpp,False
 io,io,io/graphics_manager.cpp,34,io/null_graphics.hpp,io/null_graphics.hpp,False
 io,io,io/graphics_manager.hpp,32,graphics_backend_interface.hpp,io/graphics_backend_interface.hpp,True

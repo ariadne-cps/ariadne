@@ -69,7 +69,7 @@ HybridFigure::write(const char* cfilename) const
 Void
 HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    #if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
+    #if not(defined(HAVE_CAIRO_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
         const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;

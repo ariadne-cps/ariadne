@@ -39,7 +39,7 @@
 #include <thread>
 #include <type_traits>
 
-#include "betterthreads/workload.hpp"
+#include "threading/workload.hpp"
 
 #include "function/procedure.hpp"
 #include "solvers/constraint_solver.hpp"
@@ -1565,7 +1565,7 @@ struct ParallelSmtSearchState {
     std::atomic<bool> limit_reached{false};
 };
 
-using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
+using ParallelSmtWorkload = DynamicWorkload<UpperBoxType>;
 
 Bool parallel_stop_condition_impl(
     std::atomic<bool> const& found,

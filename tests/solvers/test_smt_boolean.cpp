@@ -26,7 +26,7 @@
 #include "solvers/smt_boolean.hpp"
 #include "symbolic/variable.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 

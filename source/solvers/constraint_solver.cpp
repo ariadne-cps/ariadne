@@ -115,7 +115,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         candidate_result=optimiser.feasible_candidate(
             domain,function,codomain);
     } catch(const SingularMatrixException&) {
-        CONCLOG_PRINTLN(
+        LOGGING_PRINTLN(
             "Interior-point candidate search encountered a singular system");
         return make_pair(indeterminate,ExactPointType());
     }

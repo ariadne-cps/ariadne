@@ -565,8 +565,8 @@ class SmtSolver {
     SmtResult solve(ExactBoxType const& domain,
                     List<ValidatedConstraint> const& constraints) const;
 
-    //! \brief Solve using BetterThreads dynamic workload processing.
-    //! \details The actual concurrency is controlled by BetterThreads::ThreadManager.
+    //! \brief Solve using dynamic workload processing.
+    //! \details The actual concurrency is controlled by ThreadManager.
     SmtResult solve_parallel(ExactBoxType const& domain,
                              List<ValidatedConstraint> const& constraints) const;
 
@@ -575,7 +575,7 @@ class SmtSolver {
                     ExactBoxType const& domain,
                     List<SmtTheoryPrimitiveLiteral> const& literals) const;
 
-    //! \brief Solve normalized theory primitives using BetterThreads.
+    //! \brief Solve normalized theory primitives using Threading.
     SmtResult solve_parallel(RealSpace const& space,
                              ExactBoxType const& domain,
                              List<SmtTheoryPrimitiveLiteral> const& literals) const;

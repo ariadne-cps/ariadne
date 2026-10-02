@@ -25,21 +25,21 @@
 #include <sstream>
 
 #include "solvers/smt_solver.hpp"
-#include "betterthreads/thread_manager.hpp"
+#include "threading/thread_manager.hpp"
 
-#include "../test.hpp"
+#include "utility/test.hpp"
 
 using namespace Ariadne;
 
 class ConcurrencyGuard {
   public:
-    explicit ConcurrencyGuard(BetterThreads::ThreadManager& thread_manager)
+    explicit ConcurrencyGuard(ThreadManager& thread_manager)
         : _thread_manager(thread_manager), _original(thread_manager.concurrency()) { }
 
     ~ConcurrencyGuard() { _thread_manager.set_concurrency(_original); }
 
   private:
-    BetterThreads::ThreadManager& _thread_manager;
+    ThreadManager& _thread_manager;
     SizeType _original;
 };
 
@@ -2948,7 +2948,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-theory-solve] parallel/sequential agreement for strict primitive" << std::endl;
-            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            auto& thread_manager=ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);
             SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u ? 2u : thread_manager.maximum_concurrency();
             if(parallel_concurrency>0u) {
@@ -3823,7 +3823,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-parallel] fused direct box processing" << std::endl;
-            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            auto& thread_manager=ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);
             SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u
                 ? 2u : thread_manager.maximum_concurrency();
@@ -3857,7 +3857,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-dpll] sequential/parallel theory agreement" << std::endl;
-            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            auto& thread_manager=ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);
             SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u
                 ? 2u : thread_manager.maximum_concurrency();
@@ -4067,10 +4067,10 @@ class TestSmtSolver {
 
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
-        auto& thread_manager=BetterThreads::ThreadManager::instance();
+        auto& thread_manager=ThreadManager::instance();
         ConcurrencyGuard concurrency_guard(thread_manager);
 
-        std::cout << "[smt-parallel] sequential BetterThreads mode concurrency=0" << std::endl;
+        std::cout << "[smt-parallel] sequential Threading mode concurrency=0" << std::endl;
         thread_manager.set_concurrency(0);
         {
             ExactBoxType domain({ExactIntervalType(3,4)});
@@ -4092,7 +4092,7 @@ class TestSmtSolver {
 
         SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u ? 2u : thread_manager.maximum_concurrency();
         if(parallel_concurrency>0u) {
-            std::cout << "[smt-parallel] concurrent BetterThreads mode concurrency="
+            std::cout << "[smt-parallel] concurrent Threading mode concurrency="
                       << parallel_concurrency << std::endl;
             thread_manager.set_concurrency(parallel_concurrency);
 

@@ -335,7 +335,7 @@ class TestConstraintSolver
             ExactBoxType({{-2.0_x,2.0_x},{-2.0_x,2.0_x}}),
             acos(x[0])+x[1],
             ExactIntervalType(0.0_x,0.0_x),
-            ExactBoxType({{1.0_x,1.0_x},{-1.5707963267948966_x,-1.5707963267948966_x}}));
+            ExactBoxType({{1.0_x,1.0_x},{-1.5707963267948966_pr,-1.5707963267948966_pr}}));
     }
 
     Void test_monotone_reduce() {
@@ -838,7 +838,7 @@ class TestConstraintSolver
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             ValidatedVectorMultivariateFunction function({xy[0]+xy[1]});
             ExactBoxType domain({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-            ExactBoxType codomain({{0.19_x,0.21_x}});
+            ExactBoxType codomain({{0.19_pr,0.21_pr}});
             ARIADNE_TEST_ASSERT(not definitely(contractor.check_feasibility(
                 domain,function,codomain,domain.midpoint())));
             auto feasibility_result=contractor.feasible(domain,function,codomain);
@@ -863,9 +863,9 @@ class TestConstraintSolver
                 {0.0_x,1.0_x}
             });
             ExactBoxType codomain({
-                {0.0_x,0.1_x},
-                {0.0_x,0.1_x},
-                {1.8_x,2.0_x}
+                {0.0_x,0.1_pr},
+                {0.0_x,0.1_pr},
+                {1.8_pr,2.0_x}
             });
             UpperBoxType direct_image=Ariadne::apply(function,domain);
             for(SizeType i=0u; i!=codomain.size(); ++i) {
@@ -883,7 +883,7 @@ class TestConstraintSolver
                 validated_x[0]*(1-validated_x[0])
             });
             ExactBoxType domain({{0.0_x,1.0_x}});
-            ExactBoxType codomain({{0.32_x,0.32_x}});
+            ExactBoxType codomain({{0.32_pr,0.32_pr}});
             UpperBoxType direct_image=Ariadne::apply(function,domain);
             ARIADNE_TEST_ASSERT(
                 possibly(intersect(direct_image[0],codomain[0])));
@@ -903,7 +903,7 @@ class TestConstraintSolver
                 {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
                 {0.0_x,1.0_x}
             });
-            ExactBoxType codomain({{1.175_x,1.425_x}});
+            ExactBoxType codomain({{1.175_pr,1.425_pr}});
             auto feasibility_result=contractor.feasible(domain,function,codomain);
             ARIADNE_TEST_ASSERT(possibly(feasibility_result.first));
             if(definitely(feasibility_result.first)) {

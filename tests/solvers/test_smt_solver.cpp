@@ -699,7 +699,7 @@ class TestSmtSolver {
         });
 
         SmtSolver without_derivative_users(SmtSolverConfiguration(
-            0.01_x,
+            0.01_pr,
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
@@ -712,7 +712,7 @@ class TestSmtSolver {
             0u);
 
         SmtSolver with_monotone(SmtSolverConfiguration(
-            0.01_x,
+            0.01_pr,
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
@@ -725,7 +725,7 @@ class TestSmtSolver {
             space.dimension());
 
         SmtSolver with_sensitivity(SmtSolverConfiguration(
-            0.01_x,
+            0.01_pr,
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
@@ -1487,7 +1487,7 @@ class TestSmtSolver {
             RealVariable sy("adaptive_preclass_y");
             RealSpace adaptive_space({sx,sy});
             SmtSolver adaptive_solver(SmtSolverConfiguration(
-                0.00001_x,
+                0.00001_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 24u,
@@ -1504,7 +1504,7 @@ class TestSmtSolver {
                 true));
             List<SmtTheoryPrimitiveLiteral> literals({
                 SmtTheoryPrimitiveLiteral(
-                    sin(1000*ex)-0.3_x,SmtTheoryPrimitiveRelation::EQ_ZERO)
+                    sin(1000*ex)-0.3_pr,SmtTheoryPrimitiveRelation::EQ_ZERO)
             });
             SmtResult solve_result=adaptive_solver.solve(
                 adaptive_space,
@@ -1637,7 +1637,7 @@ class TestSmtSolver {
             std::cout << "[smt-solve] classify non-splittable DP resolution exhaustion" << std::endl;
             auto tiny_x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -1986,7 +1986,7 @@ class TestSmtSolver {
             auto inactive_alternatives=normalize_smt_theory_literal(
                 make_smt_theory_literal(eay>=-1000));
             auto active_alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sin(10*eax)==0.3_x));
+                make_smt_theory_literal(sin(10*eax)==0.3_pr));
             ARIADNE_TEST_EQUAL(inactive_alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(inactive_alternatives[0].size(),1u);
             ARIADNE_TEST_EQUAL(active_alternatives.size(),1u);
@@ -1997,7 +1997,7 @@ class TestSmtSolver {
             literals.append(active_alternatives[0][0]);
 
             SmtSolver active_split_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
@@ -2039,7 +2039,7 @@ class TestSmtSolver {
             std::cout << "[smt-solve] split ignores wider inactive coordinate" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             SmtSolver bounded_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
@@ -2050,9 +2050,9 @@ class TestSmtSolver {
             });
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(
-                    ValidatedNumber(0.3_x),
+                    ValidatedNumber(0.3_pr),
                     sin(10*xy[0]),
-                    ValidatedNumber(0.3_x))
+                    ValidatedNumber(0.3_pr))
             });
             SmtResult solve_result=bounded_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
@@ -2070,7 +2070,7 @@ class TestSmtSolver {
             std::cout << "[smt-solve] epsilon-active split ignores already certified wide constraint" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             SmtSolver active_split_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
@@ -2085,9 +2085,9 @@ class TestSmtSolver {
                     xy[1],
                     ValidatedNumber(100.0_x)),
                 ValidatedConstraint(
-                    ValidatedNumber(0.3_x),
+                    ValidatedNumber(0.3_pr),
                     sin(10*xy[0]),
-                    ValidatedNumber(0.3_x))
+                    ValidatedNumber(0.3_pr))
             });
             SmtResult solve_result=active_split_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
@@ -2103,7 +2103,7 @@ class TestSmtSolver {
             std::cout << "[smt-solve] sensitivity-guided split is exercised" << std::endl;
             auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
             SmtSolver split_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
@@ -2114,9 +2114,9 @@ class TestSmtSolver {
             });
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(
-                    ValidatedNumber(0.3_x),
-                    sin(10*xy[0])+0.000001_x*xy[1],
-                    ValidatedNumber(0.3_x))
+                    ValidatedNumber(0.3_pr),
+                    sin(10*xy[0])+0.000001_pr*xy[1],
+                    ValidatedNumber(0.3_pr))
             });
             SmtResult solve_result=split_solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unknown());
@@ -2140,7 +2140,7 @@ class TestSmtSolver {
                 ExactIntervalType(0,1)
             });
             List<ValidatedConstraint> constraints({
-                ValidatedConstraint(ValidatedNumber(1.3_x),sum,ValidatedNumber(1.3_x))
+                ValidatedConstraint(ValidatedNumber(1.3_pr),sum,ValidatedNumber(1.3_pr))
             });
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
@@ -2187,7 +2187,7 @@ class TestSmtSolver {
             std::cout << "[smt-solve] non-splittable uncertified singleton returns precision UNKNOWN" << std::endl;
             auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -2213,7 +2213,7 @@ class TestSmtSolver {
         {
             std::cout << "[smt-solve] terminal box skips interior-point candidate search" << std::endl;
             auto sx=ValidatedScalarMultivariateFunction::coordinates(1);
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_pr));
             ValidatedScalarMultivariateFunction residual=
                 sqr(sin(sx[0]))+sqr(cos(sx[0]))-1;
             List<ValidatedConstraint> constraints({
@@ -2373,7 +2373,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-theory-solve] DP terminal precision limit returns precision UNKNOWN" << std::endl;
-            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_x));
+            SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(1e-30_pr));
             RealExpression residual=sqr(sin(ex))+sqr(cos(ex))-1;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(residual==0)});
             SmtResult solve_result=tiny_epsilon_solver.solve(
@@ -2398,7 +2398,7 @@ class TestSmtSolver {
         {
             std::cout << "[smt-theory-solve] shaving proves dependency-hidden strict UNSAT" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({
-                primitive(ex*(1-ex)>0.32_x)
+                primitive(ex*(1-ex)>0.32_pr)
             });
             SmtResult solve_result=solver.solve(
                 space,ExactBoxType({ExactIntervalType(0,1)}),literals);
@@ -2485,7 +2485,7 @@ class TestSmtSolver {
             RealExpression singleton_ex=singleton_x;
             RealSpace singleton_space({singleton_x});
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -2865,13 +2865,13 @@ class TestSmtSolver {
             RealVariable y("y");
             RealSpace xy_space({x,y});
             SmtSolver bounded_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
                 false));
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sin(10*ex)==0.3_x));
+                make_smt_theory_literal(sin(10*ex)==0.3_pr));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
@@ -2894,13 +2894,13 @@ class TestSmtSolver {
             RealExpression ey=y;
             RealSpace xy_space({x,y});
             SmtSolver split_solver(SmtSolverConfiguration(
-                0.01_x,
+                0.01_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
                 false));
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sin(10*ex)+0.000001_x*ey==0.3_x));
+                make_smt_theory_literal(sin(10*ex)+0.000001_pr*ey==0.3_pr));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
@@ -2926,7 +2926,7 @@ class TestSmtSolver {
                 +RealExpression(x3)+RealExpression(x4)+RealExpression(x5)
                 +RealExpression(x6);
             auto alternatives=normalize_smt_theory_literal(
-                make_smt_theory_literal(sum==1.3_x));
+                make_smt_theory_literal(sum==1.3_pr));
             ARIADNE_TEST_EQUAL(alternatives.size(),1u);
             ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
             List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});
@@ -2967,7 +2967,7 @@ class TestSmtSolver {
     Void test_interval_newton_adaptive_retry() {
         auto make_solver=[](SizeType box_limit) {
             return SmtSolver(SmtSolverConfiguration(
-                1e-5_x,
+                1e-5_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 box_limit,
@@ -2991,22 +2991,22 @@ class TestSmtSolver {
             RealSpace space({x0,x1,x2});
             List<SmtTheoryPrimitiveLiteral> literals({
                 SmtTheoryPrimitiveLiteral(
-                    e0*e1-0.12_x,
+                    e0*e1-0.12_pr,
                     SmtTheoryPrimitiveRelation::EQ_ZERO),
                 SmtTheoryPrimitiveLiteral(
-                    e1*e2-0.15_x,
+                    e1*e2-0.15_pr,
                     SmtTheoryPrimitiveRelation::EQ_ZERO),
                 SmtTheoryPrimitiveLiteral(
-                    e0+e1+e2-1.2_x,
+                    e0+e1+e2-1.2_pr,
                     SmtTheoryPrimitiveRelation::EQ_ZERO)
             });
 
             SmtResult solve_result=make_solver(16384u).solve(
                 space,
                 ExactBoxType({
-                    ExactIntervalType(0.25_x,0.55_x),
-                    ExactIntervalType(0.2_x,0.4_x),
-                    ExactIntervalType(0.4_x,0.6_x)
+                    ExactIntervalType(0.25_x,0.55_pr),
+                    ExactIntervalType(0.2_pr,0.4_pr),
+                    ExactIntervalType(0.4_pr,0.6_pr)
                 }),
                 literals);
 
@@ -3031,18 +3031,18 @@ class TestSmtSolver {
             RealSpace space({x0,x1});
             List<SmtTheoryPrimitiveLiteral> literals({
                 SmtTheoryPrimitiveLiteral(
-                    e0*e1-0.12_x,
+                    e0*e1-0.12_pr,
                     SmtTheoryPrimitiveRelation::EQ_ZERO),
                 SmtTheoryPrimitiveLiteral(
-                    e0+e1-0.7_x,
+                    e0+e1-0.7_pr,
                     SmtTheoryPrimitiveRelation::EQ_ZERO)
             });
 
             SmtResult solve_result=make_solver(4096u).solve(
                 space,
                 ExactBoxType({
-                    ExactIntervalType(0.36_x,0.8_x),
-                    ExactIntervalType(0.15_x,0.34_x)
+                    ExactIntervalType(0.36_pr,0.8_pr),
+                    ExactIntervalType(0.15_pr,0.34_pr)
                 }),
                 literals);
 
@@ -3119,7 +3119,7 @@ class TestSmtSolver {
             RealExpression ey=y;
             RealSpace newton_space({x,y});
             SmtSolver newton_solver(SmtSolverConfiguration(
-                1e-5_x,
+                1e-5_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 1u,
@@ -3626,7 +3626,7 @@ class TestSmtSolver {
         {
             std::cout << "[smt-dpll] DP resolution UNKNOWN propagates through Boolean theory search" << std::endl;
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -3951,7 +3951,7 @@ class TestSmtSolver {
             std::cout << "[smt-parallel] non-splittable DP resolution exhaustion counted once" << std::endl;
             auto x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -3984,7 +3984,7 @@ class TestSmtSolver {
             RealExpression ex=x;
             RealSpace space({x});
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
-                1e-30_x,
+                1e-30_pr,
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
                 std::numeric_limits<SizeType>::max(),
@@ -4118,7 +4118,7 @@ class TestSmtSolver {
                 std::cout << "[smt-parallel] concurrent split with one-box budget" << std::endl;
                 auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
                 SmtSolver split_solver(SmtSolverConfiguration(
-                    0.01_x,
+                    0.01_pr,
                     std::numeric_limits<SizeType>::max(),
                     std::numeric_limits<SizeType>::max(),
                     1u,
@@ -4129,9 +4129,9 @@ class TestSmtSolver {
                 });
                 List<ValidatedConstraint> constraints({
                     ValidatedConstraint(
-                        ValidatedNumber(0.3_x),
+                        ValidatedNumber(0.3_pr),
                         sin(10*xy[0]),
-                        ValidatedNumber(0.3_x))
+                        ValidatedNumber(0.3_pr))
                 });
                 SmtResult solve_result=split_solver.solve_parallel(domain,constraints);
                 ARIADNE_TEST_ASSERT(solve_result.is_unknown());
@@ -4150,13 +4150,13 @@ class TestSmtSolver {
                 RealExpression etx=tx;
                 RealSpace theory_space({tx,ty});
                 SmtSolver split_solver(SmtSolverConfiguration(
-                    0.01_x,
+                    0.01_pr,
                     std::numeric_limits<SizeType>::max(),
                     std::numeric_limits<SizeType>::max(),
                     1u,
                     false));
                 auto alternatives=normalize_smt_theory_literal(
-                    make_smt_theory_literal(sin(10*etx)==0.3_x));
+                    make_smt_theory_literal(sin(10*etx)==0.3_pr));
                 ARIADNE_TEST_EQUAL(alternatives.size(),1u);
                 ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
                 List<SmtTheoryPrimitiveLiteral> literals({alternatives[0][0]});

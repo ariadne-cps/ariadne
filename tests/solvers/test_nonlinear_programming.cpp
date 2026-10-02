@@ -224,7 +224,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         auto x=ValidatedScalarMultivariateFunction::coordinates(2);
         ValidatedVectorMultivariateFunction g({x[0]+x[1]});
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{0.19_x,0.21_x}});
+        ExactBoxType C({{0.19_pr,0.21_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -237,7 +237,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         auto x=ValidatedScalarMultivariateFunction::coordinates(2);
         ValidatedVectorMultivariateFunction g({sqr(x[0])+x[1]});
         ExactBoxType D({{0.0_x,2.0_x},{0.0_x,2.0_x}});
-        ExactBoxType C({{0.49_x,0.51_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -283,7 +283,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
             {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
             {0.0_x,1.0_x}
         });
-        ExactBoxType C({{1.175_x,1.425_x}});
+        ExactBoxType C({{1.175_pr,1.425_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -297,7 +297,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         auto x=ValidatedScalarMultivariateFunction::coordinates(2);
         ValidatedVectorMultivariateFunction g({x[0]+x[1]});
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{0.199999_x,0.200001_x}});
+        ExactBoxType C({{0.199999_pr,0.200001_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -311,8 +311,8 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
     Void test_candidate_anisotropic_domain() {
         auto x=ValidatedScalarMultivariateFunction::coordinates(2);
         ValidatedVectorMultivariateFunction g({1000*x[0]+x[1]});
-        ExactBoxType D({{0.0_x,0.001_x},{0.0_x,1000.0_x}});
-        ExactBoxType C({{0.49_x,0.51_x}});
+        ExactBoxType D({{0.0_x,0.001_pr},{0.0_x,1000.0_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -331,7 +331,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
             x[0]-x[1]
         });
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{1.19_x,1.21_x},{-0.01_x,0.01_x}});
+        ExactBoxType C({{1.19_pr,1.21_pr},{-0.01_pr,0.01_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -352,7 +352,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
             {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
             {0.0_x,1.0_x}
         });
-        ExactBoxType C({{1.29_x,1.31_x}});
+        ExactBoxType C({{1.29_pr,1.31_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -367,7 +367,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         auto x=ValidatedScalarMultivariateFunction::coordinates(2);
         ValidatedVectorMultivariateFunction g({x[0]+x[1]});
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{0.0_x,0.01_x}});
+        ExactBoxType C({{0.0_x,0.01_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -385,7 +385,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
             2*x[0]+2*x[1]
         });
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{0.49_x,0.51_x},{0.98_x,1.02_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr},{0.98_pr,1.02_pr}});
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
         ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
@@ -405,9 +405,9 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
         });
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
         ExactBoxType C({
-            {0.99_x,1.01_x},
-            {-0.01_x,0.01_x},
-            {1.49_x,1.51_x}
+            {0.99_pr,1.01_pr},
+            {-0.01_pr,0.01_pr},
+            {1.49_pr,1.51_pr}
         });
 
         auto candidate_result=optimiser.feasible_candidate(D,g,C);
@@ -426,7 +426,7 @@ class TestNonlinearInfeasibleInteriorPointOptimiser
             x[0]-x[1]
         });
         ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x}});
-        ExactBoxType C({{0.99_x,1.01_x},{-0.01_x,0.01_x}});
+        ExactBoxType C({{0.99_pr,1.01_pr},{-0.01_pr,0.01_pr}});
 
         auto first=optimiser.feasible_candidate(D,g,C);
         auto second=optimiser.feasible_candidate(D,g,C);

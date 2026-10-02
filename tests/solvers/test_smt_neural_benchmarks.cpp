@@ -41,7 +41,7 @@ class TestSmtNeuralBenchmarks {
         UpperIntervalType origin_image=apply(barrier_function,origin);
         ARIADNE_TEST_ASSERT(definitely(subset(
             origin_image,
-            ExactIntervalType(3.809_x,3.810_x))));
+            ExactIntervalType(3.809_pr,3.810_pr))));
 
         auto alternatives=normalize_smt_theory_literal(
             make_smt_theory_literal(barrier==0));
@@ -54,7 +54,7 @@ class TestSmtNeuralBenchmarks {
             ExactIntervalType(-2.0_x,1.0_x)
         });
         SmtSolver solver(SmtSolverConfiguration(
-            0.01_x,
+            0.01_pr,
             std::numeric_limits<SizeType>::max(),
             std::numeric_limits<SizeType>::max(),
             1u,

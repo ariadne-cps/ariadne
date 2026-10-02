@@ -25,7 +25,7 @@
 #include "dynamics/differential_inclusion_evolver.hpp"
 #include "dynamics/orbit.hpp"
 #include "algebra/sweeper.hpp"
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 #include "geometry/box.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"

@@ -19,8 +19,8 @@
 #include "function/taylor_function.hpp"
 #include "function/affine_model.hpp"
 #include "symbolic/expression.hpp"
-#include "solvers/linear_programming.hpp"
-#include "solvers/smt_solver.hpp"
+#include "solving/linear_programming.hpp"
+#include "solving/smt_solver.hpp"
 
 #include "smt_barr3_full64.hpp"
 

@@ -35,9 +35,9 @@
 #include "function/function.hpp"
 #include "function/constraint.hpp"
 #include "function/procedure.hpp"
-#include "solvers/linear_programming.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "solving/linear_programming.hpp"
+#include "solving/nonlinear_programming.hpp"
+#include "solving/constraint_solver.hpp"
 
 using namespace Ariadne;
 

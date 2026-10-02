@@ -33,7 +33,7 @@
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
-#include "solvers/configuration_interface.hpp"
+#include "solving/configuration_interface.hpp"
 #include "dynamics/vector_field.hpp"
 #include "dynamics/orbit.hpp"
 

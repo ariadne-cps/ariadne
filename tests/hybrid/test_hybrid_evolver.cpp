@@ -33,7 +33,7 @@
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "geometry/affine_set.hpp"
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "io/graphics_interface.hpp"
 #include "io/figure.hpp"

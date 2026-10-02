@@ -28,7 +28,7 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
-#include "solvers/linear_programming.hpp"
+#include "solving/linear_programming.hpp"
 #include "function/function.hpp"
 #include "function/affine.hpp"
 #include "function/affine_model.hpp"

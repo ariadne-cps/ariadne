@@ -35,7 +35,7 @@
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 #include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field_simulator.hpp"
 #include "io/figure.hpp"

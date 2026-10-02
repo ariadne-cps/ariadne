@@ -1,0 +1,459 @@
+/***************************************************************************
+ *            test_nonlinear_programming.cpp
+ *
+ *  Copyright  2010-20  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Ariadne is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <iostream>
+#include <fstream>
+
+#include "config.hpp"
+
+#include "utility/test.hpp"
+
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
+#include "solving/nonlinear_programming.hpp"
+#include "geometry/box.hpp"
+#include "io/command_line_interface.hpp"
+
+using namespace std;
+using namespace Ariadne;
+
+class TestOptimiser
+{
+  private:
+    std::unique_ptr<OptimiserInterface> optimiser;
+    DoublePrecision pr;
+  public:
+    TestOptimiser(const OptimiserInterface& opt)
+        : optimiser(opt.clone()) { }
+
+    Void test() {
+        ARIADNE_TEST_CALL(test_feasibility_check());
+        ARIADNE_TEST_CALL(test_unconstrained_optimisation());
+        ARIADNE_TEST_CALL(test_constrained_optimisation());
+        ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
+        ARIADNE_TEST_CALL(test_linear_feasibility());
+        ARIADNE_TEST_CALL(test_nonlinear_feasibility());
+        ARIADNE_TEST_CALL(test_nonlinear_equality_feasibility());
+    }
+
+    Void test_unconstrained_optimisation() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveScalarMultivariateFunction x0s = sqr(x[0]);
+        EffectiveScalarMultivariateFunction f(x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0]));
+        ARIADNE_TEST_PRINT(f);
+        EffectiveVectorMultivariateFunction g(0u,2u);
+        ARIADNE_TEST_PRINT(g);
+        ExactBoxType D=ExactBoxType{{-1,2},{-3,5}};
+        ExactBoxType C=ExactBoxType{};
+        ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
+
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
+        //ExactDouble required_accuracy=1e-8_pr;
+        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
+    }
+
+    Void test_equality_constrained_optimisation() {
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveScalarMultivariateFunction f=(sqr(x[0])+sqr(x[1]));
+        ARIADNE_TEST_PRINT(f);
+        Real a(1.5_x); Real b(0.25_x);
+        EffectiveVectorMultivariateFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
+        ARIADNE_TEST_PRINT(g);
+        ExactBoxType C={{0.0_x,0.0_x}};
+        ExactBoxType D=ExactBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x}};
+        ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
+
+        ExactDouble required_accuracy=1e-7_pr;
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
+    }
+
+    Void test_constrained_optimisation() {
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        EffectiveScalarMultivariateFunction x0s = sqr(x[0]);
+        EffectiveScalarMultivariateFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
+        ARIADNE_TEST_PRINT(f);
+        //EffectiveVectorMultivariateFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
+        ExactBoxType D = ExactBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{-3.0_x,5.0_x}};
+        ARIADNE_TEST_PRINT(D);
+        EffectiveVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875_x)};
+        ARIADNE_TEST_PRINT(g);
+        ExactBoxType C = ExactBoxType{{0.0_x,inf},{0.0_x,inf}};
+        ARIADNE_TEST_PRINT(C);
+
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
+        //ExactDouble required_accuracy=1e-6_pr;
+        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
+    }
+
+    Void test_mixed_constrained_optimisation() {
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        EffectiveScalarMultivariateFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
+        ARIADNE_TEST_PRINT(f);
+        ExactBoxType D = ExactBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{1.25_x,2.25_x}};
+        ARIADNE_TEST_PRINT(D);
+        EffectiveScalarMultivariateFunction g = x[0]*x[1]-x[0]*Real(1.25_x);
+        EffectiveVectorMultivariateFunction h = {Real(1.5_x)+x[0]+2*x[1]+Real(0.25_x)*x[0]*x[1]};
+        EffectiveVectorMultivariateFunction gh=join(g,h);
+        ARIADNE_TEST_PRINT(gh);
+        ExactBoxType C = ExactBoxType {{-1.0_x,-0.5_x},{0.0_x,0.0_x}};
+        ARIADNE_TEST_PRINT(C);
+
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
+        ExactDouble required_accuracy=1e-8_pr;
+        ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
+    }
+
+    Void test_linear_feasibility() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction g=EffectiveVectorMultivariateFunction(1u, 2*x[0]+x[1]);
+        ARIADNE_TEST_PRINT(g);
+        ExactBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
+        ExactBoxType C = ExactBoxType{{-2.0_x,1.0_x}};
+
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        C=ExactBoxType{{1.0_x,1.5_x}};
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        D=ExactBoxType{{1.0_x,1.5_x},{0.5_x,1.0_x}};
+        ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
+    }
+
+    Void test_nonlinear_feasibility() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
+        ARIADNE_TEST_PRINT(g);
+        ExactBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
+        ExactBoxType C = ExactBoxType{{-2.0_x,1.0_x}};
+
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        C=ExactBoxType{{1.0_x,1.5_x}};
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
+        D=ExactBoxType{{1.0_x,1.5_x},{0.5_x,1.0_x}};
+        ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
+    }
+
+    Void test_nonlinear_equality_feasibility() {
+        // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
+        ARIADNE_TEST_PRINT(h);
+        ExactBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
+        ExactBoxType C = ExactBoxType{{0.0_x,0.0_x}};
+
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
+    }
+
+    Void test_feasibility_check() {
+        EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
+        ARIADNE_TEST_CONSTRUCT( EffectiveVectorMultivariateFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, D, ({{-1.0_x, 1.0_x},{-1.0_x,1.0_x}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, C, ({{0.0_x,0.0_x}}) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X1, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},pr) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
+
+        // The following test fails since it is difficult to find the feasible
+        // point in the box.
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X2, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}},pr) );
+        ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X3, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}},pr) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
+
+        ARIADNE_TEST_CONSTRUCT(FloatDPVector, x2, ({0.343750_x,0.656250_x},pr) );
+        ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
+    }
+
+};
+
+class TestNonlinearInfeasibleInteriorPointOptimiser
+{
+  private:
+    NonlinearInfeasibleInteriorPointOptimiser optimiser;
+  public:
+    Void test() {
+        ARIADNE_TEST_CALL(test_candidate_linear());
+        ARIADNE_TEST_CALL(test_candidate_nonlinear());
+        ARIADNE_TEST_CALL(test_candidate_equality());
+        ARIADNE_TEST_CALL(test_candidate_infeasible());
+        ARIADNE_TEST_CALL(test_candidate_seven_dimensional());
+        ARIADNE_TEST_CALL(test_candidate_narrow_codomain());
+        ARIADNE_TEST_CALL(test_candidate_anisotropic_domain());
+        ARIADNE_TEST_CALL(test_candidate_multiple_constraints());
+        ARIADNE_TEST_CALL(test_candidate_nonlinear_seven_dimensional());
+        ARIADNE_TEST_CALL(test_candidate_boundary());
+        ARIADNE_TEST_CALL(test_candidate_rank_deficient());
+        ARIADNE_TEST_CALL(test_candidate_overdetermined());
+        ARIADNE_TEST_CALL(test_candidate_deterministic());
+    }
+
+    Void test_candidate_linear() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.19_pr,0.21_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(candidate_result.first));
+        ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+            D,g,C,cast_exact(candidate_result.second)));
+    }
+
+    Void test_candidate_nonlinear() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({sqr(x[0])+x[1]});
+        ExactBoxType D({{0.0_x,2.0_x},{0.0_x,2.0_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_equality() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({2*x[0]-x[1]+x[0]*x[1]/8});
+        ExactBoxType D({{0.0_x,2.0_x},{0.0_x,2.0_x}});
+        ExactBoxType C({{0.0_x,0.0_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(candidate_result.first));
+        ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+            D,g,C,cast_exact(candidate_result.second)));
+    }
+
+    Void test_candidate_infeasible() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{3.0_x,4.0_x}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(definitely(not candidate_result.first));
+    }
+
+    Void test_candidate_seven_dimensional() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(7);
+        ValidatedScalarMultivariateFunction sum=x[0];
+        for(SizeType i=1u; i!=7u; ++i) {
+            sum=sum+x[i];
+        }
+        ValidatedVectorMultivariateFunction g({sum});
+        ExactBoxType D({
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x}
+        });
+        ExactBoxType C({{1.175_pr,1.425_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+    Void test_candidate_narrow_codomain() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.199999_pr,0.200001_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_anisotropic_domain() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({1000*x[0]+x[1]});
+        ExactBoxType D({{0.0_x,0.001_pr},{0.0_x,1000.0_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        ARIADNE_TEST_ASSERT(not definitely(not candidate_result.first));
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_multiple_constraints() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(3);
+        ValidatedVectorMultivariateFunction g({
+            x[0]+x[1]+x[2],
+            x[0]-x[1]
+        });
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{1.19_pr,1.21_pr},{-0.01_pr,0.01_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_nonlinear_seven_dimensional() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(7);
+        ValidatedScalarMultivariateFunction expression=
+            sqr(x[0])+x[1]+x[2]+x[3]+x[4]+x[5]+x[6];
+        ValidatedVectorMultivariateFunction g({expression});
+        ExactBoxType D({
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x},
+            {0.0_x,1.0_x}
+        });
+        ExactBoxType C({{1.29_pr,1.31_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_boundary() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({x[0]+x[1]});
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.0_x,0.01_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_rank_deficient() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({
+            x[0]+x[1],
+            2*x[0]+2*x[1]
+        });
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.49_pr,0.51_pr},{0.98_pr,1.02_pr}});
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_overdetermined() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(2);
+        ValidatedVectorMultivariateFunction g({
+            x[0]+x[1],
+            x[0]-x[1],
+            x[0]+2*x[1]
+        });
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({
+            {0.99_pr,1.01_pr},
+            {-0.01_pr,0.01_pr},
+            {1.49_pr,1.51_pr}
+        });
+
+        auto candidate_result=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(contains(D,cast_exact(candidate_result.second)));
+        ARIADNE_TEST_ASSERT(candidate_result.second.size()==D.dimension());
+        if(definitely(candidate_result.first)) {
+            ARIADNE_TEST_ASSERT(optimiser.validate_feasibility(
+                D,g,C,cast_exact(candidate_result.second)));
+        }
+    }
+
+    Void test_candidate_deterministic() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(3);
+        ValidatedVectorMultivariateFunction g({
+            sqr(x[0])+x[1]+x[2],
+            x[0]-x[1]
+        });
+        ExactBoxType D({{0.0_x,1.0_x},{0.0_x,1.0_x},{0.0_x,1.0_x}});
+        ExactBoxType C({{0.99_pr,1.01_pr},{-0.01_pr,0.01_pr}});
+
+        auto first=optimiser.feasible_candidate(D,g,C);
+        auto second=optimiser.feasible_candidate(D,g,C);
+        ARIADNE_TEST_ASSERT(first.first==second.first);
+        ARIADNE_TEST_EQUAL(first.second.size(),second.second.size());
+        for(SizeType i=0u; i!=first.second.size(); ++i) {
+            ARIADNE_TEST_EQUAL(first.second[i].raw(),second.second[i].raw());
+        }
+    }
+
+};
+
+Int main(Int argc, const char* argv[]) {
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+
+    NonlinearInfeasibleInteriorPointOptimiser nlio;
+    TestOptimiser(nlio).test();
+    TestNonlinearInfeasibleInteriorPointOptimiser().test();
+    return ARIADNE_TEST_FAILURES;
+    NonlinearInteriorPointOptimiser nlo;
+    TestOptimiser(nlo).test();
+
+    ApproximateOptimiser appo;
+    TestOptimiser(appo).test_nonlinear_equality_feasibility();
+
+    IntervalOptimiser ivlo;
+    TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
+    return ARIADNE_TEST_FAILURES;
+}
+

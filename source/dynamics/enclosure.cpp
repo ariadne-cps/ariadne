@@ -58,8 +58,8 @@
 #include "geometry/paver.hpp"
 #include "geometry/grid_paving.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/nonlinear_programming.hpp"
+#include "solving/constraint_solver.hpp"
+#include "solving/nonlinear_programming.hpp"
 
 #include "io/graphics_interface.hpp"
 #include "io/drawer.hpp"

@@ -43,9 +43,9 @@
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"
 
-#include "solvers/linear_programming.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "solving/linear_programming.hpp"
+#include "solving/nonlinear_programming.hpp"
+#include "solving/constraint_solver.hpp"
 #include "geometry/affine_set.hpp"
 
 #include "io/figure.hpp"

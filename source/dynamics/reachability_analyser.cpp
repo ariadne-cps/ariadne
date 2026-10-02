@@ -46,8 +46,8 @@
 #include "geometry/list_set.hpp"
 #include "geometry/grid_paving.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
+#include "solving/integrator.hpp"
+#include "solving/solver.hpp"
 #include "geometry/function_set.hpp"
 
 #include "dynamics/vector_field.hpp"
@@ -59,7 +59,7 @@
 
 #include "logging/logging.hpp"
 #include "io/figure.hpp"
-#include "solvers/linear_programming.hpp"
+#include "solving/linear_programming.hpp"
 
 #include "dynamics/reachability_analyser.tpl.hpp"
 

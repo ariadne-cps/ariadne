@@ -51,7 +51,7 @@
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/function_expression.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "solving/constraint_solver.hpp"
 
 #include "function/function_mixin.tpl.hpp"
 

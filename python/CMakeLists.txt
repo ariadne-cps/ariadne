@@ -13,8 +13,8 @@ if(Python3_FOUND)
     message(STATUS "Python includes:   ${Python3_INCLUDE_DIRS}")
     message(STATUS "Python SOABI:      ${Python3_SOABI}")
 
-    if(NOT TARGET pyariadne-numeric)
-        message(FATAL_ERROR "The Numeric Python binding target is required to build pyariadne.")
+    if(NOT TARGET pyariadne-interval)
+        message(FATAL_ERROR "The Interval Python binding target is required to build pyariadne.")
     endif()
 
     if(NOT TARGET pybind11::module)
@@ -34,7 +34,7 @@ if(Python3_FOUND)
     )
     target_link_libraries(pyariadne PRIVATE
         ariadne
-        pyariadne-numeric
+        pyariadne-interval
     )
     add_dependencies(bindings pyariadne)
 

@@ -26,6 +26,7 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 #include "numeric_submodule.hpp"
+#include "interval-utilities.hpp"
 
 #include "config.hpp"
 
@@ -33,7 +34,6 @@
 #include "io/geometry2d.hpp"
 #include "geometry/point.hpp"
 #include "geometry/curve.hpp"
-#include "interval/interval.hpp"
 #include "geometry/box.hpp"
 #include "geometry/grid_paving.hpp"
 #include "geometry/function_set.hpp"
@@ -45,24 +45,12 @@ namespace Ariadne {
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
 
 template<> struct PythonTemplateName<Point> { static std::string get() { return "Point"; } };
-template<> struct PythonTemplateName<Interval> { static std::string get() { return "Interval"; } };
 template<> struct PythonTemplateName<Box> { static std::string get() { return "Box"; } };
 
 template<class X> struct PythonClassName<Point<X>> {
     std::string get() const { return python_template_class_name<X>("Point"); } };
-template<class X> struct PythonClassName<Interval<X>> {
-    std::string get() const { return python_template_class_name<X>("Interval"); } };
 template<class X> struct PythonClassName<Box<X>> {
     std::string get() const { return python_template_class_name<X>("Box"); } };
-
-template<> struct PythonClassName<Interval<FloatDP>> {
-    std::string get() const { return "FloatDPExactInterval"; } };
-template<> struct PythonClassName<Interval<FloatDPUpperBound>> {
-    std::string get() const { return "FloatDPUpperInterval"; } };
-template<> struct PythonClassName<Interval<FloatDPLowerBound>> {
-    std::string get() const { return "FloatDPLowerInterval"; } };
-template<> struct PythonClassName<Interval<FloatDPApproximation>> {
-    std::string get() const { return "FloatDPApproximateInterval"; } };
 
 template<class UB> struct PythonClassName<Box<Interval<UB>>> {
     std::string get() const { return python_class_name<UB>()+"Box"; } };
@@ -75,17 +63,6 @@ template<> struct PythonClassName<Box<Interval<FloatDPLowerBound>>> {
 template<> struct PythonClassName<Box<Interval<FloatDPApproximation>>> {
     std::string get() const { return "FloatDPApproximateBox"; } };
 
-
-template<class UB> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Interval<UB>>& repr) {
-    Interval<UB> const& ivl=repr.reference();
-    // Use tuple literal rather than dict, as not all types support hashing
-    return os << "(" << python_literal(ivl.lower_bound()) << "," << python_literal(ivl.upper_bound()) << ")";
-}
-
-template<class UB> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Interval<UB>>& repr) {
-    Interval<UB> const& ivl=repr.reference();
-    return os << python_class_name<Interval<UB>>() << "(" << python_literal(ivl.lower_bound()) << "," << python_literal(ivl.upper_bound()) << ")";
-}
 
 template<class UB> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Box<UB>>& repr) {
     Box<UB> const& bx=repr.reference();
@@ -312,58 +289,6 @@ template<class T> class LocatedSetWrapper<ValidatedTag,T>
 
 using namespace Ariadne;
 
-template<class X> X from_python_object_or_literal_allowing_default_precision(pybind11::handle h) {
-    if constexpr (Same<X,Decimal>) {
-        try {
-            return X(pybind11::cast<double>(h));
-        } catch(pybind11::cast_error&) { }
-    }
-    if constexpr (Constructible<X,String>) {
-        try {
-            return X(pybind11::cast<String>(h));
-        } catch (pybind11::cast_error&) { }
-    }
-    if constexpr (ConstructibleGivenDefaultPrecision<X,String>) {
-        try {
-            PrecisionType<X> pr;
-            return X(pybind11::cast<String>(h),pr);
-        } catch (pybind11::cast_error&) { }
-    }
-    if constexpr (ConstructibleGivenDefaultPrecision<X,Dyadic>) {
-        PrecisionType<X> pr;
-        try {
-            return X(pybind11::cast<Dyadic>(h),pr);
-        } catch (pybind11::cast_error&) { }
-        try {
-            return X(Dyadic(pybind11::cast<String>(h)),pr);
-        } catch (pybind11::cast_error&) { }
-    }
-    return pybind11::cast<X>(h);
-}
-
-template<class IVL> IVL interval_from_pair(pybind11::handle lh, pybind11::handle uh) {
-    typedef typename IVL::LowerBoundType LB;
-    typedef typename IVL::UpperBoundType UB;
-    LB lb = from_python_object_or_literal_allowing_default_precision<LB>(lh);
-    UB ub = from_python_object_or_literal_allowing_default_precision<UB>(uh);
-    return IVL(lb,ub);
-}
-
-template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
-    assert(dct.size()==1);
-    pybind11::detail::dict_iterator::reference item = *dct.begin();
-    pybind11::handle lh = item.first;
-    pybind11::handle uh = item.second;
-    return interval_from_pair<IVL>(lh,uh);
-}
-
-template<class IVL> IVL interval_from_tuple(pybind11::tuple tup) {
-    assert(tup.size()==2);
-    pybind11::handle lh = tup[0];
-    pybind11::handle uh = tup[1];
-    return interval_from_pair<IVL>(lh,uh);
-}
-
 template<class BX> BX box_from_list(pybind11::list lst) {
     typedef typename BX::IntervalType IVL;
     Array<IVL> ary( lst.size(), [&lst](SizeType i){return pybind11::cast<IVL>(lst[i]);} );
@@ -460,210 +385,11 @@ Void export_points(pybind11::module& module) {
     point_template.instantiate<FloatDPApproximation>();
 }
 
-template<class IVL> Void export_interval_arithmetic(pybind11::module&, pybind11::class_<IVL>&) {
+Void export_interval_function_operations(pybind11::module& module) {
+    module.def("image",
+        (UpperIntervalType(*)(UpperIntervalType const&, ValidatedScalarUnivariateFunction const&)) &_image_);
 }
 
-template<> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<UpperIntervalType>& interval_class) {
-    define_arithmetic(module,interval_class);
-    define_transcendental(module,interval_class);
-
-    define_mixed_arithmetic(module,interval_class,Tag<ValidatedNumber>());
-}
-
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Approximation<F>>>& cls) {
-    cls.def(pybind11::init<T<F>>());
-    cls.def(pybind11::init<T<Bounds<F>>>());
-    cls.def(pybind11::init<T<UpperBound<F>>>());
-    cls.def(pybind11::init<T<LowerBound<F>>>());
-}
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<LowerBound<F>>>& cls) {
-    cls.def(pybind11::init<T<F>>());
-    cls.def(pybind11::init<T<Bounds<F>>>());
-}
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<UpperBound<F>>>& cls) {
-    cls.def(pybind11::init<T<F>>());
-    cls.def(pybind11::init<T<Bounds<F>>>());
-}
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Bounds<F>>>& cls) {
-    cls.def(pybind11::init<T<F>>());
-}
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<F>>&) {
-}
-
-
-
-template<class IVL> Void export_interval(pybind11::module& module, std::string name=python_class_name<IVL>()) {
-    typedef IVL IntervalType;
-    typedef typename IntervalType::LowerBoundType LowerBoundType;
-    typedef typename IntervalType::UpperBoundType UpperBoundType;
-    typedef typename IntervalType::MidpointType MidpointType;
-
-    typedef decltype(contains(declval<IntervalType>(),declval<MidpointType>())) ContainsType;
-    typedef decltype(disjoint(declval<IntervalType>(),declval<IntervalType>())) DisjointType;
-    typedef decltype(subset(declval<Interval<UpperBoundType>>(),declval<Interval<LowerBoundType>>())) SubsetType;
-
-    pybind11::class_< IntervalType > interval_class(module,name.c_str());
-    interval_class.def(pybind11::init<IntervalType>());
-    interval_class.def(pybind11::init<MidpointType>());
-    interval_class.def(pybind11::init<LowerBoundType,UpperBoundType>());
-    interval_class.def(pybind11::init([](pybind11::dict pydct){return interval_from_dict<IntervalType>(pydct);}));
-    interval_class.def(pybind11::init([](pybind11::tuple pytup){return interval_from_tuple<IntervalType>(pytup);}));
-    pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
-    pybind11::implicitly_convertible<pybind11::tuple, IntervalType>();
-
-    if constexpr (Constructible<UpperBoundType,String>) {
-        interval_class.def(pybind11::init([](String lb, String ub){return Interval(LowerBoundType(lb),UpperBoundType(ub));}));
-    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,String>) {
-        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(lb,pr),UpperBoundType(ub,pr));}));
-    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,Decimal>) {
-        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(Decimal(lb),pr),UpperBoundType(Decimal(ub),pr));}));
-    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,Dyadic>) {
-        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(Dyadic(lb),pr),UpperBoundType(Dyadic(ub),pr));}));
-    }
-
-    if constexpr (Constructible<IntervalType,IntervalDomainType> and not Same<IntervalType,IntervalDomainType>) {
-        interval_class.def(pybind11::init<IntervalDomainType>());
-        if constexpr(Convertible<IntervalDomainType,IntervalType>) {
-             pybind11::implicitly_convertible<IntervalDomainType,IntervalType>();
-         }
-    }
-    if constexpr (Constructible<IntervalType,DyadicInterval> and not Same<IntervalType,DyadicInterval>) {
-        interval_class.def(pybind11::init<DyadicInterval>());
-        interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
-        if constexpr(Convertible<DyadicInterval,IntervalType>) {
-            pybind11::implicitly_convertible<DyadicInterval,IntervalType>();
-        }
-    }
-    if constexpr (Constructible<IntervalType,RationalInterval> and not Same<IntervalType,RationalInterval>) {
-        interval_class.def(pybind11::init<RationalInterval>());
-        interval_class.def(pybind11::init([](Rational l, Rational u){return IntervalType(RationalInterval(l,u));}));
-        if constexpr(Convertible<RationalInterval,IntervalType>) {
-            pybind11::implicitly_convertible<RationalInterval,IntervalType>();
-        }
-    }
-    if constexpr (Constructible<IntervalType,RealInterval> and not Same<IntervalType,RealInterval>) {
-        interval_class.def(pybind11::init<RealInterval>());
-        interval_class.def(pybind11::init([](Real l, Real u){return IntervalType(RealInterval(l,u));}));
-        if constexpr(Convertible<RealInterval,IntervalType>) {
-            pybind11::implicitly_convertible<DyadicInterval,IntervalType>();
-        }
-    }
-    if constexpr (HasPrecisionType<UpperBoundType>) {
-        typedef PrecisionType<UpperBoundType> PrecisionType;
-        if constexpr (Constructible<UpperBoundType,String,PrecisionType>) {
-            interval_class.def(pybind11::init([](String ls, String us, PrecisionType pr){return IntervalType(LowerBoundType(ls,pr),UpperBoundType(us,pr));}));
-        } else if constexpr (Constructible<UpperBoundType,Decimal,PrecisionType>) {
-            interval_class.def(pybind11::init([](String ls, String us, PrecisionType pr){return IntervalType(LowerBoundType(Decimal(ls),pr),UpperBoundType(Decimal(us),pr));}));
-        }
-
-        if constexpr (Constructible<IntervalType,FloatBounds<PrecisionType>>) {
-            interval_class.def(pybind11::init<FloatBounds<PrecisionType>>());
-            if constexpr(Convertible<FloatBounds<PrecisionType>,IntervalType>) {
-                pybind11::implicitly_convertible<FloatBounds<PrecisionType>,IntervalType>();
-            }
-        }
-        if constexpr (Constructible<IntervalType,RealInterval,PrecisionType>) {
-            interval_class.def(pybind11::init<RealInterval,PrecisionType>());
-            interval_class.def(pybind11::init([](Real l, Real u, PrecisionType pr){return IntervalType(RealInterval(l,u),pr);}));
-        } else if constexpr (Constructible<IntervalType,DyadicInterval,PrecisionType>) {
-            interval_class.def(pybind11::init<DyadicInterval,PrecisionType>());
-            interval_class.def(pybind11::init([](Dyadic l, Dyadic u, PrecisionType pr){return IntervalType(DyadicInterval(l,u),pr);}));
-        }
-        export_conversions(interval_class);
-    }
-
-    export_interval_arithmetic(module,interval_class);
-
-    if constexpr (HasEquality<IVL,IVL>) {
-        interval_class.def("__eq__",  &__eq__<IVL,IVL , Return<EqualityType<IVL,IVL>> >);
-        interval_class.def("__ne__",  &__ne__<IVL,IVL , Return<InequalityType<IVL,IVL>> >);
-    }
-
-    interval_class.def("lower_bound", &IntervalType::lower_bound);
-    interval_class.def("upper_bound", &IntervalType::upper_bound);
-    interval_class.def("centre", &IntervalType::centre  );
-    interval_class.def("midpoint", &IntervalType::midpoint);
-    interval_class.def("radius", &IntervalType::radius);
-    interval_class.def("width", &IntervalType::width);
-    interval_class.def("empty", &IntervalType::is_empty);
-    interval_class.def("__str__",&__cstr__<IntervalType>);
-    interval_class.def("__repr__",&__repr__<IntervalType>);
-
-    interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
-    module.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
-    if constexpr (HasPrecisionType<UpperBoundType>) {
-        typedef PrecisionType<UpperBoundType> PrecisionType;
-        if constexpr (Same<UpperBoundType,FloatUpperBound<PrecisionType>> and false) {
-            interval_class.def("contains", (ContainsType(*)(IntervalType const&, FloatBounds<PrecisionType> const&)) &contains);
-            module.def("contains", (ContainsType(*)(IntervalType const&, FloatBounds<PrecisionType> const&)) &contains);
-        }
-    }
-
-    module.def("centre", &IntervalType::centre);
-    module.def("midpoint", &IntervalType::midpoint);
-    module.def("radius", &IntervalType::radius);
-    module.def("width", &IntervalType::width);
-
-    module.def("disjoint", (DisjointType(*)(IntervalType const&,IntervalType const&)) &disjoint);
-    module.def("subset", (SubsetType(*)(Interval<UpperBoundType> const&,Interval<LowerBoundType> const&)) &subset);
-
-    module.def("intersection", (IntervalType(*)(IntervalType const&,IntervalType const&)) &intersection);
-    module.def("hull", (IntervalType(*)(IntervalType const&, IntervalType const&)) &hull);
-    module.def("split", (Pair<IntervalType,IntervalType>(*)(IntervalType const&)) &split);
-
-    if constexpr (Same<IVL,IntervalDomainType>) {
-        module.attr("IntervalDomainType")=interval_class;
-    } else if constexpr (Same<IVL,IntervalValidatedRangeType>) {
-        module.attr("IntervalValidatedRangeType")=interval_class;
-    } else if constexpr (Same<IVL,IntervalApproximateRangeType>) {
-        module.attr("IntervalApproximateRangeType")=interval_class;
-    }
-
-}
-
-Void export_intervals(pybind11::module& module) {
-//    export_interval<ExactIntervalType>(module,"ExactIntervalType");
-//    export_interval<UpperIntervalType>(module,"UpperIntervalType");
-//    export_interval<ApproximateIntervalType>(module,"ApproximateIntervalType");
-    export_interval<DyadicInterval>(module);
-    export_interval<DecimalInterval>(module);
-    export_interval<RationalInterval>(module);
-    export_interval<RealInterval>(module);
-    pybind11::implicitly_convertible<DyadicInterval,DecimalInterval>();
-    pybind11::implicitly_convertible<DyadicInterval,RationalInterval>();
-    pybind11::implicitly_convertible<DyadicInterval,RealInterval>();
-    pybind11::implicitly_convertible<DecimalInterval,RationalInterval>();
-    pybind11::implicitly_convertible<DecimalInterval,RealInterval>();
-    pybind11::implicitly_convertible<RationalInterval,RealInterval>();
-
-    export_interval<FloatDPExactInterval>(module);
-    export_interval<FloatDPLowerInterval>(module);
-    export_interval<FloatDPUpperInterval>(module);
-    export_interval<FloatDPApproximateInterval>(module);
-
-    pybind11::implicitly_convertible<FloatDPExactInterval,FloatDPUpperInterval>();
-    pybind11::implicitly_convertible<FloatDPExactInterval,FloatDPLowerInterval>();
-//    pybind11::implicitly_convertible<FloatDPExactInterval,FloatDPApproximateInterval>();
-//    pybind11::implicitly_convertible<FloatDPUpperInterval,FloatDPApproximateInterval>();
-//    pybind11::implicitly_convertible<FloatDPLowerInterval,FloatDPApproximateInterval>();
-
-
-    //    export_interval<FloatMPUpperInterval>(module,"FloatMPUpperInterval");
-    module.def("cast_singleton", (FloatDPBounds(*)(Interval<FloatDPUpperBound> const&)) &cast_singleton);
-    module.def("cast_singleton", (FloatMPBounds(*)(Interval<FloatMPUpperBound> const&)) &cast_singleton);
-
-    module.def("image", (UpperIntervalType(*)(UpperIntervalType const&, ValidatedScalarUnivariateFunction const&)) &_image_);
-
-    template_<Interval> interval_template(module);
-    interval_template.instantiate<Dyadic>();
-    interval_template.instantiate<Decimal>();
-    interval_template.instantiate<Rational>();
-    interval_template.instantiate<Real>();
-    interval_template.instantiate<FloatDP>();
-    interval_template.instantiate<FloatDPUpperBound>();
-    interval_template.instantiate<FloatDPLowerBound>();
-    interval_template.instantiate<FloatDPApproximation>();
-}
 template<class UB> using BoxWithUpperBound=Box<Interval<UB>>;
 
 template<class BX> Void export_box(pybind11::module& module, std::string name=python_class_name<BX>())
@@ -776,7 +502,6 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
         module.attr("BoxApproximateRangeType")=box_class;
     }
 
-    module.def("cast_exact",(IntervalDomainType(*)(IntervalApproximateRangeType const&)) &cast_exact_interval);
     module.def("cast_exact",(BoxDomainType(*)(BoxApproximateRangeType const&)) &cast_exact_box);
 
 }
@@ -1020,7 +745,7 @@ Void geometry_submodule(pybind11::module& module) {
     export_set_interface(module);
 
     export_points(module);
-    export_intervals(module);
+    export_interval_function_operations(module);
     export_boxes(module);
 //    export_zonotope(module);
 //    export_polytope(module);

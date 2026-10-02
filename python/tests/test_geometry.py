@@ -22,71 +22,14 @@
 
 from pyariadne import *
 
-IntervalDomainType = FloatDPExactInterval
-IntervalRangeType = FloatDPUpperInterval
 BoxDomainType = FloatDPExactBox
 BoxRangeType = FloatDPUpperBox
 
 def test_generics():
-    assert(Interval[FloatDP]==FloatDPExactInterval)
-    assert(Interval[FloatDPUpperBound]==FloatDPUpperInterval)
-    assert(Interval[FloatDPLowerBound]==FloatDPLowerInterval)
-    assert(Interval[FloatDPApproximation]==FloatDPApproximateInterval)
-
     assert(Box[FloatDP]==FloatDPExactBox)
     assert(Box[FloatDPUpperBound]==FloatDPUpperBox)
     assert(Box[FloatDPLowerBound]==FloatDPLowerBox)
     assert(Box[FloatDPApproximation]==FloatDPApproximateBox)
-
-def test_interval():
-
-    dp = DoublePrecision()
-    mp = MultiplePrecision(64)
-
-    xd=ExactDouble(0)
-    w=Dyadic(0)
-
-    wivl=DyadicInterval(-w,w)
-    rivl=RealInterval(wivl)
-
-    x=FloatDP(0,dp)
-    u=FloatDPUpperBound(0,dp)
-    l=FloatDPLowerBound(0,dp)
-    a=FloatDPApproximation(0,dp)
-
-    xivl=FloatDPExactInterval({-xd:xd})
-    xivl=FloatDPExactInterval(-x,x)
-    uivl=FloatDPUpperInterval(-u,u)
-    livl=FloatDPLowerInterval(-l,l)
-    aivl=FloatDPApproximateInterval(-a,a)
-
-    xivl=FloatDPExactInterval(wivl)
-    uivl=FloatDPUpperInterval(rivl)
-
-    xivl.lower_bound()
-    xivl.upper_bound()
-    xivl.midpoint()
-#    xivl.radius()
-#    xivl.width()
-    xivl.contains(x)
-    xivl.empty()
-
-    contains(xivl,x)
-    disjoint(xivl,xivl)
-    subset(xivl,xivl)
-    intersection(xivl,xivl)
-    hull(xivl,xivl)
-    (xivl,xivl)=split(xivl)
-
-    assert(type(subset(xivl,xivl))==Boolean)
-    assert(type(subset(livl,uivl))==ValidatedUpperKleenean)
-    assert(type(subset(uivl,livl))==ValidatedLowerKleenean)
-    assert(type(subset(aivl,aivl))==ApproximateKleenean)
-
-    assert(IntervalDomainType==FloatDPExactInterval)
-    assert(IntervalValidatedRangeType==FloatDPUpperInterval)
-    assert(IntervalApproximateRangeType==FloatDPApproximateInterval)
-
 
 def test_box():
     dp = DoublePrecision()
@@ -156,7 +99,6 @@ def test_box():
 
 
 def test_geometry():
-    test_interval()
     test_box()
 
 

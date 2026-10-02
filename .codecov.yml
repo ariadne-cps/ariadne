@@ -26,6 +26,6 @@ comment:
   require_changes: no
 
 ignore:
-  - "test"
-  - "test/**/*"
-  - "python/source"
+  - "tests"
+  - "tests/**/*"
+  - "python/bindings"

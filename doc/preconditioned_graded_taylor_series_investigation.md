@@ -3355,7 +3355,7 @@ inside the same dense pre-ranked accumulator:
 
 This isolates arithmetic scheduling from indexing, sweeping, and accumulator structure.
 
-`tests/function/test_taylor_model.cpp` now multiplies deterministic Taylor models under
+`test/function/test_taylor_model.cpp` now multiplies deterministic Taylor models under
 both settings and requires exact equality of both the resulting Expansion and Error. The
 cases cover:
 

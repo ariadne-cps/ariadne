@@ -13,7 +13,7 @@ if(Python3_FOUND)
     message(STATUS "Python includes:   ${Python3_INCLUDE_DIRS}")
     message(STATUS "Python SOABI:      ${Python3_SOABI}")
 
-    if(NOT TARGET pyariadne-numeric-python)
+    if(NOT TARGET pyariadne-numeric)
         message(FATAL_ERROR "The Numeric Python binding target is required to build pyariadne.")
     endif()
 
@@ -25,7 +25,7 @@ if(Python3_FOUND)
         )
     endif()
 
-    add_subdirectory(source)
+    add_subdirectory(bindings)
 
     pybind11_add_module(pyariadne
         $<TARGET_OBJECTS:pyariadne-module-obj>
@@ -34,7 +34,7 @@ if(Python3_FOUND)
     )
     target_link_libraries(pyariadne PRIVATE
         ariadne
-        pyariadne-numeric-python
+        pyariadne-numeric
     )
     add_dependencies(bindings pyariadne)
 

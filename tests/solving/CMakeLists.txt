@@ -20,7 +20,7 @@ endforeach()
 
 target_include_directories(
     test_smt_neural_benchmarks
-    PRIVATE ${PROJECT_SOURCE_DIR}/benchmarks/solvers)
+    PRIVATE ${PROJECT_SOURCE_DIR}/benchmarks/solving)
 target_compile_definitions(
     test_smt_neural_benchmarks
     PRIVATE ARIADNE_SMT_BARR3_DATA_PATH="${PROJECT_SOURCE_DIR}/benchmarks/solving/data/smt_barr3_full64.bin")

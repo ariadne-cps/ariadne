@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - decoupled-interval
   pull_request:
 
 env:

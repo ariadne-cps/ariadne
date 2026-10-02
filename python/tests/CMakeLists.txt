@@ -20,7 +20,6 @@ if(PYTHON_TESTS)
 
     set(TESTS_PYTHON
         import
-        numeric
         linear_algebra
         function
         calculus

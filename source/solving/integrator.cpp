@@ -49,7 +49,7 @@
 #include "function/taylor_model.hpp"
 
 #include "function/polynomial.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 
 #include "algebra/expansion.inl.hpp"
 

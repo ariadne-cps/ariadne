@@ -47,7 +47,7 @@
 //#include "function/function_model.hpp"
 
 #include "geometry/set.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "geometry/box.hpp"
 #include "geometry/function_set.hpp"
 

@@ -29,7 +29,7 @@
 #ifndef ARIADNE_DOMAIN_HPP
 #define ARIADNE_DOMAIN_HPP
 
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "geometry/box.hpp"
 
 namespace Ariadne {

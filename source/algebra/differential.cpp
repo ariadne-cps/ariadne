@@ -23,7 +23,7 @@
  */
 
 #include "numeric/numeric.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 
 #include "algebra/differential.hpp"
 #include "algebra/univariate_differential.hpp"

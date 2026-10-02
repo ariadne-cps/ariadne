@@ -33,7 +33,7 @@
 
 #include "paradigm/logical.hpp"
 #include "numeric/floatdp.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "geometry/point.hpp"
 #include "geometry/set_interface.hpp"
 

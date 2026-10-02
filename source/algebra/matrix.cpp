@@ -146,7 +146,7 @@ template class SymmetricMatrix<FloatDPApproximation>;
 
 } // namespace Ariadne
 
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 
 namespace Ariadne {
 template class Matrix<FloatDPUpperInterval>;

@@ -34,7 +34,7 @@
 #include "../function/polynomial.hpp"
 #include "../algebra/differential.hpp"
 #include "../algebra/evaluate.hpp"
-#include "../geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "../geometry/box.hpp"
 #include "../geometry/set_wrapper.hpp"
 

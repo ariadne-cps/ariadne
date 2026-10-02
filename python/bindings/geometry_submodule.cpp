@@ -33,7 +33,7 @@
 #include "io/geometry2d.hpp"
 #include "geometry/point.hpp"
 #include "geometry/curve.hpp"
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "geometry/box.hpp"
 #include "geometry/grid_paving.hpp"
 #include "geometry/function_set.hpp"

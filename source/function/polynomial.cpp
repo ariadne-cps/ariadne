@@ -25,7 +25,7 @@
 #include "numeric/numeric.hpp"
 #include "config.hpp"
 
-#include "geometry/interval.hpp"
+#include "interval/interval.hpp"
 #include "function/polynomial.hpp"
 #include "function/polynomial.tpl.hpp"
 

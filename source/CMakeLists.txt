@@ -1,4 +1,4 @@
-link_libraries(threading paradigm numeric interval)
+link_libraries(threading interval)
 
 add_subdirectory(algebra)
 add_subdirectory(function)

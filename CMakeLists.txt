@@ -44,17 +44,12 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/numeric|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric|submodules/configuration"
     )
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/numeric/submodules/paradigm|submodules/utility"
-    )
-    require_same_dependency_commit(Numeric
-        REFERENCES
-            "${PROJECT_SOURCE_DIR}|submodules/numeric"
-            "${PROJECT_SOURCE_DIR}/submodules/interval|submodules/numeric"
+            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric/submodules/paradigm|submodules/utility"
     )
 endif()
 
@@ -133,15 +128,13 @@ target_include_directories(ariadne PUBLIC
 )
 target_link_libraries(ariadne PUBLIC
     $<BUILD_INTERFACE:threading>
-    $<BUILD_INTERFACE:paradigm>
-    $<BUILD_INTERFACE:numeric>
     $<BUILD_INTERFACE:interval>
     $<INSTALL_INTERFACE:GMP::GMP>
     $<INSTALL_INTERFACE:MPFR::MPFR>
 )
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")

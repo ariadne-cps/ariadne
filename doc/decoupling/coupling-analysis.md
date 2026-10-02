@@ -100,7 +100,7 @@ Key baseline evidence:
 - `ariadne-core` contained foundation, numeric, algebra, external objects, and `geometry/interval.cpp`; `ariadne-kernel` added function, geometry, solvers, io, and symbolic; `ariadne` added dynamics and hybrid. These were overlapping aggregates, not independently packaged layers with explicit dependencies.
 - Only the aggregate `ariadne` target was installed/exported. `config.hpp` generated into the source tree and global include directories were additional contracts to replace with target properties.
 - Numeric/algebra tests linked `ariadne-core`; function/symbolic/geometry/solvers/io linked `ariadne-kernel`; dynamics/hybrid linked `ariadne`. Therefore the baseline tests did not prove isolated linkage of individual directories.
-- A `tests/foundation/CMakeLists.txt` existed but was not registered from `tests/CMakeLists.txt`.
+- A `test/foundation/CMakeLists.txt` existed but was not registered from `test/CMakeLists.txt`.
 - utility/logging/threading came from the submodule tree, and compatible `configuration` commits had to be coordinated.
 
 Foundation now provides the first concrete counterexample to those baseline limitations: it has its own repository, CMake target, tests, installation layout, Unix/Windows/Coverage CI, an explicit Utility dependency, and is consumed by Ariadne as a pinned submodule.

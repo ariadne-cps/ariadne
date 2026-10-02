@@ -226,8 +226,8 @@ The implementation is split across:
   of theory atoms.
 - `source/solvers/smt_theory.hpp/.cpp`: normalization of real theory
   predicates into primitive literals.
-- `tests/solvers/test_smt_solver.cpp` and
-  `tests/solvers/test_smt_boolean.cpp`: semantic and coverage tests.
+- `test/solving/test_smt_solver.cpp` and
+  `test/solving/test_smt_boolean.cpp`: semantic and coverage tests.
 
 ## Theory semantics
 
@@ -749,7 +749,7 @@ derivatives, validated reduction, epsilon checking and neural-expression split
 selection without turning the ordinary test suite into a long benchmark.
 
 The ordinary neural regression is intentionally kept cheap. The executable
-`tests/solvers/test_smt_neural_benchmarks.cpp` retains only the published Barr3
+`test/solving/test_smt_neural_benchmarks.cpp` retains only the published Barr3
 `2-64-64-1` model: it checks the validated origin value, theory-literal
 normalization, and one-box end-to-end SMT processing using the cheap geometric
 path with sensitivity, witness probing, shaving and hull reduction disabled.
@@ -794,7 +794,7 @@ expansion or SMT machinery.
 The exact published `2-64-64-1` model is now included as the fourth scaling
 point. Rather than embedding another very large C++ initializer, the six
 float32 tensors are stored internally as the raw little-endian tensor payload
-`tests/solvers/data/smt_barr3_full64.bin`. The payload is derived directly
+`test/solving/data/smt_barr3_full64.bin`. The payload is derived directly
 from the verified checkpoint by concatenating `W1,b1,W2,b2,W3,b3` in that
 order. Its SHA-256 is
 `d1c6646a9354d44092e23de07495c40d2a6575f2235aaa5be0d68b1e9b61bdbf`
@@ -2909,13 +2909,13 @@ the published Barr3 fixture and binary payload used by the Barr3 benchmark.
 The fast `test_smt_neural_benchmarks` regression continues to reuse that
 published fixture explicitly through its target include path and data-path
 definition, but the benchmark implementation itself no longer lives under
-`tests/`.
+`test/`.
 
 The top-level CMake configuration adds `benchmarks` with
 `EXCLUDE_FROM_ALL`. A dedicated `benchmarks` target builds all benchmark
 executables without registering them as CTest tests or making them part of the
 ordinary test targets. Executable target names are unchanged; only their build
-tree location moves from `tests/solvers/` to `benchmarks/solvers/`.
+tree location moves from `test/solving/` to `benchmarks/solvers/`.
 Historical command examples in this design log have been updated to the new
 path.
 

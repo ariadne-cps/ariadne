@@ -25,6 +25,7 @@ if(Python3_FOUND)
             $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
             )
     target_link_libraries(pyariadne PUBLIC ariadne)
+    add_dependencies(bindings pyariadne)
 
     pybind11_add_module(pyariadne-numeric
             $<TARGET_OBJECTS:pyariadne-numeric-module-obj>

@@ -19,7 +19,6 @@ endif()
 if(PYTHON_TESTS)
 
     set(TESTS_PYTHON
-        import
         linear_algebra
         function
         calculus

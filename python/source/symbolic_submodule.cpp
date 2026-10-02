@@ -102,10 +102,6 @@ Void export_constants(pybind11::module& module)
     real_constant_class.def("__str__", &__cstr__<RealConstant>);
     real_constant_class.def("__repr__", &__repr__<RealConstant>);
 
-    pybind11::class_<String> string_class(module,"String");
-    string_class.def(pybind11::init<const char*>());
-    pybind11::implicitly_convertible<const char*,String>();
-
     pybind11::class_<StringConstant,pybind11::bases<String>> string_constant_class(module,python_class_name<StringConstant>().c_str());
     string_constant_class.def(pybind11::init<String>());
 //    string_constant_class.def(pybind11::init<Identifier,String>());

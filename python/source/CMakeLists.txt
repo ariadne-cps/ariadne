@@ -1,26 +1,15 @@
 include_directories(${Python3_INCLUDE_DIRS})
-include_directories(SYSTEM ${PYBIND11_INCLUDE_DIR})
+
+get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
+include_directories("${PYTHON_COMMON_SOURCE_DIR}/include")
 
 message(STATUS "Please note that you need to use the Python 3 interpreter to import pyariadne correctly.")
-
-add_library(pyariadne-numeric-submodule-obj OBJECT
-    paradigm_submodule.cpp
-    numeric_submodule.cpp
-)
-
-add_library(pyariadne-numeric-module-obj OBJECT
-    numeric_module.cpp
-)
 
 add_library(pyariadne-algebra-submodule-obj OBJECT
     utilities.cpp
     linear_algebra_submodule.cpp
     differentiation_submodule.cpp
     calculus_submodule.cpp
-)
-
-add_library(pyariadne-algebra-module-obj OBJECT
-    algebra_module.cpp
 )
 
 add_library(pyariadne-extra-submodule-obj OBJECT
@@ -42,3 +31,15 @@ add_library(pyariadne-module-obj OBJECT
     ariadne_module.cpp
 )
 
+foreach(target
+    pyariadne-algebra-submodule-obj
+    pyariadne-extra-submodule-obj
+    pyariadne-module-obj
+)
+    target_link_libraries(${target} PRIVATE
+        ariadne
+        pyariadne-python-common
+        pybind11::module
+    )
+    set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endforeach()

@@ -13,39 +13,33 @@ if(Python3_FOUND)
     message(STATUS "Python includes:   ${Python3_INCLUDE_DIRS}")
     message(STATUS "Python SOABI:      ${Python3_SOABI}")
 
-    add_subdirectory(pybind11)
+    if(NOT TARGET pyariadne-numeric-python)
+        message(FATAL_ERROR "The Numeric Python binding target is required to build pyariadne.")
+    endif()
 
-    link_libraries(threading paradigm numeric)
+    if(NOT TARGET pybind11::module)
+        get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
+        add_subdirectory(
+            "${PYTHON_COMMON_SOURCE_DIR}/pybind11"
+            "${CMAKE_CURRENT_BINARY_DIR}/pybind11"
+        )
+    endif()
+
     add_subdirectory(source)
 
     pybind11_add_module(pyariadne
-            $<TARGET_OBJECTS:pyariadne-module-obj>
-            $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-            $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
-            $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
-            )
-    target_link_libraries(pyariadne PUBLIC ariadne)
+        $<TARGET_OBJECTS:pyariadne-module-obj>
+        $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
+        $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
+    )
+    target_link_libraries(pyariadne PRIVATE
+        ariadne
+        pyariadne-numeric-python
+    )
     add_dependencies(bindings pyariadne)
 
-    pybind11_add_module(pyariadne-numeric
-            $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
-            $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-            $<TARGET_OBJECTS:UTILITY_SRC>
-            $<TARGET_OBJECTS:PARADIGM_SRC>
-            $<TARGET_OBJECTS:NUMERIC_SRC>
-            )
-    set_target_properties(pyariadne-numeric PROPERTIES OUTPUT_NAME "pyariadne_numeric")
-
-    pybind11_add_module(pyariadne-algebra
-            $<TARGET_OBJECTS:pyariadne-algebra-module-obj>
-            $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-            $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
-            )
-    set_target_properties(pyariadne-algebra PROPERTIES OUTPUT_NAME "pyariadne_algebra")
-    target_link_libraries(pyariadne-algebra PUBLIC ariadne)
-
     set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}"
-            CACHE STRING "Install destination for Python targets")
+        CACHE STRING "Install destination for Python targets")
     install(TARGETS pyariadne DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
 
     if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)

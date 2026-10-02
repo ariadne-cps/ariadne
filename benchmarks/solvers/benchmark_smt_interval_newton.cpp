@@ -14,8 +14,8 @@
 #include "function/function.hpp"
 #include "function/procedure.hpp"
 #include "geometry/box.hpp"
-#include "solvers/solver.hpp"
-#include "solvers/smt_solver.hpp"
+#include "solving/solver.hpp"
+#include "solving/smt_solver.hpp"
 
 using namespace Ariadne;
 

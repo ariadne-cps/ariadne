@@ -13,7 +13,7 @@
 #include "function/function.hpp"
 #include "function/procedure.hpp"
 #include "geometry/box.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "solving/constraint_solver.hpp"
 
 using namespace Ariadne;
 

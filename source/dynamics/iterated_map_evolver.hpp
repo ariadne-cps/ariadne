@@ -38,7 +38,7 @@
 
 #include "dynamics/iterated_map.hpp"
 #include "function/function_interface.hpp"
-#include "solvers/configuration_interface.hpp"
+#include "solving/configuration_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 
 #include "logging/logging.hpp"

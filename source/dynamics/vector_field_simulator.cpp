@@ -41,7 +41,7 @@
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
-#include "solvers/runge_kutta_integrator.hpp"
+#include "solving/runge_kutta_integrator.hpp"
 
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field.hpp"

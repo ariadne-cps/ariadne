@@ -98,7 +98,7 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-solvers>
+    $<TARGET_OBJECTS:ariadne-solving>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:THREADING_SRC>
@@ -112,7 +112,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-solvers>
+    $<TARGET_OBJECTS:ariadne-solving>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>

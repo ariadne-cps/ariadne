@@ -37,7 +37,7 @@
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
 #include "symbolic/expression_set.hpp"
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 #include "io/figure.hpp"
 #include "io/command_line_interface.hpp"
 

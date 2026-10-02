@@ -39,8 +39,8 @@
 
 #include "dynamics/vector_field.hpp"
 #include "function/function_interface.hpp"
-#include "solvers/configuration_interface.hpp"
-#include "solvers/integrator_interface.hpp"
+#include "solving/configuration_interface.hpp"
+#include "solving/integrator_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 
 #include "threading/workload.hpp"

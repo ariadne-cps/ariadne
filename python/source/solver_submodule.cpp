@@ -28,13 +28,13 @@
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
-#include "solvers/solver_interface.hpp"
-#include "solvers/solver.hpp"
+#include "solving/solver_interface.hpp"
+#include "solving/solver.hpp"
 #include "function/taylor_function.hpp"
 
-#include "solvers/integrator_interface.hpp"
-#include "solvers/integrator.hpp"
-#include "solvers/runge_kutta_integrator.hpp"
+#include "solving/integrator_interface.hpp"
+#include "solving/integrator.hpp"
+#include "solving/runge_kutta_integrator.hpp"
 
 using namespace Ariadne;
 

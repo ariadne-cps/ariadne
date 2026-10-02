@@ -32,7 +32,7 @@
 #include "function/function.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"

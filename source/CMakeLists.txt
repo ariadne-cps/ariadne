@@ -2,7 +2,7 @@ link_libraries(threading paradigm numeric)
 
 add_subdirectory(algebra)
 add_subdirectory(function)
-add_subdirectory(solvers)
+add_subdirectory(solving)
 add_subdirectory(geometry)
 add_subdirectory(dynamics)
 add_subdirectory(symbolic)

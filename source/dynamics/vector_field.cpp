@@ -36,7 +36,7 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "solvers/integrator.hpp"
+#include "solving/integrator.hpp"
 
 #include "logging/logging.hpp"
 

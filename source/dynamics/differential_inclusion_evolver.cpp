@@ -27,8 +27,8 @@
 #include "function/function_patch.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
-#include "solvers/integrator.hpp"
-#include "solvers/bounder.hpp"
+#include "solving/integrator.hpp"
+#include "solving/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "logging/progress_indicator.hpp"
 

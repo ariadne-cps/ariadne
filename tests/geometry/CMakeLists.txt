@@ -4,8 +4,7 @@ set(UNIT_TESTS
     test_box
     test_point_curve
     test_constrained_image_set
-    test_interval
-    test_grid_paving
+test_grid_paving
     test_paving
     test_measurable_set
 )

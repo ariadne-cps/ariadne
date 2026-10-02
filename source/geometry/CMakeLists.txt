@@ -2,7 +2,6 @@ set(LIBRARY_NAME ariadne-geometry)
 
 add_library(${LIBRARY_NAME} OBJECT
     point.cpp
-    interval.cpp
     box.cpp
     curve.cpp
     set.cpp

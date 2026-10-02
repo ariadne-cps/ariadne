@@ -51,6 +51,11 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
             "${PROJECT_SOURCE_DIR}/submodules/numeric/submodules/paradigm|submodules/utility"
     )
+    require_same_dependency_commit(Numeric
+        REFERENCES
+            "${PROJECT_SOURCE_DIR}|submodules/numeric"
+            "${PROJECT_SOURCE_DIR}/submodules/interval|submodules/numeric"
+    )
 endif()
 
 find_package(Threads)
@@ -87,7 +92,7 @@ add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:THREADING_SRC>
     $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
-    source/geometry/interval.cpp
+    $<TARGET_OBJECTS:INTERVAL_SRC>
 )
 
 add_library(ariadne-kernel SHARED
@@ -102,6 +107,7 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:THREADING_SRC>
     $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
+    $<TARGET_OBJECTS:INTERVAL_SRC>
 )
 
 add_library(ariadne SHARED
@@ -118,6 +124,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:THREADING_SRC>
     $<TARGET_OBJECTS:LOGGING_SRC>
     $<TARGET_OBJECTS:UTILITY_SRC>
+    $<TARGET_OBJECTS:INTERVAL_SRC>
 )
 
 target_include_directories(ariadne PUBLIC
@@ -128,12 +135,13 @@ target_link_libraries(ariadne PUBLIC
     $<BUILD_INTERFACE:threading>
     $<BUILD_INTERFACE:paradigm>
     $<BUILD_INTERFACE:numeric>
+    $<BUILD_INTERFACE:interval>
     $<INSTALL_INTERFACE:GMP::GMP>
     $<INSTALL_INTERFACE:MPFR::MPFR>
 )
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:paradigm> $<BUILD_INTERFACE:numeric> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
@@ -175,6 +183,7 @@ install(EXPORT AriadneTargets
     DESTINATION lib/cmake/Ariadne
 )
 get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
+get_target_property(INTERVAL_SOURCE_DIR interval SOURCE_DIR)
 
 install(FILES
     ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
@@ -192,6 +201,7 @@ get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY "${PARADIGM_SOURCE_DIR}/include/paradigm" DESTINATION include/ariadne)
 install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
+install(DIRECTORY "${INTERVAL_SOURCE_DIR}/include/interval" DESTINATION include/ariadne)
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
 install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
 install(DIRECTORY "${UTILITY_SOURCE_DIR}/include/utility" DESTINATION include/ariadne)

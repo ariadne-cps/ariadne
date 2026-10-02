@@ -742,14 +742,14 @@ Void TestProcedure::test_abs_backpropagation()
     }
     {
         UpperIntervalType argument=ExactIntervalType(-2,2);
-        UpperIntervalType result=ExactIntervalType::empty_interval();
-        backpropagate(result,Abs(),argument);
+        UpperIntervalType target=ExactIntervalType::empty_interval();
+        backpropagate(target,Abs(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
     {
         UpperIntervalType argument=ExactIntervalType(-2,2);
-        UpperIntervalType result=ExactIntervalType(-2,-1);
-        backpropagate(result,Abs(),argument);
+        UpperIntervalType target=ExactIntervalType(-2,-1);
+        backpropagate(target,Abs(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
 }
@@ -767,20 +767,20 @@ Void TestProcedure::test_nul_hlf_backpropagation()
     }
     {
         UpperIntervalType argument=ExactIntervalType(-4,4);
-        UpperIntervalType result=ExactIntervalType::empty_interval();
-        backpropagate(result,Hlf(),argument);
+        UpperIntervalType target=ExactIntervalType::empty_interval();
+        backpropagate(target,Hlf(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
     {
         UpperIntervalType argument=ExactIntervalType(-4,4);
-        UpperIntervalType result=ExactIntervalType(-1,1);
-        backpropagate(result,Nul(),argument);
+        UpperIntervalType target=ExactIntervalType(-1,1);
+        backpropagate(target,Nul(),argument);
         ARIADNE_TEST_ASSERT(not definitely(argument.is_empty()));
     }
     {
         UpperIntervalType argument=ExactIntervalType(-4,4);
-        UpperIntervalType result=ExactIntervalType(1,2);
-        backpropagate(result,Nul(),argument);
+        UpperIntervalType target=ExactIntervalType(1,2);
+        backpropagate(target,Nul(),argument);
         ARIADNE_TEST_ASSERT(definitely(argument.is_empty()));
     }
 }
@@ -845,4 +845,3 @@ Int main() {
     TestProcedure().test();
     return ARIADNE_TEST_FAILURES;
 }
-

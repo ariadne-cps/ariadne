@@ -878,9 +878,9 @@ class TestConstraintSolver
 
         {
             std::cout << "[constraint-feasible] dependency-hidden nonlinear infeasibility" << std::endl;
-            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            auto validated_x=ValidatedScalarMultivariateFunction::coordinates(1);
             ValidatedVectorMultivariateFunction function({
-                x[0]*(1-x[0])
+                validated_x[0]*(1-validated_x[0])
             });
             ExactBoxType domain({{0.0_x,1.0_x}});
             ExactBoxType codomain({{0.32_x,0.32_x}});
@@ -920,4 +920,3 @@ Int main(Int argc, const char* argv[]) {
     TestConstraintSolver().test();
     return ARIADNE_TEST_FAILURES;
 }
-

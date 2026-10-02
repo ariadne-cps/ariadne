@@ -1635,7 +1635,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-solve] classify non-splittable DP resolution exhaustion" << std::endl;
-            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            auto tiny_x=ValidatedScalarMultivariateFunction::coordinates(1);
             SmtSolver tiny_epsilon_solver(SmtSolverConfiguration(
                 1e-30_x,
                 std::numeric_limits<SizeType>::max(),
@@ -1643,7 +1643,7 @@ class TestSmtSolver {
                 std::numeric_limits<SizeType>::max(),
                 false));
             ExactBoxType domain({ExactIntervalType(1,1)});
-            ValidatedScalarMultivariateFunction residual=sin(x[0])-sin(x[0]);
+            ValidatedScalarMultivariateFunction residual=sin(tiny_x[0])-sin(tiny_x[0]);
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(0),residual,ValidatedNumber(0))
             });

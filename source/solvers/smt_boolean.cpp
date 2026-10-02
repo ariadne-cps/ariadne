@@ -25,6 +25,7 @@
 #include "solvers/smt_boolean.hpp"
 
 #include <map>
+#include <optional>
 
 #include "utility/exceptions.hpp"
 #include "solvers/smt_theory.hpp"

@@ -517,6 +517,12 @@ Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
 
 namespace Ariadne {
 
+template<class X, class A>
+static Void compute_procedure(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
+    execute(t,p,a);
+    r=Vector<Graded<A>>(p._results.size(), [&t,&p](SizeType i){return t[p._results[i]];},a.element_characteristics());
+}
+
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 typedef Differential<FloatDPBounds> ValidatedDifferential;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;

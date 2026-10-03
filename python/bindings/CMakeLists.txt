@@ -4,14 +4,11 @@ get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
 
 message(STATUS "Please note that you need to use the Python 3 interpreter to import pyariadne correctly.")
 
-add_library(pyariadne-algebra-submodule-obj OBJECT
+add_library(pyariadne-bindings-obj OBJECT
     utilities.cpp
     linear_algebra_submodule.cpp
     differentiation_submodule.cpp
     calculus_submodule.cpp
-)
-
-add_library(pyariadne-extra-submodule-obj OBJECT
     symbolic_submodule.cpp
     optimization_submodule.cpp
     function_submodule.cpp
@@ -30,8 +27,7 @@ add_library(pyariadne-module-obj OBJECT
 )
 
 foreach(target
-    pyariadne-algebra-submodule-obj
-    pyariadne-extra-submodule-obj
+    pyariadne-bindings-obj
     pyariadne-module-obj
 )
     target_include_directories(${target} PRIVATE

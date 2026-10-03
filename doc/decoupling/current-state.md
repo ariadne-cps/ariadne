@@ -70,6 +70,18 @@ Interval. Duplicating these definitions in Ariadne is a boundary violation and
 can also produce C++ redefinition errors once the lower aggregate headers are
 correctly visible.
 
+## Ariadne aggregate targets
+
+The former `ariadne-core` and `ariadne-kernel` shared-library aggregates have
+been removed on `decouple-algebra`. In-tree tests and benchmarks now link the
+single `ariadne` library directly. The corresponding Python binding object
+split has also been removed: Ariadne-owned bindings are compiled through one
+`pyariadne-bindings-obj` target, while `pyariadne-module-obj` remains separate
+only for the Python module entry point.
+
+This deliberately favours a single aggregate at the Ariadne level while the
+repository stack is being split into independently packaged lower layers.
+
 ## Algebra
 
 Algebra has a real dependency on Interval. Current examples include

@@ -1,228 +1,191 @@
-# Ariadne decoupling work plan
+# Ariadne Foundation decoupling work plan
 
 Status: active  
-Branch: `decoupling`  
-Baseline: `master` at `949d7e044ae65837fc02e6387701b10e7c15ddc6`  
-Last updated: 2026-09-29
+Branch: `decouple-foundation`  
+Historical baseline: `949d7e044ae65837fc02e6387701b10e7c15ddc6` (2026-09-29)  
+Current reference: `main` at `7be5bad2d8131ce5e7fec422fe86435a64c69084`  
+Last updated: 2026-10-03
 
-This is the living document for the decoupling activity. Update it in the same
-commit as architectural changes that affect component boundaries, dependency
-direction, packaging, or validation.
+See [current-state.md](current-state.md) for the verified current structure and
+the evidence behind this plan.
 
 ## Goal
 
-Make the directories under `source/` independently buildable and testable with
-declared, versionable dependencies. Separate repositories are an outcome of
-verified boundaries; they are not the first mechanical step.
+Create `ariadne-cps/foundation` from the current algebra and function modules.
 
-A component is ready for extraction when:
+The intended external Foundation dependencies are:
 
-1. its public headers compile through an installed or exported target;
-2. its CMake target declares every direct dependency with the correct
-   `PUBLIC`, `PRIVATE`, or `INTERFACE` visibility;
-3. its tests link to that target and to no aggregate Ariadne library;
-4. a small external consumer can configure, compile, link, and run against the
-   installed package;
-5. dependency versions and configuration inputs are explicit;
-6. no source include reaches into an undeclared sibling directory;
-7. the component has no dependency cycle with a package intended to be
-   released separately.
+1. `configuration`;
+2. `interval`.
 
-## Working principles
+Foundation must not require Ariadne's remaining geometry, symbolic, io, solving,
+dynamics, hybrid, logging or threading modules.
 
-- Refactor and validate boundaries inside the monorepo before moving files.
-- Preserve behaviour; structural commits should avoid unrelated API changes.
-- Prefer moving misplaced integrations to a higher layer over introducing
-  abstract interfaces without a concrete use case.
-- Keep primitive mathematical types below algorithms that operate on them.
-- Keep rendering adapters outside mathematical data types where practical.
-- Treat header dependencies as part of the public contract, including template
-  implementation headers.
-- Add a focused validation before removing an include; transitive compilation
-  success is not evidence of a sound public header.
-- Record changes to the dependency graph and the rationale in this document.
+Repository extraction is the final step. The boundary must first be enforced
+inside Ariadne.
 
-## Target dependency shape
+## Current facts
 
-The precise package split remains a decision, but the intended direction is:
-
-1. the standalone `foundation` package, depending only on `utility`, for
-   computational paradigms and logical contracts;
-2. numeric types built on that foundation;
-3. algebra built on numeric types;
-4. primitive geometry built on numeric and algebra;
-5. function and symbolic facilities organised around a shared low-level
-   expression contract, without mutual implementation dependencies;
-6. geometry algorithms, solvers, and rendering adapters above those primitives;
-7. dynamics above the mathematical kernel;
-8. hybrid above dynamics, with no dependency returning from dynamics or
-   primitive geometry to hybrid.
-
-This is a hypothesis to validate, not a frozen module list. In particular,
-`geometry` currently mixes primitives, function-defined sets, paving
-algorithms, solver calls, and drawing responsibilities. It is expected to split
-before it becomes a standalone package.
+- Interval is already a standalone repository and has been removed from
+  `source/geometry`.
+- Current algebra interval usage goes directly through `interval/...`; the old
+  baseline `algebra -> geometry` interval edge is obsolete.
+- Algebra's remaining upward coupling is concentrated in function-specific
+  integrations.
+- Function still has real geometry and symbolic dependencies.
+- No semantic algebra/function dependency on logging has been established.
+  `function/calculus_base.hpp` contains one unused logging include.
+- The current top-level Ariadne build still aggregates logging/threading objects;
+  aggregate linkage is not evidence that Foundation itself needs those
+  dependencies.
 
 ## Milestones
 
-### M0 — Reproducible baseline
+### F0 - Make the documentation describe the current graph
 
-- [x] Capture the direct include graph at the baseline commit.
-- [x] Classify all direct relations as low, medium, or high.
-- [x] Store the analysis, graph, summary, and include evidence in the repository.
-- [ ] Add a repeatable repository script or build target that regenerates the
-      dependency data and fails when an unreviewed edge appears.
-- [ ] Record a clean baseline build and test result for each current aggregate:
-      `ariadne-core`, `ariadne-kernel`, and `ariadne`.
+- [x] Record the standalone Interval boundary.
+- [x] Separate the 2026-09-29 baseline from the current repository state.
+- [x] Record Foundation as `algebra + function` with external dependencies
+      `configuration + interval`.
+- [x] Record the currently observed residual algebra/function edges.
+- [ ] Add a repeatable dependency scanner so the current graph is generated
+      rather than maintained manually.
 
-Exit criterion: another contributor can regenerate the graph and reproduce the
-baseline build without relying on this document's author.
+Exit criterion: contributors can distinguish historical coupling evidence from
+the active Foundation plan.
 
-### M1 — Explicit component targets
+### F1 - Make algebra independent of function
 
-- [ ] Replace directory-wide include visibility with target include properties.
-- [ ] Express every component-to-component dependency in CMake.
-- [ ] Decide which headers are public, private, generated, or template
-      implementation details.
-- [ ] Generate `config.hpp` in the build tree and expose it through a target.
-- [ ] Add public-header compilation checks for every component.
-- [ ] Make each test directory link to its component target instead of an
-      aggregate library.
-- [x] Extract Foundation tests into the standalone `ariadne-cps/foundation`
-      repository and remove the obsolete monorepo test directory.
+- [ ] Move `compute_procedure` and its `Procedure` dependency out of
+      `algebra/graded.hpp`.
+- [ ] Move TaylorSeries/AnalyticFunction composition code out of
+      `algebra/algebra_operations.tpl.hpp`.
+- [ ] Decide whether to delete, revive, or relocate
+      `algebra/dense_differential.cpp`; it is not in the current algebra
+      object target but still carries a function include.
+- [ ] Compile every public algebra header without adding function include paths.
+- [ ] Give algebra an explicit target-level dependency on its actual lower
+      dependencies instead of inheriting Ariadne-wide linkage.
 
-Exit criterion: removing an undeclared target dependency causes configuration
-or compilation to fail locally and in CI.
+Exit criterion: no algebra source/header includes `function/` and algebra
+builds/tests without the function target.
 
-### M2 — Remove small backward edges
+### F2 - Remove accidental infrastructure dependencies from function
 
-- [ ] Verify and remove the apparently unused
-      `dynamics/enclosure.cpp → hybrid/discrete_event.hpp` include.
-- [ ] Verify and remove the apparently unused
-      `geometry/list_set.hpp → hybrid/discrete_location.hpp` include.
-- [ ] Isolate `algebra` drawing support for `Tensor` behind an adapter owned by
-      the rendering layer.
-- [ ] Move function-specific extensions from `algebra/graded.hpp` and
-      `algebra/algebra_operations.tpl.hpp` to the function layer where feasible.
-- [ ] Isolate the inclusion-integrator bridge to symbolic expression sets from
-      the general solver interfaces.
+- [ ] Remove the unused `logging/logging.hpp` include from
+      `function/calculus_base.hpp`.
+- [ ] Verify no logging symbol is required by any function implementation.
+- [ ] Verify function and algebra do not require threading directly.
+- [ ] Stop relying on parent-directory `link_libraries(threading interval)` for
+      the future Foundation targets; declare only real target dependencies.
 
-Exit criterion: `hybrid` depends on `dynamics` and the mathematical kernel, but
-neither `dynamics` nor lower-level geometry depends on `hybrid`.
+Exit criterion: logging and threading can be absent from a Foundation-only
+configure/build.
 
-### M3 — Stabilise the mathematical core
+### F3 - Establish a primitive domain boundary
 
-- [x] Remove numeric/symbolic implementation dependencies from Foundation's
-      logical machinery; keep Sequence integration in numeric.
-- [x] Break the backward `numeric → foundation` and `symbolic → foundation`
-      edges and extract Foundation as a lower-level standalone package.
-- [x] Remove numeric's remaining dependency on high-level symbolic expression
-      templates; Numeric now owns its private lazy Real/logical expression
-      storage.
-- [ ] Stabilise `algebra → function` as the primary direction by relocating the
-      two function-specific algebra integrations.
-- [ ] Identify the smallest primitive-geometry API needed by algebra and
-      function (`Interval`, `Box`, declarations, and associated operations).
-- [x] Version Foundation independently from numeric.
+- [ ] Design a low-level Box/domain value type that depends only on the lower
+      Foundation/Interval stack.
+- [ ] Split that primitive from the current `geometry/box.hpp`, whose public
+      surface currently also depends on Point and SetInterface.
+- [ ] Move function domain declarations to the primitive Box contract.
+- [ ] Leave Box set algorithms, function integrations and drawing adapters above
+      the primitive boundary.
+- [ ] Re-run public-header compilation for function after removing
+      `geometry/box*.hpp` dependencies.
 
-Exit criterion: the foundation/numeric/algebra/primitive-geometry subgraph is
-acyclic at package level and has standalone consumers.
+Exit criterion: the core Function API can represent scalar/vector domains
+without including Ariadne geometry.
 
-### M4 — Separate mixed responsibilities
+### F4 - Move geometry integrations above function core
 
-- [ ] Split geometry primitives from function-defined sets and paving
-      algorithms.
-- [ ] Move linear/nonlinear programming integrations out of primitive geometry.
-- [ ] Separate graphics interfaces, mathematical drawing adapters, and
-      Cairo backend.
-- [ ] Separate generic symbolic templates from conversions between
-      `Expression`, `Formula`, functions, and sets.
-- [ ] Re-evaluate component names and package boundaries after these moves.
+- [ ] Move measurable-function integrations that depend on
+      `geometry/set.hpp`, `measurable_set.hpp` and `set_wrapper.hpp` out of
+      the Foundation function core.
+- [ ] Move multifunction/Taylor-multifunction integrations that depend on
+      FunctionSet/SetWrapper out of the core, retaining only genuinely generic
+      function/multifunction abstractions.
+- [ ] Decide whether these adapters belong to geometry or a separate integration
+      layer.
 
-Exit criterion: rendering and optimisation can be disabled without changing or
-rebuilding the primitive mathematical packages.
+Exit criterion: no Foundation function source/header includes `geometry/`.
 
-### M5 — Repository extraction
+### F5 - Split low-level symbolic machinery from symbolic integration
 
-Foundation is the first completed extraction and serves as the reference pattern
-for subsequent repositories. Numeric is now source/test isolated in the
-monorepo and ready for repository extraction once `ariadne-cps/numeric`
-exists.
+- [ ] Move concrete Expression/Function conversion code out of
+      `function/function.cpp` to the symbolic side.
+- [ ] Classify `symbolic/templates.hpp`: it currently depends only on numeric
+      and is used by Formula/Procedure, so evaluate moving it to Foundation under
+      a non-symbolic-specific name/location.
+- [ ] Classify `symbolic/constant.hpp` and `symbolic/identifier.hpp` as either
+      low-level Foundation value types or symbolic-owned types; avoid keeping a
+      path-level dependency merely for historical naming.
+- [ ] Ensure Foundation has no dependency on the high-level Expression, Space or
+      Variable implementation.
 
-- [x] Select and extract Foundation as the first repository.
-- [ ] Provide install/export rules and a versioned CMake package.
-- [x] Add standalone Unix, Windows, and Coverage CI for Foundation.
-- [ ] Add a dedicated installed/external-consumer test.
-- [x] Replace the monorepo Foundation source/tests with the pinned
-      `ariadne-cps/foundation` submodule.
-- [ ] Document release compatibility and coordinated-change procedure.
-- [ ] Extract Numeric to `ariadne-cps/numeric`, add standalone
-      Unix/Windows/Coverage CI, and replace the monorepo source/tests with a
-      pinned submodule.
-- [ ] Repeat one component at a time; keep an integration build spanning all
-      released packages.
+Exit criterion: no Foundation target includes high-level `symbolic/` headers;
+any retained low-level machinery is owned by Foundation itself.
 
-Exit criterion: a component can be cloned, built, tested, installed, consumed,
-and released without checking out the Ariadne monorepo.
+### F6 - Standalone Foundation target
 
-## First work slice
+- [ ] Create component-level CMake targets for algebra and function with explicit
+      public/private dependencies.
+- [ ] Add public-header compilation checks.
+- [ ] Make Foundation tests link only to Foundation targets.
+- [ ] Add standalone Unix/Windows/Coverage CI.
+- [ ] Add an installed/external-consumer test.
+- [ ] Confirm Foundation configures without Ariadne source directories.
 
-The first implementation slice should be deliberately small and measurable:
+Exit criterion: Foundation is independently buildable and testable with only
+its declared external dependencies.
 
-1. add component target dependency declarations without moving files;
-2. add public-header compilation checks for `foundation`, `numeric`, and
-   `algebra`;
-3. make their tests link to component-level targets;
-4. remove the two suspected unused backward includes after compile and test
-   verification;
-5. regenerate the dependency graph and record the changed edge count.
+### F7 - Repository extraction
 
-Expected result: two low-cost cycle-closing edges disappear, while the build
-starts enforcing the dependencies needed for the core work.
+- [ ] Create/populate `ariadne-cps/foundation`.
+- [ ] Depend on the required `configuration` and `interval` revisions.
+- [ ] Move algebra/function sources, tests and package configuration.
+- [ ] Replace Ariadne's in-tree algebra/function copies with the Foundation
+      dependency.
+- [ ] Keep Ariadne integration CI spanning Foundation plus the remaining
+      high-level modules.
 
-## Work log
+Exit criterion: Ariadne consumes Foundation as a versioned external repository
+and no duplicate algebra/function implementation remains in Ariadne.
 
-| Date | Change | Validation | Graph impact | Status |
-|---|---|---|---|---|
-| 2026-09-30 | Prepared Numeric for standalone extraction: removed the dependency on `symbolic/templates.hpp`; removed Numeric's production dependency on monorepo `config.hpp`; introduced `NUMERIC_SRC`, the `numeric` interface target, and standalone `ariadne-numeric`; made Numeric's dependencies explicit (`foundation`, `utility`, GMP, MPFR); retargeted Numeric tests from `ariadne-core` to `ariadne-numeric` and `utility/test.hpp`. | Static source/CMake checks completed. GitHub Actions had not yet registered runs for the latest branch head at the time of this update. | Removes the baseline `symbolic → numeric` edge and removes inherited `threading`/monorepo-config build dependencies from Numeric. | In progress |
-| 2026-09-29 | Replaced the in-tree `foundation` module with the standalone `ariadne-cps/foundation` submodule; removed local source/tests copies and wired `FOUNDATION_SRC` plus the `foundation` interface into Ariadne aggregates. | Standalone Foundation Unix/Windows/Coverage CI passed. Ariadne integration was updated to inherit the Foundation interface in C++ and Python. `configuration@6b90c981939253a6740e93b726137ea3b6934ecb` is identical in Ariadne, Threading, Foundation, and Utility; `utility@d28ec8bfa0f176f948756b00ac9c14e8eb3b2de2` is identical in Threading and Foundation. | Foundation is now an external repository boundary; local duplicate implementation removed. | Done |
-| 2026-09-29 | Made `foundation` source-level autonomous from `numeric` and `symbolic`: logical expression nodes are owned by Foundation and infinite `Sequence` conjunction/disjunction lives in numeric. | Standalone Foundation builds and tests pass on Unix, Windows, and Coverage CI. | Removed the backward `numeric → foundation` and `symbolic → foundation` edges while retaining the intended `foundation → numeric` direction. | Done |
-| 2026-09-29 | Removed graphics and whole-tensor stream output from `algebra/Tensor`; moved Tensor drawing to the `io` layer through `tensor_drawable`, and adjusted the acoustic PDE example. | Static source review only; build/test validation still required. | Expected removal of backward `io → algebra`; the existing forward `algebra → io` remains. | In progress |
-| 2026-09-29 | Removed the two low-volume backward includes from `geometry/list_set.hpp` and `dynamics/enclosure.cpp` into `hybrid`. | Static symbol inspection: neither consumer uses `DiscreteLocation`/`DiscreteEvent`; build and test validation still required. | Expected removal of `hybrid → geometry` and `hybrid → dynamics`; 55 → 53 direct edges pending regeneration. | In progress |
-| 2026-09-29 | Created `decoupling` from `master`; recorded the baseline analysis and initial plan. | Branch SHA matched `master` before the documentation commit. | Baseline: 55 edges, 13 mutual pairs, one strongly connected component; 9 A / 35 M / 11 B. | Done |
+## Immediate implementation slice
 
-## Decision log
+The smallest useful code slice after this documentation update is:
 
-| ID | Date | Decision | Rationale | Revisit when |
-|---|---|---|---|---|
-| D-001 | 2026-09-29 | Refactor boundaries in the monorepo before creating component repositories. | All ten directories are in one strongly connected component; immediate extraction would preserve cycles and add versioning overhead. | At least one component meets the extraction criteria. |
-| D-002 | 2026-09-29 | Weight header propagation when prioritising coupling. | Header dependencies affect downstream consumers and templates, so raw include counts understate their cost. | A regeneration tool provides a better semantic metric. |
-| D-003 | 2026-09-29 | Treat the proposed target dependency shape as provisional. | `geometry`, `symbolic`, and `io` mix responsibilities that must be separated before final package names are credible. | M3 and M4 produce tested boundaries. |
-| D-004 | 2026-09-29 | Version Foundation independently as `ariadne-cps/foundation`, depending only on Utility. | The backward numeric/symbolic implementation edges were removed, standalone CI passes on Unix/Windows/Coverage, and Ariadne can consume a pinned Foundation submodule. | If a future lower-level contract requires coordinated versioning with numeric. |
+1. remove the unused logging include;
+2. move the two function-specific public-template integrations out of algebra;
+3. add an algebra public-header compile check that runs without function;
+4. then tackle Box as the first structural function/geometry boundary.
 
-## Open questions
+This order deliberately proves the easy boundary first. Starting with Box would
+mix a local cleanup problem with the larger geometry split and make failures
+harder to attribute.
 
-- Which interval and box types belong to primitive geometry, and which aliases
-  belong to function or set packages?
-- Should drawing use free-function adapters, explicit renderer objects, or a
-  small non-owning interface package?
-- Which component should be extracted after Numeric?
+## Decisions
 
-## Risks
+| ID | Date | Decision | Rationale |
+|---|---|---|---|
+| D-001 | 2026-09-29 | Preserve the original coupling analysis as a historical baseline. | It remains useful evidence but no longer describes the repository after extraction work. |
+| D-002 | 2026-10-03 | Build the next Foundation package from algebra and function, depending externally on configuration and interval. | Interval is already standalone; algebra/function are the next low-level reusable layer. |
+| D-003 | 2026-10-03 | Do not treat logging as a Foundation dependency. | The only direct function include found is unused; aggregate Ariadne linkage must not define the package boundary. |
+| D-004 | 2026-10-03 | Treat Box as a primitive-boundary refactor, not a wholesale geometry move. | Current Box headers/implementation mix primitive domain representation with Point/SetInterface/function/io responsibilities. |
+| D-005 | 2026-10-03 | Separate low-level symbolic templates from high-level Expression/Function bridges. | The former may belong below symbolic; the latter are integration code and should stay above Foundation. |
 
-- Include removal may reveal accidental reliance on transitive headers.
-- Template instantiation and link-time dependencies may not appear in the direct
-  include graph.
-- Splitting types across package boundaries can create ABI and release-lockstep
-  constraints even after the include graph is acyclic.
-- A large interface layer can disguise coupling instead of reducing it.
-- Separate repositories can slow coordinated refactors unless an integration
-  build continuously tests compatible revisions.
+## Validation discipline
 
-## Updating this document
+For each boundary change:
 
-For each decoupling change, update the work log with the validation command or
-CI job, the dependency edges added or removed, and the relevant decision. Add a
-new decision entry when a package boundary or dependency direction changes.
-Keep completed milestones for historical context rather than deleting them.
+1. compile the changed public headers in isolation;
+2. build the affected component target without relying on transitive sibling
+   include directories;
+3. run its focused tests;
+4. run the Ariadne integration build/tests;
+5. record the removed/added dependency edge in this document or regenerated
+   dependency data.
 
+Do not interpret successful compilation through an aggregate Ariadne target as
+proof that a standalone package boundary is correct.

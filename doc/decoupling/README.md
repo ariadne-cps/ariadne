@@ -1,42 +1,45 @@
 # Decoupling Ariadne components
 
-This directory collects the architectural analysis and the evolving plan for
-separating the components currently stored under `source/` so that they can be
-built, tested, versioned, and eventually developed in separate repositories.
+This directory records the architectural analysis and current work for moving
+low-level Ariadne components into independently buildable repositories.
 
-The documents describe dependencies in the direction **provider → dependent**.
-An arrow therefore points to the component that consumes the other component.
+Dependency arrows in the historical analysis use **provider -> dependent**: an
+arrow points to the component that consumes the provider.
 
-## Documents
+## Read this first
 
-- [Coupling analysis](coupling-analysis.md): baseline at commit
-  `949d7e044ae65837fc02e6387701b10e7c15ddc6`, scoring method, complete
-  dependency matrix, architectural interpretation, and supporting evidence.
-- [Working plan](work-plan.md): living document for milestones, current work,
-  decisions, risks, and validation results.
-- [Dependency graph](dependency-graph.svg): full directed graph. A V arrowhead
-  denotes low coupling, an open triangle medium coupling, and a filled triangle
-  high coupling. Two arrowheads denote a mutual dependency; each end retains
-  its own coupling level.
-- [Dependency summary](dependency-summary.csv): one row for every direct
-  inter-directory dependency.
-- [Include evidence](include-evidence.csv): source location for every include
-  directive used by the analysis.
+- [Current state](current-state.md): verified repository structure as of
+  2026-10-03, the target Foundation boundary, and the residual
+  `algebra`/`function` dependencies that must be removed.
+- [Working plan](work-plan.md): ordered implementation plan for producing
+  `ariadne-cps/foundation`.
 
-## Current conclusion
+## Historical baseline
 
-The baseline at `949d7e...` contained one strongly connected component across
-all ten source directories, with 55 direct dependency relations: 9 high,
-35 medium, and 11 low. Those measurements remain the historical reference.
+The following files describe the baseline captured on 2026-09-29 at
+`949d7e044ae65837fc02e6387701b10e7c15ddc6`. They are intentionally retained
+as historical evidence and are **not** the current dependency graph:
 
-The current `decoupling` branch has progressed beyond that baseline. Foundation
-has been made dependent only on Utility, extracted to
-`ariadne-cps/foundation`, validated by standalone Unix/Windows/Coverage CI,
-and re-integrated into Ariadne as a pinned submodule. The two small backward
-includes from geometry/dynamics into hybrid have also been removed, and Tensor
-graphics support has been moved out of algebra.
+- [Coupling analysis](coupling-analysis.md)
+- [Dependency graph](dependency-graph.svg)
+- [Dependency summary](dependency-summary.csv)
+- [Include evidence](include-evidence.csv)
 
-The remaining work follows the same pattern: remove backward implementation
-dependencies, make target boundaries explicit, validate components independently,
-and extract repositories only after those boundaries are enforced.
+At that baseline all ten source directories formed one strongly connected
+component with 55 direct dependency relations.
 
+## Current direction
+
+The decoupling work has moved to `main`; the working branch for the next step
+is `decouple-foundation`.
+
+Interval has already been removed from `source/geometry` and is consumed from
+the standalone `ariadne-cps/interval` repository. The next package boundary is
+Foundation: it will contain the current `algebra` and `function` modules and
+will depend on `configuration` and `interval`.
+
+The immediate task is therefore not repository movement. It is to remove every
+remaining semantic dependency from algebra/function to Ariadne modules that
+will stay outside Foundation. In particular, logging is not an intended
+Foundation dependency; the one direct include currently found in
+`function/calculus_base.hpp` is unused and should be treated as cleanup.

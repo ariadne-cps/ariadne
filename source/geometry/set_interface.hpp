@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "geometry/declarations.hpp"
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "utility/writable.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function_traits.hpp"

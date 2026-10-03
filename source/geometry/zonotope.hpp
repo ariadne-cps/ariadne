@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 #include "geometry/declarations.hpp"
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

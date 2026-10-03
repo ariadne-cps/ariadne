@@ -33,7 +33,7 @@
 
 #include "expansion.hpp"
 #include "expansion.inl.hpp"
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 
 namespace Ariadne {
 

@@ -40,7 +40,7 @@
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
 

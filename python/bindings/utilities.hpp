@@ -37,7 +37,7 @@
 #include "numeric/declarations.hpp"
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
-#include "paradigm/representation.hpp"
+#include "foundation/representation.hpp"
 #include "geometry/declarations.hpp"
 #include "utility/metaprogramming.hpp"
 

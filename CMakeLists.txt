@@ -49,7 +49,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric/submodules/paradigm|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric/submodules/foundation|submodules/utility"
     )
 endif()
 
@@ -81,7 +81,7 @@ add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
-    $<TARGET_OBJECTS:PARADIGM_SRC>
+    $<TARGET_OBJECTS:FOUNDATION_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:THREADING_SRC>
@@ -91,7 +91,7 @@ add_library(ariadne-core SHARED
 )
 
 add_library(ariadne-kernel SHARED
-    $<TARGET_OBJECTS:PARADIGM_SRC>
+    $<TARGET_OBJECTS:FOUNDATION_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -106,7 +106,7 @@ add_library(ariadne-kernel SHARED
 )
 
 add_library(ariadne SHARED
-    $<TARGET_OBJECTS:PARADIGM_SRC>
+    $<TARGET_OBJECTS:FOUNDATION_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -186,13 +186,13 @@ install(FILES
     ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
     DESTINATION lib/cmake/Ariadne
 )
-get_target_property(PARADIGM_SOURCE_DIR paradigm SOURCE_DIR)
+get_target_property(FOUNDATION_SOURCE_DIR foundation SOURCE_DIR)
 get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
 get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
 get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
 
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY "${PARADIGM_SOURCE_DIR}/include/paradigm" DESTINATION include/ariadne)
+install(DIRECTORY "${FOUNDATION_SOURCE_DIR}/include/foundation" DESTINATION include/ariadne)
 install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
 install(DIRECTORY "${INTERVAL_SOURCE_DIR}/include/interval" DESTINATION include/ariadne)
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)

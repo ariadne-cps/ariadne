@@ -29,7 +29,7 @@
 #include "utility/typedefs.hpp"
 
 #include "utility/metaprogramming.hpp"
-#include "paradigm/logical.decl.hpp"
+#include "foundation/logical.decl.hpp"
 
 namespace Ariadne {
 

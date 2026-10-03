@@ -30,7 +30,7 @@
 #include <iomanip>
 #include <functional>
 
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 #include "dynamics/orbit.hpp"

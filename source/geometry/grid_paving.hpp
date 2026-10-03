@@ -35,7 +35,7 @@
 
 #include <memory>
 
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "utility/array.hpp"
 #include "utility/iterator.hpp"
 

@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "geometry/box.hpp"
 #include "utility/handle.hpp"
 #include "geometry/set.decl.hpp"

@@ -31,7 +31,7 @@
 #include "utility/stlio.hpp"
 
 #include "utility/macros.hpp"
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "numeric/numeric.hpp"
 
 #include "geometry/binary_tree.hpp"

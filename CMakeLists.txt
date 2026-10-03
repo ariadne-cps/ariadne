@@ -80,31 +80,6 @@ add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
-add_library(ariadne-core SHARED
-    $<TARGET_OBJECTS:FOUNDATION_SRC>
-    $<TARGET_OBJECTS:NUMERIC_SRC>
-    $<TARGET_OBJECTS:ariadne-algebra>
-    $<TARGET_OBJECTS:THREADING_SRC>
-    $<TARGET_OBJECTS:LOGGING_SRC>
-    $<TARGET_OBJECTS:UTILITY_SRC>
-    $<TARGET_OBJECTS:INTERVAL_SRC>
-)
-
-add_library(ariadne-kernel SHARED
-    $<TARGET_OBJECTS:FOUNDATION_SRC>
-    $<TARGET_OBJECTS:NUMERIC_SRC>
-    $<TARGET_OBJECTS:ariadne-algebra>
-    $<TARGET_OBJECTS:ariadne-function>
-    $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-solving>
-    $<TARGET_OBJECTS:ariadne-io>
-    $<TARGET_OBJECTS:ariadne-symbolic>
-    $<TARGET_OBJECTS:THREADING_SRC>
-    $<TARGET_OBJECTS:LOGGING_SRC>
-    $<TARGET_OBJECTS:UTILITY_SRC>
-    $<TARGET_OBJECTS:INTERVAL_SRC>
-)
-
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:FOUNDATION_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
@@ -133,8 +108,6 @@ target_link_libraries(ariadne PUBLIC
     $<INSTALL_INTERFACE:MPFR::MPFR>
 )
 target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core PUBLIC $<BUILD_INTERFACE:threading> $<BUILD_INTERFACE:interval> PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 
 set(_ariadne_coverage_filter_args)
 if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
@@ -155,7 +128,6 @@ add_subdirectory(python)
 
 if(CAIRO_FOUND)
     target_link_libraries(ariadne PUBLIC Cairo::Cairo)
-    target_link_libraries(ariadne-kernel PRIVATE ${CAIRO_LIBRARIES})
 endif()
 
 configure_package_config_file(

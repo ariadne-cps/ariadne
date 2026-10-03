@@ -31,7 +31,7 @@
 
 #include "utility/container.hpp"
 
-#include "paradigm/logical.hpp"
+#include "foundation/logical.hpp"
 #include "numeric/floatdp.hpp"
 #include "interval/interval.hpp"
 #include "geometry/point.hpp"

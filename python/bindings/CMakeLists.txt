@@ -1,13 +1,6 @@
 include_directories(${Python3_INCLUDE_DIRS})
 
 get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
-get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
-get_target_property(INTERVAL_SOURCE_DIR interval SOURCE_DIR)
-include_directories(
-    "${PYTHON_COMMON_SOURCE_DIR}/include"
-    "${NUMERIC_SOURCE_DIR}/python/bindings"
-    "${INTERVAL_SOURCE_DIR}/python/bindings"
-)
 
 message(STATUS "Please note that you need to use the Python 3 interpreter to import pyariadne correctly.")
 
@@ -41,6 +34,10 @@ foreach(target
     pyariadne-extra-submodule-obj
     pyariadne-module-obj
 )
+    target_include_directories(${target} PRIVATE
+        "${PYTHON_COMMON_SOURCE_DIR}/include"
+        $<TARGET_PROPERTY:pyariadne-interval,INTERFACE_INCLUDE_DIRECTORIES>
+    )
     target_link_libraries(${target} PRIVATE
         ariadne
         pyariadne-python-common

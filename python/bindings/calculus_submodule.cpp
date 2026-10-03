@@ -115,10 +115,6 @@ ValidatedVectorMultivariateTaylorFunctionModelDP __getslice__(const ValidatedVec
 
 
 
-template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< X >& repr) {
-    return os << repr.reference();
-}
-
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<MultiIndex,X> >& repr) {
     const Expansion<MultiIndex,X>& exp=repr.reference();
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {

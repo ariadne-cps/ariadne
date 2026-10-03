@@ -30,7 +30,7 @@
 #define ARIADNE_PYTHON_ARIADNE_UTILITIES_HPP
 
 #include "pybind11.hpp"
-#include "numeric-utilities.hpp"
+#include "interval-utilities.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"

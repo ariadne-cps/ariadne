@@ -26,6 +26,14 @@ aggregator.
 - [x] Update Numeric to consume `submodules/foundation`, target
       `foundation`, `FOUNDATION_SRC`, Python Foundation targets, and
       `foundation/...` includes.
+- [x] Layer the Python binding interfaces as
+      `pyariadne-foundation -> pyariadne-numeric -> pyariadne-interval -> pyariadne`.
+- [x] Make each Python layer consume only the aggregate binding
+      interface/header of its direct lower-level repository, with no manual
+      references to nested submodule binding paths.
+- [x] Start reducing Ariadne `python/bindings/utilities.hpp` to
+      Ariadne-specific helpers by removing copies already owned by
+      python-common/Foundation/Numeric/Interval.
 - [ ] Promote the coordinated Foundation/Numeric revisions and cascade updated
       pins through Interval and Ariadne.
 
@@ -77,9 +85,16 @@ For every boundary change:
 
 1. compile affected public headers in isolation;
 2. build the component without sibling include leakage;
-3. run focused tests;
-4. run Ariadne integration tests;
-5. record the removed dependency edge here.
+3. for Python bindings, consume only the aggregate `pyariadne-<direct-dependency>`
+   interface and direct dependency's aggregate Python header; never add include
+   paths or source references to nested submodules;
+4. keep each layer's Python utility header minimal: move or remove helpers that
+   are already owned by a lower layer instead of duplicating them;
+5. run focused tests;
+6. run Ariadne integration tests;
+7. record the removed dependency edge here.
 
 Do not treat successful aggregate Ariadne linkage as proof of a valid standalone
-boundary.
+boundary. In particular, a Python build is not considered decoupled if it works
+only because transitive repositories have been exposed manually through nested
+submodule paths.

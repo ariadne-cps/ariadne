@@ -29,6 +29,47 @@ semantic names.
 Numeric consumes Foundation as `submodules/foundation`, links the
 `foundation` target, and aggregates `FOUNDATION_SRC`.
 
+## Python binding layering
+
+Python bindings follow the same repository layering as the C++ libraries:
+
+```text
+pyariadne-foundation
+  -> pyariadne-numeric
+       -> pyariadne-interval
+            -> pyariadne
+```
+
+Each layer has two responsibilities:
+
+1. own and compile the Python bindings for that component;
+2. expose an aggregate Python interface for the next layer, including the
+   binding include requirements inherited from its direct lower dependency.
+
+A consumer must know only its **direct** lower-level Python dependency. It must
+not reach through that dependency to nested repositories with paths such as
+`submodules/.../submodules/...`, nor manually add binding include directories
+for transitive components.
+
+Concretely, Ariadne consumes the Interval Python binding surface only. Its local
+`python/bindings/utilities.hpp` includes the aggregate Interval utility header,
+which in turn obtains Numeric and Foundation Python support through the lower
+layers. Ariadne must therefore contain no direct Python include-path knowledge of
+Numeric or Foundation.
+
+The same rule applies recursively: Interval consumes Numeric's Python surface;
+Numeric consumes Foundation's Python surface. The public `pyariadne-<component>`
+INTERFACE target is responsible for propagating what the next layer needs.
+
+This layering is also being used to shrink
+`ariadne/python/bindings/utilities.hpp`. It must contain only helpers belonging
+to the Ariadne layer. Generic Python machinery belongs in python-common;
+representation helpers belong in Foundation; numeric operators and arithmetic
+binding helpers belong in Numeric; interval-specific representations belong in
+Interval. Duplicating these definitions in Ariadne is a boundary violation and
+can also produce C++ redefinition errors once the lower aggregate headers are
+correctly visible.
+
 ## Algebra
 
 Algebra has a real dependency on Interval. Current examples include
@@ -67,3 +108,8 @@ integration code.
 A repository boundary is ready only when the component configures, builds its
 public headers and implementation, runs focused tests, and is consumable
 externally using only declared lower-level dependencies.
+
+For Python bindings, validation additionally requires that the component builds
+when given only the aggregate Python interface of its direct lower repository.
+A successful build that relies on manually exposed nested-submodule include
+paths does not validate the boundary.

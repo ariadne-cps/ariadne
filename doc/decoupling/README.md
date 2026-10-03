@@ -41,6 +41,18 @@ utility
 
 Configuration remains shared build infrastructure where required.
 
+The same one-level dependency rule applies to the Python bindings. Each repository
+exports an aggregate `pyariadne-<component>` interface and its component-level
+Python utility/header surface. A higher layer consumes only the Python interface
+of its **direct** lower-level repository; it must not add include paths or source
+references into nested submodules. Lower-level Python binding requirements are
+propagated transitively by the direct dependency.
+
+As part of this work, Ariadne's `python/bindings/utilities.hpp` is being reduced
+to Ariadne-specific helpers only. Helpers already owned by python-common,
+Foundation, Numeric or Interval are included through the direct Interval Python
+surface rather than copied or redefined in Ariadne.
+
 Interval is already standalone. The next architectural task is to make Algebra
 independent of Function, extract Algebra above Interval, then make Function
 independent of the Ariadne modules that must remain above it before extracting

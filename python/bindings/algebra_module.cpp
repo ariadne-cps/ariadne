@@ -24,13 +24,13 @@
 
 #include "pybind11.hpp"
 
-void paradigm_submodule(pybind11::module&);
+void foundation_submodule(pybind11::module&);
 void numeric_submodule(pybind11::module&);
 void linear_algebra_submodule(pybind11::module&);
 void differentiation_submodule(pybind11::module&);
 
 PYBIND11_MODULE(pyariadne_algebra, module) {
-    paradigm_submodule(module);
+    foundation_submodule(module);
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);

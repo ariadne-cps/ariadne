@@ -2,7 +2,7 @@
 
 Baseline analysis dated September 29, 2026, branch `master`, commit `949d7e044ae65837fc02e6387701b10e7c15ddc6`.
 
-> **Historical baseline.** The measurements and dependency grades in this document describe the baseline commit above. They are intentionally retained as the reference point for the decoupling work and do **not** describe the current repository graph. As of 2026-10-03, Interval has been extracted to `ariadne-cps/interval` and removed from `source/geometry`; the next target is a new `ariadne-cps/foundation` containing the current algebra and function modules. See `current-state.md` for the verified current structure.
+> **Historical baseline.** The measurements and dependency grades in this document describe the baseline commit above and do **not** describe the current repository graph. As of 2026-10-03, Interval is standalone and the former `ariadne-cps/paradigm` repository has been renamed to `ariadne-cps/foundation`. Foundation remains the low-level logical/computational package; Algebra and Function are planned as separate repositories above Interval and Algebra respectively. See `current-state.md` for the active structure.
 
 ## Result
 

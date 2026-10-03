@@ -26,18 +26,17 @@
  *  Commonly used inline methods for the Python interface.
  */
 
-#ifndef ARIADNE_PYTHON_UTILITIES_HPP
-#define ARIADNE_PYTHON_UTILITIES_HPP
+#ifndef ARIADNE_PYTHON_ARIADNE_UTILITIES_HPP
+#define ARIADNE_PYTHON_ARIADNE_UTILITIES_HPP
 
 #include "pybind11.hpp"
+#include "numeric-utilities.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
-#include "numeric/declarations.hpp"
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
-#include "foundation/representation.hpp"
 #include "geometry/declarations.hpp"
 #include "utility/metaprogramming.hpp"
 
@@ -45,99 +44,7 @@
 
 namespace Ariadne {
 
-template<class T> struct PythonClassName;
-template<class T> inline std::string python_class_name() { return PythonClassName<T>().get(); }
-template<class T> inline std::string python_template_class_name(std::string str) { return python_class_name<T>()+str; }
-
-template<template<class...>class> struct PythonTemplateName;
-template<template<class...>class T> inline std::string python_template_name() { return PythonTemplateName<T>::get(); }
-
-} // namespace Ariadne
-
-
-namespace PyBind11 __attribute__((visibility("hidden"))) {
-
-template<template<class...>class T> class Template { };
-
-template<class V, class K> void as_instantiate_template(pybind11::module const& module, pybind11::dict& instantiations) {
-    instantiations[module.attr(Ariadne::python_class_name<K>().c_str())]=module.attr(Ariadne::python_class_name<V>().c_str());
-}
-
-template<template<class...>class T, class K> void instantiate(pybind11::module const& module, pybind11::dict& instantiations) {
-    instantiations[module.attr(Ariadne::python_class_name<K>().c_str())]=module.attr(Ariadne::python_class_name<T<K>>().c_str());
-}
-template<template<class...>class T, class K1, class K2> static inline void instantiate(pybind11::module const& module, pybind11::dict& instantiations) {
-    pybind11::tuple tuple_name=pybind11::make_tuple( module.attr(Ariadne::python_class_name<K1>().c_str()),
-                                                     module.attr(Ariadne::python_class_name<K2>().c_str()) );
-    instantiations[tuple_name]=module.attr(Ariadne::python_class_name<T<K1,K2>>().c_str());
-}
-
-template<template<class...>class T, class... KS> void instantiate_template(pybind11::module const& module, pybind11::dict& instantiations) {
-    instantiate<T,KS...>(module,instantiations);
-}
-
-template<template<class...>class T> class template_ : public pybind11::class_<Template<T>> {
-    pybind11::module _module;
-    pybind11::dict _instantiations;
-  public:
-    static pybind11::class_<Template<T>> _get_class(pybind11::module m, const char* n) {
-        if (pybind11::hasattr(m,n)) { return m.attr(n); } else { return pybind11::class_<Template<T>>(m,n); } }
-    static pybind11::dict _get_instantiations(pybind11::class_<Template<T>> cls) {
-        if (pybind11::hasattr(cls,"_instantiations")) { return cls.attr("_instantiations"); } else { return pybind11::dict(); } }
-    template_(pybind11::module m, const char* name=Ariadne::python_template_name<T>().c_str())
-        : pybind11::class_<Template<T>>(_get_class(m,name)), _module(m), _instantiations(_get_instantiations(*this)) { }
-    ~template_() {
-        this->attr("_instantiations")=this->_instantiations;
-        this->_def_class_getitem(this->_instantiations); }
-//    template<class K> void instantiate(pybind11::class_<K> key, pybind11::class_<T<K>> value) {
-//        _instantiations[key]=value; }
-    template<class V, class... K> void as_instantiate() {
-        as_instantiate_template<V,K...>(this->_module,this->_instantiations); }
-    template<class... K> void instantiate() {
-        instantiate_template<T,K...>(this->_module,this->_instantiations); }
-    void instantiate(const char* k, const char* v) {
-        pybind11::object key=this->_module.attr(k);
-        pybind11::object value=this->_module.attr(v);
-        _instantiations[key]=value; }
-    void instantiate(std::string k, std::string v) {
-        this->instantiate(k.c_str(),v.c_str()); }
-    template<class F> void def_new(F&& f) {
-        this->_def_new(std::forward<F>(f), (pybind11::detail::function_signature_t<F>*) nullptr); }
-  private:
-    template<class F, class R, class... ARGS> void _def_new(F&& f, R(*)(ARGS...)) {
-        this->def("__new__", [&f](pybind11::object, ARGS... args){return f(args...);}); }
-  private:
-    template<template<class...>class TM, class X> static inline void _instantiate_template(pybind11::module const& module, pybind11::dict const& t) {
-        t[module.attr(Ariadne::python_class_name<X>().c_str())]=module.attr(Ariadne::python_class_name<TM<X>>().c_str());
-    }
-    template<template<class,class>class TM, class X1, class X2> static inline void _instantiate_template(pybind11::module const& module, pybind11::dict const& t) {
-        pybind11::tuple tuple_name=pybind11::make_tuple( module.attr(Ariadne::python_class_name<X1>().c_str()),
-                                                         module.attr(Ariadne::python_class_name<X2>().c_str()) );
-        t[tuple_name]=module.attr(Ariadne::python_class_name<TM<X1,X2>>().c_str());
-    }
-  private:
-      void _def_class_getitem(pybind11::dict instantiations) {
-        this->def_static("__class_getitem__", [instantiations](pybind11::object key) {
-            return instantiations[key]; } ); }
-};
-
-} // namespace PyBind11
-
-
-
-namespace Ariadne {
-
 using namespace PyBind11;
-
-#define __py_div__ (PY_MAJOR_VERSION>=3) ? "__truediv__" : "__div__"
-#define __py_rdiv__ (PY_MAJOR_VERSION>=3) ? "__rtruediv__" : "__rdiv__"
-
-class String;
-template<class X> String class_name();
-
-
-
-
 
 
 inline uint pyindex(int i, uint n) { return (i>=0) ? static_cast<uint>(i) : (n-static_cast<uint>(-i)); }
@@ -163,72 +70,6 @@ Void __setitem2__(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 
-template<class A> bool __bool__(const A& a) { return static_cast<bool>(a); }
-
-template<class A, class RET=Return<decltype(+declval<A>())>>
-ReturnType<RET> __pos__(const A& a) { return static_cast<ReturnType<RET>>(+a); }
-
-template<class A, class RET=Return<decltype(-declval<A>())>>
-ReturnType<RET> __neg__(const A& a) { return static_cast<ReturnType<RET>>(-a); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()+declval<A2>())>>
-ReturnType<RET> __add__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1+a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()-declval<A2>())>>
-ReturnType<RET> __sub__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1-a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()*declval<A2>())>>
-ReturnType<RET> __mul__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1*a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()/declval<A2>())>>
-ReturnType<RET> __div__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1/a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A2>()+declval<A1>())>>
-ReturnType<RET> __radd__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a2+a1); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A2>()-declval<A1>())>>
-ReturnType<RET> __rsub__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a2-a1); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A2>()*declval<A1>())>>
-ReturnType<RET> __rmul__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a2*a1); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A2>()/declval<A1>())>>
-ReturnType<RET> __rdiv__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a2/a1); }
-
-template<class A1, class A2, class RET=Return<decltype(pow(declval<A1>(),declval<A2>()))>>
-ReturnType<RET> __pow__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(pow(a1,a2)); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()&&declval<A2>())>>
-ReturnType<RET> __and__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1 && a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()||declval<A2>())>>
-ReturnType<RET> __or__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1 || a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()|declval<A2>())>>
-ReturnType<RET> __bitor__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1 | a2); }
-
-template<class A, class RET=Return<decltype(!declval<A>())>>
-ReturnType<RET> __not__(const A& a) { return static_cast<ReturnType<RET>>(!a); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()==declval<A2>())>>
-ReturnType<RET> __eq__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1==a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()!=declval<A2>())>>
-ReturnType<RET> __ne__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1!=a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()>declval<A2>())>>
-ReturnType<RET> __gt__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1>a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()<declval<A2>())>>
-ReturnType<RET> __lt__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1<a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()>=declval<A2>())>>
-ReturnType<RET> __ge__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1>=a2); }
-
-template<class A1, class A2, class RET=Return<decltype(declval<A1>()<=declval<A2>())>>
-ReturnType<RET> __le__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1<=a2); }
-
-
 template<class A1, class A2>
 A1& __iadd__(A1& a1, const A2& a2) { return a1+=a2; }
 
@@ -240,40 +81,6 @@ A1& __imul__(A1& a1, const A2& a2) { return a1*=a2; }
 
 template<class A1, class A2>
 A1& __idiv__(A1& a1, const A2& a2) { return a1/=a2; }
-
-template<class... AS> auto _add_(AS const& ... as) -> decltype(add(as...)) { return add(as...); }
-template<class... AS> auto _sub_(AS const& ... as) -> decltype(sub(as...)) { return sub(as...); }
-template<class... AS> auto _mul_(AS const& ... as) -> decltype(mul(as...)) { return mul(as...); }
-template<class... AS> auto _div_(AS const& ... as) -> decltype(div(as...)) { return div(as...); }
-template<class... AS> auto _fma_(AS const& ... as) -> decltype(fma(as...)) { return fma(as...); }
-
-template<class... AS> auto _nul_(AS const& ... as) -> decltype(nul(as...)) { return nul(as...); }
-template<class... AS> auto _pos_(AS const& ... as) -> decltype(pos(as...)) { return pos(as...); }
-template<class... AS> auto _neg_(AS const& ... as) -> decltype(neg(as...)) { return neg(as...); }
-template<class... AS> auto _hlf_(AS const& ... as) -> decltype(hlf(as...)) { return hlf(as...); }
-template<class... AS> auto _rec_(AS const& ... as) -> decltype(rec(as...)) { return rec(as...); }
-template<class... AS> auto _sqr_(AS const& ... as) -> decltype(sqr(as...)) { return sqr(as...); }
-template<class... AS> auto _pow_(AS const& ... as) -> decltype(pow(as...)) { return pow(as...); }
-template<class... AS> auto _sqrt_(AS const& ... as) -> decltype(sqrt(as...)) { return sqrt(as...); }
-template<class... AS> auto _exp_(AS const& ... as) -> decltype(exp(as...)) { return exp(as...); }
-template<class... AS> auto _log_(AS const& ... as) -> decltype(log(as...)) { return log(as...); }
-template<class... AS> auto _sin_(AS const& ... as) -> decltype(sin(as...)) { return sin(as...); }
-template<class... AS> auto _cos_(AS const& ... as) -> decltype(cos(as...)) { return cos(as...); }
-template<class... AS> auto _tan_(AS const& ... as) -> decltype(tan(as...)) { return tan(as...); }
-template<class... AS> auto _asin_(AS const& ... as) -> decltype(asin(as...)) { return asin(as...); }
-template<class... AS> auto _acos_(AS const& ... as) -> decltype(acos(as...)) { return acos(as...); }
-template<class... AS> auto _atan_(AS const& ... as) -> decltype(atan(as...)) { return atan(as...); }
-template<class... AS> auto _max_(AS const& ... as) -> decltype(max(as...)) { return max(as...); }
-template<class... AS> auto _min_(AS const& ... as) -> decltype(min(as...)) { return min(as...); }
-template<class... AS> auto _abs_(AS const& ... as) -> decltype(abs(as...)) { return abs(as...); }
-template<class... AS> auto _sgn_(AS const& ... as) -> decltype(sgn(as...)) { return sgn(as...); }
-template<class... AS> auto _mag_(AS const& ... as) -> decltype(mag(as...)) { return mag(as...); }
-template<class... AS> auto _mig_(AS const& ... as) -> decltype(mig(as...)) { return mig(as...); }
-template<class... AS> auto _arg_(AS const& ... as) -> decltype(arg(as...)) { return arg(as...); }
-template<class... AS> auto _conj_(AS const& ... as) -> decltype(conj(as...)) { return conj(as...); }
-template<class... AS> auto _dist_(AS const& ... as) -> decltype(dist(as...)) { return dist(as...); }
-
-template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 
 template<class F, class... AS> auto __call__(F const& f, AS... as) -> decltype(f(as...)) { return f(as...); }
 template<class... AS> auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
@@ -304,11 +111,6 @@ template<class... AS> auto _split_(AS... as) -> decltype(split(as...)) { return 
 template<class... AS> auto _derivative_(AS... as) -> decltype(derivative(as...)) { return derivative(as...); }
 template<class... AS> auto _antiderivative_(AS... as) -> decltype(antiderivative(as...)) { return antiderivative(as...); }
 
-template<class... AS> auto _coarsening_(AS... as) -> decltype(coarsening(as...)) { return coarsening(as...); }
-template<class... AS> auto _refinement_(AS... as) -> decltype(refinement(as...)) { return refinement(as...); }
-template<class... AS> auto _refines_(AS... as) -> decltype(refines(as...)) { return refines(as...); }
-template<class... AS> auto _inconsistent_(AS... as) -> decltype(inconsistent(as...)) { return inconsistent(as...); }
-
 template<class... AS> auto _widen_(AS const& ... as) -> decltype(widen(as...)) { return widen(as...); }
 
 template<class... AS> auto _contains_(AS const& ... as) -> decltype(contains(as...)) { return contains(as...); }
@@ -324,32 +126,6 @@ template<class... AS> auto _inside_(AS const& ... as) -> decltype(inside(as...))
 
 template<class... AS> auto _image_(AS const& ... as) -> decltype(image(as...)) { return image(as...); }
 template<class... AS> auto _preimage_(AS const& ... as) -> decltype(preimage(as...)) { return preimage(as...); }
-
-template<class T> std::string __cstr__(const T& t) {
-    std::stringstream ss; ss << t; return ss.str(); }
-
-template<class T> std::string __crepr__(const T& t) {
-    std::stringstream ss; ss << representation(t); return ss.str(); }
-
-
-template<class T> struct PythonRepresentation {
-    const T* pointer;
-    PythonRepresentation(const T& t) : pointer(&t) { }
-    const T& reference() const { return *pointer; }
-};
-template<class T> PythonRepresentation<T> python_representation(const T& t) {
-    return PythonRepresentation<T>(t); }
-
-template<class T> std::string __repr__(const T& t) {
-    std::stringstream ss; ss << python_representation(t); return ss.str();}
-
-template<class T> struct PythonLiteral {
-    const T* pointer;
-    PythonLiteral(const T& t) : pointer(&t) { }
-    const T& reference() const { return *pointer; }
-};
-template<class T> PythonLiteral<T> python_literal(const T& t) {
-    return PythonLiteral<T>(t); }
 
 
 } // namespace Ariadnelist
@@ -390,8 +166,6 @@ template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
 
 namespace Ariadne {
 
-template<class... TS> struct Tag { };
-
 template<class F, class T> void define_conversion(pybind11::class_<T>& pyclass) {
     if constexpr (Constructible<T,F> and not Same<T,F>) {
         pyclass.def(pybind11::init<F>());
@@ -399,90 +173,6 @@ template<class F, class T> void define_conversion(pybind11::class_<T>& pyclass) 
             pybind11::implicitly_convertible<F,T>();
         }
     }
-}
-
-template<class A> pybind11::class_<A>& define_logical(pybind11::module&, pybind11::class_<A>& pyclass) {
-    pyclass.def("__and__", &__and__<A,A>);
-    pyclass.def("__or__", &__or__<A,A>);
-    pyclass.def("__invert__", &__not__<A>);
-    return pyclass;
-}
-
-template<class X> pybind11::class_<X>& define_lattice(pybind11::module& module, pybind11::class_<X>& pyclass) {
-    module.def("abs", &_abs_<X>);
-    module.def("max", &_max_<X,X>);
-    module.def("min", &_min_<X,X>);
-    return pyclass;
-}
-
-template<class X, class Y> pybind11::class_<X>& define_mixed_lattice(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
-    module.def("max", &_max_<X,Y>);
-    module.def("max", &_max_<Y,X>);
-    module.def("min", &_min_<X,Y>);
-    module.def("min", &_min_<Y,X>);
-    return pyclass;
-}
-
-template<class X> pybind11::class_<X>& define_comparisons(pybind11::module&, pybind11::class_<X>& pyclass) {
-    pyclass.def("__eq__", &__eq__<X,X>, pybind11::is_operator());
-    pyclass.def("__ne__", &__ne__<X,X>, pybind11::is_operator());
-    pyclass.def("__le__", &__le__<X,X>, pybind11::is_operator());
-    pyclass.def("__ge__", &__ge__<X,X>, pybind11::is_operator());
-    pyclass.def("__lt__", &__lt__<X,X>, pybind11::is_operator());
-    pyclass.def("__gt__", &__gt__<X,X>, pybind11::is_operator());
-    return pyclass;
-}
-
-template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
-    pyclass.def("__eq__", &__eq__<X,Y>, pybind11::is_operator());
-    pyclass.def("__ne__", &__ne__<X,Y>, pybind11::is_operator());
-    pyclass.def("__le__", &__le__<X,Y>, pybind11::is_operator());
-    pyclass.def("__ge__", &__ge__<X,Y>, pybind11::is_operator());
-    pyclass.def("__lt__", &__lt__<X,Y>, pybind11::is_operator());
-    pyclass.def("__gt__", &__gt__<X,Y>, pybind11::is_operator());
-    pyclass.def("__eq__", &__eq__<Y,X>, pybind11::is_operator());
-    pyclass.def("__ne__", &__ne__<Y,X>, pybind11::is_operator());
-    pyclass.def("__le__", &__le__<Y,X>, pybind11::is_operator());
-    pyclass.def("__ge__", &__ge__<Y,X>, pybind11::is_operator());
-    pyclass.def("__lt__", &__lt__<Y,X>, pybind11::is_operator());
-    pyclass.def("__gt__", &__gt__<Y,X>, pybind11::is_operator());
-    return pyclass;
-}
-
-template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module&, pybind11::class_<X>& pyclass) {
-    pyclass.def("__pos__", &__pos__<X>, pybind11::is_operator());
-    pyclass.def("__neg__", &__neg__<X>, pybind11::is_operator());
-    pyclass.def("__add__", &__add__<X,X>, pybind11::is_operator());
-    pyclass.def("__sub__", &__sub__<X,X>, pybind11::is_operator());
-    pyclass.def("__mul__", &__mul__<X,X>, pybind11::is_operator());
-    if constexpr(CanDivide<X,X>) {
-        pyclass.def(__py_div__, &__div__<X,X>, pybind11::is_operator());
-    }
-
-    pyclass.def("__radd__", &__radd__<X,X>, pybind11::is_operator());
-    pyclass.def("__rsub__", &__rsub__<X,X>, pybind11::is_operator());
-    pyclass.def("__rmul__", &__rmul__<X,X>, pybind11::is_operator());
-    if constexpr(CanDivide<X,X>) {
-        pyclass.def(__py_rdiv__, &__rdiv__<X,X>, pybind11::is_operator());
-    }
-
-    return pyclass;
-}
-
-template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
-    pyclass.def("__add__", &__add__<X,Y>, pybind11::is_operator());
-    pyclass.def("__radd__", &__radd__<X,Y>, pybind11::is_operator());
-    pyclass.def("__sub__", &__sub__<X,Y>, pybind11::is_operator());
-    pyclass.def("__rsub__", &__rsub__<X,Y>, pybind11::is_operator());
-    pyclass.def("__mul__", &__mul__<X,Y>, pybind11::is_operator());
-    pyclass.def("__rmul__", &__rmul__<X,Y>, pybind11::is_operator());
-    if constexpr(CanDivide<X,Y>) {
-        pyclass.def(__py_div__, &__div__<X,Y>, pybind11::is_operator());
-    }
-    if constexpr(CanDivide<Y,X>) {
-        pyclass.def(__py_rdiv__, &__rdiv__<X,Y>, pybind11::is_operator());
-    }
-    return pyclass;
 }
 
 template<class X, class Y>
@@ -493,58 +183,6 @@ pybind11::class_<X>& define_inplace_arithmetic(pybind11::module& module, pybind1
     module.def("__idiv__", &__idiv__<X,Y>);
     return pyclass;
 }
-
-
-template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& module, pybind11::class_<X>& pyclass) {
-    module.def("nul", &_nul_<X>);
-    module.def("pos", &_pos_<X>);
-    module.def("neg", &_neg_<X>);
-    module.def("sqr", &_sqr_<X>);
-    module.def("hlf", &_hlf_<X>);
-    module.def("rec", &_rec_<X>);
-    module.def("pow", &_pow_<X,Int>);
-    module.def("sqrt", &_sqrt_<X>);
-    module.def("exp", &_exp_<X>);
-    module.def("log", &_log_<X>);
-    module.def("sin", &_sin_<X>);
-    module.def("cos", &_cos_<X>);
-    module.def("tan", &_tan_<X>);
-    module.def("asin", &_asin_<X>);
-    module.def("acos", &_acos_<X>);
-    module.def("atan", &_atan_<X>);
-    return pyclass;
-}
-
-template<class X> pybind11::class_<X>& define_elementary(pybind11::module& module, pybind11::class_<X>& pyclass) {
-    define_arithmetic(module,pyclass);
-    define_transcendental(module,pyclass);
-    return pyclass;
-}
-
-
-template<class X> pybind11::class_<X>& define_monotonic(pybind11::module& module, pybind11::class_<X>& pyclass) {
-    using NX = decltype(-declval<X>());
-    pyclass.def("__pos__", &__pos__<X>, pybind11::is_operator());
-    pyclass.def("__neg__", &__neg__<X>, pybind11::is_operator());
-    pyclass.def("__add__", &__add__<X,X>, pybind11::is_operator());
-    pyclass.def("__sub__", &__sub__<X,NX>, pybind11::is_operator());
-    module.def("sqrt", &_sqrt_<X>);
-    module.def("exp", &_exp_<X>);
-    module.def("log", &_log_<X>);
-    module.def("atan", &_atan_<X>);
-    return pyclass;
-}
-
-template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11::module&, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
-    using NY = decltype(-declval<Y>());
-    pyclass.def("__add__", &__add__<X,Y>, pybind11::is_operator());
-    pyclass.def("__radd__", &__radd__<X,Y>, pybind11::is_operator());
-    pyclass.def("__sub__", &__sub__<X,NY>, pybind11::is_operator());
-    pyclass.def("__rsub__", &__rsub__<X,NY>, pybind11::is_operator());
-    return pyclass;
-}
-
-
 
 template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {
     define_arithmetic(module,pyclass);
@@ -734,4 +372,4 @@ pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std
 }
 
 
-#endif /* ARIADNE_PYTHON_UTILITIES_HPP */
+#endif /* ARIADNE_PYTHON_ARIADNE_UTILITIES_HPP */

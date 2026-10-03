@@ -416,40 +416,19 @@ template<class A> A NormedAlgebraOperations<A>::apply(Tanh, const A& x)
 template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
-*/
+
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
-*/
+
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
-*/
+
 }
 
 

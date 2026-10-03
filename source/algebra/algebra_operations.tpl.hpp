@@ -52,6 +52,128 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 
 
 
+// Compose using the Taylor formula directly. The final term is the Taylor series computed
+// over the range of the series. This method tends to suffer from blow-up of the
+// truncation error
+template<ANormedAlgebra A> A _compose1(const AnalyticFunction& fn, const A& tm, double eps)
+{
+    static const Nat DEGREE=18;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
+    Nat d=DEGREE;
+    FloatDP c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
+
+    FloatDPUpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
+                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
+    }
+
+    A x=tm-c;
+    A res(tm.argument_size(),tm.accuracy_ptr());
+    res+=range_series[d];
+    for(Nat i=0; i!=d; ++i) {
+        //std::cerr<<"i="<<i<<" r="<<res<<"\n";
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
+    }
+    //std::cerr<<"i="<<d<<" r="<<res<<"\n";
+    return res;
+}
+
+// Compose using the Taylor formula with a constant truncation error. This method
+// is usually better than _compose1 since there is no blow-up of the trunction
+// error. The radius of convergence of this method is still quite low,
+// typically only half of the radius of convergence of the power series itself
+template<ANormedAlgebra A> A _compose2(const AnalyticFunction& fn, const A& tm, double eps)
+{
+    static const Nat DEGREE=20;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
+    Nat d=DEGREE;
+    FloatDP c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
+
+    //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
+    //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
+    //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+    FloatDPError truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    //std::cerr<<"te="<<truncation_error<<"\n";
+    if(truncation_error.raw()>TRUNCATION_ERROR) {
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
+    }
+
+    A x=tm-c;
+    A res(tm.argument_size(),tm.accuracy_ptr());
+    res+=centre_series[d];
+    for(Nat i=0; i!=d; ++i) {
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
+    }
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
+    return res;
+}
+
+template<class F> Error<F> error_bound(Bounds<F> const& b, F const& c) {
+    return Error<F>(max(b.upper()-c,c-b.lower()));
+}
+
+template<class F> Error<F> error_bound(Bounds<F> const& b, Bounds<F> const& c) {
+    return Error<F>(max(b.upper()-c.lower(),c.upper()-b.lower()));
+}
+
+// Compose using the Taylor formula with a constant truncation error. This method
+// is usually better than _compose1 since there is no blow-up of the trunction
+// error. This method is better than _compose2 since the truncation error is
+// assumed at the ends of the intervals
+template<ANormedAlgebra A> A _compose3(const AnalyticFunction& fn, const A& tm, FloatDP)
+{
+    static const Nat DEGREE=20;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
+    Nat d=DEGREE;
+    FloatDP c=tm.value();
+    FloatDPBounds r=tm.range();
+    Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
+    Series<FloatDPBounds> range_series=fn.series(r);
+
+    //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
+    //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
+    //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+    FloatDPError se=error_bound(range_series[d],centre_series[d]);
+    FloatDPError e=error_bound(r,c);
+    FloatDPError p=pow(e,d);
+    //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
+    // FIXME: Here we assume the dth derivative of f is monotone increasing
+    FloatDP truncation_error=(se*p).raw();
+    //std::cerr<<"te="<<truncation_error<<"\n";
+    if(truncation_error>TRUNCATION_ERROR) {
+        ARIADNE_WARN("Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
+    }
+
+    A x=tm;
+    A res(tm.argument_size(),tm.accuracy_ptr());
+    res+=centre_series[d];
+    for(Nat i=0; i!=d; ++i) {
+        res=centre_series[d-i-1]+x*res;
+        //res.sweep(eps);
+    }
+    res+=FloatDPBounds(-truncation_error,+truncation_error);
+    return res;
+}
+
+
+template<ANormedAlgebra A> A _compose(const AnalyticFunction& fn, const A& tm, FloatDP eps)
+{
+    return _compose3(fn,tm,eps);
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Algebraic and trancendental functions
@@ -294,16 +416,40 @@ template<class A> A NormedAlgebraOperations<A>::apply(Tanh, const A& x)
 template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
+/*
+    static const Nat DEG=18;
+    typedef typename A::NumericType X;
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
+*/
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
+/*
+    static const Nat DEG=18;
+    typedef typename A::NumericType X;
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
+*/
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
+/*
+    static const Nat DEG=18;
+    typedef typename A::NumericType X;
+    FloatDP xavg = x.average();
+    FloatDP xrad = x.radius();
+    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
+    return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
+*/
 }
 
 

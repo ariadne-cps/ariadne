@@ -10,4 +10,5 @@ add_library(${LIBRARY_NAME} OBJECT
     algebra.cpp
 )
 
+target_link_libraries(${LIBRARY_NAME} PUBLIC interval)
 

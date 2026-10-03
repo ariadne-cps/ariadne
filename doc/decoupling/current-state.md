@@ -76,17 +76,22 @@ Algebra has a real dependency on Interval. Current examples include
 `Differential<Float*UpperInterval>`, interval-valued expansions, matrices and
 sweepers.
 
-The unwanted edge is `algebra -> function`:
+The former unwanted edge `algebra -> function` has been removed on
+`decouple-algebra`:
 
-- `algebra/graded.hpp` includes `function/procedure.hpp` for
-  `compute_procedure`;
-- `algebra/algebra_operations.tpl.hpp` includes
-  `function/taylor_series.hpp` for TaylorSeries/AnalyticFunction composition;
-- `algebra/dense_differential.cpp` includes `function/functional.hpp`, though
-  it is not currently part of the algebra object target.
+- `compute_procedure` was removed from `algebra/graded.hpp` and placed next
+  to its only consumer in the solving integrator;
+- TaylorSeries-specific composition and the
+  `function/taylor_series.hpp` include were removed from
+  `algebra/algebra_operations.tpl.hpp`; the remaining
+  `AnalyticFunction` composition is algebraic because `AnalyticFunction` is
+  defined in `algebra/series.hpp`;
+- the unnecessary `function/functional.hpp` include was removed from
+  `algebra/dense_differential.cpp`;
+- the `ariadne-algebra` target now declares Interval explicitly.
 
-These integrations must move upward so Algebra can be extracted as a repository
-built above Interval.
+Algebra source files therefore have no direct Function include. Standalone
+public-header validation remains the final proof required before extraction.
 
 ## Function
 

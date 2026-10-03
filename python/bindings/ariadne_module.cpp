@@ -34,7 +34,6 @@ void function_submodule(pybind11::module& module);
 void calculus_submodule(pybind11::module& module);
 void geometry_submodule(pybind11::module& module);
 void io_submodule(pybind11::module& module);
-void concurrency_submodule(pybind11::module& module);
 void solver_submodule(pybind11::module& module);
 void storage_submodule(pybind11::module& module);
 void symbolic_submodule(pybind11::module& module);
@@ -53,7 +52,6 @@ PYBIND11_MODULE(pyariadne, module) {
     calculus_submodule(module);
     geometry_submodule(module);
     io_submodule(module);
-    concurrency_submodule(module);
     solver_submodule(module);
     optimization_submodule(module);
     storage_submodule(module);

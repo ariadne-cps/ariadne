@@ -1,6 +1,6 @@
 
 
-# Ariadne <img align="right" src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="80"/> 
+# Ariadne <img align="right" src="https://raw.githubusercontent.com/ariadne-cps/website/master/static/img/ariadne-transparent.png" alt="Ariadne" width="80"/> 
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Unix Status](https://github.com/ariadne-cps/ariadne/actions/workflows/unix.yml/badge.svg?branch=master&event=push)](https://github.com/ariadne-cps/ariadne/actions/workflows/unix.yml) [![Coverage Status](https://github.com/ariadne-cps/ariadne/actions/workflows/coverage.yml/badge.svg?branch=master&event=push)](https://github.com/ariadne-cps/ariadne/actions/workflows/coverage.yml) [![codecov](https://codecov.io/github/ariadne-cps/ariadne/branch/master/graph/badge.svg)](https://app.codecov.io/github/ariadne-cps/ariadne?branch=master)
 

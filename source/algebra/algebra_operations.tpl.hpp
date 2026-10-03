@@ -26,7 +26,6 @@
 #include "algebra/operations.hpp"
 
 #include "algebra/series.hpp"
-#include "function/taylor_series.hpp"
 
 namespace Ariadne {
 
@@ -51,35 +50,6 @@ compose(const Series<typename A::NumericType>& x, const A& y)
     return r;
 }
 
-
-template<class X> class TaylorSeries;
-
-template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, const A& tv, double eps)
-{
-    //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
-    //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    FloatDP& vref=const_cast<FloatDP&>(tv.value());
-    FloatDP vtmp=vref;
-    vref=0;
-    A r(tv.argument_size());
-    r+=ts[ts.degree()];
-    for(Nat i=1; i<=ts.degree(); ++i) {
-        //std::cerr<<"    r="<<r<<std::endl;
-        r=r*tv;
-        r+=ts[ts.degree()-i];
-        r.sweep(eps);
-    }
-    //std::cerr<<"    r="<<r<<std::endl;
-    r+=ts.error();
-    //std::cerr<<"    r="<<r<<std::endl;
-    vref=vtmp;
-    return r;
-}
-
-template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, const A& tm)
-{
-    return _compose(ts,tm,tm.tolerance());
-}
 
 
 // Compose using the Taylor formula directly. The final term is the Taylor series computed
@@ -446,40 +416,19 @@ template<class A> A NormedAlgebraOperations<A>::apply(Tanh, const A& x)
 template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
-*/
+
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
-*/
+
 }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A&)
 {
     ARIADNE_NOT_IMPLEMENTED;
-/*
-    static const Nat DEG=18;
-    typedef typename A::NumericType X;
-    FloatDP xavg = x.average();
-    FloatDP xrad = x.radius();
-    FloatDPBounds xrng = xavg + FloatDPBounds(-xrad,+xrad);
-    return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
-*/
+
 }
 
 

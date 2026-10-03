@@ -39,12 +39,14 @@ aggregator.
 
 ## F1 - Make Algebra independent of Function
 
-- [ ] Move `compute_procedure` out of `algebra/graded.hpp`.
-- [ ] Move TaylorSeries/AnalyticFunction composition out of
-      `algebra/algebra_operations.tpl.hpp`.
-- [ ] Resolve `algebra/dense_differential.cpp`.
+- [x] Move `compute_procedure` out of `algebra/graded.hpp`.
+- [x] Remove TaylorSeries-specific composition from
+      `algebra/algebra_operations.tpl.hpp`; retain `AnalyticFunction`, which is
+      defined by Algebra itself.
+- [x] Remove the unnecessary Function include from
+      `algebra/dense_differential.cpp`.
 - [ ] Compile Algebra public headers without Function.
-- [ ] Give Algebra explicit target-level dependencies.
+- [x] Give Algebra an explicit target-level dependency on Interval.
 - [ ] Extract `ariadne-cps/algebra` above Interval.
 
 Exit criterion: Algebra depends only on its intended lower stack, with Interval

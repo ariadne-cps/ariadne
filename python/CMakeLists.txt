@@ -29,8 +29,7 @@ if(Python3_FOUND)
 
     pybind11_add_module(pyariadne
         $<TARGET_OBJECTS:pyariadne-module-obj>
-        $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
-        $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
+        $<TARGET_OBJECTS:pyariadne-bindings-obj>
     )
     target_link_libraries(pyariadne PRIVATE
         ariadne

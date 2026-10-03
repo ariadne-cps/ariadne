@@ -30,7 +30,7 @@
 #define ARIADNE_GRADED_HPP
 
 #include "utility/uniform_list.hpp"
-#include "function/procedure.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -556,11 +556,6 @@ template<class X> Graded<X> make_graded(const X& val) {
 template<class X> Graded<X> create_graded(const X&) {
     return Graded<X>(); }
 
-
-template<class X, class A> Void compute_procedure(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
-    execute(t,p,a);
-    r=Vector<Graded<A>>(p._results.size(), [&t,&p](SizeType i){return t[p._results[i]];},a.element_characteristics());
-}
 
 } // namespace Ariadne
 

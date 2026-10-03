@@ -22,8 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-
 #include "config.hpp"
 
 #include "algebra/dense_differential.hpp"

@@ -44,7 +44,7 @@
 #include "algebra/evaluate.hpp"
 #include "function/domain.hpp"
 #include "function/scaling.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 
 namespace Ariadne {
 

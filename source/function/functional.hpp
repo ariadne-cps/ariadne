@@ -36,7 +36,7 @@
 #include "algebra/differential.hpp"
 
 #include "function/affine.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/function_model.hpp"
 

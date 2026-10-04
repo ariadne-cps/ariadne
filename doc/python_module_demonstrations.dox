@@ -35,13 +35,12 @@ namespace Ariadne {
 On this page, we illustrate how to use %Ariadne via the Python interface.
 The focus is on the syntax used (which may be different from the C++ syntax) and not on how to use %Ariadne to solve problems, for which examples can be found on the \ref rigorous_numerics_tutorial_page page and the \ref python_module_tutorials_page page.
 
-First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_numerical_demonstration and \ref python_linear_algebra_demonstration sections. A guide to the nonlinear functions available is given in \ref python_function_demonstration, including a guide to the use of polynomial function calculus in \ref python_taylor_function_calculus_demonstration.
+First, a brief overview of the numerical types is given in the \ref python_numerical_demonstration section. A guide to the nonlinear functions available is given in \ref python_function_demonstration, including a guide to the use of polynomial function calculus in \ref python_taylor_function_calculus_demonstration.
 A guide to working with sets and geometry is given in \ref python_geometry_demonstration.
 Solving algebraic and differential equations, and optimisation problems is handled in \ref python_solvers_demonstration.
 
 The full code of the demonstrations are given in the following files in the \ref python/tutorials/ directory:
 \link python/tutorials/numeric_demonstration.py numeric_demonstration.py\endlink,
-\link python/tutorials/algebra_demonstration.py algebra_demonstration.py\endlink,
 \link python/tutorials/function_demonstration.py function_demonstration.py\endlink,
 \link python/tutorials/geometry_demonstration.py geometry_demonstration.py\endlink and
 \link python/tutorials/solver_demonstration.py solver_demonstration.py\endlink.
@@ -138,24 +137,6 @@ and the \ref Approximation classes support approximate arithmetic.
 \skipline =FloatMPApproximation
 
 \sa \ref NumericModule
-
-
-
-\section python_linear_algebra_demonstration Linear Algebra
-
-\dontinclude python/tutorials/algebra_demonstration.py
-
-%Ariadne supports linear algebra operations based on Vector and Matrix classes. In the C++ library, these types are parameterised by the scalar type (e.g. \ref Rational, \ref FloatDP::FloatDPBounds "FloatDPBounds"). In Python, this gives class names such as \ref Vector::RationalVector "RationalVector" and \ref Matrix::FloatDPBoundsMatrix "FloatDPBoundsMatrix".
-
-%Vector and matrix classes can be constructed using Python lists.
-\skipline Vector
-\skipline RationalMatrix
-\skipline Matrix
-
-As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine for solving systems of linear equations:
-\skipline solve
-
-\sa \ref LinearAlgebraSubModule
 
 
 
@@ -329,7 +310,6 @@ If \f$:\R^n\to\R^n\f$, \f$D\subset\R^n\f$ and \f$h>0\f$, then the operator \c fl
 /*!
 
 \example python/tutorials/numeric_demonstration.py A demonstration of the functionality of the Numeric module.
-\example python/tutorials/algebra_demonstration.py A demonstration of the functionality of the Algebra module.
 \example python/tutorials/function_demonstration.py A demonstration of the functionality of the Function module.
 \example python/tutorials/geometry_demonstration.py A demonstration of the geometryality of the Geometry module.
 \example python/tutorials/solver_demonstration.py A demonstration of the functionality of the Solver module.

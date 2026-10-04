@@ -45,7 +45,7 @@ aggregator.
       defined by Algebra itself.
 - [x] Remove the unnecessary Function include from
       `algebra/dense_differential.cpp`.
-- [ ] Compile Algebra public headers without Function as part of a completely
+- [x] Compile Algebra public headers without Function as part of a completely
       green standalone validation.
 - [x] Give Algebra an explicit target-level dependency on Interval.
 - [x] Create the standalone `ariadne-cps/algebra` repository above Interval.
@@ -55,9 +55,10 @@ aggregator.
 - [x] Complete the Chebyshev algebra-operation contract with unary `Pos`.
 - [x] Move `SweeperBase` and `RelativeSweeperBase` implementation code out
       of `function/taylor_model.tpl.hpp` and into the Algebra repository.
-- [ ] Get all standalone Algebra CI jobs green: C++, Python, installation and
+- [x] Get all standalone Algebra CI jobs green: C++, Python, installation and
       external-consumer/tutorial checks.
-- [ ] Update Ariadne to consume the validated standalone Algebra revision.
+- [x] Update Ariadne to consume the validated standalone Algebra revision and
+      remove the local Algebra implementation, duplicate bindings, and Algebra-owned tests/demonstrations.
 
 Exit criterion: Algebra depends only on its intended lower stack, with Interval
 as its immediate repository dependency, and the standalone Algebra CI is green.

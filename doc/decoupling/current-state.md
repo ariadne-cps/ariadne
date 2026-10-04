@@ -121,10 +121,13 @@ polynomial representations that semantically belong to Algebra:
   into Algebra so that sweeper vtables no longer require Function-owned
   implementation code.
 
-Standalone CI for Algebra is the current gate. Extraction is not considered
-complete until the repository builds, tests, installs, and exercises its
-external consumers using only the declared lower stack. Ariadne will be updated
-to consume the resulting Algebra revision only after that gate is green.
+Standalone Algebra CI is green and the extraction has been merged to
+`ariadne-cps/algebra:main`. Ariadne on `decouple-algebra` now consumes Algebra
+as its direct repository dependency, with Interval supplied through Algebra.
+The former local `source/algebra` tree, Function-owned Polynomial and
+ChebyshevPolynomial implementations, Sweeper implementations, duplicate Algebra
+Python bindings, and Algebra-owned tests/demonstrations have been removed from
+Ariadne.
 
 ## Function
 

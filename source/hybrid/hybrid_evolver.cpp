@@ -27,7 +27,7 @@
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/function_patch.hpp"
 #include "function/function_model.hpp"

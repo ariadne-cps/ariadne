@@ -32,7 +32,7 @@
 #include "function/function.hpp"
 #include "function/procedure.hpp"
 #include "function/constraint.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/taylor_function.hpp"
 #include "geometry/box.hpp"
 #include "geometry/grid_paving.hpp"

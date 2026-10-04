@@ -35,7 +35,7 @@
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
 #include "algebra/multi_index.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "algebra/differential.hpp"
 #include "algebra/evaluate.hpp"
 #include "function/taylor_model.hpp"

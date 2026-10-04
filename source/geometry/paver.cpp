@@ -29,7 +29,7 @@
 
 #include "utility/macros.hpp"
 #include "logging/logging.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/procedure.hpp"

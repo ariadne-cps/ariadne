@@ -42,7 +42,7 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/differential.hpp"
 #include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 
 #include "function/function_model.hpp"

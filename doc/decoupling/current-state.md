@@ -52,11 +52,11 @@ not reach through that dependency to nested repositories with paths such as
 `submodules/.../submodules/...`, nor manually add binding include directories
 for transitive components.
 
-Concretely, Ariadne consumes the Interval Python binding surface only. Its local
-`python/bindings/utilities.hpp` includes the aggregate Interval utility header,
-which in turn obtains Numeric and Foundation Python support through the lower
-layers. Ariadne must therefore contain no direct Python include-path knowledge of
-Numeric or Foundation.
+Concretely, Ariadne consumes the Algebra Python binding surface only. Its local
+`python/bindings/utilities.hpp` includes `algebra-utilities.hpp`, which obtains
+Interval, Numeric and Foundation Python support through the lower layers.
+Ariadne therefore has no direct Python include-path knowledge of those
+transitive dependencies.
 
 The same rule applies recursively: Interval consumes Numeric's Python surface;
 Numeric consumes Foundation's Python surface. The public `pyariadne-<component>`

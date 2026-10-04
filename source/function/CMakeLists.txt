@@ -2,8 +2,6 @@ set(LIBRARY_NAME ariadne-function)
 
 add_library(${LIBRARY_NAME} OBJECT
     affine.cpp
-    polynomial.cpp
-    chebyshev_polynomial.cpp
     formula.cpp
     procedure.cpp
     function.cpp

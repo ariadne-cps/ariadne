@@ -39,7 +39,7 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/differential.hpp"
 #include "function/formula.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/affine.hpp"
 #include "function/taylor_model.hpp"
 #include "function/taylor_function.hpp"
@@ -57,22 +57,8 @@
 
 namespace Ariadne {
 
-template<> struct PythonTemplateName<MultivariatePolynomial> { static std::string get() { return "MultivariatePolynomial"; } };
 template<> struct PythonTemplateName<Procedure> { static std::string get() { return "Procedure"; } };
 template<> struct PythonTemplateName<Function> { static std::string get() { return "Function"; } };
-
-template<class X> struct PythonClassName<MultivariatePolynomial<X>> { static std::string get() { return python_template_class_name<X>("MultivariatePolynomial"); } };
-
-template struct PythonClassName<MultivariatePolynomial<FloatDPApproximation>>;
-template struct PythonClassName<MultivariatePolynomial<FloatMPApproximation>>;
-template struct PythonClassName<MultivariatePolynomial<FloatDPBounds>>;
-template struct PythonClassName<MultivariatePolynomial<FloatMPBounds>>;
-
-MultiIndex multi_index_from_python(pybind11::tuple pytup) {
-    MultiIndex res(static_cast<SizeType>(len(pytup)));
-    for(SizeType i=0; i!=res.size(); ++i) { res.set(i,pybind11::cast<Nat>(pytup[i])); }
-    return res;
-}
 
 template<class P, class ARG> pybind11::object function_from_python(typename DomainTraits<ARG>::EntireDomainType dom, pybind11::object pyf) {
     Function<P,ARG(ARG)> id = Function<P,ARG(ARG)>::identity(dom);
@@ -239,74 +225,6 @@ template<class F> Void export_function_derivatives(pybind11::module module, pybi
     export_function_derivatives(module, function_class, Paradigm<F>());
 }
 
-
-Void export_multi_index(pybind11::module& module)
-{
-    pybind11::class_< MultiIndex > multi_index_class(module,"MultiIndex");
-    multi_index_class.def(pybind11::init<Nat>());
-    multi_index_class.def(pybind11::init(&multi_index_from_python));
-    multi_index_class.def(pybind11::init<MultiIndex>());
-    multi_index_class.def("__getitem__",&MultiIndex::get);
-    multi_index_class.def("__setitem__",&MultiIndex::set);
-    multi_index_class.def("degree",&MultiIndex::degree);
-    multi_index_class.def("__str__", &__cstr__<MultiIndex>);
-    multi_index_class.def("__repr__", &__repr__<MultiIndex>);
-
-    pybind11::implicitly_convertible<pybind11::tuple,MultiIndex>();
-}
-
-
-template<class X>
-pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module& module)
-{
-    pybind11::class_< MultivariateMonomial<X> > monomial_class(module,python_template_class_name<X>("MultivariateMonomial").c_str());
-    monomial_class.def(pybind11::init<MultiIndex,X>());
-    monomial_class.def("index", (MultiIndex const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::index);
-    monomial_class.def("coefficient", (X const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::coefficient);
-    monomial_class.def("__str__", &__cstr__<MultivariateMonomial<X>>);
-
-
-    pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_template_class_name<X>("MultivariatePolynomial").c_str());
-    polynomial_class.def(pybind11::init< MultivariatePolynomial<X> >());
-    polynomial_class.def_static("constant", (MultivariatePolynomial<X>(*)(SizeType,X const&)) &MultivariatePolynomial<X>::constant);
-
-    if constexpr (HasPrecisionType<X>) {
-        typedef typename X::PrecisionType PR;
-        polynomial_class.def(pybind11::init<Nat,PR>());
-        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("variables", [](Nat as,PR pr){return MultivariatePolynomial<X>::variables(as,pr).array();});
-    } else {
-        polynomial_class.def(pybind11::init<Nat>());
-        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("variables", [](Nat as){return MultivariatePolynomial<X>::variables(as).array();});
-    }
-
-    polynomial_class.def("argument_size", &MultivariatePolynomial<X>::argument_size);
-    polynomial_class.def("insert", &MultivariatePolynomial<X>::insert);
-
-    define_algebra(module,polynomial_class);
-    polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
-
-    export_vector<MultivariatePolynomial<X>>(module, (python_template_class_name<X>("MultivariatePolynomialVector")).c_str());
-
-    return polynomial_class;
-}
-
-Void export_polynomials(pybind11::module& module)
-{
-    export_polynomial<FloatDPBounds>(module);
-    export_polynomial<FloatDPApproximation>(module);
-    export_polynomial<FloatMPBounds>(module);
-    export_polynomial<FloatMPApproximation>(module);
-
-    template_<MultivariatePolynomial> multivariate_polynomial_template(module);
-    multivariate_polynomial_template.instantiate<FloatDPBounds>();
-    multivariate_polynomial_template.instantiate<FloatDPApproximation>();
-    multivariate_polynomial_template.instantiate<FloatMPBounds>();
-    multivariate_polynomial_template.instantiate<FloatMPApproximation>();
-}
 
 Void export_domains(pybind11::module& module)
 {
@@ -567,9 +485,7 @@ Void export_function_patches(pybind11::module& module) {
 
 Void function_submodule(pybind11::module& module) {
 
-    export_multi_index(module);
 
-    export_polynomials(module);
 
     export_domains(module);
 

@@ -31,7 +31,7 @@
 #include "algebra/expansion.tpl.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function_interface.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/procedure.hpp"
 

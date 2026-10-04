@@ -32,7 +32,7 @@
 #include "solving/integrator.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"

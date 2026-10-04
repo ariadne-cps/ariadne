@@ -36,7 +36,7 @@
 #include "function/taylor_model.hpp"
 #include "function/taylor_function.hpp"
 #include "algebra/differential.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "function/function.hpp"
 
 #include "function/formula.hpp"

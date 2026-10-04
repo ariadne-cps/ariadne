@@ -36,7 +36,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/multi_index.hpp"
-#include "function/polynomial.hpp"
+#include "algebra/polynomial.hpp"
 #include "algebra/differential.hpp"
 
 #include "function/function.hpp"

@@ -1,7 +1,7 @@
 # Current decoupling state
 
-Status date: 2026-10-03  
-Working branch: `decouple-foundation`
+Status date: 2026-10-04  
+Working branch: `decouple-algebra`
 
 The CSV, SVG and include evidence in this directory remain the historical
 2026-09-29 baseline. This file describes the active architecture.
@@ -37,7 +37,8 @@ Python bindings follow the same repository layering as the C++ libraries:
 pyariadne-foundation
   -> pyariadne-numeric
        -> pyariadne-interval
-            -> pyariadne
+            -> pyariadne-algebra
+                 -> pyariadne
 ```
 
 Each layer has two responsibilities:
@@ -102,8 +103,28 @@ The former unwanted edge `algebra -> function` has been removed on
   `algebra/dense_differential.cpp`;
 - the `ariadne-algebra` target now declares Interval explicitly.
 
-Algebra source files therefore have no direct Function include. Standalone
-public-header validation remains the final proof required before extraction.
+Algebra source files therefore have no direct Function include.
+
+The standalone repository `ariadne-cps/algebra` now exists above Interval on
+the coordinated `decouple-algebra` branch. The extraction also moved the
+polynomial representations that semantically belong to Algebra:
+
+- `Polynomial` and its implementation/templates were moved from
+  `source/function` into Algebra;
+- `UnivariateChebyshevPolynomial` and
+  `MultivariateChebyshevPolynomial` were moved with their C++ tests and
+  Python bindings;
+- the Chebyshev operation set was completed with unary `Pos`, matching the
+  `DispatchAlgebraOperations` contract already satisfied by `Polynomial`;
+- the `SweeperBase` and `RelativeSweeperBase` implementations, which were
+  still physically defined in `function/taylor_model.tpl.hpp`, were moved
+  into Algebra so that sweeper vtables no longer require Function-owned
+  implementation code.
+
+Standalone CI for Algebra is the current gate. Extraction is not considered
+complete until the repository builds, tests, installs, and exercises its
+external consumers using only the declared lower stack. Ariadne will be updated
+to consume the resulting Algebra revision only after that gate is green.
 
 ## Function
 

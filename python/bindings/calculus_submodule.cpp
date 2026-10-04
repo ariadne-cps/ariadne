@@ -115,30 +115,7 @@ ValidatedVectorMultivariateTaylorFunctionModelDP __getslice__(const ValidatedVec
 
 
 
-template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<MultiIndex,X> >& repr) {
-    const Expansion<MultiIndex,X>& exp=repr.reference();
-    for(typename Expansion<MultiIndex,X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
-        os << (iter==exp.begin()?'{':',') << "(";
-        for(SizeType j=0; j!=iter->index().size(); ++j) {
-            if(j!=0) { os << ','; } os << Int(iter->index()[j]);
-        }
-        os << "):" << python_representation(iter->coefficient());
-    }
-    os << "}";
-    return os;
-}
 
-template<class X, class CMP> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< SortedExpansion<MultiIndex,X,CMP> >& repr) {
-    return os << python_representation(static_cast<const Expansion<MultiIndex,X>&>(repr.reference()));
-}
-
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPApproximation> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPBounds> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDP> >&);
-
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPApproximation> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPBounds> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMP> >&);
 
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {

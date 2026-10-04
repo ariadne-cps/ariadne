@@ -1,2 +1,2 @@
 add_subdirectory(threading)
-add_subdirectory(interval)
+add_subdirectory(algebra)

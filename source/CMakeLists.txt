@@ -1,6 +1,5 @@
-link_libraries(threading interval)
+link_libraries(threading algebra)
 
-add_subdirectory(algebra)
 add_subdirectory(function)
 add_subdirectory(solving)
 add_subdirectory(geometry)

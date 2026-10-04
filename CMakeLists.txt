@@ -44,12 +44,12 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/algebra/submodules/interval/submodules/numeric|submodules/configuration"
     )
     require_same_dependency_commit(Utility
         REFERENCES
             "${PROJECT_SOURCE_DIR}/submodules/threading/submodules/logging|submodules/utility"
-            "${PROJECT_SOURCE_DIR}/submodules/interval/submodules/numeric/submodules/foundation|submodules/utility"
+            "${PROJECT_SOURCE_DIR}/submodules/algebra/submodules/algebra/submodules/interval/submodules/numeric/submodules/foundation|submodules/utility"
     )
 endif()
 
@@ -83,7 +83,7 @@ add_subdirectory(experimental EXCLUDE_FROM_ALL)
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:FOUNDATION_SRC>
     $<TARGET_OBJECTS:NUMERIC_SRC>
-    $<TARGET_OBJECTS:ariadne-algebra>
+    $<TARGET_OBJECTS:ALGEBRA_SRC>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
     $<TARGET_OBJECTS:ariadne-solving>
@@ -103,7 +103,7 @@ target_include_directories(ariadne PUBLIC
 )
 target_link_libraries(ariadne PUBLIC
     $<BUILD_INTERFACE:threading>
-    $<BUILD_INTERFACE:interval>
+    $<BUILD_INTERFACE:algebra>
     $<INSTALL_INTERFACE:GMP::GMP>
     $<INSTALL_INTERFACE:MPFR::MPFR>
 )
@@ -147,6 +147,7 @@ install(EXPORT AriadneTargets
     NAMESPACE Ariadne::
     DESTINATION lib/cmake/Ariadne
 )
+get_target_property(ALGEBRA_SOURCE_DIR algebra SOURCE_DIR)
 get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
 get_target_property(INTERVAL_SOURCE_DIR interval SOURCE_DIR)
 
@@ -167,6 +168,7 @@ install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.
 install(DIRECTORY "${FOUNDATION_SOURCE_DIR}/include/foundation" DESTINATION include/ariadne)
 install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
 install(DIRECTORY "${INTERVAL_SOURCE_DIR}/include/interval" DESTINATION include/ariadne)
+install(DIRECTORY "${ALGEBRA_SOURCE_DIR}/include/algebra" DESTINATION include/ariadne)
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
 install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
 install(DIRECTORY "${UTILITY_SOURCE_DIR}/include/utility" DESTINATION include/ariadne)

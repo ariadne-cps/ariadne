@@ -6,8 +6,6 @@ message(STATUS "Please note that you need to use the Python 3 interpreter to imp
 
 add_library(pyariadne-bindings-obj OBJECT
     utilities.cpp
-    linear_algebra_submodule.cpp
-    differentiation_submodule.cpp
     calculus_submodule.cpp
     symbolic_submodule.cpp
     optimization_submodule.cpp
@@ -32,7 +30,7 @@ foreach(target
 )
     target_include_directories(${target} PRIVATE
         "${PYTHON_COMMON_SOURCE_DIR}/include"
-        $<TARGET_PROPERTY:pyariadne-interval,INTERFACE_INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:pyariadne-algebra,INTERFACE_INCLUDE_DIRECTORIES>
     )
     target_link_libraries(${target} PRIVATE
         ariadne

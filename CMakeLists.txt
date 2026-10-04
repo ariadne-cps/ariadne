@@ -147,9 +147,9 @@ install(EXPORT AriadneTargets
     NAMESPACE Ariadne::
     DESTINATION lib/cmake/Ariadne
 )
-get_target_property(ALGEBRA_SOURCE_DIR algebra SOURCE_DIR)
 get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
-get_target_property(INTERVAL_SOURCE_DIR interval SOURCE_DIR)
+get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
+get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
 
 install(FILES
     ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
@@ -159,16 +159,13 @@ install(FILES
     ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
     DESTINATION lib/cmake/Ariadne
 )
-get_target_property(FOUNDATION_SOURCE_DIR foundation SOURCE_DIR)
-get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
-get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
-get_target_property(UTILITY_SOURCE_DIR utility SOURCE_DIR)
 
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY "${FOUNDATION_SOURCE_DIR}/include/foundation" DESTINATION include/ariadne)
-install(DIRECTORY "${NUMERIC_SOURCE_DIR}/include/numeric" DESTINATION include/ariadne)
-install(DIRECTORY "${INTERVAL_SOURCE_DIR}/include/interval" DESTINATION include/ariadne)
-install(DIRECTORY "${ALGEBRA_SOURCE_DIR}/include/algebra" DESTINATION include/ariadne)
+
+ariadne_install_dependency_bundle(
+    TARGET algebra
+    DESTINATION include/ariadne
+)
+
 install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
 install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
-install(DIRECTORY "${UTILITY_SOURCE_DIR}/include/utility" DESTINATION include/ariadne)

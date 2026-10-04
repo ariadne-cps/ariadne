@@ -44,7 +44,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         REFERENCES
             "${PROJECT_SOURCE_DIR}|submodules/configuration"
             "${PROJECT_SOURCE_DIR}/submodules/threading|submodules/configuration"
-            "${PROJECT_SOURCE_DIR}/submodules/algebra/submodules/interval/submodules/numeric|submodules/configuration"
+            "${PROJECT_SOURCE_DIR}/submodules/algebra|submodules/configuration"
     )
     require_same_dependency_commit(Utility
         REFERENCES

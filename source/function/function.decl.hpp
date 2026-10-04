@@ -30,26 +30,14 @@
 #define ARIADNE_FUNCTION_DECL_HPP
 
 #include "interval/interval.decl.hpp"
+#include "algebra/declarations.hpp"
 #include "geometry/box.decl.hpp"
 
 namespace Ariadne {
 
-template<class X> using Scalar=X;
-template<class X> class Vector;
-template<class X> class Matrix;
-
-class Real;
-
 //! \ingroup LinearAlgebraSubModule
 //! \brief A scalar real number. Defined as a synomym for Real.
 using RealScalar=Scalar<Real>;
-//! \ingroup LinearAlgebraSubModule
-//! \brief A vector of real numbers.
-using RealVector=Vector<Real>;
-//! \ingroup LinearAlgebraSubModule
-//! \brief A matrix of real numbers.
-using RealMatrix=Matrix<Real>;
-
 // Expression declarations
 template<class T> class Variable;
 template<class T> class Space;
@@ -208,12 +196,7 @@ template<class P, class PR, class PRE=PR> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
 template<class FMF, class D> class FunctionModelCreator;
 
-class UniIndex;
-class MultiIndex;
-
 template<class I, class X> class Monomial;
-template<class I, class X> class Polynomial;
-
 //! \relates Monomial
 //! \name Type shorthands and synonyms for Monomial classes.
 //!@{
@@ -229,9 +212,6 @@ using FloatMPBoundsMultivariateMonomial = MultivariateMonomial<FloatMPBounds>; /
 //! \relates Polynomial
 //! \name Type shorthands and synonyms for Polynomial classes
 //!@{
-template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>; //!< <p/>
-template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>; //!< <p/>
-
 using FloatDPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatDPBounds>; //!< <p/>
 using FloatMPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatMPApproximation>; //!< <p/>

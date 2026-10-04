@@ -23,8 +23,6 @@ namespace Ariadne {
 
 template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;
-template<class X> class Differential;
-template<class X> class ElementaryAlgebra;
 template<class X> class Formula;
 
 } // namespace Ariadne

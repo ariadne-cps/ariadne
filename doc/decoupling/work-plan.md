@@ -27,7 +27,7 @@ aggregator.
       `foundation`, `FOUNDATION_SRC`, Python Foundation targets, and
       `foundation/...` includes.
 - [x] Layer the Python binding interfaces as
-      `pyariadne-foundation -> pyariadne-numeric -> pyariadne-interval -> pyariadne`.
+      `pyariadne-foundation -> pyariadne-numeric -> pyariadne-interval -> pyariadne-algebra -> pyariadne`.
 - [x] Make each Python layer consume only the aggregate binding
       interface/header of its direct lower-level repository, with no manual
       references to nested submodule binding paths.

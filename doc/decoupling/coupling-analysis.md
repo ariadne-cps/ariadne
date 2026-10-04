@@ -2,7 +2,7 @@
 
 Baseline analysis dated September 29, 2026, branch `master`, commit `949d7e044ae65837fc02e6387701b10e7c15ddc6`.
 
-> **Historical baseline.** The measurements and dependency grades in this document describe the baseline commit above and do **not** describe the current repository graph. As of 2026-10-03, Interval is standalone and the former `ariadne-cps/paradigm` repository has been renamed to `ariadne-cps/foundation`. Foundation remains the low-level logical/computational package; Algebra and Function are planned as separate repositories above Interval and Algebra respectively. See `current-state.md` for the active structure.
+> **Historical baseline.** The measurements and dependency grades in this document describe the baseline commit above and do **not** describe the current repository graph. As of 2026-10-04, Utility, Foundation, Numeric, Interval and Algebra form the validated standalone lower chain, and Ariadne consumes standalone Algebra. Function is the next extraction boundary. See `current-state.md` for the active structure.
 
 ## Result
 
@@ -103,15 +103,19 @@ Key baseline evidence:
 - A `test/foundation/CMakeLists.txt` existed but was not registered from `test/CMakeLists.txt`.
 - utility/logging/threading came from the submodule tree, and compatible `configuration` commits had to be coordinated.
 
-Foundation now provides the first concrete counterexample to those baseline limitations: it has its own repository, CMake target, tests, installation layout, Unix/Windows/Coverage CI, an explicit Utility dependency, and is consumed by Ariadne as a pinned submodule.
+The standalone Utility -> Foundation -> Numeric -> Interval -> Algebra chain now
+provides the concrete counterexample to those baseline limitations: each
+component has an explicit repository boundary, focused validation, installation
+support and coordinated dependency pins, while Ariadne remains the integration
+build.
 
-## Recommended order
+## How to use this baseline now
 
-1. **Build boundaries before extraction.** Use public-header checks, target-scoped PUBLIC/PRIVATE/INTERFACE dependencies, generated configuration in the build tree, and tests linked only to declared dependencies.
-2. **Cut small verified backward edges.** Remove unused cycle-closing includes and move localised adapters/extensions upward. The two hybrid-backward includes and Tensor graphics coupling have already been addressed.
-3. **Stabilise the mathematical core.** Foundation is now independently versioned. Next, remove numeric's remaining dependency on high-level symbolic templates, stabilise algebra, and identify a primitive-geometry layer.
-4. **Separate mixed middle-layer responsibilities.** Split functional sets, solvers, and graphics/rendering adapters; separate generic symbolic templates from Expression/Formula conversions.
-5. **Extract repositories only after boundaries are verified.** Repeat the successful Foundation pattern one component at a time while keeping Ariadne as the integration build that pins compatible revisions.
+The measurements below are retained to explain where the original coupling came
+from. They are not an active extraction priority list. The completed lower-layer
+work through Algebra should be read from `current-state.md`; the remaining
+operational plan is focused on the Function boundary and is maintained in
+`work-plan.md`.
 
 ## All baseline relations and rationale
 

@@ -1,34 +1,13 @@
 # Decoupling Ariadne components
 
-This directory records the architectural analysis and current work for moving
-low-level Ariadne components into independently buildable repositories.
+This directory records the architectural state and the remaining work for
+splitting Ariadne into independently buildable repositories.
 
-Dependency arrows in the historical analysis use **provider -> dependent**.
+Dependency arrows use **provider -> dependent**.
 
-## Read this first
+## Current state
 
-- [Current state](current-state.md): verified repository structure as of 2026-10-03
-  and the active extraction chain.
-- [Working plan](work-plan.md): ordered work for Algebra and Function decoupling.
-
-## Historical baseline
-
-The following files describe the baseline captured on 2026-09-29 at
-`949d7e044ae65837fc02e6387701b10e7c15ddc6`. They are retained as historical
-evidence and are not the current graph:
-
-- [Coupling analysis](coupling-analysis.md)
-- [Dependency graph](dependency-graph.svg)
-- [Dependency summary](dependency-summary.csv)
-- [Include evidence](include-evidence.csv)
-
-## Current direction
-
-The old `ariadne-cps/paradigm` repository has been renamed to
-`ariadne-cps/foundation`. Foundation remains the low-level logical/computational
-paradigm package; it is not an aggregator for Algebra and Function.
-
-The intended repository chain is now:
+The low-level repository chain through Algebra is complete and validated:
 
 ```text
 utility
@@ -36,28 +15,47 @@ utility
        -> numeric
             -> interval
                  -> algebra
-                      -> function
+                      -> function   (next extraction)
 ```
 
-Configuration remains shared build infrastructure where required.
+`foundation` is the renamed former `paradigm` repository. The semantic C++
+concepts `Paradigm`, `ParadigmCode`, `ParadigmTraits`, etc. retain their
+names.
 
-The same one-level dependency rule applies to the Python bindings. Each repository
-exports an aggregate `pyariadne-<component>` interface and its component-level
-Python utility/header surface. A higher layer consumes only the Python interface
-of its **direct** lower-level repository; it must not add include paths or source
-references into nested submodules. Lower-level Python binding requirements are
-propagated transitively by the direct dependency.
+Ariadne consumes standalone Algebra rather than owning a local Algebra
+implementation. Function is the next component to be decoupled and extracted.
 
-As part of this work, Ariadne's `python/bindings/utilities.hpp` is being reduced
-to Ariadne-specific helpers only. Helpers already owned by python-common,
-Foundation, Numeric or Interval are included through the direct Interval Python
-surface rather than copied or redefined in Ariadne.
+See:
 
-Interval is already standalone. The next architectural task is to make Algebra
-independent of Function, extract Algebra above Interval, then make Function
-independent of the Ariadne modules that must remain above it before extracting
-Function above Algebra.
+- [Current state](current-state.md) for the active architecture and boundary
+  rules.
+- [Working plan](work-plan.md) for the remaining Function extraction work.
 
-The direct `logging/logging.hpp` include in
-`function/calculus_base.hpp` is currently unused and is cleanup, not a package
-dependency.
+## Historical baseline
+
+The following files describe the repository baseline captured on 2026-09-29 at
+`949d7e044ae65837fc02e6387701b10e7c15ddc6`. They are retained as historical
+evidence and are not the current dependency graph:
+
+- [Coupling analysis](coupling-analysis.md)
+- [Dependency graph](dependency-graph.svg)
+- [Dependency summary](dependency-summary.csv)
+- [Include evidence](include-evidence.csv)
+
+The baseline data is intentionally not rewritten as the architecture changes.
+
+## Boundary rules
+
+Each repository owns only its layer and consumes its immediate lower repository.
+The same rule applies to Python bindings: a layer consumes the aggregate
+`pyariadne-<component>` interface and utility header of its direct dependency,
+without reaching into nested submodules.
+
+Repositories that use shared CMake infrastructure carry
+`submodules/configuration` directly. When the same Configuration repository is
+also present transitively, `require_same_dependency_commit` verifies that the
+gitlinks agree.
+
+Public headers are registered with `ariadne_register_public_headers` and
+installed transitively with `ariadne_install_dependency_bundle`. Consumers
+should not reproduce nested header-install lists manually.

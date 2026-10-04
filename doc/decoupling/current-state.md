@@ -1,18 +1,16 @@
 # Current decoupling state
 
 Status date: 2026-10-04  
-Working branch: `decouple-algebra`
+State described here: post-merge architecture after the Algebra extraction
 
 The CSV, SVG and include evidence in this directory remain the historical
-2026-09-29 baseline. This file describes the active architecture.
+2026-09-29 baseline. This file describes the current architecture.
 
 ## Repository chain
 
-The low-level repositories are being organised as:
+The validated low-level chain is:
 
 ```text
-configuration   (shared build support)
-
 utility
   -> foundation
        -> numeric
@@ -21,17 +19,34 @@ utility
                       -> function
 ```
 
-`foundation` is the renamed former `paradigm` repository. Its public header
-directory becomes `include/foundation`, while `paradigm.hpp` and the C++
-concepts `Paradigm`, `ParadigmCode`, `ParadigmTraits`, etc. retain their
-semantic names.
+Utility, Foundation, Numeric, Interval and Algebra are standalone repositories.
+Function is still owned by Ariadne and is the next extraction target.
 
-Numeric consumes Foundation as `submodules/foundation`, links the
-`foundation` target, and aggregates `FOUNDATION_SRC`.
+Ariadne itself consumes the standalone lower stack through its direct
+dependencies rather than carrying local copies of those components.
+
+## Direct dependency discipline
+
+A repository consumes only its immediate lower repository. It must not encode
+knowledge of nested dependency paths when the direct dependency can propagate
+the requirement.
+
+Shared CMake infrastructure follows the same principle. Repositories that use
+Configuration carry `submodules/configuration` directly and bootstrap from:
+
+```text
+submodules/configuration/cmake/ProjectOptions.cmake
+```
+
+When Configuration is also present through a dependency,
+`require_same_dependency_commit` checks that all visible gitlinks point to the
+same commit. This avoids nested bootstrap paths such as
+`submodules/.../submodules/configuration` while still detecting incompatible
+pins.
 
 ## Python binding layering
 
-Python bindings follow the same repository layering as the C++ libraries:
+Python bindings mirror the C++ repository chain:
 
 ```text
 pyariadne-foundation
@@ -41,116 +56,103 @@ pyariadne-foundation
                  -> pyariadne
 ```
 
-Each layer has two responsibilities:
+Each layer owns and compiles its bindings and exports an aggregate interface for
+the next layer. A consumer sees only the Python binding surface of its direct
+lower dependency.
 
-1. own and compile the Python bindings for that component;
-2. expose an aggregate Python interface for the next layer, including the
-   binding include requirements inherited from its direct lower dependency.
+Ariadne therefore consumes `pyariadne-algebra`. Its
+`python/bindings/utilities.hpp` builds on `algebra-utilities.hpp` instead of
+redefining lower-layer helpers. Algebra-owned Python representations and class
+registrations are not duplicated in Function/Ariadne bindings.
 
-A consumer must know only its **direct** lower-level Python dependency. It must
-not reach through that dependency to nested repositories with paths such as
-`submodules/.../submodules/...`, nor manually add binding include directories
-for transitive components.
+## Installation
 
-Concretely, Ariadne consumes the Algebra Python binding surface only. Its local
-`python/bindings/utilities.hpp` includes `algebra-utilities.hpp`, which obtains
-Interval, Numeric and Foundation Python support through the lower layers.
-Ariadne therefore has no direct Python include-path knowledge of those
-transitive dependencies.
+Standalone components register their public headers with
+`ariadne_register_public_headers`. The installation helper
+`ariadne_install_dependency_bundle` follows registered
+`INTERFACE_LINK_LIBRARIES` recursively and installs the reachable public
+header directories once.
 
-The same rule applies recursively: Interval consumes Numeric's Python surface;
-Numeric consumes Foundation's Python surface. The public `pyariadne-<component>`
-INTERFACE target is responsible for propagating what the next layer needs.
+Ariadne uses dependency bundles for both lower branches:
 
-This layering is also being used to shrink
-`ariadne/python/bindings/utilities.hpp`. It must contain only helpers belonging
-to the Ariadne layer. Generic Python machinery belongs in python-common;
-representation helpers belong in Foundation; numeric operators and arithmetic
-binding helpers belong in Numeric; interval-specific representations belong in
-Interval. Duplicating these definitions in Ariadne is a boundary violation and
-can also produce C++ redefinition errors once the lower aggregate headers are
-correctly visible.
+```cmake
+ariadne_install_dependency_bundle(
+    TARGET algebra
+    DESTINATION include/ariadne
+)
 
-## Ariadne aggregate targets
+ariadne_install_dependency_bundle(
+    TARGET threading
+    DESTINATION include/ariadne
+)
+```
 
-The former `ariadne-core` and `ariadne-kernel` shared-library aggregates have
-been removed on `decouple-algebra`. In-tree tests and benchmarks now link the
-single `ariadne` library directly. The corresponding Python binding object
-split has also been removed: Ariadne-owned bindings are compiled through one
-`pyariadne-bindings-obj` target, while `pyariadne-module-obj` remains separate
-only for the Python module entry point.
+This replaces manual installation lists for Algebra, Interval, Numeric,
+Foundation, Utility, Threading and Logging.
 
-This deliberately favours a single aggregate at the Ariadne level while the
-repository stack is being split into independently packaged lower layers.
+The remaining CMake-package-specific cleanup is separate from header bundling:
+Ariadne still installs its own package configuration and currently obtains the
+GMP/MPFR find modules from Numeric. That source-tree knowledge should eventually
+be removed from the package-export path.
 
-## Algebra
+## Ariadne integration shape
 
-Algebra has a real dependency on Interval. Current examples include
-`Differential<Float*UpperInterval>`, interval-valued expansions, matrices and
-sweepers.
+The former `ariadne-core` and `ariadne-kernel` aggregates are gone. Ariadne
+builds one aggregate `ariadne` library from Ariadne-owned components plus the
+standalone lower-layer objects.
 
-The former unwanted edge `algebra -> function` has been removed on
-`decouple-algebra`:
+Ariadne no longer contains:
 
-- `compute_procedure` was removed from `algebra/graded.hpp` and placed next
-  to its only consumer in the solving integrator;
-- TaylorSeries-specific composition and the
-  `function/taylor_series.hpp` include were removed from
-  `algebra/algebra_operations.tpl.hpp`; the remaining
-  `AnalyticFunction` composition is algebraic because `AnalyticFunction` is
-  defined in `algebra/series.hpp`;
-- the unnecessary `function/functional.hpp` include was removed from
-  `algebra/dense_differential.cpp`;
-- the `ariadne-algebra` target now declares Interval explicitly.
+- a local `source/algebra` implementation;
+- Function-owned copies of `Polynomial` or Chebyshev polynomial classes;
+- Function-owned Sweeper implementations;
+- duplicate Algebra Python bindings;
+- Algebra-owned tests, demonstrations or tutorials.
 
-Algebra source files therefore have no direct Function include.
+In-tree Ariadne tests and benchmarks link the aggregate `ariadne` target.
 
-The standalone repository `ariadne-cps/algebra` now exists above Interval on
-the coordinated `decouple-algebra` branch. The extraction also moved the
-polynomial representations that semantically belong to Algebra:
+## Algebra boundary
 
-- `Polynomial` and its implementation/templates were moved from
-  `source/function` into Algebra;
+Algebra depends directly on Interval and has no dependency on Function. It owns
+the algebraic representations and infrastructure moved out of Ariadne,
+including:
+
+- `Polynomial`;
 - `UnivariateChebyshevPolynomial` and
-  `MultivariateChebyshevPolynomial` were moved with their C++ tests and
-  Python bindings;
-- the Chebyshev operation set was completed with unary `Pos`, matching the
-  `DispatchAlgebraOperations` contract already satisfied by `Polynomial`;
-- the `SweeperBase` and `RelativeSweeperBase` implementations, which were
-  still physically defined in `function/taylor_model.tpl.hpp`, were moved
-  into Algebra so that sweeper vtables no longer require Function-owned
-  implementation code.
+  `MultivariateChebyshevPolynomial`;
+- Sweeper implementation code;
+- the corresponding C++ tests, Python bindings and standalone tutorials.
 
-Standalone Algebra CI is green and the extraction has been merged to
-`ariadne-cps/algebra:main`. Ariadne on `decouple-algebra` now consumes Algebra
-as its direct repository dependency, with Interval supplied through Algebra.
-The former local `source/algebra` tree, Function-owned Polynomial and
-ChebyshevPolynomial implementations, Sweeper implementations, duplicate Algebra
-Python bindings, and Algebra-owned tests/demonstrations have been removed from
-Ariadne.
+Standalone Algebra CI and Ariadne integration CI are green in the state assumed
+by this document.
 
-## Function
+## Next boundary: Function
 
-Function should then be extracted as a repository built above Algebra.
+Function should become the repository immediately above Algebra. The remaining
+upward dependencies to resolve are principally:
 
-The remaining upward dependencies are mainly:
+- **Geometry:** Box/domain primitives are mixed with Point/SetInterface and
+  higher-level set functionality.
+- **Symbolic:** generic symbolic machinery and concrete
+  Expression/Function bridges still cross the boundary.
+- **Infrastructure cleanup:** verify that Function has no semantic dependency on
+  Logging or Threading; the known direct Logging include is cleanup rather than
+  part of the intended package boundary.
 
-- Geometry: Box/domain and set/multifunction integrations.
-- Symbolic: generic symbolic helpers plus concrete Expression/Function bridges.
-- Logging: one unused include in `function/calculus_base.hpp`, not a semantic
-  dependency.
+The Box/domain issue is structural: Function needs a primitive domain
+representation, not the higher-level Geometry package as a whole.
 
-The Box case requires a real boundary split because the current geometry Box
-mixes primitive domain representation with Point/SetInterface and higher-level
-integration code.
+## Validation rule
 
-## Validation
+A repository boundary is ready only when it:
 
-A repository boundary is ready only when the component configures, builds its
-public headers and implementation, runs focused tests, and is consumable
-externally using only declared lower-level dependencies.
+1. compiles its public headers in isolation;
+2. builds from only its declared lower dependencies;
+3. runs focused C++ tests;
+4. builds Python bindings using only the aggregate Python interface of its
+   direct dependency;
+5. installs cleanly and is consumable by an external project;
+6. passes the Ariadne integration build after its revision is propagated.
 
-For Python bindings, validation additionally requires that the component builds
-when given only the aggregate Python interface of its direct lower repository.
-A successful build that relies on manually exposed nested-submodule include
-paths does not validate the boundary.
+Successful aggregate Ariadne linkage alone is not proof of a valid standalone
+boundary.

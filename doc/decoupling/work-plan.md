@@ -1,96 +1,78 @@
 # Ariadne decoupling work plan
 
 Status: active  
-Branch: `decouple-algebra`  
-Historical baseline: `949d7e044ae65837fc02e6387701b10e7c15ddc6`  
+Base state: low-level chain through Algebra extracted and green  
 Last updated: 2026-10-04
 
-## Target chain
+## Established chain
 
 ```text
 utility -> foundation -> numeric -> interval -> algebra -> function
 ```
 
-Foundation is the renamed former Paradigm package, not an Algebra/Function
-aggregator.
+Utility, Foundation, Numeric, Interval and Algebra are standalone. The completed
+Foundation/Algebra extraction history is recorded in Git history and
+`current-state.md`; completed migration checklists are intentionally omitted
+from this active plan.
 
-## F0 - Rename Paradigm package to Foundation
+## F1 - Remove accidental Function infrastructure dependencies
 
-- [x] Rename GitHub repository `ariadne-cps/paradigm` to
-      `ariadne-cps/foundation`.
-- [x] Rename package/build identifiers: project, target, installed library,
-      `PARADIGM_SRC -> FOUNDATION_SRC`.
-- [x] Move public headers from `include/paradigm/` to
-      `include/foundation/`.
-- [x] Preserve `paradigm.hpp` and C++ `Paradigm*` concepts.
-- [x] Update Numeric to consume `submodules/foundation`, target
-      `foundation`, `FOUNDATION_SRC`, Python Foundation targets, and
-      `foundation/...` includes.
-- [x] Layer the Python binding interfaces as
-      `pyariadne-foundation -> pyariadne-numeric -> pyariadne-interval -> pyariadne-algebra -> pyariadne`.
-- [x] Make each Python layer consume only the aggregate binding
-      interface/header of its direct lower-level repository, with no manual
-      references to nested submodule binding paths.
-- [x] Start reducing Ariadne `python/bindings/utilities.hpp` to
-      Ariadne-specific helpers by removing copies already owned by
-      python-common/Foundation/Numeric/Interval.
-- [ ] Promote the coordinated Foundation/Numeric revisions and cascade updated
-      pins through Interval and Ariadne.
-
-## F1 - Make Algebra independent of Function
-
-- [x] Move `compute_procedure` out of `algebra/graded.hpp`.
-- [x] Remove TaylorSeries-specific composition from
-      `algebra/algebra_operations.tpl.hpp`; retain `AnalyticFunction`, which is
-      defined by Algebra itself.
-- [x] Remove the unnecessary Function include from
-      `algebra/dense_differential.cpp`.
-- [x] Compile Algebra public headers without Function as part of a completely
-      green standalone validation.
-- [x] Give Algebra an explicit target-level dependency on Interval.
-- [x] Create the standalone `ariadne-cps/algebra` repository above Interval.
-- [x] Move `Polynomial`, `UnivariateChebyshevPolynomial` and
-      `MultivariateChebyshevPolynomial` from Function into Algebra, including
-      focused tests and Python bindings.
-- [x] Complete the Chebyshev algebra-operation contract with unary `Pos`.
-- [x] Move `SweeperBase` and `RelativeSweeperBase` implementation code out
-      of `function/taylor_model.tpl.hpp` and into the Algebra repository.
-- [x] Get all standalone Algebra CI jobs green: C++, Python, installation and
-      external-consumer/tutorial checks.
-- [x] Update Ariadne to consume the validated standalone Algebra revision and
-      remove the local Algebra implementation, duplicate bindings, and Algebra-owned tests/demonstrations.
-
-Exit criterion: Algebra depends only on its intended lower stack, with Interval
-as its immediate repository dependency, and the standalone Algebra CI is green.
-
-## F2 - Remove accidental Function infrastructure dependencies
-
-- [ ] Remove unused `logging/logging.hpp` from
+- [ ] Remove the unused `logging/logging.hpp` include from
       `function/calculus_base.hpp`.
-- [ ] Verify Function has no direct Logging or Threading requirement.
-- [ ] Use explicit target dependencies rather than Ariadne-wide linkage.
+- [ ] Verify that Function has no semantic Logging or Threading dependency.
+- [ ] Make Function target dependencies explicit rather than relying on
+      Ariadne-wide linkage.
 
-## F3 - Remove Function -> Geometry
+## F2 - Remove Function -> high-level Geometry
 
-- [ ] Split a low-level Box/domain value type from current geometry Box.
-- [ ] Move Function domain declarations to that primitive.
-- [ ] Move measurable-function and multifunction set integrations upward.
-- [ ] Ensure Function public headers no longer include `geometry/`.
+- [ ] Identify the minimal Box/domain value types required by Function.
+- [ ] Separate those primitives from Point/SetInterface and higher-level
+      Geometry responsibilities.
+- [ ] Move measurable-function and multifunction set integrations above the
+      Function boundary where appropriate.
+- [ ] Ensure Function public headers no longer depend on the high-level
+      `geometry/` package.
 
-## F4 - Remove Function -> high-level Symbolic
+## F3 - Remove Function -> high-level Symbolic
 
-- [ ] Move Expression/Function conversion code to the Symbolic side.
-- [ ] Classify low-level symbolic templates/constants by semantics and relocate
-      only those genuinely required below Symbolic.
-- [ ] Ensure Function no longer depends on high-level Expression/Space/Variable
-      implementation.
+- [ ] Separate generic symbolic machinery genuinely required by Function from
+      high-level Expression/Space/Variable integration.
+- [ ] Move concrete Expression/Function conversion bridges to the higher layer.
+- [ ] Ensure Function no longer depends on high-level Symbolic implementation.
 
-## F5 - Extract Function
+## F4 - Make Function standalone
 
-- [ ] Add standalone Function CMake target and public-header checks.
-- [ ] Add focused tests and external-consumer test.
-- [ ] Extract `ariadne-cps/function` above Algebra.
-- [ ] Replace Ariadne in-tree copies with pinned repository dependencies.
+- [ ] Define the standalone Function target above Algebra using only intended
+      lower dependencies.
+- [ ] Register Function public headers and use the dependency-bundle
+      installation model.
+- [ ] Give Function a direct Configuration dependency and verify matching
+      Configuration gitlinks with its direct dependency.
+- [ ] Add public-header isolation checks.
+- [ ] Add focused C++ tests.
+- [ ] Layer Python bindings on the aggregate `pyariadne-algebra` interface
+      only.
+- [ ] Add standalone installation and external-consumer/tutorial checks.
+- [ ] Get Unix, Windows, Coverage and Python CI green.
+
+## F5 - Integrate standalone Function into Ariadne
+
+- [ ] Add the standalone `ariadne-cps/function` repository as Ariadne's direct
+      lower Function dependency.
+- [ ] Remove Ariadne's local Function implementation and Function-owned tests or
+      bindings that move with the repository.
+- [ ] Make Ariadne consume the aggregate Function C++ and Python interfaces.
+- [ ] Propagate compatible dependency pins.
+- [ ] Get the full Ariadne integration CI green.
+
+## Cross-cutting packaging cleanup
+
+- [ ] Remove Ariadne's remaining source-tree knowledge of Numeric used only to
+      copy `FindGMP.cmake` and `FindMPFR.cmake`; keep the installed
+      `AriadneConfig.cmake` contract valid while doing so.
+- [ ] Continue using `ariadne_register_public_headers` and
+      `ariadne_install_dependency_bundle` instead of manual transitive header
+      installation lists.
 
 ## Validation discipline
 
@@ -98,16 +80,13 @@ For every boundary change:
 
 1. compile affected public headers in isolation;
 2. build the component without sibling include leakage;
-3. for Python bindings, consume only the aggregate `pyariadne-<direct-dependency>`
-   interface and direct dependency's aggregate Python header; never add include
-   paths or source references to nested submodules;
-4. keep each layer's Python utility header minimal: move or remove helpers that
-   are already owned by a lower layer instead of duplicating them;
-5. run focused tests;
-6. run Ariadne integration tests;
-7. record the removed dependency edge here.
+3. consume only the immediate lower repository at the C++ boundary;
+4. for Python, consume only the aggregate
+   `pyariadne-<direct-dependency>` interface and utility header;
+5. keep layer utility headers free of helpers already owned below;
+6. run focused tests and standalone installation/consumer checks;
+7. propagate the validated revision upward;
+8. run Ariadne integration CI.
 
-Do not treat successful aggregate Ariadne linkage as proof of a valid standalone
-boundary. In particular, a Python build is not considered decoupled if it works
-only because transitive repositories have been exposed manually through nested
-submodule paths.
+Do not treat successful aggregate Ariadne linkage as proof of a standalone
+boundary.

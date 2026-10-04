@@ -148,8 +148,6 @@ install(EXPORT AriadneTargets
     DESTINATION lib/cmake/Ariadne
 )
 get_target_property(NUMERIC_SOURCE_DIR numeric SOURCE_DIR)
-get_target_property(LOGGING_SOURCE_DIR logging SOURCE_DIR)
-get_target_property(THREADING_SOURCE_DIR threading SOURCE_DIR)
 
 install(FILES
     ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
@@ -167,5 +165,7 @@ ariadne_install_dependency_bundle(
     DESTINATION include/ariadne
 )
 
-install(DIRECTORY "${LOGGING_SOURCE_DIR}/include/logging" DESTINATION include/ariadne)
-install(DIRECTORY "${THREADING_SOURCE_DIR}/include/threading" DESTINATION include/ariadne)
+ariadne_install_dependency_bundle(
+    TARGET threading
+    DESTINATION include/ariadne
+)

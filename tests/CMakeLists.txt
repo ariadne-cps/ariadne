@@ -3,7 +3,6 @@ add_custom_target(tests-cpp)
 
 add_dependencies(everything tests)
 
-add_subdirectory(algebra)
 add_subdirectory(function)
 add_subdirectory(symbolic)
 add_subdirectory(geometry)

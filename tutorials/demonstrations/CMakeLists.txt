@@ -1,5 +1,4 @@
 set(TUTORIALS_DEMONSTRATION
-    algebra_demonstration
     function_demonstration
     geometry_demonstration
     solver_demonstration

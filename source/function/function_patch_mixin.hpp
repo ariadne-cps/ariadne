@@ -35,12 +35,12 @@
 #include "numeric/operators.hpp"
 #include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/range.hpp"
-#include "../algebra/operations.hpp"
-#include "../algebra/algebra_interface.hpp"
-#include "../algebra/algebra_mixin.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/range.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/algebra_interface.hpp"
+#include "algebra/algebra_mixin.hpp"
 
 #include "../function/domain.hpp"
 #include "../function/function_interface.hpp"

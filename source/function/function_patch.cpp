@@ -24,7 +24,7 @@
 
 #include "../function/function_patch.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
 #include "../function/formula.hpp"
 

@@ -1,7 +1,8 @@
 # Current decoupling state
 
-Status date: 2026-10-04  
-State described here: post-merge architecture after the Algebra extraction
+Status date: 2026-10-05  
+State described here: post-merge architecture after the Algebra extraction,
+with an active Windows portability validation on `fix-windows`
 
 The CSV, SVG and include evidence in this directory remain the historical
 2026-09-29 baseline. This file describes the current architecture.
@@ -125,6 +126,70 @@ including:
 
 Standalone Algebra CI and Ariadne integration CI are green in the state assumed
 by this document.
+
+## Active Windows portability validation
+
+A cross-repository `fix-windows` effort is validating that the decoupled stack
+can be built on Windows without changing the C++ architecture for that
+platform.
+
+The current build-policy streamlining starts in Configuration and is propagated
+bottom-up. The active chain is:
+
+```text
+configuration
+  -> utility
+       -> foundation
+            -> numeric
+```
+
+and independently:
+
+```text
+configuration
+  -> utility
+       -> logging
+            -> threading
+```
+
+Each repository modified during this decoupling effort uses a `fix-windows`
+branch and an open pull request so its CI can be inspected before the revision
+is propagated upward.
+
+The current pull requests for this build-policy pass are:
+
+- Configuration PR #2;
+- Utility PR #6;
+- Foundation PR #6;
+- Logging PR #11;
+- Threading PR #14;
+- Numeric PR #24.
+
+Propagation toward `interval -> algebra -> kernel` is deliberately paused at
+Numeric. At the current Numeric revision, Unix and Coverage CI succeed, while
+Windows fails during the **Build** step before C++ or Python tests run. The
+failure must be resolved at Numeric before its revision is propagated upward.
+
+This Windows work also exposed that warning suppression can make integration
+progress appear better than it is. The portability rules are therefore
+explicit:
+
+1. **No Windows-specific C++ implementation paths.** The same C++ design and
+   semantics must be used across supported platforms.
+2. **No warning suppression as a fix.** MSVC `/wd*` flags and equivalent
+   mechanisms are not accepted. Warnings promoted by the common policy must be
+   understood and fixed.
+3. **Centralize compiler/build policy.** Common MSVC options and aggregate
+   library policy belong in Configuration, not scattered through individual
+   repositories.
+4. Platform-specific CMake logic is acceptable only for genuine build-system
+   or packaging constraints; it must not hide semantic differences in the C++
+   implementation.
+
+The current Configuration experiment centralizes the common MSVC policy,
+including `/bigobj`, and makes the aggregate project library static on Windows
+while remaining shared on Unix-like systems. Repository-local duplicates of
+that policy are being removed as the revision is propagated.
 
 ## Next boundary: Function
 

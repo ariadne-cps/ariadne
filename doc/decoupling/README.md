@@ -25,6 +25,13 @@ names.
 Ariadne consumes standalone Algebra rather than owning a local Algebra
 implementation. Function is the next component to be decoupled and extracted.
 
+A separate Windows portability/packaging validation is currently active on
+`fix-windows` branches. It does not change the intended repository boundaries:
+the goal is to make the same code build cleanly on Windows with centralized
+build policy, not to introduce platform-specific C++ implementations. The
+current propagation is intentionally stopped at Numeric while its Windows CI is
+red; Unix and Coverage are green.
+
 See:
 
 - [Current state](current-state.md) for the active architecture and boundary
@@ -55,6 +62,16 @@ Repositories that use shared CMake infrastructure carry
 `submodules/configuration` directly. When the same Configuration repository is
 also present transitively, `require_same_dependency_commit` verifies that the
 gitlinks agree.
+
+Windows/compiler policy is centralized in Configuration and must not be
+reimplemented piecemeal in upper repositories. In particular:
+
+- Windows-specific C++ code paths are not accepted as a portability solution;
+- compiler-warning suppression is not accepted, including MSVC `/wd*` flags;
+- warnings enabled by the common policy must be fixed at their source;
+- platform-specific CMake packaging/toolchain settings are allowed only when
+  they express an actual platform constraint and should live in shared
+  Configuration where applicable.
 
 Public headers are registered with `ariadne_register_public_headers` and
 installed transitively with `ariadne_install_dependency_bundle`. Consumers

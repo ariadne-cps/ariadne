@@ -2,7 +2,7 @@
 
 Status: active  
 Base state: low-level chain through Algebra extracted and green  
-Last updated: 2026-10-04
+Last updated: 2026-10-06
 
 ## Established chain
 
@@ -64,6 +64,45 @@ from this active plan.
 - [ ] Make Ariadne consume the aggregate Function C++ and Python interfaces.
 - [ ] Propagate compatible dependency pins.
 - [ ] Get the full Ariadne integration CI green.
+
+## W1 - Windows portability and build-policy streamlining
+
+This work is active and must be completed before the Function extraction is
+allowed to rely on Windows integration results.
+
+- [x] Centralize common Windows/MSVC build policy in
+      `configuration/fix-windows`.
+- [x] Propagate that Configuration revision through Utility and Foundation.
+- [x] Propagate the same Configuration revision through Logging and Threading.
+- [x] Update Numeric to consume the streamlined Configuration/Foundation chain
+      and remove local `/bigobj` duplication.
+- [x] Make Numeric Windows CI green under the centralized unsuppressed policy.
+- [x] Propagate the first validated pass through Interval.
+- [x] Remove the existing MSVC warning suppressions from Algebra so the real
+      diagnostics are visible.
+- [x] Fix Numeric-owned C4244 diagnostics exposed by Algebra consumer-side
+      template instantiation.
+- [ ] Restart propagation from current `numeric:main`
+      (`bbb57e946f86d6d0134dcb90b81a86102ccae816`) and revalidate Interval.
+- [ ] Repoint Algebra to the revalidated Interval revision.
+- [ ] Fix Algebra-owned C4661 diagnostics from broad explicit class
+      instantiation without suppression.
+- [ ] Propagate the validated Algebra and Threading revisions into Kernel.
+- [ ] Re-run Kernel Windows build and runtime tests with the unsuppressed common
+      warning policy.
+
+Non-negotiable constraints for this work:
+
+- **Do not add Windows-specific C++ code paths.**
+- **Do not suppress compiler warnings** (`/wd*`, `-Wno-*`, or equivalent)
+  to obtain a green build.
+- Fix diagnostics at the owning layer and validate that layer before
+  propagating its revision upward.
+- Keep platform-specific logic in CMake limited to real compiler, linker or
+  packaging requirements and centralize common policy in Configuration.
+- Until this decoupling/portability pass is closed, use `fix-windows` in every
+  repository updated by the effort and expose the change through a PR so CI is
+  visible before upward propagation.
 
 ## Cross-cutting packaging cleanup
 

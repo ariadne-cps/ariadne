@@ -28,15 +28,22 @@ implementation. Function is the next component to be decoupled and extracted.
 A separate Windows portability/packaging validation is currently active on
 `fix-windows` branches. It does not change the intended repository boundaries:
 the goal is to make the same code build cleanly on Windows with centralized
-build policy, not to introduce platform-specific C++ implementations. The
-current propagation is intentionally stopped at Numeric while its Windows CI is
-red; Unix and Coverage are green.
+build policy, not to introduce platform-specific C++ implementations. Utility,
+Foundation, Logging, Threading, Numeric and Interval reached green CI under the
+streamlined policy. Algebra then exposed the next unsuppressed warning families.
+
+The next propagation pass starts from the latest `numeric:main`
+(`bbb57e946f86d6d0134dcb90b81a86102ccae816`), which already contains the
+source-level C4244 fixes discovered through Algebra.
 
 See:
 
 - [Current state](current-state.md) for the active architecture and boundary
   rules.
 - [Working plan](work-plan.md) for the remaining Function extraction work.
+- [Windows portability history](windows-portability-history.md) for the
+  successful, failed and reverted approaches taken during the Kernel/Windows
+  decoupling work.
 
 ## Historical baseline
 

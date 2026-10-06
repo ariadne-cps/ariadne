@@ -1,6 +1,6 @@
 # Current decoupling state
 
-Status date: 2026-10-05  
+Status date: 2026-10-06  
 State described here: post-merge architecture after the Algebra extraction,
 with an active Windows portability validation on `fix-windows`
 
@@ -165,10 +165,22 @@ The current pull requests for this build-policy pass are:
 - Threading PR #14;
 - Numeric PR #24.
 
-Propagation toward `interval -> algebra -> kernel` is deliberately paused at
-Numeric. At the current Numeric revision, Unix and Coverage CI succeed, while
-Windows fails during the **Build** step before C++ or Python tests run. The
-failure must be resolved at Numeric before its revision is propagated upward.
+The first propagation pass reached green CI in Utility, Foundation, Logging,
+Threading, Numeric and Interval. Algebra was then rebuilt with its previous MSVC
+warning suppressions removed and exposed two real diagnostic families:
+
+- Numeric-owned C4244 narrowing warnings triggered by consumer-side template
+  instantiation;
+- Algebra-owned C4661 warnings caused by broad explicit class instantiation.
+
+The Numeric C4244 sites were fixed at source in
+`413a2a00ae61e96d6734196f7b0faac139d5672e`. The next pass will restart from
+the latest Numeric main branch,
+`bbb57e946f86d6d0134dcb90b81a86102ccae816`, which contains that fix.
+
+Interval and Algebra must therefore be repointed and revalidated from that
+Numeric main baseline before propagation continues to Kernel. Algebra C4661
+remains open work.
 
 This Windows work also exposed that warning suppression can make integration
 progress appear better than it is. The portability rules are therefore

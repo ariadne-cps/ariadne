@@ -2,7 +2,7 @@
 
 Status: active  
 Base state: low-level chain through Algebra extracted and green  
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 ## Established chain
 
@@ -76,12 +76,17 @@ allowed to rely on Windows integration results.
 - [x] Propagate the same Configuration revision through Logging and Threading.
 - [x] Update Numeric to consume the streamlined Configuration/Foundation chain
       and remove local `/bigobj` duplication.
-- [ ] Make Numeric Windows CI green. Current state: Unix and Coverage pass;
-      Windows fails in the Build step before tests.
-- [ ] Only after Numeric is green, propagate bottom-up through Interval and
-      Algebra.
-- [ ] Remove all remaining MSVC warning suppressions from Algebra and any other
-      repository encountered during upward propagation.
+- [x] Make Numeric Windows CI green under the centralized unsuppressed policy.
+- [x] Propagate the first validated pass through Interval.
+- [x] Remove the existing MSVC warning suppressions from Algebra so the real
+      diagnostics are visible.
+- [x] Fix Numeric-owned C4244 diagnostics exposed by Algebra consumer-side
+      template instantiation.
+- [ ] Restart propagation from current `numeric:main`
+      (`bbb57e946f86d6d0134dcb90b81a86102ccae816`) and revalidate Interval.
+- [ ] Repoint Algebra to the revalidated Interval revision.
+- [ ] Fix Algebra-owned C4661 diagnostics from broad explicit class
+      instantiation without suppression.
 - [ ] Propagate the validated Algebra and Threading revisions into Kernel.
 - [ ] Re-run Kernel Windows build and runtime tests with the unsuppressed common
       warning policy.

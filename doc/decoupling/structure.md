@@ -10,9 +10,9 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `analysis` uses both `evolution` and `satisfiability`.
 - `evolution` uses `integration`, `system`, and `labelled`.
 - `integration` uses `kernel`.
-- `system` uses both `kernel` and `symbolic`, but does not use `labelled`.
-- `satisfiability` uses both `kernel` and `symbolic`.
-- `labelled` uses both `kernel` and `symbolic`.
+- `system` uses `symbolic`, but does not use `labelled` directly.
+- `satisfiability` uses `symbolic`.
+- `labelled` uses `symbolic`.
 - `symbolic` uses `kernel`.
 - `kernel` remains an aggregate repository internally composed of the modules `function`, `geometry`, `io`, and `solving`. Until these modules can be decoupled further, they remain part of `kernel`.
 - `kernel` uses `bdd` and `algebra`.
@@ -26,7 +26,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 
 In addition, every repository uses `configuration`. This dependency is omitted from the graph below because it would otherwise appear from every repository node.
 
-Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelled`: it receives `labelled` through `evolution`.
+Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelled`: it receives `labelled` through `evolution`. Likewise, `system`, `labelled`, and `satisfiability` do not need direct dependencies on `kernel`, since they receive it through `symbolic`.
 
 ## Dependency graph
 
@@ -45,13 +45,10 @@ graph TD
 
     integration --> kernel
 
-    system --> kernel
     system --> symbolic
 
-    satisfiability --> kernel
     satisfiability --> symbolic
 
-    labelled --> kernel
     labelled --> symbolic
 
     symbolic --> kernel
@@ -84,7 +81,7 @@ Each repository exposes the repositories it uses to its consumers. Consequently,
 
 These diamonds are intentional. At CMake level, consistency is enforced by checking that whenever the same dependency appears multiple times along the dependency chains, every occurrence resolves to the same commit. A build must therefore not combine different commits of the same repository through different paths.
 
-For example, `kernel` is reached from `evolution` through `integration`, through `system`, and through `labelled`; both `system` and `labelled` also reach `kernel` through `symbolic`. All paths must ultimately expose the same `kernel` commit.
+For example, `kernel` is reached from `evolution` directly through `integration`, and transitively through `symbolic` along both the `system` and `labelled` branches. It is also reached from `analysis` through `satisfiability -> symbolic`. All paths must ultimately expose the same `kernel` commit.
 
 Similarly, `analysis` reaches `labelled` transitively through `evolution`; no additional direct `analysis -> labelled` dependency is required.
 
@@ -98,11 +95,8 @@ As a concrete example, a change to `kernel` that must become visible to `ariadne
 
 ```text
 kernel -> integration                 -> evolution -> analysis -> ariadne
-kernel -> system                      -> evolution -> analysis -> ariadne
 kernel -> symbolic -> system          -> evolution -> analysis -> ariadne
-kernel -> labelled                    -> evolution -> analysis -> ariadne
 kernel -> symbolic -> labelled        -> evolution -> analysis -> ariadne
-kernel -> satisfiability                          -> analysis -> ariadne
 kernel -> symbolic -> satisfiability              -> analysis -> ariadne
 ```
 

@@ -14,7 +14,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `satisfiability` uses `symbolic`.
 - `labelling` uses `symbolic`.
 - `symbolic` uses `kernel`.
-- `kernel` remains an aggregate repository internally composed of the modules `function`, `geometry`, `io`, and `solving`. Until these modules can be decoupled further, they remain part of `kernel`.
+- `kernel` remains an aggregate repository internally composed of the modules `function`, `geometry`, `drawing`, and `solving`. Until these modules can be decoupled further, they remain part of `kernel`.
 - `kernel` uses `bdd` and `algebra`.
 - `bdd` uses `threading` and `python-common`.
 - `threading` uses `utility`.
@@ -58,7 +58,7 @@ graph TD
 
     kernel -. internal module .-> function
     kernel -. internal module .-> geometry
-    kernel -. internal module .-> io
+    kernel -. internal module .-> drawing
     kernel -. internal module .-> solving
 
     bdd --> threading

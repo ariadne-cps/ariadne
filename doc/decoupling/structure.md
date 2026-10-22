@@ -17,11 +17,12 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `kernel` remains an aggregate repository internally composed of the modules `function`, `geometry`, `drawing`, and `solving`. Until these modules can be decoupled further, they remain part of `kernel`.
 - `kernel` uses `bdd` and `algebra`.
 - `bdd` uses `threading` and `python-common`.
-- `threading` uses `utility`.
+- `threading` uses `logging`.
+- `logging` uses `utility`.
 - `utility` uses `macro`.
 - `algebra` uses `interval`.
 - `interval` uses `numeric`.
-- `numeric` uses `foundation`.
+- `numeric` uses `foundation` and `logging`.
 - `foundation` uses `utility` and `python-common`.
 
 In addition, every repository uses `configuration`. This dependency is omitted from the graph below because it would otherwise appear from every repository node.
@@ -64,12 +65,14 @@ graph TD
     bdd --> threading
     bdd --> python_common["python-common"]
 
-    threading --> utility
+    threading --> logging
+    logging --> utility
     utility --> macro
 
     algebra --> interval
     interval --> numeric
     numeric --> foundation
+    numeric --> logging
 
     foundation --> utility
     foundation --> python_common

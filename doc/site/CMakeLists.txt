@@ -12,8 +12,6 @@ include("${_doc_support}")
 ariadne_setup_documentation(
   INPUT
     "${ARIADNE_ROOT}/source"
-    "${ARIADNE_ROOT}/python"
-    "${ARIADNE_ROOT}/tutorials"
     "${ARIADNE_ROOT}/doc"
   IMAGE_PATH "${ARIADNE_ROOT}/doc"
 )
@@ -23,14 +21,25 @@ ariadne_setup_documentation(
 # This extends the generated config instead of copying Doxyfile.in.
 if(TARGET doxygen)
   set(_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
+  # Centralize all Ariadne-only exclusions under doc/site.
+  include("${ARIADNE_ROOT}/doc/site/exclusions.cmake")
+  set(_doxygen_excludes "")
+  foreach(_excluded IN LISTS ARIADNE_DOXYGEN_EXCLUSIONS)
+    if(IS_ABSOLUTE "${_excluded}")
+      message(FATAL_ERROR "Doxygen exclusion must be relative: ${_excluded}")
+    endif()
+    if(EXISTS "${ARIADNE_ROOT}/${_excluded}")
+      string(APPEND _doxygen_excludes " \"${ARIADNE_ROOT}/${_excluded}\"")
+    endif()
+  endforeach()
   file(APPEND "${_doxyfile}" "
 PROJECT_NAME = Ariadne
 PROJECT_BRIEF = \"Ariadne library and mathematical documentation\"
 STRIP_FROM_PATH = \"${ARIADNE_ROOT}\"
-LAYOUT_FILE = \"${ARIADNE_ROOT}/doc/DoxygenLayout.xml\"
+LAYOUT_FILE =
 MATHJAX_CODEFILE = \"${ARIADNE_ROOT}/doc/macros.js\"
-EXAMPLE_PATH = \"${ARIADNE_ROOT}/tutorials\" \"${ARIADNE_ROOT}/python\"
-EXCLUDE = \"${ARIADNE_ROOT}/source/prototyping\" \"${ARIADNE_ROOT}/source/experimental\" \"${ARIADNE_ROOT}/python/pybind11\" \"${ARIADNE_ROOT}/source/algebra/vector-crtp.hpp\" \"${ARIADNE_ROOT}/source/algebra/vector-sfinae.hpp\" \"${ARIADNE_ROOT}/source/algebra/matrix-crtp.hpp\" \"${ARIADNE_ROOT}/source/algebra/matrix-sfinae.hpp\"
+EXAMPLE_PATH =
+EXCLUDE =${_doxygen_excludes}
 EXTRA_PACKAGES = amsmath amsfonts amssymb \"${ARIADNE_ROOT}/doc/macros\"
 ")
 endif()

@@ -25,6 +25,54 @@ jobs:
           npm install --global moxygen@2.1.19
       - name: Configure documentation-only project
         run: cmake -S doc/site -B build-docsite -DDOXYFILE_LATEX=OFF
+      - name: Check Doxygen inputs, exclusions and mathematics
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          config = Path('build-docsite/Doxyfile').read_text()
+          def setting(key):
+              found = re.findall(r'^' + key + r'\s*=\s*(.*)
+      - name: Validate results and legacy pages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          root = Path('build-docsite/docs')
+          assert (root / 'xml/index.xml').is_file()
+          assert (root / 'html/index.html').is_file()
+          pages = list((root / 'markdown').glob('*.md'))
+          assert len(pages) > 2, f"Too few Markdown pages: {len(pages)}"
+          index = ET.parse(root / 'xml/index.xml').getroot()
+          kinds = {c.get('kind') for c in index.findall('compound')}
+          assert 'page' in kinds, "Expected narrative .dox pages"
+          assert 'group' in kinds, "Expected module groups"
+          print(f"{len(pages)} Markdown pages; XML kinds {sorted(kinds)}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ariadne-doc-markdown-prototype
+          path: |
+            build-docsite/docs/html/
+            build-docsite/docs/xml/
+            build-docsite/docs/markdown/
+          retention-days: 14
+, config, re.M)
+              assert found, key
+              return found[-1].strip()
+          inputs = setting('INPUT')
+          assert '/source' in inputs and '/doc' in inputs, inputs
+          assert '/python' not in inputs and '/tutorials' not in inputs, inputs
+          assert setting('LAYOUT_FILE') == ''
+          assert setting('EXAMPLE_PATH') == ''
+          excludes = setting('EXCLUDE')
+          assert '/doc/site' in excludes and 'python_module_tutorials.dox' in excludes
+          js = setting('MATHJAX_CODEFILE').strip('"')
+          assert js.endswith('/doc/macros.js') and Path(js).is_file(), js
+          assert '/doc/macros' in setting('EXTRA_PACKAGES')
+          print('Validated documentation scope and macro resources')
+          PY
       - name: Build Doxygen XML and Markdown
         run: cmake --build build-docsite --target doc-markdown
       - name: Validate results and legacy pages

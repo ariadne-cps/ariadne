@@ -161,7 +161,6 @@ pi.compute(acc): [3.141592653589793115997963468544185161590576171875:3.141592653
 
 /*!
 
-\example python/tutorials/computing_pi.py An example illustrating the use of %Ariadne to compute \f$\pi\f$ to different precisions.
 
 */
 

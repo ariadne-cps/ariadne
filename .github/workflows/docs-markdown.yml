@@ -1,0 +1,54 @@
+name: Documentation Markdown prototype
+on:
+  push:
+    branches: [docs-doxygen-markdown]
+  pull_request:
+    paths:
+      - 'doc/site/**'
+      - 'doc/shared-configuration'
+      - '.gitmodules'
+      - '.github/workflows/docs-markdown.yml'
+jobs:
+  documentation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+          npm install --global moxygen@2.1.19
+      - name: Configure documentation-only project
+        run: cmake -S doc/site -B build-docsite -DDOXYFILE_LATEX=OFF
+      - name: Build Doxygen XML and Markdown
+        run: cmake --build build-docsite --target doc-markdown
+      - name: Validate results and legacy pages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          root = Path('build-docsite/docs')
+          assert (root / 'xml/index.xml').is_file()
+          assert (root / 'html/index.html').is_file()
+          pages = list((root / 'markdown').glob('*.md'))
+          assert len(pages) > 2, f"Too few Markdown pages: {len(pages)}"
+          index = ET.parse(root / 'xml/index.xml').getroot()
+          kinds = {c.get('kind') for c in index.findall('compound')}
+          assert 'page' in kinds, "Expected narrative .dox pages"
+          assert 'group' in kinds, "Expected module groups"
+          print(f"{len(pages)} Markdown pages; XML kinds {sorted(kinds)}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ariadne-doc-markdown-prototype
+          path: |
+            build-docsite/docs/html/
+            build-docsite/docs/xml/
+            build-docsite/docs/markdown/
+          retention-days: 14

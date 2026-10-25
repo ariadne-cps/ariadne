@@ -60,13 +60,10 @@ graph TD
 
     symbolic --> kernel
 
-    kernel --> bdd
-    kernel --> algebra
-    rendering --> interval
+    kernel --> bdd & algebra
+    kernel -. internal module .-> function & geometry & solving
 
-    kernel -. internal module .-> function
-    kernel -. internal module .-> geometry
-    kernel -. internal module .-> solving
+    rendering --> interval
 
     bdd --> threading
     bdd --> python_common["python-common"]

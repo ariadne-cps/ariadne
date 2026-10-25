@@ -62,7 +62,6 @@ graph TD
 
     kernel --> bdd
     kernel --> algebra
-    bdd ~~~ algebra
     rendering --> interval
 
     kernel -. internal module .-> function

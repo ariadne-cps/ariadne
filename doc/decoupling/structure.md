@@ -60,6 +60,16 @@ graph TD
 
     symbolic --> kernel
 
+    subgraph kernel_level[""]
+        direction LR
+        function
+        geometry
+        solving
+        bdd
+        algebra
+    end
+    style kernel_level fill:none,stroke:none
+
     kernel --> bdd & algebra
     kernel -.-> function
     kernel -.-> geometry

@@ -66,9 +66,9 @@ graph TD
     geometry --> bdd
     rendering --> interval
 
-    kernel -. internal module .-> function
-    kernel -. internal module .-> geometry
-    kernel -. internal module .-> solving
+    kernel -.-> function
+    kernel -.-> geometry
+    kernel -.-> solving
 
     bdd --> threading
     bdd --> python_common["python-common"]

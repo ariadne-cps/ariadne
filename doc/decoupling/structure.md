@@ -37,6 +37,7 @@ In the graph, a solid arrow means "uses", while a dotted arrow connects `kernel`
 
 ```mermaid
 graph TD
+    %%{init: {"flowchart": {"nodeSpacing": 12, "rankSpacing": 50}}}%%
     ariadne --> analysis
 
     analysis --> evolution
@@ -60,7 +61,7 @@ graph TD
 
     symbolic --> kernel
 
-    subgraph kernel_level
+    subgraph kernel_level[" "]
         direction LR
         function
         geometry

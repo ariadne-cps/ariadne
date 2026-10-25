@@ -68,7 +68,7 @@ graph TD
         bdd
         algebra
     end
-    style kernel_level fill:none,stroke:none
+    style kernel_level fill:none,stroke:none,color:transparent
 
     kernel --> bdd & algebra
     kernel -.-> function

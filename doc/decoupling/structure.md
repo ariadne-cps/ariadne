@@ -63,13 +63,20 @@ graph TD
 
     subgraph kernel_level[" "]
         direction LR
+        kernel
+        rendering
+    end
+    style kernel_level fill:none,stroke:none,color:transparent
+
+    subgraph kernel_children[" "]
+        direction LR
         function
         geometry
         solving
         bdd
         algebra
     end
-    style kernel_level fill:none,stroke:none,color:transparent
+    style kernel_children fill:none,stroke:none,color:transparent
 
     kernel --> bdd & algebra
     kernel -.-> function

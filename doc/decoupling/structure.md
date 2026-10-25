@@ -33,11 +33,10 @@ Dependencies are exposed transitively. In particular, `analysis` does not need a
 
 ## Dependency graph
 
-In the graph, a solid arrow means "uses", while a dotted arrow connects `kernel` to one of its internal modules.
+In the graph, a solid arrow means "uses", while a dotted arrow marks an internal module contained in the `kernel` aggregate.
 
 ```mermaid
 graph TD
-    %%{init: {"flowchart": {"nodeSpacing": 12, "rankSpacing": 50}}}%%
     ariadne --> analysis
 
     analysis --> evolution
@@ -61,29 +60,13 @@ graph TD
 
     symbolic --> kernel
 
-    subgraph kernel_level[" "]
-        direction LR
-        kernel
-        rendering
-    end
-    style kernel_level fill:none,stroke:none,color:transparent
-
-    subgraph kernel_children[" "]
-        direction LR
-        function
-        geometry
-        solving
-        bdd
-        algebra
-    end
-    style kernel_children fill:none,stroke:none,color:transparent
-
-    kernel --> bdd & algebra
-    kernel -.-> function
-    kernel -.-> geometry
-    kernel -.-> solving
-
+    kernel --> bdd
+    kernel --> algebra
     rendering --> interval
+
+    kernel -. internal module .-> function
+    kernel -. internal module .-> geometry
+    kernel -. internal module .-> solving
 
     bdd --> threading
     bdd --> python_common["python-common"]

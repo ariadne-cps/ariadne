@@ -33,7 +33,7 @@ Dependencies are exposed transitively. In particular, `analysis` does not need a
 
 ## Dependency graph
 
-The graph shows repository dependencies; internal modules contained in the `kernel` aggregate are omitted.
+In the graph, a solid arrow means "uses", while a dotted arrow connects `kernel` to one of its internal modules.
 
 ```mermaid
 graph TD
@@ -61,6 +61,10 @@ graph TD
     symbolic --> kernel
 
     kernel --> bdd & algebra
+    kernel -.-> function
+    kernel -.-> geometry
+    kernel -.-> solving
+
     rendering --> interval
 
     bdd --> threading

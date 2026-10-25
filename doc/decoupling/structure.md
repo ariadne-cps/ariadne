@@ -12,10 +12,11 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `integration` uses `kernel`.
 - `system` uses `symbolic`, but does not use `labelling` directly.
 - `satisfiability` uses `symbolic`.
-- `labelling` uses `symbolic`.
+- `labelling` uses `symbolic` and `drawing`.
+- `drawing` uses both `rendering` and `kernel`.
 - `symbolic` uses `kernel`.
 - `kernel` remains an aggregate repository internally composed of the modules `function`, `geometry`, and `solving`. Until these modules can be decoupled further, they remain part of `kernel`.
-- `kernel` uses `bdd`, `algebra`, and `rendering`.
+- `kernel` uses `bdd` and `algebra`.
 - `rendering` uses `interval`.
 - `bdd` uses `threading` and `python-common`.
 - `threading` uses `logging`.
@@ -28,7 +29,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 
 In addition, every repository uses `configuration`. This dependency is omitted from the graph below because it would otherwise appear from every repository node.
 
-Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system`, `labelling`, and `satisfiability` do not need direct dependencies on `kernel`, since they receive it through `symbolic`.
+Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system`, `labelling`, and `satisfiability` do not need direct dependencies on `kernel`, since they receive it through `symbolic`. `labelling` also receives `drawing` through its direct dependency, and `drawing` exposes both `rendering` and `kernel`.
 
 ## Dependency graph
 
@@ -52,12 +53,15 @@ graph TD
     satisfiability --> symbolic
 
     labelling --> symbolic
+    labelling --> drawing
+
+    drawing --> rendering
+    drawing --> kernel
 
     symbolic --> kernel
 
     kernel --> bdd
     kernel --> algebra
-    kernel --> rendering
     rendering --> interval
 
     kernel -. internal module .-> function
@@ -86,7 +90,7 @@ Each repository exposes the repositories it uses to its consumers. Consequently,
 
 These diamonds are intentional. At CMake level, consistency is enforced by checking that whenever the same dependency appears multiple times along the dependency chains, every occurrence resolves to the same commit. A build must therefore not combine different commits of the same repository through different paths.
 
-For example, `kernel` is reached from `evolution` directly through `integration`, and transitively through `symbolic` along both the `system` and `labelling` branches. It is also reached from `analysis` through `satisfiability -> symbolic`. All paths must ultimately expose the same `kernel` commit.
+For example, `kernel` is reached from `evolution` directly through `integration`, and transitively through `symbolic` along the `system` and `labelling` branches. The `labelling` branch also reaches `kernel` through `drawing`. It is also reached from `analysis` through `satisfiability -> symbolic`. All paths must ultimately expose the same `kernel` commit. Likewise, `rendering` is exposed to `labelling` through `drawing`.
 
 Similarly, `analysis` reaches `labelling` transitively through `evolution`; no additional direct `analysis -> labelling` dependency is required.
 
@@ -105,10 +109,11 @@ This is necessary because a repository can be exposed through several branches o
 As a concrete example, a change to `kernel` that must become visible to `ariadne` has to be propagated through all paths that reach it:
 
 ```text
-kernel -> integration                 -> evolution -> analysis -> ariadne
-kernel -> symbolic -> system          -> evolution -> analysis -> ariadne
-kernel -> symbolic -> labelling        -> evolution -> analysis -> ariadne
-kernel -> symbolic -> satisfiability              -> analysis -> ariadne
+kernel -> integration                         -> evolution -> analysis -> ariadne
+kernel -> symbolic -> system                  -> evolution -> analysis -> ariadne
+kernel -> symbolic -> labelling               -> evolution -> analysis -> ariadne
+kernel -> drawing -> labelling                 -> evolution -> analysis -> ariadne
+kernel -> symbolic -> satisfiability                       -> analysis -> ariadne
 ```
 
 The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

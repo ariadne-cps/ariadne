@@ -60,7 +60,7 @@ graph TD
 
     symbolic --> kernel
 
-    subgraph kernel_level[""]
+    subgraph kernel_level
         direction LR
         function
         geometry

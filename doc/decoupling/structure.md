@@ -7,11 +7,12 @@ This document describes the intended structure of Ariadne after the current deco
 The top-level repository is `ariadne`. Its dependency chain is organized as follows:
 
 - `ariadne` uses `analysis`.
-- `analysis` uses both `evolution` and `satisfiability`.
+- `analysis` uses `evolution`, `smt`, and `sat`.
 - `evolution` uses `integration`, `system`, and `labelling`.
 - `integration` uses `kernel`.
 - `system` uses `symbolic`, but does not use `labelling` directly.
-- `satisfiability` uses `symbolic`.
+- `smt` uses `symbolic`.
+- `sat` uses only `bdd`.
 - `labelling` uses `symbolic` and `drawing`.
 - `drawing` uses both `rendering` and `kernel`.
 - `symbolic` uses `kernel`.
@@ -29,7 +30,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 
 In addition, every repository uses `configuration`. This dependency is omitted from the graph below because it would otherwise appear from every repository node.
 
-Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system`, `labelling`, and `satisfiability` do not need direct dependencies on `kernel`, since they receive it through `symbolic`. `labelling` also receives `drawing` through its direct dependency, and `drawing` exposes both `rendering` and `kernel`.
+Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system`, `labelling`, and `smt` do not need direct dependencies on `kernel`, since they receive it through `symbolic`. `labelling` also receives `drawing` through its direct dependency, and `drawing` exposes both `rendering` and `kernel`. The `sat` repository depends exclusively on `bdd`, independently of `symbolic` and `kernel`.
 
 ## Dependency graph
 
@@ -40,7 +41,8 @@ graph TD
     ariadne --> analysis
 
     analysis --> evolution
-    analysis --> satisfiability
+    analysis --> smt
+    analysis --> sat
 
     evolution --> integration
     evolution --> system
@@ -50,7 +52,9 @@ graph TD
 
     system --> symbolic
 
-    satisfiability --> symbolic
+    smt --> symbolic
+
+    sat --> bdd
 
     labelling --> symbolic
     labelling --> drawing
@@ -93,7 +97,9 @@ Each repository exposes the repositories it uses to its consumers. Consequently,
 
 These diamonds are intentional. At CMake level, consistency is enforced by checking that whenever the same dependency appears multiple times along the dependency chains, every occurrence resolves to the same commit. A build must therefore not combine different commits of the same repository through different paths.
 
-For example, `kernel` is reached from `evolution` directly through `integration`, and transitively through `symbolic` along the `system` and `labelling` branches. The `labelling` branch also reaches `kernel` through `drawing`. It is also reached from `analysis` through `satisfiability -> symbolic`. All paths must ultimately expose the same `kernel` commit. Likewise, `rendering` is exposed to `labelling` through `drawing`.
+For example, `kernel` is reached from `evolution` directly through `integration`, and transitively through `symbolic` along the `system` and `labelling` branches. The `labelling` branch also reaches `kernel` through `drawing`. It is also reached from `analysis` through `smt -> symbolic`. All paths must ultimately expose the same `kernel` commit. Likewise, `rendering` is exposed to `labelling` through `drawing`.
+
+The new `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat`, as well as through `evolution -> integration -> kernel -> geometry -> bdd`. These paths must agree on the same `bdd` commit.
 
 Similarly, `analysis` reaches `labelling` transitively through `evolution`; no additional direct `analysis -> labelling` dependency is required.
 
@@ -116,7 +122,9 @@ kernel -> integration                         -> evolution -> analysis -> ariadn
 kernel -> symbolic -> system                  -> evolution -> analysis -> ariadne
 kernel -> symbolic -> labelling               -> evolution -> analysis -> ariadne
 kernel -> drawing -> labelling                 -> evolution -> analysis -> ariadne
-kernel -> symbolic -> satisfiability                       -> analysis -> ariadne
+kernel -> symbolic -> smt                       -> analysis -> ariadne
 ```
+
+A change to `bdd` must similarly be propagated through both the direct `sat -> analysis` branch and the `geometry -> kernel` branch, including all upstream routes through which `kernel` is exposed.
 
 The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

@@ -10,7 +10,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `analysis` uses `evolution`, `smt`, and `sat`.
 - `evolution` uses `integration`, `system`, and `labelling`.
 - `integration` uses `function`.
-- `system` uses `symbolic`, but does not use `labelling` directly.
+- `system` uses `symbolic`.
 - `smt` uses `symbolic`, `threading`, and `cdcl`.
 - `sat` uses `bdd` and `cdcl`.
 - `cdcl` uses `utility` and `python-common`.

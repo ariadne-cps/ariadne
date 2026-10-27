@@ -11,7 +11,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `evolution` uses `integration`, `system`, and `labelling`.
 - `integration` uses `function`.
 - `system` uses `symbolic`, but does not use `labelling` directly.
-- `smt` uses `symbolic`.
+- `smt` uses `symbolic` and `threading`.
 - `sat` uses only `bdd`.
 - `labelling` uses `symbolic` and `drawing`.
 - `drawing` uses `rendering` and `paving`.
@@ -54,6 +54,7 @@ graph TD
     system --> symbolic
 
     smt --> symbolic
+    smt --> threading
 
     sat --> bdd
 
@@ -101,6 +102,8 @@ For example, `function` is reached from `evolution` directly through `integratio
 
 The `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat`, as well as through `evolution -> labelling -> drawing -> paving`. These paths must agree on the same `bdd` commit.
 
+The direct `smt -> threading` dependency adds another diamond: `analysis` reaches `threading` through `smt`, through `sat -> bdd`, and through `evolution -> labelling -> drawing -> paving -> bdd`. All paths must resolve to the same `threading` commit.
+
 Similarly, `analysis` reaches `labelling` transitively through `evolution`; no additional direct `analysis -> labelling` dependency is required.
 
 ## Minimal checkout strategy
@@ -125,6 +128,6 @@ function -> solving -> set -> paving -> drawing -> labelling    -> evolution -> 
 function -> solving -> set -> symbolic -> smt                                -> analysis -> ariadne
 ```
 
-A change to `bdd` must similarly be propagated through both the direct `sat -> analysis` branch and the `paving -> drawing -> labelling -> evolution` branch, including all upstream routes through which `bdd` is exposed.
+A change to `bdd` must similarly be propagated through both the direct `sat -> analysis` branch and the `paving -> drawing -> labelling -> evolution` branch, including all upstream routes through which `bdd` is exposed. A change to `threading` must additionally be propagated through `smt`, alongside the paths through `bdd`.
 
 The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

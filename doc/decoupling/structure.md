@@ -11,8 +11,9 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 - `evolution` uses `integration`, `system`, and `labelling`.
 - `integration` uses `function`.
 - `system` uses `symbolic`, but does not use `labelling` directly.
-- `smt` uses `symbolic` and `threading`.
-- `sat` uses only `bdd`.
+- `smt` uses `symbolic`, `threading`, and `cdcl`.
+- `sat` uses `bdd` and `cdcl`.
+- `cdcl` uses `utility` and `python-common`.
 - `labelling` uses `symbolic` and `drawing`.
 - `drawing` uses `rendering` and `paving`.
 - `symbolic` uses `set`.
@@ -33,7 +34,7 @@ The top-level repository is `ariadne`. Its dependency chain is organized as foll
 
 In addition, every repository uses `configuration`. This dependency is omitted from the graph below because it would otherwise appear from every repository node.
 
-Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system` and `smt` receive `set` transitively through `symbolic`, while `labelling` receives `set` both through `symbolic` and through `drawing -> paving`. `drawing` exposes `rendering` and `paving`, and `paving` exposes `bdd`. The `sat` repository depends exclusively on `bdd`, independently of `symbolic` and `paving`.
+Dependencies are exposed transitively. In particular, `analysis` does not need a direct dependency on `labelling`: it receives `labelling` through `evolution`. Likewise, `system` and `smt` receive `set` transitively through `symbolic`, while `labelling` receives `set` both through `symbolic` and through `drawing -> paving`. `drawing` exposes `rendering` and `paving`, and `paving` exposes `bdd`. The `sat` repository depends on `bdd` and `cdcl`, independently of `symbolic` and `paving`.
 
 ## Dependency graph
 
@@ -55,8 +56,13 @@ graph TD
 
     smt --> symbolic
     smt --> threading
+    smt --> cdcl
 
     sat --> bdd
+    sat --> cdcl
+
+    cdcl --> utility
+    cdcl --> python_common
 
     labelling --> symbolic
     labelling --> drawing
@@ -100,7 +106,7 @@ These diamonds are intentional. At CMake level, consistency is enforced by check
 
 For example, `function` is reached from `evolution` directly through `integration`, and transitively through `symbolic -> set -> solving` along the `system` and `labelling` branches. The `labelling` branch also reaches `function` through `drawing -> paving -> set -> solving`. It is also reached from `analysis` through `smt -> symbolic -> set -> solving`. All paths must ultimately expose the same `function` commit. Likewise, `rendering` is exposed to `labelling` through `drawing`.
 
-The `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat`, as well as through `evolution -> labelling -> drawing -> paving`. These paths must agree on the same `bdd` commit.
+The `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat`, as well as through `evolution -> labelling -> drawing -> paving`. These paths must agree on the same `bdd` commit. Likewise, `analysis` reaches `cdcl` through both `smt` and `sat`, so those paths must agree on the same `cdcl` commit.
 
 The direct `smt -> threading` dependency adds another diamond: `analysis` reaches `threading` through `smt`, through `sat -> bdd`, and through `evolution -> labelling -> drawing -> paving -> bdd`. All paths must resolve to the same `threading` commit.
 
@@ -128,6 +134,6 @@ function -> solving -> set -> paving -> drawing -> labelling    -> evolution -> 
 function -> solving -> set -> symbolic -> smt                                -> analysis -> ariadne
 ```
 
-A change to `bdd` must similarly be propagated through both the direct `sat -> analysis` branch and the `paving -> drawing -> labelling -> evolution` branch, including all upstream routes through which `bdd` is exposed. A change to `threading` must additionally be propagated through `smt`, alongside the paths through `bdd`.
+A change to `bdd` must similarly be propagated through both the direct `sat -> analysis` branch and the `paving -> drawing -> labelling -> evolution` branch, including all upstream routes through which `bdd` is exposed. A change to `threading` must additionally be propagated through `smt`, alongside the paths through `bdd`. A change to `cdcl` must be propagated through both `smt` and `sat` before reaching `analysis`.
 
 The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

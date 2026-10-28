@@ -17,8 +17,7 @@ graph TD
     smt["SMT"]
     sat["SAT"]
     symbolic["SYMBOLIC"]
-    constraint_propagation["CONSTRAINT PROPAGATION"]
-    constraint_feasibility["CONSTRAINT FEASIBILITY"]
+    constraint_solver["CONSTRAINT SOLVER"]
     equation_solving["EQUATION SOLVING"]
     nonlinear_programming["NONLINEAR PROGRAMMING"]
     linear_programming["LINEAR PROGRAMMING"]
@@ -57,19 +56,16 @@ graph TD
     paving --> set
     paving --> bdd
     set --> linear_programming
-    set --> constraint_propagation
-    set --> constraint_feasibility
+    set --> constraint_solver
     smt --> symbolic
-    smt --> constraint_propagation
-    smt --> nonlinear_programming
+    smt --> constraint_solver
     smt --> equation_solving
     smt --> threading
     smt --> cdcl
     sat --> bdd
     sat --> cdcl
     symbolic --> function
-    constraint_propagation --> function
-    constraint_feasibility --> nonlinear_programming
+    constraint_solver --> nonlinear_programming
     equation_solving --> function
     nonlinear_programming --> function
     linear_programming --> algebra
@@ -103,12 +99,11 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 - `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
 - `symbolic-set` uses `symbolic`, `set`. See [commit constraints](#symbolic-set-commit-constraints).
 - `paving` uses `set`, `bdd`. See [commit constraints](#paving-commit-constraints).
-- `set` uses `linear-programming`, `constraint-propagation`, `constraint-feasibility`. See [commit constraints](#set-commit-constraints).
-- `smt` uses `symbolic`, `constraint-propagation`, `nonlinear-programming`, `equation-solving`, `threading`, `cdcl`. See [commit constraints](#smt-commit-constraints).
+- `set` uses `linear-programming`, `constraint-solver`. See [commit constraints](#set-commit-constraints).
+- `smt` uses `symbolic`, `constraint-solver`, `equation-solving`, `threading`, `cdcl`. See [commit constraints](#smt-commit-constraints).
 - `sat` uses `bdd`, `cdcl`. See [commit constraints](#sat-commit-constraints).
 - `symbolic` uses `function`.
-- `constraint-propagation` uses `function`.
-- `constraint-feasibility` uses `nonlinear-programming`.
+- `constraint-solver` uses `nonlinear-programming`.
 - `equation-solving` uses `function`.
 - `nonlinear-programming` uses `function`.
 - `linear-programming` uses `algebra`.
@@ -127,11 +122,11 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `symbolic-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming`, `constraint-propagation`, and `constraint-feasibility` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-feasibility`. The repositories `constraint-propagation`, `equation-solving`, and `nonlinear-programming` use `function`, while `constraint-feasibility` uses `nonlinear-programming`.
+All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `symbolic-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solver` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solver`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solver` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solver`, so it needs no separate edge to `nonlinear-programming` in the reduced graph.
 
 ## Commit consistency verification
 
-The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced graph above** and assume that each submodule has already validated its own dependencies. The graph itself is unchanged.
+The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced graph above** and assume that each submodule has already validated its own dependencies. The checks below reflect the graph shown above.
 
 ### Verification rules
 
@@ -161,15 +156,12 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`bdd`**:
   - `evolution -> labelling -> drawing -> paving -> bdd`
   - `sat -> bdd`
-- **`constraint-propagation`**:
-  - `evolution -> symbolic-set -> set -> constraint-propagation`
-  - `smt -> constraint-propagation`
+- **`constraint-solver`**:
+  - `evolution -> symbolic-set -> set -> constraint-solver`
+  - `smt -> constraint-solver`
 - **`threading`**:
   - `sat -> bdd -> threading`
   - `smt -> threading`
-- **`nonlinear-programming`**:
-  - `evolution -> symbolic-set -> set -> constraint-feasibility -> nonlinear-programming`
-  - `smt -> nonlinear-programming`
 
 ### `evolution` commit constraints
 
@@ -189,7 +181,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 - **`function`**:
   - `symbolic -> function`
-  - `drawing -> paving -> set -> constraint-propagation -> function`
+  - `drawing -> paving -> set -> constraint-solver -> nonlinear-programming -> function`
 
 ### `drawing` commit constraints
 
@@ -204,7 +196,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 - **`function`**:
   - `symbolic -> function`
-  - `set -> constraint-propagation -> function`
+  - `set -> constraint-solver -> nonlinear-programming -> function`
 
 ### `paving` commit constraints
 
@@ -217,19 +209,15 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 ### `set` commit constraints
 
-- **`function`**:
-  - `constraint-propagation -> function`
-  - `constraint-feasibility -> nonlinear-programming -> function`
 - **`algebra`**:
   - `linear-programming -> algebra`
-  - `constraint-propagation -> function -> geometry -> algebra`
+  - `constraint-solver -> nonlinear-programming -> function -> geometry -> algebra`
 
 ### `smt` commit constraints
 
 - **`function`**:
   - `symbolic -> function`
-  - `constraint-propagation -> function`
-  - `nonlinear-programming -> function`
+  - `constraint-solver -> nonlinear-programming -> function`
   - `equation-solving -> function`
 - **`logging`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`

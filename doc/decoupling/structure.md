@@ -1,8 +1,98 @@
 # Post-decoupling repository structure
 
-This document describes the intended structure of Ariadne after the current decoupling effort. Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
+Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
 
-## Repository hierarchy
+## Structure
+
+```mermaid
+graph TD
+    ariadne["ARIADNE"]
+    analysis["ANALYSIS"]
+    evolution["EVOLUTION"]
+    integration["INTEGRATION"]
+    system["SYSTEM"]
+    labelling["LABELLING"]
+    drawing["DRAWING"]
+    symbolic_set["SYMBOLIC SET"]
+    paving["PAVING"]
+    set["SET"]
+    smt["SMT"]
+    sat["SAT"]
+    symbolic["SYMBOLIC"]
+    constraint_propagation["CONSTRAINT PROPAGATION"]
+    constraint_feasibility["CONSTRAINT FEASIBILITY"]
+    equation_solving["EQUATION SOLVING"]
+    nonlinear_programming["NONLINEAR PROGRAMMING"]
+    linear_programming["LINEAR PROGRAMMING"]
+    function["FUNCTION"]
+    geometry["GEOMETRY"]
+    algebra["ALGEBRA"]
+    interval["INTERVAL"]
+    numeric["NUMERIC"]
+    rendering["RENDERING"]
+    bdd["BDD"]
+    cdcl["CDCL"]
+    threading["THREADING"]
+    logging["LOGGING"]
+    foundation["FOUNDATION"]
+    utility["UTILITY"]
+    python_common["PYTHON COMMON"]
+    macro["MACRO"]
+
+    ariadne --> analysis
+    analysis --> evolution
+    analysis --> smt
+    analysis --> sat
+    evolution --> integration
+    evolution --> system
+    evolution --> labelling
+    evolution --> symbolic_set
+    evolution --> equation_solving
+    integration --> function
+    system --> symbolic
+    labelling --> symbolic
+    labelling --> drawing
+    drawing --> rendering
+    drawing --> paving
+    symbolic_set --> symbolic
+    symbolic_set --> set
+    paving --> set
+    paving --> bdd
+    set --> linear_programming
+    set --> constraint_propagation
+    set --> constraint_feasibility
+    smt --> symbolic
+    smt --> constraint_propagation
+    smt --> nonlinear_programming
+    smt --> equation_solving
+    smt --> threading
+    smt --> cdcl
+    sat --> bdd
+    sat --> cdcl
+    symbolic --> function
+    constraint_propagation --> function
+    constraint_feasibility --> nonlinear_programming
+    equation_solving --> function
+    nonlinear_programming --> function
+    linear_programming --> algebra
+    function --> geometry
+    geometry --> algebra
+    algebra --> interval
+    interval --> numeric
+    numeric --> foundation
+    numeric --> logging
+    rendering --> utility
+    rendering --> python_common
+    bdd --> threading
+    bdd --> python_common
+    cdcl --> utility
+    cdcl --> python_common
+    threading --> logging
+    logging --> utility
+    foundation --> utility
+    foundation --> python_common
+    utility --> macro
+```
 
 The top-level repository is `ariadne`. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
@@ -172,112 +262,6 @@ Repositories without cross-submodule constraints in the graph: `ariadne`, `integ
 
 In total, the graph yields **25 independent commit checks across 10 repositories**, using **54 representative paths**. The omitted downstream comparisons are implied by the verified commits and the dependency DAG.
 
-## Dependency graph
-
-```mermaid
-graph TD
-    ariadne["ARIADNE"]
-    analysis["ANALYSIS"]
-    evolution["EVOLUTION"]
-    integration["INTEGRATION"]
-    system["SYSTEM"]
-    labelling["LABELLING"]
-    drawing["DRAWING"]
-    symbolic_set["SYMBOLIC SET"]
-    paving["PAVING"]
-    set["SET"]
-    smt["SMT"]
-    sat["SAT"]
-    symbolic["SYMBOLIC"]
-    constraint_propagation["CONSTRAINT PROPAGATION"]
-    constraint_feasibility["CONSTRAINT FEASIBILITY"]
-    equation_solving["EQUATION SOLVING"]
-    nonlinear_programming["NONLINEAR PROGRAMMING"]
-    linear_programming["LINEAR PROGRAMMING"]
-    function["FUNCTION"]
-    geometry["GEOMETRY"]
-    algebra["ALGEBRA"]
-    interval["INTERVAL"]
-    numeric["NUMERIC"]
-    rendering["RENDERING"]
-    bdd["BDD"]
-    cdcl["CDCL"]
-    threading["THREADING"]
-    logging["LOGGING"]
-    foundation["FOUNDATION"]
-    utility["UTILITY"]
-    python_common["PYTHON COMMON"]
-    macro["MACRO"]
-
-    ariadne --> analysis
-    analysis --> evolution
-    analysis --> smt
-    analysis --> sat
-    evolution --> integration
-    evolution --> system
-    evolution --> labelling
-    evolution --> symbolic_set
-    evolution --> equation_solving
-    integration --> function
-    system --> symbolic
-    labelling --> symbolic
-    labelling --> drawing
-    drawing --> rendering
-    drawing --> paving
-    symbolic_set --> symbolic
-    symbolic_set --> set
-    paving --> set
-    paving --> bdd
-    set --> linear_programming
-    set --> constraint_propagation
-    set --> constraint_feasibility
-    smt --> symbolic
-    smt --> constraint_propagation
-    smt --> nonlinear_programming
-    smt --> equation_solving
-    smt --> threading
-    smt --> cdcl
-    sat --> bdd
-    sat --> cdcl
-    symbolic --> function
-    constraint_propagation --> function
-    constraint_feasibility --> nonlinear_programming
-    equation_solving --> function
-    nonlinear_programming --> function
-    linear_programming --> algebra
-    function --> geometry
-    geometry --> algebra
-    algebra --> interval
-    interval --> numeric
-    numeric --> foundation
-    numeric --> logging
-    rendering --> utility
-    rendering --> python_common
-    bdd --> threading
-    bdd --> python_common
-    cdcl --> utility
-    cdcl --> python_common
-    threading --> logging
-    logging --> utility
-    foundation --> utility
-    foundation --> python_common
-    utility --> macro
-```
-
-## Exposed dependencies and diamonds
-
-Each repository exposes the repositories it uses to its consumers. Consequently, the dependency graph contains diamonds: the same lower-level repository may be reachable from a consumer through more than one dependency path.
-
-These diamonds are intentional. At CMake level, consistency is enforced by checking that whenever the same dependency appears multiple times along dependency chains, every occurrence resolves to the same commit. A build must therefore not combine different commits of the same repository through different paths.
-
-For example, `analysis` reaches `symbolic` through `evolution -> system`, `evolution -> labelling`, `evolution -> symbolic-set`, and `smt`. It reaches `set` through `evolution -> symbolic-set` and through `evolution -> labelling -> drawing -> paving`. The `set` dependencies introduce further diamonds for `constraint-propagation` and `constraint-feasibility`: `evolution` reaches `set` through both `symbolic-set` and `labelling -> drawing -> paving`. Additionally, `analysis` reaches `constraint-propagation` through `smt`.
-
-The `nonlinear-programming` repository is reached through `set -> constraint-feasibility -> nonlinear-programming` and directly through `smt -> nonlinear-programming`. Similarly, `equation-solving` is reached directly from `evolution` and through `smt`. The shared `function` repository is exposed through `integration`, `symbolic`, `constraint-propagation`, `nonlinear-programming`, and `equation-solving`. Every such path must agree on the dependency commit.
-
-The `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat` and through `evolution -> labelling -> drawing -> paving`. Moreover, `analysis` reaches `cdcl` through both `smt` and `sat`, and reaches `threading` directly through `smt` and transitively through `bdd`. All paths must agree on the commit of each shared repository.
-
-`algebra` is reached through both `function -> geometry` and `set -> linear-programming`; `python-common` is shared by `rendering`, `bdd`, `cdcl`, and `foundation`.
-
 ## Minimal checkout strategy
 
 The transitive dependency graph does not imply a recursive checkout of the whole submodule tree. The CMake dependency machinery checks out only what is strictly necessary for the repository being configured. When validating a dependency diamond, it descends into nested submodules only as far as needed to inspect and compare the referenced commits and verify that all paths resolve the same repository to the same commit.
@@ -289,23 +273,5 @@ Consequently, a recursive submodule checkout such as `git submodule update --ini
 When a repository is modified and a repository above it must see those changes, the new dependency commit must be propagated upward along **every** path that reaches the consumer.
 
 This is necessary because a repository can be exposed through several branches of the graph. Updating only one branch would make different paths resolve the same dependency to different commits, which the CMake consistency check is expected to reject.
-
-Representative (not exhaustive) paths for a change to `function` to reach `ariadne` include:
-
-```text
-function -> integration                                             -> evolution -> analysis -> ariadne
-function -> symbolic -> system                                     -> evolution -> analysis -> ariadne
-function -> symbolic -> labelling                                  -> evolution -> analysis -> ariadne
-function -> symbolic -> symbolic-set                               -> evolution -> analysis -> ariadne
-function -> constraint-propagation -> set -> symbolic-set           -> evolution -> analysis -> ariadne
-function -> nonlinear-programming -> constraint-feasibility -> set -> symbolic-set -> evolution -> analysis -> ariadne
-function -> equation-solving                                      -> evolution -> analysis -> ariadne
-function -> symbolic -> smt                                                     -> analysis -> ariadne
-function -> nonlinear-programming -> smt                                        -> analysis -> ariadne
-```
-
-Additional paths pass through `paving`, `set`, and their consumers. The representative routes above do not replace the requirement to propagate along **all** paths in the dependency graph.
-
-A change to `bdd` must be propagated through both `sat` and `paving -> drawing -> labelling -> evolution`, including all upstream consumers. A change to `threading` must additionally propagate through `smt`, alongside the routes through `bdd`. A change to `cdcl` must propagate through both `smt` and `sat` before reaching `analysis`. Similarly, changes to `constraint-propagation`, `constraint-feasibility`, `equation-solving`, or `nonlinear-programming` require updating every direct and transitive consumer shown in the graph.
 
 The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

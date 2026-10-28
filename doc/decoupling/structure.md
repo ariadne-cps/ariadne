@@ -1,8 +1,6 @@
-# Post-decoupling repository structure
+# Structure
 
 Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
-
-## Structure
 
 ```mermaid
 graph TD

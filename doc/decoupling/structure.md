@@ -43,11 +43,10 @@ graph TD
     evolution --> integration
     evolution --> system
     evolution --> labelling
-    evolution --> expression_set
     evolution --> equation_solving
     integration --> function
     system --> symbolic
-    labelling --> symbolic
+    labelling --> expression_set
     labelling --> drawing
     drawing --> rendering
     drawing --> paving
@@ -92,10 +91,10 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 
 - `ariadne` uses `analysis`.
 - `analysis` uses `evolution`, `smt`, `sat`. See [commit constraints](#analysis-commit-constraints).
-- `evolution` uses `integration`, `system`, `labelling`, `expression-set`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
+- `evolution` uses `integration`, `system`, `labelling`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
 - `system` uses `symbolic`.
-- `labelling` uses `symbolic`, `drawing`. See [commit constraints](#labelling-commit-constraints).
+- `labelling` uses `expression-set`, `drawing`. See [commit constraints](#labelling-commit-constraints).
 - `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
 - `expression-set` uses `symbolic`, `set`. See [commit constraints](#expression-set-commit-constraints).
 - `paving` uses `set`, `bdd`. See [commit constraints](#paving-commit-constraints).
@@ -122,7 +121,7 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph.
+All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. Similarly, `evolution` reaches `expression-set` through `labelling`, and `labelling` reaches `symbolic` through `expression-set`; neither relationship needs a separate direct edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph.
 
 ## Commit consistency verification
 
@@ -157,7 +156,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `evolution -> labelling -> drawing -> paving -> bdd`
   - `sat -> bdd`
 - **`constraint-solving`**:
-  - `evolution -> expression-set -> set -> constraint-solving`
+  - `evolution -> labelling -> expression-set -> set -> constraint-solving`
   - `smt -> constraint-solving`
 - **`threading`**:
   - `sat -> bdd -> threading`
@@ -167,11 +166,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 - **`symbolic`**:
   - `system -> symbolic`
-  - `labelling -> symbolic`
-  - `expression-set -> symbolic`
-- **`set`**:
-  - `labelling -> drawing -> paving -> set`
-  - `expression-set -> set`
+  - `labelling -> expression-set -> symbolic`
 - **`function`**:
   - `integration -> function`
   - `system -> symbolic -> function`
@@ -179,9 +174,9 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 ### `labelling` commit constraints
 
-- **`function`**:
-  - `symbolic -> function`
-  - `drawing -> paving -> set -> constraint-solving -> nonlinear-programming -> function`
+- **`set`**:
+  - `expression-set -> set`
+  - `drawing -> paving -> set`
 
 ### `drawing` commit constraints
 

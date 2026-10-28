@@ -4,18 +4,18 @@ This document describes the intended structure of Ariadne after the current deco
 
 ## Repository hierarchy
 
-The top-level repository is `ariadne`. The direct repository dependencies shown in the diagram are:
+The top-level repository is `ariadne`. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `analysis`.
 - `analysis` uses `evolution`, `smt`, `sat`.
-- `evolution` uses `integration`, `system`, `labelling`, `symbolic-set`, `constraint-propagation`, `constraint-feasibility`, `equation-solving`.
+- `evolution` uses `integration`, `system`, `labelling`, `symbolic-set`, `equation-solving`.
 - `integration` uses `function`.
 - `system` uses `symbolic`.
 - `labelling` uses `symbolic`, `drawing`.
 - `drawing` uses `rendering`, `paving`.
 - `symbolic-set` uses `symbolic`, `set`.
-- `paving` uses `set`, `constraint-propagation`, `bdd`.
-- `set` uses `linear-programming`, `constraint-propagation`, `constraint-feasibility`, `nonlinear-programming`.
+- `paving` uses `set`, `bdd`.
+- `set` uses `linear-programming`, `constraint-propagation`, `constraint-feasibility`.
 - `smt` uses `symbolic`, `constraint-propagation`, `nonlinear-programming`, `equation-solving`, `threading`, `cdcl`.
 - `sat` uses `bdd`, `cdcl`.
 - `symbolic` uses `function`.
@@ -39,7 +39,7 @@ The top-level repository is `ariadne`. The direct repository dependencies shown 
 
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `symbolic-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes the dedicated `linear-programming`, `constraint-propagation`, `constraint-feasibility`, and `nonlinear-programming` repositories. The repositories `constraint-propagation`, `equation-solving`, and `nonlinear-programming` use `function`, while `constraint-feasibility` uses `nonlinear-programming`.
+All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `symbolic-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming`, `constraint-propagation`, and `constraint-feasibility` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-feasibility`. The repositories `constraint-propagation`, `equation-solving`, and `nonlinear-programming` use `function`, while `constraint-feasibility` uses `nonlinear-programming`.
 
 ## Dependency graph
 
@@ -86,8 +86,6 @@ graph TD
     evolution --> system
     evolution --> labelling
     evolution --> symbolic_set
-    evolution --> constraint_propagation
-    evolution --> constraint_feasibility
     evolution --> equation_solving
     integration --> function
     system --> symbolic
@@ -98,12 +96,10 @@ graph TD
     symbolic_set --> symbolic
     symbolic_set --> set
     paving --> set
-    paving --> constraint_propagation
     paving --> bdd
     set --> linear_programming
     set --> constraint_propagation
     set --> constraint_feasibility
-    set --> nonlinear_programming
     smt --> symbolic
     smt --> constraint_propagation
     smt --> nonlinear_programming
@@ -135,15 +131,6 @@ graph TD
     foundation --> utility
     foundation --> python_common
     utility --> macro
-
-    classDef repository fill:#00284d,stroke:#0c3e6d,color:#a8d2ff,stroke-width:1px;
-    classDef symbolicRepo fill:#3d4341,stroke:#19ad4b,color:#ffffff,stroke-width:2px;
-    classDef setRepo fill:#434139,stroke:#e78b00,color:#ffffff,stroke-width:2px;
-    classDef solvingRepo fill:#3d4148,stroke:#3977ff,color:#ffffff,stroke-width:2px;
-    class ariadne,analysis,evolution,integration,system,labelling,drawing,smt,sat,function,algebra,interval,numeric,rendering,bdd,cdcl,threading,logging,foundation,utility,python_common,macro repository;
-    class symbolic,symbolic_set symbolicRepo;
-    class set,paving,geometry setRepo;
-    class constraint_propagation,constraint_feasibility,equation_solving,nonlinear_programming,linear_programming solvingRepo;
 ```
 
 ## Exposed dependencies and diamonds
@@ -152,9 +139,9 @@ Each repository exposes the repositories it uses to its consumers. Consequently,
 
 These diamonds are intentional. At CMake level, consistency is enforced by checking that whenever the same dependency appears multiple times along dependency chains, every occurrence resolves to the same commit. A build must therefore not combine different commits of the same repository through different paths.
 
-For example, `analysis` reaches `symbolic` through `evolution -> system`, `evolution -> labelling`, `evolution -> symbolic-set`, and `smt`. It reaches `set` through `evolution -> symbolic-set` and through `evolution -> labelling -> drawing -> paving`. The `set` dependencies introduce further diamonds for `constraint-propagation` and `constraint-feasibility`, since `evolution` also uses both directly; `constraint-propagation` is additionally used by `paving` and `smt`.
+For example, `analysis` reaches `symbolic` through `evolution -> system`, `evolution -> labelling`, `evolution -> symbolic-set`, and `smt`. It reaches `set` through `evolution -> symbolic-set` and through `evolution -> labelling -> drawing -> paving`. The `set` dependencies introduce further diamonds for `constraint-propagation` and `constraint-feasibility`: `evolution` reaches `set` through both `symbolic-set` and `labelling -> drawing -> paving`. Additionally, `analysis` reaches `constraint-propagation` through `smt`.
 
-The `nonlinear-programming` repository is exposed through `set`, `constraint-feasibility`, and `smt`. Similarly, `equation-solving` is reached directly from `evolution` and through `smt`. The shared `function` repository is exposed through `integration`, `symbolic`, `constraint-propagation`, `nonlinear-programming`, and `equation-solving`. Every such path must agree on the dependency commit.
+The `nonlinear-programming` repository is reached through `set -> constraint-feasibility -> nonlinear-programming` and directly through `smt -> nonlinear-programming`. Similarly, `equation-solving` is reached directly from `evolution` and through `smt`. The shared `function` repository is exposed through `integration`, `symbolic`, `constraint-propagation`, `nonlinear-programming`, and `equation-solving`. Every such path must agree on the dependency commit.
 
 The `sat` branch also creates a diamond for `bdd`: `analysis` reaches `bdd` through `sat` and through `evolution -> labelling -> drawing -> paving`. Moreover, `analysis` reaches `cdcl` through both `smt` and `sat`, and reaches `threading` directly through `smt` and transitively through `bdd`. All paths must agree on the commit of each shared repository.
 
@@ -179,8 +166,8 @@ function -> integration                                             -> evolution
 function -> symbolic -> system                                     -> evolution -> analysis -> ariadne
 function -> symbolic -> labelling                                  -> evolution -> analysis -> ariadne
 function -> symbolic -> symbolic-set                               -> evolution -> analysis -> ariadne
-function -> constraint-propagation                                 -> evolution -> analysis -> ariadne
-function -> nonlinear-programming -> constraint-feasibility        -> evolution -> analysis -> ariadne
+function -> constraint-propagation -> set -> symbolic-set           -> evolution -> analysis -> ariadne
+function -> nonlinear-programming -> constraint-feasibility -> set -> symbolic-set -> evolution -> analysis -> ariadne
 function -> equation-solving                                      -> evolution -> analysis -> ariadne
 function -> symbolic -> smt                                                     -> analysis -> ariadne
 function -> nonlinear-programming -> smt                                        -> analysis -> ariadne

@@ -149,116 +149,112 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 ### `analysis` commit constraints
 
-- **`equation-solving`** (equal commits):
+- **`equation-solving`**:
   - `evolution -> equation-solving`
   - `smt -> equation-solving`
-- **`cdcl`** (equal commits):
+- **`cdcl`**:
   - `smt -> cdcl`
   - `sat -> cdcl`
-- **`symbolic`** (equal commits):
+- **`symbolic`**:
   - `evolution -> system -> symbolic`
   - `smt -> symbolic`
-- **`bdd`** (equal commits):
+- **`bdd`**:
   - `evolution -> labelling -> drawing -> paving -> bdd`
   - `sat -> bdd`
-- **`constraint-propagation`** (equal commits):
+- **`constraint-propagation`**:
   - `evolution -> symbolic-set -> set -> constraint-propagation`
   - `smt -> constraint-propagation`
-- **`threading`** (equal commits):
+- **`threading`**:
   - `sat -> bdd -> threading`
   - `smt -> threading`
-- **`nonlinear-programming`** (equal commits):
+- **`nonlinear-programming`**:
   - `evolution -> symbolic-set -> set -> constraint-feasibility -> nonlinear-programming`
   - `smt -> nonlinear-programming`
 
 ### `evolution` commit constraints
 
-- **`symbolic`** (equal commits):
+- **`symbolic`**:
   - `system -> symbolic`
   - `labelling -> symbolic`
   - `symbolic-set -> symbolic`
-- **`set`** (equal commits):
+- **`set`**:
   - `labelling -> drawing -> paving -> set`
   - `symbolic-set -> set`
-- **`function`** (equal commits):
+- **`function`**:
   - `integration -> function`
   - `system -> symbolic -> function`
   - `equation-solving -> function`
 
 ### `labelling` commit constraints
 
-- **`function`** (equal commits):
+- **`function`**:
   - `symbolic -> function`
   - `drawing -> paving -> set -> constraint-propagation -> function`
 
 ### `drawing` commit constraints
 
-- **`python-common`** (equal commits):
+- **`python-common`**:
   - `rendering -> python-common`
   - `paving -> bdd -> python-common`
-- **`utility`** (equal commits):
+- **`utility`**:
   - `rendering -> utility`
   - `paving -> bdd -> threading -> logging -> utility`
 
 ### `symbolic-set` commit constraints
 
-- **`function`** (equal commits):
+- **`function`**:
   - `symbolic -> function`
   - `set -> constraint-propagation -> function`
 
 ### `paving` commit constraints
 
-- **`logging`** (equal commits):
+- **`logging`**:
   - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
   - `bdd -> threading -> logging`
-- **`python-common`** (equal commits):
+- **`python-common`**:
   - `set -> linear-programming -> algebra -> interval -> numeric -> foundation -> python-common`
   - `bdd -> python-common`
 
 ### `set` commit constraints
 
-- **`function`** (equal commits):
+- **`function`**:
   - `constraint-propagation -> function`
   - `constraint-feasibility -> nonlinear-programming -> function`
-- **`algebra`** (equal commits):
+- **`algebra`**:
   - `linear-programming -> algebra`
   - `constraint-propagation -> function -> geometry -> algebra`
 
 ### `smt` commit constraints
 
-- **`function`** (equal commits):
+- **`function`**:
   - `symbolic -> function`
   - `constraint-propagation -> function`
   - `nonlinear-programming -> function`
   - `equation-solving -> function`
-- **`logging`** (equal commits):
+- **`logging`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`
   - `threading -> logging`
-- **`python-common`** (equal commits):
+- **`python-common`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> foundation -> python-common`
   - `cdcl -> python-common`
-- **`utility`** (equal commits):
+- **`utility`**:
   - `threading -> logging -> utility`
   - `cdcl -> utility`
 
 ### `sat` commit constraints
 
-- **`python-common`** (equal commits):
+- **`python-common`**:
   - `bdd -> python-common`
   - `cdcl -> python-common`
-- **`utility`** (equal commits):
+- **`utility`**:
   - `bdd -> threading -> logging -> utility`
   - `cdcl -> utility`
 
 ### `numeric` commit constraints
 
-- **`utility`** (equal commits):
+- **`utility`**:
   - `foundation -> utility`
   - `logging -> utility`
-
-Repositories without cross-submodule constraints in the graph: `ariadne`, `integration`, `system`, `symbolic`, `constraint-propagation`, `constraint-feasibility`, `equation-solving`, `nonlinear-programming`, `linear-programming`, `function`, `geometry`, `algebra`, `interval`, `rendering`, `bdd`, `cdcl`, `threading`, `logging`, `foundation`, `utility`, `python-common`, `macro`.
-
-In total, the graph yields **25 independent commit checks across 10 repositories**, using **54 representative paths**. The omitted downstream comparisons are implied by the verified commits and the dependency DAG.
 
 ## Minimal checkout strategy
 

@@ -7,17 +7,17 @@ This document describes the intended structure of Ariadne after the current deco
 The top-level repository is `ariadne`. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `analysis`.
-- `analysis` uses `evolution`, `smt`, `sat`.
-- `evolution` uses `integration`, `system`, `labelling`, `symbolic-set`, `equation-solving`.
+- `analysis` uses `evolution`, `smt`, `sat`. See [commit constraints](#analysis-commit-constraints).
+- `evolution` uses `integration`, `system`, `labelling`, `symbolic-set`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
 - `system` uses `symbolic`.
-- `labelling` uses `symbolic`, `drawing`.
-- `drawing` uses `rendering`, `paving`.
-- `symbolic-set` uses `symbolic`, `set`.
-- `paving` uses `set`, `bdd`.
-- `set` uses `linear-programming`, `constraint-propagation`, `constraint-feasibility`.
-- `smt` uses `symbolic`, `constraint-propagation`, `nonlinear-programming`, `equation-solving`, `threading`, `cdcl`.
-- `sat` uses `bdd`, `cdcl`.
+- `labelling` uses `symbolic`, `drawing`. See [commit constraints](#labelling-commit-constraints).
+- `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
+- `symbolic-set` uses `symbolic`, `set`. See [commit constraints](#symbolic-set-commit-constraints).
+- `paving` uses `set`, `bdd`. See [commit constraints](#paving-commit-constraints).
+- `set` uses `linear-programming`, `constraint-propagation`, `constraint-feasibility`. See [commit constraints](#set-commit-constraints).
+- `smt` uses `symbolic`, `constraint-propagation`, `nonlinear-programming`, `equation-solving`, `threading`, `cdcl`. See [commit constraints](#smt-commit-constraints).
+- `sat` uses `bdd`, `cdcl`. See [commit constraints](#sat-commit-constraints).
 - `symbolic` uses `function`.
 - `constraint-propagation` uses `function`.
 - `constraint-feasibility` uses `nonlinear-programming`.
@@ -28,7 +28,7 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 - `geometry` uses `algebra`.
 - `algebra` uses `interval`.
 - `interval` uses `numeric`.
-- `numeric` uses `foundation`, `logging`.
+- `numeric` uses `foundation`, `logging`. See [commit constraints](#numeric-commit-constraints).
 - `rendering` uses `utility`, `python-common`.
 - `bdd` uses `threading`, `python-common`.
 - `cdcl` uses `utility`, `python-common`.
@@ -40,6 +40,137 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
 All dependencies are exposed transitively. For example, `analysis` obtains `labelling` through `evolution`, so it does not need a direct `labelling` dependency. `symbolic-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming`, `constraint-propagation`, and `constraint-feasibility` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-feasibility`. The repositories `constraint-propagation`, `equation-solving`, and `nonlinear-programming` use `function`, while `constraint-feasibility` uses `nonlinear-programming`.
+
+## Commit consistency verification
+
+The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced graph above** and assume that each submodule has already validated its own dependencies. The graph itself is unchanged.
+
+### Verification rules
+
+1. For each repository, consider every dependency reachable through two or more of its direct submodules. Only such shared dependencies can require a local cross-submodule commit comparison.
+2. Compare commit identities (not merely repository names, branches, or version labels). A successful equality check on a dependency also fixes the commits of all its transitive dependencies, provided that the dependency's commit identifies an immutable, consistent submodule structure.
+3. Perform the checks in dependency order: check an upstream/shared repository before using its equality to infer equality for repositories farther downstream. The local consistency of each submodule must also have been established before these inferences are used.
+4. After checking a shared dependency, treat the direct submodules synchronized by that comparison as one equivalence group **for descendants of that shared dependency**. This does not assert that their unrelated dependencies match.
+5. For a later shared dependency, compare just **one representative path from each still-distinct group** that reaches it. Choose the shortest path from any direct submodule in each group; if several paths are equally short, any one is sufficient.
+6. Omit a downstream check if all direct submodules reaching that dependency already belong to one synchronized group. Do not omit a check that is still needed to connect another, previously unverified group.
+7. `configuration`, which every repository uses but which is omitted from the graph, is excluded from the following graph-derived checks and must be handled separately.
+
+All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
+
+**Example:** For `analysis`, checking `bdd` already synchronizes the `evolution` and `sat` branches for descendants of `bdd`. Therefore, the `threading` check only compares `sat -> bdd -> threading` with `smt -> threading`; a third `evolution` path is redundant.
+
+### `analysis` commit constraints
+
+- **`equation-solving`** (equal commits):
+  - `evolution -> equation-solving`
+  - `smt -> equation-solving`
+- **`cdcl`** (equal commits):
+  - `smt -> cdcl`
+  - `sat -> cdcl`
+- **`symbolic`** (equal commits):
+  - `evolution -> system -> symbolic`
+  - `smt -> symbolic`
+- **`bdd`** (equal commits):
+  - `evolution -> labelling -> drawing -> paving -> bdd`
+  - `sat -> bdd`
+- **`constraint-propagation`** (equal commits):
+  - `evolution -> symbolic-set -> set -> constraint-propagation`
+  - `smt -> constraint-propagation`
+- **`threading`** (equal commits):
+  - `sat -> bdd -> threading`
+  - `smt -> threading`
+- **`nonlinear-programming`** (equal commits):
+  - `evolution -> symbolic-set -> set -> constraint-feasibility -> nonlinear-programming`
+  - `smt -> nonlinear-programming`
+
+### `evolution` commit constraints
+
+- **`symbolic`** (equal commits):
+  - `system -> symbolic`
+  - `labelling -> symbolic`
+  - `symbolic-set -> symbolic`
+- **`set`** (equal commits):
+  - `labelling -> drawing -> paving -> set`
+  - `symbolic-set -> set`
+- **`function`** (equal commits):
+  - `integration -> function`
+  - `system -> symbolic -> function`
+  - `equation-solving -> function`
+
+### `labelling` commit constraints
+
+- **`function`** (equal commits):
+  - `symbolic -> function`
+  - `drawing -> paving -> set -> constraint-propagation -> function`
+
+### `drawing` commit constraints
+
+- **`python-common`** (equal commits):
+  - `rendering -> python-common`
+  - `paving -> bdd -> python-common`
+- **`utility`** (equal commits):
+  - `rendering -> utility`
+  - `paving -> bdd -> threading -> logging -> utility`
+
+### `symbolic-set` commit constraints
+
+- **`function`** (equal commits):
+  - `symbolic -> function`
+  - `set -> constraint-propagation -> function`
+
+### `paving` commit constraints
+
+- **`logging`** (equal commits):
+  - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
+  - `bdd -> threading -> logging`
+- **`python-common`** (equal commits):
+  - `set -> linear-programming -> algebra -> interval -> numeric -> foundation -> python-common`
+  - `bdd -> python-common`
+
+### `set` commit constraints
+
+- **`function`** (equal commits):
+  - `constraint-propagation -> function`
+  - `constraint-feasibility -> nonlinear-programming -> function`
+- **`algebra`** (equal commits):
+  - `linear-programming -> algebra`
+  - `constraint-propagation -> function -> geometry -> algebra`
+
+### `smt` commit constraints
+
+- **`function`** (equal commits):
+  - `symbolic -> function`
+  - `constraint-propagation -> function`
+  - `nonlinear-programming -> function`
+  - `equation-solving -> function`
+- **`logging`** (equal commits):
+  - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`
+  - `threading -> logging`
+- **`python-common`** (equal commits):
+  - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> foundation -> python-common`
+  - `cdcl -> python-common`
+- **`utility`** (equal commits):
+  - `threading -> logging -> utility`
+  - `cdcl -> utility`
+
+### `sat` commit constraints
+
+- **`python-common`** (equal commits):
+  - `bdd -> python-common`
+  - `cdcl -> python-common`
+- **`utility`** (equal commits):
+  - `bdd -> threading -> logging -> utility`
+  - `cdcl -> utility`
+
+### `numeric` commit constraints
+
+- **`utility`** (equal commits):
+  - `foundation -> utility`
+  - `logging -> utility`
+
+Repositories without cross-submodule constraints in the graph: `ariadne`, `integration`, `system`, `symbolic`, `constraint-propagation`, `constraint-feasibility`, `equation-solving`, `nonlinear-programming`, `linear-programming`, `function`, `geometry`, `algebra`, `interval`, `rendering`, `bdd`, `cdcl`, `threading`, `logging`, `foundation`, `utility`, `python-common`, `macro`.
+
+In total, the graph yields **25 independent commit checks across 10 repositories**, using **54 representative paths**. The omitted downstream comparisons are implied by the verified commits and the dependency DAG.
 
 ## Dependency graph
 

@@ -198,7 +198,7 @@ Void HybridGridTreePaving::recombine() {
 
 ValidatedLowerKleenean HybridGridTreePaving::separated(const HybridExactBox& hbx) const {
     LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
-    return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.euclidean_set() );
+    return _loc_iter == this->locations_end() || _loc_iter->second.separated( hbx.euclidean_set() );
 }
 
 ValidatedLowerKleenean HybridGridTreePaving::overlaps(const HybridExactBox& hbx) const {

@@ -46,6 +46,7 @@ class TestHybridSet {
 public:
     Void test() {
         ARIADNE_TEST_CALL(test_hybrid_list_set());
+        ARIADNE_TEST_CALL(test_hybrid_paving_separation());
         //ARIADNE_TEST_CALL(test_compile_incorrect_hybrid_paving());
     }
 
@@ -105,6 +106,23 @@ public:
         ARIADNE_TEST_EQUAL(loc_iter->second.second, ls1);
         ++loc_iter;
         ARIADNE_TEST_ASSERT(loc_iter == hls.locations_end());
+    }
+
+    // A location absent from the paving is disjoint from every box there.
+    // In particular, checking separation must never dereference map::end().
+    Void test_hybrid_paving_separation() {
+        DiscreteLocation loc(123);
+        RealVariable x("x");
+        RealSpace state_space({x});
+        MonolithicHybridSpace hybrid_space;
+        hybrid_space.new_location(loc,state_space);
+        HybridGridTreePaving paving{HybridGrid(hybrid_space)};
+        HybridExactBox box(loc,state_space,ExactBoxType({{0,1}}));
+        ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
+
+        // A present but empty Euclidean paving is separated as well.
+        paving[loc];
+        ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
     }
 
     Void test_compile_incorrect_hybrid_paving() {

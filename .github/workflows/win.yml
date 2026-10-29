@@ -1,0 +1,61 @@
+name: Windows
+
+on:
+  push:
+    branches:
+      - main
+      - decoupling
+  pull_request:
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  build-test:
+    name: Windows 2025 MSVC [${{ matrix.build_type == 'Release' && 'Release Build' || 'Debug Tests' }}]
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+
+    steps:
+      - name: Enable long paths in Git
+        shell: pwsh
+        run: git config --system core.longpaths true
+
+      - uses: actions/checkout@v3
+
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: x64
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.11
+        with:
+          version: "v0.18.0"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Configure CMake
+        run: |
+          # /Z7 avoids concurrent compiler PDB writes in Debug.
+          cmake -S . -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_FLAGS_DEBUG="/Z7 /Ob0 /Od /RTC1" `
+            -DBUILD_PYTHON_BINDINGS=OFF `
+            -DWARNINGS_AS_ERRORS=ON
+
+      - name: Build Ariadne and legacy dynamics/hybrid tests
+        run: |
+          cmake --build build --parallel --target ariadne
+          cmake --build build --parallel --target tests
+
+      - name: Test legacy dynamics/hybrid C++
+        if: matrix.build_type == 'Debug'
+        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure

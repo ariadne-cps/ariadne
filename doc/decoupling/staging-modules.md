@@ -43,3 +43,14 @@ system    -> symbolic
   Ensure `evolution` has no dependency on `analysis`.
 - Restore actual compile/test, Python bindings, install/consumer and CI checks
   only after the relevant source/API migrations are complete.
+
+## CI scope and configuration
+
+Unix, Windows, Coverage, and Sanitizers run on `decoupling` as well as `main`.
+They follow the extracted repositories by avoiding direct GMP/MPFR/Cairo
+packages. Compilation and C++ tests of the existing `dynamics` and `hybrid`
+modules remain mandatory. Python, installation and example/tutorial integration
+have not yet been reconnected and remain explicit work items.
+
+`configuration` is pinned to `cb75e7472b900025b7016d103c2e170197be1996`,
+the latest verified `main` commit on 2026-10-29, shared by the dependencies.

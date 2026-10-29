@@ -68,7 +68,7 @@ class TestDifferentialInclusionEvolver {
 
         DifferentialInclusion ivf(dynamics, inputs);
 
-        SizeType period_of_parameter_reduction = 3;
+        Nat period_of_parameter_reduction = 3;
         ExactDouble ratio_of_parameters_to_keep = 3.0_x;
         ExactDouble sw_threshold = 1e-8_pr;
         ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
@@ -83,7 +83,8 @@ class TestDifferentialInclusionEvolver {
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 
-        LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
+        LohnerReconditioner reconditioner(static_cast<Nat>(initial.variables().size()),
+                                          static_cast<Nat>(inputs.variables().size()),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
         run_each_approximation(name, ivf, initial, evolution_time, step, approximations, integrator, reconditioner, false);
@@ -157,7 +158,7 @@ public:
 
         DifferentialInclusion ivf(dynamics, inputs);
 
-        SizeType period_of_parameter_reduction = 3;
+        Nat period_of_parameter_reduction = 3;
         ExactDouble ratio_of_parameters_to_keep = 1.25_x;
         ExactDouble sw_threshold = 1e-10_pr;
         ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
@@ -169,7 +170,8 @@ public:
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 
-        LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
+        LohnerReconditioner reconditioner(static_cast<Nat>(initial.variables().size()),
+                                          static_cast<Nat>(inputs.variables().size()),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
         run_each_approximation("recondition", ivf, initial, evolution_time, step, {AffineApproximation()}, integrator, reconditioner, false);

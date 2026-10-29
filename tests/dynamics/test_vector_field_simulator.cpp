@@ -76,9 +76,9 @@ class TestVectorFieldSimulator
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
 
-        SizeType trajectory_number = 4;
+        Nat trajectory_number = 4;
 
-        for (SizeType t=1; t<=trajectory_number; t++) {
+        for (Nat t=1; t<=trajectory_number; t++) {
             simulator.configuration().insert_subspace(x, t);
             ARIADNE_TEST_PRINT(simulator.configuration());
 
@@ -110,10 +110,10 @@ class TestVectorFieldSimulator
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
 
-        SizeType trajectory_number = 4;
+        Nat trajectory_number = 4;
 
-        for (SizeType first=1; first<=trajectory_number; first++) {
-            for (SizeType second=1; second<=trajectory_number; second++){
+        for (Nat first=1; first<=trajectory_number; first++) {
+            for (Nat second=1; second<=trajectory_number; second++){
                 simulator.configuration().insert_subspace(x, first);
                 simulator.configuration().insert_subspace(y, second);
                 ARIADNE_TEST_PRINT(simulator.configuration());

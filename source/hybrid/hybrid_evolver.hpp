@@ -60,7 +60,7 @@ using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
 
 class IntegratorInterface;
-class SolverInterface;
+class EquationSolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
@@ -167,7 +167,7 @@ class HybridEvolverBase
     //! \brief Set the class which integrates the continuous dynamics.
     Void set_integrator(const IntegratorInterface& integrator);
     //! \brief Set the class which integrates the continuous dynamics.
-    Void set_solver(const SolverInterface& solver);
+    Void set_solver(const EquationSolverInterface& solver);
 
     Bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     Bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
@@ -460,7 +460,7 @@ class HybridEvolverBase
   private:
     std::shared_ptr< FunctionFactoryType::Interface > _function_factory_ptr;
   protected:
-    std::shared_ptr< SolverInterface > _solver_ptr;
+    std::shared_ptr< EquationSolverInterface > _solver_ptr;
     std::shared_ptr< SystemType > _sys_ptr;
   protected:
     std::shared_ptr< ConfigurationType > _configuration_ptr;

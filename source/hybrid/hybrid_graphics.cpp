@@ -70,6 +70,10 @@ Void
 HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
     #if not(defined(HAVE_CAIRO_H))
+        // The arguments are used by the Cairo branch below.
+        static_cast<void>(cfilename);
+        static_cast<void>(drawing_width);
+        static_cast<void>(drawing_height);
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
         const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;

@@ -39,6 +39,7 @@
 
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"
+#include "equation-solving/interval_newton_method.hpp"
 
 #include "hybrid/hybrid_evolver.hpp"
 
@@ -308,7 +309,7 @@ HybridEvolverBase::_create(
 {
     this->_sys_ptr=std::shared_ptr<SystemType>(system.clone());
     this->_function_factory_ptr=factory.managed_pointer();
-    this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
+    this->_solver_ptr=std::shared_ptr<EquationSolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
 }
@@ -351,9 +352,9 @@ HybridEvolverBase::set_integrator(const IntegratorInterface& integrator)
 }
 
 Void
-HybridEvolverBase::set_solver(const SolverInterface& solver)
+HybridEvolverBase::set_solver(const EquationSolverInterface& solver)
 {
-    this->_solver_ptr=std::shared_ptr<SolverInterface>(solver.clone());
+    this->_solver_ptr=std::shared_ptr<EquationSolverInterface>(solver.clone());
 }
 
 
@@ -609,7 +610,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
 {
     LOGGING_SCOPE_CREATE;
 
-    const SolverInterface& solver=*this->_solver_ptr;
+    const EquationSolverInterface& solver=*this->_solver_ptr;
 
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
@@ -653,7 +654,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 LOGGING_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<":"<<e.what());
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
-            catch(const SolverException& e) {
+            catch(const EquationSolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
                 LOGGING_PRINTLN_AT(2,"Error in computing crossing time for event "<<*event_iter<<": "<<e.what());
@@ -769,7 +770,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                             UpperIntervalType crossing_time_range=crossing_time.range();
                             LOGGING_PRINTLN_AT(2,"crossing_time_range="<<crossing_time_range);
                             crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
-                        } catch(const SolverException& e) {
+                        } catch(const EquationSolverException& e) {
                             LOGGING_PRINTLN_AT(2,"Error in computing crossing time over reduced time interval for event "<<*event_iter<<": " <<e.what());
                             // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
                             crossings[event]=CrossingData(CrossingKind::GRAZING);
@@ -784,7 +785,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                         crossings[event].guard_range_at_critical_time=guard_range_at_critical_time;
                     }
                 }
-                catch(const SolverException& e) {
+                catch(const EquationSolverException& e) {
                     LOGGING_PRINTLN_AT(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what());
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
@@ -1846,7 +1847,7 @@ _estimate_timing(Set<DiscreteEvent>&,
         LOGGING_PRINTLN("Possible creep step; h="<<step_size);
         LOGGING_PRINTLN("crossings="<<crossings);
 
-        const SolverInterface& solver=*this->_solver_ptr;
+        const EquationSolverInterface& solver=*this->_solver_ptr;
 
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());

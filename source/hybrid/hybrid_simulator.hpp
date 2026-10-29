@@ -44,7 +44,7 @@ enum class DiscretizationHybridType
   HRecombine
 };
 
-OutputStream& operator<<(OutputStream& os, const DiscretizationHybridType& dtype) {
+inline OutputStream& operator<<(OutputStream& os, const DiscretizationHybridType& dtype) {
 
     if(dtype == DiscretizationHybridType::HMince){ os << "Mince"; }
     else{ os << "Recombine"; }

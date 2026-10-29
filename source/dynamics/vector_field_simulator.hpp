@@ -50,7 +50,7 @@ enum class DiscretisationType
   Recombine
 };
 
-OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
+inline OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
     if(dtype == DiscretisationType::Mince){ os << "Mince"; }
     else if(dtype == DiscretisationType::Recombine){ os << "Recombine"; }

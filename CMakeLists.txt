@@ -63,10 +63,6 @@ endif()
 
 setup_project()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR NOT APPLE)
-    add_compile_options(-frounding-math)
-endif()
-
 # Legacy dynamics/hybrid code still includes "config.hpp".
 # Generate it in the build tree, not the source checkout.
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/generated")

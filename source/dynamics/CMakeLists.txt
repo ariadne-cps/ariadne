@@ -1,5 +1,6 @@
 set(LIBRARY_NAME ariadne-dynamics)
 
+# Transitional object library: files currently mix system/evolution/analysis.
 add_library(${LIBRARY_NAME} OBJECT
     enclosure.cpp
     orbit.cpp
@@ -13,5 +14,4 @@ add_library(${LIBRARY_NAME} OBJECT
     vector_field_simulator.cpp
     reachability_analyser.cpp
 )
-
-
+target_link_libraries(${LIBRARY_NAME} PRIVATE ariadne-analysis)

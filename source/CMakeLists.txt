@@ -1,12 +1,7 @@
-link_libraries(threading algebra)
-
-add_subdirectory(function)
-add_subdirectory(solving)
-add_subdirectory(geometry)
+# The legacy dynamics and hybrid directories remain staged until their
+# files can be allocated to system, evolution, and analysis.
 add_subdirectory(system)
 add_subdirectory(evolution)
 add_subdirectory(analysis)
 add_subdirectory(dynamics)
-add_subdirectory(symbolic)
-add_subdirectory(io)
 add_subdirectory(hybrid)

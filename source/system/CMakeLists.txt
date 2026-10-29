@@ -1,4 +1,4 @@
-# The system module is staged here until its owners can be moved out of
-# source/dynamics and source/hybrid without higher-level dependencies.
-# No compiled sources are assigned to this target yet.
+# Staging interface: system definitions will be migrated from dynamics/hybrid.
+# System must not link to labelling, evolution, or analysis.
 add_library(ariadne-system INTERFACE)
+target_link_libraries(ariadne-system INTERFACE symbolic)

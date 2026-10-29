@@ -31,8 +31,8 @@
 
 #include "solving/configuration_interface.hpp"
 #include "geometry/set.hpp"
-#include "geometry/grid_paving.hpp"
-#include "geometry/function_set.hpp"
+#include "paving/grid_paving.hpp"
+#include "set/function_set.hpp"
 
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"

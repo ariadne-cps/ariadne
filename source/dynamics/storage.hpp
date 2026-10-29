@@ -31,10 +31,10 @@
 
 #include <iosfwd>
 #include "geometry/set_interface.hpp"
-#include "geometry/paving_interface.hpp"
-#include "geometry/grid_paving.hpp"
+#include "paving/paving_interface.hpp"
+#include "paving/grid_paving.hpp"
 #include "symbolic/identifier.hpp"
-#include "io/graphics_interface.hpp"
+#include "labelling/graphics_interface.hpp"
 
 namespace Ariadne {
 

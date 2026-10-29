@@ -37,10 +37,10 @@
 #include <mutex>
 
 #include "numeric/numeric.hpp"
-#include "io/graphics_interface.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/curve.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "set/function_set.hpp"
+#include "set/list_set.hpp"
+#include "set/curve.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
 #include "threading/using.hpp"

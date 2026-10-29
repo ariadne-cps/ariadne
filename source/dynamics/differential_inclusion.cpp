@@ -23,7 +23,7 @@
  */
 
 #include "differential_inclusion.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "function/symbolic_function.hpp"
 
 namespace Ariadne {

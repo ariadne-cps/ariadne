@@ -35,14 +35,14 @@
 #include "algebra/vector.hpp"
 #include "geometry/set_interface.hpp"
 #include "symbolic/identifier.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/drawer_interface.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "drawing/drawer_interface.hpp"
 
 #include "function/function_patch.hpp"
 #include "function/function_model.hpp"
 
 #include "geometry/box.hpp"
-#include "geometry/paver.hpp"
+#include "paving/paver.hpp"
 
 namespace Ariadne {
 
@@ -365,7 +365,7 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionPatch& functi
 } // namespace Ariadne
 
 #include "symbolic/space.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 namespace Ariadne {
 

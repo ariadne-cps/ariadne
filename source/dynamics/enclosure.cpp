@@ -49,31 +49,31 @@
 #include "function/taylor_function.hpp"
 
 #include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "paving/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "set/function_set.hpp"
+#include "set/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_paving.hpp"
+#include "paving/paving_interface.hpp"
+#include "paving/paver.hpp"
+#include "paving/grid_paving.hpp"
 
-#include "solving/constraint_solver.hpp"
-#include "solving/nonlinear_programming.hpp"
+#include "constraint-solving/constraint_solver.hpp"
+#include "nonlinear-programming/nonlinear_programming.hpp"
 
-#include "io/graphics_interface.hpp"
-#include "io/drawer.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "drawing/drawer.hpp"
 #include "logging/progress_indicator.hpp"
 
-#include "io/figure.hpp"
-#include "io/graphics_manager.hpp"
+#include "rendering/figure.hpp"
+#include "rendering/rendering_manager.hpp"
 #include "logging/logging.hpp"
 
 #include "function/functional.hpp"
 
 #include "numeric/operators.hpp"
 #include "symbolic/space.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 #include "algebra/expansion.inl.hpp"
 

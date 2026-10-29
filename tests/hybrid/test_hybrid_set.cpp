@@ -108,6 +108,8 @@ public:
         ARIADNE_TEST_ASSERT(loc_iter == hls.locations_end());
     }
 
+    // ValidatedLowerKleenean(false) maps to UNLIKELY rather than FALSE:
+    // such lower predicates cannot prove the negation with not possibly().
     // A location absent from the paving is disjoint from every box there.
     // In particular, checking separation must never dereference map::end().
     Void test_hybrid_paving_separation() {
@@ -119,14 +121,14 @@ public:
         HybridGridTreePaving paving{HybridGrid(hybrid_space)};
         HybridExactBox box(loc,state_space,ExactBoxType({{0,1}}));
         ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
-        ARIADNE_TEST_ASSERT(not possibly(paving.overlaps(box)));
-        ARIADNE_TEST_ASSERT(not possibly(paving.covers(box)));
+        ARIADNE_TEST_EQUAL(paving.overlaps(box).repr(), LogicalValue::UNLIKELY);
+        ARIADNE_TEST_EQUAL(paving.covers(box).repr(), LogicalValue::UNLIKELY);
 
         // A present but empty Euclidean paving is separated as well.
         paving[loc];
         ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
-        ARIADNE_TEST_ASSERT(not possibly(paving.overlaps(box)));
-        ARIADNE_TEST_ASSERT(not possibly(paving.covers(box)));
+        ARIADNE_TEST_EQUAL(paving.overlaps(box).repr(), LogicalValue::UNLIKELY);
+        ARIADNE_TEST_EQUAL(paving.covers(box).repr(), LogicalValue::UNLIKELY);
     }
 
     Void test_compile_incorrect_hybrid_paving() {

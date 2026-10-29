@@ -13,6 +13,7 @@ namespace Ariadne {
 class HybridSpace;
 class LabelledStorage;
 class HybridStorage;
+class GridTreePaving;
 
 template<class SYS> struct AnalysisTraits;
 
@@ -42,6 +43,21 @@ template<class SPACE> struct SpaceAnalysisTraits {
     using RegularSetInterfaceType = typename SPACE::RegularSetInterfaceType;
     using RegularLocatedSetInterfaceType = typename SPACE::RegularLocatedSetInterfaceType;
     using SetApproximationType = typename SPACE::SetApproximationType;
+};
+
+// EuclideanSpace intentionally describes the geometry only; the
+// discretisation used by reachability analysis is an analysis concern.
+// Do not add SetApproximationType back to EuclideanSpace.
+template<> struct SpaceAnalysisTraits<EuclideanSpace> {
+    using BoundingDomainType = EuclideanSpace::BoundingDomainType;
+    using BoundedSetInterfaceType = EuclideanSpace::BoundedSetInterfaceType;
+    using OvertSetInterfaceType = EuclideanSpace::OvertSetInterfaceType;
+    using OpenSetInterfaceType = EuclideanSpace::OpenSetInterfaceType;
+    using CompactSetInterfaceType = EuclideanSpace::CompactSetInterfaceType;
+    using LocatedSetInterfaceType = EuclideanSpace::LocatedSetInterfaceType;
+    using RegularSetInterfaceType = EuclideanSpace::RegularSetInterfaceType;
+    using RegularLocatedSetInterfaceType = EuclideanSpace::RegularLocatedSetInterfaceType;
+    using SetApproximationType = GridTreePaving;
 };
 
 template<> struct SpaceAnalysisTraits<HybridSpace> {

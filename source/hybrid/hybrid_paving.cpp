@@ -197,18 +197,23 @@ Void HybridGridTreePaving::recombine() {
 }
 
 ValidatedLowerKleenean HybridGridTreePaving::separated(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
-    return _loc_iter == this->locations_end() || _loc_iter->second.separated( hbx.euclidean_set() );
+    LocationsConstIterator loc_iter = this->_map.find(hbx.location());
+    // ValidatedLowerKleenean overloads operator||, so it does not short-circuit.
+    if (loc_iter == this->locations_end()) { return true; }
+    return loc_iter->second.separated(hbx.euclidean_set());
 }
 
 ValidatedLowerKleenean HybridGridTreePaving::overlaps(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
-    return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.euclidean_set() );
+    LocationsConstIterator loc_iter = this->_map.find(hbx.location());
+    // Do not evaluate the predicate on an absent location (overloaded &&).
+    if (loc_iter == this->locations_end()) { return false; }
+    return loc_iter->second.overlaps(hbx.euclidean_set());
 }
 
 ValidatedLowerKleenean HybridGridTreePaving::covers(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
-    return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.euclidean_set() );
+    LocationsConstIterator loc_iter = this->_map.find(hbx.location());
+    if (loc_iter == this->locations_end()) { return false; }
+    return loc_iter->second.covers(hbx.euclidean_set());
 }
 
 ValidatedLowerKleenean HybridGridTreePaving::inside(const HybridExactBoxes& hbx) const  {

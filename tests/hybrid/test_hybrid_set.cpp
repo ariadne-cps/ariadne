@@ -119,10 +119,14 @@ public:
         HybridGridTreePaving paving{HybridGrid(hybrid_space)};
         HybridExactBox box(loc,state_space,ExactBoxType({{0,1}}));
         ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
+        ARIADNE_TEST_ASSERT(not possibly(paving.overlaps(box)));
+        ARIADNE_TEST_ASSERT(not possibly(paving.covers(box)));
 
         // A present but empty Euclidean paving is separated as well.
         paving[loc];
         ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
+        ARIADNE_TEST_ASSERT(not possibly(paving.overlaps(box)));
+        ARIADNE_TEST_ASSERT(not possibly(paving.covers(box)));
     }
 
     Void test_compile_incorrect_hybrid_paving() {

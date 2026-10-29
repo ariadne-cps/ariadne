@@ -25,18 +25,18 @@
 #include "dynamics/differential_inclusion_evolver.hpp"
 #include "dynamics/orbit.hpp"
 #include "algebra/sweeper.hpp"
-#include "solving/integrator.hpp"
+#include "integration/integrator.hpp"
 #include "geometry/box.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
-#include "geometry/function_set.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/function_set.hpp"
+#include "labelling/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
+#include "expression-set/expression_set.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 
@@ -184,7 +184,7 @@ public:
 };
 
 int main(int argc, const char* argv[]) {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     TestDifferentialInclusionEvolver().test();
     return ARIADNE_TEST_FAILURES;
 }

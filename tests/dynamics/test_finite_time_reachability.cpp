@@ -30,18 +30,18 @@
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/grid_paving.hpp"
+#include "set/function_set.hpp"
+#include "paving/grid_paving.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
-#include "symbolic/expression_set.hpp"
-#include "solving/integrator.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
+#include "expression-set/expression_set.hpp"
+#include "integration/integrator.hpp"
+#include "labelling/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace std;
 using namespace Ariadne;
@@ -202,7 +202,7 @@ class TestFiniteTimeReachability
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
 
     TestFiniteTimeReachability().test();
     return ARIADNE_TEST_FAILURES;

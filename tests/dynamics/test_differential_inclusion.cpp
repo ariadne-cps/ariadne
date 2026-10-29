@@ -26,16 +26,16 @@
 #include "geometry/box.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
-#include "geometry/function_set.hpp"
+#include "set/function_set.hpp"
 
 #include "dynamics/differential_inclusion.hpp"
 
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 

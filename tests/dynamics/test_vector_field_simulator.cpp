@@ -34,15 +34,15 @@
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "solving/integrator.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/list_set.hpp"
+#include "integration/integrator.hpp"
+#include "expression-set/expression_set.hpp"
 #include "dynamics/vector_field_simulator.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
+#include "labelling/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -199,7 +199,7 @@ class TestVectorFieldSimulator
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     TestVectorFieldSimulator().test();
     return ARIADNE_TEST_FAILURES;
 }

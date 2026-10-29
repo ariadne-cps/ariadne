@@ -35,16 +35,16 @@
 #include "function/taylor_function.hpp"
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/function_set.hpp"
-#include "solving/integrator.hpp"
-#include "symbolic/expression_set.hpp"
-#include "io/figure.hpp"
-#include "io/drawer.hpp"
-#include "io/graphics_manager.hpp"
+#include "set/list_set.hpp"
+#include "set/function_set.hpp"
+#include "integration/integrator.hpp"
+#include "expression-set/expression_set.hpp"
+#include "labelling/figure.hpp"
+#include "drawing/drawer.hpp"
+#include "drawing/drawer_manager.hpp"
 #include "logging/logging.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 
 using namespace Ariadne;
@@ -213,7 +213,7 @@ class TestEnclosure
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);
-        GraphicsManager::instance().set_drawer(drawer);
+        DrawerManager::instance().set_drawer(drawer);
         ExactBoxType dom({{0.0_x,1.0_x},{1.0_x,2.0_x}});
         auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp),0);
@@ -245,7 +245,7 @@ class TestEnclosure
         LabelledEnclosure lencl(encl,RealSpace({x,y}),RealSpace({z}));
         LabelledFigure fig(Axes2d(-1.0<=x<=3,-1<=z<=11));
         fig << lencl;
-        GraphicsManager::instance().set_drawer(AffineDrawer(1));
+        DrawerManager::instance().set_drawer(AffineDrawer(1));
         fig.write("test_enclosure_auxiliary");
     }
 };

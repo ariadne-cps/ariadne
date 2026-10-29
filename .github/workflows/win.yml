@@ -11,31 +11,34 @@ env:
 
 jobs:
   build-test:
-    name: Windows 2025 MSVC [${{ matrix.build_type == 'Release' && 'Release Build' || 'Debug Tests' }}]
-    runs-on: windows-2025
+    name: ${{ matrix.config.name }} [${{ matrix.build_type }}]
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         build_type: [Release, Debug]
+        config:
+          - { name: "Windows 2025 x86 MSVC", os: windows-2025, arch: x64 }
+          - { name: "Windows 11 arm MSVC", os: windows-11-arm, arch: arm64 }
 
     steps:
       - name: Enable long paths in Git
         shell: pwsh
         run: git config --system core.longpaths true
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Set up MSVC environment
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
-          arch: x64
+          arch: ${{ matrix.config.arch }}
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
         with:
           version: "v0.18.0"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 

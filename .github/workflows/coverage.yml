@@ -17,11 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { name: "macOS 26 AppleClang 21 [Coverage]", os: macos-26, cxx: "/usr/bin/clang++" }
-          - { name: "Ubuntu 24.04 GCC 13 [Coverage]", os: ubuntu-24.04, cxx: "g++-13" }
+          - { name: "macOS 26 arm AppleClang 21 [Coverage]", os: macos-26, cxx: "/usr/bin/clang++" }
+          - { name: "Ubuntu 24.04 x86 GCC 13 [Coverage]", os: ubuntu-24.04, cxx: "g++-13" }
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - name: Enable compiler cache
       uses: mozilla-actions/sccache-action@v0.0.11

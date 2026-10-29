@@ -1,0 +1,59 @@
+name: macOS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} [${{ matrix.build_type }}]
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+        config:
+          - { name: "macOS 26 arm AppleClang 21", os: macos-26, cxx: "/usr/bin/clang++" }
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.11
+      with:
+        version: "v0.18.0"
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+
+    - name: Get macOS Concurrency
+      if: runner.os == 'macOS'
+      run: echo "NPROC=$(sysctl -n hw.ncpu)" >> "$GITHUB_ENV"
+
+    - name: Set Up macOS Dependencies
+      if: runner.os == 'macOS'
+      run: brew install ninja pkg-config
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{ runner.workspace }}/build
+
+    - name: Configure CMake
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=OFF
+
+    - name: Build Ariadne and legacy dynamics/hybrid tests
+      working-directory: ${{ runner.workspace }}/build
+      run: |
+        cmake --build . --parallel "$NPROC" --target ariadne
+        cmake --build . --parallel "$NPROC" --target tests
+
+    - name: Test legacy dynamics/hybrid C++
+      if: matrix.build_type == 'Debug'
+      working-directory: ${{ runner.workspace }}/build
+      run: ctest -j "$NPROC" -LE python --output-on-failure

@@ -355,7 +355,7 @@ ValidatedKleenean Enclosure::satisfies(ValidatedScalarMultivariateFunction const
     UpperIntervalType constraint_range=apply(constraint,this->codomain());
     if(definitely(constraint_range.upper_bound()<0)) { return false; }
     if(definitely(constraint_range.lower_bound()>0)) { return true; }
-    return ValidatedKleenean(indeterminate);
+    return ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 
@@ -787,12 +787,12 @@ Enclosure::satisfies(ValidatedConstraint c) const
     Enclosure copy=*this;
     copy.new_state_constraint(c);
     if(definitely(copy.is_empty())) { return false; }
-    else { return ValidatedKleenean(indeterminate); }
+    else { return ValidatedKleenean(LogicalValue::INDETERMINATE); }
 }
 
 ValidatedLowerKleenean Enclosure::is_bounded() const
 {
-    return this->domain().is_bounded() || ValidatedKleenean(indeterminate);
+    return this->domain().is_bounded() || ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::is_empty() const
@@ -809,7 +809,7 @@ ValidatedLowerKleenean Enclosure::is_empty() const
         }
     }
     if(this->_reduced_domain.is_empty()) { return true; }
-    return ValidatedKleenean(indeterminate);
+    return ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::inside(const ExactBoxType& bx) const
@@ -821,7 +821,7 @@ ValidatedLowerKleenean Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
-    return ValidatedLowerKleenean(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
+    return ValidatedLowerKleenean(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const

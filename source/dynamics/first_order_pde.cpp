@@ -23,6 +23,9 @@
 
 #include "first_order_pde.hpp"
 
+#include <cmath>
+#include <limits>
+
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 #include "numeric/float_bounds.hpp"
@@ -35,6 +38,15 @@
 
 
 namespace Ariadne {
+
+// The original discretisation counts truncate positive floating-point values.
+// Validate their range before the explicit floating-point-to-integer conversion.
+template<class IntegerType> IntegerType discretisation_count(double value) {
+    ARIADNE_ASSERT_MSG(std::isfinite(value) && value>=0.0
+                       && value<static_cast<double>(std::numeric_limits<IntegerType>::max()),
+                       "Invalid or out-of-range PDE discretisation count: "<<value);
+    return static_cast<IntegerType>(value);
+}
 
 template<class X> decltype(auto) sup_norm(Matrix<X> const& A) {
     auto z=A.zero_element();
@@ -139,16 +151,16 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
     auto mag_ddphi = mag(ddphi);
 
     PositiveUpperBound<X> error_constant = 2u*sqrt(PositiveUpperBound<X>(cndA * max_nrm * mag_ddphi));
-    Nat N = log2((error_constant/tolerance).get_d())+1;
+    Nat N = discretisation_count<Nat>(log2((error_constant/tolerance).get_d())+1);
 
-    SizeType two_pow_N = std::pow(2,N);
+    SizeType two_pow_N = discretisation_count<SizeType>(std::pow(2.0,N));
     Positive<X> h(Dyadic(1,N),pr);
 
     auto courant_nrm = 1/(1/sup_norm(invA*B0)+1/sup_norm(invA*B1));
-    Nat L = log2(courant_nrm.get_d())+1;
+    Nat L = discretisation_count<Nat>(log2(courant_nrm.get_d())+1);
     Positive<X> tau(Dyadic(1,N+L),pr);
 
-    Nat steps=(tmax*pow(Natural(2u),N+L)).get_d();
+    Nat steps=discretisation_count<Nat>((tmax*pow(Natural(2u),N+L)).get_d());
 
     UpperBound<X> error = h * error_constant;
 

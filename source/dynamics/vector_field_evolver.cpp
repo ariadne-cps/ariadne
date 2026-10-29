@@ -90,20 +90,20 @@ carried_expansion_snapshot(ValidatedVectorMultivariateFunctionPatch const& mappi
         ARIADNE_ASSERT(taylor_component!=nullptr);
         auto const& expansion=taylor_component->expansion();
         for(auto const& term : expansion) {
-            auto degree=static_cast<std::size_t>(term.index().degree());
-            if(degree>=CarriedExpansionSnapshot::degree_slots) {
-                degree=CarriedExpansionSnapshot::degree_slots-1u;
+            auto bucket_degree=static_cast<std::size_t>(term.index().degree());
+            if(bucket_degree>=CarriedExpansionSnapshot::degree_slots) {
+                bucket_degree=CarriedExpansionSnapshot::degree_slots-1u;
             }
             const double magnitude=std::abs(term.coefficient().get_d());
             if(magnitude<3e-14) {
-                ++profile.below_tight_count[degree];
-                profile.below_tight_abs_mass[degree]+=magnitude;
+                ++profile.below_tight_count[bucket_degree];
+                profile.below_tight_abs_mass[bucket_degree]+=magnitude;
             } else if(magnitude<1e-12) {
-                ++profile.bridge_count[degree];
-                profile.bridge_abs_mass[degree]+=magnitude;
+                ++profile.bridge_count[bucket_degree];
+                profile.bridge_abs_mass[bucket_degree]+=magnitude;
             } else {
-                ++profile.above_loose_count[degree];
-                profile.above_loose_abs_mass[degree]+=magnitude;
+                ++profile.above_loose_count[bucket_degree];
+                profile.above_loose_abs_mass[bucket_degree]+=magnitude;
             }
         }
     }
@@ -118,24 +118,24 @@ print_carried_expansion_snapshot(
     Sweeper<FloatDP> const& sweeper)
 {
     auto const profile=carried_expansion_snapshot(mapping);
-    for(std::size_t degree=0u;
-        degree!=CarriedExpansionSnapshot::degree_slots; ++degree) {
+    for(std::size_t bucket_degree=0u;
+        bucket_degree!=CarriedExpansionSnapshot::degree_slots; ++bucket_degree) {
         const auto total_count=
-            profile.below_tight_count[degree]
-            +profile.bridge_count[degree]
-            +profile.above_loose_count[degree];
+            profile.below_tight_count[bucket_degree]
+            +profile.bridge_count[bucket_degree]
+            +profile.above_loose_count[bucket_degree];
         if(total_count==0u) { continue; }
         std::cerr << "[CarriedExpansionSnapshot]"
                   << " sweeper=" << sweeper
                   << " stage=" << stage
                   << " step=" << step
-                  << " degree=" << degree
-                  << " below_3e-14_count=" << profile.below_tight_count[degree]
-                  << " bridge_3e-14_to_1e-12_count=" << profile.bridge_count[degree]
-                  << " above_1e-12_count=" << profile.above_loose_count[degree]
-                  << " below_3e-14_abs_mass=" << profile.below_tight_abs_mass[degree]
-                  << " bridge_3e-14_to_1e-12_abs_mass=" << profile.bridge_abs_mass[degree]
-                  << " above_1e-12_abs_mass=" << profile.above_loose_abs_mass[degree]
+                  << " degree=" << bucket_degree
+                  << " below_3e-14_count=" << profile.below_tight_count[bucket_degree]
+                  << " bridge_3e-14_to_1e-12_count=" << profile.bridge_count[bucket_degree]
+                  << " above_1e-12_count=" << profile.above_loose_count[bucket_degree]
+                  << " below_3e-14_abs_mass=" << profile.below_tight_abs_mass[bucket_degree]
+                  << " bridge_3e-14_to_1e-12_abs_mass=" << profile.bridge_abs_mass[bucket_degree]
+                  << " above_1e-12_abs_mass=" << profile.above_loose_abs_mass[bucket_degree]
                   << std::endl;
     }
 }

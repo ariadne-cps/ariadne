@@ -23,14 +23,24 @@
  */
 
 #include "differential_inclusion.hpp"
+
+#include <limits>
 #include "expression-set/expression_set.hpp"
 #include "function/symbolic_function.hpp"
 
 namespace Ariadne {
 
+// Formula variable indices are Nat, while container sizes are SizeType.
+// Reject dimensions outside the formula API range instead of narrowing them.
+static Nat formula_index(SizeType index) {
+    ARIADNE_ASSERT_MSG(index<=std::numeric_limits<Nat>::max(),
+                       "Formula variable index out of range: "<<index);
+    return static_cast<Nat>(index);
+}
+
 List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
     List<Nat> result;
-    for (SizeType i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
+    for (SizeType i : range(num_variables,num_variables+num_inputs)) { result.append(formula_index(i)); }
     return result;
 }
 
@@ -50,11 +60,11 @@ Pair<CoordinateFormulaPair,ExactIntervalType> centered_coordinate_transformation
 }
 
 
-Pair<CoordinateFormulaPairs,BoxDomainType> centered_coordinates_transformation(Nat const& dim, BoxDomainType const& inputs) {
+Pair<CoordinateFormulaPairs,BoxDomainType> centered_coordinates_transformation(SizeType dim, BoxDomainType const& inputs) {
     CoordinateFormulaPairs assignments;
     BoxDomainType new_bounds(inputs.size());
     for (auto i : range(inputs.size())) {
-        auto tr = centered_coordinate_transformation(i+dim,inputs[i]);
+        auto tr = centered_coordinate_transformation(formula_index(i+dim),inputs[i]);
         assignments.push_back(tr.first);
         new_bounds[i] = tr.second;
     }
@@ -86,7 +96,7 @@ Void DifferentialInclusion::_transform_and_assign(EffectiveVectorMultivariateFun
 
     Vector<EffectiveFormula> transformed_formulae = substitute(ff.formulae(),centering_substitution);
 
-    List<SizeType> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
+    List<Nat> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
     if (is_additive_in(transformed_formulae,input_indices)) {
         incorporate_additive_inputs_coefficients(transformed_formulae,transformed_inputs);
     }

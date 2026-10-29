@@ -115,7 +115,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     }
 
     FloatDP exl(0.12_pr,dp), exu(+0.13_pr,dp), evl(-0.04_pr,dp), evu(+0.04_pr,dp); // Expected bounds
-    HybridExactBox expected_orbit_final_bounding_box=HybridExactBox(q,{x.in(exl,exu),v.in(evl,evu)});
+    HybridExactBox expected_orbit_final_bounding_box=HybridExactBox(q,{VariableInterval<FloatDP>(exl,x,exu),VariableInterval<FloatDP>(evl,v,evu)});
     ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final,expected_orbit_final_bounding_box);
 
     Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
@@ -197,7 +197,7 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridEnclosure final_enclosure=HybridEnclosure(orbit.final()[0]);
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
-    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridRealBox(open,{height.in(ehl,ehu),aperture.in((Rational)eal,(Rational)eau)}));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridRealBox(open,{RealVariableInterval(ehl,height,ehu),RealVariableInterval((Rational)eal,aperture,(Rational)eau)}));
 
     Decimal hl(-0.1), hu(+9.1), al(-0.3), au(+1.3);
     Axes2d bounding_box={hl<=height<=hu, al<=aperture<=au};

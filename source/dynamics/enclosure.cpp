@@ -97,7 +97,21 @@ inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunction
 inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
-Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl);
+// This overload was removed from the extracted Set module. Keep the original
+// Real-interval rounding and error-enclosure algorithm local to dynamics.
+static Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl) {
+    FloatDPBounds dlb(ivl.lower_bound(),dp);
+    FloatDPBounds dub(ivl.upper_bound(),dp);
+    FloatDPApproximation dla(ivl.lower_bound(),dp);
+    FloatDPApproximation dua(ivl.upper_bound(),dp);
+    // Keep the full FloatDP precision of the approximated endpoints.  Reducing
+    // them to Float32 here creates an avoidable, step-size-independent error
+    // which is later transferred to the enclosure remainder.
+    FloatDP dl(dla.raw());
+    FloatDP du(dua.raw());
+    FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
+    return make_pair(make_interval(dl,du),e);
+}
 
 namespace {
 
@@ -864,7 +878,16 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+// The former generic overload lived in geometry/function_set.cpp. Preserve
+// its Taylor-model dispatch here while linking to the extracted Set implementation.
+Matrix<FloatDPError> nonlinearities_zeroth_order(
+    const ValidatedVectorMultivariateTaylorFunctionModelDP&, const ExactBoxType&);
+
+static Matrix<FloatDPError> nonlinearities_zeroth_order(
+    const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom) {
+    return nonlinearities_zeroth_order(
+        dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(*f.raw_pointer()), dom);
+}
 Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 Pair<SizeType,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 

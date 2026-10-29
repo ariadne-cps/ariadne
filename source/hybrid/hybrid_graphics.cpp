@@ -25,7 +25,7 @@
 #include "function/functional.hpp"
 #include "config.hpp"
 
-#include "utility/macros.hpp"
+#include "macro/general.hpp"
 #include "utility/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "symbolic/space.hpp"

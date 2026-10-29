@@ -80,7 +80,7 @@ Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transfor
             EffectiveFormula der = simplify(derivative(transformed_formulae[i],formula_index(n+j)));
             if (not identical(der,EffectiveFormula::zero()) and not identical(der,EffectiveFormula::constant(1))) {
                 transformed_inputs[j] = cast_exact(transformed_inputs[j] * der.val());
-                transformed_formulae[i] = simplify(substitute(transformed_formulae[i],n+j,EffectiveFormula::zero())+EffectiveFormula::coordinate(formula_index(n+j)));
+                transformed_formulae[i] = simplify(substitute(transformed_formulae[i],formula_index(n+j),EffectiveFormula::zero())+EffectiveFormula::coordinate(formula_index(n+j)));
             }
         }
     }

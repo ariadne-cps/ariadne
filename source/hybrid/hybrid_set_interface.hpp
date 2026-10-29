@@ -150,7 +150,8 @@ template<> class HybridClosedSetInterface<EffectiveTag>
 
 //! \brief Interface for compact (closed and bounded) sets in a hybrid space.
 template<> class HybridCompactSetInterface<EffectiveTag>
-    : public virtual HybridBoundedSetInterface<EffectiveTag>
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridBoundedSetInterface<EffectiveTag>
     , public virtual HybridClosedSetInterface<EffectiveTag>
 {
   public:
@@ -163,7 +164,8 @@ template<> class HybridCompactSetInterface<EffectiveTag>
 
 //! \brief Interface for regular (open and closed) sets in a hybrid space.
 template<> class HybridRegularSetInterface<EffectiveTag>
-    : public virtual HybridOpenSetInterface<EffectiveTag>
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridOpenSetInterface<EffectiveTag>
     , public virtual HybridClosedSetInterface<EffectiveTag>
 {
   public:
@@ -176,7 +178,8 @@ template<> class HybridRegularSetInterface<EffectiveTag>
 
 //! \brief Interface for located (overt and compact) sets in a hybrid space.
 template<> class HybridLocatedSetInterface<EffectiveTag>
-    : public virtual HybridOvertSetInterface<EffectiveTag>
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridOvertSetInterface<EffectiveTag>
     , public virtual HybridCompactSetInterface<EffectiveTag>
 {
   public:
@@ -189,7 +192,8 @@ template<> class HybridLocatedSetInterface<EffectiveTag>
 
 //! \brief Complete set interface for bounded regular sets in a hybrid space.
 template<> class HybridRegularLocatedSetInterface<EffectiveTag>
-    : public virtual HybridRegularSetInterface<EffectiveTag>
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridRegularSetInterface<EffectiveTag>
     , public virtual HybridLocatedSetInterface<EffectiveTag>
 {
   public:
@@ -261,7 +265,8 @@ template<> class HybridClosedSetInterface<ValidatedTag>
 //! \ingroup GeometryModule EuclideanSetInterfaceSubModule
 //! \brief Interface for compact (closed and bounded) sets.
 template<> class HybridCompactSetInterface<ValidatedTag>
-    : public virtual HybridBoundedSetInterface<ValidatedTag>,
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridBoundedSetInterface<ValidatedTag>,
       public virtual HybridClosedSetInterface<ValidatedTag>
 {
   public:
@@ -274,7 +279,8 @@ template<> class HybridCompactSetInterface<ValidatedTag>
 //! \ingroup GeometryModule EuclideanSetInterfaceSubModule
 //! \brief Interface for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
 template<> class HybridRegularSetInterface<ValidatedTag>
-    : public virtual HybridOpenSetInterface<ValidatedTag>,
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridOpenSetInterface<ValidatedTag>,
       public virtual HybridClosedSetInterface<ValidatedTag>
 {
     virtual HybridRegularSetInterface<ValidatedTag>* clone() const = 0;
@@ -286,7 +292,8 @@ template<> class HybridRegularSetInterface<ValidatedTag>
 //! \ingroup GeometryModule EuclideanSetInterfaceSubModule
 //! \brief Interface for located (overt and compact) sets.
 template<> class HybridLocatedSetInterface<ValidatedTag>
-    : public virtual HybridOvertSetInterface<ValidatedTag>,
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridOvertSetInterface<ValidatedTag>,
       public virtual HybridCompactSetInterface<ValidatedTag>
 {
     virtual HybridLocatedSetInterface<ValidatedTag>* clone() const = 0;
@@ -298,7 +305,8 @@ template<> class HybridLocatedSetInterface<ValidatedTag>
 //! \ingroup GeometryModule EuclideanSetInterfaceSubModule
 //! \brief Complete set interface for bounded regular sets.
 template<> class HybridRegularLocatedSetInterface<ValidatedTag>
-    : public virtual HybridRegularSetInterface<ValidatedTag>,
+    : public virtual HybridSetInterfaceBase
+    , public virtual HybridRegularSetInterface<ValidatedTag>,
       public virtual HybridLocatedSetInterface<ValidatedTag>
 {
   public:

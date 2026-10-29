@@ -122,7 +122,7 @@ Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint
 }
 
 SizeType
-Orbit<Vector<HybridApproximatePoint>>::size(Nat setNumber)
+Orbit<Vector<HybridApproximatePoint>>::size(SizeType setNumber)
 {
     return this->_curves_ptr->at(setNumber).size();
 }

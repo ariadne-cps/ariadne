@@ -224,7 +224,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
     RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
-        Int old_precision = std::clog.precision();
+        std::streamsize old_precision = std::clog.precision();
         LOGGING_PRINTLN_AT(1,
                 "t=" << std::setw(4) << std::left << t.continuous_time().compute_get(Effort(0u),double_precision)
                 << " #e=" << std::left << t.discrete_time()
@@ -373,7 +373,7 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
 
             RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
-            Int old_precision = std::clog.precision();
+            std::streamsize old_precision = std::clog.precision();
             LOGGING_PRINTLN_AT(1,
                 "t=" << std::setw(4) << std::left << t[i].continuous_time().compute_get(Effort(0u),double_precision)
                 << " #e=" << std::left << t[i].discrete_time()

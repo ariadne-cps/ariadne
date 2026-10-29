@@ -389,7 +389,7 @@ _log_summary(HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbi
     UpperBoxType starting_bounding_box=starting_set.state_bounding_box();
     UpperIntervalType starting_time_range=starting_set.time_range();
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
-    Int old_precision = std::clog.precision();
+    std::streamsize old_precision = std::clog.precision();
     LOGGING_PRINTLN(
             "#r="<<std::setw(5)<<std::left<<result->reach_size()
             <<" #f="<<std::setw(4)<<std::left<<result->final_size()

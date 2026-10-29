@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include <map>
+#include <limits>
 
 #include "macro/general.hpp"
 #include "utility/container.hpp"
@@ -39,6 +40,14 @@
 #include "hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
+
+// Keep the public Nat-based component API while checking wide container indices.
+static Nat checked_component_index(SizeType index) {
+    ARIADNE_ASSERT_MSG(index <= std::numeric_limits<Nat>::max(),
+                       "CompositeHybridAutomaton component index out of range: " << index);
+    return static_cast<Nat>(index);
+}
+
 
 const SizeType MODES_CACHE_SIZE = 4;
 
@@ -123,7 +132,7 @@ CompositeHybridAutomaton::CompositeHybridAutomaton(Identifier name)
 Nat
 CompositeHybridAutomaton::number_of_components() const
 {
-    return this->_components.size();
+    return checked_component_index(this->_components.size());
 }
 
 const HybridAutomaton&
@@ -485,7 +494,7 @@ OutputStream&
 VerboseCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << "CompositeHybridAutomaton(\n";
     for(SizeType i = 0; i < ha.number_of_components(); ++i) {
-        os << ha.component(i);
+        os << ha.component(checked_component_index(i));
     }
     return os << "\n)\n";
 }
@@ -496,7 +505,7 @@ CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridA
     Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
     HybridAutomaton::set_default_writer(CompactHybridAutomatonWriter());
     for(SizeType i = 0; i < ha.number_of_components(); ++i) {
-        os << ha.component(i);
+        os << ha.component(checked_component_index(i));
     }
     HybridAutomaton::set_default_writer(previous_writer);
     return os << "}\n";

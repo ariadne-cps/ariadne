@@ -181,7 +181,7 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
     cells.mince(accuracy);
 
     LOGGING_PRINTLN("Evolving "<<cells.size()<<" cells");
-    ProgressIndicator indicator(cells.size());
+    ProgressIndicator indicator(static_cast<double>(cells.size()));
     for (auto const& cell : cells) {
         LOGGING_PRINTLN_AT(1,"evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());

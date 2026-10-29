@@ -54,3 +54,12 @@ have not yet been reconnected and remain explicit work items.
 
 `configuration` is pinned to `cb75e7472b900025b7016d103c2e170197be1996`,
 the latest verified `main` commit on 2026-10-29, shared by the dependencies.
+
+## Local test ownership
+
+Only `tests/dynamics` and `tests/hybrid` are retained as Ariadne-owned
+C++ test suites. `tests/utility.hpp` is kept as their shared support header.
+The former Function, Geometry, Solving, Symbolic and IO test directories and
+obsolete `python/tests` were removed from this repository; those components
+are tested in their owning external repositories. This does not exclude the
+retained test executables from the CMake `tests` or CI targets.

@@ -44,10 +44,13 @@ namespace Ariadne {
 static const Nat HYBRID_DEFAULT_WIDTH = 800;
 static const Nat HYBRID_DEFAULT_HEIGHT = 800;
 
+// Margins are only referenced by the Cairo rendering path.
+#if defined(HAVE_CAIRO_H)
 static const Nat HYBRID_LEFT_MARGIN = 0;
 static const Nat HYBRID_BOTTOM_MARGIN = 0;
 static const Nat HYBRID_TOP_MARGIN = 0;
 static const Nat HYBRID_RIGHT_MARGIN = 0;
+#endif
 
 
 HybridFigure::~HybridFigure() {

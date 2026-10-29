@@ -35,11 +35,11 @@
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "io/command_line_interface.hpp"
-#include "io/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
+#include "labelling/figure.hpp"
 #include "logging/logging.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 
 using namespace Ariadne;

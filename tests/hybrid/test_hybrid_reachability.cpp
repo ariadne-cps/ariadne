@@ -31,22 +31,22 @@
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "solving/integrator.hpp"
+#include "set/list_set.hpp"
+#include "integration/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/figure.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "labelling/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
-#include "io/graphics_manager.hpp"
-#include "io/drawer.hpp"
-#include "io/command_line_interface.hpp"
+#include "drawing/drawer_manager.hpp"
+#include "drawing/drawer.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -119,9 +119,9 @@ Void TestHybridReachability::test_bouncing_ball() const {
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
 
-    GraphicsManager::instance().set_drawer(GridDrawer(2));
+    DrawerManager::instance().set_drawer(GridDrawer(2));
 
     TestHybridReachability().test();
     return ARIADNE_TEST_FAILURES;

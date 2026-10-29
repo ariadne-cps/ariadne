@@ -31,19 +31,19 @@
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "solving/integrator.hpp"
+#include "set/list_set.hpp"
+#include "integration/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/figure.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "labelling/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "io/command_line_interface.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -211,7 +211,7 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
 
     TestHybridEvolution().test();
     return ARIADNE_TEST_FAILURES;

@@ -31,12 +31,12 @@
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "solving/integrator.hpp"
+#include "set/list_set.hpp"
+#include "set/affine_set.hpp"
+#include "integration/integrator.hpp"
 #include "dynamics/orbit.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/figure.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "labelling/figure.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
@@ -44,9 +44,9 @@
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_automaton-composite.hpp"
-#include "io/command_line_interface.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -899,7 +899,7 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
     ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_integrator).test_all());

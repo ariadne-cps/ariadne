@@ -26,12 +26,12 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 #include "symbolic/expression.hpp"
 #include "symbolic/valuation.hpp"
 #include "hybrid/hybrid_automata.hpp"
-#include "io/command_line_interface.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
 using namespace Ariadne;
 
@@ -397,7 +397,7 @@ TestHybridAutomaton::test_static_analysis()
 
 
 Int main(Int argc, const char* argv[]) {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     ARIADNE_TEST_CALL(TestHybridAutomaton().test());
     return ARIADNE_TEST_FAILURES;
 }

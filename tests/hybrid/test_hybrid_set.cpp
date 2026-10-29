@@ -26,16 +26,16 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 
-#include "geometry/function_set.hpp"
+#include "set/function_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "io/figure.hpp"
+#include "labelling/figure.hpp"
 
 using namespace std;
 using namespace Ariadne;

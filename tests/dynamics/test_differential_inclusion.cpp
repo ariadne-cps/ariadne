@@ -45,7 +45,7 @@ class TestDifferentialInclusion {
     Void test_missing_input() {
         RealVariable x("x"), y("y"), z("z"), u("u");
         DottedRealAssignments dynamics={dot(x)=y+u,dot(y)=-x+z};
-        RealVariableIntervals inputs={-4/100_q<=u<=4/100_q};
+        RealVariablesBox inputs={-4/100_q<=u<=4/100_q};
 
         ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), MissingInputException);
     }
@@ -53,7 +53,7 @@ class TestDifferentialInclusion {
     Void test_unused_input() {
         RealVariable x("x"), y("y"), u("u");
         DottedRealAssignments dynamics={dot(x)=y,dot(y)=-x};
-        RealVariableIntervals inputs={-4/100_q<=u<=4/100_q};
+        RealVariablesBox inputs={-4/100_q<=u<=4/100_q};
 
         ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), UnusedInputException);
     }
@@ -61,7 +61,7 @@ class TestDifferentialInclusion {
     Void test_dynamics_transformation() {
         RealVariable x("x"), y("y"), u("u");
         DottedRealAssignments dynamics={dot(x)=-y,dot(y)=x+2*u};
-        RealVariableIntervals inputs={1<=u<=2};
+        RealVariablesBox inputs={1<=u<=2};
 
         DifferentialInclusion ivf(dynamics, inputs);
 
@@ -95,7 +95,7 @@ class TestDifferentialInclusion {
     Void test_nonaffine_field() {
         RealVariable x("x"), y("y"), u1("u1"), u2("u2");
         DottedRealAssignments dynamics={dot(x)=u1*u2*x*(1-y),dot(y)=u2*y*(x-1)};
-        RealVariableIntervals inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
+        RealVariablesBox inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
         DifferentialInclusion ivf(dynamics, inputs);
 
@@ -112,7 +112,7 @@ class TestDifferentialInclusion {
     Void test_nonadditive_field() {
         RealVariable x("x"), y("y"), u1("u1"), u2("u2");
         DottedRealAssignments dynamics={dot(x)=u1*x*(1-y),dot(y)=u2*y*(x-1)};
-        RealVariableIntervals inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
+        RealVariablesBox inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
         DifferentialInclusion ivf(dynamics, inputs);
 
@@ -129,7 +129,7 @@ class TestDifferentialInclusion {
     Void test_additive_field() {
         RealVariable x("x"), y("y"), z("z"), u("u");
         DottedRealAssignments dynamics={dot(x)=-y-z,dot(y)=x+y*0.1_dec,dot(z)=z*(x-6)+u};
-        RealVariableIntervals inputs={0.099_dec<=u<=0.101_dec};
+        RealVariablesBox inputs={0.099_dec<=u<=0.101_dec};
 
         DifferentialInclusion ivf(dynamics, inputs);
 

@@ -63,7 +63,7 @@ public:
 
     Void test_single_trajectory() const {
 
-        typedef VectorField::EnclosureType EnclosureType;
+        typedef VectorFieldEvolver::EnclosureType EnclosureType;
 
         // Set up the evolution parameters and grid
         Real time(2.0_dec);

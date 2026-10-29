@@ -293,6 +293,11 @@ Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, con
 
 
 
+HybridUpperBoxes HybridValidatedConstrainedImageSet::bounding_box() const {
+    return this->Base::bounding_boxes();
+}
+
+
 HybridConstraintSet::HybridConstraintSet()
     : _sets()
 {
@@ -629,6 +634,10 @@ template class HybridBox<UpperIntervalType>;
 template class HybridBoxes<UpperIntervalType>;
 
 template class HybridBox<RealInterval>;
+
+// The drawable interface delegates to this out-of-line template member.
+template Void HybridBasicSet<ValidatedConstrainedImageSet>::draw(
+    CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
 
 
 template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;

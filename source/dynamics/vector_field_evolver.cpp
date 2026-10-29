@@ -39,7 +39,7 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "solving/integrator.hpp"
+#include "integration/integrator.hpp"
 
 #include "logging/logging.hpp"
 
@@ -48,7 +48,7 @@
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 
 namespace Ariadne {

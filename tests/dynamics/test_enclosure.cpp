@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -222,7 +223,7 @@ class TestEnclosure
         Enclosure encl(dom,fnc,configuration);
         RealVariable x("x"),y("y");
         LabelledEnclosure lencl(encl,RealSpace({x,y}));
-        LabelledFigure fig(Axes2d(-1.0<=x<=1.0,-1.5<=y<=1.5));
+        LabelledFigure fig(Axes2d(-1.0_dec<=x<=1.0_dec,-1.5_dec<=y<=1.5_dec));
         fig << line_style(true) << lencl;
         fig.write(("test_enclosure_"+suffix).c_str());
     }
@@ -243,7 +244,7 @@ class TestEnclosure
         encl.set_auxiliary_mapping(auxiliary);
         RealVariable x("x"), y("y"), z("z");
         LabelledEnclosure lencl(encl,RealSpace({x,y}),RealSpace({z}));
-        LabelledFigure fig(Axes2d(-1.0<=x<=3,-1<=z<=11));
+        LabelledFigure fig(Axes2d(-1.0_dec<=x<=3,-1<=z<=11));
         fig << lencl;
         DrawerManager::instance().set_drawer(AffineDrawer(1));
         fig.write("test_enclosure_auxiliary");

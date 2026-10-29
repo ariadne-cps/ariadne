@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -97,7 +98,7 @@ public:
         evolver.configuration().set_maximum_step_size(step_size);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        LabelledFigure fig(Axes2d(-2.25 <= x <= +2.25, -2.25 <= v <= +2.25));
+        LabelledFigure fig(Axes2d(-2.25_dec <= x <= +2.25_dec, -2.25_dec <= v <= +2.25_dec));
 
         // Define the initial set
         RealExpressionBoundedConstraintSet initial_set({0.95_dec <= x <= 1.05_dec, 0.45_dec <= v <= 0.55_dec});

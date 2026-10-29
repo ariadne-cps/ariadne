@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -187,7 +188,7 @@ class TestVectorFieldSimulator
 
         Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
 
-        LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
+        LabelledFigure fig({-2.5_dec<=x<=2.5_dec,-3<=y<=3});
         fig << orbit;
         fig.write("test_real_box_list_vector_field_simulator_xy");
 

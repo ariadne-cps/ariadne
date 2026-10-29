@@ -28,6 +28,7 @@
 #include "config.hpp"
 #include "macro/testing.hpp"
 
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"

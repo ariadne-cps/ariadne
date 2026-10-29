@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"

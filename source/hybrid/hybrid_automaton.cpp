@@ -535,12 +535,6 @@ HybridAutomaton::mode(DiscreteLocation location)
 {
     const HybridAutomaton& self=*this;
     return const_cast<DiscreteMode&>(self.mode(location));
-
-    if(!this->_modes.has_key(location)) {
-        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::mode(DiscreteLocation)",
-                      location<<" is not a location of the automaton with locations "<<this->locations());
-    }
-    return this->_modes.find(location)->second;
 }
 
 const DiscreteMode&

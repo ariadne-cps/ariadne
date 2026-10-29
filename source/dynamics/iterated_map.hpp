@@ -41,13 +41,6 @@
 
 namespace Ariadne {
 
-class Enclosure;
-class LabelledEnclosure;
-class Storage;
-class LabelledStorage;
-
-class IteratedMapEvolver;
-
 //! \brief An iterated function system.
 class IteratedMap
 {
@@ -56,11 +49,6 @@ class IteratedMap
     typedef Integer TimeType;
     //! \brief The type used to represent real numbers.
     typedef Real RealType;
-    //! \brief The type used to evolve the system
-    typedef IteratedMapEvolver EvolverType;
-    typedef LabelledEnclosure EnclosureType;
-    //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef LabelledStorage StorageType;
     //! \brief The state space
     typedef EuclideanSpace StateSpaceType;
   public:

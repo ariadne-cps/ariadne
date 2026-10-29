@@ -45,6 +45,7 @@
 #include "solving/inclusion_integrator.hpp"
 #include "solving/configuration_interface.hpp"
 #include "differential_inclusion.hpp"
+#include "evolution/traits.hpp"
 
 
 namespace Ariadne {
@@ -126,7 +127,7 @@ class DifferentialInclusionEvolver {
   public:
     typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
     typedef DifferentialInclusion SystemType;
-    typedef SystemType::EnclosureType EnclosureType;
+    typedef typename EvolutionTraits<SystemType>::EnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
   protected:
     SystemType _system;

@@ -30,7 +30,7 @@
 #define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "geometry/set_interface.hpp"
+#include "analysis/traits.hpp"
 
 namespace Ariadne {
 
@@ -45,33 +45,33 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \brief The type of the internal system.
     typedef SYS SystemType;
     //! \brief The type used to define the elapsed evolution time for the system type.
-    typedef typename SystemType::EvolverType EvolverType;
+    typedef typename EvolutionTraits<SystemType>::EvolverType EvolverType;
     //! \brief The type used to define enclosures for local reach and evolve sets.
-    typedef typename EvolverType::EnclosureType EnclosureType;
+    typedef typename EvolutionTraits<SystemType>::EnclosureType EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef typename SystemType::StorageType StorageType;
+    typedef typename AnalysisTraits<SystemType>::StorageType StorageType;
     //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::TimeType TimeType;
     //! \brief The type used to describe the state space of the system evolution.
     typedef typename SystemType::StateSpaceType StateSpaceType;
     //! \brief The type used to describe the interface for bounded sets in the state space.
-    typedef typename StateSpaceType::BoundingDomainType BoundingDomainType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::BoundingDomainType BoundingDomainType;
     //! \brief The type used to describe the interface for overt sets in the state space, which are used as initial sets for lower reachability analysis.
-    typedef typename StateSpaceType::OvertSetInterfaceType OvertSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::OvertSetInterfaceType OvertSetInterfaceType;
     //! \brief The type used to describe the interface for open sets in the state space, which are used as safe sets for lower reachability analysis.
-    typedef typename StateSpaceType::OpenSetInterfaceType OpenSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::OpenSetInterfaceType OpenSetInterfaceType;
     //! \brief The type used to describe the interface for compact sets in the state space, which are used as initial sets for upper reachability analysis.
-    typedef typename StateSpaceType::CompactSetInterfaceType CompactSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::CompactSetInterfaceType CompactSetInterfaceType;
     //! \brief The type used to describe the interface for located sets in the state space, which are used as initial sets for verification.
-    typedef typename StateSpaceType::LocatedSetInterfaceType LocatedSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::LocatedSetInterfaceType LocatedSetInterfaceType;
     //! \brief The type used to describe the interface for regular sets in the state space, which are used as safe sets for verification.
-    typedef typename StateSpaceType::RegularSetInterfaceType RegularSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::RegularSetInterfaceType RegularSetInterfaceType;
     //! \brief The type used to describe the interface for bounded sets in the state space.
-    typedef typename StateSpaceType::BoundedSetInterfaceType BoundedSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::BoundedSetInterfaceType BoundedSetInterfaceType;
     //! \brief The type used to describe the interface for bounded regular sets in the state space.
-    typedef typename StateSpaceType::RegularLocatedSetInterfaceType RegularLocatedSetInterfaceType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::RegularLocatedSetInterfaceType RegularLocatedSetInterfaceType;
     //! \brief The type used to describe the type used for upper approximations to sets.
-    typedef typename StateSpaceType::SetApproximationType SetApproximationType;
+    typedef typename SpaceAnalysisTraits<StateSpaceType>::SetApproximationType SetApproximationType;
     //! \brief The type used to represent a certificate of safety.
     typedef SafetyCertificate<StateSpaceType> SafetyCertificateType;
   public:

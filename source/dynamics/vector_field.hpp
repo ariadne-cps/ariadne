@@ -43,16 +43,6 @@
 
 namespace Ariadne {
 
-template<class S> class LabelledSet;
-
-class Enclosure;
-class LabelledEnclosure;
-class Storage;
-class LabelledStorage;
-
-class VectorFieldEvolver;
-
-
 //! \brief A vector field in Euclidean space.
 class VectorField
 {
@@ -63,12 +53,6 @@ class VectorField
     typedef Real RealType;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
-    //! \brief The class used to compute the system evolution.
-    typedef VectorFieldEvolver EvolverType;
-    //! \brief The type used to store local over-approximations to reach and evolve sets.
-    typedef LabelledEnclosure EnclosureType;
-    //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef LabelledStorage StorageType;
   public:
     VectorField(const List<DottedRealAssignment>&);
     VectorField(const List<DottedRealAssignment>&, List<RealAssignment> const&);

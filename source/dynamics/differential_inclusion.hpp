@@ -47,9 +47,6 @@ class UnusedInputException : public std::runtime_error {
     UnusedInputException(const String& str) : std::runtime_error(str) { }
 };
 
-class LabelledEnclosure;
-class InclusionVectorFieldEvolver;
-
 //! \brief A differential inclusion in Euclidean space.
 class DifferentialInclusion
 {
@@ -60,9 +57,6 @@ class DifferentialInclusion
     typedef Real RealType;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
-    //! \brief The generic type used to compute the system evolution.
-    typedef InclusionVectorFieldEvolver EvolverType;
-    typedef LabelledEnclosure EnclosureType;
   public:
     //! \brief Construct from expressions with dotted \a dynamics and a given range for the \a inputs.
     DifferentialInclusion(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);

@@ -50,10 +50,6 @@ typedef Space<Real> RealSpace;
 enum class EventKind : std::uint8_t { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
-class HybridEvolverInterface;
-class HybridEnclosure;
-class HybridStorage;
-
 //! \defgroup SystemSpecificationErrors System specification errors
 //! \ingroup HybridAutomataSubModule
 //! \brief  Exception classes reporting system specification errors
@@ -197,11 +193,6 @@ class HybridAutomatonInterface {
     typedef HybridTime TimeType;
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
-    //! \brief The type used to describe the state space.
-    typedef HybridEvolverInterface EvolverType;
-    typedef HybridEnclosure EnclosureType;
-    //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef HybridStorage StorageType;
   public:
     //! \brief Virtual destructor.
     virtual ~HybridAutomatonInterface() = default;

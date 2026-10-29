@@ -113,7 +113,7 @@ namespace Ariadne
             }
         }
         //Compute each time step
-        for (n = 1; n < Ntime; n++)
+        for (n = 1; n < Ntime - 1; n++)
         {
             for (SizeType i = 1; i < Nx - 1; i++)
             {

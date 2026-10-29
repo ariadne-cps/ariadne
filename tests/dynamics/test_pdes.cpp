@@ -171,7 +171,10 @@ class TestPdes
             Tensor<3, Float<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
             //Check values
-            for (SizeType time = 0; time < data.size(1); time++)
+            ARIADNE_TEST_ASSERT(data.size(0) == SizeType(Nx));
+            ARIADNE_TEST_ASSERT(data.size(1) == SizeType(Ny));
+            // Tensor dimensions are {Nx, Ny, Ntime}; visit every valid time step.
+            for (SizeType time = 0; time < data.size(2); time++)
             {
                 for (SizeType x2 = 0; x2 < SizeType(Ny); x2++)
                 {

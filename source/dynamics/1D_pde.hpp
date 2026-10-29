@@ -119,7 +119,7 @@ namespace Ariadne
         }// first time step
 
         // For each time step - main loop
-        for (n = 1; n < Nt.get_d(); n++)
+        for (n = 1; n < Ntime - 1; n++)
         {
             uts[{0, n}] = 0;
             uts[{Nx - 1, n}] = 0;

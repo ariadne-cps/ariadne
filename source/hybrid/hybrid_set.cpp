@@ -113,8 +113,8 @@ Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<Disc
 }
 
 Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint>& vhpt)
+    : _curves_ptr(new Vector(vhpt.size(), List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(0).location(),vhpt.at(0).space(),InterpolatedCurve(0,vhpt.at(0).point())))))
 {
-    this->_curves_ptr = new Vector(vhpt.size(), List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(0).location(),vhpt.at(0).space(),InterpolatedCurve(0,vhpt.at(0).point()))));
     for(SizeType i=1; i<vhpt.size(); i++)
     {
         this->_curves_ptr->at(i) = List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(i).location(),vhpt.at(i).space(),InterpolatedCurve(0,vhpt.at(i).point())));

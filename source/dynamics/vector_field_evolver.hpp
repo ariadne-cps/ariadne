@@ -39,7 +39,7 @@
 
 #include "dynamics/vector_field.hpp"
 #include "function/function_interface.hpp"
-#include "solving/configuration_interface.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "integration/integrator_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 

@@ -43,7 +43,7 @@
 #include "logging/logging.hpp"
 #include "integration/integrator_interface.hpp"
 #include "integration/inclusion_integrator.hpp"
-#include "solving/configuration_interface.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "differential_inclusion.hpp"
 #include "evolution/traits.hpp"
 

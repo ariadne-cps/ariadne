@@ -30,7 +30,7 @@
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
 #include "logging/logging.hpp"
-#include "solving/configuration_interface.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_paving.hpp"
 

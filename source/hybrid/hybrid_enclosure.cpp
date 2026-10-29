@@ -35,7 +35,7 @@
 #include "algebra/polynomial.hpp"
 #include "function/taylor_function.hpp"
 #include "geometry/box.hpp"
-#include "geometry/grid_paving.hpp"
+#include "paving/grid_paving.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_storage.hpp"
@@ -43,12 +43,12 @@
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"
 
-#include "solving/linear_programming.hpp"
-#include "solving/nonlinear_programming.hpp"
-#include "solving/constraint_solver.hpp"
-#include "geometry/affine_set.hpp"
+#include "linear-programming/linear_programming.hpp"
+#include "nonlinear-programming/nonlinear_programming.hpp"
+#include "constraint-solving/constraint_solver.hpp"
+#include "set/affine_set.hpp"
 
-#include "io/figure.hpp"
+#include "rendering/figure.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 

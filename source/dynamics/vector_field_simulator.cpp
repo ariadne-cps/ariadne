@@ -35,13 +35,13 @@
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 #include "function/function.hpp"
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
-#include "solving/runge_kutta_integrator.hpp"
+#include "integration/runge_kutta_integrator.hpp"
 
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field.hpp"

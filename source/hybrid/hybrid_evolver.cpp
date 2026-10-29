@@ -31,14 +31,14 @@
 #include "function/function.hpp"
 #include "function/function_patch.hpp"
 #include "function/function_model.hpp"
-#include "geometry/grid_paving.hpp"
+#include "paving/grid_paving.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "solving/integrator.hpp"
-#include "solving/solver.hpp"
+#include "integration/integrator.hpp"
+#include "equation-solving/equation_solver.hpp"
 
 #include "hybrid/hybrid_evolver.hpp"
 

@@ -33,13 +33,13 @@
 #include <string>
 #include <vector>
 
-#include "io/colour.hpp"
+#include "rendering/colour.hpp"
 #include "symbolic/variable.hpp"
-#include "io/graphics_interface.hpp"
-#include "io/figure.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "rendering/figure.hpp"
 #include "logging/logging.hpp"
 
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/hybrid_graphics_interface.hpp"
 

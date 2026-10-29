@@ -31,12 +31,12 @@
 #include "symbolic/space.hpp"
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
-#include "io/geometry2d.hpp"
-#include "io/figure.hpp"
-#include "io/graphics_manager.hpp"
+#include "rendering/geometry2d.hpp"
+#include "rendering/figure.hpp"
+#include "rendering/rendering_manager.hpp"
 #include "hybrid/discrete_location.hpp"
-#include "geometry/function_set.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/function_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {

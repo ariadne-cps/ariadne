@@ -41,12 +41,12 @@
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
 #include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_paving.hpp"
-#include "geometry/curve.hpp"
+#include "set/function_set.hpp"
+#include "set/list_set.hpp"
+#include "paving/grid_paving.hpp"
+#include "set/curve.hpp"
 
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"

@@ -39,7 +39,7 @@
 #include "hybrid/discrete_location.hpp"
 #include "symbolic/space.hpp"
 #include "geometry/set.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {

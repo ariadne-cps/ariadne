@@ -42,7 +42,7 @@
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
-#include "solving/runge_kutta_integrator.hpp"
+#include "integration/runge_kutta_integrator.hpp"
 
 #include "logging/logging.hpp"
 

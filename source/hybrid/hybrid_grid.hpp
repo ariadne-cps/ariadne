@@ -35,7 +35,7 @@
 #include "hybrid/hybrid_space.hpp"
 #include "hybrid/hybrid_scalings.hpp"
 
-#include "geometry/grid.hpp"
+#include "paving/grid.hpp"
 
 namespace Ariadne {
 

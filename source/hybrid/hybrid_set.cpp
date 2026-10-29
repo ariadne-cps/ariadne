@@ -33,19 +33,19 @@
 #include "numeric/real.hpp"
 #include "numeric/casts.hpp"
 
-#include "symbolic/expression_set.hpp"
-#include "geometry/function_set.hpp"
+#include "expression-set/expression_set.hpp"
+#include "set/function_set.hpp"
 
 #include "hybrid/hybrid_space.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
-#include "io/figure.hpp"
+#include "rendering/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
-#include "io/graphics_interface.hpp"
-#include "geometry/function_set.hpp"
+#include "labelling/graphics_interface.hpp"
+#include "set/function_set.hpp"
 
 namespace Ariadne {
 

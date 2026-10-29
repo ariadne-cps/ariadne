@@ -43,11 +43,11 @@
 #include "algebra/matrix.hpp"
 
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_paving.hpp"
+#include "set/list_set.hpp"
+#include "paving/grid_paving.hpp"
 
-#include "solving/integrator.hpp"
-#include "solving/solver.hpp"
+#include "integration/integrator.hpp"
+#include "equation-solving/equation_solver.hpp"
 
 #include "dynamics/reachability_analyser.tpl.hpp"
 
@@ -63,8 +63,8 @@
 
 
 #include "logging/logging.hpp"
-#include "io/figure.hpp"
-#include "solving/linear_programming.hpp"
+#include "rendering/figure.hpp"
+#include "linear-programming/linear_programming.hpp"
 
 #include "hybrid/hybrid_graphics.hpp"
 

@@ -245,7 +245,7 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
 template FirstOrderPDESolution<DP>
 first_order_pde(FirstOrderPDE const&, EffectiveVectorMultivariateFunction const& phi0, DP pr);
 
-template FirstOrderPDESolution<MP>
-first_order_pde(FirstOrderPDE const&, EffectiveVectorMultivariateFunction const& phi0, MP pr);
+template FirstOrderPDESolution<MultiplePrecision>
+first_order_pde(FirstOrderPDE const&, EffectiveVectorMultivariateFunction const& phi0, MultiplePrecision pr);
 
 } // namespace Ariadne

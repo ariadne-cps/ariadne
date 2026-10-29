@@ -33,7 +33,7 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
 
-#include "utility/macros.hpp"
+#include "macro/general.hpp"
 #include "utility/exceptions.hpp"
 #include "utility/stopwatch.hpp"
 #include "numeric/numeric.hpp"
@@ -63,6 +63,7 @@
 
 #include "labelling/graphics_interface.hpp"
 #include "drawing/drawer.hpp"
+#include "drawing/drawer_manager.hpp"
 #include "logging/progress_indicator.hpp"
 
 #include "rendering/figure.hpp"
@@ -1281,7 +1282,7 @@ inline ValidatedVectorMultivariateFunctionPatch join(const ValidatedVectorMultiv
 }
 
 Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    GraphicsManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
+    DrawerManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {

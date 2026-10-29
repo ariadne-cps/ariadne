@@ -426,6 +426,7 @@ class LabelledEnclosure
     friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledEnclosure&);
 
     virtual LabelledEnclosure* clone() const override;
+    virtual LabelledEnclosure* labelled_clone() const override { return clone(); }
 
     using Enclosure::draw;
     virtual Void draw(CanvasInterface&, const Variables2d&) const override;
@@ -459,7 +460,8 @@ template<> class ListSet<LabelledEnclosure> : public LabelledDrawable2dInterface
     LabelledUpperBoxType bounding_box() const;
     const ListSet<LabelledSet<UpperBoxType>> bounding_boxes() const;
 
-    virtual ListSet<LabelledEnclosure>* clone() const override;
+    virtual ListSet<LabelledEnclosure>* clone() const;
+    virtual ListSet<LabelledEnclosure>* labelled_clone() const override { return clone(); }
     virtual Void draw(CanvasInterface&, const Variables2d&) const override;
 };
 

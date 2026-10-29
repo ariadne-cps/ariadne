@@ -38,6 +38,7 @@
 
 #include "numeric/numeric.hpp"
 #include "labelling/graphics_interface.hpp"
+#include "labelling/point.hpp"
 #include "set/function_set.hpp"
 #include "set/list_set.hpp"
 #include "set/curve.hpp"
@@ -117,7 +118,7 @@ class Orbit<LabelledPoint<Approximation<F>>>
     Void insert(F t, const LabelledPoint<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
     const LabelledInterpolatedCurve& curves() const { return *this->_curve; }
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _curve->draw(canvas,axes); }
-    virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
+    virtual LabelledDrawable2dInterface* labelled_clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
   private:
     std::shared_ptr<LabelledInterpolatedCurve> _curve;
 };
@@ -134,7 +135,7 @@ class Orbit<List<LabelledPoint<Approximation<F>>>>
     const LabelledInterpolatedCurve& curve(SizeType i) { return _curves->at(i); }
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override {
         for (SizeType i=0; i<_curves->size(); i++){ _curves->at(i).draw(canvas, axes); } }
-    virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<List<LabelledPoint<Approximation<F>>>>(*this); }
+    virtual LabelledDrawable2dInterface* labelled_clone() const override { return new Orbit<List<LabelledPoint<Approximation<F>>>>(*this); }
   private:
     std::shared_ptr<List<LabelledInterpolatedCurve>> _curves;
 };
@@ -221,7 +222,7 @@ class Orbit<LabelledEnclosure>
     EnclosureListType const& final() const { return this->_final; }
 
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _reach.draw(canvas,axes); }
-    virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<LabelledEnclosure>(*this); }
+    virtual LabelledDrawable2dInterface* labelled_clone() const override { return new Orbit<LabelledEnclosure>(*this); }
   private:
     ES _initial;
     ESL _reach;

@@ -35,6 +35,7 @@
 #include "paving/grid_paving.hpp"
 #include "symbolic/identifier.hpp"
 #include "labelling/graphics_interface.hpp"
+#include "drawing/grid_paving_draw.hpp"
 
 namespace Ariadne {
 
@@ -105,8 +106,7 @@ class Storage
     virtual Storage* clone() const override { return new Storage(*this); }
     virtual DimensionType dimension() const override { return this->_state_set.dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const override {
-        GridTreePaving state_aux_set=this->state_auxiliary_set();
-        return this->state_auxiliary_set().draw(c,p); }
+        Ariadne::draw(c,p,this->state_auxiliary_set()); }
 
     friend OutputStream& operator<<(OutputStream& os, Storage const& set) {
         return os << "Storage(" << set._state_set << "," << set._auxiliary_mapping << ")"; }
@@ -250,6 +250,7 @@ class LabelledStorage
         return intersect(set1.state_set(),set2.state_set()); }
 
     virtual LabelledStorage* clone() const override { return new LabelledStorage(*this); }
+    virtual LabelledStorage* labelled_clone() const override { return clone(); }
 
     using Storage::draw;
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const override;

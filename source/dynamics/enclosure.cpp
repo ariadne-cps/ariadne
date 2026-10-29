@@ -75,6 +75,8 @@
 #include "numeric/operators.hpp"
 #include "symbolic/space.hpp"
 #include "expression-set/expression_set.hpp"
+#include "labelling/set.hpp"
+#include "labelling/figure.hpp"
 
 #include "algebra/expansion.inl.hpp"
 

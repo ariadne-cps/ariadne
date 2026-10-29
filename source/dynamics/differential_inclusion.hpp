@@ -34,6 +34,7 @@
 #include "paving/grid.hpp"
 #include "symbolic/identifier.hpp"
 #include "symbolic/expression.decl.hpp"
+#include "expression-set/expression_set.hpp"
 
 namespace Ariadne {
 

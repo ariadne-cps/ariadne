@@ -209,7 +209,7 @@ template<class IVL> class HybridBox
     typedef typename IVL::UpperBoundType UB;
   public:
     explicit HybridBox(const DiscreteLocation& loc, const VariablesBox<IVL>& bx)
-        : HybridBox(loc,bx.operator LabelledSet<Box<IVL>>()) { }
+        : HybridBox(loc,LabelledSet<Box<IVL>>(bx)) { }
     HybridBox(const DiscreteLocation& loc, const List<VariableInterval<UB>>& bnds)
         : HybridBox(loc,_make_box(bnds)) { }
     HybridBox(const DiscreteLocation& loc, const InitializerList<VariableInterval<UB>>& bnds)

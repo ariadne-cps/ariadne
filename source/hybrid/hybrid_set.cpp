@@ -41,6 +41,8 @@
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "rendering/figure.hpp"
+#include "drawing/geometry_draw.hpp"
+#include "labelling/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
@@ -104,7 +106,7 @@ Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<Disc
         if(locations.empty() || locations.contains(hcurve.location())) {
             RealSpace const& space=hcurve.space();
             if(valid_axis_variables(space,axes)) {
-                hcurve.euclidean_set().draw(canvas,projection(space,axes));
+                Ariadne::draw(canvas,projection(space,axes),hcurve.euclidean_set());
             }
         }
     }
@@ -154,7 +156,7 @@ Orbit<Vector<HybridApproximatePoint>>::draw(CanvasInterface& canvas, const Set<D
             if(locations.empty() || locations.contains(hcurve.location())) {
                 RealSpace const& space=hcurve.space();
                 if(valid_axis_variables(space,axes)) {
-                    hcurve.euclidean_set().draw(canvas,projection(space,axes));
+                    Ariadne::draw(canvas,projection(space,axes),hcurve.euclidean_set());
                 }
             }
         }
@@ -284,7 +286,7 @@ Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, con
     if(qs.empty() || qs.contains(this->location())) {
         RealSpace spc(List<RealVariable>(this->variables()));
         Projection2d prj(spc.dimension(),spc.index(vs.x()),spc.index(vs.y()));
-        this->euclidean_set(spc).draw(c,prj);
+        Ariadne::draw(c,prj,this->euclidean_set(spc));
     }
 }
 
@@ -515,7 +517,7 @@ Void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLoca
         if(q.empty() || q.contains(loc)) {
             Set<RealVariable> variables=this->variables(loc);
             RealSpace space(List<RealVariable>(variables.begin(),variables.end()));
-            this->euclidean_set(loc,space).draw(c,projection(space,p));
+            Ariadne::draw(c,projection(space,p),this->euclidean_set(loc,space));
         }
     }
 }
@@ -548,7 +550,7 @@ template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const Dis
 {
     if(set.location()==location) {
         Projection2d projection(set.euclidean_set().dimension(),set.space().index(axes.x()),set.space().index(axes.y()));
-        set.euclidean_set().draw(canvas,projection);
+        Ariadne::draw(canvas,projection,set.euclidean_set());
     }
 }
 
@@ -572,7 +574,7 @@ template<class IVL> Void HybridBoxes<IVL>::draw(CanvasInterface& canvas, const S
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
             Projection2d projection(space.dimension(),space.index(axis_variables.x()),space.index(axis_variables.y()));
-            loc_iter->second.euclidean_set().draw(canvas,projection);
+            Ariadne::draw(canvas,projection,loc_iter->second.euclidean_set());
         }
     }
 }

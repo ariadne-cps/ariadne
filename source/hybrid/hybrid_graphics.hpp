@@ -36,6 +36,7 @@
 #include "rendering/colour.hpp"
 #include "symbolic/variable.hpp"
 #include "labelling/graphics_interface.hpp"
+#include "labelling/figure.hpp"
 #include "rendering/figure.hpp"
 #include "logging/logging.hpp"
 
@@ -47,9 +48,9 @@
 namespace Ariadne {
 
 struct HybridGraphicsObject {
-    HybridGraphicsObject(const GraphicsProperties& gp, const HybridDrawableInterface& sh)
+    HybridGraphicsObject(const RenderingProperties& gp, const HybridDrawableInterface& sh)
         : properties(gp), shape_ptr(&sh) { }
-    GraphicsProperties properties;
+    RenderingProperties properties;
     const HybridDrawableInterface* shape_ptr;
 };
 
@@ -95,7 +96,7 @@ class HybridFigure
     Map<RealVariable,ApproximateDoubleInterval> bounds;
     Set<DiscreteLocation> locations;
     Variables2d variables;
-    GraphicsProperties properties;
+    RenderingProperties properties;
     List<HybridGraphicsObject> objects;
 };
 

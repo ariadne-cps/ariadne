@@ -40,6 +40,8 @@
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "rendering/figure.hpp"
+#include "drawing/grid_paving_draw.hpp"
+#include "labelling/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
@@ -267,7 +269,7 @@ Void HybridGridTreePaving::draw(CanvasInterface& canvas, const Set<DiscreteLocat
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
             Projection2d projection(space.dimension(),space.index(axis_variables.x()),space.index(axis_variables.y()));
-            loc_iter->second.draw(canvas,projection);
+            Ariadne::draw(canvas,projection,loc_iter->second);
         }
     }
 }

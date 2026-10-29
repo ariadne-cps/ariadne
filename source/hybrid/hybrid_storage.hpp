@@ -58,6 +58,7 @@ template<class X> class Vector;
 
 class Storage;
 class GridTreePaving;
+class HybridStorage;
 
 // FIXME: This class should not be necessary, as indexing HybridStorage should give a reference to a Euclidean/Labelled storage
 class HybridStorageElementReference {

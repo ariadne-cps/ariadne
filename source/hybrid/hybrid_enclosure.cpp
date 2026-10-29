@@ -49,6 +49,8 @@
 #include "set/affine_set.hpp"
 
 #include "rendering/figure.hpp"
+#include "labelling/figure.hpp"
+#include "paving/paver.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
@@ -618,7 +620,7 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fine
     RealSpace paving_space=hgtp.space(location);
     RealSpace state_space=this->state_space();
     if(state_space==paving_space) {
-        set.state_set().adjoin_outer_approximation_to(paving,fineness);
+        set.configuration().paver().adjoin_outer_approximation(paving,set.state_set(),fineness);
     } else {
         ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" do not match variables "<<paving_space<<" of HybridStorage in location "<<location);
     }

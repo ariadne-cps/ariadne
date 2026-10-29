@@ -40,6 +40,7 @@ namespace Ariadne {
 #include "config.hpp"
 
 #include "numeric/numeric.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 
@@ -47,17 +48,17 @@ namespace Ariadne {
 #include "function/taylor_model.hpp"
 #include "function/taylor_function.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_paving.hpp"
+#include "set/function_set.hpp"
+#include "set/affine_set.hpp"
+#include "paving/grid_paving.hpp"
 
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
-#include "geometry/curve.hpp"
+#include "set/curve.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "solving/integrator.hpp"
-#include "solving/solver.hpp"
+#include "integration/integrator.hpp"
+#include "equation-solving/equation_solver.hpp"
 
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
@@ -75,10 +76,11 @@ namespace Ariadne {
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
-#include "io/figure.hpp"
-#include "io/graphics_manager.hpp"
-#include "io/cairo.hpp"
-#include "io/command_line_interface.hpp"
+#include "labelling/figure.hpp"
+#include "rendering/rendering_manager.hpp"
+#include "drawing/drawer_manager.hpp"
+// Cairo-specific interfaces are no longer part of the extracted rendering API.
+#include "drawing/drawing_command_line_interface.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
 #include "logging/logging.hpp"

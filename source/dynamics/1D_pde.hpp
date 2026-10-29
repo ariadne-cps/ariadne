@@ -1,6 +1,8 @@
 #include "numeric/numeric.hpp"
 #include "utility/array.hpp"
 #include "algebra/tensor.hpp"
+#include <cmath>
+#include <limits>
 
 namespace Ariadne
 {
@@ -93,7 +95,12 @@ namespace Ariadne
         Float<PR> dt = (stringParameter.CourantNumber*dx/c).value();
 
         Float<PR> Nt = round(T/dt).value();
-        SizeType Ntime = Nt.get_d();
+        // The number of time steps is already rounded; validate it before narrowing.
+        const double ntime_value = Nt.get_d();
+        ARIADNE_ASSERT_MSG(std::isfinite(ntime_value) && ntime_value >= 2.0
+                           && ntime_value < std::ldexp(1.0, std::numeric_limits<SizeType>::digits),
+                           "Invalid PDE time-step count: " << ntime_value);
+        SizeType Ntime = static_cast<SizeType>(ntime_value);
 
         Array<Float<PR>> time = linspace1d(T, Ntime, pr);
 

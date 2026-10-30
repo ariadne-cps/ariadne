@@ -60,7 +60,6 @@ graph TD
     smt --> symbolic
     smt --> constraint_solving
     smt --> equation_solving
-    smt --> threading
     smt --> cdcl
     sat --> bdd
     sat --> cdcl
@@ -79,7 +78,7 @@ graph TD
     rendering --> python_common
     bdd --> threading
     bdd --> python_common
-    cdcl --> utility
+    cdcl --> threading
     cdcl --> python_common
     threading --> logging
     logging --> utility
@@ -101,7 +100,7 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 - `expression-set` uses `symbolic`, `set`. See [commit constraints](#expression-set-commit-constraints).
 - `paving` uses `set`, `bdd`. See [commit constraints](#paving-commit-constraints).
 - `set` uses `linear-programming`, `constraint-solving`. See [commit constraints](#set-commit-constraints).
-- `smt` uses `symbolic`, `constraint-solving`, `equation-solving`, `threading`, `cdcl`. See [commit constraints](#smt-commit-constraints).
+- `smt` uses `symbolic`, `constraint-solving`, `equation-solving`, `cdcl`. See [commit constraints](#smt-commit-constraints).
 - `sat` uses `bdd`, `cdcl`. See [commit constraints](#sat-commit-constraints).
 - `symbolic` uses `function`.
 - `constraint-solving` uses `nonlinear-programming`.
@@ -115,7 +114,7 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 - `numeric` uses `foundation`, `logging`. See [commit constraints](#numeric-commit-constraints).
 - `rendering` uses `utility`, `python-common`.
 - `bdd` uses `threading`, `python-common`.
-- `cdcl` uses `utility`, `python-common`.
+- `cdcl` uses `threading`, `python-common`.
 - `threading` uses `logging`.
 - `logging` uses `utility`.
 - `foundation` uses `utility`, `python-common`.
@@ -123,7 +122,7 @@ The top-level repository is `ariadne`. The list below and the diagram show a *tr
 
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-All dependencies are exposed transitively. For example, `analysis` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph.
+All dependencies are exposed transitively. For example, `analysis` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph. With `cdcl` now depending on `threading`, its path `cdcl -> threading -> logging -> utility` makes the old `cdcl -> utility` edge redundant. The `smt -> threading` edge is also redundant because `smt` reaches `threading` via `cdcl`. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
 
 ## Commit consistency verification
 
@@ -141,7 +140,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `analysis`, checking `bdd` already synchronizes the `evolution` and `sat` branches for descendants of `bdd`. Therefore, the `threading` check only compares `sat -> bdd -> threading` with `smt -> threading`; a third `evolution` path is redundant.
+**Example:** For `analysis`, a separate `threading` check is no longer necessary. Its `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and its `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. The `sat` submodule has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit.
 
 ### `analysis` commit constraints
 
@@ -160,10 +159,6 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`constraint-solving`**:
   - `evolution -> system -> hybrid -> labelled -> expression-set -> set -> constraint-solving`
   - `smt -> constraint-solving`
-- **`threading`**:
-  - `sat -> bdd -> threading`
-  - `smt -> threading`
-
 ### `evolution` commit constraints
 
 - **`function`**:
@@ -215,22 +210,18 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `equation-solving -> function`
 - **`logging`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`
-  - `threading -> logging`
+  - `cdcl -> threading -> logging`
 - **`python-common`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> foundation -> python-common`
   - `cdcl -> python-common`
-- **`utility`**:
-  - `threading -> logging -> utility`
-  - `cdcl -> utility`
-
 ### `sat` commit constraints
 
+- **`threading`**:
+  - `bdd -> threading`
+  - `cdcl -> threading`
 - **`python-common`**:
   - `bdd -> python-common`
   - `cdcl -> python-common`
-- **`utility`**:
-  - `bdd -> threading -> logging -> utility`
-  - `cdcl -> utility`
 
 ### `numeric` commit constraints
 

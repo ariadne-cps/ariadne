@@ -31,9 +31,8 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/valuation.hpp"
 #include "system/hybrid_automaton_interface.hpp"
-#include "system/hybrid_space.hpp"
+#include "hybrid/hybrid_space.hpp"
 #include "system/hybrid_automata.hpp"
-#include "hybrid/hybrid_automata.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 
 using namespace Ariadne;

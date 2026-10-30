@@ -35,6 +35,7 @@
 
 #include "set/function_set.hpp"
 #include "system/hybrid_constraint_set.hpp"
+#include "system/hybrid_bounded_constraint_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "labelling/figure.hpp"

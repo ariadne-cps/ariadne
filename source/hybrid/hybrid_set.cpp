@@ -167,71 +167,6 @@ LowerKleenean HybridConstraintSet::separated(const HybridExactBox& bx) const {
     }
 }
 
-HybridBoundedConstraintSet::HybridBoundedConstraintSet()
-    : _sets()
-{
-}
-
-HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                       const RealExpressionBoundedConstraintSet& set)
-{
-    this->adjoin(loc,set);
-}
-
-HybridBoundedConstraintSet::HybridBoundedConstraintSet(const Set<DiscreteLocation>& locs,
-                                                       const RealExpressionBoundedConstraintSet& set)
-{
-    for (auto loc : locs) { this->adjoin(loc,set); }
-}
-
-HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                       const InitializerList<RealVariableInterval>& bnd)
-{
-    this->adjoin(loc,RealExpressionBoundedConstraintSet(bnd));
-}
-
-HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                       const InitializerList<RealVariableInterval>& bnd,
-                                                       const InitializerList<ContinuousPredicate>& cnstr)
-{
-    this->adjoin(loc,RealExpressionBoundedConstraintSet(bnd,cnstr));
-}
-
-HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                       const RealVariablesBox& bx)
-{
-    this->adjoin(loc,RealExpressionBoundedConstraintSet(bx));
-}
-
-HybridBoundedConstraintSet& HybridBoundedConstraintSet::adjoin(const DiscreteLocation& loc,
-                                                               const RealExpressionBoundedConstraintSet& set)
-{
-    _sets.insert(loc,set); return *this;
-}
-
-HybridBoundedConstraintSet* HybridBoundedConstraintSet::clone() const {
-    return new HybridBoundedConstraintSet(*this);
-}
-
-Set<RealVariable> HybridBoundedConstraintSet::variables(DiscreteLocation loc) const {
-    ARIADNE_ASSERT(this->_sets.has_key(loc));
-    return _sets[loc].variables();
-}
-
-RealExpressionBoundedConstraintSet const& HybridBoundedConstraintSet::continuous_set(DiscreteLocation loc) const {
-    ARIADNE_ASSERT(this->_sets.has_key(loc));
-    return this->_sets[loc];
-}
-
-BoundedConstraintSet const HybridBoundedConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
-    ARIADNE_ASSERT(this->_sets.has_key(loc));
-    return BoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
-}
-
-EuclideanSetInterfaceBase* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
-    return new BoundedConstraintSet(this->euclidean_set(loc,spc));
-}
-
 LowerKleenean HybridBoundedConstraintSet::overlaps(const HybridExactBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.euclidean_set());
@@ -269,15 +204,6 @@ LowerKleenean HybridBoundedConstraintSet::inside(const HybridExactBoxes& bxs) co
     return result;
 }
 
-DiscreteLocation HybridBoundedConstraintSet::location() const {
-    ARIADNE_ASSERT(this->_sets.size()==1);
-    return this->_sets.begin()->first;
-}
-
-Set<DiscreteLocation> HybridBoundedConstraintSet::locations() const {
-    return this->_sets.keys();
-}
-
 HybridUpperBoxes HybridBoundedConstraintSet::bounding_box() const {
     HybridUpperBoxes result;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
@@ -288,10 +214,6 @@ HybridUpperBoxes HybridBoundedConstraintSet::bounding_box() const {
         result.insert(iter->first,spc,ebx);
     }
     return result;
-}
-
-OutputStream& HybridBoundedConstraintSet::_write(OutputStream& os) const {
-    return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 
 HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const HybridConstraintSet& hcs) {

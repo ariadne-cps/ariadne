@@ -30,6 +30,7 @@
 #define ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 
 #include "labelling/graphics_interface.hpp"
+#include "system/hybrid_drawable_interface.hpp"
 
 namespace Ariadne {
 
@@ -43,19 +44,6 @@ class DiscreteLocation;
 struct Variables2d;
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables);
-
-//! \ingroup GraphicsModule
-//! \brief Base interface for drawable objects
-class HybridDrawableInterface {
-  public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Variables2d ProjectionType;
-    //! brief Virtual destructor.
-    virtual ~HybridDrawableInterface() = default;
-    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const = 0;
-};
-
 
 } // namespace Ariadne
 

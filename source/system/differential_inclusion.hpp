@@ -31,12 +31,13 @@
 
 #include "function/function.hpp"
 #include "geometry/set_interface.hpp"
-#include "paving/grid.hpp"
 #include "symbolic/identifier.hpp"
 #include "symbolic/expression.decl.hpp"
 #include "expression-set/expression_set.hpp"
 
 namespace Ariadne {
+
+class Grid;
 
 class MissingInputException : public std::runtime_error {
   public:
@@ -67,7 +68,7 @@ class DifferentialInclusion
     SizeType dimension() const { return _function.result_size(); }
     SizeType number_of_inputs() const { return _inputs.size(); }
     RealSpace state_space() const;
-    Grid grid() const { return Grid(_function.result_size()); }
+    Grid grid() const;
 
     //! \brief If the dynamics is affine in the inputs.
     Bool is_input_affine() const;

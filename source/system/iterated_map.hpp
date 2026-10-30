@@ -33,7 +33,6 @@
 
 #include "function/function.hpp"
 #include "geometry/set_interface.hpp"
-#include "paving/grid.hpp"
 
 #include "symbolic/variable.hpp"
 #include "symbolic/assignment.hpp"

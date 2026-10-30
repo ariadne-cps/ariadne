@@ -5,6 +5,7 @@ add_library(${LIBRARY_NAME} OBJECT
     enclosure.cpp
     orbit.cpp
     differential_inclusion_evolver.cpp
+    differential_inclusion_grid.cpp
     first_order_pde.cpp
     iterated_map_evolver.cpp
     vector_field_evolver.cpp

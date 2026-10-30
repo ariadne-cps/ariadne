@@ -34,7 +34,7 @@
 #include "paving/paving_interface.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/identifier.hpp"
-#include "labelling/graphics_interface.hpp"
+#include "labelled/graphics_interface.hpp"
 #include "drawing/grid_paving_draw.hpp"
 
 namespace Ariadne {

@@ -10,9 +10,9 @@
 [submodule "sat"]
 	path = ss/sat
 	url = https://github.com/ariadne-cps/sat
-[submodule "labelling"]
+[submodule "labelled"]
 	path = ss/lab
-	url = https://github.com/ariadne-cps/labelling
+	url = https://github.com/ariadne-cps/labelled
 [submodule "configuration"]
 	path = ss/cfg
 	url = https://github.com/ariadne-cps/configuration

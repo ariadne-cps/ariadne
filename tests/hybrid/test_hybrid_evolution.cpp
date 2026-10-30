@@ -39,8 +39,8 @@
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
-#include "labelling/graphics_interface.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/graphics_interface.hpp"
+#include "labelled/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 

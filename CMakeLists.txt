@@ -26,13 +26,13 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         "equation-solving|configuration"
         "smt|configuration"
         "sat|configuration"
-        "labelling|configuration"
+        "labelled|configuration"
         "symbolic|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
-        "labelling|expression-set|symbolic"
+        "labelled|expression-set|symbolic"
         "smt|symbolic"
-        "labelling|expression-set|symbolic"
+        "labelled|expression-set|symbolic"
     )
     require_same_dependency_commit(EquationSolving CHAINS
         "equation-solving"
@@ -41,7 +41,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Function CHAINS
         "integration|function"
         "equation-solving|function"
-        "labelling|expression-set|symbolic|function"
+        "labelled|expression-set|symbolic|function"
     )
     require_same_dependency_commit(Cdcl CHAINS
         "smt|cdcl"
@@ -49,7 +49,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Bdd CHAINS
         "sat|bdd"
-        "labelling|drawing|paving|bdd"
+        "labelled|drawing|paving|bdd"
     )
     require_same_dependency_commit(Threading CHAINS
         "smt|threading"
@@ -57,7 +57,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(ConstraintSolving CHAINS
         "smt|constraint-solving"
-        "labelling|expression-set|set|constraint-solving"
+        "labelled|expression-set|set|constraint-solving"
     )
 endif()
 
@@ -97,7 +97,7 @@ add_library(ariadne ${_ariadne_library_type}
 # Collect dependency objects exactly once, preserving the standalone
 # repositories' aggregate interface and avoiding duplicate object linkage.
 set(_ariadne_external_objects)
-foreach(_dependency integration equation_solving smt sat labelling symbolic)
+foreach(_dependency integration equation_solving smt sat labelled symbolic)
     get_target_property(_objects ${_dependency} ARIADNE_PROJECT_OBJECT_TARGETS)
     if(_objects)
         list(APPEND _ariadne_external_objects ${_objects})

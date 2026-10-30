@@ -61,7 +61,7 @@
 #include "constraint-solving/constraint_solver.hpp"
 #include "nonlinear-programming/nonlinear_programming.hpp"
 
-#include "labelling/graphics_interface.hpp"
+#include "labelled/graphics_interface.hpp"
 #include "drawing/drawer.hpp"
 #include "drawing/drawer_manager.hpp"
 #include "logging/progress_indicator.hpp"
@@ -75,8 +75,8 @@
 #include "numeric/operators.hpp"
 #include "symbolic/space.hpp"
 #include "expression-set/expression_set.hpp"
-#include "labelling/set.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/set.hpp"
+#include "labelled/figure.hpp"
 
 #include "algebra/expansion.inl.hpp"
 

@@ -43,7 +43,7 @@
 #include "set/list_set.hpp"
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 
 #include "macro/testing.hpp"

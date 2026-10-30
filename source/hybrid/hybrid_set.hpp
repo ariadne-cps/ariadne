@@ -47,7 +47,7 @@
 #include "set/curve.hpp"
 
 #include "expression-set/expression_set.hpp"
-#include "labelling/set.hpp"
+#include "labelled/set.hpp"
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"

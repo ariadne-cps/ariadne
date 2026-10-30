@@ -37,11 +37,11 @@
 #include "hybrid/hybrid_space.hpp"
 #include "rendering/figure.hpp"
 #include "drawing/grid_paving_draw.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
-#include "labelling/graphics_interface.hpp"
+#include "labelled/graphics_interface.hpp"
 #include "set/function_set.hpp"
 
 namespace Ariadne {

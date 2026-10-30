@@ -36,7 +36,7 @@
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "logging/logging.hpp"
 
 #include "macro/testing.hpp"

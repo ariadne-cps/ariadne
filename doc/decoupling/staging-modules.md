@@ -2,7 +2,7 @@
 
 The dependency graph of record is [structure.md](structure.md). This branch
 installs six direct external dependencies in `ss/`: `symbolic`,
-`integration`, `equation-solving`, `labelling`, `smt`, and `sat`.
+`integration`, `equation-solving`, `labelled`, `smt`, and `sat`.
 `configuration` is pinned directly in `ss/cfg`.
 
 The old local source modules `function/`, `geometry/`, `solving/`,
@@ -18,7 +18,7 @@ The intended repository dependencies (dependent -> provider) are:
 
 ```text
 analysis  -> evolution, smt, sat
-evolution -> system, integration, labelling, equation-solving
+evolution -> system, integration, labelled, equation-solving
 system    -> symbolic
 ```
 
@@ -39,7 +39,7 @@ system    -> symbolic
   A passing CMake dependency consistency check is not a compile test.
 - Before extraction, classify every source file by responsibility, update all
   includes, and compile public headers in isolation. Ensure `system` has no
-  includes or target linkage to `evolution`, `analysis`, or `labelling`.
+  includes or target linkage to `evolution`, `analysis`, or `labelled`.
   Ensure `evolution` has no dependency on `analysis`.
 - Restore actual compile/test, Python bindings, install/consumer and CI checks
   only after the relevant source/API migrations are complete.

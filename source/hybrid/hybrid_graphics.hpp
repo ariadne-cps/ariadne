@@ -35,8 +35,8 @@
 
 #include "rendering/colour.hpp"
 #include "symbolic/variable.hpp"
-#include "labelling/graphics_interface.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/graphics_interface.hpp"
+#include "labelled/figure.hpp"
 #include "rendering/figure.hpp"
 #include "logging/logging.hpp"
 

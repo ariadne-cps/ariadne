@@ -38,7 +38,7 @@
 #include "system/hybrid_bounded_constraint_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 
 using namespace std;
 using namespace Ariadne;

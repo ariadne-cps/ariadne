@@ -1,4 +1,4 @@
-# Hybrid sets and spaces are an independent representation layer above labelling.
+# Hybrid sets and spaces are an independent representation layer above labelled.
 add_library(ariadne-hybrid OBJECT
     discrete_location.cpp
     hybrid_constraint_set.cpp
@@ -9,4 +9,4 @@ add_library(ariadne-hybrid OBJECT
     hybrid_graphics.cpp
 )
 set_target_properties(ariadne-hybrid PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(ariadne-hybrid PUBLIC labelling)
+target_link_libraries(ariadne-hybrid PUBLIC labelled)

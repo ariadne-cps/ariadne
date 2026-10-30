@@ -7,7 +7,7 @@
 #include "system/hybrid_automaton_interface.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "drawing/grid_paving_draw.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
 

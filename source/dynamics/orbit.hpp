@@ -37,9 +37,9 @@
 #include <mutex>
 
 #include "numeric/numeric.hpp"
-#include "labelling/graphics_interface.hpp"
-#include "labelling/point.hpp"
-#include "labelling/curve.hpp"
+#include "labelled/graphics_interface.hpp"
+#include "labelled/point.hpp"
+#include "labelled/curve.hpp"
 #include "set/function_set.hpp"
 #include "set/list_set.hpp"
 #include "set/curve.hpp"

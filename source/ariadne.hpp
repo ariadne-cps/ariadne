@@ -76,7 +76,7 @@ namespace Ariadne {
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "rendering/rendering_manager.hpp"
 #include "drawing/drawer_manager.hpp"
 // Cairo-specific interfaces are no longer part of the extracted rendering API.

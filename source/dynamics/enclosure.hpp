@@ -35,7 +35,7 @@
 #include "algebra/vector.hpp"
 #include "geometry/set_interface.hpp"
 #include "symbolic/identifier.hpp"
-#include "labelling/graphics_interface.hpp"
+#include "labelled/graphics_interface.hpp"
 #include "drawing/drawer_interface.hpp"
 
 #include "function/function_patch.hpp"

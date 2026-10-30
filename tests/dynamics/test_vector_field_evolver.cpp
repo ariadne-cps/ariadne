@@ -41,7 +41,7 @@
 #include "expression-set/expression_set.hpp"
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 
 #include "macro/testing.hpp"

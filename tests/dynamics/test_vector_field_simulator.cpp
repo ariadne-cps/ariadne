@@ -39,7 +39,7 @@
 #include "integration/integrator.hpp"
 #include "expression-set/expression_set.hpp"
 #include "dynamics/vector_field_simulator.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 #include "dynamics/orbit.hpp"
 

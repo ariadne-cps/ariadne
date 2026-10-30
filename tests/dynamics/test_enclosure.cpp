@@ -40,7 +40,7 @@
 #include "set/function_set.hpp"
 #include "integration/integrator.hpp"
 #include "expression-set/expression_set.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "drawing/drawer.hpp"
 #include "drawing/drawer_manager.hpp"
 #include "logging/logging.hpp"

@@ -32,7 +32,7 @@
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
 #include "set/function_set.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 #include "expression-set/expression_set.hpp"
 

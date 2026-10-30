@@ -22,10 +22,10 @@ high level, the intended direct dependencies are:
 
 ```text
 symbolic       -> kernel
-labelling      -> symbolic
+labelled      -> symbolic
 system         -> symbolic
 integration    -> kernel
-evolution      -> integration, system, labelling
+evolution      -> integration, system, labelled
 satisfiability -> symbolic
 analysis       -> evolution, satisfiability
 ariadne        -> analysis
@@ -33,11 +33,11 @@ ariadne        -> analysis
 
 Dependencies are exposed transitively. In particular:
 
-- `system`, `labelling`, and `satisfiability` obtain `kernel` through
+- `system`, `labelled`, and `satisfiability` obtain `kernel` through
   `symbolic`; they do not declare a direct `kernel` dependency.
-- `analysis` obtains `labelling` through `evolution`; it does not declare a
-  direct `labelling` dependency.
-- `system` must not depend on `labelling`, `evolution`, or `analysis`.
+- `analysis` obtains `labelled` through `evolution`; it does not declare a
+  direct `labelled` dependency.
+- `system` must not depend on `labelled`, `evolution`, or `analysis`.
 
 The high-level split is by responsibility rather than by the current
 `dynamics/` and `hybrid/` source directories:
@@ -101,19 +101,19 @@ standalone repository.
 - [ ] Propagate compatible dependency pins.
 - [ ] Get the full Ariadne integration CI green.
 
-## H1 - Establish the Labelling boundary
+## H1 - Establish the Labelled boundary
 
-`labelling` is a normal repository in the dependency DAG, not a transverse
-layer. Its responsibility is the generic labelling of concepts owned by
+`labelled` is a normal repository in the dependency DAG, not a transverse
+layer. Its responsibility is the generic labelled forms of concepts owned by
 `kernel`.
 
-- [ ] Move generic labelled forms of Kernel concepts into `labelling`.
+- [ ] Move generic labelled forms of Kernel concepts into `labelled`.
       Candidates include `LabelledPoint`, `LabelledSet`, `LabelledBox`,
       `LabelledInterval`, and other labelled wrappers of Geometry/Function
       concepts.
 - [ ] Classify `LabelledGrid`, `LabelledGridTreePaving`,
       `LabelledMapping`, labelled curves, and graphics-related labelled types
-      according to the same rule: they belong in `labelling` only when the
+      according to the same rule: they belong in `labelled` only when the
       underlying unlabelled concept is owned by `kernel`.
 - [ ] Keep `RealSpace`, variables, assignments, expressions, predicates,
       `VariablesPoint`, `VariablesBox`, and `RealVariablesBox` in
@@ -121,15 +121,15 @@ layer. Its responsibility is the generic labelling of concepts owned by
       around a Kernel object.
 - [ ] Split the current `symbolic/expression_set.hpp` responsibilities so that
       generic symbolic variable/domain machinery remains in `symbolic` while
-      `LabelledSet`/`LabelledBox`-style wrappers move to `labelling`.
-- [ ] Ensure `labelling` depends on `symbolic` and obtains `kernel`
+      `LabelledSet`/`LabelledBox`-style wrappers move to `labelled`.
+- [ ] Ensure `labelled` depends on `symbolic` and obtains `kernel`
       transitively through it.
 
 The naming rule is deliberately not "every class beginning with
-`Labelled` belongs to `labelling`". A thin labelled adaptation of a concept
+`Labelled` belongs to `labelled`". A thin labelled adaptation of a concept
 introduced by a higher repository stays with that concept.
 
-## H2 - Extract System without Labelling or upward dependencies
+## H2 - Extract System without Labelled or upward dependencies
 
 The `system` repository must describe what evolves without knowing how it is
 evolved or analysed.
@@ -149,7 +149,7 @@ evolved or analysed.
 - [ ] Keep system state-variable semantics expressed through `symbolic`
       concepts such as `RealSpace`, variables, assignments, and predicates.
 - [ ] Keep `DifferentialInclusion` input domains expressible with
-      `RealVariablesBox` without introducing a `labelling` dependency.
+      `RealVariablesBox` without introducing a `labelled` dependency.
 - [ ] Reduce `HybridSpace` to the system-level notion of locations mapped to
       `RealSpace`.
 - [ ] Move analysis-oriented `HybridSpace` aliases such as
@@ -158,7 +158,7 @@ evolved or analysed.
 - [ ] Remove indirect includes such as `hybrid_set_interface.hpp` from
       `HybridSpace` once those analysis responsibilities have moved.
 - [ ] Add a boundary check proving that System public headers do not include or
-      require `labelling`, `evolution`, or `analysis`.
+      require `labelled`, `evolution`, or `analysis`.
 
 ## H3 - Extract Evolution
 
@@ -175,7 +175,7 @@ that advance a system.
 - [ ] Keep `LabelledEnclosure` focused on labelling metadata and consistency
       around the numerical `Enclosure` operations; the numerical evolution
       logic remains in `Enclosure`.
-- [ ] Make the direct dependency `evolution -> labelling` explicit.
+- [ ] Make the direct dependency `evolution -> labelled` explicit.
 - [ ] Replace System-owned `EvolverType`/`EnclosureType` associations with
       evolution-owned traits or equivalent dispatch, e.g. an
       `EvolutionTraits<SYS>` mapping.
@@ -201,7 +201,7 @@ representations.
 - [ ] Move state-space analysis aliases currently stored in `HybridSpace` to
       analysis-owned traits.
 - [ ] Make `analysis -> evolution` and `analysis -> satisfiability` the
-      direct high-level dependencies; use the exposed `labelling` dependency
+      direct high-level dependencies; use the exposed `labelled` dependency
       inherited through `evolution` instead of adding a direct repository
       edge.
 
@@ -246,13 +246,13 @@ analysis:
 
 ## H6 - Enforce the high-level dependency contracts
 
-- [ ] Add public-header isolation tests for `labelling`, `system`,
+- [ ] Add public-header isolation tests for `labelled`, `system`,
       `evolution`, and `analysis`.
 - [ ] Add repository-level checks preventing `system` from acquiring a
-      `labelling`, `evolution`, or `analysis` dependency.
-- [ ] Verify that `system`, `labelling`, and `satisfiability` see
+      `labelled`, `evolution`, or `analysis` dependency.
+- [ ] Verify that `system`, `labelled`, and `satisfiability` see
       `kernel` only through the exposed `symbolic` dependency.
-- [ ] Verify that `analysis` receives `labelling` through `evolution` and
+- [ ] Verify that `analysis` receives `labelled` through `evolution` and
       does not add a direct dependency.
 - [ ] Check all dependency diamonds against the same-commit consistency rule
       described in `structure.md`.

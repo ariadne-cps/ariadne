@@ -49,7 +49,7 @@
 #include "set/affine_set.hpp"
 
 #include "rendering/figure.hpp"
-#include "labelling/figure.hpp"
+#include "labelled/figure.hpp"
 #include "paving/paver.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"

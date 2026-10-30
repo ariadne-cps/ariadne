@@ -1,4 +1,4 @@
-# Dependency order: labelling -> hybrid -> system -> evolution -> analysis.
+# Dependency order: labelled -> hybrid -> system -> evolution -> analysis.
 add_subdirectory(hybrid)
 add_subdirectory(system)
 add_subdirectory(evolution)

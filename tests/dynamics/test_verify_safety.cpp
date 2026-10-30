@@ -77,7 +77,7 @@ class TestVerifySafety
         RealVariable x("x");
         // A stationary state tests safety certification without the
         // cost of repeatedly evolving a two-dimensional oscillator.
-        SystemType sys({dot(x)=0});
+        SystemType sys(List<DottedRealAssignment>{dot(x)=0});
         cout << "Done building system\n";
         return sys;
     }

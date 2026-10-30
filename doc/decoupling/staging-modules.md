@@ -1,26 +1,42 @@
 # Staging of System, Evolution and Analysis
 
 The dependency graph of record is [structure.md](structure.md). This branch
-installs six direct external dependencies in `ss/`: `symbolic`,
-`integration`, `equation-solving`, `labelled`, `smt`, and `sat`.
-`configuration` is pinned directly in `ss/cfg`.
+pins five direct external code dependencies in `ss/`: `integration`,
+`equation-solving`, `labelled`, `smt`, and `sat`, plus the shared
+`configuration` submodule in `ss/cfg`. `symbolic` is transitive, not a
+direct Ariadne submodule.
 
 The old local source modules `function/`, `geometry/`, `solving/`,
 `symbolic/`, and `io/` were retired from `source/`. They are replaced by
 the appropriate external repositories and their transitive dependencies;
 there is deliberately no second local Symbolic implementation.
 
-The only remaining Ariadne-owned source modules are:
-- `dynamics/`, `hybrid/`: legacy holding areas for mixed responsibilities.
-- `system/`, `evolution/`, `analysis/`: empty staging module targets.
+The Ariadne-owned source layers and their responsibilities are:
 
-The intended repository dependencies (dependent -> provider) are:
+- `hybrid/`: fundamental hybrid representations, sets, paving, and graphics,
+  analogous to the representations supplied by `labelled`.
+- `system/`: system definitions, including discrete maps, vector fields,
+  differential inclusions, and hybrid automata.
+- `evolution/`: system evolution, including enclosures, evolvers, simulators,
+  and orbits.
+- `analysis/`: system analysis, including reachability and safety.
+- `dynamics/`: legacy source location for some evolution and analysis code
+  still awaiting physical relocation.
+
+The current source-layer target dependencies (dependent -> provider) are:
 
 ```text
+hybrid    -> labelled
+system    -> hybrid
+evolution -> system, integration, equation-solving
 analysis  -> evolution, smt, sat
-evolution -> system, integration, labelled, equation-solving
-system    -> symbolic
 ```
+
+As a transitional exception, `DiscreteEvent` is still defined in
+`source/system/discrete_event.hpp`, with a compatibility include in
+`source/hybrid`; its intended ownership is the hybrid representation layer.
+`DiscreteLocation` and `HybridSpace` already have canonical definitions in
+`source/hybrid`. All three are domain primitives, not system algorithms.
 
 ## Verification and migration blockers
 
@@ -28,19 +44,20 @@ system    -> symbolic
   Configuration, Symbolic, EquationSolving, Function, Cdcl, Bdd, Threading,
   and ConstraintSolving. These do not prove that legacy source headers are
   valid against the newly extracted repository APIs.
-- `source/dynamics` and `source/hybrid` continue to refer to old
-  `solving/` and `io/` headers. New upstream repositories place these APIs
-  under `integration/`, `equation-solving/`, `smt/`, `sat/`, and the
-  drawing/rendering chain. They cannot be assumed source-compatible.
+- Legacy sources may still refer to old `solving/` and `io/` headers. The
+  extracted repositories expose APIs through `integration/`,
+  `equation-solving/`, `smt/`, `sat/`, and the drawing/rendering chain.
+  Compile compatibility must be verified for each migrated source.
 - Existing Python aggregation, examples, tutorials, and packaging must be
   rewired for the repository structure; they are intentionally not configured
   as part of this staging pass.
-- The legacy object libraries are retained but have NOT been proven to build.
-  A passing CMake dependency consistency check is not a compile test.
-- Before extraction, classify every source file by responsibility, update all
-  includes, and compile public headers in isolation. Ensure `system` has no
-  includes or target linkage to `evolution`, `analysis`, or `labelled`.
-  Ensure `evolution` has no dependency on `analysis`.
+- Aggregate compilation and test CI were green for commit `25cfd9b` on
+  Ubuntu, macOS, Windows, Coverage, and Sanitizers. This does not prove
+  standalone public-header or module-boundary isolation.
+- Before further extraction, classify sources by responsibility, update
+  includes, and compile public headers in isolation. `system` may consume
+  `hybrid` and its transitive `labelled` representation API, but must not
+  depend on `evolution` or `analysis`; `evolution` must not depend on `analysis`.
 - Restore actual compile/test, Python bindings, install/consumer and CI checks
   only after the relevant source/API migrations are complete.
 

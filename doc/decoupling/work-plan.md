@@ -2,7 +2,7 @@
 
 Status: active  
 Base state: low-level chain through Algebra extracted and green  
-Last updated: 2026-10-13
+Last updated: 2026-10-30
 
 ## Established chain
 
@@ -17,39 +17,36 @@ from this active plan.
 
 ## Target repository structure
 
-The current target dependency graph is documented in `structure.md`. At the
-high level, the intended direct dependencies are:
+The current source-layer graph is described in `structure.md`. In Ariadne the
+responsibilities and dependency direction are:
 
 ```text
-symbolic       -> kernel
-labelled      -> symbolic
-system         -> symbolic
-integration    -> kernel
-evolution      -> integration, system, labelled
-satisfiability -> symbolic
-analysis       -> evolution, satisfiability
-ariadne        -> analysis
+hybrid    -> labelled
+system    -> hybrid
+evolution -> system, integration, equation-solving
+analysis  -> evolution, smt, sat
+ariadne   -> analysis
 ```
 
-Dependencies are exposed transitively. In particular:
+`hybrid`, `system`, `evolution`, and `analysis` are Ariadne-owned source modules.
+`labelled`, `integration`, `equation-solving`, `smt`, and `sat` are external
+repositories. Dependencies such as `symbolic` are obtained transitively.
 
-- `system`, `labelled`, and `satisfiability` obtain `kernel` through
-  `symbolic`; they do not declare a direct `kernel` dependency.
-- `analysis` obtains `labelled` through `evolution`; it does not declare a
-  direct `labelled` dependency.
-- `system` must not depend on `labelled`, `evolution`, or `analysis`.
+The ownership rule is semantic:
 
-The high-level split is by responsibility rather than by the current
-`dynamics/` and `hybrid/` source directories:
+- `hybrid` owns fundamental hybrid-domain representations, including
+  `DiscreteLocation`, `DiscreteEvent`, `HybridSpace`, hybrid sets, paving,
+  and graphics, just as `labelled` owns labelled geometric representations;
+- `system` defines systems: discrete maps, vector fields, differential
+  inclusions, and hybrid automata;
+- `evolution` owns how such systems evolve: enclosures, evolvers, simulators,
+  and orbit types, including their hybrid variants;
+- `analysis` owns how systems and their evolution are analysed: global
+  storage, reachability, safety certificates, and related algorithms.
 
-- `system` describes discrete maps, vector fields, differential inclusions,
-  hybrid automata, locations, events, and state spaces;
-- `evolution` contains enclosures, evolvers, simulators, and orbit types;
-- `analysis` contains global storage, reachability analysis, safety
-  certificates, and related algorithms.
-
-Hybrid types follow the same responsibility split instead of forming a
-standalone repository.
+`system` consumes `hybrid` but does not own hybrid primitives. `evolution` and
+`analysis` must not leak their algorithms into `system` or `hybrid`.
+Transitive access to `labelled` via `hybrid` is intentional.
 
 ## F1 - Remove accidental Function infrastructure dependencies
 
@@ -129,36 +126,33 @@ The naming rule is deliberately not "every class beginning with
 `Labelled` belongs to `labelled`". A thin labelled adaptation of a concept
 introduced by a higher repository stays with that concept.
 
-## H2 - Extract System without Labelled or upward dependencies
+## H2 - Extract System definitions above Hybrid
 
-The `system` repository must describe what evolves without knowing how it is
-evolved or analysed.
+`system` defines what a system is, not its evolution or analysis. The
+fundamental hybrid representation layer stays in `source/hybrid`.
 
-- [ ] Move the system-description classes from the current Dynamics and Hybrid
-      modules into `system`: `IteratedMap`, `VectorField`,
-      `DifferentialInclusion`, `HybridAutomaton`,
-      `HybridAutomatonInterface`, `DiscreteLocation`, `DiscreteEvent`,
-      `HybridSpace`, and directly related specification types.
+- [ ] Keep `DiscreteLocation`, `DiscreteEvent`, `HybridSpace`, and other
+      fundamental hybrid representations in `source/hybrid`, alongside
+      hybrid sets, paving, and graphics. Do not relocate them to `system`.
+- [ ] Consolidate system-definition classes in `source/system`:
+      `IteratedMap`, `VectorField`, `DifferentialInclusion`,
+      `HybridAutomaton`, `HybridAutomatonInterface`, and directly related
+      specification types.
 - [ ] Remove `EvolverType`, `EnclosureType`, and `StorageType` aliases from
       `IteratedMap`, `VectorField`, `DifferentialInclusion`, and
       `HybridAutomatonInterface`.
-- [ ] Remove corresponding forward declarations and includes of evolver,
-      enclosure, storage, and `Labelled*` types from System public headers.
-- [ ] Remove the unused `LabelledSet` forward declaration from
-      `vector_field.hpp`.
-- [ ] Keep system state-variable semantics expressed through `symbolic`
-      concepts such as `RealSpace`, variables, assignments, and predicates.
-- [ ] Keep `DifferentialInclusion` input domains expressible with
-      `RealVariablesBox` without introducing a `labelled` dependency.
-- [ ] Reduce `HybridSpace` to the system-level notion of locations mapped to
-      `RealSpace`.
-- [ ] Move analysis-oriented `HybridSpace` aliases such as
-      `BoundingDomainType`, set-interface aliases, and
-      `SetApproximationType` out of `system` and into analysis-side traits.
-- [ ] Remove indirect includes such as `hybrid_set_interface.hpp` from
-      `HybridSpace` once those analysis responsibilities have moved.
-- [ ] Add a boundary check proving that System public headers do not include or
-      require `labelled`, `evolution`, or `analysis`.
+- [ ] Keep evolution, enclosure, and storage implementations out of System
+      public headers. System may use lower-layer hybrid representations.
+- [ ] Express system state variables using symbolic concepts (`RealSpace`,
+      variables, assignments, and predicates); preserve
+      `DifferentialInclusion` input domains expressed through
+      `RealVariablesBox`.
+- [ ] Keep analysis-specific space traits and set-approximation choices in
+      `analysis`, without removing the hybrid sets and graphics owned by
+      `hybrid`.
+- [ ] Test that System public headers and targets do not depend on
+      `evolution` or `analysis`; its dependency on `hybrid` (and transitive
+      access to `labelled`) is allowed.
 
 ## H3 - Extract Evolution
 
@@ -175,7 +169,7 @@ that advance a system.
 - [ ] Keep `LabelledEnclosure` focused on labelling metadata and consistency
       around the numerical `Enclosure` operations; the numerical evolution
       logic remains in `Enclosure`.
-- [ ] Make the direct dependency `evolution -> labelled` explicit.
+- [ ] Use the `labelled` representation API exposed through `system -> hybrid`, without adding an unnecessary direct `evolution -> labelled` dependency.
 - [ ] Replace System-owned `EvolverType`/`EnclosureType` associations with
       evolution-owned traits or equivalent dispatch, e.g. an
       `EvolutionTraits<SYS>` mapping.
@@ -198,47 +192,46 @@ representations.
       `Storage` for the actual paving operations.
 - [ ] Replace System-owned `StorageType` associations with analysis-owned
       traits or equivalent dispatch, e.g. an `AnalysisTraits<SYS>` mapping.
-- [ ] Move state-space analysis aliases currently stored in `HybridSpace` to
-      analysis-owned traits.
-- [ ] Make `analysis -> evolution` and `analysis -> satisfiability` the
-      direct high-level dependencies; use the exposed `labelled` dependency
-      inherited through `evolution` instead of adding a direct repository
-      edge.
+- [ ] Keep state-space analysis aliases in analysis-owned traits rather than
+      introducing them into the core `HybridSpace` representation.
+- [ ] Keep `analysis -> evolution, smt, sat` as the high-level dependencies; use
+      `labelled` transitively through `evolution -> system -> hybrid`.
 
-## H5 - Reclassify current Dynamics and Hybrid source files
+## H5 - Classify source files by responsibility
 
-Before physically extracting repositories, classify every file currently under
-`source/dynamics` and `source/hybrid` by its target responsibility.
+Classify every file currently under `source/dynamics` and `source/hybrid`
+by the concept it implements, not by whether its name contains `Hybrid` or
+`Labelled`.
 
-- [ ] Produce a file/class inventory for `system`, `evolution`, and
-      `analysis`.
-- [ ] Treat "hybrid" as a variant within each responsibility rather than as a
-      target repository boundary.
-- [ ] Treat the `Labelled*` prefix as an implementation/API variant, not as a
-      repository selector: the owner is determined by the underlying concept.
-- [ ] Identify files that mix responsibilities and split them before moving
-      repositories.
-- [ ] Remove obsolete cross-module forwarding headers only after consumers have
-      migrated.
+- [ ] Produce a file/class inventory for `hybrid`, `system`, `evolution`,
+      and `analysis`.
+- [ ] Retain the core hybrid representations, sets, paving, and graphics
+      together in `source/hybrid`, analogously to `labelled`.
+- [ ] Move hybrid evolution and analysis algorithms to their respective
+      layers alongside continuous and discrete counterparts.
+- [ ] Identify and split files that mix responsibilities before extracting
+      any additional repositories.
+- [ ] Remove obsolete forwarding headers only after consumers migrate.
 
 The intended classification includes, at minimum:
 
 ```text
-system:
-    IteratedMap
-    VectorField
-    DifferentialInclusion
-    HybridAutomaton / HybridAutomatonInterface
+hybrid (representation layer):
     DiscreteLocation / DiscreteEvent
-    HybridSpace
+    HybridSpace / MonolithicHybridSpace
+    HybridConstraintSet / HybridBoundedConstraintSet
+    Hybrid sets, paving, and graphics
 
-evolution:
+system (system definitions):
+    IteratedMap / VectorField / DifferentialInclusion
+    HybridAutomaton / HybridAutomatonInterface
+
+evolution (evolution of systems):
     Enclosure / LabelledEnclosure / HybridEnclosure
     EvolverInterface and concrete evolvers
-    simulators
-    Orbit specialisations
+    Simulators and Orbit specialisations
 
-analysis:
+analysis (analysis of systems):
     Storage / LabelledStorage / HybridStorage
     ReachabilityAnalyser / HybridReachabilityAnalyser
     SafetyCertificate
@@ -248,10 +241,11 @@ analysis:
 
 - [ ] Add public-header isolation tests for `labelled`, `system`,
       `evolution`, and `analysis`.
-- [ ] Add repository-level checks preventing `system` from acquiring a
-      `labelled`, `evolution`, or `analysis` dependency.
-- [ ] Verify that `system`, `labelled`, and `satisfiability` see
-      `kernel` only through the exposed `symbolic` dependency.
+- [ ] Add repository-level checks preventing `system` from depending on
+      `evolution` or `analysis`; its lower-layer dependency on `hybrid`,
+      including transitive `labelled`, is intentional.
+- [ ] Verify that shared lower-level dependencies are reached transitively
+      and consistently through the repository DAG.
 - [ ] Verify that `analysis` receives `labelled` through `evolution` and
       does not add a direct dependency.
 - [ ] Check all dependency diamonds against the same-commit consistency rule

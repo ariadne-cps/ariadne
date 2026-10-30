@@ -13,9 +13,6 @@
 [submodule "labelling"]
 	path = ss/lab
 	url = https://github.com/ariadne-cps/labelling
-[submodule "symbolic"]
-	path = ss/sym
-	url = https://github.com/ariadne-cps/symbolic
 [submodule "configuration"]
 	path = ss/cfg
 	url = https://github.com/ariadne-cps/configuration

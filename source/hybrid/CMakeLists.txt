@@ -1,15 +1,12 @@
-set(LIBRARY_NAME ariadne-hybrid)
-
-# Transitional object library: hybrid automata and related types migrate in stages.
-add_library(${LIBRARY_NAME} OBJECT
+# Hybrid sets and spaces are an independent representation layer above labelling.
+add_library(ariadne-hybrid OBJECT
+    discrete_location.cpp
+    hybrid_constraint_set.cpp
+    hybrid_bounded_constraint_set.cpp
     hybrid_set.cpp
-    hybrid_set_orbit.cpp
     hybrid_set_adapters.cpp
     hybrid_paving.cpp
-    hybrid_enclosure.cpp
-    hybrid_simulator.cpp
-    hybrid_evolver.cpp
-    hybrid_reachability_analyser.cpp
     hybrid_graphics.cpp
 )
-target_link_libraries(${LIBRARY_NAME} PRIVATE ariadne-analysis)
+set_target_properties(ariadne-hybrid PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(ariadne-hybrid PUBLIC labelling)

@@ -162,16 +162,8 @@ class UnderspecifiedResetError : public UnderspecifiedSystemError {
 };
 
 //! \brief The discrete locations of a system are ill-defined in some way.
-class StateSpecificationError : public std::runtime_error {
-  public:
-    StateSpecificationError(const StringType& what) : std::runtime_error(what) { }
-};
+// Location specification errors belong to the hybrid domain.
 
-//! \brief Two discrete locations define different variables, but variables defined in both locations differ.
-class IndistinguishableLocationsError : public StateSpecificationError {
-  public:
-    IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
-};
 
 //! \brief A discrete location defines more variables than are needed to specify the discrete mode.
 //! \details Only relevant for a complete hybrid automaton,

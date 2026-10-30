@@ -54,8 +54,8 @@
 #include "geometry/box.hpp"
 
 #include "hybrid/hybrid_graphics_interface.hpp"
-#include "system/hybrid_constraint_set.hpp"
-#include "system/hybrid_bounded_constraint_set.hpp"
+#include "hybrid/hybrid_constraint_set.hpp"
+#include "hybrid/hybrid_bounded_constraint_set.hpp"
 
 namespace Ariadne {
 

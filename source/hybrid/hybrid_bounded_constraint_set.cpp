@@ -1,6 +1,6 @@
 // Mathematical operations on bounded symbolic hybrid sets.
 #include "config.hpp"
-#include "system/hybrid_bounded_constraint_set.hpp"
+#include "hybrid/hybrid_bounded_constraint_set.hpp"
 #include "set/function_set.hpp"
 #include "utility/stlio.hpp"
 

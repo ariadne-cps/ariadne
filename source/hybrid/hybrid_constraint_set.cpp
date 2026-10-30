@@ -7,7 +7,7 @@
 
 #include "function/functional.hpp"
 #include "config.hpp"
-#include "system/hybrid_constraint_set.hpp"
+#include "hybrid/hybrid_constraint_set.hpp"
 #include "set/function_set.hpp"
 #include "utility/stlio.hpp"
 

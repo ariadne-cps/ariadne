@@ -30,7 +30,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         "symbolic|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
-        "symbolic"
+        "labelling|expression-set|symbolic"
         "smt|symbolic"
         "labelling|expression-set|symbolic"
     )
@@ -41,7 +41,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Function CHAINS
         "integration|function"
         "equation-solving|function"
-        "symbolic|function"
+        "labelling|expression-set|symbolic|function"
     )
     require_same_dependency_commit(Cdcl CHAINS
         "smt|cdcl"
@@ -75,7 +75,7 @@ include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)
 
-# System definitions and the two remaining legacy object modules are Ariadne-owned.
+# The four ordered internal object modules are Ariadne-owned.
 # All other code is
 # provided by upstream submodules and their transitively exposed dependencies.
 # These transitional modules do not annotate exported symbols. On Windows,
@@ -89,8 +89,9 @@ else()
 endif()
 add_library(ariadne ${_ariadne_library_type}
     $<TARGET_OBJECTS:ariadne-system>
-    $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:ariadne-evolution>
+    $<TARGET_OBJECTS:ariadne-analysis>
 )
 
 # Collect dependency objects exactly once, preserving the standalone

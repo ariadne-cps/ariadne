@@ -30,7 +30,7 @@
 #define ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 
 #include "labelling/graphics_interface.hpp"
-#include "system/hybrid_drawable_interface.hpp"
+#include "hybrid/hybrid_drawable_interface.hpp"
 
 namespace Ariadne {
 

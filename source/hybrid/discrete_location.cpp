@@ -22,8 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "system/discrete_location.hpp"
-#include "system/hybrid_automaton_interface.hpp"
+#include "hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 

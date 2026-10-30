@@ -1,8 +1,5 @@
 # Resolve by the logical repository names from .gitmodules, rather than
 # assuming a particular submodule checkout path in lower repositories.
-if(NOT TARGET symbolic)
-    ariadne_add_submodule(symbolic)
-endif()
 if(NOT TARGET integration)
     ariadne_add_submodule(integration)
 endif()

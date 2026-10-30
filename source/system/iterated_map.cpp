@@ -33,12 +33,10 @@
 #include "function/function.hpp"
 #include "function/constraint.hpp"
 #include "symbolic/assignment.hpp"
-#include "dynamics/enclosure.hpp"
-#include "dynamics/orbit.hpp"
 
 #include "logging/logging.hpp"
 
-#include "dynamics/iterated_map.hpp"
+#include "system/iterated_map.hpp"
 
 
 namespace Ariadne {

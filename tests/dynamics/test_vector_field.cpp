@@ -36,6 +36,7 @@
 #include "geometry/box.hpp"
 #include "set/list_set.hpp"
 #include "expression-set/expression_set.hpp"
+#include "system/vector_field.hpp"
 #include "dynamics/vector_field.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
 

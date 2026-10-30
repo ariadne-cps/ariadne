@@ -32,6 +32,7 @@
 #include "function/symbolic_function.hpp"
 #include "set/function_set.hpp"
 
+#include "system/differential_inclusion.hpp"
 #include "dynamics/differential_inclusion.hpp"
 
 

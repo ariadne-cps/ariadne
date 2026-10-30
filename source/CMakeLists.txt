@@ -1,5 +1,5 @@
-# The legacy dynamics and hybrid directories remain staged until their
-# files can be allocated to system, evolution, and analysis.
+# System definitions are compiled in ariadne-system. The remaining dynamics
+# and hybrid object modules are staged for extraction into evolution/analysis.
 add_subdirectory(system)
 add_subdirectory(evolution)
 add_subdirectory(analysis)

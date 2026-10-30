@@ -1,8 +1,7 @@
 set(LIBRARY_NAME ariadne-hybrid)
 
-# Transitional object library: files currently mix system/evolution/analysis.
+# Transitional object library: hybrid automata and related types migrate in stages.
 add_library(${LIBRARY_NAME} OBJECT
-    discrete_location.cpp
     hybrid_set.cpp
     hybrid_paving.cpp
     hybrid_enclosure.cpp

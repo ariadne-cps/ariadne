@@ -75,7 +75,8 @@ include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)
 
-# Only the two legacy object modules are Ariadne-owned. All other code is
+# System definitions and the two remaining legacy object modules are Ariadne-owned.
+# All other code is
 # provided by upstream submodules and their transitively exposed dependencies.
 # These transitional modules do not annotate exported symbols. On Windows,
 # a DLL with no exports does not produce the import library needed by the
@@ -87,6 +88,7 @@ else()
     set(_ariadne_library_type SHARED)
 endif()
 add_library(ariadne ${_ariadne_library_type}
+    $<TARGET_OBJECTS:ariadne-system>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )

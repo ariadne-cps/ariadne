@@ -33,14 +33,11 @@
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"
-#include "dynamics/enclosure.hpp"
-#include "dynamics/orbit.hpp"
 
-#include "integration/integrator.hpp"
 
 #include "logging/logging.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "system/vector_field.hpp"
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"

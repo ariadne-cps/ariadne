@@ -41,6 +41,7 @@
 #include "dynamics/orbit.hpp"
 #include "geometry/box.hpp"
 #include "set/list_set.hpp"
+#include "system/iterated_map.hpp"
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
 #include "labelling/figure.hpp"

@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "differential_inclusion.hpp"
+#include "system/differential_inclusion.hpp"
 
 #include <limits>
 #include "expression-set/expression_set.hpp"

@@ -36,7 +36,7 @@
 #include <map>
 
 #include "function/function.hpp"
-#include "system/discrete_location.hpp"
+#include "hybrid/discrete_location.hpp"
 #include "system/discrete_event.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/expression.hpp"

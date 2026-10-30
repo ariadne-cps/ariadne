@@ -35,7 +35,7 @@
 #include "symbolic/space.hpp"
 #include "function/function.hpp"
 
-#include "system/hybrid_space.hpp"
+#include "hybrid/hybrid_space.hpp"
 
 #include "system/hybrid_automaton-composite.hpp"
 

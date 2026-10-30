@@ -1,4 +1,0 @@
-#ifndef ARIADNE_COMPAT_SYSTEM_HYBRID_BOUNDED_CONSTRAINT_SET_HPP
-#define ARIADNE_COMPAT_SYSTEM_HYBRID_BOUNDED_CONSTRAINT_SET_HPP
-#include "hybrid/hybrid_bounded_constraint_set.hpp"
-#endif

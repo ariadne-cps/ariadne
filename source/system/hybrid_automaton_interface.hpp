@@ -32,7 +32,7 @@
 #include <cassert>
 #include "function/function.hpp"
 #include "system/discrete_event.hpp"
-#include "system/discrete_location.hpp"
+#include "hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 

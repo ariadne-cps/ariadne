@@ -1,4 +1,0 @@
-#ifndef ARIADNE_COMPAT_SYSTEM_HYBRID_DRAWABLE_INTERFACE_HPP
-#define ARIADNE_COMPAT_SYSTEM_HYBRID_DRAWABLE_INTERFACE_HPP
-#include "hybrid/hybrid_drawable_interface.hpp"
-#endif

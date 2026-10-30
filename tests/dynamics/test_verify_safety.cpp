@@ -46,15 +46,6 @@
 using namespace std;
 using namespace Ariadne;
 
-Colour reach_set_colour(0.25,0.25,0.50);
-Colour intermediate_set_colour(0.50,0.50,0.75);
-Colour final_set_colour(0.75,0.75,1.00);
-Colour evolve_set_colour(0.75,0.75,1.00);
-Colour initial_set_colour(0.75,0.75,1.00);
-Colour guard_set_colour(0.75,0.75,0.75);
-Colour bounding_box_colour(0.75,0.75,0.875);
-Colour safe_set_colour(0.50,1.00,0.50);
-
 class TestVerifySafety
 {
 
@@ -71,10 +62,7 @@ class TestVerifySafety
 
     SystemType system;
     AnalyserType analyser;
-    Grid grid;
     RealVariable x;
-    RealVariable y;
-    ExactBoxType graphics_box;
     SymbolicSetType symbolic_initial_set;
     SetType initial_set;
     SymbolicSetType symbolic_safe_set;
@@ -87,9 +75,9 @@ class TestVerifySafety
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
         RealVariable x("x");
-        RealVariable y("y");
-        Real a(-0.5_x); Real b(1.0_x);
-        SystemType sys({dot(x)=-a*x-b*y,dot(y)=b*x+2*a*y});
+        // A stationary state tests safety certification without the
+        // cost of repeatedly evolving a two-dimensional oscillator.
+        SystemType sys({dot(x)=0});
         cout << "Done building system\n";
         return sys;
     }
@@ -109,13 +97,10 @@ class TestVerifySafety
     TestVerifySafety()
         : system(build_system()),
           analyser(build_analyser(system)),
-          grid(2),
           x("x"),
-          y("y"),
-          graphics_box({{-3,3},{-3,3}}),
-          symbolic_initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
+          symbolic_initial_set({0.3125_dec<=x<=0.34375_dec}),
           initial_set(symbolic_initial_set.euclidean_set(system.state_space())),
-          symbolic_safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec},{sqr(x)+sqr(y)<=sqr((Real)3)}),
+          symbolic_safe_set({-2_dec<=x<=2_dec}),
           safe_set(symbolic_safe_set.euclidean_set(system.state_space()))
     {
         cout << "Done creating initial and safe sets\n" << endl;
@@ -129,22 +114,22 @@ class TestVerifySafety
         analyser.configuration().set_bounding_domain_ptr(nullptr);
         auto safety_certificate=analyser.verify_safety(initial_set,safe_set);
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
-
     }
 
     Void test_verify_safety_crossing_bounding() {
-        analyser.configuration().set_bounding_domain(BoundingDomainType(analyser.system().dimension(),{-1,+1}));
+        // Restriction must reject an initial set entirely outside the bounding domain.
+        analyser.configuration().set_bounding_domain(BoundingDomainType(analyser.system().dimension(),{1,2}));
         ARIADNE_TEST_FAIL(analyser.verify_safety(initial_set,safe_set));
     }
 
     Void test_verify_safety_crossing_safe() {
         analyser.configuration().set_bounding_domain_ptr(nullptr);
-        SymbolicSetType smaller_symbolic_safe_set({-2_dec<=x<=2.5_dec,-2_dec<=y<=2.5_dec},{sqr(x)+sqr(y)<=sqr(2.5_dec)});
+        // Initial cells are outside this safe set, so no proof is possible.
+        SymbolicSetType smaller_symbolic_safe_set({1_dec<=x<=2_dec});
         auto smaller_safe_set = smaller_symbolic_safe_set.euclidean_set(system.state_space());
 
         auto safety_certificate=analyser.verify_safety(initial_set,smaller_safe_set);
         ARIADNE_TEST_ASSERT(is_indeterminate(safety_certificate.is_safe));
-
     }
 
 

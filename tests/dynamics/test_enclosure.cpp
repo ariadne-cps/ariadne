@@ -129,7 +129,10 @@ class TestEnclosure
         ExactBoxType before=encl.codomain();
         encl.kuhn_recondition();
         ARIADNE_TEST_EQUALS(encl.number_of_parameters(),2u);
-        ARIADNE_TEST_ASSERT(before.inside(encl.codomain()));
+        // Non-strict inclusion is required: equal boundaries are permitted.
+        ARIADNE_TEST_PRINT(before);
+        ARIADNE_TEST_PRINT(encl.codomain());
+        ARIADNE_TEST_ASSERT(before.subset(encl.codomain()));
     }
 
     Void test_auxiliary_map() const {

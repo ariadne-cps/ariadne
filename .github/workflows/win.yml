@@ -76,11 +76,11 @@ jobs:
           New-Item -ItemType Directory -Force -Path $output | Out-Null
           $commands = Join-Path $output 'exceptions.dbg'
           @'
-          sxe -c ".echo === C++ exception first chance ===; kP; gn" eh
-          sxe -c ".echo === Access violation ===; .ecxr; kP; q" av
+          sxd eh
+          sxe -c ".echo === Access violation ===; r; kP; !analyze -v; .frame /r 1; dv /t; q" av
           g
           '@ | Set-Content -Path $commands -Encoding ascii
-          foreach ($test in @('test_infinite_time_reachability', 'test_hybrid_reachability')) {
+          foreach ($test in @('test_hybrid_set', 'test_hybrid_reachability')) {
             $exe = Get-ChildItem -Path build -Recurse -File -Filter "$test.exe" | Select-Object -First 1
             if (-not $exe) { Write-Warning "Missing executable: $test"; continue }
             $log = Join-Path $output "$test.log"

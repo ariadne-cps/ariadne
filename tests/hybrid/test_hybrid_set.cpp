@@ -143,6 +143,10 @@ public:
         Dyadic radius=1/pow(two,6);
         HybridBoundedConstraintSet initial(loc,
             {height-radius<=x<=height+radius,-radius<=v<=radius});
+        // Probe the effective Euclidean interface before the paving call.
+        const auto euclidean=initial.euclidean_set(loc,state_space);
+        ARIADNE_TEST_EQUALS(euclidean.dimension(),2u);
+        ARIADNE_TEST_PRINT(euclidean.bounding_box());
         HybridGridTreePaving paving{HybridGrid(hybrid_space)};
         paving.adjoin_outer_approximation(initial,4u);
         ARIADNE_TEST_ASSERT(paving.nontrivial_location(loc));

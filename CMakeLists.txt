@@ -27,7 +27,6 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         "smt|configuration"
         "sat|configuration"
         "labelled|configuration"
-        "symbolic|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
         "labelled|expression-set|symbolic"
@@ -97,7 +96,7 @@ add_library(ariadne ${_ariadne_library_type}
 # Collect dependency objects exactly once, preserving the standalone
 # repositories' aggregate interface and avoiding duplicate object linkage.
 set(_ariadne_external_objects)
-foreach(_dependency integration equation_solving smt sat labelled symbolic)
+foreach(_dependency integration equation_solving smt sat labelled)
     get_target_property(_objects ${_dependency} ARIADNE_PROJECT_OBJECT_TARGETS)
     if(_objects)
         list(APPEND _ariadne_external_objects ${_objects})

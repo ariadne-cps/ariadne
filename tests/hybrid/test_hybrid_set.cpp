@@ -147,6 +147,23 @@ public:
         const auto euclidean=initial.euclidean_set(loc,state_space);
         ARIADNE_TEST_EQUALS(euclidean.dimension(),2u);
         ARIADNE_TEST_PRINT(euclidean.bounding_box());
+        // Exercise each abstract view of the same multiply inherited
+        // object. This used to dispatch via incompatible covariant thunks
+        // on MSVC Debug, before reaching the paving implementation.
+        const HybridSetInterfaceBase& as_base=initial;
+        const EffectiveHybridBoundedSetInterface& as_bounded=initial;
+        const EffectiveHybridClosedSetInterface& as_closed=initial;
+        const EffectiveHybridCompactSetInterface& as_compact=initial;
+        const EffectiveHybridLocatedSetInterface& as_located=initial;
+        const EffectiveHybridSetInterface& as_full=initial;
+        ARIADNE_TEST_EQUALS(as_base.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_bounded.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_closed.euclidean_set(loc,state_space).dimension(),2u);
+        auto from_compact=as_compact.euclidean_set(loc,state_space);
+        ARIADNE_TEST_EQUALS(from_compact.dimension(),2u);
+        ARIADNE_TEST_EQUAL(from_compact.bounding_box(),euclidean.bounding_box());
+        ARIADNE_TEST_EQUALS(as_located.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_full.euclidean_set(loc,state_space).dimension(),2u);
         HybridGridTreePaving paving{HybridGrid(hybrid_space)};
         paving.adjoin_outer_approximation(initial,4u);
         ARIADNE_TEST_ASSERT(paving.nontrivial_location(loc));

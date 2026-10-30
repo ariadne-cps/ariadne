@@ -239,7 +239,7 @@ RealSpace HybridBoxSet::space(DiscreteLocation loc) const {
     ARIADNE_ASSERT(this->location()==loc);
     return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
 }
-EffectiveEuclideanSetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation, RealSpace) const {
+EuclideanSetInterfaceBase* HybridBoxSet::_euclidean_set(DiscreteLocation, RealSpace) const {
     ARIADNE_NOT_IMPLEMENTED; // FIXME: Box does not inherit from SetInterface...
 }
 
@@ -356,7 +356,7 @@ ConstraintSet const HybridConstraintSet::euclidean_set(DiscreteLocation loc, Rea
     return ConstraintSet(this->_sets[loc].euclidean_set(spc));
 }
 
-EffectiveEuclideanRegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+EuclideanSetInterfaceBase* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
@@ -451,7 +451,7 @@ BoundedConstraintSet const HybridBoundedConstraintSet::euclidean_set(DiscreteLoc
     return BoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
 }
 
-BoundedConstraintSet* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+EuclideanSetInterfaceBase* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     return new BoundedConstraintSet(this->euclidean_set(loc,spc));
 }
 

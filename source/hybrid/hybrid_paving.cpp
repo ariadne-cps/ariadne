@@ -134,17 +134,7 @@ Void HybridGridTreePaving::adjoin_outer_approximation(const EffectiveHybridCompa
             _loc_iter!=hlocs.end(); ++_loc_iter) {
         DiscreteLocation loc=*_loc_iter;
         RealSpace spc=this->space(loc);
-        if(const auto* bounded=dynamic_cast<const HybridBoundedConstraintSet*>(&hs)) {
-            // MSVC Debug may dispatch the covariant _euclidean_set() override
-            // through an incompatible vftable when called on a hybrid compact
-            // interface. Use the concrete conversion, retaining all constraints,
-            // rather than approximating only the initial bounding box.
-            BoundedConstraintSet euclidean=bounded->euclidean_set(loc,spc);
-            const EffectiveEuclideanCompactSetInterface& compact=euclidean;
-            this->_provide_location(loc).adjoin_outer_approximation(compact,fineness);
-        } else {
-            this->_provide_location(loc).adjoin_outer_approximation(hs.euclidean_set(loc,spc),fineness);
-        }
+        this->_provide_location(loc).adjoin_outer_approximation(hs.euclidean_set(loc,spc),fineness);
     }
 }
 

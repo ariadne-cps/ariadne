@@ -317,7 +317,7 @@ class HybridValidatedConstrainedImageSet
 
     friend OutputStream& operator<<(OutputStream& os, const HybridValidatedConstrainedImageSet& hset) { return os << static_cast<const Base&>(hset); }
   protected:
-    virtual ValidatedConstrainedImageSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override {
+    virtual EuclideanSetInterfaceBase* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override {
         static_cast<void>(loc);
         static_cast<void>(spc);
         ARIADNE_ASSERT(loc==this->location());

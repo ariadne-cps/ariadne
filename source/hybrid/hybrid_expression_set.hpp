@@ -112,7 +112,7 @@ class HybridBoxSet
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   private:
     virtual HybridBoxSet* clone() const override;
-    virtual EffectiveEuclideanSetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
+    virtual EuclideanSetInterfaceBase* _euclidean_set(DiscreteLocation, RealSpace) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -196,7 +196,7 @@ class HybridConstraintSet
 
     virtual OutputStream& _write(OutputStream& os) const override;
   protected:
-    virtual EffectiveEuclideanRegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    virtual EuclideanSetInterfaceBase* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -248,7 +248,7 @@ class HybridBoundedConstraintSet
     virtual OutputStream& _write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   protected:
-    virtual BoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    virtual EuclideanSetInterfaceBase* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
 
 } // namespace Ariadne

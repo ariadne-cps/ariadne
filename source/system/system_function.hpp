@@ -8,9 +8,6 @@
 
 namespace Ariadne {
 
-//! Order algebraic assignments by dependencies, rejecting algebraic loops.
-List<RealAssignment> algebraic_sort(List<RealAssignment> const&);
-
 //! Shared symbolic constructors for continuous, discrete and hybrid systems.
 EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const&, List<RealAssignment> const&);
 EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const&, List<RealAssignment> const&, List<DottedRealAssignment> const&);

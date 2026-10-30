@@ -24,30 +24,15 @@
 
 #include "function/functional.hpp"
 #include "config.hpp"
-
 #include "hybrid/hybrid_expression_set.hpp"
 #include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_storage.hpp"
-
 #include "numeric/real.hpp"
 #include "numeric/casts.hpp"
-
+#include "numeric/rounding.hpp"
 #include "expression-set/expression_set.hpp"
 #include "set/function_set.hpp"
-
 #include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "rendering/figure.hpp"
-#include "drawing/geometry_draw.hpp"
-#include "labelling/figure.hpp"
-#include "hybrid/hybrid_graphics.hpp"
-#include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"
-#include "labelling/graphics_interface.hpp"
-#include "set/function_set.hpp"
 
 namespace Ariadne {
 
@@ -65,135 +50,6 @@ HybridExactBox over_approximation(HybridRealBox const& hbx) {
     return HybridExactBox(hbx.location(),hbx.space(),over_approximation(hbx.euclidean_set()));
 }
 
-
-Orbit<HybridApproximatePoint>::Orbit(const HybridApproximatePoint& hpt)
-    : _curves_ptr(new List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
-{ }
-
-Orbit<HybridApproximatePoint>::Orbit(List<HybridInterpolatedCurve> hcrvs)
-    : _curves_ptr(new List<HybridInterpolatedCurve>(std::move(hcrvs)))
-{ }
-
-SizeType
-Orbit<HybridApproximatePoint>::size() const
-{
-    return this->_curves_ptr->size();
-}
-
-const InterpolatedCurve&
-Orbit<HybridApproximatePoint>::curve(Nat m) const
-{
-    return (*this->_curves_ptr)[m].euclidean_set();
-}
-
-Void
-Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoint& hpt)
-{
-    ARIADNE_ASSERT(ht.discrete_time()<=this->size());
-    Real time=ht.continuous_time();
-    FloatDP flt_time=cast_exact(time.get(dp));
-    if(this->size()==ht.discrete_time()) {
-        this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
-    } else {
-        (*this->_curves_ptr)[static_cast<unsigned int>(ht.discrete_time().get_si())].euclidean_set().insert(flt_time,hpt.point());
-    }
-}
-
-Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
-    const Orbit<HybridApproximatePoint>& orbit=*this;
-    for(SizeType i=0; i!=orbit._curves_ptr->size(); ++i) {
-        HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
-        if(locations.empty() || locations.contains(hcurve.location())) {
-            RealSpace const& space=hcurve.space();
-            if(valid_axis_variables(space,axes)) {
-                Ariadne::draw(canvas,projection(space,axes),hcurve.euclidean_set());
-            }
-        }
-    }
-}
-
-Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint>& vhpt)
-    : _curves_ptr(new Vector(vhpt.size(), List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(0).location(),vhpt.at(0).space(),InterpolatedCurve(0,vhpt.at(0).point())))))
-{
-    for(SizeType i=1; i<vhpt.size(); i++)
-    {
-        this->_curves_ptr->at(i) = List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(i).location(),vhpt.at(i).space(),InterpolatedCurve(0,vhpt.at(i).point())));
-    }
-}
-
-SizeType
-Orbit<Vector<HybridApproximatePoint>>::size(SizeType setNumber)
-{
-    return this->_curves_ptr->at(setNumber).size();
-}
-
-Void
-Orbit<Vector<HybridApproximatePoint>>::insert(HybridTime ht, const HybridApproximatePoint& hpt, SizeType setNumber)
-{
-    ARIADNE_ASSERT(ht.discrete_time()<=this->size(setNumber));
-    Real time=ht.continuous_time();
-    FloatDP flt_time=cast_exact(time.get(dp));
-    if(this->size(setNumber)==ht.discrete_time()) {
-        this->_curves_ptr->at(setNumber).push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
-    } else {
-        this->_curves_ptr->at(setNumber)[static_cast<unsigned int>(ht.discrete_time().get_si())].euclidean_set().insert(flt_time,hpt.point());
-    }
-}
-
-const InterpolatedCurve&
-Orbit<Vector<HybridApproximatePoint>>::curve(Nat setNumber, Nat step)
-{
-    return this->_curves_ptr->at(setNumber)[step].euclidean_set();
-}
-
-Void
-Orbit<Vector<HybridApproximatePoint>>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
-    const Orbit<Vector<HybridApproximatePoint>>& orbit=*this;
-    for(SizeType i=0; i<orbit._curves_ptr->size(); i++)
-    {
-        for(SizeType j=0; j!=orbit._curves_ptr->at(i).size(); ++j) {
-            HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i).at(j);
-            if(locations.empty() || locations.contains(hcurve.location())) {
-                RealSpace const& space=hcurve.space();
-                if(valid_axis_variables(space,axes)) {
-                    Ariadne::draw(canvas,projection(space,axes),hcurve.euclidean_set());
-                }
-            }
-        }
-    }
-}
-
-
-
-template<>
-OutputStream&
-operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
-{
-    return os << orb.curves();
-}
-
-
-
-
-Void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-    this->reach().draw(c,l,v);
-}
-
-Void Orbit<HybridStorage>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-    this->reach().draw(c,l,v);
-}
-
-template<>
-OutputStream&
-operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
-{
-    os << "Orbit(\n  initial=" << orb.initial()
-       << "\n  intermediate=" << orb.intermediate()
-       << "\n  reach=" << orb.reach()
-       << "\n  final=" << orb.final()
-       << ")\n";
-    return os;
-}
 
 /*
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& x)
@@ -282,17 +138,6 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
 OutputStream& HybridBoxSet::_write(OutputStream& os) const {
     return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);
 }
-Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
-    if(qs.empty() || qs.contains(this->location())) {
-        RealSpace spc(List<RealVariable>(this->variables()));
-        Projection2d prj(spc.dimension(),spc.index(vs.x()),spc.index(vs.y()));
-        Ariadne::draw(c,prj,this->euclidean_set(spc));
-    }
-}
-
-
-
-
 HybridUpperBoxes HybridValidatedConstrainedImageSet::bounding_box() const {
     return this->Base::bounding_boxes();
 }
@@ -517,17 +362,6 @@ OutputStream& HybridBoundedConstraintSet::_write(OutputStream& os) const {
     return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 
-Void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
-    for(auto loc : this->locations()) {
-        if(q.empty() || q.contains(loc)) {
-            Set<RealVariable> variables=this->variables(loc);
-            RealSpace space(List<RealVariable>(variables.begin(),variables.end()));
-            Ariadne::draw(c,projection(space,p),this->euclidean_set(loc,space));
-        }
-    }
-}
-
-
 HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const HybridConstraintSet& hcs) {
     HybridBoundedConstraintSet res;
     for(auto loc : hbxs.locations()) {
@@ -540,51 +374,6 @@ HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const Hybrid
     }
     return res;
 }
-
-template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const {
-    if(this->space()==paving.space(this->location())) {
-        paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),fineness);
-    } else {
-        ARIADNE_FAIL_MSG("HybridSet's state variables "<<this->space()<<
-                         " do not match variables "<<paving.space()<<" of paving in location "<<this->location());
-    }
-}
-
-
-template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
-{
-    if(set.location()==location) {
-        Projection2d projection(set.euclidean_set().dimension(),set.space().index(axes.x()),set.space().index(axes.y()));
-        Ariadne::draw(canvas,projection,set.euclidean_set());
-    }
-}
-
-template<class EBS> Void HybridBasicSet<EBS>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
-{
-    for (auto loc : locations) {
-        draw_hybrid_basic_set(canvas,loc,axes,*this);
-    }
-}
-
-
-template<class IVL> Void HybridBox<IVL>::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& p) const {
-    DiscreteLocation const& q=this->location();
-    if(qs.empty() || qs.contains(q)) {
-        Ariadne::draw_hybrid_basic_set(c,q,p,static_cast<HybridBasicSet<Box<IVL>>const&>(*this));
-    }
-}
-
-template<class IVL> Void HybridBoxes<IVL>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
-    for(auto loc_iter=this->begin(); loc_iter!=this->end(); ++loc_iter) {
-        if(locations.empty() || locations.contains(loc_iter->first)) {
-            RealSpace const& space=this->space(loc_iter->first);
-            Projection2d projection(space.dimension(),space.index(axis_variables.x()),space.index(axis_variables.y()));
-            Ariadne::draw(canvas,projection,loc_iter->second.euclidean_set());
-        }
-    }
-}
-
-
 
 template<class DS, class HBS>
 HybridSpaceSetConstIterator<DS,HBS>::
@@ -621,24 +410,9 @@ template<> String class_name<UpperBoxType>() { return "UpperFloatDPBox"; }
 template<> String class_name<GridCell>() { return "GridCell"; }
 
 
-// Instantiations
+// Instantiations of mathematical hybrid points.
 template class HybridPoint<FloatDPApproximation>;
 template class HybridPoint<Real>;
-
-template class HybridBasicSet<ExactBoxType>;
-template class HybridBox<ExactIntervalType>;
-template class HybridBoxes<ExactIntervalType>;
-
-template class HybridBasicSet<UpperBoxType>;
-template class HybridBox<UpperIntervalType>;
-template class HybridBoxes<UpperIntervalType>;
-
-template class HybridBox<RealInterval>;
-
-// The drawable interface delegates to this out-of-line template member.
-template Void HybridBasicSet<ValidatedConstrainedImageSet>::draw(
-    CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
-
 
 template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;
 

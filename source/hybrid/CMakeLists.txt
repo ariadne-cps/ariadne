@@ -3,6 +3,8 @@ set(LIBRARY_NAME ariadne-hybrid)
 # Transitional object library: hybrid automata and related types migrate in stages.
 add_library(${LIBRARY_NAME} OBJECT
     hybrid_set.cpp
+    hybrid_set_orbit.cpp
+    hybrid_set_adapters.cpp
     hybrid_paving.cpp
     hybrid_enclosure.cpp
     hybrid_simulator.cpp

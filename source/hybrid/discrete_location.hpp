@@ -32,6 +32,8 @@
 #include <string>
 #include <stdexcept>
 #include "utility/container.hpp"
+// symbolic/variable.hpp instantiates conversions involving Real; define it first.
+#include "numeric/real.hpp"
 #include "symbolic/valuation.hpp"
 
 namespace Ariadne {

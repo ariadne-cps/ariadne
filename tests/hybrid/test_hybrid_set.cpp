@@ -147,7 +147,10 @@ public:
         paving.adjoin_outer_approximation(initial,4u);
         ARIADNE_TEST_ASSERT(paving.nontrivial_location(loc));
         ARIADNE_TEST_ASSERT(paving.size()>0u);
-        ExactBoxType initial_box=initial.euclidean_set(loc,state_space).domain();
+        // The domain is a RealBox; use an outward enclosure before
+        // converting to an exact box for the paving containment check.
+        const HybridUpperBoxes bounds=initial.bounding_box();
+        ExactBoxType initial_box=cast_exact_box(bounds.euclidean_set(loc,state_space));
         ARIADNE_TEST_ASSERT(paving.euclidean_set(loc).superset(initial_box));
     }
 

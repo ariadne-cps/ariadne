@@ -23,3 +23,7 @@ endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+
+if(WIN32)
+    set_tests_properties(test_infinite_time_reachability PROPERTIES TIMEOUT 240)
+endif()

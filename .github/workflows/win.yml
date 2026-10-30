@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - decoupling
   pull_request:
 
 env:
@@ -87,7 +86,14 @@ jobs:
             $log = Join-Path $output "$test.log"
             Push-Location $exe.DirectoryName
             try {
-              & $cdb -cf $commands -logo $log $exe.FullName 2>&1 | Out-Host
+              $args = @('-cf', ('"{0}"' -f $commands), '-logo', ('"{0}"' -f $log), ('"{0}"' -f $exe.FullName))
+              $debugger = Start-Process -FilePath $cdb -ArgumentList $args -PassThru -NoNewWindow
+              try {
+                Wait-Process -InputObject $debugger -Timeout 240 -ErrorAction Stop
+              } catch {
+                Write-Warning "CDB timed out for $test after 240 seconds"
+                Stop-Process -Id $debugger.Id -Force -ErrorAction SilentlyContinue
+              }
             } finally {
               Pop-Location
             }

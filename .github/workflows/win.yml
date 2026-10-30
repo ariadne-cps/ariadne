@@ -53,57 +53,13 @@ jobs:
             -DBUILD_PYTHON_BINDINGS=OFF `
             -DWARNINGS_AS_ERRORS=ON
 
-      - name: Build Ariadne and legacy dynamics/hybrid tests
-        run: |
-          cmake --build build --parallel --target ariadne
-          cmake --build build --parallel --target tests
+      - name: Build Ariadne
+        run: cmake --build build --parallel --target ariadne
+
+      - name: Build C++ tests (Debug only)
+        if: matrix.build_type == 'Debug'
+        run: cmake --build build --parallel --target tests
 
       - name: Test legacy dynamics/hybrid C++
         if: matrix.build_type == 'Debug'
         run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure --timeout 240
-
-      - name: Capture CDB stacks for failing Windows x64 Debug tests
-        if: failure() && matrix.build_type == 'Debug' && matrix.config.arch == 'x64'
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          $cdb = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\Debuggers\x64\cdb.exe'
-          if (-not (Test-Path $cdb)) {
-            Write-Warning "cdb.exe not installed on this Windows runner"
-            exit 0
-          }
-          $output = Join-Path $env:GITHUB_WORKSPACE 'windows-debug-stacks'
-          New-Item -ItemType Directory -Force -Path $output | Out-Null
-          $commands = Join-Path $output 'exceptions.dbg'
-          @'
-          sxd eh
-          sxe -c ".echo === Access violation ===; r; kP; .echo === Faulting call instruction ===; ub poi(@rsp) L20; u poi(@rsp) L4; .echo === Potential dispatch table ===; dps @rdx L12; .echo === Effective object ===; dps @rcx L6; !analyze -v; .frame /r 1; dv /t; q" av
-          g
-          '@ | Set-Content -Path $commands -Encoding ascii
-          foreach ($test in @('test_hybrid_set', 'test_hybrid_reachability')) {
-            $exe = Get-ChildItem -Path build -Recurse -File -Filter "$test.exe" | Select-Object -First 1
-            if (-not $exe) { Write-Warning "Missing executable: $test"; continue }
-            $log = Join-Path $output "$test.log"
-            Push-Location $exe.DirectoryName
-            try {
-              $args = @('-cf', ('"{0}"' -f $commands), '-logo', ('"{0}"' -f $log), ('"{0}"' -f $exe.FullName))
-              $debugger = Start-Process -FilePath $cdb -ArgumentList $args -PassThru -NoNewWindow
-              try {
-                Wait-Process -InputObject $debugger -Timeout 240 -ErrorAction Stop
-              } catch {
-                Write-Warning "CDB timed out for $test after 240 seconds"
-                Stop-Process -Id $debugger.Id -Force -ErrorAction SilentlyContinue
-              }
-            } finally {
-              Pop-Location
-            }
-          }
-          exit 0
-
-      - name: Upload Windows x64 Debug failure stacks
-        if: failure() && matrix.build_type == 'Debug' && matrix.config.arch == 'x64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-x64-debug-stacktraces
-          path: windows-debug-stacks/*.log
-          if-no-files-found: warn

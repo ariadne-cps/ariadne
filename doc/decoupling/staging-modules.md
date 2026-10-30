@@ -54,12 +54,11 @@ The old `source/hybrid` include remains as a compatibility wrapper.
 - Aggregate compilation and test CI were green for commit `25cfd9b` on
   Ubuntu, macOS, Windows, Coverage, and Sanitizers. This does not prove
   standalone public-header or module-boundary isolation.
-- System headers are compiled independently in their own translation units
-  during the aggregate build. CMake also rejects direct upward includes from
-  System sources into `dynamics`, `evolution`, or `analysis`; `system` may
-  consume `hybrid` and its transitive `labelled` API.
-- Continue classifying and isolating evolution and analysis sources; the
-  aggregate checks do not yet prove full standalone module independence.
+- `system` consumes `hybrid` and its transitively exposed repositories.
+  Remove unwanted API dependencies in source files, without inserting
+  extra compile checks into the existing CMake build.
+- Continue classifying and isolating evolution and analysis sources; a green
+  aggregate build does not yet prove standalone module independence.
 - Restore actual compile/test, Python bindings, install/consumer and CI checks
   only after the relevant source/API migrations are complete.
 

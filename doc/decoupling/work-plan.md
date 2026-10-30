@@ -152,11 +152,10 @@ fundamental hybrid representation layer stays in `source/hybrid`.
 - [ ] Keep analysis-specific space traits and set-approximation choices in
       `analysis`, without removing the hybrid sets and graphics owned by
       `hybrid`.
-- [x] Add per-header compilation and direct-include guards to prevent
-      dependencies on `evolution` and `analysis` from System sources; these
-      checks run as part of the `ariadne` build. The dependency on `hybrid`
-      (and transitive `labelled`) is allowed.
-- [ ] Validate the new isolation checks across the CI matrix.
+- [ ] Remove actual unwanted dependencies on `evolution` or `analysis`
+      from System headers and sources; keep only the ordinary module build.
+- [ ] Validate the resulting dependencies through the existing C++ build and
+      tests, without adding special CMake header-isolation targets.
 
 ## H3 - Extract Evolution
 

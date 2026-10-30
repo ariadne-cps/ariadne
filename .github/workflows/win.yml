@@ -60,7 +60,7 @@ jobs:
 
       - name: Test legacy dynamics/hybrid C++
         if: matrix.build_type == 'Debug'
-        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure
+        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure --timeout 240
 
       - name: Capture CDB stacks for failing Windows x64 Debug tests
         if: failure() && matrix.build_type == 'Debug' && matrix.config.arch == 'x64'

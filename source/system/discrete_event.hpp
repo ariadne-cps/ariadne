@@ -22,12 +22,15 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid/discrete_event.hpp
+/*! \file system/discrete_event.hpp
  *  \brief Class representing a discrete event.
  */
 
 #ifndef ARIADNE_DISCRETE_EVENT_HPP
 #define ARIADNE_DISCRETE_EVENT_HPP
+
+#include <ostream>
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 

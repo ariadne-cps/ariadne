@@ -35,10 +35,10 @@ repositories. Dependencies such as `symbolic` are obtained transitively.
 The ownership rule is semantic:
 
 - `hybrid` owns fundamental hybrid-domain representations, including
-  `DiscreteLocation`, `DiscreteEvent`, `HybridSpace`, hybrid sets, paving,
+  `DiscreteLocation`, `HybridSpace`, hybrid sets, paving,
   and graphics, just as `labelled` owns labelled geometric representations;
 - `system` defines systems: discrete maps, vector fields, differential
-  inclusions, and hybrid automata;
+  inclusions, discrete events, and hybrid automata;
 - `evolution` owns how such systems evolve: enclosures, evolvers, simulators,
   and orbit types, including their hybrid variants;
 - `analysis` owns how systems and their evolution are analysed: global
@@ -131,9 +131,11 @@ introduced by a higher repository stays with that concept.
 `system` defines what a system is, not its evolution or analysis. The
 fundamental hybrid representation layer stays in `source/hybrid`.
 
-- [ ] Keep `DiscreteLocation`, `DiscreteEvent`, `HybridSpace`, and other
-      fundamental hybrid representations in `source/hybrid`, alongside
-      hybrid sets, paving, and graphics. Do not relocate them to `system`.
+- [ ] Keep `DiscreteLocation`, `HybridSpace`, and other fundamental hybrid
+      representations in `source/hybrid`, alongside hybrid sets, paving,
+      and graphics. Do not relocate them to `system`.
+- [x] Keep `DiscreteEvent` in `source/system`, because events belong to a
+      system's transitions and behaviour rather than the hybrid state space.
 - [ ] Consolidate system-definition classes in `source/system`:
       `IteratedMap`, `VectorField`, `DifferentialInclusion`,
       `HybridAutomaton`, `HybridAutomatonInterface`, and directly related
@@ -150,9 +152,11 @@ fundamental hybrid representation layer stays in `source/hybrid`.
 - [ ] Keep analysis-specific space traits and set-approximation choices in
       `analysis`, without removing the hybrid sets and graphics owned by
       `hybrid`.
-- [ ] Test that System public headers and targets do not depend on
-      `evolution` or `analysis`; its dependency on `hybrid` (and transitive
-      access to `labelled`) is allowed.
+- [x] Add per-header compilation and direct-include guards to prevent
+      dependencies on `evolution` and `analysis` from System sources; these
+      checks run as part of the `ariadne` build. The dependency on `hybrid`
+      (and transitive `labelled`) is allowed.
+- [ ] Validate the new isolation checks across the CI matrix.
 
 ## H3 - Extract Evolution
 
@@ -217,12 +221,13 @@ The intended classification includes, at minimum:
 
 ```text
 hybrid (representation layer):
-    DiscreteLocation / DiscreteEvent
+    DiscreteLocation
     HybridSpace / MonolithicHybridSpace
     HybridConstraintSet / HybridBoundedConstraintSet
     Hybrid sets, paving, and graphics
 
 system (system definitions):
+    DiscreteEvent
     IteratedMap / VectorField / DifferentialInclusion
     HybridAutomaton / HybridAutomatonInterface
 

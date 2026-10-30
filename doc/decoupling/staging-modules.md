@@ -15,8 +15,8 @@ The Ariadne-owned source layers and their responsibilities are:
 
 - `hybrid/`: fundamental hybrid representations, sets, paving, and graphics,
   analogous to the representations supplied by `labelled`.
-- `system/`: system definitions, including discrete maps, vector fields,
-  differential inclusions, and hybrid automata.
+- `system/`: system definitions, including discrete events, discrete maps,
+  vector fields, differential inclusions, and hybrid automata.
 - `evolution/`: system evolution, including enclosures, evolvers, simulators,
   and orbits.
 - `analysis/`: system analysis, including reachability and safety.
@@ -32,11 +32,11 @@ evolution -> system, integration, equation-solving
 analysis  -> evolution, smt, sat
 ```
 
-As a transitional exception, `DiscreteEvent` is still defined in
-`source/system/discrete_event.hpp`, with a compatibility include in
-`source/hybrid`; its intended ownership is the hybrid representation layer.
-`DiscreteLocation` and `HybridSpace` already have canonical definitions in
-`source/hybrid`. All three are domain primitives, not system algorithms.
+`DiscreteEvent` is correctly defined in `source/system/discrete_event.hpp`:
+its meaning belongs to system transitions, not to hybrid state-space geometry.
+The old `source/hybrid` include remains as a compatibility wrapper.
+`DiscreteLocation` and `HybridSpace` have canonical definitions in
+`source/hybrid`, alongside hybrid sets, paving, and graphics.
 
 ## Verification and migration blockers
 
@@ -54,10 +54,12 @@ As a transitional exception, `DiscreteEvent` is still defined in
 - Aggregate compilation and test CI were green for commit `25cfd9b` on
   Ubuntu, macOS, Windows, Coverage, and Sanitizers. This does not prove
   standalone public-header or module-boundary isolation.
-- Before further extraction, classify sources by responsibility, update
-  includes, and compile public headers in isolation. `system` may consume
-  `hybrid` and its transitive `labelled` representation API, but must not
-  depend on `evolution` or `analysis`; `evolution` must not depend on `analysis`.
+- System headers are compiled independently in their own translation units
+  during the aggregate build. CMake also rejects direct upward includes from
+  System sources into `dynamics`, `evolution`, or `analysis`; `system` may
+  consume `hybrid` and its transitive `labelled` API.
+- Continue classifying and isolating evolution and analysis sources; the
+  aggregate checks do not yet prove full standalone module independence.
 - Restore actual compile/test, Python bindings, install/consumer and CI checks
   only after the relevant source/API migrations are complete.
 

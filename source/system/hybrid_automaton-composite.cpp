@@ -34,10 +34,10 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "system/hybrid_space.hpp"
+
+#include "system/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 

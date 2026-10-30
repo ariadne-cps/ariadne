@@ -5,8 +5,6 @@ add_library(${LIBRARY_NAME} OBJECT
     hybrid_set.cpp
     hybrid_paving.cpp
     hybrid_enclosure.cpp
-    hybrid_automaton.cpp
-    hybrid_automaton-composite.cpp
     hybrid_simulator.cpp
     hybrid_evolver.cpp
     hybrid_reachability_analyser.cpp

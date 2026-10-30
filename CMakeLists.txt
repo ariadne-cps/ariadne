@@ -31,7 +31,6 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Symbolic CHAINS
         "labelled|expression-set|symbolic"
         "smt|symbolic"
-        "labelled|expression-set|symbolic"
     )
     require_same_dependency_commit(EquationSolving CHAINS
         "equation-solving"

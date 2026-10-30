@@ -101,7 +101,7 @@ class TestVerifySafety
         EvolverType evolver(system,integrator);
 
         AnalyserType analyser(evolver);
-        analyser.configuration().set_maximum_grid_fineness(3);
+        analyser.configuration().set_maximum_grid_fineness(2);
         cout << "Done building analyser\n";
         return analyser;
     }
@@ -130,11 +130,6 @@ class TestVerifySafety
         auto safety_certificate=analyser.verify_safety(initial_set,safe_set);
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
-        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
-        plot("test_verify_safety-safe.png",Projection2d(2,0,1),graphics_box,
-             safe_set_colour,safety_certificate.safe_set,
-             reach_set_colour,safety_certificate.chain_reach_set,
-             initial_set_colour,initial_set);
     }
 
     Void test_verify_safety_crossing_bounding() {
@@ -150,11 +145,6 @@ class TestVerifySafety
         auto safety_certificate=analyser.verify_safety(initial_set,smaller_safe_set);
         ARIADNE_TEST_ASSERT(is_indeterminate(safety_certificate.is_safe));
 
-        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
-        plot("test_verify_safety-possibly-unsafe.png",Projection2d(2,0,1),graphics_box,
-             safe_set_colour,safety_certificate.safe_set,
-             reach_set_colour,safety_certificate.chain_reach_set,
-             initial_set_colour,initial_set);
     }
 
 

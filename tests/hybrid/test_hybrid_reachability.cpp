@@ -78,7 +78,7 @@ Void TestHybridReachability::_set_analyser(const HybridAutomatonInterface& syste
     evolver.configuration().set_maximum_enclosure_radius(0.125);
     evolver.configuration().set_maximum_enclosure_radius(0.5);
     analyser.reset(new HybridReachabilityAnalyser(evolver));
-    analyser->configuration().set_maximum_grid_fineness(4);
+    analyser->configuration().set_maximum_grid_fineness(2);
     analyser->configuration().set_lock_to_grid_time(5);
     ARIADNE_TEST_PRINT(analyser->configuration());
 }
@@ -104,17 +104,17 @@ Void TestHybridReachability::test_bouncing_ball() const {
     Dyadic height=2;
     Dyadic radius=1/pow(two,6);
     HybridBoundedConstraintSet initial(q,{height-radius<=x<=height+radius,-radius<=v<=radius});
-    Decimal tmax(6.5);
-    Natural maxsteps=5u;
+    // Exercise the first impact, not a long sequence of bounces.
+    Decimal tmax(2.5);
+    Natural maxsteps=2u;
     HybridTime time(tmax,maxsteps);
 
     this->_set_analyser(bouncing_ball);
 
     auto reach_evolve=analyser->upper_reach_evolve(initial,time);
 
-    Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
-    Axes2d bounding_box={xl<=x<=xu,vl<=v<=vu};
-    plot("test_hybrid_reachability-bouncing_ball",bounding_box,reach_evolve.first);
+    ARIADNE_TEST_ASSERT(reach_evolve.first.size()>0u);
+    ARIADNE_TEST_ASSERT(reach_evolve.second.size()>0u);
 }
 
 

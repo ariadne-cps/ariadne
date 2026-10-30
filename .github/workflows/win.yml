@@ -77,7 +77,7 @@ jobs:
           $commands = Join-Path $output 'exceptions.dbg'
           @'
           sxd eh
-          sxe -c ".echo === Access violation ===; r; kP; !analyze -v; .frame /r 1; dv /t; q" av
+          sxe -c ".echo === Access violation ===; r; kP; .echo === Faulting call instruction ===; ub poi(@rsp) L20; u poi(@rsp) L4; .echo === Potential dispatch table ===; dps @rdx L12; .echo === Effective object ===; dps @rcx L6; !analyze -v; .frame /r 1; dv /t; q" av
           g
           '@ | Set-Content -Path $commands -Encoding ascii
           foreach ($test in @('test_hybrid_set', 'test_hybrid_reachability')) {

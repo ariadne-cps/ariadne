@@ -75,9 +75,10 @@ class TestVerifySafety
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
         RealVariable x("x");
-        // A stationary state tests safety certification without the
-        // cost of repeatedly evolving a two-dimensional oscillator.
-        SystemType sys(List<DottedRealAssignment>{dot(x)=0});
+        // Contract toward the centre of a grid cell.  Its outer
+        // approximation reaches a fixed point without accumulating
+        // spurious neighbouring cells as a stationary flow can.
+        SystemType sys(List<DottedRealAssignment>{dot(x)=0.375_dec-x});
         cout << "Done building system\n";
         return sys;
     }
@@ -113,6 +114,9 @@ class TestVerifySafety
     Void test_verify_safety_no_bounding() {
         analyser.configuration().set_bounding_domain_ptr(nullptr);
         auto safety_certificate=analyser.verify_safety(initial_set,safe_set);
+        ARIADNE_TEST_PRINT(safety_certificate.is_safe);
+        ARIADNE_TEST_PRINT(safety_certificate.chain_reach_set.size());
+        ARIADNE_TEST_PRINT(safety_certificate.safe_set.size());
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
     }
 

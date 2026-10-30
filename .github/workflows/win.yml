@@ -61,3 +61,42 @@ jobs:
       - name: Test legacy dynamics/hybrid C++
         if: matrix.build_type == 'Debug'
         run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure
+
+      - name: Capture CDB stacks for failing Windows x64 Debug tests
+        if: failure() && matrix.build_type == 'Debug' && matrix.config.arch == 'x64'
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $cdb = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\Debuggers\x64\cdb.exe'
+          if (-not (Test-Path $cdb)) {
+            Write-Warning "cdb.exe not installed on this Windows runner"
+            exit 0
+          }
+          $output = Join-Path $env:GITHUB_WORKSPACE 'windows-debug-stacks'
+          New-Item -ItemType Directory -Force -Path $output | Out-Null
+          $commands = Join-Path $output 'exceptions.dbg'
+          @'
+          sxe -c ".echo === C++ exception first chance ===; kP; gn" eh
+          sxe -c ".echo === Access violation ===; .ecxr; kP; q" av
+          g
+          '@ | Set-Content -Path $commands -Encoding ascii
+          foreach ($test in @('test_infinite_time_reachability', 'test_hybrid_reachability')) {
+            $exe = Get-ChildItem -Path build -Recurse -File -Filter "$test.exe" | Select-Object -First 1
+            if (-not $exe) { Write-Warning "Missing executable: $test"; continue }
+            $log = Join-Path $output "$test.log"
+            Push-Location $exe.DirectoryName
+            try {
+              & $cdb -cf $commands -logo $log $exe.FullName 2>&1 | Out-Host
+            } finally {
+              Pop-Location
+            }
+          }
+          exit 0
+
+      - name: Upload Windows x64 Debug failure stacks
+        if: failure() && matrix.build_type == 'Debug' && matrix.config.arch == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-debug-stacktraces
+          path: windows-debug-stacks/*.log
+          if-no-files-found: warn

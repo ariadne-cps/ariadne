@@ -161,7 +161,9 @@ public:
         ARIADNE_TEST_EQUALS(as_closed.euclidean_set(loc,state_space).dimension(),2u);
         auto from_compact=as_compact.euclidean_set(loc,state_space);
         ARIADNE_TEST_EQUALS(from_compact.dimension(),2u);
-        ARIADNE_TEST_EQUAL(from_compact.bounding_box(),euclidean.bounding_box());
+        // Upper bounds have three-valued geometric equality. We need
+        // identical endpoint representations across the two conversions.
+        ARIADNE_TEST_ASSERT(same(from_compact.bounding_box(),euclidean.bounding_box()));
         ARIADNE_TEST_EQUALS(as_located.euclidean_set(loc,state_space).dimension(),2u);
         ARIADNE_TEST_EQUALS(as_full.euclidean_set(loc,state_space).dimension(),2u);
         HybridGridTreePaving paving{HybridGrid(hybrid_space)};

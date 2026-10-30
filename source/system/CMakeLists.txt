@@ -3,6 +3,7 @@
 # linking semantics, including on Windows where the aggregate is static.
 add_library(ariadne-system OBJECT
     system_function.cpp
+    hybrid_constraint_set.cpp
     vector_field.cpp
     iterated_map.cpp
     differential_inclusion.cpp

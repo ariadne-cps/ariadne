@@ -1146,19 +1146,14 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
-    // Set the uniform error of the original model
-    // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    FloatDPError* error_ptr;
-    if(number_of_error_variables==index_of_error) {
-        error_ptr = &r.error();
-    } else {
+    // Accumulate bounds in an Error object, not through a FloatDP alias.
+    const Bool embed_error_in_variable = index_of_error < number_of_error_variables;
+    if(embed_error_in_variable) {
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,FloatDP(dp));
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
-    FloatDPError& error=*error_ptr;
-    error += tm.error();
+    FloatDPError error=tm.error();
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         UniformConstReference<MultiIndex> xa=iter->index();
@@ -1177,6 +1172,12 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
             }
             r.expansion().append(ra,xv);
         }
+    }
+    if(embed_error_in_variable) {
+        // Store the upward-rounded bound as an exact coefficient.
+        r.expansion().begin()->coefficient()=error.raw();
+    } else {
+        r.error()=error;
     }
     return r;
 }

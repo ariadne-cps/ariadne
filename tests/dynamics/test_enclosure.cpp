@@ -60,6 +60,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_is_bounded());
         ARIADNE_TEST_CALL(test_subset_separated());
         ARIADNE_TEST_CALL(test_restriction());
+        ARIADNE_TEST_CALL(test_kuhn_reconditioning_encloses_original());
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
         ARIADNE_TEST_CALL(test_split());
@@ -116,6 +117,19 @@ class TestEnclosure
         ExactBoxType box2({{0.5_x,1.5_x},{1.5_x,2.5_x}});
         auto encl2 = restriction(encl,box2);
         ARIADNE_TEST_ASSERT(definitely(encl2.subset(codomain1)));
+    }
+
+    // Discard all original parameters and preserve the represented set.
+    Void test_kuhn_reconditioning_encloses_original() const {
+        ExactBoxType original({{-1.0_x,1.0_x},{-2.0_x,2.0_x}});
+        auto swp=ThresholdSweeper<FloatDP>(dp,1e-8);
+        EnclosureConfiguration configuration{TaylorFunctionFactory(swp)};
+        configuration.set_reconditioning_num_blocks(1u);
+        Enclosure encl(original,configuration);
+        ExactBoxType before=encl.codomain();
+        encl.kuhn_recondition();
+        ARIADNE_TEST_EQUALS(encl.number_of_parameters(),2u);
+        ARIADNE_TEST_ASSERT(before.inside(encl.codomain()));
     }
 
     Void test_auxiliary_map() const {

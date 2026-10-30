@@ -47,6 +47,7 @@ public:
     Void test() {
         ARIADNE_TEST_CALL(test_hybrid_list_set());
         ARIADNE_TEST_CALL(test_hybrid_paving_separation());
+        ARIADNE_TEST_CALL(test_hybrid_initial_outer_approximation());
         //ARIADNE_TEST_CALL(test_compile_incorrect_hybrid_paving());
     }
 
@@ -129,6 +130,25 @@ public:
         ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
         ARIADNE_TEST_EQUAL(paving.overlaps(box).repr(), LogicalValue::UNLIKELY);
         ARIADNE_TEST_EQUAL(paving.covers(box).repr(), LogicalValue::UNLIKELY);
+    }
+
+    // Isolate the bounding-box paving from hybrid evolution.
+    Void test_hybrid_initial_outer_approximation() {
+        DiscreteLocation loc;
+        RealVariable x("x"), v("v");
+        RealSpace state_space({x,v});
+        MonolithicHybridSpace hybrid_space;
+        hybrid_space.new_location(loc,state_space);
+        Dyadic height=2;
+        Dyadic radius=1/pow(two,6);
+        HybridBoundedConstraintSet initial(loc,
+            {height-radius<=x<=height+radius,-radius<=v<=radius});
+        HybridGridTreePaving paving{HybridGrid(hybrid_space)};
+        paving.adjoin_outer_approximation(initial,4u);
+        ARIADNE_TEST_ASSERT(paving.nontrivial_location(loc));
+        ARIADNE_TEST_ASSERT(paving.size()>0u);
+        ExactBoxType initial_box=initial.euclidean_set(loc,state_space).domain();
+        ARIADNE_TEST_ASSERT(paving.euclidean_set(loc).superset(initial_box));
     }
 
     Void test_compile_incorrect_hybrid_paving() {

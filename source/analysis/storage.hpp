@@ -30,6 +30,7 @@
 #define ARIADNE_STORAGE_HPP
 
 #include <iosfwd>
+#include "function/function.hpp"
 #include "geometry/set_interface.hpp"
 #include "paving/paving_interface.hpp"
 #include "paving/grid_paving.hpp"

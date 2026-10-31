@@ -25,7 +25,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "config.hpp"
 #include "utility/tuple.hpp"
 #include "numeric/rational.hpp"
 #include "algebra/vector.hpp"

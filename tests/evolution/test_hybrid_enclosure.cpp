@@ -24,7 +24,6 @@
 
 #include <iostream>
 
-#include "config.hpp"
 #include "macro/testing.hpp"
 
 #include "algebra/algebra.hpp"

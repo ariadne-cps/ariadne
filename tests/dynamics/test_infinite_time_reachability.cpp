@@ -26,7 +26,6 @@
 #include <fstream>
 #include <string>
 
-#include "config.hpp"
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"

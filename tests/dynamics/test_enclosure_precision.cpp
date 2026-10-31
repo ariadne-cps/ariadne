@@ -4,7 +4,6 @@
  *  Regression test for precision loss in RealBox enclosure construction.
  ****************************************************************************/
 
-#include "config.hpp"
 #include "algebra/vector.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"

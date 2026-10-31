@@ -1,6 +1,7 @@
 # system layer behavioral tests (moved without changing test logic).
 set(UNIT_TESTS
     test_hybrid_automaton
+    test_first_order_pde_model_header
 )
 
 foreach(TEST IN LISTS UNIT_TESTS)

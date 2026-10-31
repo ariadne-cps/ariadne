@@ -2,7 +2,9 @@
 #ifndef ARIADNE_SYSTEM_FIRST_ORDER_PDE_HPP
 #define ARIADNE_SYSTEM_FIRST_ORDER_PDE_HPP
 
+#include "numeric/float.decl.hpp"
 #include "numeric/real.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/tensor.hpp"
 #include "function/function.decl.hpp"

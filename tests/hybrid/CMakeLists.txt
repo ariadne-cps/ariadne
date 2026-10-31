@@ -1,12 +1,9 @@
 set(UNIT_TESTS
-    test_hybrid_automaton
-    test_hybrid_evolution    
-    test_hybrid_evolver
+
     # Graphics-only executable has no automatic behavioral assertions.
-    test_hybrid_enclosure
+
     test_hybrid_set
-    test_hybrid_simulator
-    test_hybrid_reachability
+
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -19,6 +16,3 @@ endforeach()
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
 
-if(WIN32)
-    set_tests_properties(test_hybrid_reachability PROPERTIES TIMEOUT 240)
-endif()

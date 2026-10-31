@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.hpp"
 
 #include "function/functional.hpp"
 

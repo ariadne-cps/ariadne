@@ -23,7 +23,6 @@
  */
 
 #include <typeinfo>
-#include "config.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

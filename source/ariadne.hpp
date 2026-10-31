@@ -37,7 +37,6 @@ namespace Ariadne {
 #include <iostream>
 #include <iomanip>
 
-#include "config.hpp"
 
 #include "numeric/numeric.hpp"
 #include "numeric/rational.hpp"

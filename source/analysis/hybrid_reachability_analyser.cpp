@@ -23,7 +23,6 @@
  */
 
 #include "function/functional.hpp"
-#include "config.hpp"
 
 #include <string>
 #include <sstream>

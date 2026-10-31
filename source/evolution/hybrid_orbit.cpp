@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.hpp"
 #include "evolution/hybrid_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_graphics.hpp"

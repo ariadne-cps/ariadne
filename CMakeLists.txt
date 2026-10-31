@@ -62,14 +62,6 @@ endif()
 
 setup_project()
 
-# Remaining legacy dynamics/system code still includes "config.hpp".
-# Generate it in the build tree, not the source checkout.
-file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/generated")
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake"
-    "${PROJECT_BINARY_DIR}/generated/config.hpp"
-)
-include_directories(BEFORE "${PROJECT_BINARY_DIR}/generated")
 include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)

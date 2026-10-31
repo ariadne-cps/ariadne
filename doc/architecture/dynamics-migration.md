@@ -5,8 +5,8 @@ remaining headers are forwarding adapters for source compatibility.
 
 | Ownership | Files |
 |---|---|
-| `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition, and physical 1D/2D wave parameters |
-| `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, differential inclusion gridding, 1D/2D wave finite differences, first-order PDE evolution |
+| `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition |
+| `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, differential inclusion gridding, first-order PDE evolution |
 | `analysis/` | reachability analyser, reachability interfaces and template implementation, storage used in reachability analysis |
 | `dynamics/` | forwarding headers only, to be deprecated in a future API-breaking release |
 
@@ -16,7 +16,7 @@ new lower-level implementation should depend on these forwarding headers.
 
 The legacy `tests/dynamics/` executable organization is retained for now to
 preserve the original behavior-focused regression and its CTest names; the
-PDE regression itself now lives under `tests/evolution/test_pdes.cpp`.
+PDE regression itself now lives under `tests/evolution/test_first_order_pde.cpp`.
 A subsequent change can relocate other tests without conflating test
 ownership with production dependency direction.
 
@@ -27,4 +27,4 @@ reachability analyser may depend on an evolver; system definitions must never
 include an analyser or an evolver.
 
 See [PDE architecture](system-evolution-pde.md) for the detailed mathematical
-model, solver interface, and limitations of the legacy PDE prototypes.
+model, solver interface, and the deliberate removal of obsolete 1D/2D wave prototypes.

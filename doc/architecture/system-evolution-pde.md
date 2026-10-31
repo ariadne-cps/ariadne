@@ -2,95 +2,66 @@
 
 ## Dependency boundary
 
-A dynamical **system** specifies a state space and a mathematical law. It must
-not choose a time step, a grid resolution, an integrator, an enclosure, or a
-reachability algorithm. **Evolution** consumes that law and initial data to
-compute trajectories or approximations; **analysis** consumes evolvers to
-answer reachability and safety questions.
+A dynamical **system** specifies a state space and mathematical law. It does
+not choose time steps, grid resolutions, integrators, result enclosures or
+reachability algorithms. **Evolution** computes solutions or approximations;
+**analysis** consumes evolvers and results to answer reachability and safety
+questions.
 
 ```text
 analysis -> evolution -> system -> hybrid -> labelled
 ```
 
-The CMake sources of `ariadne-system` must not include `evolution/`,
-`analysis/`, or `dynamics/`. Compatibility headers in `dynamics/` are for
-old clients only and must not be used by new internal code.
+The `ariadne-system` target must not depend on `evolution`, `analysis` or
+the compatibility layer `dynamics/`.
 
 ## First-order PDE
 
-**Model**: `source/system/first_order_pde.hpp` declares `FirstOrderPDE`,
-the system
+[`source/system/first_order_pde.hpp`](../../source/system/first_order_pde.hpp)
+defines the mathematical model `FirstOrderPDE`:
 
 ```text
 A du/dt + sum_j B_j du/dx_j = f(u)
 ```
 
-with coefficient matrices `A`, `Bs`, diagonalizations `Ds`, `Ts`, and
-reaction/source function `f`. The `Ds`, `Ts`, and `f` members are borrowed
-references: all three referenced values must outlive the model and any solver
-call that uses it. This is the **existing ownership contract**; no
-discretization or result data is stored in the model.
+It owns `A` and `Bs` and borrows `Ds`, `Ts` and `f` by reference.
+Those referenced objects must outlive the model and any solver invocation.
+An initial condition, numerical grid, time step and computed solution belong
+to evolution, not to the model.
 
-**Evolution**: `source/evolution/first_order_pde.hpp` declares
-`FirstOrderPDESolution<PR>` (spatial step `h`, temporal step `tau`,
-sampled trajectory `uts`, and error bound) and the `first_order_pde`
-algorithm. Its implementation is in `source/evolution/first_order_pde.cpp`.
-The initial condition `phi0` and precision `PR` are solver inputs, not
-properties of the PDE. Numerical interpolation, step-count checks, and error
-estimation belong entirely to evolution.
+[`source/evolution/first_order_pde.hpp`](../../source/evolution/first_order_pde.hpp)
+provides `FirstOrderPDESolution<PR>` (spatial step `h`, temporal step
+`tau`, sampled trajectory `uts`, error estimate) and the solver
+`first_order_pde`. The solver is implemented in
+`source/evolution/first_order_pde.cpp` and consumes the model, initial
+condition `phi0` and numeric precision `PR`.
 
-In particular, `first_order_pde` **computes an approximation/solution**;
-it does not perform reachability analysis. Keeping it in `analysis` would
-reverse the dependency boundary.
-
-## Legacy one- and two-dimensional wave prototypes
-
-The original `1D_pde.hpp` and `2D_pde.hpp` combined physical data and a
-finite-difference algorithm in one header. They are now split as follows:
-
-| Definition (system) | Sampling and propagation (evolution) |
-| --- | --- |
-| `system/one_dimensional_wave_equation.hpp`: `WaveEquation1D<PR>` | `evolution/one_dimensional_wave_solver.hpp`: `Parameter1D<PR>`, `set_ic`, `linspace1d`, `pde_1d_solver` |
-| `system/two_dimensional_wave_equation.hpp`: `Parameter2D<PR>` | `evolution/two_dimensional_wave_solver.hpp`: `set_ic_2d`, `linspace2d`, `pde_2d_solver`, `gaussian_function` |
-
-`Parameter1D` remains source compatible with old callers and extends the
-physical `WaveEquation1D` model with `CourantNumber`. This latter quantity
-is **a finite-difference tuning parameter**, not part of the physical
-definition. Keeping it only in the evolution-side compatibility configuration
-prevents it from contaminating the new system definition.
-
-The 2D `Parameter2D` represents physical information for one spatial axis.
-The existing 2D routine still chooses its propagation speed, final time and
-time step internally. Both historical solvers also choose particular initial
-profiles and boundary conditions. **They are examples of finite-difference
-schemes, not a general or rigorously validated PDE solver interface.**
-No claim of a general PDE framework or reliable stability/error guarantees
-is implied by moving them. Refactoring their numerical algorithms and
-validation must be separate, behavior-tested work.
-
-The unused `1D_pde.cpp` and `2D_pde.cpp` copies were removed; they had
-different signatures and were not part of the CMake build. The functions
-actually tested were the templates in the headers.
-
-## Compatibility and usage
-
-Old source paths continue to work via forwarding includes:
+New code should include the layers it actually needs:
 
 ```cpp
-#include "dynamics/first_order_pde.hpp"
-#include "dynamics/1D_pde.hpp"
-#include "dynamics/2D_pde.hpp"
+#include "system/first_order_pde.hpp"      // PDE specification
+#include "evolution/first_order_pde.hpp"   // PDE evolution and solution
 ```
 
-New code should express intent explicitly:
+The retained regression is
+[`tests/evolution/test_first_order_pde.cpp`](../../tests/evolution/test_first_order_pde.cpp)
+and its CTest name is `test_first_order_pde`.
 
-```cpp
-#include "system/first_order_pde.hpp"            // mathematical PDE
-#include "evolution/first_order_pde.hpp"         // solution type + algorithm
-#include "system/one_dimensional_wave_equation.hpp"
-#include "evolution/one_dimensional_wave_solver.hpp"
-```
+## Removed historical 1D/2D wave prototypes
 
-The PDE regression is `tests/evolution/test_pdes.cpp` and runs as
-`ctest -R '^test_pdes$'`. It tests existing PDE behavior; relocating the
-interfaces does **not** constitute new solver accuracy or stability testing.
+The historical `1D_pde` and `2D_pde` prototypes have been intentionally
+removed, including their model/parameter classes, finite-difference solvers,
+associated tests and `dynamics/` compatibility forwarding headers. They
+were special-purpose examples, not validated general PDE interfaces; their
+discretization assumptions, hardcoded settings, and numerical tests did not
+justify keeping them in the core library.
+
+In particular, `WaveEquation1D`, `Parameter1D`, `Parameter2D`,
+`pde_1d_solver`, `pde_2d_solver`, `linspace1d`, `linspace2d`,
+`set_ic`, `set_ic_2d` and `gaussian_function` from the prototypes are
+no longer provided. Compatibility with these APIs was deliberately broken;
+the original implementations remain recoverable from Git history.
+
+Retaining `FirstOrderPDE` does not imply a complete generic PDE framework
+or new stability and accuracy guarantees. These require independent
+mathematical verification and focused numerical tests.

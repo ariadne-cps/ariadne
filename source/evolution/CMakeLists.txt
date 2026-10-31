@@ -9,8 +9,8 @@ add_library(ariadne-evolution OBJECT
     ../dynamics/vector_field_simulator.cpp
     ../hybrid/hybrid_set_orbit.cpp
     ../hybrid/hybrid_enclosure.cpp
-    ../hybrid/hybrid_simulator.cpp
-    ../hybrid/hybrid_evolver.cpp
+    hybrid_simulator.cpp
+    hybrid_evolver.cpp
     hybrid_paving_evolution.cpp
 )
 set_target_properties(ariadne-evolution PROPERTIES POSITION_INDEPENDENT_CODE ON)

@@ -32,16 +32,16 @@
 #include "function/function_patch.hpp"
 #include "function/function_model.hpp"
 #include "paving/grid_paving.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_evolver.hpp"
+#include "evolution/hybrid_time.hpp"
+#include "system/hybrid_automaton_interface.hpp"
+#include "evolution/hybrid_evolver.hpp"
 #include "dynamics/orbit.hpp"
 
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"
 #include "equation-solving/interval_newton_method.hpp"
 
-#include "hybrid/hybrid_evolver.hpp"
+#include "evolution/hybrid_evolver.hpp"
 
 namespace {
 

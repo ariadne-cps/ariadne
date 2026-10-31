@@ -31,11 +31,11 @@
 
 #include "dynamics/evolver_interface.hpp"
 
-#include "hybrid/hybrid_time.hpp"
+#include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "system/discrete_event.hpp"
 
 #include "logging/logging.hpp"
 

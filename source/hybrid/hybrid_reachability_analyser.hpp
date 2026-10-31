@@ -34,7 +34,7 @@
 #include "dynamics/reachability_analyser.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
-#include "hybrid/hybrid_evolver_interface.hpp"
+#include "evolution/hybrid_evolver_interface.hpp"
 #include "hybrid/hybrid_reachability_analyser_interface.hpp"
 
 #include "hybrid/hybrid_orbit.hpp"

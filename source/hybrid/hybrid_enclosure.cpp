@@ -39,7 +39,7 @@
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_storage.hpp"
-#include "hybrid/hybrid_time.hpp"
+#include "evolution/hybrid_time.hpp"
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"
 

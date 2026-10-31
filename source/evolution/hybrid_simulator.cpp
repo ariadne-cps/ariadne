@@ -28,7 +28,7 @@
 
 #include "config.hpp"
 
-#include "hybrid/hybrid_simulator.hpp"
+#include "evolution/hybrid_simulator.hpp"
 
 #include "utility/array.hpp"
 #include "utility/container.hpp"
@@ -48,8 +48,8 @@
 
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "evolution/hybrid_time.hpp"
+#include "system/hybrid_automaton_interface.hpp"
 
 
 namespace Ariadne {

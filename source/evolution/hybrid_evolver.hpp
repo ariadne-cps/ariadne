@@ -39,14 +39,14 @@
 
 #include "threading/workload.hpp"
 
-#include "hybrid/hybrid_time.hpp"
+#include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
 
 #include "dynamics/configuration_interface.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_evolver_interface.hpp"
+#include "system/hybrid_automaton_interface.hpp"
+#include "evolution/hybrid_evolver_interface.hpp"
 
 #include "logging/logging.hpp"
 

@@ -30,7 +30,7 @@
 #include "algebra/algebra.hpp"
 #include "function/taylor_function.hpp"
 #include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
+#include "evolution/hybrid_enclosure.hpp"
 
 using namespace std;
 using namespace Ariadne;

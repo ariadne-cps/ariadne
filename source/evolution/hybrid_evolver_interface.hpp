@@ -33,7 +33,7 @@
 
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
 
 #include "system/discrete_event.hpp"
 

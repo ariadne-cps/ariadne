@@ -23,8 +23,7 @@
  */
 
 #include "config.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_storage.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "drawing/geometry_draw.hpp"
@@ -142,10 +141,6 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
 
 
 Void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-    this->reach().draw(c,l,v);
-}
-
-Void Orbit<HybridStorage>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
     this->reach().draw(c,l,v);
 }
 

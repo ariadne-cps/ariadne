@@ -43,8 +43,8 @@
 #include "hybrid/hybrid_set.hpp"
 
 #include "dynamics/configuration_interface.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_enclosure.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "system/hybrid_automaton_interface.hpp"
 #include "evolution/hybrid_evolver_interface.hpp"
 

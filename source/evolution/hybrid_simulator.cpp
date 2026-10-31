@@ -47,7 +47,7 @@
 #include "logging/logging.hpp"
 
 #include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "system/hybrid_automaton_interface.hpp"
 

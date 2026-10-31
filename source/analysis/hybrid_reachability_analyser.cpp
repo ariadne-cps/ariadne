@@ -51,15 +51,15 @@
 
 #include "dynamics/reachability_analyser.tpl.hpp"
 
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "system/hybrid_automaton_interface.hpp"
 
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_evolver.hpp"
-#include "hybrid/hybrid_reachability_analyser.hpp"
+#include "analysis/hybrid_reachability_analyser.hpp"
 
 
 #include "logging/logging.hpp"

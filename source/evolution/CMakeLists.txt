@@ -7,8 +7,8 @@ add_library(ariadne-evolution OBJECT
     ../dynamics/iterated_map_evolver.cpp
     ../dynamics/vector_field_evolver.cpp
     ../dynamics/vector_field_simulator.cpp
-    ../hybrid/hybrid_set_orbit.cpp
-    ../hybrid/hybrid_enclosure.cpp
+    hybrid_orbit.cpp
+    hybrid_enclosure.cpp
     hybrid_simulator.cpp
     hybrid_evolver.cpp
     hybrid_paving_evolution.cpp

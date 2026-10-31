@@ -30,7 +30,7 @@
 #include "symbolic/space.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "evolution/hybrid_simulator.hpp"

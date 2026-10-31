@@ -38,9 +38,8 @@
 #include "paving/grid_paving.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_storage.hpp"
 #include "evolution/hybrid_time.hpp"
-#include "hybrid/discrete_event.hpp"
+#include "system/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"
 
 #include "linear-programming/linear_programming.hpp"
@@ -51,7 +50,7 @@
 #include "rendering/figure.hpp"
 #include "labelled/figure.hpp"
 #include "paving/paver.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
+#include "evolution/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
 #include "threading/workload.hpp"
@@ -609,10 +608,9 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
-Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fineness) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgtp, Nat fineness) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    HybridGridTreePaving& hgtp=hst.state_set();
     GridTreePaving& paving = hgtp[location];
     RealSpace paving_space=hgtp.space(location);
     RealSpace state_space=this->state_space();
@@ -623,15 +621,7 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fine
     }
 }
 
-/*
-HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat fineness) {
-    HybridStorage result(g);
-    for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result.state_set()[iter->location()].adjoin_outer_approximation(iter->continuous_set().state_set(),fineness);
-    }
-    return result;
-}
-*/
+
 
 ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const

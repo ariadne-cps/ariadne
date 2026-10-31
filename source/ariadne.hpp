@@ -64,7 +64,8 @@ namespace Ariadne {
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
+#include "analysis/hybrid_storage_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_automata.hpp"
 
@@ -74,7 +75,7 @@ namespace Ariadne {
 #include "dynamics/iterated_map_evolver.hpp"
 #include "evolution/hybrid_evolver.hpp"
 #include "evolution/hybrid_simulator.hpp"
-#include "hybrid/hybrid_reachability_analyser.hpp"
+#include "analysis/hybrid_reachability_analyser.hpp"
 
 #include "labelled/figure.hpp"
 #include "rendering/rendering_manager.hpp"

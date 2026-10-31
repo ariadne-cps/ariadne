@@ -35,13 +35,14 @@
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
 #include "evolution/hybrid_evolver_interface.hpp"
-#include "hybrid/hybrid_reachability_analyser_interface.hpp"
+#include "analysis/hybrid_reachability_analyser_interface.hpp"
 
-#include "hybrid/hybrid_orbit.hpp"
+#include "evolution/hybrid_orbit.hpp"
 #include "hybrid/hybrid_grid.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_storage.hpp"
+#include "analysis/hybrid_storage.hpp"
+#include "analysis/hybrid_storage_orbit.hpp"
 
 #include "logging/logging.hpp"
 

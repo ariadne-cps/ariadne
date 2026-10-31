@@ -42,7 +42,7 @@
 #include "labelled/graphics_interface.hpp"
 #include "labelled/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "hybrid/hybrid_reachability_analyser.hpp"
+#include "analysis/hybrid_reachability_analyser.hpp"
 #include "drawing/drawer_manager.hpp"
 #include "drawing/drawer.hpp"
 #include "drawing/drawing_command_line_interface.hpp"

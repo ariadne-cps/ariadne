@@ -39,7 +39,7 @@
 #include "labelled/graphics_interface.hpp"
 #include "set/function_set.hpp"
 #include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
+#include "evolution/hybrid_enclosure.hpp"
 
 #include "dynamics/orbit.hpp"
 
@@ -104,29 +104,6 @@ Orbit<HybridApproximatePoint> extend_auxiliary(Orbit<HybridApproximatePoint> con
 template<>
 OutputStream&
 operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb);
-
-template<>
-class Orbit<HybridStorage>
-    : public HybridDrawableInterface
-{
-    struct Data;
-  public:
-    typedef HybridStorage EnclosureListType;
-
-    Orbit(const HybridStorage& initial_set);
-    Orbit(const HybridStorage& initial_set, const HybridStorage& reach_set,
-          const HybridStorage& intermediate_set, const HybridStorage& final_set);
-
-    HybridStorage const& initial() const;
-    HybridStorage const& reach() const;
-    HybridStorage const& intermediate() const;
-    HybridStorage const& final() const;
-
-    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
-  private:
-    SharedPointer<Data> _data;
-};
-
 
 template<>
 class Orbit<HybridEnclosure>

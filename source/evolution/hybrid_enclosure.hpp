@@ -44,7 +44,7 @@
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
+#include "system/discrete_event.hpp"
 #include "hybrid/hybrid_graphics_interface.hpp"
 
 #include "geometry/box.hpp"
@@ -72,7 +72,7 @@ template<class ES> class ListSet;
 template<class ES> class HybridListSet;
 
 class HybridEnclosure;
-class HybridStorage;
+class HybridGridTreePaving;
 template<> class ListSet<HybridEnclosure>;
 
 //! \ingroup HybridSetSubModule
@@ -293,7 +293,11 @@ class HybridEnclosure
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a fineness subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridStorage& paving, Nat fineness) const;
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
+    template<class StorageType>
+    Void adjoin_outer_approximation_to(StorageType& storage, Nat fineness) const {
+        this->adjoin_outer_approximation_to(storage.state_set(),fineness);
+    }
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(SizeType dim) const;
@@ -385,7 +389,6 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
-HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat dpth);
 
 
 } // namespace Ariadne

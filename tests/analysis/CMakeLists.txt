@@ -1,6 +1,7 @@
 # analysis layer behavioral tests (moved without changing test logic).
 set(UNIT_TESTS
     test_hybrid_reachability
+    test_storage_orbit_header
 )
 
 foreach(TEST IN LISTS UNIT_TESTS)

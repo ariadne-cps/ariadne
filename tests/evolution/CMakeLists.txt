@@ -6,6 +6,7 @@ set(UNIT_TESTS
     test_hybrid_simulator
     test_first_order_pde
     test_first_order_pde_evolution_header
+    test_orbit_evolution_header
 )
 
 foreach(TEST IN LISTS UNIT_TESTS)
@@ -17,3 +18,9 @@ endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+
+# A source-level guard, independent of the compiled numerical tests.
+add_test(NAME test_evolution_dependency_boundary
+    COMMAND ${CMAKE_COMMAND}
+        "-DEVOLUTION_SOURCE_DIR=${PROJECT_SOURCE_DIR}/source/evolution"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/check_dependency_boundary.cmake")

@@ -35,8 +35,7 @@
 #include "set/function_set.hpp"
 
 #include "dynamics/enclosure.hpp"
-#include "dynamics/storage.hpp"
-#include "dynamics/orbit.hpp"
+#include "analysis/storage_orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser_interface.hpp"
 

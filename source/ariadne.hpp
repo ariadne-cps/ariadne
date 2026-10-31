@@ -55,6 +55,7 @@ namespace Ariadne {
 #include "geometry/box.hpp"
 #include "set/curve.hpp"
 #include "dynamics/orbit.hpp"
+#include "analysis/storage_orbit.hpp"
 
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"

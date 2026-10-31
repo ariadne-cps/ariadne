@@ -44,7 +44,6 @@
 #include "set/list_set.hpp"
 #include "set/curve.hpp"
 #include "dynamics/enclosure.hpp"
-#include "dynamics/storage.hpp"
 #include "threading/using.hpp"
 
 namespace Ariadne {
@@ -139,34 +138,6 @@ class Orbit<List<LabelledPoint<Approximation<F>>>>
     virtual LabelledDrawable2dInterface* labelled_clone() const override { return new Orbit<List<LabelledPoint<Approximation<F>>>>(*this); }
   private:
     std::shared_ptr<List<LabelledInterpolatedCurve>> _curves;
-};
-
-template<>
-class Orbit<Storage>
-{
-    struct Data;
-  public:
-    typedef Storage EnclosureListType;
-
-    Orbit(const Storage& initial);
-    Orbit(const Storage& initial, const Storage& reach,
-          const Storage& intermediate, const Storage& final);
-
-    Storage const& initial() const;
-    Storage const& reach() const;
-    Storage const& intermediate() const;
-    Storage const& final() const;
-  private:
-    std::shared_ptr<Data> _data;
-};
-
-struct Orbit<Storage>::Data {
-    Data(const Grid& grid, const EffectiveVectorMultivariateFunction& auxiliary_mapping)
-            : initial(grid,auxiliary_mapping), reach(initial), intermediate(initial), final(initial) { }
-    Storage initial;
-    Storage reach;
-    Storage intermediate;
-    Storage final;
 };
 
 template<>

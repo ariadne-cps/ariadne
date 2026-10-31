@@ -3,6 +3,8 @@ add_library(ariadne-analysis OBJECT
     reachability_analyser.cpp
     hybrid_reachability_analyser.cpp
     hybrid_storage_orbit.cpp
+    storage_orbit.cpp
+    enclosure_storage.cpp
 )
 set_target_properties(ariadne-analysis PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(ariadne-analysis PUBLIC ariadne-evolution smt sat)

@@ -32,7 +32,7 @@
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
-#include "hybrid/hybrid_automata.hpp"
+#include "system/hybrid_automata.hpp"
 #include "evolution/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "drawing/drawing_command_line_interface.hpp"

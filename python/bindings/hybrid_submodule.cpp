@@ -39,9 +39,9 @@
 #include "symbolic/space.hpp"
 #include "io/figure.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "system/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_automata.hpp"
+#include "system/hybrid_automata.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "evolution/hybrid_orbit.hpp"
 #include "hybrid/hybrid_set.hpp"

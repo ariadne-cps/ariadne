@@ -61,13 +61,13 @@ namespace Ariadne {
 #include "equation-solving/equation_solver.hpp"
 
 #include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
+#include "system/discrete_event.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_orbit.hpp"
 #include "analysis/hybrid_storage_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
-#include "hybrid/hybrid_automata.hpp"
+#include "system/hybrid_automata.hpp"
 
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/differential_inclusion_evolver.hpp"

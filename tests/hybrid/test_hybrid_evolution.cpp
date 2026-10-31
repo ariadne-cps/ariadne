@@ -35,7 +35,7 @@
 #include "set/list_set.hpp"
 #include "integration/integrator.hpp"
 #include "dynamics/orbit.hpp"
-#include "hybrid/hybrid_automata.hpp"
+#include "system/hybrid_automata.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_evolver.hpp"

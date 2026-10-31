@@ -33,7 +33,7 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
 
-#include "utility/macros.hpp"
+#include "macro/general.hpp"
 #include "utility/exceptions.hpp"
 #include "utility/stopwatch.hpp"
 #include "numeric/numeric.hpp"
@@ -49,31 +49,34 @@
 #include "function/taylor_function.hpp"
 
 #include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "paving/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "set/function_set.hpp"
+#include "set/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_paving.hpp"
+#include "paving/paving_interface.hpp"
+#include "paving/paver.hpp"
+#include "paving/grid_paving.hpp"
 
-#include "solving/constraint_solver.hpp"
-#include "solving/nonlinear_programming.hpp"
+#include "constraint-solving/constraint_solver.hpp"
+#include "nonlinear-programming/nonlinear_programming.hpp"
 
-#include "io/graphics_interface.hpp"
-#include "io/drawer.hpp"
+#include "labelled/graphics_interface.hpp"
+#include "drawing/drawer.hpp"
+#include "drawing/drawer_manager.hpp"
 #include "logging/progress_indicator.hpp"
 
-#include "io/figure.hpp"
-#include "io/graphics_manager.hpp"
+#include "rendering/figure.hpp"
+#include "rendering/rendering_manager.hpp"
 #include "logging/logging.hpp"
 
 #include "function/functional.hpp"
 
 #include "numeric/operators.hpp"
 #include "symbolic/space.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
+#include "labelled/set.hpp"
+#include "labelled/figure.hpp"
 
 #include "algebra/expansion.inl.hpp"
 
@@ -94,7 +97,21 @@ inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunction
 inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
-Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl);
+// This overload was removed from the extracted Set module. Keep the original
+// Real-interval rounding and error-enclosure algorithm local to dynamics.
+static Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl) {
+    FloatDPBounds dlb(ivl.lower_bound(),dp);
+    FloatDPBounds dub(ivl.upper_bound(),dp);
+    FloatDPApproximation dla(ivl.lower_bound(),dp);
+    FloatDPApproximation dua(ivl.upper_bound(),dp);
+    // Keep the full FloatDP precision of the approximated endpoints.  Reducing
+    // them to Float32 here creates an avoidable, step-size-independent error
+    // which is later transferred to the enclosure remainder.
+    FloatDP dl(dla.raw());
+    FloatDP du(dua.raw());
+    FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
+    return make_pair(make_interval(dl,du),e);
+}
 
 namespace {
 
@@ -338,7 +355,7 @@ ValidatedKleenean Enclosure::satisfies(ValidatedScalarMultivariateFunction const
     UpperIntervalType constraint_range=apply(constraint,this->codomain());
     if(definitely(constraint_range.upper_bound()<0)) { return false; }
     if(definitely(constraint_range.lower_bound()>0)) { return true; }
-    return ValidatedKleenean(indeterminate);
+    return ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 
@@ -770,12 +787,12 @@ Enclosure::satisfies(ValidatedConstraint c) const
     Enclosure copy=*this;
     copy.new_state_constraint(c);
     if(definitely(copy.is_empty())) { return false; }
-    else { return ValidatedKleenean(indeterminate); }
+    else { return ValidatedKleenean(LogicalValue::INDETERMINATE); }
 }
 
 ValidatedLowerKleenean Enclosure::is_bounded() const
 {
-    return this->domain().is_bounded() || ValidatedKleenean(indeterminate);
+    return this->domain().is_bounded() || ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::is_empty() const
@@ -792,7 +809,7 @@ ValidatedLowerKleenean Enclosure::is_empty() const
         }
     }
     if(this->_reduced_domain.is_empty()) { return true; }
-    return ValidatedKleenean(indeterminate);
+    return ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::inside(const ExactBoxType& bx) const
@@ -804,7 +821,7 @@ ValidatedLowerKleenean Enclosure::subset(const ExactBoxType& bx) const
 {
     this->reduce();
 
-    return ValidatedLowerKleenean(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(indeterminate);
+    return ValidatedLowerKleenean(Ariadne::subset(Ariadne::apply(this->_state_function,this->_reduced_domain),bx)) || ValidatedKleenean(LogicalValue::INDETERMINATE);
 }
 
 ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
@@ -861,7 +878,16 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+// The former generic overload lived in geometry/function_set.cpp. Preserve
+// its Taylor-model dispatch here while linking to the extracted Set implementation.
+Matrix<FloatDPError> nonlinearities_zeroth_order(
+    const ValidatedVectorMultivariateTaylorFunctionModelDP&, const ExactBoxType&);
+
+static Matrix<FloatDPError> nonlinearities_zeroth_order(
+    const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom) {
+    return nonlinearities_zeroth_order(
+        dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(*f.raw_pointer()), dom);
+}
 Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 Pair<SizeType,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
@@ -1120,19 +1146,14 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
-    // Set the uniform error of the original model
-    // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    FloatDPError* error_ptr;
-    if(number_of_error_variables==index_of_error) {
-        error_ptr = &r.error();
-    } else {
+    // Accumulate bounds in an Error object, not through a FloatDP alias.
+    const Bool embed_error_in_variable = index_of_error < number_of_error_variables;
+    if(embed_error_in_variable) {
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,FloatDP(dp));
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
-    FloatDPError& error=*error_ptr;
-    error += tm.error();
+    FloatDPError error=tm.error();
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         UniformConstReference<MultiIndex> xa=iter->index();
@@ -1151,6 +1172,12 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
             }
             r.expansion().append(ra,xv);
         }
+    }
+    if(embed_error_in_variable) {
+        // Store the upward-rounded bound as an exact coefficient.
+        r.expansion().begin()->coefficient()=error.raw();
+    } else {
+        r.error()=error;
     }
     return r;
 }
@@ -1281,7 +1308,7 @@ inline ValidatedVectorMultivariateFunctionPatch join(const ValidatedVectorMultiv
 }
 
 Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    GraphicsManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
+    DrawerManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {

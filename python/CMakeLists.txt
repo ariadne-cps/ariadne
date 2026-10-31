@@ -41,9 +41,6 @@ if(Python3_FOUND)
         CACHE STRING "Install destination for Python targets")
     install(TARGETS pyariadne DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
 
-    if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-        add_subdirectory(tests)
-    endif()
 
 else()
     if(PYTHON_ENFORCE_TESTS)

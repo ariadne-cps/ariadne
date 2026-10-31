@@ -42,19 +42,19 @@
 #include "algebra/matrix.hpp"
 
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_paving.hpp"
+#include "set/list_set.hpp"
+#include "paving/grid_paving.hpp"
 
-#include "solving/integrator.hpp"
-#include "solving/solver.hpp"
-#include "geometry/function_set.hpp"
+#include "integration/integrator.hpp"
+#include "equation-solving/equation_solver.hpp"
+#include "set/function_set.hpp"
 
 #include "dynamics/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
-#include "io/figure.hpp"
+#include "rendering/figure.hpp"
 #include "logging/progress_indicator.hpp"
-#include "solving/linear_programming.hpp"
+#include "linear-programming/linear_programming.hpp"
 
 
 namespace Ariadne {
@@ -181,7 +181,7 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
     cells.mince(accuracy);
 
     LOGGING_PRINTLN("Evolving "<<cells.size()<<" cells");
-    ProgressIndicator indicator(cells.size());
+    ProgressIndicator indicator(static_cast<double>(cells.size()));
     for (auto const& cell : cells) {
         LOGGING_PRINTLN_AT(1,"evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());

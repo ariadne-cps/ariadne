@@ -1,9 +1,18 @@
-[submodule "submodules/threading"]
-	path = submodules/threading
-	url = https://github.com/ariadne-cps/threading
-[submodule "submodules/configuration"]
-	path = submodules/configuration
+[submodule "integration"]
+	path = ss/int
+	url = https://github.com/ariadne-cps/integration
+[submodule "equation-solving"]
+	path = ss/equ
+	url = https://github.com/ariadne-cps/equation-solving
+[submodule "smt"]
+	path = ss/smt
+	url = https://github.com/ariadne-cps/smt
+[submodule "sat"]
+	path = ss/sat
+	url = https://github.com/ariadne-cps/sat
+[submodule "labelled"]
+	path = ss/lab
+	url = https://github.com/ariadne-cps/labelled
+[submodule "configuration"]
+	path = ss/cfg
 	url = https://github.com/ariadne-cps/configuration
-[submodule "submodules/algebra"]
-	path = submodules/algebra
-	url = https://github.com/ariadne-cps/algebra

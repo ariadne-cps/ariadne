@@ -39,12 +39,13 @@
 #include "function/function_model.hpp"
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 #include "logging/logging.hpp"
-#include "solving/integrator_interface.hpp"
-#include "solving/inclusion_integrator.hpp"
-#include "solving/configuration_interface.hpp"
+#include "integration/integrator_interface.hpp"
+#include "integration/inclusion_integrator.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "differential_inclusion.hpp"
+#include "evolution/traits.hpp"
 
 
 namespace Ariadne {
@@ -126,7 +127,7 @@ class DifferentialInclusionEvolver {
   public:
     typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
     typedef DifferentialInclusion SystemType;
-    typedef SystemType::EnclosureType EnclosureType;
+    typedef typename EvolutionTraits<SystemType>::EnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
   protected:
     SystemType _system;

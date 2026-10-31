@@ -29,10 +29,10 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_HPP
 
-#include "solving/configuration_interface.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "geometry/set.hpp"
-#include "geometry/grid_paving.hpp"
-#include "geometry/function_set.hpp"
+#include "paving/grid_paving.hpp"
+#include "set/function_set.hpp"
 
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"

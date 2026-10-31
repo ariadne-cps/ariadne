@@ -34,19 +34,19 @@
 
 #include <memory>
 
-#include "utility/macros.hpp"
+#include "macro/general.hpp"
 #include "utility/stlio.hpp"
 #include "numeric/declarations.hpp"
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
 #include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_paving.hpp"
-#include "geometry/curve.hpp"
+#include "set/function_set.hpp"
+#include "set/list_set.hpp"
+#include "paving/grid_paving.hpp"
+#include "set/curve.hpp"
 
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
@@ -168,11 +168,6 @@ template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(Discrete
 
 inline HybridGridTreePaving inner_approximation(const EffectiveHybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
     HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
-
-
-class HybridAutomatonInterface;
-
-HybridGridTreePaving extend_auxiliary(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& ha);
 
 
 } // namespace Ariadne

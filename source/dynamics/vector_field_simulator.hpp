@@ -33,7 +33,7 @@
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
-#include "solving/configuration_interface.hpp"
+#include "dynamics/configuration_interface.hpp"
 #include "dynamics/vector_field.hpp"
 #include "dynamics/orbit.hpp"
 
@@ -50,7 +50,7 @@ enum class DiscretisationType
   Recombine
 };
 
-OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
+inline OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
     if(dtype == DiscretisationType::Mince){ os << "Mince"; }
     else if(dtype == DiscretisationType::Recombine){ os << "Recombine"; }

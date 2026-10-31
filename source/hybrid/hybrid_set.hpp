@@ -34,19 +34,20 @@
 
 #include <memory>
 
-#include "utility/macros.hpp"
+#include "macro/general.hpp"
 #include "utility/stlio.hpp"
 #include "numeric/declarations.hpp"
 #include "algebra/declarations.hpp"
 #include "function/declarations.hpp"
 #include "geometry/declarations.hpp"
 #include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_paving.hpp"
-#include "geometry/curve.hpp"
+#include "set/function_set.hpp"
+#include "set/list_set.hpp"
+#include "paving/grid_paving.hpp"
+#include "set/curve.hpp"
 
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
+#include "labelled/set.hpp"
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
@@ -208,7 +209,7 @@ template<class IVL> class HybridBox
     typedef typename IVL::UpperBoundType UB;
   public:
     explicit HybridBox(const DiscreteLocation& loc, const VariablesBox<IVL>& bx)
-        : HybridBox(loc,bx.operator LabelledSet<Box<IVL>>()) { }
+        : HybridBox(loc,LabelledSet<Box<IVL>>(bx)) { }
     HybridBox(const DiscreteLocation& loc, const List<VariableInterval<UB>>& bnds)
         : HybridBox(loc,_make_box(bnds)) { }
     HybridBox(const DiscreteLocation& loc, const InitializerList<VariableInterval<UB>>& bnds)
@@ -316,7 +317,7 @@ class HybridValidatedConstrainedImageSet
 
     friend OutputStream& operator<<(OutputStream& os, const HybridValidatedConstrainedImageSet& hset) { return os << static_cast<const Base&>(hset); }
   protected:
-    virtual ValidatedConstrainedImageSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override {
+    virtual EuclideanSetInterfaceBase* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override {
         static_cast<void>(loc);
         static_cast<void>(spc);
         ARIADNE_ASSERT(loc==this->location());

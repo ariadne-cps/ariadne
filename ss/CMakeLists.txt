@@ -1,0 +1,17 @@
+# Resolve by the logical repository names from .gitmodules, rather than
+# assuming a particular submodule checkout path in lower repositories.
+if(NOT TARGET integration)
+    ariadne_add_submodule(integration)
+endif()
+if(NOT TARGET equation_solving)
+    ariadne_add_submodule(equation-solving)
+endif()
+if(NOT TARGET labelled)
+    ariadne_add_submodule(labelled)
+endif()
+if(NOT TARGET smt)
+    ariadne_add_submodule(smt)
+endif()
+if(NOT TARGET sat)
+    ariadne_add_submodule(sat)
+endif()

@@ -11,7 +11,7 @@
 #include "geometry/box.hpp"
 #include "dynamics/enclosure.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 

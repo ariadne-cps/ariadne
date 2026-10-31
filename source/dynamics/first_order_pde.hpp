@@ -30,6 +30,7 @@
 
 #include "numeric/float.decl.hpp"
 #include "numeric/real.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/tensor.hpp"
 #include "function/function.decl.hpp"
 

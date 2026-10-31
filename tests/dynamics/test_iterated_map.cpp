@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -39,13 +40,14 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
+#include "set/list_set.hpp"
+#include "system/iterated_map.hpp"
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
+#include "labelled/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -71,7 +73,7 @@ class TestIteratedMap
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     TestIteratedMap().test();
     return ARIADNE_TEST_FAILURES;
 }

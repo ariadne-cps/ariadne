@@ -35,7 +35,6 @@
 #include "utility/stlio.hpp"
 #include "symbolic/space.hpp"
 #include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
 
 
 namespace Ariadne {
@@ -44,8 +43,6 @@ class LocationException : public std::runtime_error {
   public:
     LocationException(const StringType& what) : std::runtime_error(what) { }
 };
-
-class HybridGridTreePaving;
 
 class HybridSpaceInterface
 {
@@ -66,26 +63,6 @@ class HybridSpaceInterface
 class HybridSpace
 {
   public:
-    //! \brief The canonical type used for bounding sets in the space.
-    typedef HybridExactBoxes BoundingDomainType;
-    //! \brief The interface satisified by bounded sets in the space.
-    typedef EffectiveHybridBoundedSetInterface BoundedSetInterfaceType;
-    //! \brief The interface satisified by overt sets in the space.
-    typedef EffectiveHybridOvertSetInterface OvertSetInterfaceType;
-    //! \brief The interface satisified by over sets in the space.
-    typedef EffectiveHybridOpenSetInterface OpenSetInterfaceType;
-    //! \brief The interface satisified by closed sets in the space.
-    typedef EffectiveHybridClosedSetInterface ClosedSetInterfaceType;
-    //! \brief The interface satisified by compact sets in the space.
-    typedef EffectiveHybridCompactSetInterface CompactSetInterfaceType;
-    //! \brief The interface satisified by regular sets in the space.
-    typedef EffectiveHybridRegularSetInterface RegularSetInterfaceType;
-    //! \brief The interface satisified by located sets in the space.
-    typedef EffectiveHybridLocatedSetInterface LocatedSetInterfaceType;
-    //! \brief The interface satisified by located sets in the space.
-    typedef EffectiveHybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
-    //! \brief The type of approximations to sets in the space.
-    typedef HybridGridTreePaving SetApproximationType;
   public:
     HybridSpace(const HybridSpaceInterface& hspc) : _ptr(hspc.clone()) { }
     HybridSpace(const HybridSpaceInterface* hspc_ptr) : _ptr(hspc_ptr) { }

@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -34,15 +35,15 @@
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "solving/integrator.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/list_set.hpp"
+#include "integration/integrator.hpp"
+#include "expression-set/expression_set.hpp"
 #include "dynamics/vector_field_simulator.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
+#include "labelled/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -75,9 +76,9 @@ class TestVectorFieldSimulator
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
 
-        SizeType trajectory_number = 4;
+        Nat trajectory_number = 4;
 
-        for (SizeType t=1; t<=trajectory_number; t++) {
+        for (Nat t=1; t<=trajectory_number; t++) {
             simulator.configuration().insert_subspace(x, t);
             ARIADNE_TEST_PRINT(simulator.configuration());
 
@@ -109,10 +110,10 @@ class TestVectorFieldSimulator
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
 
-        SizeType trajectory_number = 4;
+        Nat trajectory_number = 4;
 
-        for (SizeType first=1; first<=trajectory_number; first++) {
-            for (SizeType second=1; second<=trajectory_number; second++){
+        for (Nat first=1; first<=trajectory_number; first++) {
+            for (Nat second=1; second<=trajectory_number; second++){
                 simulator.configuration().insert_subspace(x, first);
                 simulator.configuration().insert_subspace(y, second);
                 ARIADNE_TEST_PRINT(simulator.configuration());
@@ -187,7 +188,7 @@ class TestVectorFieldSimulator
 
         Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
 
-        LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
+        LabelledFigure fig({-2.5_dec<=x<=2.5_dec,-3<=y<=3});
         fig << orbit;
         fig.write("test_real_box_list_vector_field_simulator_xy");
 
@@ -199,7 +200,7 @@ class TestVectorFieldSimulator
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     TestVectorFieldSimulator().test();
     return ARIADNE_TEST_FAILURES;
 }

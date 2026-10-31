@@ -27,18 +27,20 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/list_set.hpp"
+#include "expression-set/expression_set.hpp"
+#include "system/vector_field.hpp"
 #include "dynamics/vector_field.hpp"
-#include "io/command_line_interface.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -72,7 +74,7 @@ class TestVectorField
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
     TestVectorField().test();
     return ARIADNE_TEST_FAILURES;
 }

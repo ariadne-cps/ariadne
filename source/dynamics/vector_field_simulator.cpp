@@ -35,13 +35,13 @@
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "symbolic/expression_set.hpp"
+#include "expression-set/expression_set.hpp"
 
 #include "function/function.hpp"
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
-#include "solving/runge_kutta_integrator.hpp"
+#include "integration/runge_kutta_integrator.hpp"
 
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field.hpp"
@@ -238,7 +238,7 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
     RungeKutta4Integrator integrator(_configuration->step_size().get_d());
     Point<FloatDPApproximation> state_pt = initial;
 
-    Int old_precision = std::clog.precision();
+    std::streamsize old_precision = std::clog.precision();
     LOGGING_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
     while(decide(t<tmax)) {
         state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());

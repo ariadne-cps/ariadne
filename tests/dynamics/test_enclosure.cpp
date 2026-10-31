@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -35,16 +36,16 @@
 #include "function/taylor_function.hpp"
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/function_set.hpp"
-#include "solving/integrator.hpp"
-#include "symbolic/expression_set.hpp"
-#include "io/figure.hpp"
-#include "io/drawer.hpp"
-#include "io/graphics_manager.hpp"
+#include "set/list_set.hpp"
+#include "set/function_set.hpp"
+#include "integration/integrator.hpp"
+#include "expression-set/expression_set.hpp"
+#include "labelled/figure.hpp"
+#include "drawing/drawer.hpp"
+#include "drawing/drawer_manager.hpp"
 #include "logging/logging.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 
 using namespace Ariadne;
@@ -59,6 +60,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_is_bounded());
         ARIADNE_TEST_CALL(test_subset_separated());
         ARIADNE_TEST_CALL(test_restriction());
+        ARIADNE_TEST_CALL(test_kuhn_reconditioning_encloses_original());
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
         ARIADNE_TEST_CALL(test_split());
@@ -115,6 +117,22 @@ class TestEnclosure
         ExactBoxType box2({{0.5_x,1.5_x},{1.5_x,2.5_x}});
         auto encl2 = restriction(encl,box2);
         ARIADNE_TEST_ASSERT(definitely(encl2.subset(codomain1)));
+    }
+
+    // Discard all original parameters and preserve the represented set.
+    Void test_kuhn_reconditioning_encloses_original() const {
+        ExactBoxType original({{-1.0_x,1.0_x},{-2.0_x,2.0_x}});
+        auto swp=ThresholdSweeper<FloatDP>(dp,1e-8);
+        EnclosureConfiguration configuration{TaylorFunctionFactory(swp)};
+        configuration.set_reconditioning_num_blocks(1u);
+        Enclosure encl(original,configuration);
+        ExactBoxType before=encl.codomain();
+        encl.kuhn_recondition();
+        ARIADNE_TEST_EQUALS(encl.number_of_parameters(),2u);
+        // Non-strict inclusion is required: equal boundaries are permitted.
+        ARIADNE_TEST_PRINT(before);
+        ARIADNE_TEST_PRINT(encl.codomain());
+        ARIADNE_TEST_ASSERT(before.subset(encl.codomain()));
     }
 
     Void test_auxiliary_map() const {
@@ -213,7 +231,7 @@ class TestEnclosure
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);
-        GraphicsManager::instance().set_drawer(drawer);
+        DrawerManager::instance().set_drawer(drawer);
         ExactBoxType dom({{0.0_x,1.0_x},{1.0_x,2.0_x}});
         auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp),0);
@@ -222,7 +240,7 @@ class TestEnclosure
         Enclosure encl(dom,fnc,configuration);
         RealVariable x("x"),y("y");
         LabelledEnclosure lencl(encl,RealSpace({x,y}));
-        LabelledFigure fig(Axes2d(-1.0<=x<=1.0,-1.5<=y<=1.5));
+        LabelledFigure fig(Axes2d(-1.0_dec<=x<=1.0_dec,-1.5_dec<=y<=1.5_dec));
         fig << line_style(true) << lencl;
         fig.write(("test_enclosure_"+suffix).c_str());
     }
@@ -243,9 +261,9 @@ class TestEnclosure
         encl.set_auxiliary_mapping(auxiliary);
         RealVariable x("x"), y("y"), z("z");
         LabelledEnclosure lencl(encl,RealSpace({x,y}),RealSpace({z}));
-        LabelledFigure fig(Axes2d(-1.0<=x<=3,-1<=z<=11));
+        LabelledFigure fig(Axes2d(-1.0_dec<=x<=3,-1<=z<=11));
         fig << lencl;
-        GraphicsManager::instance().set_drawer(AffineDrawer(1));
+        DrawerManager::instance().set_drawer(AffineDrawer(1));
         fig.write("test_enclosure_auxiliary");
     }
 };

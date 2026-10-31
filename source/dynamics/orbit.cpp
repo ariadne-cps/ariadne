@@ -32,10 +32,10 @@
 
 #include "geometry/box.hpp"
 #include "geometry/point.hpp"
-#include "geometry/curve.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "io/figure.hpp"
+#include "set/curve.hpp"
+#include "set/function_set.hpp"
+#include "set/list_set.hpp"
+#include "rendering/figure.hpp"
 
 namespace Ariadne {
 

@@ -1,12 +1,9 @@
 set(UNIT_TESTS
-    test_hybrid_automaton
-    test_hybrid_evolution    
-    test_hybrid_evolver
-    test_hybrid_graphics
-    test_hybrid_enclosure
+
+    # Graphics-only executable has no automatic behavioral assertions.
+
     test_hybrid_set
-    test_hybrid_simulator
-    test_hybrid_reachability
+
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -18,3 +15,4 @@ endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+

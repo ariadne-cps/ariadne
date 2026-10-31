@@ -36,7 +36,7 @@
 #include "utility/stlio.hpp"
 
 #include "numeric/builtin.hpp"
-#include "geometry/grid.hpp"
+#include "paving/grid.hpp"
 #include "symbolic/variable.hpp"
 
 namespace Ariadne {

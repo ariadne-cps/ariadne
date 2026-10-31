@@ -1,0 +1,65 @@
+name: Windows
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  build-test:
+    name: ${{ matrix.config.name }} [${{ matrix.build_type }}]
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+        config:
+          - { name: "Windows 2025 x86 MSVC", os: windows-2025, arch: x64 }
+          - { name: "Windows 11 arm MSVC", os: windows-11-arm, arch: arm64 }
+
+    steps:
+      - name: Enable long paths in Git
+        shell: pwsh
+        run: git config --system core.longpaths true
+
+      - uses: actions/checkout@v7
+
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: ${{ matrix.config.arch }}
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.11
+        with:
+          version: "v0.18.0"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Configure CMake
+        run: |
+          # /Z7 avoids concurrent compiler PDB writes in Debug.
+          cmake -S . -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_FLAGS_DEBUG="/Z7 /Ob0 /Od /RTC1" `
+            -DBUILD_PYTHON_BINDINGS=OFF `
+            -DWARNINGS_AS_ERRORS=ON
+
+      - name: Build Ariadne
+        run: cmake --build build --parallel --target ariadne
+
+      - name: Build C++ tests (Debug only)
+        if: matrix.build_type == 'Debug'
+        run: cmake --build build --parallel --target tests
+
+      - name: Test legacy dynamics/hybrid C++
+        if: matrix.build_type == 'Debug'
+        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure --timeout 240

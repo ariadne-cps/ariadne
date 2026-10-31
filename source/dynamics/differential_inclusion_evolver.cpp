@@ -27,8 +27,8 @@
 #include "function/function_patch.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
-#include "solving/integrator.hpp"
-#include "solving/bounder.hpp"
+#include "integration/integrator.hpp"
+#include "integration/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "logging/progress_indicator.hpp"
 
@@ -433,7 +433,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
         return;
     }
 
-    Nat number_of_variables_to_remove = m - this->_number_of_parameters_to_keep;
+    SizeType number_of_variables_to_remove = m - this->_number_of_parameters_to_keep;
     LOGGING_PRINTLN_AT(1, "Number of parameters to remove:" << _number_of_parameters_to_keep);
 
     for (auto j : range(number_of_variables_to_remove)) {

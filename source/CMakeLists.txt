@@ -1,9 +1,5 @@
-link_libraries(threading algebra)
-
-add_subdirectory(function)
-add_subdirectory(solving)
-add_subdirectory(geometry)
-add_subdirectory(dynamics)
-add_subdirectory(symbolic)
-add_subdirectory(io)
+# Dependency order: labelled -> hybrid -> system -> evolution -> analysis.
 add_subdirectory(hybrid)
+add_subdirectory(system)
+add_subdirectory(evolution)
+add_subdirectory(analysis)

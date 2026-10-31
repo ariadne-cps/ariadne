@@ -30,10 +30,25 @@
 #define ARIADNE_DISCRETE_LOCATION_HPP
 
 #include <string>
+#include <stdexcept>
 #include "utility/container.hpp"
+// symbolic/variable.hpp instantiates conversions involving Real; define it first.
+#include "numeric/real.hpp"
 #include "symbolic/valuation.hpp"
 
 namespace Ariadne {
+
+class StateSpecificationError : public std::runtime_error {
+  public:
+    StateSpecificationError(const StringType& what) : std::runtime_error(what) { }
+};
+
+//! \brief Two discrete locations define different variables, but variables defined in both locations differ.
+class IndistinguishableLocationsError : public StateSpecificationError {
+  public:
+    IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
+};
+
 
 //! \ingroup SystemModule
 //! \brief Type of a  discrete location of a hybrid system.

@@ -27,6 +27,7 @@
 
 #include "config.hpp"
 #include "utility/tuple.hpp"
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
@@ -35,15 +36,15 @@
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "solving/integrator.hpp"
-#include "symbolic/expression_set.hpp"
+#include "set/list_set.hpp"
+#include "integration/integrator.hpp"
+#include "expression-set/expression_set.hpp"
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
-#include "io/figure.hpp"
-#include "io/command_line_interface.hpp"
+#include "labelled/figure.hpp"
+#include "drawing/drawing_command_line_interface.hpp"
 
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
 using namespace Ariadne;
 using namespace std;
@@ -62,7 +63,7 @@ public:
 
     Void test_single_trajectory() const {
 
-        typedef VectorField::EnclosureType EnclosureType;
+        typedef VectorFieldEvolver::EnclosureType EnclosureType;
 
         // Set up the evolution parameters and grid
         Real time(2.0_dec);
@@ -97,7 +98,7 @@ public:
         evolver.configuration().set_maximum_step_size(step_size);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        LabelledFigure fig(Axes2d(-2.25 <= x <= +2.25, -2.25 <= v <= +2.25));
+        LabelledFigure fig(Axes2d(-2.25_dec <= x <= +2.25_dec, -2.25_dec <= v <= +2.25_dec));
 
         // Define the initial set
         RealExpressionBoundedConstraintSet initial_set({0.95_dec <= x <= 1.05_dec, 0.45_dec <= v <= 0.55_dec});
@@ -224,7 +225,7 @@ public:
 
 Int main(Int argc, const char* argv[])
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+    if (not DrawingCommandLineInterface().acquire(argc,argv)) return -1;
 
     TestVectorFieldEvolver().test();
     return ARIADNE_TEST_FAILURES;

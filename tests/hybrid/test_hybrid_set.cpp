@@ -26,16 +26,19 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "utility/test.hpp"
+#include "macro/testing.hpp"
 
+#include "numeric/rational.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "function/function.hpp"
 
-#include "geometry/function_set.hpp"
+#include "set/function_set.hpp"
+#include "hybrid/hybrid_constraint_set.hpp"
+#include "hybrid/hybrid_bounded_constraint_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "io/figure.hpp"
+#include "labelled/figure.hpp"
 
 using namespace std;
 using namespace Ariadne;
@@ -45,6 +48,8 @@ class TestHybridSet {
 public:
     Void test() {
         ARIADNE_TEST_CALL(test_hybrid_list_set());
+        ARIADNE_TEST_CALL(test_hybrid_paving_separation());
+        ARIADNE_TEST_CALL(test_hybrid_initial_outer_approximation());
         //ARIADNE_TEST_CALL(test_compile_incorrect_hybrid_paving());
     }
 
@@ -104,6 +109,74 @@ public:
         ARIADNE_TEST_EQUAL(loc_iter->second.second, ls1);
         ++loc_iter;
         ARIADNE_TEST_ASSERT(loc_iter == hls.locations_end());
+    }
+
+    // ValidatedLowerKleenean(false) maps to UNLIKELY rather than FALSE:
+    // such lower predicates cannot prove the negation with not possibly().
+    // A location absent from the paving is disjoint from every box there.
+    // In particular, checking separation must never dereference map::end().
+    Void test_hybrid_paving_separation() {
+        DiscreteLocation loc(123);
+        RealVariable x("x");
+        RealSpace state_space({x});
+        MonolithicHybridSpace hybrid_space;
+        hybrid_space.new_location(loc,state_space);
+        HybridGridTreePaving paving{HybridGrid(hybrid_space)};
+        HybridExactBox box(loc,state_space,ExactBoxType({{0,1}}));
+        ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
+        ARIADNE_TEST_EQUAL(paving.overlaps(box).repr(), LogicalValue::UNLIKELY);
+        ARIADNE_TEST_EQUAL(paving.covers(box).repr(), LogicalValue::UNLIKELY);
+
+        // A present but empty Euclidean paving is separated as well.
+        paving[loc];
+        ARIADNE_TEST_ASSERT(definitely(paving.separated(box)));
+        ARIADNE_TEST_EQUAL(paving.overlaps(box).repr(), LogicalValue::UNLIKELY);
+        ARIADNE_TEST_EQUAL(paving.covers(box).repr(), LogicalValue::UNLIKELY);
+    }
+
+    // Isolate the bounding-box paving from hybrid evolution.
+    Void test_hybrid_initial_outer_approximation() {
+        DiscreteLocation loc;
+        RealVariable x("x"), v("v");
+        RealSpace state_space({x,v});
+        MonolithicHybridSpace hybrid_space;
+        hybrid_space.new_location(loc,state_space);
+        Dyadic height=2;
+        Dyadic radius=1/pow(two,6);
+        HybridBoundedConstraintSet initial(loc,
+            {height-radius<=x<=height+radius,-radius<=v<=radius});
+        // Probe the effective Euclidean interface before the paving call.
+        const auto euclidean=initial.euclidean_set(loc,state_space);
+        ARIADNE_TEST_EQUALS(euclidean.dimension(),2u);
+        ARIADNE_TEST_PRINT(euclidean.bounding_box());
+        // Exercise each abstract view of the same multiply inherited
+        // object. This used to dispatch via incompatible covariant thunks
+        // on MSVC Debug, before reaching the paving implementation.
+        const HybridSetInterfaceBase& as_base=initial;
+        const EffectiveHybridBoundedSetInterface& as_bounded=initial;
+        const EffectiveHybridClosedSetInterface& as_closed=initial;
+        const EffectiveHybridCompactSetInterface& as_compact=initial;
+        const EffectiveHybridLocatedSetInterface& as_located=initial;
+        const EffectiveHybridSetInterface& as_full=initial;
+        ARIADNE_TEST_EQUALS(as_base.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_bounded.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_closed.euclidean_set(loc,state_space).dimension(),2u);
+        auto from_compact=as_compact.euclidean_set(loc,state_space);
+        ARIADNE_TEST_EQUALS(from_compact.dimension(),2u);
+        // Upper bounds have three-valued geometric equality. We need
+        // identical endpoint representations across the two conversions.
+        ARIADNE_TEST_ASSERT(same(from_compact.bounding_box(),euclidean.bounding_box()));
+        ARIADNE_TEST_EQUALS(as_located.euclidean_set(loc,state_space).dimension(),2u);
+        ARIADNE_TEST_EQUALS(as_full.euclidean_set(loc,state_space).dimension(),2u);
+        HybridGridTreePaving paving{HybridGrid(hybrid_space)};
+        paving.adjoin_outer_approximation(initial,4u);
+        ARIADNE_TEST_ASSERT(paving.nontrivial_location(loc));
+        ARIADNE_TEST_ASSERT(paving.size()>0u);
+        // The domain is a RealBox; use an outward enclosure before
+        // converting to an exact box for the paving containment check.
+        const HybridUpperBoxes bounds=initial.bounding_box();
+        ExactBoxType initial_box=cast_exact_box(bounds.euclidean_set(loc,state_space));
+        ARIADNE_TEST_ASSERT(paving.euclidean_set(loc).superset(initial_box));
     }
 
     Void test_compile_incorrect_hybrid_paving() {

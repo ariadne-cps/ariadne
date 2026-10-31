@@ -1,0 +1,69 @@
+name: Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} [${{ matrix.build_type }}]
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release, Debug]
+        config:
+          - { name: "Ubuntu 24.04 x86 Clang 16", os: ubuntu-24.04, cxx: "clang++-16", pkg: "clang-16" }
+          - { name: "Ubuntu 24.04 arm Clang 16", os: ubuntu-24.04-arm, cxx: "clang++-16", pkg: "clang-16" }
+          - { name: "Ubuntu 24.04 x86 GCC 13", os: ubuntu-24.04, cxx: "g++-13", pkg: "g++-13", libstdcxx_debug: true }
+          - { name: "Ubuntu 24.04 arm GCC 13", os: ubuntu-24.04-arm, cxx: "g++-13", pkg: "g++-13", libstdcxx_debug: true }
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.11
+      with:
+        version: "v0.18.0"
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+
+    - name: Get Linux Concurrency
+      if: runner.os == 'Linux'
+      run: echo "NPROC=$(nproc)" >> "$GITHUB_ENV"
+
+    - name: Set Up Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build pkg-config ${{ matrix.config.pkg }}
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{ runner.workspace }}/build
+
+    - name: Configure CMake
+      env:
+        CXXFLAGS: ${{ matrix.build_type == 'Debug' && matrix.config.libstdcxx_debug && '-D_GLIBCXX_DEBUG' || '' }}
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=OFF
+
+    - name: Build Ariadne
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake --build . --parallel "$NPROC" --target ariadne
+
+    - name: Build C++ tests (Debug only)
+      if: matrix.build_type == 'Debug'
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake --build . --parallel "$NPROC" --target tests
+
+    - name: Test legacy dynamics/hybrid C++
+      if: matrix.build_type == 'Debug'
+      working-directory: ${{ runner.workspace }}/build
+      run: ctest -j "$NPROC" -LE python --output-on-failure

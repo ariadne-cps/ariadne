@@ -34,13 +34,11 @@
 #include "paving/paving_interface.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/identifier.hpp"
+#include "symbolic/space.hpp"
 #include "labelled/graphics_interface.hpp"
 #include "drawing/grid_paving_draw.hpp"
 
 namespace Ariadne {
-
-template<class T> class Space;
-using RealSpace = Space<Real>;
 
 typedef EffectiveVectorMultivariateFunction Mapping;
 

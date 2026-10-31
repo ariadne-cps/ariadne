@@ -2,6 +2,7 @@
 set(UNIT_TESTS
     test_hybrid_reachability
     test_storage_orbit_header
+    test_storage_header
 )
 
 foreach(TEST IN LISTS UNIT_TESTS)

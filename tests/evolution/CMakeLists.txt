@@ -4,6 +4,7 @@ set(UNIT_TESTS
     test_hybrid_evolution
     test_hybrid_evolver
     test_hybrid_simulator
+    test_pdes
 )
 
 foreach(TEST IN LISTS UNIT_TESTS)

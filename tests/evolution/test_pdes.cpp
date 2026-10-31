@@ -28,13 +28,14 @@
 #include "numeric/float_bounds.hpp"
 #include "algebra/tensor.hpp"
 
-#include "dynamics/first_order_pde.hpp"
+#include "system/first_order_pde.hpp"
+#include "evolution/first_order_pde.hpp"
 
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 
-#include "dynamics/1D_pde.hpp"
-#include "dynamics/2D_pde.hpp"
+#include "evolution/one_dimensional_wave_solver.hpp"
+#include "evolution/two_dimensional_wave_solver.hpp"
 
 using namespace Ariadne;
 using namespace std;

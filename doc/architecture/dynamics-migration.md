@@ -14,11 +14,20 @@ The build uses sources from their owning directories. Includes of the historical
 `dynamics/` paths are no longer supported; use the owning module's headers.
 This is an intentional source-compatibility break for external C++ consumers.
 
-The legacy `tests/dynamics/` executable organization is retained for now to
-preserve the original behavior-focused regression and its CTest names; the
-PDE regression itself now lives under `tests/evolution/test_first_order_pde.cpp`.
-A subsequent change can relocate other tests without conflating test
-ownership with production dependency direction.
+The former `tests/dynamics/` test sources have been reorganized by responsibility:
+propagation, enclosure and simulator tests live under `tests/evolution/`, while
+finite/infinite-time reachability and safety verification tests live under
+`tests/analysis/`. All twelve original test sources, executable names and CTest
+names are preserved; the Windows timeout for the infinite-time reachability test
+is also preserved. The PDE regression lives under `tests/evolution/`.
+
+Three model-only regression tests (`test_differential_inclusion`,
+`test_iterated_map`, `test_vector_field`) temporarily live under
+`tests/system_legacy/`. At the currently pinned standalone `system` revision,
+equivalent tests for all their construction, missing-dynamics and input
+validation cases could not be established. They remain active in Ariadne to
+avoid silently dropping coverage, while the external `system` submodule and
+its tests remain unchanged.
 
 **The boundary is about responsibility, not the input type**: numerical
 evolution of a PDE remains evolution regardless of whether the input model

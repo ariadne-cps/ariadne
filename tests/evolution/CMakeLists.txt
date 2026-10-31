@@ -9,11 +9,26 @@ set(UNIT_TESTS
     test_orbit_evolution_header
 )
 
+# Former dynamics tests focused on numerical propagation.
+set(MIGRATED_EVOLUTION_TESTS
+    test_differential_inclusion_evolver
+    test_enclosure
+    test_enclosure_precision
+    test_iterated_map_evolver
+    test_vector_field_evolver
+    test_vector_field_simulator
+)
+list(APPEND UNIT_TESTS ${MIGRATED_EVOLUTION_TESTS})
+
 foreach(TEST IN LISTS UNIT_TESTS)
     add_executable(${TEST} ${TEST}.cpp)
     target_link_libraries(${TEST} ariadne)
     add_test(${TEST} ${TEST})
-    set_property(TEST ${TEST} PROPERTY LABELS "hybrid")
+    if(TEST IN_LIST MIGRATED_EVOLUTION_TESTS)
+        set_property(TEST ${TEST} PROPERTY LABELS "evolution")
+    else()
+        set_property(TEST ${TEST} PROPERTY LABELS "hybrid")
+    endif()
 endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})

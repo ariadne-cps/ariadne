@@ -1,6 +1,6 @@
 # Reachability and higher-level analysis, never referenced by lower layers.
 add_library(ariadne-analysis OBJECT
-    ../dynamics/reachability_analyser.cpp
+    reachability_analyser.cpp
     hybrid_reachability_analyser.cpp
     hybrid_storage_orbit.cpp
 )

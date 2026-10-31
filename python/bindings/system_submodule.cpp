@@ -36,8 +36,8 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "dynamics/iterated_map.hpp"
-#include "dynamics/vector_field.hpp"
+#include "system/iterated_map.hpp"
+#include "system/vector_field.hpp"
 
 
 using namespace Ariadne;

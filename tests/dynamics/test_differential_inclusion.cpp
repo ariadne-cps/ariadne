@@ -33,7 +33,8 @@
 #include "set/function_set.hpp"
 
 #include "system/differential_inclusion.hpp"
-#include "dynamics/differential_inclusion.hpp"
+#include "system/differential_inclusion.hpp"
+#include "paving/grid.hpp"
 
 
 #include "macro/testing.hpp"

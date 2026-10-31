@@ -8,7 +8,7 @@
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
 #include "geometry/box.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 
 #include "macro/testing.hpp"
 

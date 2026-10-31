@@ -48,7 +48,7 @@
 #include "hybrid/hybrid_graphics_interface.hpp"
 
 #include "geometry/box.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 
 
 namespace Ariadne {

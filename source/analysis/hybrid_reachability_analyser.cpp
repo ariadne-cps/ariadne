@@ -48,7 +48,7 @@
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"
 
-#include "dynamics/reachability_analyser.tpl.hpp"
+#include "analysis/reachability_analyser.tpl.hpp"
 
 #include "system/hybrid_automaton_interface.hpp"
 

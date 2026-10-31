@@ -36,10 +36,10 @@
 
 #include "utility/tuple.hpp"
 
-#include "dynamics/iterated_map.hpp"
+#include "system/iterated_map.hpp"
 #include "function/function_interface.hpp"
-#include "dynamics/configuration_interface.hpp"
-#include "dynamics/evolver_interface.hpp"
+#include "evolution/configuration_interface.hpp"
+#include "evolution/evolver_interface.hpp"
 
 #include "logging/logging.hpp"
 

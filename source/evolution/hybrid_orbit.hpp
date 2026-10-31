@@ -41,7 +41,7 @@
 #include "hybrid/hybrid_set.hpp"
 #include "evolution/hybrid_enclosure.hpp"
 
-#include "dynamics/orbit.hpp"
+#include "evolution/orbit.hpp"
 
 namespace Ariadne {
 

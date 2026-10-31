@@ -33,7 +33,7 @@
 #include "function/function.hpp"
 #include "function/constraint.hpp"
 #include "function/taylor_function.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "set/list_set.hpp"
 #include "set/function_set.hpp"

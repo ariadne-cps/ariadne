@@ -9,7 +9,7 @@ file(GLOB evolution_sources
 
 foreach(source_file IN LISTS evolution_sources)
     file(STRINGS "${source_file}" forbidden_includes
-        REGEX "^[ \t]*#[ \t]*include[ \t]*[\"<](analysis/|dynamics/(storage|reachability_analyser))")
+        REGEX "^[ \t]*#[ \t]*include[ \t]*[\"<](analysis/|dynamics/)")
     if(forbidden_includes)
         message(FATAL_ERROR "Evolution source includes analysis via ${source_file}: ${forbidden_includes}")
     endif()

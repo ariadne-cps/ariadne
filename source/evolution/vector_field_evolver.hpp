@@ -37,11 +37,11 @@
 
 #include "utility/tuple.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "system/vector_field.hpp"
 #include "function/function_interface.hpp"
-#include "dynamics/configuration_interface.hpp"
+#include "evolution/configuration_interface.hpp"
 #include "integration/integrator_interface.hpp"
-#include "dynamics/evolver_interface.hpp"
+#include "evolution/evolver_interface.hpp"
 
 #include "threading/workload.hpp"
 

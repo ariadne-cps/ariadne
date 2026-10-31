@@ -35,15 +35,15 @@
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
-#include "dynamics/enclosure.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/enclosure.hpp"
+#include "evolution/orbit.hpp"
 
 #include "integration/integrator.hpp"
 
 #include "logging/logging.hpp"
 
-#include "dynamics/vector_field.hpp"
-#include "dynamics/vector_field_evolver.hpp"
+#include "system/vector_field.hpp"
+#include "evolution/vector_field_evolver.hpp"
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"

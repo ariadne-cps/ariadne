@@ -49,18 +49,18 @@
 #include "equation-solving/equation_solver.hpp"
 #include "set/function_set.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "system/vector_field.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/iterated_map_evolver.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser.hpp"
+#include "evolution/orbit.hpp"
+#include "evolution/iterated_map_evolver.hpp"
+#include "evolution/vector_field_evolver.hpp"
+#include "analysis/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
 #include "rendering/figure.hpp"
 #include "linear-programming/linear_programming.hpp"
 
-#include "dynamics/reachability_analyser.tpl.hpp"
+#include "analysis/reachability_analyser.tpl.hpp"
 
 
 namespace Ariadne {

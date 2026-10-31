@@ -43,7 +43,7 @@
 #include "set/function_set.hpp"
 #include "set/list_set.hpp"
 #include "set/curve.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 #include "threading/using.hpp"
 
 namespace Ariadne {

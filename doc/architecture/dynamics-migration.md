@@ -1,18 +1,18 @@
 # Migration of the former dynamics directory
 
-The obsolete `source/dynamics` directory is no longer a build unit. Its
-remaining headers are forwarding adapters for source compatibility.
+The obsolete `source/dynamics` directory has been removed. All internal consumers
+now include the owning system, evolution, or analysis headers directly.
 
 | Ownership | Files |
 |---|---|
-| `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition |
-| `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, differential inclusion gridding, first-order PDE evolution |
+| `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition and differential-inclusion gridding |
+| `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, first-order PDE evolution |
 | `analysis/` | reachability analyser, reachability interfaces and template implementation, storage used in reachability analysis |
-| `dynamics/` | forwarding headers only, to be deprecated in a future API-breaking release |
+| `dynamics/` | removed; former forwarding headers no longer supported |
 
-The build uses sources from their owning directories. A compatibility
-`#include "dynamics/name.hpp"` is permitted for existing consumers but no
-new lower-level implementation should depend on these forwarding headers.
+The build uses sources from their owning directories. Includes of the historical
+`dynamics/` paths are no longer supported; use the owning module's headers.
+This is an intentional source-compatibility break for external C++ consumers.
 
 The legacy `tests/dynamics/` executable organization is retained for now to
 preserve the original behavior-focused regression and its CTest names; the

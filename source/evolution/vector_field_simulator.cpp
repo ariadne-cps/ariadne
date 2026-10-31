@@ -42,9 +42,9 @@
 
 #include "integration/runge_kutta_integrator.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field.hpp"
-#include "dynamics/vector_field_simulator.hpp"
+#include "evolution/orbit.hpp"
+#include "system/vector_field.hpp"
+#include "evolution/vector_field_simulator.hpp"
 
 namespace Ariadne {
 

@@ -32,15 +32,15 @@
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "set/list_set.hpp"
 #include "integration/integrator.hpp"
 #include "expression-set/expression_set.hpp"
-#include "dynamics/vector_field_simulator.hpp"
+#include "evolution/vector_field_simulator.hpp"
 #include "labelled/figure.hpp"
 #include "drawing/drawing_command_line_interface.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/orbit.hpp"
 
 #include "macro/testing.hpp"
 

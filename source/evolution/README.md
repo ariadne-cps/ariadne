@@ -12,3 +12,4 @@ Two legacy `Enclosure` methods still mention `Storage` in their signatures
 for compatibility, but are defined in `analysis/enclosure_storage.cpp`.
 New evolution APIs must not expose analysis storage types.
 The evolution CTest dependency guard checks direct include regressions.
+The obsolete `source/dynamics/` forwarding headers have been removed.

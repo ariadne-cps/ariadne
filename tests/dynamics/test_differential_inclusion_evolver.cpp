@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dynamics/differential_inclusion_evolver.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/differential_inclusion_evolver.hpp"
+#include "evolution/orbit.hpp"
 #include "algebra/sweeper.hpp"
 #include "integration/integrator.hpp"
 #include "geometry/box.hpp"

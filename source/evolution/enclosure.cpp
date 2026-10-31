@@ -29,7 +29,7 @@
 #include "function/constraint.hpp"
 #include "function/formula.hpp"
 #include "function/procedure.hpp"
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 
 #include "macro/general.hpp"
 #include "utility/exceptions.hpp"

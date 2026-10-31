@@ -33,9 +33,9 @@
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
-#include "dynamics/configuration_interface.hpp"
-#include "dynamics/vector_field.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/configuration_interface.hpp"
+#include "system/vector_field.hpp"
+#include "evolution/orbit.hpp"
 
 #include "threading/workload.hpp"
 #include "threading/using.hpp"

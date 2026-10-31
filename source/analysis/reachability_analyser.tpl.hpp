@@ -49,7 +49,7 @@
 #include "equation-solving/equation_solver.hpp"
 #include "set/function_set.hpp"
 
-#include "dynamics/reachability_analyser.hpp"
+#include "analysis/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
 #include "rendering/figure.hpp"

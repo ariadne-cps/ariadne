@@ -54,7 +54,7 @@ namespace Ariadne {
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "set/curve.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/orbit.hpp"
 #include "analysis/storage_orbit.hpp"
 
 #include "integration/integrator.hpp"
@@ -69,10 +69,10 @@ namespace Ariadne {
 #include "evolution/hybrid_time.hpp"
 #include "system/hybrid_automata.hpp"
 
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/differential_inclusion_evolver.hpp"
-#include "dynamics/vector_field_simulator.hpp"
-#include "dynamics/iterated_map_evolver.hpp"
+#include "evolution/vector_field_evolver.hpp"
+#include "evolution/differential_inclusion_evolver.hpp"
+#include "evolution/vector_field_simulator.hpp"
+#include "evolution/iterated_map_evolver.hpp"
 #include "evolution/hybrid_evolver.hpp"
 #include "evolution/hybrid_simulator.hpp"
 #include "analysis/hybrid_reachability_analyser.hpp"

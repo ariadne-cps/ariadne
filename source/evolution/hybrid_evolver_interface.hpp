@@ -29,7 +29,7 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "dynamics/evolver_interface.hpp"
+#include "evolution/evolver_interface.hpp"
 
 #include "evolution/hybrid_time.hpp"
 #include "hybrid/hybrid_set.decl.hpp"

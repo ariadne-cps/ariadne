@@ -34,7 +34,7 @@
 #include "evolution/hybrid_time.hpp"
 #include "system/hybrid_automaton_interface.hpp"
 #include "evolution/hybrid_evolver.hpp"
-#include "dynamics/orbit.hpp"
+#include "evolution/orbit.hpp"
 
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"

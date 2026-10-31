@@ -29,15 +29,15 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_HPP
 
-#include "dynamics/configuration_interface.hpp"
+#include "evolution/configuration_interface.hpp"
 #include "geometry/set.hpp"
 #include "paving/grid_paving.hpp"
 #include "set/function_set.hpp"
 
-#include "dynamics/enclosure.hpp"
+#include "evolution/enclosure.hpp"
 #include "analysis/storage_orbit.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser_interface.hpp"
+#include "evolution/vector_field_evolver.hpp"
+#include "analysis/reachability_analyser_interface.hpp"
 
 #include "logging/logging.hpp"
 

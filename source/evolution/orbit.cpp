@@ -27,7 +27,7 @@
 
 #include <utility>
 
-#include "dynamics/orbit.hpp"
+#include "evolution/orbit.hpp"
 
 #include "geometry/box.hpp"
 #include "geometry/point.hpp"

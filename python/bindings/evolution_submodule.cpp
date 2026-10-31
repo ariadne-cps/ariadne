@@ -25,11 +25,11 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field_simulator.hpp"
-#include "dynamics/iterated_map_evolver.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser.hpp"
+#include "evolution/orbit.hpp"
+#include "evolution/vector_field_simulator.hpp"
+#include "evolution/iterated_map_evolver.hpp"
+#include "evolution/vector_field_evolver.hpp"
+#include "analysis/reachability_analyser.hpp"
 
 
 using namespace Ariadne;

@@ -21,13 +21,12 @@ finite/infinite-time reachability and safety verification tests live under
 names are preserved; the Windows timeout for the infinite-time reachability test
 is also preserved. The PDE regression lives under `tests/evolution/`.
 
-Three model-only regression tests (`test_differential_inclusion`,
-`test_iterated_map`, `test_vector_field`) temporarily live under
-`tests/system_legacy/`. At the currently pinned standalone `system` revision,
-equivalent tests for all their construction, missing-dynamics and input
-validation cases could not be established. They remain active in Ariadne to
-avoid silently dropping coverage, while the external `system` submodule and
-its tests remain unchanged.
+Only `tests/evolution/` and `tests/analysis/` remain in this repository.
+The old model-only `test_differential_inclusion`, `test_iterated_map`, and
+`test_vector_field` have been removed here: the `system` repository is the
+sole owner of those tests. Their exact historical cases have **not** been
+ported to that repository by this change, so some scenario-specific coverage
+is intentionally lost in Ariadne; the `system` submodule is unchanged.
 
 **The boundary is about responsibility, not the input type**: numerical
 evolution of a PDE remains evolution regardless of whether the input model

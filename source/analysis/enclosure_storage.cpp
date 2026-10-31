@@ -1,9 +1,12 @@
 // Adapters between evolved enclosures and analysis-level grid storage.
 #include "function/functional.hpp"
+#include "function/constraint.hpp"
+#include "set/function_set.hpp"
 #include "analysis/storage.hpp"
 #include "evolution/enclosure.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/space.hpp"
+#include "labelled/figure.hpp"
 #include "logging/logging.hpp"
 
 namespace Ariadne {

@@ -26,10 +26,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         "equation-solving|configuration"
         "smt|configuration"
         "sat|configuration"
-        "labelled|configuration"
+        "hybrid|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
-        "labelled|expression-set|symbolic"
+        "hybrid|labelled|expression-set|symbolic"
         "smt|symbolic"
     )
     require_same_dependency_commit(EquationSolving CHAINS
@@ -39,7 +39,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Function CHAINS
         "integration|function"
         "equation-solving|function"
-        "labelled|expression-set|symbolic|function"
+        "hybrid|labelled|expression-set|symbolic|function"
     )
     require_same_dependency_commit(Cdcl CHAINS
         "smt|cdcl"
@@ -47,7 +47,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Bdd CHAINS
         "sat|bdd"
-        "labelled|drawing|paving|bdd"
+        "hybrid|labelled|drawing|paving|bdd"
     )
     require_same_dependency_commit(Threading CHAINS
         "smt|threading"
@@ -55,13 +55,13 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(ConstraintSolving CHAINS
         "smt|constraint-solving"
-        "labelled|expression-set|set|constraint-solving"
+        "hybrid|labelled|expression-set|set|constraint-solving"
     )
 endif()
 
 setup_project()
 
-# Legacy dynamics/hybrid code still includes "config.hpp".
+# Remaining legacy dynamics/system code still includes "config.hpp".
 # Generate it in the build tree, not the source checkout.
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/generated")
 configure_file(
@@ -73,7 +73,7 @@ include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)
 
-# The four ordered internal object modules are Ariadne-owned.
+# The three ordered internal object modules are Ariadne-owned; hybrid is external.
 # All other code is
 # provided by upstream submodules and their transitively exposed dependencies.
 # These transitional modules do not annotate exported symbols. On Windows,
@@ -87,7 +87,6 @@ else()
 endif()
 add_library(ariadne ${_ariadne_library_type}
     $<TARGET_OBJECTS:ariadne-system>
-    $<TARGET_OBJECTS:ariadne-hybrid>
     $<TARGET_OBJECTS:ariadne-evolution>
     $<TARGET_OBJECTS:ariadne-analysis>
 )
@@ -95,7 +94,7 @@ add_library(ariadne ${_ariadne_library_type}
 # Collect dependency objects exactly once, preserving the standalone
 # repositories' aggregate interface and avoiding duplicate object linkage.
 set(_ariadne_external_objects)
-foreach(_dependency integration equation_solving smt sat labelled)
+foreach(_dependency integration equation_solving smt sat hybrid)
     get_target_property(_objects ${_dependency} ARIADNE_PROJECT_OBJECT_TARGETS)
     if(_objects)
         list(APPEND _ariadne_external_objects ${_objects})

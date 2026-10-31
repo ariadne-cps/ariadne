@@ -9,4 +9,4 @@ add_library(ariadne-system OBJECT
     hybrid_paving.cpp
 )
 set_target_properties(ariadne-system PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(ariadne-system PUBLIC ariadne-hybrid)
+target_link_libraries(ariadne-system PUBLIC hybrid)

@@ -13,6 +13,6 @@
 [submodule "configuration"]
 	path = ss/cfg
 	url = https://github.com/ariadne-cps/configuration
-[submodule "hybrid"]
-	path = ss/hyb
-	url = https://github.com/ariadne-cps/hybrid
+[submodule "system"]
+	path = ss/sys
+	url = https://github.com/ariadne-cps/system

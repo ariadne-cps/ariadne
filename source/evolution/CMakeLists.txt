@@ -3,7 +3,6 @@ add_library(ariadne-evolution OBJECT
     enclosure.cpp
     orbit.cpp
     differential_inclusion_evolver.cpp
-    differential_inclusion_grid.cpp
     iterated_map_evolver.cpp
     vector_field_evolver.cpp
     vector_field_simulator.cpp
@@ -14,4 +13,4 @@ add_library(ariadne-evolution OBJECT
     hybrid_evolver.cpp
 )
 set_target_properties(ariadne-evolution PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(ariadne-evolution PUBLIC ariadne-system integration equation_solving)
+target_link_libraries(ariadne-evolution PUBLIC system integration equation_solving)

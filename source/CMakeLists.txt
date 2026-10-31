@@ -1,5 +1,4 @@
-# The external hybrid submodule is initialized before local modules by ss/.
-# Internal dependency order: system -> evolution -> analysis.
-add_subdirectory(system)
+# System (and transitively Hybrid) is initialized by ss/.
+# Internal dependency order: evolution -> analysis.
 add_subdirectory(evolution)
 add_subdirectory(analysis)

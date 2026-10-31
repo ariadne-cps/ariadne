@@ -87,7 +87,7 @@ graph TD
     utility --> macro
 ```
 
-The top-level repository is `ariadne`. The hybrid representation layer is pinned as the direct Git submodule `ss/hyb`; its `labelled` dependency is provided transitively by `hybrid/ss/lab`, not as a separate Ariadne submodule. The hybrid module registers its object files for the aggregate Ariadne library, and the hybrid representation tests are maintained by that repository. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
+The top-level repository is `ariadne`. The system specification layer is pinned as direct Git submodule `ss/sys`. Its Hybrid and Labelled dependencies are transitively provided by `system/ss/hyb` and `system/ss/hyb/ss/lab`. System owns the dynamical-system specifications and standalone tests; Ariadne retains only evolution and analysis implementations. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `analysis`.
 - `analysis` uses `evolution`, `smt`, `sat`. See [commit constraints](#analysis-commit-constraints).

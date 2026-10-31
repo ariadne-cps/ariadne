@@ -26,10 +26,11 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         "equation-solving|configuration"
         "smt|configuration"
         "sat|configuration"
-        "hybrid|configuration"
+        "system|hybrid|configuration"
+        "system|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
-        "hybrid|labelled|expression-set|symbolic"
+        "system|hybrid|labelled|expression-set|symbolic"
         "smt|symbolic"
     )
     require_same_dependency_commit(EquationSolving CHAINS
@@ -39,7 +40,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Function CHAINS
         "integration|function"
         "equation-solving|function"
-        "hybrid|labelled|expression-set|symbolic|function"
+        "system|hybrid|labelled|expression-set|symbolic|function"
     )
     require_same_dependency_commit(Cdcl CHAINS
         "smt|cdcl"
@@ -47,7 +48,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Bdd CHAINS
         "sat|bdd"
-        "hybrid|labelled|drawing|paving|bdd"
+        "system|hybrid|labelled|drawing|paving|bdd"
     )
     require_same_dependency_commit(Threading CHAINS
         "smt|threading"
@@ -55,7 +56,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(ConstraintSolving CHAINS
         "smt|constraint-solving"
-        "hybrid|labelled|expression-set|set|constraint-solving"
+        "system|hybrid|labelled|expression-set|set|constraint-solving"
     )
 endif()
 
@@ -73,7 +74,7 @@ include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)
 
-# The three ordered internal object modules are Ariadne-owned; hybrid is external.
+# The two ordered internal object modules are Ariadne-owned; system and hybrid are external.
 # All other code is
 # provided by upstream submodules and their transitively exposed dependencies.
 # These transitional modules do not annotate exported symbols. On Windows,
@@ -86,7 +87,6 @@ else()
     set(_ariadne_library_type SHARED)
 endif()
 add_library(ariadne ${_ariadne_library_type}
-    $<TARGET_OBJECTS:ariadne-system>
     $<TARGET_OBJECTS:ariadne-evolution>
     $<TARGET_OBJECTS:ariadne-analysis>
 )
@@ -94,7 +94,7 @@ add_library(ariadne ${_ariadne_library_type}
 # Collect dependency objects exactly once, preserving the standalone
 # repositories' aggregate interface and avoiding duplicate object linkage.
 set(_ariadne_external_objects)
-foreach(_dependency integration equation_solving smt sat hybrid)
+foreach(_dependency integration equation_solving smt sat system)
     get_target_property(_objects ${_dependency} ARIADNE_PROJECT_OBJECT_TARGETS)
     if(_objects)
         list(APPEND _ariadne_external_objects ${_objects})

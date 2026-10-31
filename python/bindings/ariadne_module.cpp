@@ -1,9 +1,9 @@
 #include "pybind11.hpp"
 
-void evolution_submodule(pybind11::module& module);
-void analysis_submodule(pybind11::module& module);
+void evolution_submodule(pybind11::module&);
+void analysis_submodule(pybind11::module&);
 
-PYBIND11_MODULE(pyariadne, module) {
-    evolution_submodule(module);
-    analysis_submodule(module);
+void ariadne_module(pybind11::module& m) {
+    evolution_submodule(m);
+    analysis_submodule(m);
 }

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - decoupling
   pull_request:
 
 env:
@@ -67,3 +68,20 @@ jobs:
       if: matrix.build_type == 'Debug'
       working-directory: ${{ runner.workspace }}/build
       run: ctest -j "$NPROC" -LE python --output-on-failure
+
+  python-bindings:
+    name: Ubuntu Python bindings [Debug]
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Install build tools
+      run: sudo apt-get update && sudo apt-get install -y cmake ninja-build pkg-config clang-16
+    - name: Configure Python bindings
+      run: cmake -S . -B build-python -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++-16 -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON
+    - name: Build Python extension
+      run: cmake --build build-python --target pyariadne --parallel 2
+    - name: Import evolution and analysis Python bindings
+      run: ctest --test-dir build-python -R '^test_python_evolution_analysis_import$' --output-on-failure

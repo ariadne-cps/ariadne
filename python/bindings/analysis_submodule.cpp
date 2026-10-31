@@ -2,6 +2,8 @@
 #include "utilities.hpp"
 #include "analysis/reachability_analyser.hpp"
 #include "analysis/storage.hpp"
+#include "analysis/hybrid_storage.hpp"
+#include "analysis/hybrid_reachability_analyser.hpp"
 #include "evolution/vector_field_evolver.hpp"
 
 using namespace Ariadne;
@@ -60,6 +62,8 @@ Void export_reachability_analyser(pybind11::module& module, const char* name)
 
 void analysis_submodule(pybind11::module& module) {
     export_storage(module);
+    pybind11::class_<HybridStorage>(module,"HybridStorage");
+    pybind11::class_<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
     export_safety_certificate<ContinuousReachabilityAnalyser>(module,"SafetyCertificate");
     export_reachability_analyser<ContinuousReachabilityAnalyser,VectorFieldEvolver>(module,"ContinuousReachabilityAnalyser");
 }

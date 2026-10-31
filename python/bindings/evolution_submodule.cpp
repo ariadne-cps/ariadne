@@ -29,6 +29,9 @@
 #include "evolution/vector_field_simulator.hpp"
 #include "evolution/iterated_map_evolver.hpp"
 #include "evolution/vector_field_evolver.hpp"
+#include "evolution/hybrid_time.hpp"
+#include "evolution/hybrid_enclosure.hpp"
+#include "evolution/hybrid_simulator.hpp"
 
 
 using namespace Ariadne;
@@ -167,5 +170,16 @@ Void evolution_submodule(pybind11::module& module)
     export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
 
     export_vector_field_evolver_configuration(module);
+
+    // Hybrid evolution belongs here, not to a separate hybrid binding layer.
+    pybind11::class_<HybridTime>(module,"HybridTime")
+        .def(pybind11::init<Real,Integer>())
+        .def("continuous_time", &HybridTime::continuous_time)
+        .def("discrete_time", &HybridTime::discrete_time);
+    pybind11::class_<HybridEnclosure>(module,"HybridEnclosure")
+        .def("location", &HybridEnclosure::location)
+        .def("state_space", &HybridEnclosure::state_space);
+    pybind11::class_<HybridSimulator>(module,"HybridSimulator")
+        .def(pybind11::init<HybridSimulator::SystemType const&>());
 
 }

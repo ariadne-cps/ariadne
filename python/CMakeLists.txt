@@ -1,51 +1,54 @@
 set(Python3_FIND_VIRTUALENV FIRST)
 set(Python3_FIND_STRATEGY LOCATION)
 set(PYBIND11_FINDPYTHON ON)
-
 find_package(Python3 3.11 COMPONENTS Interpreter Development.Module)
-
 option(PYTHON_ENFORCE_TESTS "Enforce Python tests" OFF)
-
-if(Python3_FOUND)
-
-    message(STATUS "Python executable: ${Python3_EXECUTABLE}")
-    message(STATUS "Python version:    ${Python3_VERSION}")
-    message(STATUS "Python includes:   ${Python3_INCLUDE_DIRS}")
-    message(STATUS "Python SOABI:      ${Python3_SOABI}")
-
-    if(NOT TARGET pyariadne-algebra)
-        message(FATAL_ERROR "The Algebra Python binding target is required to build pyariadne.")
-    endif()
-
-    if(NOT TARGET pybind11::module)
-        get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
-        add_subdirectory(
-            "${PYTHON_COMMON_SOURCE_DIR}/pybind11"
-            "${CMAKE_CURRENT_BINARY_DIR}/pybind11"
-        )
-    endif()
-
-    add_subdirectory(bindings)
-
-    pybind11_add_module(pyariadne
-        $<TARGET_OBJECTS:pyariadne-module-obj>
-        $<TARGET_OBJECTS:pyariadne-bindings-obj>
-    )
-    target_link_libraries(pyariadne PRIVATE
-        ariadne
-        pyariadne-algebra
-    )
-    add_dependencies(bindings pyariadne)
-
-    set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}"
-        CACHE STRING "Install destination for Python targets")
-    install(TARGETS pyariadne DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
-
-
-else()
+if(NOT Python3_FOUND)
     if(PYTHON_ENFORCE_TESTS)
-        message(FATAL_ERROR "Python >= 3.11 with Interpreter and Development.Module components is required when PYTHON_ENFORCE_TESTS=ON.")
-    else()
-        message(STATUS "Compatible Python development environment not found: Python bindings will not be built.")
+        message(FATAL_ERROR "Python >= 3.11 and its development module are required")
     endif()
+    message(STATUS "No Python development module: skipping bindings")
+    return()
 endif()
+report_python_configuration_once()
+foreach(_required pybind11::module pyariadne-python-common pyariadne-system pyariadne-integration)
+    if(NOT TARGET ${_required})
+        message(FATAL_ERROR "Missing Python dependency: ${_required}")
+    endif()
+endforeach()
+add_subdirectory(bindings)
+
+# Dependency repositories register the wrappers in dependency order.
+get_property(_upstream_modules GLOBAL PROPERTY ARIADNE_PYTHON_MODULES)
+set(_module_links)
+set(_entry_source "#include \"pybind11.hpp\"\n\n")
+set(_entry_body "PYBIND11_MODULE(pyariadne, module) {\n")
+foreach(_name IN LISTS _upstream_modules)
+    if(NOT TARGET pyariadne-${_name})
+        message(FATAL_ERROR "Registered Python module ${_name} has no target")
+    endif()
+    list(APPEND _module_links pyariadne-${_name})
+    string(APPEND _entry_source "void ${_name}_module(pybind11::module&);\n")
+    string(APPEND _entry_body "    ${_name}_module(module);\n")
+endforeach()
+list(REMOVE_DUPLICATES _module_links)
+string(APPEND _entry_source "void ariadne_module(pybind11::module&);\n\n")
+string(APPEND _entry_body "    ariadne_module(module);\n}\n")
+string(APPEND _entry_source "${_entry_body}")
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pyariadne_entry.cpp" CONTENT "${_entry_source}")
+pybind11_add_module(pyariadne
+    "${CMAKE_CURRENT_BINARY_DIR}/pyariadne_entry.cpp"
+    $<TARGET_OBJECTS:pyariadne-module-obj>
+    $<TARGET_OBJECTS:pyariadne-bindings-obj>
+)
+get_target_property(_python_common_source_dir pyariadne-python-common SOURCE_DIR)
+target_include_directories(pyariadne PRIVATE "${_python_common_source_dir}/include")
+target_link_libraries(pyariadne PRIVATE ariadne ${_module_links})
+add_dependencies(bindings pyariadne)
+set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}" CACHE STRING "Install destination for pyariadne")
+install(TARGETS pyariadne DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
+add_test(NAME test_python_evolution_analysis_import
+    COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:pyariadne>"
+        "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_evolution_analysis_import.py"
+)
+set_property(TEST test_python_evolution_analysis_import PROPERTY LABELS "python")

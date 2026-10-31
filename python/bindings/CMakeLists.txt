@@ -10,6 +10,6 @@ foreach(target pyariadne-bindings-obj pyariadne-module-obj)
     target_include_directories(${target} PRIVATE
         "${PYTHON_COMMON_SOURCE_DIR}/include"
         $<TARGET_PROPERTY:pyariadne-algebra,INTERFACE_INCLUDE_DIRECTORIES>)
-    target_link_libraries(${target} PRIVATE ariadne pyariadne-python-common pybind11::module)
+    target_link_libraries(${target} PRIVATE ariadne pyariadne-system pyariadne-integration pyariadne-python-common pybind11::module)
     set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endforeach()

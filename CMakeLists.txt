@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(Ariadne VERSION 2.5.3)
 
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
-# The old aggregate Python bindings are not compatible with this split yet.
-option(BUILD_PYTHON_BINDINGS "Build Python bindings after layer migration" OFF)
+option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
 
 find_package(Git REQUIRED)
 if(NOT TARGET ariadne-configuration)
@@ -118,11 +117,9 @@ setup_standalone_project_tests(
     SOURCES "${PROJECT_SOURCE_DIR}/source"
 )
 
-# External dependencies own their Python bindings. The legacy Ariadne Python
-# aggregate cannot be re-enabled before its layer-specific sources are split.
+# The two local binding modules augment the upstream Python registrations.
 if(BUILD_PYTHON_BINDINGS)
-    message(FATAL_ERROR
-        "The legacy pyariadne bindings require migration to system/evolution/analysis.")
+    add_subdirectory(python)
 endif()
 
 # Legacy examples/tutorials/experimental CMake references are excluded from

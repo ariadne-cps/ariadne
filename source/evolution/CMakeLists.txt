@@ -11,7 +11,6 @@ add_library(ariadne-evolution OBJECT
     hybrid_enclosure.cpp
     hybrid_simulator.cpp
     hybrid_evolver.cpp
-    hybrid_paving_evolution.cpp
 )
 set_target_properties(ariadne-evolution PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(ariadne-evolution PUBLIC ariadne-system integration equation_solving)

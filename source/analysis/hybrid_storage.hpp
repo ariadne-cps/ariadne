@@ -47,6 +47,7 @@
 #include "system/discrete_event.hpp"
 #include "hybrid/hybrid_graphics_interface.hpp"
 #include "system/hybrid_automaton_interface.hpp"
+#include "system/hybrid_paving.hpp"
 
 #include "geometry/box.hpp"
 // HybridStorage owns a HybridGridTreePaving by value, so the type must be complete.

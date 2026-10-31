@@ -1,13 +1,9 @@
-// Operations coupling hybrid set geometry to dynamic systems.
-#include "function/functional.hpp"
+// Hybrid paving operations depending on a system specification.
 #include "config.hpp"
-#include "hybrid/hybrid_paving.hpp"
+#include "function/functional.hpp"
+#include "paving/grid_paving.hpp"
+#include "system/hybrid_paving.hpp"
 #include "system/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_graphics.hpp"
-#include "drawing/grid_paving_draw.hpp"
-#include "labelled/figure.hpp"
-#include "numeric/rounding.hpp"
-#include "symbolic/assignment.hpp"
 
 namespace Ariadne {
 

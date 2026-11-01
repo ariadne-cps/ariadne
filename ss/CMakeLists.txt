@@ -1,10 +1,3 @@
-# The Evolution submodule provides System, Integration and Equation Solving.
-if(NOT TARGET evolution)
-    ariadne_add_submodule(evolution)
-endif()
-if(NOT TARGET smt)
-    ariadne_add_submodule(smt)
-endif()
-if(NOT TARGET sat)
-    ariadne_add_submodule(sat)
+if(NOT TARGET reasoning)
+    ariadne_add_submodule(reasoning)
 endif()

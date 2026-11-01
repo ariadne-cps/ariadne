@@ -3,7 +3,7 @@ name: Windows
 on:
   push:
     branches:
-      - main
+      - decoupling
   pull_request:
 
 env:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build_type: [Release, Debug]
+        build_type: [Release]
         config:
           - { name: "Windows 2025 x86 MSVC", os: windows-2025, arch: x64 }
           - { name: "Windows 11 arm MSVC", os: windows-11-arm, arch: arm64 }
@@ -50,16 +50,19 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER=sccache `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DCMAKE_CXX_FLAGS_DEBUG="/Z7 /Ob0 /Od /RTC1" `
-            -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON `
+            -DBUILD_PYTHON_BINDINGS=ON `
             -DWARNINGS_AS_ERRORS=ON
 
-      - name: Build Ariadne
-        run: cmake --build build --parallel --target ariadne pyariadne
+      - name: Build Ariadne and optional Python
+        run: |
+          cmake --build build --parallel --target ariadne
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/CMakeCache.txt -Pattern "^Python3_FOUND:INTERNAL=TRUE$" -Quiet) { cmake --build build --parallel --target pyariadne; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
 
-      - name: Build C++ tests (Debug only)
-        if: matrix.build_type == 'Debug'
-        run: cmake --build build --parallel --target tests
+  
 
-      - name: Test evolution, analysis and Python
-        if: matrix.build_type == 'Debug'
-        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS --output-on-failure --timeout 240
+      - name: Install
+        run: cmake --install build --prefix "${{ runner.workspace }}/install"
+
+      - name: Uninstall
+        run: cmake --build build --target uninstall

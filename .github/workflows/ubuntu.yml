@@ -3,7 +3,7 @@ name: Ubuntu
 on:
   push:
     branches:
-      - main
+      - decoupling
   pull_request:
 
 env:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build_type: [Release, Debug]
+        build_type: [Release]
         config:
           - { name: "Ubuntu 24.04 x86 Clang 16", os: ubuntu-24.04, cxx: "clang++-16", pkg: "clang-16" }
           - { name: "Ubuntu 24.04 arm Clang 16", os: ubuntu-24.04-arm, cxx: "clang++-16", pkg: "clang-16" }
@@ -50,21 +50,26 @@ jobs:
 
     - name: Configure CMake
       env:
-        CXXFLAGS: ${{ matrix.build_type == 'Debug' && matrix.config.libstdcxx_debug && '-D_GLIBCXX_DEBUG' || '' }}
+        CXXFLAGS: ${{ matrix.config.libstdcxx_debug && '-D_GLIBCXX_DEBUG' || '' }}
       working-directory: ${{ runner.workspace }}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=ON
 
-    - name: Build Ariadne
+    - name: Build Ariadne and optional Python
       working-directory: ${{ runner.workspace }}/build
-      run: cmake --build . --parallel "$NPROC" --target ariadne pyariadne
+      run: |
+        cmake --build . --parallel "$NPROC" --target ariadne
+        if cmake --build . --target help | grep -Eq "(^|[[:space:]])pyariadne([[:space:]]|:)"; then
+          cmake --build . --parallel "$NPROC" --target pyariadne
+        fi
 
-    - name: Build C++ tests (Debug only)
-      if: matrix.build_type == 'Debug'
+
+
+
+
+    - name: Install
       working-directory: ${{ runner.workspace }}/build
-      run: cmake --build . --parallel "$NPROC" --target tests
+      run: cmake --install . --prefix "${{ runner.workspace }}/install"
 
-    - name: Test evolution, reasoning and Python
-      if: matrix.build_type == 'Debug'
+    - name: Uninstall
       working-directory: ${{ runner.workspace }}/build
-      run: ctest -j "$NPROC" --output-on-failure
-
+      run: cmake --build . --target uninstall

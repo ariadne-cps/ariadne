@@ -35,7 +35,6 @@ graph TD
     foundation["FOUNDATION"]
     utility["UTILITY"]
     python_common["PYTHON COMMON"]
-    macro["MACRO"]
 
     ariadne --> reasoning
     reasoning --> evolution
@@ -84,7 +83,6 @@ graph TD
     logging --> utility
     foundation --> utility
     foundation --> python_common
-    utility --> macro
 ```
 
 The top-level repository is `ariadne`. The system specification layer is pinned as direct Git submodule `ss/sys`. Its Hybrid and Labelled dependencies are transitively provided by `system/ss/hyb` and `system/ss/hyb/ss/lab`. System owns the dynamical-system specifications and standalone tests; Ariadne retains only evolution and reasoning implementations. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
@@ -118,9 +116,8 @@ The top-level repository is `ariadne`. The system specification layer is pinned 
 - `threading` uses `logging`.
 - `logging` uses `utility`.
 - `foundation` uses `utility`, `python-common`.
-- `utility` uses `macro`.
 
-`python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
+`python-common` has no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
 The `ariadne-cps/testing` repository is also included as a Git submodule in every repository except `python-common`, but it is used exclusively by test targets. It is therefore omitted from the dependency graph and the graph-derived commit consistency checks.
 

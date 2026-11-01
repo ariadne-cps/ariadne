@@ -48,7 +48,7 @@
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"
 
-#include "analysis/reachability_analyser.tpl.hpp"
+#include "reasoning/reachability_analyser.tpl.hpp"
 
 #include "system/hybrid_automaton_interface.hpp"
 
@@ -58,7 +58,7 @@
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_evolver.hpp"
-#include "analysis/hybrid_reachability_analyser.hpp"
+#include "reasoning/hybrid_reachability_analyser.hpp"
 
 
 #include "logging/logging.hpp"

@@ -1,7 +1,7 @@
-#ifndef ARIADNE_ANALYSIS_HYBRID_STORAGE_ORBIT_HPP
-#define ARIADNE_ANALYSIS_HYBRID_STORAGE_ORBIT_HPP
+#ifndef ARIADNE_REASONING_HYBRID_STORAGE_ORBIT_HPP
+#define ARIADNE_REASONING_HYBRID_STORAGE_ORBIT_HPP
 
-#include "analysis/hybrid_storage.hpp"
+#include "reasoning/hybrid_storage.hpp"
 #include "evolution/hybrid_orbit.hpp"
 
 namespace Ariadne {
@@ -30,4 +30,4 @@ class Orbit<HybridStorage>
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ANALYSIS_HYBRID_STORAGE_ORBIT_HPP
+#endif // ARIADNE_REASONING_HYBRID_STORAGE_ORBIT_HPP

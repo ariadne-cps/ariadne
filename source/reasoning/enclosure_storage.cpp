@@ -1,9 +1,9 @@
-// Adapters between evolved enclosures and analysis-level grid storage.
+// Adapters between evolved enclosures and reasoning-level grid storage.
 #include "function/functional.hpp"
 #include "function/constraint.hpp"
 #include "set/function_set.hpp"
-#include "analysis/enclosure_storage.hpp"
-#include "analysis/hybrid_storage.hpp"
+#include "reasoning/enclosure_storage.hpp"
+#include "reasoning/hybrid_storage.hpp"
 #include "evolution/hybrid_enclosure.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/space.hpp"

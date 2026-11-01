@@ -1,11 +1,11 @@
-#ifndef ARIADNE_ANALYSIS_TRAITS_HPP
-#define ARIADNE_ANALYSIS_TRAITS_HPP
+#ifndef ARIADNE_REASONING_TRAITS_HPP
+#define ARIADNE_REASONING_TRAITS_HPP
 
 #include "evolution/traits.hpp"
 #include "geometry/set_interface.hpp"
 #include "hybrid/hybrid_set_interface.hpp"
 
-// Storage and set-interface associations are analysis-level concerns.
+// Storage and set-interface associations are reasoning-level concerns.
 // The generic space traits preserve the EuclideanSpace API during staging;
 // hybrid specialisation moves those aliases out of the system-level HybridSpace.
 namespace Ariadne {
@@ -46,7 +46,7 @@ template<class SPACE> struct SpaceAnalysisTraits {
 };
 
 // EuclideanSpace intentionally describes the geometry only; the
-// discretisation used by reachability analysis is an analysis concern.
+// discretisation used by reachability analysis is a reasoning concern.
 // Do not add SetApproximationType back to EuclideanSpace.
 template<> struct SpaceAnalysisTraits<EuclideanSpace> {
     using BoundingDomainType = EuclideanSpace::BoundingDomainType;
@@ -73,4 +73,4 @@ template<> struct SpaceAnalysisTraits<HybridSpace> {
 };
 
 } // namespace Ariadne
-#endif // ARIADNE_ANALYSIS_TRAITS_HPP
+#endif // ARIADNE_REASONING_TRAITS_HPP

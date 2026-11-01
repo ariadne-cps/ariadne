@@ -1,5 +1,5 @@
-// Verify the analysis-only enclosure-to-storage API compiles as a first include.
-#include "analysis/enclosure_storage.hpp"
+// Verify the reasoning-only enclosure-to-storage API compiles as a first include.
+#include "reasoning/enclosure_storage.hpp"
 
 using namespace Ariadne;
 

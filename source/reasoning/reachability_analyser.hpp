@@ -35,9 +35,9 @@
 #include "set/function_set.hpp"
 
 #include "evolution/enclosure.hpp"
-#include "analysis/storage_orbit.hpp"
+#include "reasoning/storage_orbit.hpp"
 #include "evolution/vector_field_evolver.hpp"
-#include "analysis/reachability_analyser_interface.hpp"
+#include "reasoning/reachability_analyser_interface.hpp"
 
 #include "logging/logging.hpp"
 

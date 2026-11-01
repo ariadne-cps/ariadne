@@ -32,7 +32,7 @@
 
 #include "hybrid/hybrid_set_interface.hpp"
 #include "evolution/evolver_interface.hpp"
-#include "analysis/reachability_analyser_interface.hpp"
+#include "reasoning/reachability_analyser_interface.hpp"
 
 #include "logging/logging.hpp"
 

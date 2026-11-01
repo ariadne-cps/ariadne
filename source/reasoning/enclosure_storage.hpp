@@ -1,9 +1,9 @@
-// Bridges evolution enclosures to analysis-owned grid storage.
+// Bridges evolution enclosures to reasoning-owned grid storage.
 // This interface must not be declared in evolution/enclosure.hpp.
-#ifndef ARIADNE_ANALYSIS_ENCLOSURE_STORAGE_HPP
-#define ARIADNE_ANALYSIS_ENCLOSURE_STORAGE_HPP
+#ifndef ARIADNE_REASONING_ENCLOSURE_STORAGE_HPP
+#define ARIADNE_REASONING_ENCLOSURE_STORAGE_HPP
 
-#include "analysis/storage.hpp"
+#include "reasoning/storage.hpp"
 #include "evolution/enclosure.hpp"
 
 namespace Ariadne {
@@ -17,9 +17,9 @@ Storage outer_approximation(Enclosure const& enclosure, Grid const& grid, Nat fi
 class HybridEnclosure;
 class HybridStorage;
 
-// Preserve the hybrid paving semantics without exposing analysis Storage in evolution.
+// Preserve the hybrid paving semantics without exposing reasoning Storage in evolution.
 Void adjoin_outer_approximation_to(HybridEnclosure const& enclosure, HybridStorage& storage, Nat fineness);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ANALYSIS_ENCLOSURE_STORAGE_HPP
+#endif // ARIADNE_REASONING_ENCLOSURE_STORAGE_HPP

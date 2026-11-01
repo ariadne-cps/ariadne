@@ -3,7 +3,7 @@ get_target_property(PYTHON_COMMON_SOURCE_DIR pyariadne-python-common SOURCE_DIR)
 
 add_library(pyariadne-bindings-obj OBJECT
     evolution_submodule.cpp
-    analysis_submodule.cpp
+    reasoning_submodule.cpp
 )
 add_library(pyariadne-module-obj OBJECT ariadne_module.cpp)
 foreach(target pyariadne-bindings-obj pyariadne-module-obj)

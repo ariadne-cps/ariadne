@@ -63,7 +63,7 @@ jobs:
       working-directory: ${{ runner.workspace }}/build
       run: cmake --build . --parallel "$NPROC" --target tests
 
-    - name: Test evolution, analysis and Python
+    - name: Test evolution, reasoning and Python
       if: matrix.build_type == 'Debug'
       working-directory: ${{ runner.workspace }}/build
       run: ctest -j "$NPROC" --output-on-failure

@@ -55,8 +55,8 @@ namespace Ariadne {
 #include "geometry/box.hpp"
 #include "set/curve.hpp"
 #include "evolution/orbit.hpp"
-#include "analysis/storage_orbit.hpp"
-#include "analysis/enclosure_storage.hpp"
+#include "reasoning/storage_orbit.hpp"
+#include "reasoning/enclosure_storage.hpp"
 
 #include "integration/integrator.hpp"
 #include "equation-solving/equation_solver.hpp"
@@ -66,7 +66,7 @@ namespace Ariadne {
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "evolution/hybrid_orbit.hpp"
-#include "analysis/hybrid_storage_orbit.hpp"
+#include "reasoning/hybrid_storage_orbit.hpp"
 #include "evolution/hybrid_time.hpp"
 #include "system/hybrid_automata.hpp"
 
@@ -76,7 +76,7 @@ namespace Ariadne {
 #include "evolution/iterated_map_evolver.hpp"
 #include "evolution/hybrid_evolver.hpp"
 #include "evolution/hybrid_simulator.hpp"
-#include "analysis/hybrid_reachability_analyser.hpp"
+#include "reasoning/hybrid_reachability_analyser.hpp"
 
 #include "labelled/figure.hpp"
 #include "rendering/rendering_manager.hpp"

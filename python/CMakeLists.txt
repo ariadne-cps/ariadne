@@ -47,8 +47,8 @@ target_link_libraries(pyariadne PRIVATE ariadne ${_module_links})
 add_dependencies(bindings pyariadne)
 set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}" CACHE STRING "Install destination for pyariadne")
 install(TARGETS pyariadne DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
-add_test(NAME test_python_evolution_analysis_import
+add_test(NAME test_python_evolution_reasoning_import
     COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:pyariadne>"
-        "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_evolution_analysis_import.py"
+        "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_evolution_reasoning_import.py"
 )
-set_property(TEST test_python_evolution_analysis_import PROPERTY LABELS "python")
+set_property(TEST test_python_evolution_reasoning_import PROPERTY LABELS "python")

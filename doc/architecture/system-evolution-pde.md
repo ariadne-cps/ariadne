@@ -5,14 +5,14 @@
 A dynamical **system** specifies a state space and mathematical law. It does
 not choose time steps, grid resolutions, integrators, result enclosures or
 reachability algorithms. **Evolution** computes solutions or approximations;
-**analysis** consumes evolvers and results to answer reachability and safety
+**reasoning** consumes evolvers and results to answer reachability and safety
 questions.
 
 ```text
-analysis -> evolution -> system -> hybrid -> labelled
+reasoning -> evolution -> system -> hybrid -> labelled
 ```
 
-The `ariadne-system` target must not depend on `evolution`, `analysis` or
+The `ariadne-system` target must not depend on `evolution`, `reasoning` or
 the compatibility layer `dynamics/`.
 
 ## First-order PDE

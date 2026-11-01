@@ -79,7 +79,7 @@ else()
 endif()
 add_library(ariadne ${_ariadne_library_type}
     $<TARGET_OBJECTS:ariadne-evolution>
-    $<TARGET_OBJECTS:ariadne-analysis>
+    $<TARGET_OBJECTS:ariadne-reasoning>
 )
 
 # Collect dependency objects exactly once, preserving the standalone
@@ -101,7 +101,7 @@ target_include_directories(ariadne PUBLIC
     $<INSTALL_INTERFACE:include/ariadne>
 )
 target_link_libraries(ariadne PUBLIC
-    $<BUILD_INTERFACE:ariadne-analysis>
+    $<BUILD_INTERFACE:ariadne-reasoning>
 )
 if(UNIX AND NOT APPLE)
     target_link_libraries(ariadne PRIVATE dl)

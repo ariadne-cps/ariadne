@@ -1,9 +1,9 @@
-// Grid-backed storage orbits belong to analysis, not evolution.
-#ifndef ARIADNE_ANALYSIS_STORAGE_ORBIT_HPP
-#define ARIADNE_ANALYSIS_STORAGE_ORBIT_HPP
+// Grid-backed storage orbits belong to reasoning, not evolution.
+#ifndef ARIADNE_REASONING_STORAGE_ORBIT_HPP
+#define ARIADNE_REASONING_STORAGE_ORBIT_HPP
 
 #include "evolution/orbit.hpp"
-#include "analysis/storage.hpp"
+#include "reasoning/storage.hpp"
 
 namespace Ariadne {
 
@@ -37,4 +37,4 @@ struct Orbit<Storage>::Data {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_ANALYSIS_STORAGE_ORBIT_HPP
+#endif // ARIADNE_REASONING_STORAGE_ORBIT_HPP

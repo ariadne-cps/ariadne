@@ -1,5 +1,5 @@
 // Regression: analysis storage must be self-contained when first included.
-#include "analysis/storage.hpp"
+#include "reasoning/storage.hpp"
 #include <type_traits>
 
 static_assert(std::is_same<Ariadne::RealSpace, Ariadne::Space<Ariadne::Real>>::value,

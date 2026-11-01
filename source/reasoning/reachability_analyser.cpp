@@ -54,13 +54,13 @@
 #include "evolution/orbit.hpp"
 #include "evolution/iterated_map_evolver.hpp"
 #include "evolution/vector_field_evolver.hpp"
-#include "analysis/reachability_analyser.hpp"
+#include "reasoning/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
 #include "rendering/figure.hpp"
 #include "linear-programming/linear_programming.hpp"
 
-#include "analysis/reachability_analyser.tpl.hpp"
+#include "reasoning/reachability_analyser.tpl.hpp"
 
 
 namespace Ariadne {

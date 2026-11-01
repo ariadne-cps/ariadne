@@ -49,8 +49,8 @@
 #include "equation-solving/equation_solver.hpp"
 #include "set/function_set.hpp"
 
-#include "analysis/enclosure_storage.hpp"
-#include "analysis/reachability_analyser.hpp"
+#include "reasoning/enclosure_storage.hpp"
+#include "reasoning/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
 #include "rendering/figure.hpp"

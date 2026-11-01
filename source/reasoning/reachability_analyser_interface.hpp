@@ -30,7 +30,7 @@
 #define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "analysis/traits.hpp"
+#include "reasoning/traits.hpp"
 
 namespace Ariadne {
 

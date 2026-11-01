@@ -52,7 +52,7 @@
 #include "geometry/box.hpp"
 // HybridStorage owns a HybridGridTreePaving by value, so the type must be complete.
 #include "hybrid/hybrid_paving.hpp"
-#include "analysis/storage.hpp"
+#include "reasoning/storage.hpp"
 
 
 namespace Ariadne {

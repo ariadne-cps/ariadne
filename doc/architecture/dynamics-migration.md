@@ -1,13 +1,13 @@
 # Migration of the former dynamics directory
 
 The obsolete `source/dynamics` directory has been removed. All internal consumers
-now include the owning system, evolution, or analysis headers directly.
+now include the owning system, evolution, or reasoning headers directly.
 
 | Ownership | Files |
 |---|---|
 | `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition and differential-inclusion gridding |
 | `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, first-order PDE evolution |
-| `analysis/` | reachability analyser, reachability interfaces and template implementation, storage and enclosure-to-storage adapters |
+| `reasoning/` | reachability analyser, reachability interfaces and template implementation, storage and enclosure-to-storage adapters |
 | `dynamics/` | removed; former forwarding headers no longer supported |
 
 The build uses sources from their owning directories. Includes of the historical
@@ -17,11 +17,11 @@ This is an intentional source-compatibility break for external C++ consumers.
 The former `tests/dynamics/` test sources have been reorganized by responsibility:
 propagation, enclosure and simulator tests live under `tests/evolution/`, while
 finite/infinite-time reachability and safety verification tests live under
-`tests/analysis/`. All twelve original test sources, executable names and CTest
+`tests/reasoning/`. All twelve original test sources, executable names and CTest
 names are preserved; the Windows timeout for the infinite-time reachability test
 is also preserved. The PDE regression lives under `tests/evolution/`.
 
-Only `tests/evolution/` and `tests/analysis/` remain in this repository.
+Only `tests/evolution/` and `tests/reasoning/` remain in this repository.
 The old model-only `test_differential_inclusion`, `test_iterated_map`, and
 `test_vector_field` have been removed here: the `system` repository is the
 sole owner of those tests. Their exact historical cases have **not** been

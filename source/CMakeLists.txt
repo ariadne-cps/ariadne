@@ -1,4 +1,2 @@
-# System (and transitively Hybrid) is initialized by ss/.
-# Internal dependency order: evolution -> reasoning.
-add_subdirectory(evolution)
+# Evolution is supplied by the external submodule; Reasoning remains local.
 add_subdirectory(reasoning)

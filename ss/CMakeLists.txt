@@ -1,13 +1,6 @@
-# Resolve by the logical repository names from .gitmodules, rather than
-# assuming a particular submodule checkout path in lower repositories.
-if(NOT TARGET integration)
-    ariadne_add_submodule(integration)
-endif()
-if(NOT TARGET equation_solving)
-    ariadne_add_submodule(equation-solving)
-endif()
-if(NOT TARGET system)
-    ariadne_add_submodule(system)
+# The Evolution submodule provides System, Integration and Equation Solving.
+if(NOT TARGET evolution)
+    ariadne_add_submodule(evolution)
 endif()
 if(NOT TARGET smt)
     ariadne_add_submodule(smt)

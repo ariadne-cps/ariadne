@@ -18,28 +18,28 @@ if(NOT TARGET ariadne-configuration)
 endif()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    # Compare immutable gitlink commits, not branch names.
     require_same_dependency_commit(Configuration CHAINS
         "configuration"
-        "integration|configuration"
-        "equation-solving|configuration"
+        "evolution|configuration"
+        "evolution|integration|configuration"
+        "evolution|equation-solving|configuration"
+        "evolution|system|configuration"
+        "evolution|system|hybrid|configuration"
         "smt|configuration"
         "sat|configuration"
-        "system|hybrid|configuration"
-        "system|configuration"
     )
     require_same_dependency_commit(Symbolic CHAINS
-        "system|hybrid|labelled|expression-set|symbolic"
+        "evolution|system|hybrid|labelled|expression-set|symbolic"
         "smt|symbolic"
     )
     require_same_dependency_commit(EquationSolving CHAINS
-        "equation-solving"
+        "evolution|equation-solving"
         "smt|equation-solving"
     )
     require_same_dependency_commit(Function CHAINS
-        "integration|function"
-        "equation-solving|function"
-        "system|hybrid|labelled|expression-set|symbolic|function"
+        "evolution|integration|function"
+        "evolution|equation-solving|function"
+        "evolution|system|hybrid|labelled|expression-set|symbolic|function"
     )
     require_same_dependency_commit(Cdcl CHAINS
         "smt|cdcl"
@@ -47,7 +47,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(Bdd CHAINS
         "sat|bdd"
-        "system|hybrid|labelled|drawing|paving|bdd"
+        "evolution|system|hybrid|labelled|drawing|paving|bdd"
     )
     require_same_dependency_commit(Threading CHAINS
         "smt|threading"
@@ -55,7 +55,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     )
     require_same_dependency_commit(ConstraintSolving CHAINS
         "smt|constraint-solving"
-        "system|hybrid|labelled|expression-set|set|constraint-solving"
+        "evolution|system|hybrid|labelled|expression-set|set|constraint-solving"
     )
 endif()
 
@@ -65,9 +65,8 @@ include_directories("${PROJECT_SOURCE_DIR}/source")
 add_subdirectory(ss)
 add_subdirectory(source)
 
-# The two ordered internal object modules are Ariadne-owned; system and hybrid are external.
-# All other code is
-# provided by upstream submodules and their transitively exposed dependencies.
+# Reasoning is the only local object module; Evolution and its dependencies
+# are supplied by the external Evolution submodule.
 # These transitional modules do not annotate exported symbols. On Windows,
 # a DLL with no exports does not produce the import library needed by the
 # test executables; use a static archive instead of a non-exporting DLL.
@@ -78,14 +77,13 @@ else()
     set(_ariadne_library_type SHARED)
 endif()
 add_library(ariadne ${_ariadne_library_type}
-    $<TARGET_OBJECTS:ariadne-evolution>
     $<TARGET_OBJECTS:ariadne-reasoning>
 )
 
 # Collect dependency objects exactly once, preserving the standalone
 # repositories' aggregate interface and avoiding duplicate object linkage.
 set(_ariadne_external_objects)
-foreach(_dependency integration equation_solving smt sat system)
+foreach(_dependency evolution smt sat)
     get_target_property(_objects ${_dependency} ARIADNE_PROJECT_OBJECT_TARGETS)
     if(_objects)
         list(APPEND _ariadne_external_objects ${_objects})
@@ -117,7 +115,7 @@ setup_standalone_project_tests(
     SOURCES "${PROJECT_SOURCE_DIR}/source"
 )
 
-# The two local binding modules augment the upstream Python registrations.
+# Local Reasoning bindings augment upstream Python registrations.
 if(BUILD_PYTHON_BINDINGS)
     add_subdirectory(python)
 endif()

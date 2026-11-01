@@ -1,18 +1,12 @@
-[submodule "integration"]
-	path = ss/int
-	url = https://github.com/ariadne-cps/integration
-[submodule "equation-solving"]
-	path = ss/equ
-	url = https://github.com/ariadne-cps/equation-solving
+[submodule "configuration"]
+	path = ss/cfg
+	url = https://github.com/ariadne-cps/configuration
+[submodule "evolution"]
+	path = ss/evo
+	url = https://github.com/ariadne-cps/evolution
 [submodule "smt"]
 	path = ss/smt
 	url = https://github.com/ariadne-cps/smt
 [submodule "sat"]
 	path = ss/sat
 	url = https://github.com/ariadne-cps/sat
-[submodule "configuration"]
-	path = ss/cfg
-	url = https://github.com/ariadne-cps/configuration
-[submodule "system"]
-	path = ss/sys
-	url = https://github.com/ariadne-cps/system

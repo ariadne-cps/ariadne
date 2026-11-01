@@ -7,4 +7,4 @@ add_library(ariadne-reasoning OBJECT
     enclosure_storage.cpp
 )
 set_target_properties(ariadne-reasoning PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(ariadne-reasoning PUBLIC ariadne-evolution smt sat)
+target_link_libraries(ariadne-reasoning PUBLIC evolution smt sat)

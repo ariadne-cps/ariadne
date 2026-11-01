@@ -32,6 +32,7 @@
 #include "evolution/hybrid_time.hpp"
 #include "evolution/hybrid_enclosure.hpp"
 #include "evolution/hybrid_simulator.hpp"
+#include "system/hybrid_automaton_interface.hpp"
 
 
 using namespace Ariadne;

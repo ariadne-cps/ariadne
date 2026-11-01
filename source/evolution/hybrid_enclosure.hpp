@@ -70,6 +70,7 @@ typedef Space<Real> RealSpace;
 typedef VariablesBox<UpperIntervalType> VariablesUpperBoxType;
 template<class ES> class ListSet;
 template<class ES> class HybridListSet;
+template<class EBS> class HybridBasicSet;
 
 class HybridEnclosure;
 class HybridGridTreePaving;

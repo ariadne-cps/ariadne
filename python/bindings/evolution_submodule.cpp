@@ -23,7 +23,7 @@
  */
 
 #include "pybind11.hpp"
-#include "utilities.hpp"
+#include "function-utilities.hpp"
 
 #include "evolution/orbit.hpp"
 #include "evolution/vector_field_simulator.hpp"

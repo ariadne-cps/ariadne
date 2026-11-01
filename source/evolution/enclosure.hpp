@@ -57,9 +57,6 @@ class BoundedConstraintSet;
 
 template<class BS> class ListSet;
 
-class Grid;
-class PavingInterface;
-class Storage;
 
 template<class T> class Space;
 using RealSpace = Space<Real>;
@@ -301,10 +298,6 @@ class Enclosure
     //! \brief The set obtained by restricting to the \a subdomain.
     friend Enclosure restriction(Enclosure const&, const ExactBoxType& subdomain);
 
-    //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
-    Storage outer_approximation(const Grid& grid, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
-    Void adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<ExactBoxType> splitting_subdomains_zeroth_order() const;

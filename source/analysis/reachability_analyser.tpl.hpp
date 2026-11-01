@@ -49,6 +49,7 @@
 #include "equation-solving/equation_solver.hpp"
 #include "set/function_set.hpp"
 
+#include "analysis/enclosure_storage.hpp"
 #include "analysis/reachability_analyser.hpp"
 
 #include "logging/logging.hpp"
@@ -103,12 +104,12 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
 
         auto orbit = evolver.orbit(initial_enclosure,time,semantics);
 
-        for(auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
+        for(auto enclosure : orbit.reach()) adjoin_outer_approximation_to(enclosure,reach_cells,accuracy);
         LOGGING_PRINTLN_AT(1,"final reach size = "<<reach_cells.size());
 
         for(auto enclosure : orbit.final()) {
             LOGGING_PRINTLN_AT(2,"enclosure = "<<enclosure);
-            enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
+            adjoin_outer_approximation_to(enclosure,evolve_cells,accuracy);
             EnclosureType new_enclosure = enclosure;
             new_enclosure.clear_time();
             evolve_enclosures.adjoin(new_enclosure);
@@ -137,7 +138,7 @@ _upper_reach(const StorageType& set,
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
         ListSet<EnclosureType> reach = evolver.orbit(initial_enclosure,time,Semantics::UPPER).reach();
         for(auto enclosure : reach) {
-            enclosure.adjoin_outer_approximation_to(result,accuracy);
+            adjoin_outer_approximation_to(enclosure,result,accuracy);
         }
     }
     return result;
@@ -159,7 +160,7 @@ _upper_evolve(const StorageType& set,
         LOGGING_PRINTLN_AT(1,"Evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
         ListSet<EnclosureType> final = evolver.orbit(initial_enclosure,time,Semantics::UPPER).final();
-        for (auto enclosure : final) enclosure.adjoin_outer_approximation_to(result,accuracy);
+        for (auto enclosure : final) adjoin_outer_approximation_to(enclosure,result,accuracy);
     }
     LOGGING_PRINTLN("_upper_evolve result size = "<<result.size());
     return result;
@@ -188,8 +189,8 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
         auto orbit = evolver.orbit(initial_enclosure,time,Semantics::UPPER);
         LOGGING_PRINTLN_AT(1,"computed "<<orbit.reach().size()<<" reach enclosures and "<<orbit.final().size()<<" final enclosures.");
 
-        for (auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
-        for (auto enclosure : orbit.final()) enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
+        for (auto enclosure : orbit.reach()) adjoin_outer_approximation_to(enclosure,reach_cells,accuracy);
+        for (auto enclosure : orbit.final()) adjoin_outer_approximation_to(enclosure,evolve_cells,accuracy);
         LOGGING_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of cells evolved.");
     }
 
@@ -220,7 +221,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         ListSet<EnclosureType> final_enclosures=_evolver->orbit(initial_enclosure,time,Semantics::LOWER).final();
         for(auto enclosure : final_enclosures) {
-            enclosure.adjoin_outer_approximation_to(final_cells,grid_fineness);
+            adjoin_outer_approximation_to(enclosure,final_cells,grid_fineness);
         }
     }
     return final_cells;
@@ -250,7 +251,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     for (auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures=_evolver->orbit(initial_enclosure,time,Semantics::LOWER).reach();
-        for (auto enclosure : reach_enclosures) enclosure.adjoin_outer_approximation_to(reach_cells,grid_fineness);
+        for (auto enclosure : reach_enclosures) adjoin_outer_approximation_to(enclosure,reach_cells,grid_fineness);
     }
     return reach_cells;
 }
@@ -281,8 +282,8 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
     for (auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         auto orbit = _evolver->orbit(initial_enclosure,time,Semantics::LOWER);
-        for (auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach,grid_fineness);
-        for (auto enclosure : orbit.final())  enclosure.adjoin_outer_approximation_to(evolve_cells,grid_fineness);
+        for (auto enclosure : orbit.reach()) adjoin_outer_approximation_to(enclosure,reach,grid_fineness);
+        for (auto enclosure : orbit.final())  adjoin_outer_approximation_to(enclosure,evolve_cells,grid_fineness);
     }
     return make_pair(reach,evolve_cells);
 }

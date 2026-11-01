@@ -2,8 +2,7 @@
 #include "function/functional.hpp"
 #include "function/constraint.hpp"
 #include "set/function_set.hpp"
-#include "analysis/storage.hpp"
-#include "evolution/enclosure.hpp"
+#include "analysis/enclosure_storage.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/space.hpp"
 #include "labelled/figure.hpp"
@@ -11,23 +10,23 @@
 
 namespace Ariadne {
 
-Void Enclosure::adjoin_outer_approximation_to(Storage& storage, Nat fineness) const
+Void adjoin_outer_approximation_to(Enclosure const& enclosure, Storage& storage, Nat fineness)
 {
-    if (this->auxiliary_mapping().result_size()!=0 &&
-            this->auxiliary_mapping().managed_pointer()==storage.auxiliary_mapping().managed_pointer())
+    if (enclosure.auxiliary_mapping().result_size()!=0 &&
+            enclosure.auxiliary_mapping().managed_pointer()==storage.auxiliary_mapping().managed_pointer())
     {
-        ARIADNE_WARN("enclosure="<<*this<<", "
-                    "enclosure.auxiliary_mapping()="<<this->auxiliary_mapping()<<", "
+        ARIADNE_WARN("enclosure="<<enclosure<<", "
+                    "enclosure.auxiliary_mapping()="<<enclosure.auxiliary_mapping()<<", "
                     "storage.auxiliary_mapping()="<<storage.auxiliary_mapping());
     }
-    this->configuration().paver().adjoin_outer_approximation(storage.state_set(),this->state_set(),fineness);
+    enclosure.configuration().paver().adjoin_outer_approximation(storage.state_set(),enclosure.state_set(),fineness);
 }
 
 
-Storage Enclosure::outer_approximation(const Grid& grid, Nat fineness) const
+Storage outer_approximation(Enclosure const& enclosure, Grid const& grid, Nat fineness)
 {
-    Storage paving(grid,this->auxiliary_mapping());
-    this->adjoin_outer_approximation_to(paving,fineness);
+    Storage paving(grid,enclosure.auxiliary_mapping());
+    adjoin_outer_approximation_to(enclosure,paving,fineness);
     return paving;
 }
 

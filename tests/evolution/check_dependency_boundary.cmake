@@ -15,6 +15,11 @@ foreach(source_file IN LISTS evolution_sources)
     endif()
 endforeach()
 
+file(READ "${EVOLUTION_SOURCE_DIR}/enclosure.hpp" enclosure_header)
+if(enclosure_header MATCHES "Storage")
+    message(FATAL_ERROR "Evolution Enclosure API must not expose analysis Storage")
+endif()
+
 file(READ "${EVOLUTION_SOURCE_DIR}/CMakeLists.txt" evolution_cmake)
 if(evolution_cmake MATCHES "ariadne-analysis")
     message(FATAL_ERROR "Evolution CMake target must not depend on ariadne-analysis")

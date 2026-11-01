@@ -7,7 +7,7 @@ now include the owning system, evolution, or analysis headers directly.
 |---|---|
 | `system/` | vector fields, iterated maps, differential inclusions, hybrid automata, mathematical first-order PDE definition and differential-inclusion gridding |
 | `evolution/` | enclosures and flow tubes, orbits, configuration interface for evolvers, scaling policy, continuous evolver and simulator implementations, first-order PDE evolution |
-| `analysis/` | reachability analyser, reachability interfaces and template implementation, storage used in reachability analysis |
+| `analysis/` | reachability analyser, reachability interfaces and template implementation, storage and enclosure-to-storage adapters |
 | `dynamics/` | removed; former forwarding headers no longer supported |
 
 The build uses sources from their owning directories. Includes of the historical

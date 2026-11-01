@@ -3,6 +3,7 @@ set(UNIT_TESTS
     test_hybrid_reachability
     test_storage_orbit_header
     test_storage_header
+    test_enclosure_storage_header
 )
 
 # Former dynamics tests for reachability analysis and safety.

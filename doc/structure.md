@@ -85,7 +85,7 @@ graph TD
     foundation --> python_common
 ```
 
-The top-level repository is `ariadne`. The system specification layer is pinned as direct Git submodule `ss/sys`. Its Hybrid and Labelled dependencies are transitively provided by `system/ss/hyb` and `system/ss/hyb/ss/lab`. System owns the dynamical-system specifications and standalone tests; Ariadne retains only evolution and reasoning implementations. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
+The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `reasoning`.
 - `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).

@@ -57,7 +57,7 @@ jobs:
         run: |
           cmake --build build --parallel --target ariadne
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (Select-String -Path build/CMakeCache.txt -Pattern "^Python3_FOUND:INTERNAL=TRUE$" -Quiet) { cmake --build build --parallel --target pyariadne; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+          if ((cmake --build build --target help | Select-String -Pattern "(^|\s)pyariadne(\s|:)")) { cmake --build build --parallel --target pyariadne; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
 
   
 

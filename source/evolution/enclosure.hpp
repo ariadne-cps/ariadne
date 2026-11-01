@@ -40,6 +40,7 @@
 
 #include "function/function_patch.hpp"
 #include "function/function_model.hpp"
+#include "function/constraint.hpp"
 
 #include "geometry/box.hpp"
 #include "paving/paver.hpp"
@@ -47,10 +48,6 @@
 namespace Ariadne {
 
 class ValidatedConstrainedImageSet;
-
-template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber> ValidatedConstraint;
 
 class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;

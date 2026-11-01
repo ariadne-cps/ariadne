@@ -1,5 +1,7 @@
 # Ariadne
 
+[![Ubuntu](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml?query=branch%3Adecoupling) [![macOS](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml?query=branch%3Adecoupling) [![Windows](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml?query=branch%3Adecoupling)
+
 Ariadne provides rigorous computation, numerical evolution, reachability
 analysis and verification of dynamical systems.
 

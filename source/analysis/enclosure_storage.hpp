@@ -14,6 +14,12 @@ Void adjoin_outer_approximation_to(Enclosure const& enclosure, Storage& storage,
 // Construct analysis storage containing an outer approximation of the enclosure.
 Storage outer_approximation(Enclosure const& enclosure, Grid const& grid, Nat fineness);
 
+class HybridEnclosure;
+class HybridStorage;
+
+// Preserve the hybrid paving semantics without exposing analysis Storage in evolution.
+Void adjoin_outer_approximation_to(HybridEnclosure const& enclosure, HybridStorage& storage, Nat fineness);
+
 } // namespace Ariadne
 
 #endif // ARIADNE_ANALYSIS_ENCLOSURE_STORAGE_HPP

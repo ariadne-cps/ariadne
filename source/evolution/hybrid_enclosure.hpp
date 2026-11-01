@@ -294,10 +294,6 @@ class HybridEnclosure
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a fineness subdivisions in each component.
     Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
-    template<class StorageType>
-    Void adjoin_outer_approximation_to(StorageType& storage, Nat fineness) const {
-        this->adjoin_outer_approximation_to(storage.state_set(),fineness);
-    }
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(SizeType dim) const;

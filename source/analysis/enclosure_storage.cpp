@@ -3,6 +3,8 @@
 #include "function/constraint.hpp"
 #include "set/function_set.hpp"
 #include "analysis/enclosure_storage.hpp"
+#include "analysis/hybrid_storage.hpp"
+#include "evolution/hybrid_enclosure.hpp"
 #include "paving/grid_paving.hpp"
 #include "symbolic/space.hpp"
 #include "labelled/figure.hpp"
@@ -28,6 +30,11 @@ Storage outer_approximation(Enclosure const& enclosure, Grid const& grid, Nat fi
     Storage paving(grid,enclosure.auxiliary_mapping());
     adjoin_outer_approximation_to(enclosure,paving,fineness);
     return paving;
+}
+
+Void adjoin_outer_approximation_to(HybridEnclosure const& enclosure, HybridStorage& storage, Nat fineness)
+{
+    enclosure.adjoin_outer_approximation_to(storage.state_set(),fineness);
 }
 
 LabelledStorage::LabelledStorage(Grid const& grid,

@@ -4,4 +4,4 @@ add_dependencies(everything tests)
 
 # Tests are grouped by architectural ownership rather than the former dynamics layer.
 add_subdirectory(evolution)
-add_subdirectory(analysis)
+add_subdirectory(reasoning)

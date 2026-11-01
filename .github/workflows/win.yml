@@ -50,16 +50,16 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER=sccache `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DCMAKE_CXX_FLAGS_DEBUG="/Z7 /Ob0 /Od /RTC1" `
-            -DBUILD_PYTHON_BINDINGS=OFF `
+            -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON `
             -DWARNINGS_AS_ERRORS=ON
 
       - name: Build Ariadne
-        run: cmake --build build --parallel --target ariadne
+        run: cmake --build build --parallel --target ariadne pyariadne
 
       - name: Build C++ tests (Debug only)
         if: matrix.build_type == 'Debug'
         run: cmake --build build --parallel --target tests
 
-      - name: Test legacy dynamics/hybrid C++
+      - name: Test evolution, analysis and Python
         if: matrix.build_type == 'Debug'
-        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS -LE python --output-on-failure --timeout 240
+        run: ctest --test-dir build -j $env:NUMBER_OF_PROCESSORS --output-on-failure --timeout 240

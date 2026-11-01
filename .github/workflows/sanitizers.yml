@@ -17,6 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
         with:
@@ -35,11 +39,11 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
             -DTHREAD_SANITIZER=ON \
-            -DBUILD_PYTHON_BINDINGS=OFF \
+            -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON \
             -DWARNINGS_AS_ERRORS=ON
 
       - name: Build
-        run: cmake --build "${{ runner.workspace }}/build-tsan" --parallel 2 --target tests
+        run: cmake --build "${{ runner.workspace }}/build-tsan" --parallel 2 --target tests pyariadne
 
       - name: Test
         env:
@@ -52,6 +56,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
@@ -70,14 +78,14 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++-16 \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DBUILD_PYTHON_BINDINGS=OFF \
+            -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_ENFORCE_TESTS=ON \
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all" \
             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
             -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined" \
             -DWARNINGS_AS_ERRORS=ON
 
       - name: Build
-        run: cmake --build "${{ runner.workspace }}/build-asan" --parallel 2 --target tests
+        run: cmake --build "${{ runner.workspace }}/build-asan" --parallel 2 --target tests pyariadne
 
       - name: Test
         env:

@@ -48,7 +48,9 @@ jobs:
       - name: Test
         env:
           TSAN_OPTIONS: halt_on_error=1
-        run: ctest --test-dir "${{ runner.workspace }}/build-tsan" --output-on-failure
+        # Python is uninstrumented and cannot load a TSAN-instrumented libariadne.so.
+        # pyariadne is still compiled above; regular CI runs its import tests.
+        run: ctest --test-dir "${{ runner.workspace }}/build-tsan" -LE python --output-on-failure
 
   address-undefined-sanitizer:
     name: Ubuntu 24.04 x86 Clang 16 [AddressSanitizer + UBSan]
@@ -91,4 +93,6 @@ jobs:
         env:
           ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
-        run: ctest --test-dir "${{ runner.workspace }}/build-asan" --output-on-failure
+        # The uninstrumented Python interpreter does not preload the ASAN runtime.
+        # pyariadne is still compiled above; regular CI runs its import tests.
+        run: ctest --test-dir "${{ runner.workspace }}/build-asan" -LE python --output-on-failure

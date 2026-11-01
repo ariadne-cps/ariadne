@@ -11,6 +11,16 @@ set(EXAMPLES_CONTINUOUS_NOISY
 	dc-dc
 	
 	noisy-benchmark
+    harmonic-oscillator
+    clock
+    vanderpol-noisy
+    fitzhugh-nagumo
+    vinograd
+    sphere
+    order7
+    wiggins1873
+    ross-mcdonald
+    michelson
 )
 
 foreach(example ${EXAMPLES_CONTINUOUS_NOISY})

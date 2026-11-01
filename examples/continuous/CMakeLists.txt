@@ -2,6 +2,7 @@ set(EXAMPLES_CONTINUOUS
     attractor
     vanderpol
     lorenz
+    laub-loomis
 )
 
 foreach(example ${EXAMPLES_CONTINUOUS})

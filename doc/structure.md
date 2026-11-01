@@ -5,7 +5,7 @@ Repository names in prose and dependency descriptions use their actual lowercase
 ```mermaid
 graph TD
     ariadne["ARIADNE"]
-    analysis["ANALYSIS"]
+    reasoning["REASONING"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]
     system["SYSTEM"]
@@ -37,10 +37,10 @@ graph TD
     python_common["PYTHON COMMON"]
     macro["MACRO"]
 
-    ariadne --> analysis
-    analysis --> evolution
-    analysis --> smt
-    analysis --> sat
+    ariadne --> reasoning
+    reasoning --> evolution
+    reasoning --> smt
+    reasoning --> sat
     evolution --> integration
     evolution --> system
     evolution --> equation_solving
@@ -87,10 +87,10 @@ graph TD
     utility --> macro
 ```
 
-The top-level repository is `ariadne`. The system specification layer is pinned as direct Git submodule `ss/sys`. Its Hybrid and Labelled dependencies are transitively provided by `system/ss/hyb` and `system/ss/hyb/ss/lab`. System owns the dynamical-system specifications and standalone tests; Ariadne retains only evolution and analysis implementations. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
+The top-level repository is `ariadne`. The system specification layer is pinned as direct Git submodule `ss/sys`. Its Hybrid and Labelled dependencies are transitively provided by `system/ss/hyb` and `system/ss/hyb/ss/lab`. System owns the dynamical-system specifications and standalone tests; Ariadne retains only evolution and reasoning implementations. The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
-- `ariadne` uses `analysis`.
-- `analysis` uses `evolution`, `smt`, `sat`. See [commit constraints](#analysis-commit-constraints).
+- `ariadne` uses `reasoning`.
+- `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
 - `system` uses `hybrid`.
@@ -122,7 +122,7 @@ The top-level repository is `ariadne`. The system specification layer is pinned 
 
 `python-common` and `macro` have no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-All dependencies are exposed transitively. For example, `analysis` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph. With `cdcl` now depending on `threading`, its path `cdcl -> threading -> logging -> utility` makes the old `cdcl -> utility` edge redundant. The `smt -> threading` edge is also redundant because `smt` reaches `threading` via `cdcl`. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
+All dependencies are exposed transitively. For example, `reasoning` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph. With `cdcl` now depending on `threading`, its path `cdcl -> threading -> logging -> utility` makes the old `cdcl -> utility` edge redundant. The `smt -> threading` edge is also redundant because `smt` reaches `threading` via `cdcl`. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
 
 ## Commit consistency verification
 
@@ -140,9 +140,9 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `analysis`, a separate `threading` check is no longer necessary. Its `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and its `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. The `sat` submodule has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit.
+**Example:** For `reasoning`, a separate `threading` check is no longer necessary. Its `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and its `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. The `sat` submodule has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit.
 
-### `analysis` commit constraints
+### `reasoning` commit constraints
 
 - **`equation-solving`**:
   - `evolution -> equation-solving`

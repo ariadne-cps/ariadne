@@ -1,6 +1,6 @@
 # Ariadne
 
-[![Ubuntu](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml?query=branch%3Adecoupling) [![macOS](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml?query=branch%3Adecoupling) [![Windows](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml/badge.svg?branch=decoupling)](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml?query=branch%3Adecoupling)
+[![Ubuntu](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/ariadne-cps/ariadne/actions/workflows/ubuntu.yml?query=branch%3Amain) [![macOS](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/ariadne-cps/ariadne/actions/workflows/macos.yml?query=branch%3Amain) [![Windows](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml/badge.svg?branch=main)](https://github.com/ariadne-cps/ariadne/actions/workflows/win.yml?query=branch%3Amain)
 
 Ariadne provides rigorous computation, numerical evolution, reachability
 analysis and verification of dynamical systems.
@@ -20,7 +20,7 @@ provided transitively by Reasoning.
 ## Build
 
 ```bash
-git clone --branch decoupling --recurse-submodules https://github.com/ariadne-cps/ariadne.git
+git clone --branch main --recurse-submodules https://github.com/ariadne-cps/ariadne.git
 cd ariadne
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel --target ariadne

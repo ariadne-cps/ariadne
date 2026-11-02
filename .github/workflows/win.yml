@@ -3,7 +3,7 @@ name: Windows
 on:
   push:
     branches:
-      - decoupling
+      - main
   pull_request:
 
 env:

@@ -6,6 +6,7 @@ Repository names in prose and dependency descriptions use their actual lowercase
 graph TD
     ariadne["ARIADNE"]
     reasoning["REASONING"]
+    neural["NEURAL"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]
     system["SYSTEM"]
@@ -40,6 +41,9 @@ graph TD
     reasoning --> evolution
     reasoning --> smt
     reasoning --> sat
+    reasoning --> neural
+    neural --> function
+    neural --> threading
     evolution --> integration
     evolution --> system
     evolution --> equation_solving
@@ -88,7 +92,8 @@ graph TD
 The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `reasoning`.
-- `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
+- `reasoning` uses `evolution`, `smt`, `sat`, `neural`. See [commit constraints](#reasoning-commit-constraints).
+- `neural` uses `function`, `threading`. See [commit constraints](#neural-commit-constraints).
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
 - `system` uses `hybrid`.
@@ -119,6 +124,8 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 
 `python-common` has no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
+The `neural` node describes the intended architecture. Currently, `ariadne-cps/neural` only contains its license and has no submodule or build declarations, so its dependencies and the corresponding commit checks are not yet implemented. `reasoning` does not yet include `neural` as a submodule either.
+
 The `ariadne-cps/testing` repository is also included as a Git submodule in every repository except `python-common`, but it is used exclusively by test targets. It is therefore omitted from the dependency graph and the graph-derived commit consistency checks.
 
 All dependencies are exposed transitively. For example, `reasoning` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. `expression-set` uses both `symbolic` and `set`; unlike the previous structure, `symbolic` uses `function` directly. `set` exposes `linear-programming` and `constraint-solving` directly in the reduced graph, and `nonlinear-programming` transitively through `constraint-solving`. The repositories `equation-solving` and `nonlinear-programming` use `function`, while `constraint-solving` uses only `nonlinear-programming`. Likewise, `smt` reaches `nonlinear-programming` through `constraint-solving`, so it needs no separate edge to `nonlinear-programming` in the reduced graph. With `cdcl` now depending on `threading`, its path `cdcl -> threading -> logging -> utility` makes the old `cdcl -> utility` edge redundant. The `smt -> threading` edge is also redundant because `smt` reaches `threading` via `cdcl`. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
@@ -139,7 +146,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `reasoning`, a separate `threading` check is no longer necessary. Its `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and its `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. The `sat` submodule has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit.
+**Example:** For `reasoning`, the existing `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`. The new direct submodule `neural` must additionally match their `threading` commit; likewise, its `function` commit must match the one already shared by `evolution` and `smt`.
 
 ### `reasoning` commit constraints
 
@@ -158,6 +165,19 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`constraint-solving`**:
   - `evolution -> system -> hybrid -> labelled -> expression-set -> set -> constraint-solving`
   - `smt -> constraint-solving`
+- **`threading`**:
+  - `sat -> bdd -> threading`
+  - `neural -> threading`
+- **`function`**:
+  - `evolution -> equation-solving -> function`
+  - `neural -> function`
+
+### `neural` commit constraints
+
+- **`logging`**:
+  - `function -> geometry -> algebra -> interval -> numeric -> logging`
+  - `threading -> logging`
+
 ### `evolution` commit constraints
 
 - **`function`**:

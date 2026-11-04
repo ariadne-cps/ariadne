@@ -18,7 +18,7 @@ graph TD
     expression_set["EXPRESSION SET"]
     paving["PAVING"]
     set["SET"]
-    neuro_symbolic["NEURO SYMBOLIC"]
+    neurosymbolic["NEUROSYMBOLIC"]
     neural["NEURAL"]
     symbolic["SYMBOLIC"]
     constraint_solving["CONSTRAINT SOLVING"]
@@ -43,9 +43,9 @@ graph TD
     reasoning --> evolution
     reasoning --> smt
     reasoning --> sat
-    reasoning --> neuro_symbolic
-    neuro_symbolic --> neural
-    neuro_symbolic --> symbolic
+    reasoning --> neurosymbolic
+    neurosymbolic --> neural
+    neurosymbolic --> symbolic
     neural --> threading
     evolution --> integration
     evolution --> system
@@ -95,8 +95,8 @@ graph TD
 The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `reasoning`.
-- `reasoning` uses `evolution`, `smt`, `sat`, `neuro-symbolic`. See [commit constraints](#reasoning-commit-constraints).
-- `neuro-symbolic` uses `neural`, `symbolic`. See [commit constraints](#neuro-symbolic-commit-constraints).
+- `reasoning` uses `evolution`, `smt`, `sat`, `neurosymbolic`. See [commit constraints](#reasoning-commit-constraints).
+- `neurosymbolic` uses `neural`, `symbolic`. See [commit constraints](#neurosymbolic-commit-constraints).
 - `neural` uses `threading`.
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
@@ -128,7 +128,7 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 
 `python-common` has no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
 
-The `neural` and `neuro-symbolic` nodes describe the intended architecture rather than fully implemented submodule relationships. In particular, `reasoning` does not yet include `neuro-symbolic` as a submodule; the planned dependencies and their commit checks still need to be implemented in the corresponding repositories.
+The `neural` and `neurosymbolic` nodes describe the intended architecture rather than fully implemented submodule relationships. In particular, `reasoning` does not yet include `neurosymbolic` as a submodule; the planned dependencies and their commit checks still need to be implemented in the corresponding repositories.
 
 The `ariadne-cps/testing` repository is also included as a Git submodule in every repository except `python-common`, but it is used exclusively by test targets. It is therefore omitted from the dependency graph and the graph-derived commit consistency checks.
 
@@ -150,7 +150,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`. The new direct submodule `neuro-symbolic` must match that `threading` commit through `neural`, and its `symbolic` commit must match the one shared by `evolution` and `smt`. No separate `function` check is needed: equality of `symbolic`, together with the submodules' local consistency checks, already fixes the relevant `function` commits.
+**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`. The new direct submodule `neurosymbolic` must match that `threading` commit through `neural`, and its `symbolic` commit must match the one shared by `evolution` and `smt`. No separate `function` check is needed: equality of `symbolic`, together with the submodules' local consistency checks, already fixes the relevant `function` commits.
 
 ### `reasoning` commit constraints
 
@@ -163,7 +163,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`symbolic`**:
   - `evolution -> system -> hybrid -> labelled -> expression-set -> symbolic`
   - `smt -> symbolic`
-  - `neuro-symbolic -> symbolic`
+  - `neurosymbolic -> symbolic`
 - **`bdd`**:
   - `evolution -> system -> hybrid -> labelled -> drawing -> paving -> bdd`
   - `sat -> bdd`
@@ -172,9 +172,9 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `smt -> constraint-solving`
 - **`threading`**:
   - `sat -> bdd -> threading`
-  - `neuro-symbolic -> neural -> threading`
+  - `neurosymbolic -> neural -> threading`
 
-### `neuro-symbolic` commit constraints
+### `neurosymbolic` commit constraints
 
 - **`logging`**:
   - `neural -> threading -> logging`

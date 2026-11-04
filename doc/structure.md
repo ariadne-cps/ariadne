@@ -149,7 +149,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`. The new direct submodule `neuro-symbolic` must match that `threading` commit through `neural`, and its `symbolic` commit must match the one shared by `evolution` and `smt`. No separate `function` check is needed: equality of `symbolic`, together with the submodules\u0027 local consistency checks, already fixes the relevant `function` commits.
+**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`. The new direct submodule `neuro-symbolic` must match that `threading` commit through `neural`, and its `symbolic` commit must match the one shared by `evolution` and `smt`. No separate `function` check is needed: equality of `symbolic`, together with the submodules' local consistency checks, already fixes the relevant `function` commits.
 
 ### `reasoning` commit constraints
 

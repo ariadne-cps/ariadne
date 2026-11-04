@@ -6,7 +6,7 @@ Repository names in prose and dependency descriptions use their actual lowercase
 graph TD
     ariadne["ARIADNE"]
     reasoning["REASONING"]
-    neuro_symbolic["NEURO-SYMBOLIC"]
+    neuro_symbolic["NEURO SYMBOLIC"]
     neural["NEURAL"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]

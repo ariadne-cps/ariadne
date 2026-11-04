@@ -7,8 +7,9 @@ Repository names in prose and dependency descriptions use their actual lowercase
 graph TD
     ariadne["ARIADNE"]
     reasoning["REASONING"]
-    smt["SMT"]
     sat["SAT"]
+    smt["SMT"]
+    neurosymbolic["NEUROSYMBOLIC"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]
     system["SYSTEM"]
@@ -18,7 +19,6 @@ graph TD
     expression_set["EXPRESSION SET"]
     paving["PAVING"]
     set["SET"]
-    neurosymbolic["NEUROSYMBOLIC"]
     neural["NEURAL"]
     symbolic["SYMBOLIC"]
     constraint_solving["CONSTRAINT SOLVING"]
@@ -40,10 +40,16 @@ graph TD
     python_common["PYTHON COMMON"]
 
     ariadne --> reasoning
-    reasoning --> evolution
-    reasoning --> smt
     reasoning --> sat
+    reasoning --> smt
     reasoning --> neurosymbolic
+    reasoning --> evolution
+    sat --> bdd
+    sat --> cdcl
+    smt --> symbolic
+    smt --> cdcl
+    smt --> constraint_solving
+    smt --> equation_solving
     neurosymbolic --> neural
     neurosymbolic --> expression_set
     neural --> threading
@@ -55,20 +61,14 @@ graph TD
     hybrid --> labelled
     labelled --> expression_set
     labelled --> drawing
-    drawing --> rendering
-    drawing --> paving
     expression_set --> symbolic
     expression_set --> set
+    drawing --> rendering
+    drawing --> paving
     paving --> set
     paving --> bdd
     set --> linear_programming
     set --> constraint_solving
-    smt --> symbolic
-    smt --> constraint_solving
-    smt --> equation_solving
-    smt --> cdcl
-    sat --> bdd
-    sat --> cdcl
     symbolic --> function
     constraint_solving --> nonlinear_programming
     equation_solving --> function

@@ -3,8 +3,8 @@
 Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
 
 ```mermaid
-%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 85}}}%%
-graph TD
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 90}}}%%
+flowchart TD
     ariadne["ARIADNE"]
     reasoning["REASONING"]
     sat["SAT"]
@@ -16,15 +16,15 @@ graph TD
     hybrid["HYBRID"]
     labelled["LABELLED"]
     drawing["DRAWING"]
-    expression_set["EXPRESSION SET"]
+    expression_set["EXPRESSION<br/>SET"]
     paving["PAVING"]
     set["SET"]
     neural["NEURAL"]
     symbolic["SYMBOLIC"]
-    constraint_solving["CONSTRAINT SOLVING"]
-    equation_solving["EQUATION SOLVING"]
-    nonlinear_programming["NONLINEAR PROGRAMMING"]
-    linear_programming["LINEAR PROGRAMMING"]
+    constraint_solving["CONSTRAINT<br/>SOLVING"]
+    equation_solving["EQUATION<br/>SOLVING"]
+    nonlinear_programming["NONLINEAR<br/>PROGRAMMING"]
+    linear_programming["LINEAR<br/>PROGRAMMING"]
     function["FUNCTION"]
     geometry["GEOMETRY"]
     algebra["ALGEBRA"]
@@ -37,22 +37,29 @@ graph TD
     logging["LOGGING"]
     foundation["FOUNDATION"]
     utility["UTILITY"]
-    python_common["PYTHON COMMON"]
+    python_common["PYTHON<br/>COMMON"]
 
     ariadne --> reasoning
     reasoning --> sat
     reasoning --> smt
     reasoning --> neurosymbolic
     reasoning --> evolution
+
+    sat ~~~ smt
+    smt ~~~ neurosymbolic
+    neurosymbolic ~~~ evolution
+
     sat --> bdd
     sat --> cdcl
     smt --> symbolic
     smt --> cdcl
     smt --> constraint_solving
     smt --> equation_solving
+
     neurosymbolic --> neural
     neurosymbolic --> expression_set
     neural --> threading
+
     evolution --> integration
     evolution --> system
     evolution --> equation_solving
@@ -61,6 +68,7 @@ graph TD
     hybrid --> labelled
     labelled --> expression_set
     labelled --> drawing
+
     expression_set --> symbolic
     expression_set --> set
     drawing --> rendering
@@ -69,6 +77,7 @@ graph TD
     paving --> bdd
     set --> linear_programming
     set --> constraint_solving
+
     symbolic --> function
     constraint_solving --> nonlinear_programming
     equation_solving --> function
@@ -80,6 +89,7 @@ graph TD
     interval --> numeric
     numeric --> foundation
     numeric --> logging
+
     rendering --> utility
     rendering --> python_common
     bdd --> threading

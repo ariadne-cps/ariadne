@@ -3,11 +3,12 @@
 Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 85}}}%%
 graph TD
     ariadne["ARIADNE"]
     reasoning["REASONING"]
-    neuro_symbolic["NEURO SYMBOLIC"]
-    neural["NEURAL"]
+    smt["SMT"]
+    sat["SAT"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]
     system["SYSTEM"]
@@ -17,8 +18,8 @@ graph TD
     expression_set["EXPRESSION SET"]
     paving["PAVING"]
     set["SET"]
-    smt["SMT"]
-    sat["SAT"]
+    neuro_symbolic["NEURO SYMBOLIC"]
+    neural["NEURAL"]
     symbolic["SYMBOLIC"]
     constraint_solving["CONSTRAINT SOLVING"]
     equation_solving["EQUATION SOLVING"]

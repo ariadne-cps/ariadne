@@ -13,9 +13,12 @@ bindings.
 
 ## Dependencies
 
-The direct Git submodules are [Configuration](https://github.com/ariadne-cps/configuration),
-required to bootstrap CMake, and Reasoning. Other dependencies are
-provided transitively by Reasoning.
+The direct Git submodules are [Build](https://github.com/ariadne-cps/build),
+which bootstraps CMake, and [Reasoning](https://github.com/ariadne-cps/reasoning).
+Other dependencies, including [Ariadne Testing](https://github.com/ariadne-cps/testing)
+for the upstream C++ suites, are supplied transitively by Reasoning.
+This top-level aggregator defines no separate C++ test executables.
+CMake verifies that the direct and transitive Build commits agree.
 
 ## Build
 

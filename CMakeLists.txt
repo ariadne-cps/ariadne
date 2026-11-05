@@ -4,22 +4,22 @@ project(Ariadne VERSION 2.5.3)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings when Python is available" ON)
 
-# Configuration is deliberately direct: it bootstraps CMake before Reasoning.
+# Build must be bootstrapped before Reasoning so the CMake helpers are available.
 find_package(Git REQUIRED)
-if(NOT TARGET ariadne-configuration)
+if(NOT TARGET ariadne-build)
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" -C "${PROJECT_SOURCE_DIR}"
-                submodule update --init -- ss/cfg
-        RESULT_VARIABLE _configuration_result)
-    if(_configuration_result)
-        message(FATAL_ERROR "Cannot initialize Configuration submodule")
+                submodule update --init -- ss/bui
+        RESULT_VARIABLE _build_result)
+    if(_build_result)
+        message(FATAL_ERROR "Cannot initialize Build submodule")
     endif()
-    include("${PROJECT_SOURCE_DIR}/ss/cfg/cmake/ProjectOptions.cmake")
+    include("${PROJECT_SOURCE_DIR}/ss/bui/cmake/ProjectOptions.cmake")
 endif()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    require_same_dependency_commit(Configuration CHAINS
-        "configuration" "reasoning|configuration")
+    require_same_dependency_commit(Build CHAINS
+        "build" "reasoning|build")
 endif()
 
 setup_project()

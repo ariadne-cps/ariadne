@@ -138,7 +138,7 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 
 `python-common` has no further dependencies in the graph. Each repository also uses `build`, which is omitted from the graph to avoid drawing an edge from every node.
 
-The `ariadne-cps/testing` repository is also included as a Git submodule in every repository except `python-common`, but it is used exclusively by test targets. It is therefore omitted from the dependency graph and the graph-derived commit consistency checks.
+The `ariadne-cps/testing` repository is included as a test-only Git submodule in repositories that define C++ test suites. The top-level `ariadne` aggregator has no separate test executables and obtains Testing transitively through `reasoning`. Testing is therefore omitted from the functional dependency graph and graph-derived commit consistency checks.
 
 All dependencies are exposed transitively. For example, `reasoning` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
 

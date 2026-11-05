@@ -136,7 +136,7 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 - `logging` uses `utility`.
 - `foundation` uses `utility`, `python-common`.
 
-`python-common` has no further dependencies in the graph. Each repository also uses `configuration`, which is omitted from the graph to avoid drawing an edge from every node.
+`python-common` has no further dependencies in the graph. Each repository also uses `build`, which is omitted from the graph to avoid drawing an edge from every node.
 
 The `ariadne-cps/testing` repository is also included as a Git submodule in every repository except `python-common`, but it is used exclusively by test targets. It is therefore omitted from the dependency graph and the graph-derived commit consistency checks.
 
@@ -154,7 +154,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 4. After checking a shared dependency, treat the direct submodules synchronized by that comparison as one equivalence group **for descendants of that shared dependency**. This does not assert that their unrelated dependencies match.
 5. For a later shared dependency, compare just **one representative path from each still-distinct group** that reaches it. Choose the shortest path from any direct submodule in each group; if several paths are equally short, any one is sufficient.
 6. Omit a downstream check if all direct submodules reaching that dependency already belong to one synchronized group. Do not omit a check that is still needed to connect another, previously unverified group.
-7. `configuration`, which every repository uses but which is omitted from the graph, is excluded from the following graph-derived checks and must be handled separately.
+7. `build`, which every repository uses but which is omitted from the graph, is excluded from the following graph-derived checks and must be handled separately.
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
@@ -272,4 +272,4 @@ When a repository is modified and a repository above it must see those changes, 
 
 This is necessary because a repository can be exposed through several branches of the graph. Updating only one branch would make different paths resolve the same dependency to different commits, which the CMake consistency check is expected to reject.
 
-The special case is `configuration`: because every repository depends on it, making a new `configuration` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.
+The special case is `build`: because every repository depends on it, making a new `build` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.

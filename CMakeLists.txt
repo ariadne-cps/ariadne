@@ -38,6 +38,12 @@ foreach(_object IN LISTS _ariadne_objects)
     target_sources(ariadne PRIVATE $<TARGET_OBJECTS:${_object}>)
 endforeach()
 target_link_libraries(ariadne PUBLIC reasoning)
+target_include_directories(ariadne PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/ariadne>)
+ariadne_register_public_headers(
+    TARGET ariadne
+    FILES "${PROJECT_SOURCE_DIR}/include/ariadne.hpp")
 if(UNIX AND NOT APPLE)
     target_link_libraries(ariadne PRIVATE dl)
 endif()
@@ -48,7 +54,7 @@ install(TARGETS ariadne
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin)
-ariadne_install_dependency_bundle(TARGET reasoning DESTINATION include/ariadne)
+ariadne_install_dependency_bundle(TARGET ariadne DESTINATION include/ariadne)
 
 # Reasoning registers every upstream Python module, including SAT and SMT.
 # Compose one extension from the registered entry points and the objects

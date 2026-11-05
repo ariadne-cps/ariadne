@@ -15,11 +15,6 @@ bindings.
 
 The direct Git submodules are [Build](https://github.com/ariadne-cps/build),
 which bootstraps CMake, and [Reasoning](https://github.com/ariadne-cps/reasoning).
-Other dependencies, including [Ariadne Testing](https://github.com/ariadne-cps/testing)
-for the upstream C++ suites, are supplied transitively by Reasoning.
-This top-level aggregator defines no separate C++ test executables.
-CMake verifies that the direct and transitive Build commits agree.
-
 ## Build
 
 ```bash
@@ -33,6 +28,12 @@ If Python 3.11 or newer with development headers is available, build the
 optional extension with `cmake --build build --target pyariadne`.
 To disable Python bindings explicitly, configure with
 `-DBUILD_PYTHON_BINDINGS=OFF`.
+
+## C++ integration
+
+The installed umbrella header `ariadne.hpp` includes `ariadne-reasoning.hpp`
+and exposes the entire public API. With the default install layout, it is
+available as `<ariadne.hpp>` using the `include/ariadne` include directory.
 
 ## Install and uninstall
 

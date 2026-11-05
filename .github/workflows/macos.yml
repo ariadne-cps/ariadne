@@ -8,6 +8,8 @@ on:
 
 env:
   SCCACHE_GHA_ENABLED: "true"
+  SCCACHE_IGNORE_SERVER_IO_ERROR: "1"
+  SCCACHE_CONF: ${{ github.workspace }}/ss/bui/cmake/sccache.toml
 
 jobs:
   build:
@@ -25,6 +27,7 @@ jobs:
 
     - name: Set up sccache
       uses: mozilla-actions/sccache-action@v0.0.11
+      continue-on-error: true
       with:
         version: "v0.18.0"
 
@@ -43,9 +46,14 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{ runner.workspace }}/build
 
+    - name: Initialize optional sccache before compilation
+      run: |
+        git submodule update --init -- ss/bui
+        cmake -P ss/bui/cmake/InitializeSccache.cmake
+
     - name: Configure CMake
       working-directory: ${{ runner.workspace }}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_CXX_COMPILER_LAUNCHER="$SCCACHE_LAUNCHER" -G Ninja -DWARNINGS_AS_ERRORS=ON -DBUILD_PYTHON_BINDINGS=ON
 
     - name: Build Ariadne and optional Python
       working-directory: ${{ runner.workspace }}/build

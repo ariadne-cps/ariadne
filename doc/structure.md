@@ -42,12 +42,10 @@ flowchart TD
     ariadne --> reasoning
     reasoning --> sat
     reasoning --> smt
-    reasoning --> neurosymbolic
     reasoning --> evolution
 
     sat ~~~ smt
-    smt ~~~ neurosymbolic
-    neurosymbolic ~~~ evolution
+    smt ~~~ evolution
 
     sat --> bdd
     sat --> cdcl
@@ -65,6 +63,7 @@ flowchart TD
     evolution --> equation_solving
     integration --> function
     system --> hybrid
+    system --> neurosymbolic
     hybrid --> labelled
     labelled --> expression_set
     labelled --> drawing
@@ -105,12 +104,12 @@ flowchart TD
 The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `reasoning`.
-- `reasoning` uses `evolution`, `smt`, `sat`, `neurosymbolic`. See [commit constraints](#reasoning-commit-constraints).
+- `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
 - `neurosymbolic` uses `neural`, `expression-set`. See [commit constraints](#neurosymbolic-commit-constraints).
 - `neural` uses `threading`.
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
-- `system` uses `hybrid`.
+- `system` uses `hybrid`, `neurosymbolic`. See [commit constraints](#system-commit-constraints).
 - `hybrid` uses `labelled`.
 - `labelled` uses `expression-set`, `drawing`. See [commit constraints](#labelled-commit-constraints).
 - `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
@@ -158,7 +157,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 
 All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
-**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`.
+**Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`, so `reasoning` needs no separate `threading` check.
 
 ### `reasoning` commit constraints
 
@@ -168,9 +167,6 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`cdcl`**:
   - `smt -> cdcl`
   - `sat -> cdcl`
-- **`expression-set`**:
-  - `evolution -> system -> hybrid -> labelled -> expression-set`
-  - `neurosymbolic -> expression-set`
 - **`symbolic`**:
   - `evolution -> system -> hybrid -> labelled -> expression-set -> symbolic`
   - `smt -> symbolic`
@@ -180,9 +176,6 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`constraint-solving`**:
   - `evolution -> system -> hybrid -> labelled -> expression-set -> set -> constraint-solving`
   - `smt -> constraint-solving`
-- **`threading`**:
-  - `sat -> bdd -> threading`
-  - `neurosymbolic -> neural -> threading`
 
 ### `neurosymbolic` commit constraints
 
@@ -196,6 +189,15 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `integration -> function`
   - `system -> hybrid -> labelled -> expression-set -> symbolic -> function`
   - `equation-solving -> function`
+
+### `system` commit constraints
+
+- **`expression-set`**:
+  - `hybrid -> labelled -> expression-set`
+  - `neurosymbolic -> expression-set`
+- **`threading`**:
+  - `hybrid -> labelled -> drawing -> paving -> bdd -> threading`
+  - `neurosymbolic -> neural -> threading`
 
 ### `labelled` commit constraints
 

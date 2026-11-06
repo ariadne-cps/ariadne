@@ -9,7 +9,7 @@ flowchart TD
     reasoning["REASONING"]
     sat["SAT"]
     smt["SMT"]
-    neurosymbolic["NEUROSYMBOLIC"]
+    neural_set["NEURAL<br/>SET"]
     evolution["EVOLUTION"]
     integration["INTEGRATION"]
     system["SYSTEM"]
@@ -19,7 +19,7 @@ flowchart TD
     expression_set["EXPRESSION<br/>SET"]
     paving["PAVING"]
     set["SET"]
-    neural["NEURAL"]
+    ann["ANN"]
     symbolic["SYMBOLIC"]
     constraint_solving["CONSTRAINT<br/>SOLVING"]
     equation_solving["EQUATION<br/>SOLVING"]
@@ -54,16 +54,16 @@ flowchart TD
     smt --> constraint_solving
     smt --> equation_solving
 
-    neurosymbolic --> neural
-    neurosymbolic --> expression_set
-    neural --> threading
+    neural_set --> ann
+    neural_set --> set
+    ann --> threading
 
     evolution --> integration
     evolution --> system
     evolution --> equation_solving
     integration --> function
     system --> hybrid
-    system --> neurosymbolic
+    system --> neural_set
     hybrid --> labelled
     labelled --> expression_set
     labelled --> drawing
@@ -105,11 +105,11 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 
 - `ariadne` uses `reasoning`.
 - `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
-- `neurosymbolic` uses `neural`, `expression-set`. See [commit constraints](#neurosymbolic-commit-constraints).
-- `neural` uses `threading`.
+- `neural-set` uses `ann`, `set`. See [commit constraints](#neural-set-commit-constraints).
+- `ann` uses `threading`.
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`.
-- `system` uses `hybrid`, `neurosymbolic`. See [commit constraints](#system-commit-constraints).
+- `system` uses `hybrid`, `neural-set`. See [commit constraints](#system-commit-constraints).
 - `hybrid` uses `labelled`.
 - `labelled` uses `expression-set`, `drawing`. See [commit constraints](#labelled-commit-constraints).
 - `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
@@ -177,11 +177,11 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `evolution -> system -> hybrid -> labelled -> expression-set -> set -> constraint-solving`
   - `smt -> constraint-solving`
 
-### `neurosymbolic` commit constraints
+### `neural-set` commit constraints
 
 - **`logging`**:
-  - `neural -> threading -> logging`
-  - `expression-set -> symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`
+  - `ann -> threading -> logging`
+  - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
 
 ### `evolution` commit constraints
 
@@ -192,12 +192,12 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 ### `system` commit constraints
 
-- **`expression-set`**:
-  - `hybrid -> labelled -> expression-set`
-  - `neurosymbolic -> expression-set`
+- **`set`**:
+  - `hybrid -> labelled -> expression-set -> set`
+  - `neural-set -> set`
 - **`threading`**:
   - `hybrid -> labelled -> drawing -> paving -> bdd -> threading`
-  - `neurosymbolic -> neural -> threading`
+  - `neural-set -> ann -> threading`
 
 ### `labelled` commit constraints
 

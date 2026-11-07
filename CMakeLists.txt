@@ -8,7 +8,8 @@ option(BUILD_PYTHON_BINDINGS "Build Python bindings when Python is available" ON
 find_package(Git REQUIRED)
 if(NOT TARGET ariadne-build)
     execute_process(
-        COMMAND "${GIT_EXECUTABLE}" -C "${PROJECT_SOURCE_DIR}"
+        COMMAND "${CMAKE_COMMAND}" -E env "LC_ALL=C"
+                "${GIT_EXECUTABLE}" -C "${PROJECT_SOURCE_DIR}"
                 submodule update --init -- ss/bui
         RESULT_VARIABLE _build_result)
     if(_build_result)

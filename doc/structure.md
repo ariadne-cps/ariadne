@@ -18,6 +18,7 @@ flowchart TD
     drawing["DRAWING"]
     expression_set["EXPRESSION<br/>SET"]
     paving["PAVING"]
+    tree["TREE"]
     set["SET"]
     ann["ANN"]
     symbolic["SYMBOLIC"]
@@ -74,6 +75,9 @@ flowchart TD
     drawing --> paving
     paving --> set
     paving --> bdd
+    paving --> tree
+    tree --> foundation
+    tree --> threading
     set --> linear_programming
     set --> constraint_solving
 
@@ -114,7 +118,8 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 - `labelled` uses `expression-set`, `drawing`. See [commit constraints](#labelled-commit-constraints).
 - `drawing` uses `rendering`, `paving`. See [commit constraints](#drawing-commit-constraints).
 - `expression-set` uses `symbolic`, `set`. See [commit constraints](#expression-set-commit-constraints).
-- `paving` uses `set`, `bdd`. See [commit constraints](#paving-commit-constraints).
+- `paving` uses `set`, `bdd`, `tree`. See [commit constraints](#paving-commit-constraints).
+- `tree` uses `foundation`, `threading`.
 - `set` uses `linear-programming`, `constraint-solving`. See [commit constraints](#set-commit-constraints).
 - `smt` uses `symbolic`, `constraint-solving`, `equation-solving`, `cdcl`. See [commit constraints](#smt-commit-constraints).
 - `sat` uses `bdd`, `cdcl`. See [commit constraints](#sat-commit-constraints).
@@ -212,7 +217,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `paving -> bdd -> python-common`
 - **`utility`**:
   - `rendering -> utility`
-  - `paving -> bdd -> threading -> logging -> utility`
+  - `paving -> tree -> foundation -> utility`
 
 ### `expression-set` commit constraints
 
@@ -222,11 +227,17 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 ### `paving` commit constraints
 
+- **`foundation`**:
+  - `set -> linear-programming -> algebra -> interval -> numeric -> foundation`
+  - `tree -> foundation`
+- **`threading`**:
+  - `bdd -> threading`
+  - `tree -> threading`
 - **`logging`**:
   - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
   - `bdd -> threading -> logging`
 - **`python-common`**:
-  - `set -> linear-programming -> algebra -> interval -> numeric -> foundation -> python-common`
+  - `tree -> foundation -> python-common`
   - `bdd -> python-common`
 
 ### `set` commit constraints

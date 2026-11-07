@@ -48,6 +48,13 @@ flowchart TD
     sat ~~~ smt
     smt ~~~ evolution
 
+    %% Layout-only links: stagger independent branches across more vertical
+    %% ranks to reduce width. These are not repository dependencies.
+    integration ~~~ system
+    symbolic ~~~ paving
+    tree ~~~ bdd
+    tree ~~~ set
+    constraint_solving ~~~ threading
     sat --> bdd
     sat --> cdcl
     smt --> symbolic

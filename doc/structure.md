@@ -68,6 +68,7 @@ flowchart TD
     evolution --> system
     evolution --> equation_solving
     integration --> function
+    integration --> logging
     system --> hybrid
     system --> neural_set
     hybrid --> labelled
@@ -89,14 +90,16 @@ flowchart TD
     symbolic --> function
     constraint_solving --> nonlinear_programming
     equation_solving --> function
+    equation_solving --> logging
     nonlinear_programming --> function
+    nonlinear_programming --> logging
     linear_programming --> algebra
+    linear_programming --> logging
     function --> geometry
     geometry --> algebra
     algebra --> interval
     interval --> numeric
     numeric --> foundation
-    numeric --> logging
 
     rendering --> utility
     rendering --> python_common
@@ -117,7 +120,7 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 - `neural-set` uses `ann`, `set`. See [commit constraints](#neural-set-commit-constraints).
 - `ann` uses `threading`.
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
-- `integration` uses `function`.
+- `integration` uses `function`, `logging`.
 - `system` uses `hybrid`, `neural-set`. See [commit constraints](#system-commit-constraints).
 - `hybrid` uses `labelled`.
 - `labelled` uses `expression-set`, `drawing`. See [commit constraints](#labelled-commit-constraints).
@@ -130,14 +133,14 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 - `sat` uses `bdd`, `cdcl`. See [commit constraints](#sat-commit-constraints).
 - `symbolic` uses `function`.
 - `constraint-solving` uses `nonlinear-programming`.
-- `equation-solving` uses `function`.
-- `nonlinear-programming` uses `function`.
-- `linear-programming` uses `algebra`.
+- `equation-solving` uses `function`, `logging`.
+- `nonlinear-programming` uses `function`, `logging`.
+- `linear-programming` uses `algebra`, `logging`.
 - `function` uses `geometry`.
 - `geometry` uses `algebra`.
 - `algebra` uses `interval`.
 - `interval` uses `numeric`.
-- `numeric` uses `foundation`, `logging`. See [commit constraints](#numeric-commit-constraints).
+- `numeric` uses `foundation`.
 - `rendering` uses `utility`, `python-common`.
 - `bdd` uses `threading`, `python-common`.
 - `cdcl` uses `threading`, `python-common`.
@@ -191,7 +194,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
 
 - **`logging`**:
   - `ann -> threading -> logging`
-  - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
+  - `set -> linear-programming -> logging`
 
 ### `evolution` commit constraints
 
@@ -199,6 +202,10 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `integration -> function`
   - `system -> hybrid -> labelled -> expression-set -> symbolic -> function`
   - `equation-solving -> function`
+- **`logging`**:
+  - `integration -> logging`
+  - `system -> neural-set -> ann -> threading -> logging`
+  - `equation-solving -> logging`
 
 ### `system` commit constraints
 
@@ -239,7 +246,7 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `bdd -> threading`
   - `tree -> threading`
 - **`logging`**:
-  - `set -> linear-programming -> algebra -> interval -> numeric -> logging`
+  - `set -> linear-programming -> logging`
   - `bdd -> threading -> logging`
 - **`python-common`**:
   - `tree -> foundation -> python-common`
@@ -250,6 +257,9 @@ All paths below start at a *direct submodule* of the repository named in the sub
 - **`algebra`**:
   - `linear-programming -> algebra`
   - `constraint-solving -> nonlinear-programming -> function -> geometry -> algebra`
+- **`logging`**:
+  - `linear-programming -> logging`
+  - `constraint-solving -> nonlinear-programming -> logging`
 
 ### `smt` commit constraints
 
@@ -258,7 +268,8 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `constraint-solving -> nonlinear-programming -> function`
   - `equation-solving -> function`
 - **`logging`**:
-  - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> logging`
+  - `constraint-solving -> nonlinear-programming -> logging`
+  - `equation-solving -> logging`
   - `cdcl -> threading -> logging`
 - **`python-common`**:
   - `symbolic -> function -> geometry -> algebra -> interval -> numeric -> foundation -> python-common`
@@ -272,19 +283,13 @@ All paths below start at a *direct submodule* of the repository named in the sub
   - `bdd -> python-common`
   - `cdcl -> python-common`
 
-### `numeric` commit constraints
-
-- **`utility`**:
-  - `foundation -> utility`
-  - `logging -> utility`
-
 ## Minimal checkout strategy
 
 The transitive dependency graph does not imply a recursive checkout of the whole submodule tree. The CMake dependency machinery checks out only what is strictly necessary for the repository being configured. When validating a dependency diamond, it descends into nested submodules only as far as needed to inspect and compare the referenced commits and verify that all paths resolve the same repository to the same commit.
 
 **Each logical dependency is certified only once per CMake configuration run.** On the first successful `require_same_dependency_commit(NAME CHAINS ...)` call, CMake compares all the specified Gitlink commits and records a `GLOBAL` certification for `NAME`. Subsequent checks for the same logical repository in nested projects return immediately: they neither repeat the comparisons nor initialize submodules solely to follow those chains. Certification is recorded *only after* all paths agree; a mismatch still fails configuration. The property is keyed by the logical dependency name, **not by an individual Git commit SHA or checkout path**, and is reset for the next configuration run.
 
-This relies on the repository invariant that each pinned submodule commit is already internally consistent. For example, when `numeric` has certified `testing` across its direct dependency branches, `logging` does not need to recheck `testing` against `utility|testing`: the pinned `logging` and `utility` commits already guarantee their own internal consistency. Cross-branch comparisons that have not yet been certified are still necessary. Skipping a repeated consistency check does **not** suppress checkout of a submodule that must actually be configured or built.
+This relies on the repository invariant that each pinned submodule commit is already internally consistent. For example, when `linear-programming` has certified `testing` across its direct dependency branches, `logging` does not need to recheck `testing` against `utility|testing`: the pinned `logging` and `utility` commits already guarantee their own internal consistency. Cross-branch comparisons that have not yet been certified are still necessary. Skipping a repeated consistency check does **not** suppress checkout of a submodule that must actually be configured or built.
 
 Consequently, a recursive submodule checkout such as `git submodule update --init --recursive` is unnecessary for the normal build and consistency-checking workflow, and is inefficient because it materializes repositories that the current configuration does not need.
 

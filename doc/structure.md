@@ -56,8 +56,8 @@ flowchart TD
     sat --> bdd
     sat --> cdcl
     smt --> symbolic
-    smt --> constraint_solving
     smt --> cdcl
+    smt --> constraint_solving
     smt --> equation_solving
 
     neural_set --> ann

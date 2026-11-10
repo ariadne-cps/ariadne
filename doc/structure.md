@@ -113,7 +113,7 @@ flowchart TD
     foundation --> python_common
 ```
 
-The list below and the diagram show a *transitively reduced* dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
+The list below and the diagram show a *transitively reduced* functional dependency graph: edges implied by other dependency paths are omitted. The graph therefore preserves transitive reachability without necessarily listing every direct dependency declaration in the repositories:
 
 - `ariadne` uses `reasoning`.
 - `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
@@ -148,15 +148,17 @@ The list below and the diagram show a *transitively reduced* dependency graph: e
 - `logging` uses `utility`.
 - `foundation` uses `utility`, `python-common`.
 
-`python-common` has no further dependencies in the graph. Each repository also uses `build`, which is omitted from the graph to avoid drawing an edge from every node.
+`python-common` has no further dependencies in the graph. Every repository also uses `build`, which is omitted from the graph to avoid drawing an edge from every node.
 
-The `ariadne-cps/testing` repository is included as a test-only Git submodule in repositories that define C++ test suites. The top-level `ariadne` aggregator has no separate test executables and obtains Testing transitively through `reasoning`. Testing is therefore omitted from the functional dependency graph and graph-derived commit consistency checks.
+`testing` depends only on `build`. Every repository except `python-common` and the top-level `ariadne` includes `testing`, but a compilation uses only the `testing` submodule of its root repository; copies nested in dependencies are not used. Consequently, the commits of different `testing` submodules do not need to match. The `build` commit referenced by the active `testing` submodule **must**, however, be consistent with all other `build` commits used in the compilation.
+
+A selected subset of repositories also includes `benchmarking`. Its functional dependencies are `logging` and `build`; like other repositories except the two noted above, it also includes `testing`. Both `testing` and `benchmarking` are omitted from the functional dependency graph. Their implications for commit consistency are described below.
 
 All dependencies are exposed transitively. For example, `reasoning` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
 
 ## Commit consistency verification
 
-The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced graph above** and assume that each submodule has already validated its own dependencies. The checks below reflect the graph shown above.
+The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced functional graph above** and assume that each submodule has already validated its own dependencies. Auxiliary repositories omitted from the graph are handled by separate rules.
 
 ### Verification rules
 
@@ -166,9 +168,11 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 4. After checking a shared dependency, treat the direct submodules synchronized by that comparison as one equivalence group **for descendants of that shared dependency**. This does not assert that their unrelated dependencies match.
 5. For a later shared dependency, compare just **one representative path from each still-distinct group** that reaches it. Choose the shortest path from any direct submodule in each group; if several paths are equally short, any one is sufficient.
 6. Omit a downstream check if all direct submodules reaching that dependency already belong to one synchronized group. Do not omit a check that is still needed to connect another, previously unverified group.
-7. `build`, which every repository uses but which is omitted from the graph, is excluded from the following graph-derived checks and must be handled separately.
+7. `build`, which every repository uses but which is omitted from the graph, must be checked separately. In particular, the comparison must include `testing -> build` for the active `testing` submodule of the compilation root and, wherever `benchmarking` is included, `benchmarking -> build`, alongside all other paths to `build`.
+8. No consistency check between distinct **`testing` commits** is required: only the compilation root's `testing` is used. This exemption does not apply to its `build` dependency, which must pass rule 7.
+9. Wherever `benchmarking` is included, its `logging` dependency also requires consistency: add `benchmarking -> logging` to the `logging` constraint if the root repository uses `logging`; otherwise add `benchmarking -> logging -> utility` to the `utility` constraint, since the root necessarily uses `utility`. These comparisons are in addition to the functional graph-derived constraints.
 
-All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
+The following per-repository paths cover the functional graph; the auxiliary checks in rules 7 and 9 must also be applied where relevant. All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
 **Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`, so `reasoning` needs no separate `threading` check.
 
@@ -289,7 +293,7 @@ The transitive dependency graph does not imply a recursive checkout of the whole
 
 **Each logical dependency is certified only once per CMake configuration run.** On the first successful `require_same_dependency_commit(NAME CHAINS ...)` call, CMake compares all the specified Gitlink commits and records a `GLOBAL` certification for `NAME`. Subsequent checks for the same logical repository in nested projects return immediately: they neither repeat the comparisons nor initialize submodules solely to follow those chains. Certification is recorded *only after* all paths agree; a mismatch still fails configuration. The property is keyed by the logical dependency name, **not by an individual Git commit SHA or checkout path**, and is reset for the next configuration run.
 
-This relies on the repository invariant that each pinned submodule commit is already internally consistent. For example, when `linear-programming` has certified `testing` across its direct dependency branches, `logging` does not need to recheck `testing` against `utility|testing`: the pinned `logging` and `utility` commits already guarantee their own internal consistency. Cross-branch comparisons that have not yet been certified are still necessary. Skipping a repeated consistency check does **not** suppress checkout of a submodule that must actually be configured or built.
+This relies on the repository invariant that each pinned submodule commit is already internally consistent. For example, once `paving` has certified `logging` across the paths `set -> linear-programming -> logging` and `bdd -> threading -> logging`, later nested checks for that same logical dependency can reuse the certification. This does not exempt the root's active `testing -> build` path or the relevant `benchmarking` paths from their required consistency checks, nor does it allow skipping an uncertified cross-branch comparison. Skipping a repeated consistency check does **not** suppress checkout of a submodule that must actually be configured or built.
 
 Consequently, a recursive submodule checkout such as `git submodule update --init --recursive` is unnecessary for the normal build and consistency-checking workflow, and is inefficient because it materializes repositories that the current configuration does not need.
 
@@ -299,4 +303,4 @@ When a repository is modified and a repository above it must see those changes, 
 
 This is necessary because a repository can be exposed through several branches of the graph. Updating only one branch would make different paths resolve the same dependency to different commits, which the CMake consistency check is expected to reject.
 
-The special case is `build`: because every repository depends on it, making a new `build` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`.
+The special case is `build`: because every repository depends on it, making a new `build` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`. This also includes maintaining consistency with the `build` commits pinned by the compilation root's `testing` and by any included `benchmarking`; `benchmarking` must additionally remain consistent on `logging` or, where appropriate, `utility`.

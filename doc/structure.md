@@ -63,6 +63,7 @@ flowchart TD
     neural_set --> ann
     neural_set --> set
     ann --> threading
+    ann --> python_common
 
     evolution --> integration
     evolution --> system
@@ -118,7 +119,7 @@ The list below and the diagram show a *transitively reduced* functional dependen
 - `ariadne` uses `reasoning`.
 - `reasoning` uses `evolution`, `smt`, `sat`. See [commit constraints](#reasoning-commit-constraints).
 - `neural-set` uses `ann`, `set`. See [commit constraints](#neural-set-commit-constraints).
-- `ann` uses `threading`.
+- `ann` uses `threading`, `python-common`.
 - `evolution` uses `integration`, `system`, `equation-solving`. See [commit constraints](#evolution-commit-constraints).
 - `integration` uses `function`, `logging`.
 - `system` uses `hybrid`, `neural-set`. See [commit constraints](#system-commit-constraints).
@@ -199,6 +200,9 @@ The following per-repository paths cover the functional graph; the auxiliary che
 - **`logging`**:
   - `ann -> threading -> logging`
   - `set -> linear-programming -> logging`
+- **`python-common`**:
+  - `ann -> python-common`
+  - `set -> linear-programming -> algebra -> interval -> numeric -> foundation -> python-common`
 
 ### `evolution` commit constraints
 

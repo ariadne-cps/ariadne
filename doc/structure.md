@@ -308,3 +308,17 @@ When a repository is modified and a repository above it must see those changes, 
 This is necessary because a repository can be exposed through several branches of the graph. Updating only one branch would make different paths resolve the same dependency to different commits, which the CMake consistency check is expected to reject.
 
 The special case is `build`: because every repository depends on it, making a new `build` commit visible at the top requires propagating that commit through the entire dependency graph, all the way to `ariadne`. This also includes maintaining consistency with the `build` commits pinned by the compilation root's `testing` and by any included `benchmarking`; `benchmarking` must additionally remain consistent on `logging` or, where appropriate, `utility`.
+
+### Coordinated work branches and fast-forward integration
+
+When changes span `ariadne` and multiple dependency repositories, development may take place on corresponding work branches in each repository.
+
+During development, newly required dependency commits must be propagated **bottom-up through the work branches**, updating all affected gitlinks along every relevant dependency path and validating commit consistency before integration.
+
+If each work branch is subsequently integrated into its repository's `main` through a **fast-forward merge** (`git merge --ff-only`), the resulting `main` tip is exactly the former tip of the work branch. Since gitlinks record immutable commit SHAs rather than branch names, all dependency references remain unchanged.
+
+**Consequently, no additional bottom-up gitlink propagation is required after fast-forward integration**, provided that the work branches already contain the intended, mutually consistent dependency commits.
+
+A fast-forward does not automatically advance gitlinks to the latest `main` tips of their dependencies. If integration rewrites commits (e.g., through rebasing or squashing), introduces new dependency commits that must be referenced, or otherwise changes the intended dependency pins, the affected gitlinks must be updated and consistency revalidated. A non-fast-forward merge does not necessarily invalidate existing gitlinks, but the new `main` tip will no longer equal the merged branch tip.
+
+When publishing the integration, push dependency repositories before their consumers, following the dependency graph bottom-up. This ensures that every referenced commit is already available remotely when the corresponding parent repository is published.

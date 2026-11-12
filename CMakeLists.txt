@@ -33,25 +33,7 @@ ariadne_register_public_headers(TARGET ariadne
     FILES "${PROJECT_SOURCE_DIR}/include/ariadne.hpp")
 ariadne_install_dependency_bundle(TARGET ariadne DESTINATION include/ariadne)
 
-# Compose the same registered Python bindings under the pyariadne entry point.
-if(TARGET pyariadne-reasoning)
-    get_property(_modules GLOBAL PROPERTY ARIADNE_PYTHON_MODULES)
-    foreach(_module IN LISTS _modules)
-        string(APPEND _declarations "void ${_module}_module(pybind11::module&);\n")
-        string(APPEND _initializers "    ${_module}_module(module);\n")
-    endforeach()
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/pyariadne_entry.cpp"
-        CONTENT "#include \"pybind11.hpp\"\n${_declarations}\nPYBIND11_MODULE(pyariadne, module) {\n${_initializers}}\n")
-    pybind11_add_module(pyariadne "${CMAKE_CURRENT_BINARY_DIR}/pyariadne_entry.cpp")
-    target_link_libraries(pyariadne PRIVATE ariadne pyariadne-reasoning pyariadne-python-common)
-    foreach(_object IN LISTS _objects)
-        target_sources(pyariadne PRIVATE $<TARGET_OBJECTS:${_object}>)
-    endforeach()
-    if(WIN32)
-        set(_python_install_dir "Lib/site-packages")
-    else()
-        set(_python_install_dir "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-    endif()
-    install(TARGETS pyariadne DESTINATION "${_python_install_dir}")
-    add_dependencies(bindings pyariadne)
+# The aggregate Python extension is configured separately from the C++ library.
+if(BUILD_PYTHON_BINDINGS AND TARGET pyariadne-reasoning)
+    add_subdirectory(python)
 endif()

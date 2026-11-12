@@ -1,5 +1,0 @@
-#include "pybind11.hpp"
-
-@ARIADNE_PY_DECLARATIONS@
-PYBIND11_MODULE(pyariadne, module) {
-@ARIADNE_PY_INITIALIZERS@}

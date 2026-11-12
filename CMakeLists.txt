@@ -26,35 +26,29 @@ endif()
 setup_project()
 add_subdirectory(ss)
 
-# When included from a parent project, Reasoning exports the 'reasoning'
-# interface and its full transitive object list, but not its standalone
-# ariadne-reasoning binary. Reuse those same objects for the Ariadne binary.
+# Use Build's standard library assembly and installation logic.
 get_target_property(_ariadne_objects reasoning ARIADNE_PROJECT_OBJECT_TARGETS)
-if(NOT _ariadne_objects OR _ariadne_objects STREQUAL "_ariadne_objects-NOTFOUND")
+if(NOT _ariadne_objects)
     message(FATAL_ERROR "Reasoning did not export any library object targets")
 endif()
 
-add_library(ariadne ${LIBRARY_KIND})
-foreach(_object IN LISTS _ariadne_objects)
-    target_sources(ariadne PRIVATE $<TARGET_OBJECTS:${_object}>)
-endforeach()
-target_link_libraries(ariadne PUBLIC reasoning)
+setup_project_library(
+    TARGET ariadne
+    OBJECTS ${_ariadne_objects}
+    LINK_LIBRARIES reasoning)
 target_include_directories(ariadne PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/ariadne>)
 ariadne_register_public_headers(
     TARGET ariadne
     FILES "${PROJECT_SOURCE_DIR}/include/ariadne.hpp")
+
 if(UNIX AND NOT APPLE)
     target_link_libraries(ariadne PRIVATE dl)
 endif()
 find_package(Threads REQUIRED)
 target_link_libraries(ariadne PRIVATE Threads::Threads)
 
-install(TARGETS ariadne
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin)
 ariadne_install_dependency_bundle(TARGET ariadne DESTINATION include/ariadne)
 
 # Reasoning registers every upstream Python module, including SAT and SMT.

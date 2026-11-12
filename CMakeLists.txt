@@ -36,6 +36,19 @@ setup_project_library(
     TARGET ariadne
     OBJECTS ${_ariadne_objects}
     LINK_LIBRARIES reasoning)
+# setup_project_library creates the archive only for a root project.
+# Keep the previous behavior when Ariadne is included by another project.
+if(NOT TARGET ariadne)
+    add_library(ariadne ${LIBRARY_KIND})
+    foreach(_object IN LISTS _ariadne_objects)
+        target_sources(ariadne PRIVATE $<TARGET_OBJECTS:${_object}>)
+    endforeach()
+    target_link_libraries(ariadne PUBLIC reasoning)
+    install(TARGETS ariadne
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
+endif()
 target_include_directories(ariadne PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/ariadne>)

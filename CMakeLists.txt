@@ -26,8 +26,7 @@ add_subdirectory(ss)
 # Reuse Reasoning's complete object set and public header dependency graph.
 get_target_property(_objects reasoning ARIADNE_PROJECT_OBJECT_TARGETS)
 setup_project_library(TARGET ariadne OBJECTS ${_objects} LINK_LIBRARIES reasoning)
-# The shared helper creates the library only for standalone builds.
-# Examples includes Ariadne as a subproject and needs the same concrete target.
+# Ensure the aggregate library has a concrete target.
 if(NOT TARGET ariadne)
     add_library(ariadne ${LIBRARY_KIND})
     foreach(_object IN LISTS _objects)

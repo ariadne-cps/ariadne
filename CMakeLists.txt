@@ -15,6 +15,9 @@ if(NOT TARGET ariadne-build)
     include("${PROJECT_SOURCE_DIR}/ss/bui/cmake/ProjectOptions.cmake")
 endif()
 
+# Validate Ariadne's dependency graph even when embedded in arch/examples.
+set(ARIADNE_DEPENDENCY_VALIDATION_ROOT "${PROJECT_SOURCE_DIR}")
+
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Build CHAINS
         "build" "reasoning|build")

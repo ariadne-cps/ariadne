@@ -73,7 +73,6 @@ flowchart TD
     ann --> python_common
 
     drawing --> labelled
-    drawing --> hybrid
     drawing --> set
     drawing --> rendering
     drawing --> threading
@@ -120,20 +119,20 @@ flowchart TD
 
 - **`paving`** remains the owner of `Grid`, `GridCell` and both tree and ROBDD paving representations. It uses `set`, `bdd` and `tree`, but not `labelled`, `hybrid` or `drawing`.
 - **`labelled`** owns coordinate labels and generic `Labelled<T>`-style metadata; its reduced dependency is `symbolic`. Rendering, expression-set and paving-specific adaptations leave this core layer.
-- **`hybrid`** owns locations, location-dependent spaces and generic `Located<T>`/`Hybrid<T>` semantics. Its reduced dependency is `symbolic`, not `labelled`, `drawing` or `paving`. Prefer composing `Hybrid<Grid>` and `Hybrid<Scalings>` in a consumer rather than keeping bespoke types in the generic layer, subject to validating lazy construction and per-location dimensions.
-- **`drawing`** uses `set`, `rendering` and `threading` and may import the generic `labelled` and `hybrid` abstractions for their drawing adapters. It must not import `paving` (directly or transitively). `GridDrawer` and paving-specific renderers are not part of its core API; only genuinely needed specialized adapters are retained at the `reasoning` level.
+- **`hybrid`** owns locations, location-dependent spaces and generic `Located<T>`/`Hybrid<T>` semantics. Its reduced dependency is `symbolic`, not `labelled`, `drawing` or `paving`. Prefer composing `Hybrid<Grid>` and `Hybrid<Scalings>` in a consumer rather than keeping bespoke types in the generic layer, subject to validating lazy construction and per-location dimensions. Existing `HybridFigure` and `HybridDrawableInterface` are legacy location-filtering/projecting APIs: they eventually render onto an ordinary 2D canvas; evaluate their callers and migrate or retire them above the `drawing` layer rather than introducing a `drawing -> hybrid` edge.
+- **`drawing`** uses `labelled`, `set`, `rendering` and `threading`. It renders ordinary geometric objects after their continuous variables have been flattened/projected into the plotting coordinate space. It does not depend on `hybrid`, does not interpret `DiscreteLocation` or `Hybrid<T>`, and must not import `paving` (directly or transitively). `GridDrawer` and paving-specific renderers are not part of its core API; only genuinely needed specialized adapters are retained at the `reasoning` level.
 - **`system`** uses `hybrid`, `neural-set` and `expression-set` for mathematical systems and constraints; it does not create or expose `Grid` or `Paving`. In particular, `DifferentialInclusion::grid()` is not a system API, and auxiliary extensions of `HybridPaving` belong in `reasoning`.
 - **`evolution`** uses `integration`, `system`, `equation-solving`, `tree` and `drawing` for numerical evolution, histories and generic visualization; it must not depend on `paving`. Paving-based enclosure/orbit conversions migrate into `reasoning`.
 - **`reasoning`** composes `evolution`, `sat`, `smt` and `paving`, hosting analysis-specific grid construction, paving visualization and system-to-paving operations. It also reaches `drawing` through `evolution`; consumers can declare an additional direct build dependency when required without changing this transitively reduced graph.
 - **`expression-set`** remains a standalone mathematical layer using `symbolic` and `set`; it remains available to `system` for constraints. The other lower-level repositories retain their baseline functional roles.
 
-**Migration invariant:** `drawing` may depend on `hybrid` and `labelled` **only after** those repositories no longer bring `paving` or `drawing` back transitively; otherwise the proposed graph would introduce a cycle or reintroduce the forbidden paving dependency. This is a **final-state diagram**, not an instruction to wire the new gitlinks prematurely.
+**Migration invariant:** `drawing` may depend on `labelled` **only after** `labelled` no longer brings `paving` or `drawing` back transitively; otherwise the proposed graph would introduce a cycle or reintroduce the forbidden paving dependency. The selection of hybrid locations and any flattening of their variable spaces must happen in the calling layer (such as `evolution` or `reasoning`), before objects reach `drawing`. There is no planned `drawing -> hybrid` dependency. This is a **final-state diagram**, not an instruction to wire the new gitlinks prematurely.
 
 ### Target build and commit-consistency checks
 
 The functional graph above was checked for cycles and redundant edges. The final CMake `require_same_dependency_commit` declarations must be **re-derived from this target graph** as the dependency pins are migrated; the baseline paths below cannot be reused verbatim. In particular:
 
-- `drawing` must compare shared `build`, `logging`, `utility` and `python-common` dependencies reached from its `set`, `rendering`, `threading`, `labelled` and `hybrid` branches wherever independent paths exist.
+- `drawing` must compare shared `build`, `logging`, `utility` and `python-common` dependencies reached from its `set`, `rendering`, `threading` and `labelled` branches wherever independent paths exist.
 - `evolution` must synchronize the `tree` dependency and any common ancestors shared with `drawing`, `system`, `integration` and `equation-solving`.
 - `reasoning` must synchronize, among other shared dependencies, `bdd` through `paving` and `sat`, and `tree` through `paving` and `evolution`, along with `symbolic`, `set` and the common infrastructure dependencies where independent paths converge.
 - Only the active root's `testing` submodule is used for that compilation; the `build` commit pinned by it, and any `benchmarking` paths, remain subject to the baseline consistency rules.

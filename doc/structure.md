@@ -1,5 +1,149 @@
 # Structure
 
+## Planned dependency architecture (`decoupling`)
+
+**Status: target, not current state.** The following graph describes the intended functional dependencies after the `decoupling` refactor. It is **not** a statement that the corresponding gitlinks, source includes, CMake targets, Python bindings or consistency checks have already been migrated. Those changes must be validated in the individual repositories before this diagram can replace the baseline.
+
+Arrows point from a consumer to a dependency. The graph is transitively reduced: it shows a minimal set of functional edges preserving reachability, rather than every direct CMake or Git submodule declaration. As in the baseline, `build`, test-only `testing`, and auxiliary `benchmarking` are omitted.
+
+```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 90}}}%%
+flowchart TD
+    ariadne["ARIADNE"]
+    reasoning["REASONING"]
+    sat["SAT"]
+    smt["SMT"]
+    neural_set["NEURAL<br/>SET"]
+    evolution["EVOLUTION"]
+    integration["INTEGRATION"]
+    system["SYSTEM"]
+    hybrid["HYBRID"]
+    labelled["LABELLED"]
+    drawing["DRAWING"]
+    expression_set["EXPRESSION<br/>SET"]
+    paving["PAVING"]
+    tree["TREE"]
+    set["SET"]
+    ann["ANN"]
+    symbolic["SYMBOLIC"]
+    constraint_solving["CONSTRAINT<br/>SOLVING"]
+    equation_solving["EQUATION<br/>SOLVING"]
+    nonlinear_programming["NONLINEAR<br/>PROGRAMMING"]
+    linear_programming["LINEAR<br/>PROGRAMMING"]
+    function["FUNCTION"]
+    geometry["GEOMETRY"]
+    algebra["ALGEBRA"]
+    interval["INTERVAL"]
+    numeric["NUMERIC"]
+    rendering["RENDERING"]
+    bdd["BDD"]
+    cdcl["CDCL"]
+    threading["THREADING"]
+    logging["LOGGING"]
+    foundation["FOUNDATION"]
+    utility["UTILITY"]
+    python_common["PYTHON<br/>COMMON"]
+
+    ariadne --> reasoning
+    reasoning --> evolution
+    reasoning --> sat
+    reasoning --> smt
+    reasoning --> paving
+
+    sat --> bdd
+    sat --> cdcl
+    smt --> symbolic
+    smt --> cdcl
+    smt --> constraint_solving
+    smt --> equation_solving
+
+    evolution --> integration
+    evolution --> system
+    evolution --> equation_solving
+    evolution --> tree
+    evolution --> drawing
+    integration --> function
+    integration --> logging
+    system --> hybrid
+    system --> neural_set
+    system --> expression_set
+    neural_set --> ann
+    neural_set --> set
+    ann --> threading
+    ann --> python_common
+
+    drawing --> labelled
+    drawing --> hybrid
+    drawing --> set
+    drawing --> rendering
+    drawing --> threading
+    labelled --> symbolic
+    hybrid --> symbolic
+    expression_set --> symbolic
+    expression_set --> set
+
+    paving --> set
+    paving --> bdd
+    paving --> tree
+    tree --> foundation
+    tree --> threading
+    set --> linear_programming
+    set --> constraint_solving
+
+    symbolic --> function
+    constraint_solving --> nonlinear_programming
+    equation_solving --> function
+    equation_solving --> logging
+    nonlinear_programming --> function
+    nonlinear_programming --> logging
+    linear_programming --> algebra
+    linear_programming --> logging
+    function --> geometry
+    geometry --> algebra
+    algebra --> interval
+    interval --> numeric
+    numeric --> foundation
+
+    rendering --> utility
+    rendering --> python_common
+    bdd --> threading
+    bdd --> python_common
+    cdcl --> threading
+    cdcl --> python_common
+    threading --> logging
+    logging --> utility
+    foundation --> utility
+    foundation --> python_common
+```
+
+### Intended module boundaries
+
+- **`paving`** remains the owner of `Grid`, `GridCell` and both tree and ROBDD paving representations. It uses `set`, `bdd` and `tree`, but not `labelled`, `hybrid` or `drawing`.
+- **`labelled`** owns coordinate labels and generic `Labelled<T>`-style metadata; its reduced dependency is `symbolic`. Rendering, expression-set and paving-specific adaptations leave this core layer.
+- **`hybrid`** owns locations, location-dependent spaces and generic `Located<T>`/`Hybrid<T>` semantics. Its reduced dependency is `symbolic`, not `labelled`, `drawing` or `paving`. Prefer composing `Hybrid<Grid>` and `Hybrid<Scalings>` in a consumer rather than keeping bespoke types in the generic layer, subject to validating lazy construction and per-location dimensions.
+- **`drawing`** uses `set`, `rendering` and `threading` and may import the generic `labelled` and `hybrid` abstractions for their drawing adapters. It must not import `paving` (directly or transitively). `GridDrawer` and paving-specific renderers are not part of its core API; only genuinely needed specialized adapters are retained at the `reasoning` level.
+- **`system`** uses `hybrid`, `neural-set` and `expression-set` for mathematical systems and constraints; it does not create or expose `Grid` or `Paving`. In particular, `DifferentialInclusion::grid()` is not a system API, and auxiliary extensions of `HybridPaving` belong in `reasoning`.
+- **`evolution`** uses `integration`, `system`, `equation-solving`, `tree` and `drawing` for numerical evolution, histories and generic visualization; it must not depend on `paving`. Paving-based enclosure/orbit conversions migrate into `reasoning`.
+- **`reasoning`** composes `evolution`, `sat`, `smt` and `paving`, hosting analysis-specific grid construction, paving visualization and system-to-paving operations. It also reaches `drawing` through `evolution`; consumers can declare an additional direct build dependency when required without changing this transitively reduced graph.
+- **`expression-set`** remains a standalone mathematical layer using `symbolic` and `set`; it remains available to `system` for constraints. The other lower-level repositories retain their baseline functional roles.
+
+**Migration invariant:** `drawing` may depend on `hybrid` and `labelled` **only after** those repositories no longer bring `paving` or `drawing` back transitively; otherwise the proposed graph would introduce a cycle or reintroduce the forbidden paving dependency. This is a **final-state diagram**, not an instruction to wire the new gitlinks prematurely.
+
+### Target build and commit-consistency checks
+
+The functional graph above was checked for cycles and redundant edges. The final CMake `require_same_dependency_commit` declarations must be **re-derived from this target graph** as the dependency pins are migrated; the baseline paths below cannot be reused verbatim. In particular:
+
+- `drawing` must compare shared `build`, `logging`, `utility` and `python-common` dependencies reached from its `set`, `rendering`, `threading`, `labelled` and `hybrid` branches wherever independent paths exist.
+- `evolution` must synchronize the `tree` dependency and any common ancestors shared with `drawing`, `system`, `integration` and `equation-solving`.
+- `reasoning` must synchronize, among other shared dependencies, `bdd` through `paving` and `sat`, and `tree` through `paving` and `evolution`, along with `symbolic`, `set` and the common infrastructure dependencies where independent paths converge.
+- Only the active root's `testing` submodule is used for that compilation; the `build` commit pinned by it, and any `benchmarking` paths, remain subject to the baseline consistency rules.
+
+All repository changes and gitlink propagation take place on the respective `decoupling` branches. The architecture is accepted only after the affected C++ builds and behavioural regressions pass. Python validation is limited to smoke tests. `Format` failures are deliberately deferred until each repository is functionally finalized and the user runs `apply-format`.
+
+## Baseline dependency architecture (pre-`decoupling`)
+
+The graph, dependency list and detailed commit-consistency examples below document the original architecture recorded on `main`. They are preserved to make changes auditable. **They are not the final-state graph and must not be treated as current target CMake requirements.**
+
 Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
 
 ```mermaid
@@ -157,9 +301,9 @@ A selected subset of repositories also includes `benchmarking`. Its functional d
 
 All dependencies are exposed transitively. For example, `reasoning` obtains `labelled` through `evolution -> system -> hybrid`, so it does not need a direct `labelled` dependency. Similarly, `evolution` reaches `labelled` through `system -> hybrid`, and `system` reaches `symbolic` through `hybrid -> labelled -> expression-set`; none of these transitive relationships needs an additional edge in the reduced graph. These reduced edges may still be declared directly by individual repositories; the graph represents reachability, not every direct declaration.
 
-## Commit consistency verification
+## Commit consistency verification (baseline)
 
-The dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced functional graph above** and assume that each submodule has already validated its own dependencies. Auxiliary repositories omitted from the graph are handled by separate rules.
+The baseline dependency graph is a directed acyclic graph (DAG). Each repository must use the same commit for any dependency exposed by different direct submodules, even if those submodules reach it through different paths. The checks below are derived from the **transitively reduced functional graph above** and assume that each submodule has already validated its own dependencies. Auxiliary repositories omitted from the graph are handled by separate rules.
 
 ### Verification rules
 
@@ -173,7 +317,7 @@ The dependency graph is a directed acyclic graph (DAG). Each repository must use
 8. No consistency check between distinct **`testing` commits** is required: only the compilation root's `testing` is used. This exemption does not apply to its `build` dependency, which must pass rule 7.
 9. Wherever `benchmarking` is included, its `logging` dependency also requires consistency: add `benchmarking -> logging` to the `logging` constraint if the root repository uses `logging`; otherwise add `benchmarking -> logging -> utility` to the `utility` constraint, since the root necessarily uses `utility`. These comparisons are in addition to the functional graph-derived constraints.
 
-The following per-repository paths cover the functional graph; the auxiliary checks in rules 7 and 9 must also be applied where relevant. All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
+The following per-repository paths cover the baseline functional graph; the auxiliary checks in rules 7 and 9 must also be applied where relevant. All paths below start at a *direct submodule* of the repository named in the subsection. For each shared dependency, the listed paths must resolve to the same commit. The order of the subsections' checks is significant wherever a later check relies on an earlier equivalence.
 
 **Example:** For `reasoning`, the `bdd` check synchronizes the `evolution` and `sat` paths to `bdd`, and the `cdcl` check synchronizes the `smt` and `sat` paths to `cdcl`. Since `sat` has already verified that `bdd -> threading` and `cdcl -> threading` refer to the same commit, these three submodules already agree on `threading`, so `reasoning` needs no separate `threading` check.
 

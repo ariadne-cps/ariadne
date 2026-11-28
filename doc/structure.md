@@ -1,8 +1,8 @@
 # Structure
 
-## Planned dependency architecture (`decoupling`)
+## Dependency architecture
 
-**Status: target, not current state.** The following graph describes the intended functional dependencies after the `decoupling` refactor. It is **not** a statement that the corresponding gitlinks, source includes, CMake targets, Python bindings or consistency checks have already been migrated. Those changes must be validated in the individual repositories before this diagram can replace the baseline.
+This graph describes the current functional dependencies after the `decoupling` refactor, integrated into each repository's `main` by fast-forward merges. The corresponding gitlinks, source includes, CMake targets, Python bindings and consistency checks have been migrated and validated in the individual repositories.
 
 Arrows point from a consumer to a dependency. The graph is transitively reduced: it shows a minimal set of functional edges preserving reachability, rather than every direct CMake or Git submodule declaration. As in the baseline, `build`, test-only `testing`, and auxiliary `benchmarking` are omitted.
 
@@ -115,7 +115,7 @@ flowchart TD
     foundation --> python_common
 ```
 
-### Intended module boundaries
+### Module boundaries
 
 - **`paving`** remains the owner of `Grid`, `GridCell` and both tree and ROBDD paving representations. It uses `set`, `bdd` and `tree`, but not `labelled`, `hybrid` or `drawing`.
 - **`labelled`** owns coordinate labels and generic `Labelled<T>`-style metadata; its reduced dependency is `symbolic`. Rendering, expression-set and paving-specific adaptations leave this core layer.
@@ -126,22 +126,22 @@ flowchart TD
 - **`reasoning`** composes `evolution`, `sat`, `smt` and `paving`, hosting analysis-specific grid construction, paving visualization and system-to-paving operations. It also reaches `drawing` through `evolution`; consumers can declare an additional direct build dependency when required without changing this transitively reduced graph.
 - **`expression-set`** remains a standalone mathematical layer using `symbolic` and `set`; it remains available to `system` for constraints. The other lower-level repositories retain their baseline functional roles.
 
-**Migration invariant:** `drawing` may depend on `labelled` **only after** `labelled` no longer brings `paving` or `drawing` back transitively; otherwise the proposed graph would introduce a cycle or reintroduce the forbidden paving dependency. The selection of hybrid locations and any flattening of their variable spaces must happen in the calling layer (such as `evolution` or `reasoning`), before objects reach `drawing`. There is no planned `drawing -> hybrid` dependency. This is a **final-state diagram**, not an instruction to wire the new gitlinks prematurely.
+**Architectural invariant:** `drawing` depends on `labelled`, and `labelled` no longer brings `paving` or `drawing` back transitively, so the graph has no cycle and no forbidden paving dependency. The selection of hybrid locations and any flattening of their variable spaces happens in the calling layer (such as `evolution` or `reasoning`), before objects reach `drawing`. There is no `drawing -> hybrid` dependency.
 
-### Target build and commit-consistency checks
+### Build and commit-consistency checks
 
-The functional graph above was checked for cycles and redundant edges. The final CMake `require_same_dependency_commit` declarations must be **re-derived from this target graph** as the dependency pins are migrated; the baseline paths below cannot be reused verbatim. In particular:
+The functional graph above was checked for cycles and redundant edges. The CMake `require_same_dependency_commit` declarations are derived from this graph; the historical baseline paths in the section below do not apply to the current architecture. In particular:
 
-- `drawing` must compare shared `build`, `logging`, `utility` and `python-common` dependencies reached from its `set`, `rendering`, `threading` and `labelled` branches wherever independent paths exist.
-- `evolution` must synchronize the `tree` dependency and any common ancestors shared with `drawing`, `system`, `integration` and `equation-solving`.
-- `reasoning` must synchronize, among other shared dependencies, `bdd` through `paving` and `sat`, and `tree` through `paving` and `evolution`, along with `symbolic`, `set` and the common infrastructure dependencies where independent paths converge.
-- Only the active root's `testing` submodule is used for that compilation; the `build` commit pinned by it, and any `benchmarking` paths, remain subject to the baseline consistency rules.
+- `drawing` compares shared `build`, `logging`, `utility` and `python-common` dependencies reached from its `set`, `rendering`, `threading` and `labelled` branches wherever independent paths exist.
+- `evolution` synchronizes the `tree` dependency and any common ancestors shared with `drawing`, `system`, `integration` and `equation-solving`.
+- `reasoning` synchronizes, among other shared dependencies, `bdd` through `paving` and `sat`, and `tree` through `paving` and `evolution`, along with `symbolic`, `set` and the common infrastructure dependencies where independent paths converge.
+- Only the active root's `testing` submodule is used for that compilation; the `build` commit pinned by it, and any `benchmarking` paths, remain subject to the consistency rules.
 
-All repository changes and gitlink propagation take place on the respective `decoupling` branches. The architecture is accepted only after the affected C++ builds and behavioural regressions pass. Python validation is limited to smoke tests. `Format` failures are deliberately deferred until each repository is functionally finalized and the user runs `apply-format`.
+The migration was carried out on the respective `decoupling` branches and integrated into each repository's `main` by fast-forward merges after the affected C++ builds and behavioural regressions passed on the branch. Python validation is limited to smoke tests.
 
-## Baseline dependency architecture (pre-`decoupling`)
+## Baseline dependency architecture (pre-`decoupling`, historical)
 
-The graph, dependency list and detailed commit-consistency examples below document the original architecture recorded on `main`. They are preserved to make changes auditable. **They are not the final-state graph and must not be treated as current target CMake requirements.**
+The graph, dependency list and detailed commit-consistency examples below document the original architecture as recorded on `main` before the `decoupling` refactor. They are preserved to make the changes auditable. **They are historical and must not be treated as the current architecture or current CMake requirements; see the dependency architecture above.**
 
 Repository names in prose and dependency descriptions use their actual lowercase, hyphenated spelling; the graph uses uppercase, space-separated display labels.
 
